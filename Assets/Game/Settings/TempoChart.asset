@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c192ff885248966469e5072687582fac, type: 3}
+  m_Name: TempoChart
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.Gameplay.RhythmChart
+  notes:
+  - lane: 0
+    kind: 0
+    startTime: 1.5
+    endTime: 1.5
+  - lane: 1
+    kind: 0
+    startTime: 2
+    endTime: 2
+  - lane: 2
+    kind: 0
+    startTime: 2.5
+    endTime: 2.5
+  - lane: 3
+    kind: 0
+    startTime: 3
+    endTime: 3
+  - lane: 0
+    kind: 1
+    startTime: 5.2
+    endTime: 6.8
+  - lane: 2
+    kind: 0
+    startTime: 6
+    endTime: 6
+  - lane: 1
+    kind: 0
+    startTime: 7.5
+    endTime: 7.5
+  - lane: 3
+    kind: 0
+    startTime: 9
+    endTime: 9
+  completionTime: 12

@@ -1,0 +1,5 @@
+{
+  "name": "Game.Runtime",
+  "references": ["Game.Domain", "Game.Application", "Unity.InputSystem", "Unity.ugui", "Unity.Newtonsoft.Json"],
+  "autoReferenced": true
+}

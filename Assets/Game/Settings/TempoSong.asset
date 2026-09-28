@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72a3cc72ae1769a40976e58178a19abb, type: 3}
+  m_Name: TempoSong
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.Gameplay.SongDefinition
+  songId: tempo-pulse
+  title: Tempo Shift
+  artist: Rhythm Dojo
+  audioClip: {fileID: 8300000, guid: 234a43dc3bde23e4b8650cad17f7e4d3, type: 3}
+  chart: {fileID: 11400000, guid: 9798c3c7a4d0ecf41b0f8fd036f2b859, type: 2}
+  mode: {fileID: 11400000, guid: b4b0e178a2cd7eb4fa7dedd0f10a62cb, type: 2}
+  timing:
+    chartAudioOffsetSeconds: 0
+    tempoPoints:
+    - startTimeSeconds: 0
+      bpm: 120
+    - startTimeSeconds: 6
+      bpm: 180

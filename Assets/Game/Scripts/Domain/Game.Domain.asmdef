@@ -1,0 +1,6 @@
+{
+  "name": "Game.Domain",
+  "noEngineReferences": true,
+  "overrideReferences": true,
+  "autoReferenced": false
+}

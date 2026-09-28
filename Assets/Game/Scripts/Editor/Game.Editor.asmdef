@@ -1,0 +1,5 @@
+{
+  "name": "Game.Editor",
+  "references": ["Game.Domain", "Game.Application", "Game.Runtime", "Unity.InputSystem", "Unity.ugui"],
+  "includePlatforms": ["Editor"]
+}

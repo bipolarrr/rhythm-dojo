@@ -1,0 +1,39 @@
+{
+  "format": "rhythm-dojo-chart",
+  "version": 1,
+  "song": {
+    "id": "9478cb59-6ed8-4413-8592-e6a3fca018b7",
+    "title": "예제 곡",
+    "artist": "Artist",
+    "audio": "audio/example.ogg"
+  },
+  "timing": {
+    "audioOffsetSeconds": 0.05,
+    "tempoPoints": [
+      { "timeSeconds": 0.0, "bpm": 120.0 },
+      { "timeSeconds": 6.0, "bpm": 180.0 }
+    ]
+  },
+  "charts": [
+    {
+      "id": "72c1247b-32ac-4422-822c-d810d0564cf2",
+      "name": "Normal",
+      "modeId": "FourLaneMode",
+      "laneCount": 4,
+      "completionTimeSeconds": 12.0,
+      "notes": [
+        { "kind": "tap", "lane": 2, "timeSeconds": 1.1234567890123457 },
+        { "kind": "tap", "lane": 0, "timeSeconds": 1.1234567890123457 },
+        { "kind": "hold", "lane": 1, "timeSeconds": 3.0, "endTimeSeconds": 4.5 }
+      ]
+    },
+    {
+      "id": "8dd1ac51-d219-4835-89f7-4567141e2b5a",
+      "name": "Easy",
+      "modeId": "FourLaneMode",
+      "laneCount": 4,
+      "completionTimeSeconds": 12.0,
+      "notes": [{ "kind": "tap", "lane": 0, "timeSeconds": 1.5 }]
+    }
+  ]
+}

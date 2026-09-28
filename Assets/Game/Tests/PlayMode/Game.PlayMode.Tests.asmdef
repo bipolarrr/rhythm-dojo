@@ -1,0 +1,9 @@
+{
+  "name": "Game.PlayMode.Tests",
+  "references": ["Game.Domain", "Game.Application", "Game.Runtime", "Unity.InputSystem", "Unity.ugui"],
+  "optionalUnityReferences": ["TestAssemblies"],
+  "overrideReferences": true,
+  "precompiledReferences": ["nunit.framework.dll"],
+  "autoReferenced": false,
+  "defineConstraints": ["UNITY_INCLUDE_TESTS"]
+}

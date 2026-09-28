@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca22c905c7f55c949a2b0239d359037c, type: 3}
+  m_Name: GameSettings
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.Gameplay.GameSettings
+  catalog: {fileID: 11400000, guid: 3b79952f144384a4c9b74d93925de076, type: 2}
+  difficulties:
+  - {fileID: 11400000, guid: 2a9d088e6a5e7c4439fdf420d2c53026, type: 2}
+  - {fileID: 11400000, guid: 92fd82d260578f44f8c2f1fd1e1bb364, type: 2}
+  - {fileID: 11400000, guid: 8c85f5e244df6d64b92e14595eb30b89, type: 2}
+  defaultDifficulty: {fileID: 11400000, guid: 92fd82d260578f44f8c2f1fd1e1bb364, type: 2}
+  scroll: {fileID: 11400000, guid: 73007a8e5d6f3a8489f735ee5f0ce5b0, type: 2}
+  audio: {fileID: 11400000, guid: 6dedacabfd622264fa1e3d56fdf5ca1d, type: 2}
+  presentation: {fileID: 11400000, guid: 7614f0b96dd3a5047a93b39ad4af6412, type: 2}

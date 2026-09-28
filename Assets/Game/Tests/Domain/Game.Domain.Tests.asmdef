@@ -1,0 +1,11 @@
+{
+  "name": "Game.Domain.Tests",
+  "references": ["Game.Domain", "Game.Application"],
+  "includePlatforms": ["Editor"],
+  "optionalUnityReferences": ["TestAssemblies"],
+  "overrideReferences": true,
+  "precompiledReferences": ["nunit.framework.dll"],
+  "noEngineReferences": true,
+  "autoReferenced": false,
+  "defineConstraints": ["UNITY_INCLUDE_TESTS"]
+}

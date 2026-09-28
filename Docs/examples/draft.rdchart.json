@@ -1,0 +1,21 @@
+{
+  "format": "rhythm-dojo-chart",
+  "version": 1,
+  "song": {
+    "id": "57e8eb66-a343-41ea-bf13-92dd671b4b45",
+    "title": "",
+    "artist": "",
+    "audio": null
+  },
+  "timing": { "audioOffsetSeconds": 0.0, "tempoPoints": [] },
+  "charts": [
+    {
+      "id": "194b3906-c4da-41ce-b9d6-d2722f01eefb",
+      "name": "작업 중",
+      "modeId": "",
+      "laneCount": 0,
+      "completionTimeSeconds": 0.0,
+      "notes": []
+    }
+  ]
+}
