@@ -1,12 +1,10 @@
 using UnityEngine.TestTools;
 
-
-
-
 namespace RhythmDojo.Tests
 {
-    // Let the Unity Test Runner start its own scene, then restore the user's editor startup.
-    public sealed class MainMenuTestStartup : IPrebuildSetup, IPostBuildCleanup
+    // Let the Test Runner own startup, independent of any configured game entry scene.
+    // Keep the shared session key compatible with the title branch startup guard.
+    public sealed class TestRunStartup : IPrebuildSetup, IPostBuildCleanup
     {
         public void Setup()
         {

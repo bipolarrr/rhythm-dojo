@@ -13,10 +13,30 @@
 
 각 담당은 자기 기능의 테스트와 문서도 수정한다. 공통 계약 변경은 ④와 사용하는 담당이 함께 검토한다. 기존 어셈블리 경계는 유지하므로 같은 Runtime 안의 의존성 방향은 코드 리뷰로 지킨다.
 
+## 메인 화면 UI 작업 시작하기
+
+메인 화면의 씬 이름은 **Title**입니다. `main`을 받은 뒤 `Assets/Game/Scenes/Title.unity`를 열거나 **Game Tools > Scenes > Open Title**을 실행하면 볼 수 있습니다. Windows 빌드도 이 화면에서 시작합니다.
+
+| 작업 | 수정할 파일 (`Assets/Game` 기준) | 담당 |
+| --- | --- | --- |
+| 제목, 안내 문구, 색상, 크기, 배치, 종료 팝업 디자인 | `Scripts/Editor/UILayout/MainMenuLayoutBuilder.cs` | ① UI 배치·스타일 |
+| 화면 요소의 명시적 참조 | `Scripts/Runtime/UI/Views/MainMenuView.cs` | ① UI 배치·스타일 |
+| 설정·전원 아이콘 모양 | `Scripts/Runtime/UI/Views/MainMenuIcon.cs` | ① UI 배치·스타일 |
+| 클릭, 팝업 열기/닫기, 중복 입력 방지 | `Scripts/Runtime/UI/MainMenuScreen.cs` | ② UI 동작 |
+| 실제 게임 시작·종료, 씬 조립 | `Scripts/Runtime/Core/MainMenuActions.cs`, `MainMenuCompositionRoot.cs`, `Scripts/Editor/SceneGeneration/MainMenuSceneBuilder.cs` | ④ 공통 기반·통합 |
+
+1. `MainMenuLayoutBuilder`에서 디자인을 수정합니다. 배경 클릭 영역, 설정/종료 버튼, 팝업의 View 참조를 유지하세요.
+2. **Game Tools > Scenes > Build Title**을 실행합니다. 다른 화면을 재생성하지 않고 Title을 저장하고 엽니다.
+3. Play Mode에서 배경 클릭 → 곡 선택, 종료 → 팝업, 아니요 → 닫기를 확인합니다. 설정 아이콘은 현재 기능이 없는 placeholder입니다.
+4. **Game Tools > Verification > Verify UI Actions**로 화면 동작을 확인합니다. 타이틀만 확인하려면 Test Runner에서 `MainMenuTests`(EditMode)와 `MainMenuFlowTests`(PlayMode)를 선택합니다.
+5. 빌더/관련 View 변경, 재생성된 `Title.unity`, 새 에셋과 `.meta`, 화면 스크린샷을 함께 제출합니다. 이름·위치·문구의 사양을 의도적으로 바꾸면 해당 레이아웃 테스트도 맞추고, 버튼 동작 테스트는 유지합니다.
+
+씬에서 직접 바꾼 배치는 **Build Title** 실행 시 덮어써집니다. 미리보기로 실험한 값도 최종적으로 빌더에 옮겨야 다른 팀원이 같은 화면을 재생성할 수 있습니다. 새 이미지/프리팹을 쓰면 빌더에서 로드하고 View에 연결하세요. 다른 화면을 직접 실행하려면 **Game Tools > Scenes > Start Play Mode From Title**을 끄면 됩니다.
+
 ## UI 작업 방법
 
-- 배치: `SongSelectionLayoutBuilder`, `SettingsLayoutBuilder`, `GameplayHudLayoutBuilder`에서 좌표·크기·문구·계층을 수정한다. `HudLaneLayout`은 런타임 레인 반복 요소를 생성한다.
-- 참조: `SongSelectionView`, `SettingsView`, `GameplayHudView`의 참조 필드가 화면 계약이다. 객체 이름과 계층 경로는 연결 규약이 아니다. 신규 필수 컨트롤은 View의 검증에도 추가한다.
+- 배치: `MainMenuLayoutBuilder`, `SongSelectionLayoutBuilder`, `SettingsLayoutBuilder`, `GameplayHudLayoutBuilder`에서 좌표·크기·문구·계층을 수정한다. `HudLaneLayout`은 런타임 레인 반복 요소를 생성한다.
+- 참조: `MainMenuView`, `SongSelectionView`, `SettingsView`, `GameplayHudView`의 참조 필드가 화면 계약이다. 객체 이름과 계층 경로는 연결 규약이 아니다. 신규 필수 컨트롤은 View의 검증에도 추가한다.
 - 동작: Screen의 `Initialize`가 서비스 구독을 시작한다. 재초기화와 파괴 시 구독을 해제한다. 컨트롤러에서 배치 코드를 만들거나 `AppFlowController.Create`를 호출하지 않는다.
 - 조립: `SceneDependencyAssembler`가 컨트롤러와 View를 연결하고, `ScreenCompositionRoot`가 런타임 서비스를 주입한다. 직접 씬을 열어 실행하는 경우도 이 경로를 사용한다.
 - 게임플레이 복귀 버튼: 표시·클릭은 `GameplayUiController`, 세션 종료·입력 해제·씬 이동 순서는 `GameplayCompositionRoot`와 AppFlow가 담당한다. Escape 입력 콜백 안에서 입력 액션을 해제하지 않는다.
@@ -47,4 +67,3 @@
 ## 이번 범위 밖
 
 실제 채보 편집 화면, 디스크 저장 형식, 사용자 음원 파일 선택 UI, 에디터 전용 미리듣기는 아직 구현하지 않았다. 이를 위한 데이터·서비스 계약과 메모리 구현, 실제 Gameplay 진입·복귀는 제공한다. 게임에 미구현 에디터 버튼은 추가하지 않았다.
-

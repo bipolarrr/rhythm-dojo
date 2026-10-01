@@ -14,8 +14,8 @@ using RhythmDojo.UI;
 
 namespace RhythmDojo.Tests
 {
-    [PrebuildSetup(typeof(MainMenuTestStartup))]
-    [PostBuildCleanup(typeof(MainMenuTestStartup))]
+    [PrebuildSetup(typeof(TestRunStartup))]
+    [PostBuildCleanup(typeof(TestRunStartup))]
     [Category("UI")]
     public sealed class MainMenuFlowTests
     {

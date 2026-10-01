@@ -27,10 +27,8 @@ namespace RhythmDojo.EditorTools
         private static void OpenTitle()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode) return;
-            var active = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
-            // Discard only an empty host scene left by our interrupted Test Runner.
-            if (!active.name.StartsWith("InitTestScene", System.StringComparison.Ordinal) &&
-                !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+            // Check every open scene, including work done after an interrupted test run.
+            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
             EditorSceneManager.OpenScene(SceneBuilder.TitlePath);
             Apply();
         }
