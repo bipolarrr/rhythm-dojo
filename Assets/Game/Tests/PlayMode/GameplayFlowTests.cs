@@ -20,6 +20,8 @@ using RhythmDojo.Content;
 
 namespace RhythmDojo.Tests
 {
+    [PrebuildSetup(typeof(MainMenuTestStartup))]
+    [PostBuildCleanup(typeof(MainMenuTestStartup))]
     public sealed class GameplayFlowTests
     {
         [UnityTest]

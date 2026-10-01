@@ -135,3 +135,18 @@ The headless editor core supports multiple charts per song, transactional editin
 Tempo ramps, stops, reverse scroll, separate SV events, the chart editor UI, user-song catalog registration, external audio decoding, pause, calibration UI and saved records remain future work.
 
 
+
+## Main menu
+Open Assets/Game/Scenes/Title.unity to preview the title screen.
+Windows builds start here. Click the background to enter Bootstrap and song selection.
+Settings is a clickable placeholder. The power button asks for confirmation;
+Yes quits the player (stops Play Mode in the editor), No returns to the menu.
+Regenerate only this scene with **Game Tools > Scenes > Build Title**.
+Layout is maintained in MainMenuLayoutBuilder. Korean text uses the bundled
+Noto Sans KR font under the SIL Open Font License (Assets/Game/Fonts/OFL.txt).
+Editor Play Mode starts from Title even when another scene is open.
+Toggle this with **Game Tools > Scenes > Start Play Mode From Title**
+when you want to run the currently open scene. PlayMode tests temporarily
+suspend this setting and restore it when the test run finishes.
+
+Title scene generation (Game Tools > Scenes > Build Title) saves and opens Title as the only scene. Bootstrap includes a black loading camera so asynchronous scene transitions keep Display 1 rendering.

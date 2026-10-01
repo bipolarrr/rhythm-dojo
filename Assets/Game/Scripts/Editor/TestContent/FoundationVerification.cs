@@ -273,7 +273,7 @@ namespace RhythmDojo.EditorTools
         public static void BuildPlayer()
         {
             var report=BuildPipeline.BuildPlayer(new BuildPlayerOptions {
-                scenes=new[]{SceneBuilder.BootstrapPath,SceneBuilder.SelectionPath,SceneBuilder.GameplayPath,SceneBuilder.SettingsPath},
+                scenes=new[]{SceneBuilder.TitlePath,SceneBuilder.BootstrapPath,SceneBuilder.SelectionPath,SceneBuilder.GameplayPath,SceneBuilder.SettingsPath},
                 locationPathName="Builds/Windows/RhythmDojo.exe",target=BuildTarget.StandaloneWindows64,options=BuildOptions.None });
             Check(report.summary.result==BuildResult.Succeeded,"standalone player build: "+report.summary.result);
         }

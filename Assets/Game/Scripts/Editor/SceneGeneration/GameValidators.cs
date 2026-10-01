@@ -26,6 +26,7 @@ namespace RhythmDojo.EditorTools
                 }
             foreach (var root in scene.GetRootGameObjects())
             {
+                foreach (var mainMenu in root.GetComponentsInChildren<MainMenuCompositionRoot>(true)) mainMenu.Validate();
                 foreach (var bootstrap in root.GetComponentsInChildren<Bootstrap>(true)) bootstrap.Validate();
                 foreach (var composition in root.GetComponentsInChildren<GameplayCompositionRoot>(true)) composition.Validate(true);
                 foreach (var screenRoot in root.GetComponentsInChildren<ScreenCompositionRoot>(true)) screenRoot.Validate();

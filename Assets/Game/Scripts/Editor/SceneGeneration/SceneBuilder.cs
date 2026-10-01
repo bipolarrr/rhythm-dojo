@@ -10,6 +10,7 @@ namespace RhythmDojo.EditorTools
 {
     public static class SceneBuilder
     {
+        public const string TitlePath = "Assets/Game/Scenes/Title.unity";
         public const string BootstrapPath = "Assets/Game/Scenes/Bootstrap.unity";
         public const string SelectionPath = "Assets/Game/Scenes/SongSelection.unity";
         public const string GameplayPath = "Assets/Game/Scenes/Gameplay.unity";
@@ -22,8 +23,23 @@ namespace RhythmDojo.EditorTools
             Guard(); var content = SceneResources.Load();
             SaveGameplay(content); Save(ScenePresentationBuilder.Selection(content), SelectionPath);
             Save(ScenePresentationBuilder.Settings(content), SettingsPath);
-            Save(ScenePresentationBuilder.Bootstrap(content), BootstrapPath); RegisterScenes();
-            AssetDatabase.SaveAssets(); Debug.Log("Rhythm Dojo: four scenes generated and validated.");
+            Save(ScenePresentationBuilder.Bootstrap(content), BootstrapPath); BuildTitle();
+            AssetDatabase.SaveAssets(); Debug.Log("Rhythm Dojo: five scenes generated and validated.");
+        }
+        [MenuItem("Game Tools/Scenes/Build Title")]
+        public static void BuildTitle()
+        {
+            Guard();
+            var existing = SceneManager.GetSceneByPath(TitlePath);
+            var scene = MainMenuSceneBuilder.Create();
+            if (existing.IsValid() && existing.isLoaded) EditorSceneManager.CloseScene(existing, true);
+            Save(scene, TitlePath);
+            RegisterScenes();
+            AssetDatabase.SaveAssets();
+            // Open only the menu so other scenes cannot render or receive input.
+            EditorSceneManager.OpenScene(TitlePath, OpenSceneMode.Single);
+            MainMenuEditorStartup.Apply();
+            Debug.Log("Rhythm Dojo: Title generated, validated and opened.");
         }
         [MenuItem("Game Tools/Scenes/Build Bootstrap")]
         public static void BuildBootstrap()
@@ -64,7 +80,7 @@ namespace RhythmDojo.EditorTools
         public static void ValidateScene(Scene scene) => GameSceneValidator.Validate(scene);
         private static void RegisterScenes()
         {
-            var paths = new[] { BootstrapPath, SelectionPath, GameplayPath, SettingsPath };
+            var paths = new[] { TitlePath, BootstrapPath, SelectionPath, GameplayPath, SettingsPath };
             var other = EditorBuildSettings.scenes.Where(s => !paths.Contains(s.path));
             EditorBuildSettings.scenes = paths.Select(p => new EditorBuildSettingsScene(p,true)).Concat(other).ToArray();
         }

@@ -34,6 +34,7 @@ namespace RhythmDojo.EditorTools
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             content.ReloadAfterSceneChange();
             var bootstrap = new GameObject("Bootstrap").AddComponent<Bootstrap>();
+            bootstrap.EnsureCamera();
             SceneDependencyAssembler.Wire(bootstrap, "settings", content.Settings); return scene;
         }
         public static GameplaySceneParts Gameplay(GeneratedContent content)
