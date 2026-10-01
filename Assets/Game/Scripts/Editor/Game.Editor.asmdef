@@ -1,5 +1,5 @@
 {
   "name": "Game.Editor",
-  "references": ["Game.Domain", "Game.Application", "Game.Runtime", "Unity.InputSystem", "Unity.ugui"],
+  "references": ["Game.Domain", "Game.Application", "Game.Runtime", "Unity.InputSystem", "Unity.ugui", "UnityEditor.TestRunner", "UnityEngine.TestRunner"],
   "includePlatforms": ["Editor"]
 }

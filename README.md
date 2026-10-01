@@ -110,7 +110,7 @@ The Unity Test Runner exposes:
 
 Results are written to `Logs/settings-editmode.xml` and `Logs/settings-playmode.xml` when run with the commands below.
 
-**Game Tools > Verification > Verify Foundation (Play Mode and Player Build)** additionally regenerates scenes, exercises full timestamped keyboard runs through Bootstrap, checks the deliberate 180ms hitch, and builds `Builds/Windows/RhythmDojo.exe`. It checks the original 13 Perfect / 2 Good / 3 Miss run, restarted 18 Perfect run, no-input 18 Miss run, and Tempo Shift's 8 Perfect runs in both Constant and BPM modes. Evidence goes to `Logs/verification.txt`, the Unity log and `Logs/playmode.png`.
+**Game Tools > Verification > Verify Foundation (Play Mode and Player Build)** runs all Domain/EditMode tests, then all PlayMode tests, then builds `Builds/Windows/RhythmDojo.exe` only if every test passes. The former full-song scenarios are independent `GameplayJudgmentTests`. Four-scene regeneration and stability are EditMode tests. Separate **Verify UI Actions**, **Verify Gameplay Actions**, and **Verify Authoring Actions** menus run only that category without building. Results include each action name in `Logs/verification.txt` and NUnit XML in `Logs/verification-*.xml`. See the [action verification guide](Docs/verification.md) for expected button behavior, fixtures, categories, and team workflow.
 
 The input checks temporarily adjust only in-memory focus behavior for batch mode and restore it. They do not establish human keyboard/audio latency.
 
