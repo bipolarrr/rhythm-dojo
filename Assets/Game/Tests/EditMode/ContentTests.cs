@@ -220,7 +220,7 @@ namespace RhythmDojo.Tests
         }
         private static string Signature()
         {
-            return string.Join("\n", new[] { SceneBuilder.BootstrapPath, SceneBuilder.SelectionPath, SceneBuilder.GameplayPath, SceneBuilder.SettingsPath }.Select(path =>
+            return string.Join("\n", new[] { SceneBuilder.TitlePath, SceneBuilder.BootstrapPath, SceneBuilder.SelectionPath, SceneBuilder.GameplayPath, SceneBuilder.SettingsPath }.Select(path =>
             {
                 var scene = EditorSceneManager.OpenScene(path); GameSceneValidator.Validate(scene);
                 return path + "\n" + string.Join("\n",scene.GetRootGameObjects().SelectMany(r=>r.GetComponentsInChildren<Transform>(true))

@@ -4,7 +4,7 @@ For a new Windows checkout, follow [Git and Unity collaboration setup](Docs/git-
 
 Unity **6000.3.23f1**, URP **17.3.0**, Input System **1.20.0**, uGUI, Test Framework **1.6.0**. No packages were added or upgraded.
 
-Open `Assets/Game/Scenes/Bootstrap.unity` and enter Play Mode. Select a song, judgment difficulty, scroll mode and multiplier using the mouse or keyboard navigation, then choose **Load Song**. In Gameplay, **Space** starts/restarts, **D / F / J / K** play the default lanes, and **Escape** returns to the song list. Ready and Completed also have a mouse return button. Losing focus resets play to Ready.
+Open `Assets/Game/Scenes/Title.unity` and enter Play Mode. Click the background to enter Bootstrap and the song list. Select a song, judgment difficulty, scroll mode and multiplier using the mouse or keyboard navigation, then choose **Load Song**. In Gameplay, **Space** starts/restarts, **D / F / J / K** play the default lanes, and **Escape** returns to the song list. Ready and Completed also have a mouse return button. Losing focus resets play to Ready.
 
 From the song list, choose **Settings** to adjust the DSP buffer before playing. Choose Default, 32, 64, 128, 256, 512, 1024 or 2048 samples, then **Apply**. The screen reports the actual buffer size, buffer count and sample rate after Unity resets audio; supported sizes depend on the output device. Default requests the actual size captured at app startup. Failed resets attempt to restore the prior configuration and report the actual state. Back returns to the song list. The choice survives screen changes during this run and is never saved to assets, ProjectSettings or PlayerPrefs.
 
@@ -89,13 +89,13 @@ Restart resets logical state and schedules new playback. Physically held keys ar
 
 ## Authoritative scenes and generation
 
-Use **Game Tools > Scenes > Build All Scenes**, or the individual Bootstrap, Gameplay, Song Selection and Settings commands. Generated scenes are authoritative outputs of the builder.
+Use **Game Tools > Scenes > Build All Scenes**, or the individual Title, Bootstrap, Gameplay, Song Selection and Settings commands. Generated scenes are authoritative outputs of the builder.
 
 Scene generation reads existing resources through `SceneResources`, constructs UI through the screen layout builders, and assigns dependencies through `SceneDependencyAssembler`. `SceneBuilder` controls ordering, saving and scene registration. Use **Game Tools > Content > Prepare Default and Verification Content** for initial resources or explicit verification-song regeneration; normal scene builds never regenerate song content. Default settings, test songs and presentation assets have separate preparation code.
 
-Bootstrap → SongSelection → Gameplay → SongSelection. SongSelection also opens Settings and returns to the list. Starting Gameplay directly in the Editor uses Foundation Pulse / the configured default difficulty / Constant / 1x.
+Title → Bootstrap → SongSelection → Gameplay → SongSelection. SongSelection also opens Settings and returns to the list. With **Start Play Mode From Title** disabled, starting Gameplay directly in the Editor uses Foundation Pulse / the configured default difficulty / Constant / 1x.
 
-The explicit content preparation command recreates the two named test charts from code. Authored songs/charts and existing difficulty, scroll, mode and audio settings are not overwritten. Generated materials follow the presentation settings. Primitive colliders are removed. Build settings register the four game scenes first and preserve other entries. Generation checks Play Mode and unsaved scenes. Scene validation uses explicit component requirements and checks generated note views against chart kinds; note names do not affect validation. Runtime validation checks dependencies before building views for the selected song.
+The explicit content preparation command recreates the two named test charts from code. Authored songs/charts and existing difficulty, scroll, mode and audio settings are not overwritten. Generated materials follow the presentation settings. Primitive colliders are removed. Build settings register the five game scenes first, starting with Title, and preserve other entries. Generation checks Play Mode and unsaved scenes. Scene validation uses explicit component requirements and checks generated note views against chart kinds; note names do not affect validation. Runtime validation checks dependencies before building views for the selected song.
 
 ## Verification
 
@@ -110,7 +110,7 @@ The Unity Test Runner exposes:
 
 Results are written to `Logs/settings-editmode.xml` and `Logs/settings-playmode.xml` when run with the commands below.
 
-**Game Tools > Verification > Verify Foundation (Play Mode and Player Build)** additionally regenerates scenes, exercises full timestamped keyboard runs through Bootstrap, checks the deliberate 180ms hitch, and builds `Builds/Windows/RhythmDojo.exe`. It checks the original 13 Perfect / 2 Good / 3 Miss run, restarted 18 Perfect run, no-input 18 Miss run, and Tempo Shift's 8 Perfect runs in both Constant and BPM modes. Evidence goes to `Logs/verification.txt`, the Unity log and `Logs/playmode.png`.
+**Game Tools > Verification > Verify Foundation (Play Mode and Player Build)** runs all Domain/EditMode tests, then all PlayMode tests, then builds `Builds/Windows/RhythmDojo.exe` only if every test passes. The former full-song scenarios are independent `GameplayJudgmentTests`. Five-scene regeneration and stability are EditMode tests. Separate **Verify UI Actions**, **Verify Gameplay Actions**, and **Verify Authoring Actions** menus run only that category without building. Results include each action name in `Logs/verification.txt` and NUnit XML in `Logs/verification-*.xml`. See the [action verification guide](Docs/verification.md) for expected button behavior, fixtures, categories, and team workflow.
 
 The input checks temporarily adjust only in-memory focus behavior for batch mode and restore it. They do not establish human keyboard/audio latency.
 

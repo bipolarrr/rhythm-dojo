@@ -18,7 +18,7 @@ namespace RhythmDojo.EditorTools
 
         public static void Apply()
         {
-            if (EditorApplication.isPlayingOrWillChangePlaymode || SessionState.GetBool(TestRunKey, false)) return;
+            if (EditorApplication.isPlayingOrWillChangePlaymode || SessionState.GetBool(TestRunKey, false) || SessionState.GetBool(FoundationVerification.ActiveKey, false)) return;
             EditorSceneManager.playModeStartScene = EditorPrefs.GetBool(PreferenceKey, true)
                 ? AssetDatabase.LoadAssetAtPath<SceneAsset>(SceneBuilder.TitlePath) : null;
         }

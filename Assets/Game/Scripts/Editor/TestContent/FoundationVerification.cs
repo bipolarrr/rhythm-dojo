@@ -1,281 +1,177 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+using System.Reflection;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
 using UnityEditor.SceneManagement;
+using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.LowLevel;
-using UnityEngine.SceneManagement;
-using RhythmDojo.Gameplay;
-using RhythmDojo.Presentation;
-using RhythmDojo.Core;
-using RhythmDojo.Audio;
-using RhythmDojo.Application;
-using UnityEngine.UI;
 using SessionState = UnityEditor.SessionState;
 
 namespace RhythmDojo.EditorTools
 {
-    // Editor-only integration driver; no test behaviour is saved into either scene or player.
+    // Orchestrates the same independently runnable tests shown in Unity's Test Runner.
+    // SessionState survives the domain reloads between EditMode and PlayMode.
     [InitializeOnLoad]
     public static class FoundationVerification
     {
-        private const string Active = "RhythmDojo.Verification.Active";
-        private static RhythmGameController game;
-        private static Keyboard keyboard;
-        private static InputSettings originalInputSettings;
-        private static InputSettings.EditorInputBehaviorInPlayMode priorEditorBehavior;
-        private static InputSettings.BackgroundBehavior priorBackgroundBehavior;
-        private static readonly HashSet<Key> down = new HashSet<Key>();
-        private static readonly List<(double time, Key key, bool press)> events = new List<(double,Key,bool)>();
-        private static int nextEvent, run;
-        private static bool started, captured, hitched;
-        private static bool awaitingSong;
-        private static double deadline, nextDiagnostic;
+        public const string ActiveKey = "RhythmDojo.Verification.Active";
+        private const string Prefix = "RhythmDojo.Verification.";
+        private const string ReportPath = "Logs/verification.txt";
+        // In the pinned Test Framework 1.6.0, RunFinished precedes scene/settings cleanup
+        // and there is no public job-completed callback. Wait for the runner's job state,
+        // rather than exiting/building early or guessing a number of editor frames.
+        private static readonly MethodInfo isRunActive = typeof(TestRunnerApi).GetMethod(
+            "IsRunActive", BindingFlags.Static | BindingFlags.NonPublic);
+
+        private static bool RunnerIsBusy()
+        {
+            if (isRunActive == null)
+                throw new InvalidOperationException("Test Framework job-state API changed. Update the verification adapter before running tests.");
+            return (bool)isRunActive.Invoke(null, null);
+        }
+
         static FoundationVerification()
         {
-            EditorApplication.playModeStateChanged += PlayStateChanged;
-            if (SessionState.GetBool(Active,false)) EditorApplication.update += Tick;
+            TestRunnerApi.RegisterTestCallback(new Results());
+            EditorApplication.update += Continue;
         }
-        private static void Check(bool condition, string message)
-        { if (!condition) throw new InvalidOperationException("Verification failed: " + message); }
 
         [MenuItem("Game Tools/Verification/Verify Foundation (Play Mode and Player Build)")]
-        public static void RunAll()
-        {
-            SessionState.SetBool("RhythmDojo.Verification.Failed",false);
-            Directory.CreateDirectory("Logs");
-            SceneBuilder.BuildAll();
-            EditorSceneManager.NewScene(NewSceneSetup.EmptyScene,NewSceneMode.Single);
-            Check(AssetDatabase.DeleteAsset(SceneBuilder.BootstrapPath),"delete Bootstrap");
-            Check(AssetDatabase.DeleteAsset(SceneBuilder.GameplayPath),"delete Gameplay");
-            Check(AssetDatabase.DeleteAsset(SceneBuilder.SelectionPath),"delete SongSelection");
-            Check(AssetDatabase.DeleteAsset(SceneBuilder.SettingsPath),"delete Settings");
-            SceneBuilder.BuildAll();
-            Check(new[] { SceneBuilder.BootstrapPath, SceneBuilder.SelectionPath, SceneBuilder.GameplayPath, SceneBuilder.SettingsPath }.All(File.Exists),"regeneration from absent scenes");
-            string first = SceneSignature();
-            SceneBuilder.BuildAll();
-            Check(first == SceneSignature(),"repeated generation changed hierarchy/configuration");
+        public static void RunAll() => Begin("", true);
 
-            File.WriteAllText("Logs/verification.txt","PASS: four scenes recreated from scratch; repeated hierarchy and references stable.\n");
-            EditorSceneManager.OpenScene(SceneBuilder.BootstrapPath);
-            SessionState.SetBool(Active,true);
-            EditorApplication.EnterPlaymode();
-        }
-        private static string SceneSignature()
+        [MenuItem("Game Tools/Verification/Verify UI Actions")]
+        public static void RunUi() => Begin("UI", false);
+
+        [MenuItem("Game Tools/Verification/Verify Gameplay Actions")]
+        public static void RunGameplay() => Begin("Gameplay", false);
+
+        [MenuItem("Game Tools/Verification/Verify Authoring Actions")]
+        public static void RunAuthoring() => Begin("Authoring", false);
+
+        private static void Begin(string category, bool build)
         {
-            var scene = EditorSceneManager.OpenScene(SceneBuilder.GameplayPath);
-            SceneBuilder.ValidateScene(scene);
-            var all = scene.GetRootGameObjects().SelectMany(r=>r.GetComponentsInChildren<Transform>(true)).ToArray();
-            Check(all.Count(t=>t.name.StartsWith("Lane ") && t.parent && t.parent.name == "Playfield") == 4,"four lanes");
-            Check(all.Count(t=>t.name == "Judgement Line") == 1,"judgement line");
-            Check(all.Count(t=>t.GetComponent<NoteView>()) == 18,"18 note views");
-            Check(!all.Any(t=>t.GetComponent<Collider>() || t.GetComponent<Rigidbody>()),"physics-free presentation");
-            string signature = string.Join("\n",all.Select(t=>t.name+"/"+t.position+"/"+t.localScale+"/"+string.Join(",",t.GetComponents<Component>().Select(c=>c.GetType().Name))));
-            foreach (var path in new[] { SceneBuilder.BootstrapPath, SceneBuilder.SelectionPath, SceneBuilder.SettingsPath })
-            {
-                scene = EditorSceneManager.OpenScene(path); SceneBuilder.ValidateScene(scene);
-                signature += "\n" + path + "\n" + string.Join("\n", scene.GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren<Transform>(true))
-                    .Select(t => t.name + "/" + t.position + "/" + t.localScale + "/" + string.Join(",", t.GetComponents<Component>().Select(c => c.GetType().Name))));
-            }
-            return signature;
+            if (SessionState.GetBool(ActiveKey, false) || EditorApplication.isPlayingOrWillChangePlaymode || RunnerIsBusy())
+                throw new InvalidOperationException("Finish the current verification and exit Play Mode first.");
+            if (!UnityEngine.Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
+                return;
+
+            Directory.CreateDirectory("Logs");
+            File.WriteAllText(ReportPath, $"Verification started: {DateTime.UtcNow:O}\n");
+            SessionState.SetString(Prefix + "PreviousStart", AssetDatabase.GetAssetPath(EditorSceneManager.playModeStartScene));
+            SessionState.SetString(Prefix + "Category", category);
+            SessionState.SetBool(Prefix + "Build", build);
+            SessionState.SetBool(Prefix + "Failed", false);
+            SessionState.SetInt(Prefix + "Phase", build ? 0 : 1);
+            SessionState.SetBool(ActiveKey, true);
+            EditorSceneManager.playModeStartScene = null;
+            SessionState.SetBool(Prefix + "Pending", true);
         }
-        private static void PlayStateChanged(PlayModeStateChange state)
+
+        private static void Continue()
         {
-            if (!SessionState.GetBool(Active,false)) return;
-            if (state==PlayModeStateChange.EnteredPlayMode)
-            {
-                started=false; captured=false; hitched=false; awaitingSong=false; game=null;
-                deadline=EditorApplication.timeSinceStartup+150;
-                EditorApplication.update -= Tick; EditorApplication.update += Tick;
-            }
-            if (state==PlayModeStateChange.EnteredEditMode)
-            {
-                EditorApplication.update -= Tick;
-                SessionState.SetBool(Active,false);
-                if (SessionState.GetBool("RhythmDojo.Verification.Failed",false)) { if(UnityEngine.Application.isBatchMode) EditorApplication.Exit(1); return; }
-                try { BuildPlayer(); File.AppendAllText("Logs/verification.txt","PASS: exited Play Mode and Windows standalone build succeeded.\n"); if(UnityEngine.Application.isBatchMode) EditorApplication.Exit(0); }
-                catch(Exception e) { Debug.LogException(e); if(UnityEngine.Application.isBatchMode) EditorApplication.Exit(1); }
-            }
-        }
-        private static void Add(double time,Key key,double duration=.025)
-        { events.Add((time,key,true)); events.Add((time+duration,key,false)); }
-        private static void SetupEvents(bool perfect)
-        {
-            events.Clear(); nextEvent=0;
-            var keys=new[]{Key.D,Key.F,Key.J,Key.K};
-            for(int i=0;i<game.Chart.Count;i++)
-            {
-                var n=game.Chart[i];
-                if(!perfect && (i==3 || i==14)) continue;
-                double t=n.StartTime;
-                if(!perfect && i==0) t-=.08;
-                if(!perfect && i==1) t+=.08;
-                double duration=n.Kind==NoteKind.Hold ? n.EndTime-t : .025;
-                if(!perfect && i==11) duration=.3;
-                if(!perfect && i==15) { events.Add((t,keys[n.Lane],true)); continue; }
-                Add(t,keys[n.Lane],duration);
-            }
-            events.Sort((a,b)=>a.time.CompareTo(b.time));
-        }
-        private static void Queue(Key key,bool press,double targetSong)
-        {
-            if(press) down.Add(key); else down.Remove(key);
-            double stamp=Time.realtimeSinceStartupAsDouble-(game.Clock.SongTime-targetSong);
-            InputSystem.QueueStateEvent(keyboard,new KeyboardState(down.ToArray()),stamp);
-        }
-        private static void Tick()
-        {
-            if(!EditorApplication.isPlaying || EditorApplication.isCompiling) return;
+            if (!SessionState.GetBool(ActiveKey, false) || !SessionState.GetBool(Prefix + "Pending", false) ||
+                EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling) return;
+
             try
             {
-                if(EditorApplication.timeSinceStartup>deadline) throw new TimeoutException("Play Mode verification timed out.");
-                if(!game || game.Session==null)
+                if (RunnerIsBusy()) return;
+                SessionState.SetBool(Prefix + "Pending", false);
+                int phase = SessionState.GetInt(Prefix + "Phase", 0);
+                if (SessionState.GetBool(Prefix + "Failed", false)) { Finish(false); return; }
+                if (phase == 2)
                 {
-                    game=UnityEngine.Object.FindFirstObjectByType<RhythmGameController>();
-                    if(game && game.Session==null) { game=null; return; }
-                    if(!game)
-                    {
-                        var selection = UnityEngine.Object.FindFirstObjectByType<RhythmDojo.UI.SongSelectionScreen>();
-                        if(selection)
-                        {
-                            var flow=UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
-                            if(awaitingSong)
-                                flow.UpdateSelection(1,flow.Settings.defaultDifficulty,run==3 ? ScrollMode.Constant : ScrollMode.Bpm,1);
-                            flow.PlaySelected();
-                        }
-                        return;
-                    }
+                    if (SessionState.GetBool(Prefix + "Build", false)) BuildPlayer();
+                    Finish(true);
+                    return;
                 }
-                if(EditorApplication.timeSinceStartup>=nextDiagnostic)
+
+                string category = SessionState.GetString(Prefix + "Category", "");
+                var filter = new Filter
                 {
-                    nextDiagnostic=EditorApplication.timeSinceStartup+5;
-                    Debug.Log($"Verification heartbeat: state={game.Session?.State} song={game.Clock.SongTime:F3} dsp={AudioSettings.dspTime:F3} events={nextEvent} focused={UnityEngine.Application.isFocused}");
-                }
-                if(!started)
-                {
-                    Check(game.Session.State==Gameplay.SessionState.Ready,"Bootstrap loads Ready Gameplay");
-                    // Temporarily change only in-memory focus behavior for batch input.
-                    // Restore the same settings object before leaving Play Mode.
-                    originalInputSettings=InputSystem.settings;
-                    priorEditorBehavior=originalInputSettings.editorInputBehaviorInPlayMode;
-                    priorBackgroundBehavior=originalInputSettings.backgroundBehavior;
-                    InputSystem.settings.editorInputBehaviorInPlayMode=InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
-                    InputSystem.settings.backgroundBehavior=InputSettings.BackgroundBehavior.IgnoreFocus;
-                    keyboard=InputSystem.AddDevice<Keyboard>(); keyboard.MakeCurrent();
-                    started=true; run=0; down.Clear();
-                    InputSystem.onBeforeUpdate+=FeedInput;
-                    // Start via the actual Input Action, not a controller method.
-                    InputSystem.QueueStateEvent(keyboard,new KeyboardState(Key.Space));
-                    SetupEvents(false); return;
-                }
-                if(awaitingSong)
-                {
-                    Check(game.Chart.Count==8,"selected tempo song has eight notes");
-                    down.Clear(); InputSystem.QueueStateEvent(keyboard,new KeyboardState());
-                    SetupEvents(true); game.StartSession(); awaitingSong=false; return;
-                }
-                if(game.Session.State==Gameplay.SessionState.Ready) return;
-                double time=game.Clock.SongTime;
-                if(!captured && time>4.4)
-                {
-                    captured=true; CaptureView();
-                    Check(UnityEngine.Object.FindFirstObjectByType<SongClock>().GetComponent<AudioSource>().isPlaying,"scheduled audio playing");
-                    var view=UnityEngine.Object.FindObjectsByType<NoteView>(FindObjectsInactive.Include,FindObjectsSortMode.None).First(v=>v.name.StartsWith("Note 04"));
-                    Check(Math.Abs(view.transform.Find("Head").position.z)<.001,"holding head pinned to judgment line");
-                }
-                if(game.Session.State!=Gameplay.SessionState.Completed) return;
-                if(run==0)
-                {
-                    Check(game.Session.Perfect==13 && game.Session.Good==2 && game.Session.Miss==3,
-                        $"mixed run counts: {game.Session.Perfect}/{game.Session.Good}/{game.Session.Miss}");
-                    Check(game.Session.Combo==3,"combo after miss and final hold/chord");
-                    Check(!game.Session.IsHeld(1),"completed simulation clears held state");
-                    File.AppendAllText("Logs/verification.txt","PASS: Play Mode through Bootstrap; timestamped D/F/J/K, early/late Good, Perfect, tap misses, successful hold, other-lane input during hold, early-release Miss, automatic hold completion, chords, close taps, counts 13/2/3, combo 3, 180ms hitch.\n");
-                    run=1; game.StartSession(); Check(!game.Session.IsHeld(1) && game.Session.Resolved==0,"restart clears held input and counts");
-                    down.Clear(); InputSystem.QueueStateEvent(keyboard,new KeyboardState()); SetupEvents(true); return;
-                }
-                if(run==1)
-                {
-                    Check(game.Session.Perfect==18 && game.Session.Resolved==18 && game.Session.Combo==18,"restarted perfect run");
-                    File.AppendAllText("Logs/verification.txt","PASS: restart while F held; reset; second full run 18 Perfect / combo 18.\n");
-                    run=2; game.StartSession(); events.Clear(); nextEvent=0; return;
-                }
-                if(run==2)
-                {
-                    Check(game.Session.Miss==18 && game.Session.Combo==0,"unplayed taps and hold starts miss in Play Mode");
-                    File.AppendAllText("Logs/verification.txt","PASS: third full run with no input; all 18 notes including hold starts Miss.\n");
-                    run=3; awaitingSong=true; events.Clear(); nextEvent=0;
-                    UnityEngine.Object.FindFirstObjectByType<GameplayCompositionRoot>().ReturnToSelection(); game=null; return;
-                }
-                Check(game.Session.Perfect==8 && game.Session.Combo==8,"tempo song perfect results independent of scroll mode");
-                Check(game.ReadModel.Snapshot.SongTime>=12,"completed HUD retains final song time");
-                File.AppendAllText("Logs/verification.txt",$"PASS: Tempo Shift full run in {(run==3 ? "Constant" : "BPM")} scroll; 8 Perfect / combo 8; hold across 120→180 BPM boundary.\n");
-                if(run==3)
-                {
-                    run=4; awaitingSong=true; events.Clear(); nextEvent=0;
-                    UnityEngine.Object.FindFirstObjectByType<GameplayCompositionRoot>().ReturnToSelection(); game=null; return;
-                }
-                InputSystem.RemoveDevice(keyboard);
-                InputSystem.onBeforeUpdate-=FeedInput;
-                originalInputSettings.editorInputBehaviorInPlayMode=priorEditorBehavior;
-                originalInputSettings.backgroundBehavior=priorBackgroundBehavior;
-                EditorApplication.update-=Tick; EditorApplication.ExitPlaymode();
+                    testMode = phase == 0 ? TestMode.EditMode : TestMode.PlayMode,
+                    assemblyNames = phase == 0
+                        ? new[] { "Game.Domain.Tests", "Game.EditMode.Tests" }
+                        : new[] { "Game.PlayMode.Tests" },
+                    categoryNames = string.IsNullOrEmpty(category) ? null : new[] { category }
+                };
+                var api = ScriptableObject.CreateInstance<TestRunnerApi>();
+                try { api.Execute(new ExecutionSettings(filter)); }
+                finally { UnityEngine.Object.DestroyImmediate(api); }
             }
-            catch(Exception e)
+            catch (Exception error)
             {
-                Debug.LogException(e); File.AppendAllText("Logs/verification.txt",e+"\n");
-                InputSystem.onBeforeUpdate-=FeedInput;
-                if(originalInputSettings)
-                {
-                    originalInputSettings.editorInputBehaviorInPlayMode=priorEditorBehavior;
-                    originalInputSettings.backgroundBehavior=priorBackgroundBehavior;
-                }
-                SessionState.SetBool("RhythmDojo.Verification.Failed",true);
-                EditorApplication.update-=Tick; EditorApplication.ExitPlaymode();
+                File.AppendAllText(ReportPath, $"FAIL: {error}\n");
+                Debug.LogException(error);
+                Finish(false);
             }
         }
-        private static void FeedInput()
+
+        private static void Finish(bool passed)
         {
-            if(InputState.currentUpdateType!=InputUpdateType.Dynamic || !game ||
-                game.Session.State!=Gameplay.SessionState.Playing) return;
-            if(!hitched && game.Clock.SongTime>6.40)
-            { hitched=true; System.Threading.Thread.Sleep(180); }
-            // Deliver timestamped hardware-like events before the same dynamic input update
-            // and timeout sweep, including all events accumulated during a blocked frame.
-            double time=game.Clock.SongTime;
-            while(nextEvent<events.Count && time>=events[nextEvent].time)
-            { var e=events[nextEvent++]; Queue(e.key,e.press,e.time); }
+            EditorSceneManager.playModeStartScene = AssetDatabase.LoadAssetAtPath<SceneAsset>(
+                SessionState.GetString(Prefix + "PreviousStart", ""));
+            SessionState.SetBool(ActiveKey, false);
+            SessionState.SetBool(Prefix + "Pending", false);
+            SessionState.SetBool(Prefix + "Failed", !passed);
+            File.AppendAllText(ReportPath, passed ? "PASS: verification completed.\n" : "FAIL: verification stopped; see XML results.\n");
+            Debug.Log($"Rhythm Dojo verification {(passed ? "passed" : "failed")}: {ReportPath}");
+            if (UnityEngine.Application.isBatchMode) EditorApplication.Exit(passed ? 0 : 1);
         }
-        private static void CaptureView()
+
+        private sealed class Results : IErrorCallbacks
         {
-            var camera=Camera.main; var canvas=UnityEngine.Object.FindFirstObjectByType<Canvas>();
-            var target=new RenderTexture(1280,720,24);
-            var previous=RenderTexture.active;
-            try
+            public void RunStarted(ITestAdaptor testsToRun) { }
+            public void TestStarted(ITestAdaptor test) { }
+
+            public void TestFinished(ITestResultAdaptor result)
             {
-                camera.targetTexture=target; canvas.renderMode=RenderMode.ScreenSpaceCamera;
-                canvas.worldCamera=camera; canvas.planeDistance=1;
-                Canvas.ForceUpdateCanvases(); camera.Render(); RenderTexture.active=target;
-                var texture=new Texture2D(1280,720,TextureFormat.RGB24,false);
-                texture.ReadPixels(new Rect(0,0,1280,720),0,0); texture.Apply();
-                File.WriteAllBytes("Logs/playmode.png",texture.EncodeToPNG()); UnityEngine.Object.Destroy(texture);
+                if (!SessionState.GetBool(ActiveKey, false) || result.Test.IsSuite) return;
+                File.AppendAllText(ReportPath, $"{result.ResultState}: {result.FullName}\n{result.Message}\n");
             }
-            finally
+
+            public void RunFinished(ITestResultAdaptor result)
             {
-                canvas.renderMode=RenderMode.ScreenSpaceOverlay; canvas.worldCamera=null;
-                camera.targetTexture=null; RenderTexture.active=previous; target.Release(); UnityEngine.Object.Destroy(target);
+                if (!SessionState.GetBool(ActiveKey, false)) return;
+                int phase = SessionState.GetInt(Prefix + "Phase", 0);
+                string category = SessionState.GetString(Prefix + "Category", "");
+                string name = phase == 0 ? "editmode" : string.IsNullOrEmpty(category) ? "playmode" : category.ToLowerInvariant();
+                TestRunnerApi.SaveResultToFile(result, $"Logs/verification-{name}.xml");
+                bool passed = result.ResultState == "Passed" && result.PassCount > 0 &&
+                    result.FailCount == 0 && result.SkipCount == 0 && result.InconclusiveCount == 0;
+                File.AppendAllText(ReportPath,
+                    $"{name}: {result.PassCount} passed, {result.FailCount} failed, {result.SkipCount} skipped, {result.InconclusiveCount} inconclusive.\n");
+                SessionState.SetBool(Prefix + "Failed", !passed);
+                SessionState.SetInt(Prefix + "Phase", phase + 1);
+                // Continue waits for all runner cleanup tasks, including after leaving Play Mode.
+                SessionState.SetBool(Prefix + "Pending", true);
+            }
+
+            public void OnError(string message)
+            {
+                if (!SessionState.GetBool(ActiveKey, false)) return;
+                File.AppendAllText(ReportPath, $"FAIL: Test Runner: {message}\n");
+                SessionState.SetBool(Prefix + "Failed", true);
+                SessionState.SetBool(Prefix + "Pending", true);
             }
         }
+
+        [MenuItem("Game Tools/Verification/Build Player Only")]
         public static void BuildPlayer()
         {
-            var report=BuildPipeline.BuildPlayer(new BuildPlayerOptions {
-                scenes=new[]{SceneBuilder.TitlePath,SceneBuilder.BootstrapPath,SceneBuilder.SelectionPath,SceneBuilder.GameplayPath,SceneBuilder.SettingsPath},
-                locationPathName="Builds/Windows/RhythmDojo.exe",target=BuildTarget.StandaloneWindows64,options=BuildOptions.None });
-            Check(report.summary.result==BuildResult.Succeeded,"standalone player build: "+report.summary.result);
+            Directory.CreateDirectory("Builds/Windows");
+            var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
+            {
+                scenes = new[] { SceneBuilder.TitlePath, SceneBuilder.BootstrapPath, SceneBuilder.SelectionPath,
+                    SceneBuilder.GameplayPath, SceneBuilder.SettingsPath },
+                locationPathName = "Builds/Windows/RhythmDojo.exe",
+                target = BuildTarget.StandaloneWindows64,
+                options = BuildOptions.None
+            });
+            if (report.summary.result != BuildResult.Succeeded)
+                throw new InvalidOperationException("Standalone player build: " + report.summary.result);
+            Directory.CreateDirectory("Logs");
+            File.AppendAllText(ReportPath, "PASS: Windows standalone build (Title entry point).\n");
         }
     }
 }

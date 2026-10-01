@@ -16,6 +16,7 @@ namespace RhythmDojo.Tests
 {
     [PrebuildSetup(typeof(MainMenuTestStartup))]
     [PostBuildCleanup(typeof(MainMenuTestStartup))]
+    [Category("UI")]
     public sealed class MainMenuFlowTests
     {
         private MainMenuView view;
