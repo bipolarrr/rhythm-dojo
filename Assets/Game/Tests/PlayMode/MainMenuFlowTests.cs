@@ -29,8 +29,9 @@ namespace RhythmDojo.Tests
         private sealed class Actions : IMainMenuActions
         {
             public bool Transitioning { get; set; }
-            public int Starts, Quits;
+            public int Starts, Quits, Settings;
             public void StartGame() { Starts++; Transitioning = true; }
+            public void ShowSettings() { Settings++; Transitioning = true; }
             public void QuitGame() { Quits++; }
         }
 
@@ -84,11 +85,21 @@ namespace RhythmDojo.Tests
             yield return ClickAt(point);
         }
 
+        private IEnumerator OpenMenu()
+        {
+            yield return Click(view.logo);
+            yield return new WaitForSecondsRealtime(.35f);
+            Assert.That(view.menuPanel.alpha, Is.EqualTo(1f));
+            Assert.That(view.menuPanel.blocksRaycasts, Is.True);
+        }
+
         [UnityTest]
-        public IEnumerator SettingsDoesNotStartOrOpenAnyScreen()
+        public IEnumerator SettingsRequestsSettingsWithoutStartingTheGame()
         {
             var actions = new Actions(); screen.Initialize(actions);
+            yield return OpenMenu();
             yield return Click(view.settings);
+            Assert.That(actions.Settings, Is.EqualTo(1));
             Assert.That(actions.Starts, Is.Zero);
             Assert.That(actions.Quits, Is.Zero);
             Assert.That(view.quitPopup.activeSelf, Is.False);
@@ -99,6 +110,7 @@ namespace RhythmDojo.Tests
         public IEnumerator QuitPopupBlocksBackgroundAndNoRestoresMenu()
         {
             var actions = new Actions(); screen.Initialize(actions);
+            yield return OpenMenu();
             for (int repeat = 0; repeat < 2; repeat++)
             {
                 yield return Click(view.quit);
@@ -117,6 +129,7 @@ namespace RhythmDojo.Tests
         public IEnumerator YesRequestsQuitExactlyOnceWithoutStarting()
         {
             var actions = new Actions(); screen.Initialize(actions);
+            yield return OpenMenu();
             yield return Click(view.quit);
             Assert.That(view.quitPopup.activeSelf, Is.True, "Quit popup must open before confirming.");
             yield return Click(view.confirmQuit);
@@ -126,11 +139,14 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
-        public IEnumerator BackgroundClickStartsOnceAndReinitializationDoesNotDuplicateListeners()
+        public IEnumerator LogoExpandsMenuAndPlayStartsOnceWithoutDuplicateListeners()
         {
             var oldActions = new Actions(); screen.Initialize(oldActions);
             var actions = new Actions(); screen.Initialize(actions);
             yield return ClickAt(new Vector2(Screen.width * .3f, Screen.height * .7f));
+            Assert.That(actions.Starts, Is.Zero);
+            yield return OpenMenu();
+            yield return Click(view.start);
             view.start.onClick.Invoke();
             Assert.That(actions.Starts, Is.EqualTo(1));
             Assert.That(oldActions.Starts, Is.Zero);
@@ -145,7 +161,8 @@ namespace RhythmDojo.Tests
             SceneManager.sceneLoaded += loaded;
             try
             {
-                yield return ClickAt(new Vector2(Screen.width * .3f, Screen.height * .7f));
+                yield return OpenMenu();
+                yield return Click(view.start);
                 double deadline = Time.realtimeSinceStartupAsDouble + 20;
                 while (!UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>())
                 {
@@ -166,9 +183,46 @@ namespace RhythmDojo.Tests
             Capture("Logs/main-menu.png");
             Capture("Logs/main-menu-1920.png", 1920, 1080);
             Capture("Logs/main-menu-4x3.png", 1024, 768);
+            yield return OpenMenu();
+            Capture("Logs/main-menu-expanded.png");
             yield return Click(view.quit);
             Assert.That(view.quitPopup.activeSelf, Is.True);
             Capture("Logs/main-menu-quit.png");
+        }
+
+        [UnityTest]
+        public IEnumerator LogoCanCollapseMenuAndHiddenButtonsCannotStart()
+        {
+            var actions = new Actions(); screen.Initialize(actions);
+            yield return OpenMenu();
+            yield return Click(view.logo);
+            yield return new WaitForSecondsRealtime(.35f);
+            Assert.That(view.menuPanel.gameObject.activeSelf, Is.False);
+            view.start.onClick.Invoke();
+            Assert.That(actions.Starts, Is.Zero);
+        }
+
+        [UnityTest]
+        public IEnumerator TitleSettingsBackReturnsToTitle()
+        {
+            yield return OpenMenu();
+            yield return Click(view.settings);
+            double deadline = Time.realtimeSinceStartupAsDouble + 20d;
+            while (!UnityEngine.Object.FindFirstObjectByType<SettingsScreen>())
+            {
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                yield return null;
+            }
+            yield return null;
+            var settingsView = UnityEngine.Object.FindFirstObjectByType<SettingsView>();
+            settingsView.back.onClick.Invoke();
+            while (SceneManager.GetActiveScene().path != "Assets/Game/Scenes/Title.unity")
+            {
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                yield return null;
+            }
+            yield return null;
+            Assert.That(UnityEngine.Object.FindFirstObjectByType<MainMenuView>().menuPanel.gameObject.activeSelf, Is.False);
         }
 
         private static void AssertHasDisplayCamera()

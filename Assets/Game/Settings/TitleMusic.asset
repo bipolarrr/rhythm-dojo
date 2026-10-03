@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e25a58816b98474aad1fd8b291213398, type: 3}
+  m_Name: TitleMusic
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.Audio.TitleMusicSettings
+  musicClip: {fileID: 0}
+  beatsPerMinute: 120
+  firstBeatSeconds: 0
+  volume: 0.7

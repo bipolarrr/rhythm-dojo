@@ -17,16 +17,31 @@ namespace RhythmDojo.EditorTools
             var canvas = UiElements.Canvas("Main Menu");
             canvas.GetComponent<CanvasScaler>().matchWidthOrHeight = .5f;
             var view = canvas.gameObject.AddComponent<MainMenuView>();
-            view.start = Button("Start Surface", canvas.transform, Color.black);
-            Stretch((RectTransform)view.start.transform);
+            var logoObject = new GameObject("Logo", typeof(RectTransform));
+            logoObject.transform.SetParent(canvas.transform, false);
+            var circle = logoObject.AddComponent<LogoCircleGraphic>();
+            circle.color = new Color(1f, .22f, .35f);
+            view.logo = logoObject.AddComponent<Button>();
+            view.logo.targetGraphic = circle;
+            var logoNavigation = view.logo.navigation; logoNavigation.mode = Navigation.Mode.None; view.logo.navigation = logoNavigation;
+            Anchor((RectTransform)view.logo.transform, new Vector2(.5f, .5f), Vector2.zero, new Vector2(340, 340));
 
-            view.title = Label("Title", canvas.transform, "rythm-dojo", font, 64);
-            Anchor(view.title.rectTransform, new Vector2(.5f, .6f), Vector2.zero, new Vector2(1000, 110));
-            view.startPrompt = Label("Start Prompt", canvas.transform, "Click to Start", font, 28);
-            Anchor(view.startPrompt.rectTransform, new Vector2(.5f, .2f), Vector2.zero, new Vector2(600, 60));
+            view.title = Label("Title", view.logo.transform, "리듬 도장", font, 48);
+            Anchor(view.title.rectTransform, new Vector2(.5f, .5f), Vector2.zero, new Vector2(270, 90));
+            view.title.gameObject.AddComponent<TextGlow>().Configure(new Color(1f, .22f, .35f, .65f), 8f);
+            view.startPrompt = Label("Start Prompt", view.logo.transform, "Click to Start", font, 24);
+            Anchor(view.startPrompt.rectTransform, new Vector2(.5f, .5f), new Vector2(0, -205), new Vector2(340, 50));
+            view.startPrompt.gameObject.AddComponent<TextGlow>().Configure(new Color(1f, .22f, .35f, .55f), 5f);
 
-            view.quit = IconButton("Quit", canvas.transform, MainMenuIcon.IconKind.Power, new Vector2(-32, 32));
-            view.settings = IconButton("Settings", canvas.transform, MainMenuIcon.IconKind.Settings, new Vector2(-32, 112));
+            var menu = new GameObject("Menu Buttons", typeof(RectTransform), typeof(CanvasGroup));
+            menu.transform.SetParent(canvas.transform, false);
+            view.menuPanel = menu.GetComponent<CanvasGroup>();
+            Anchor((RectTransform)menu.transform, new Vector2(.5f, .5f), new Vector2(200, 0), new Vector2(660, 90));
+            view.start = MenuButton("Play", menu.transform, "플레이", font, -220);
+            view.settings = MenuButton("Settings", menu.transform, "설정", font, 0);
+            view.quit = MenuButton("Quit", menu.transform, "종료", font, 220);
+            view.SetExpansion(0f);
+            menu.SetActive(false);
 
             var overlay = Panel("Quit Popup", canvas.transform, new Color(0, 0, 0, .75f));
             Stretch(overlay.rectTransform);
@@ -65,20 +80,6 @@ namespace RhythmDojo.EditorTools
             return button;
         }
 
-        private static Button IconButton(string name, Transform parent, MainMenuIcon.IconKind kind, Vector2 position)
-        {
-            var button = Button(name, parent, new Color(.06f, .06f, .06f));
-            var rect = (RectTransform)button.transform;
-            rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(1, 0);
-            rect.anchoredPosition = position; rect.sizeDelta = new Vector2(64, 64);
-            var iconObject = new GameObject("Icon", typeof(RectTransform));
-            iconObject.transform.SetParent(button.transform, false);
-            Stretch((RectTransform)iconObject.transform);
-            var icon = iconObject.AddComponent<MainMenuIcon>();
-            icon.kind = kind; icon.color = Color.white; icon.raycastTarget = false;
-            return button;
-        }
-
         private static Text Label(string name, Transform parent, string caption, Font font, int size)
         {
             var text = UiElements.Label(name, parent, caption, Vector2.zero, Vector2.zero, size);
@@ -93,6 +94,17 @@ namespace RhythmDojo.EditorTools
             Anchor((RectTransform)button.transform, new Vector2(.5f, .5f), position, new Vector2(170, 52));
             var label = Label("Caption", button.transform, caption, font, 24);
             Stretch(label.rectTransform); return button;
+        }
+
+        private static Button MenuButton(string name, Transform parent, string caption, Font font, float x)
+        {
+            var button = Button(name, parent, new Color(.22f, .035f, .075f));
+            Anchor((RectTransform)button.transform, new Vector2(.5f, .5f), new Vector2(x, 0), new Vector2(190, 76));
+            var border = button.gameObject.AddComponent<Outline>();
+            border.effectColor = new Color(1f, .22f, .35f, .8f); border.effectDistance = new Vector2(1, -1);
+            var captionText = Label("Caption", button.transform, caption, font, 28);
+            Stretch(captionText.rectTransform);
+            return button;
         }
 
         private static void Anchor(RectTransform rect, Vector2 anchor, Vector2 position, Vector2 size)

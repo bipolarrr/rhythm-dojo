@@ -4,6 +4,7 @@ namespace RhythmDojo.Services
     {
         bool Transitioning { get; }
         void StartGame();
+        void ShowSettings();
         void QuitGame();
     }
 }

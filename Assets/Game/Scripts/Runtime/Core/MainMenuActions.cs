@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using RhythmDojo.Services;
+using RhythmDojo.Gameplay;
 
 namespace RhythmDojo.Core
 {
@@ -9,6 +10,17 @@ namespace RhythmDojo.Core
     {
         public const string BootstrapScenePath = "Assets/Game/Scenes/Bootstrap.unity";
         public bool Transitioning { get; private set; }
+        private readonly GameSettings settings;
+
+        public MainMenuActions(GameSettings gameSettings) { settings = gameSettings; }
+
+        public void ShowSettings()
+        {
+            if (Transitioning) return;
+            Transitioning = true;
+            try { AppFlowController.Create(settings).ShowTitleSettings(); }
+            catch { Transitioning = false; throw; }
+        }
 
         public void StartGame()
         {

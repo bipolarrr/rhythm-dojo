@@ -25,13 +25,24 @@
 | 클릭, 팝업 열기/닫기, 중복 입력 방지 | `Scripts/Runtime/UI/MainMenuScreen.cs` | ② UI 동작 |
 | 실제 게임 시작·종료, 씬 조립 | `Scripts/Runtime/Core/MainMenuActions.cs`, `MainMenuCompositionRoot.cs`, `Scripts/Editor/SceneGeneration/MainMenuSceneBuilder.cs` | ④ 공통 기반·통합 |
 
-1. `MainMenuLayoutBuilder`에서 디자인을 수정합니다. 배경 클릭 영역, 설정/종료 버튼, 팝업의 View 참조를 유지하세요.
+1. `MainMenuLayoutBuilder`에서 디자인을 수정합니다. 중앙 로고, 펼쳐지는 플레이/설정/종료 버튼, 팝업의 View 참조를 유지하세요.
 2. **Game Tools > Scenes > Build Title**을 실행합니다. 다른 화면을 재생성하지 않고 Title을 저장하고 엽니다.
-3. Play Mode에서 배경 클릭 → 곡 선택, 종료 → 팝업, 아니요 → 닫기를 확인합니다. 설정 아이콘은 현재 기능이 없는 placeholder입니다.
+3. Play Mode에서 중앙 원 클릭 → 오른쪽에 가로 메뉴 펼치기, 원 다시 클릭 → 접기를 확인합니다. 플레이 → 곡 선택, 설정 → 설정 화면 → 뒤로 → 타이틀, 종료 → 팝업 → 아니요 → 닫기를 확인합니다. 빈 배경을 클릭해도 게임은 시작되지 않습니다.
 4. **Game Tools > Verification > Verify UI Actions**로 화면 동작을 확인합니다. 타이틀만 확인하려면 Test Runner에서 `MainMenuTests`(EditMode)와 `MainMenuFlowTests`(PlayMode)를 선택합니다.
 5. 빌더/관련 View 변경, 재생성된 `Title.unity`, 새 에셋과 `.meta`, 화면 스크린샷을 함께 제출합니다. 이름·위치·문구의 사양을 의도적으로 바꾸면 해당 레이아웃 테스트도 맞추고, 버튼 동작 테스트는 유지합니다.
 
 씬에서 직접 바꾼 배치는 **Build Title** 실행 시 덮어써집니다. 미리보기로 실험한 값도 최종적으로 빌더에 옮겨야 다른 팀원이 같은 화면을 재생성할 수 있습니다. 새 이미지/프리팹을 쓰면 빌더에서 로드하고 View에 연결하세요. 다른 화면을 직접 실행하려면 **Game Tools > Scenes > Start Play Mode From Title**을 끄면 됩니다.
+
+중앙 로고는 `LogoCircleGraphic`으로 그리며 원 내부만 클릭할 수 있습니다. 제목과 글로우는 원에 포함되어 음악 BPM에 맞춰 함께 바운스합니다. 로고 클릭 시 0.25초 동안 왼쪽으로 이동하고 플레이·설정·종료 사각형 버튼이 오른쪽에 가로로 나타납니다. 메뉴가 펼쳐지기 전과 종료 팝업이 열려 있을 때는 게임 시작/설정 입력을 차단합니다.
+
+### 타이틀 음악 넣기
+
+1. 음원 파일을 `Assets/Game/Audio/`에 가져옵니다.
+2. `Assets/Game/Settings/TitleMusic.asset`을 선택하고 **Music Clip**에 음원을 드래그합니다.
+3. **Beats Per Minute**에 음악 BPM, **First Beat Seconds**에 음원에서 첫 박자가 시작되는 시간(초), **Volume**에 음량을 설정합니다.
+4. Title 씬에서 Play Mode를 시작하면 반복 재생되며 제목과 시작 문구가 같은 박자로 바운스합니다. BPM을 자동 분석하지 않으므로 음원의 값을 직접 입력합니다. 음원을 바꿀 때는 Play Mode를 종료한 뒤 설정합니다.
+
+음원을 비워두면 이 설정의 BPM으로 바운스만 실행합니다. 음악은 타이틀 씬을 벗어나면 정지하고 종료 팝업에서는 계속 재생됩니다. 루프마다 음원 시작점을 기준으로 박자를 다시 맞추므로 자연스럽게 반복되도록 편집한 음원을 권장합니다. **Build Title**은 이 설정 에셋을 다시 연결하므로 음원 지정이 유지됩니다. `MainMenuScreen`의 BPM은 음악 설정이 연결되지 않은 화면의 대체 값이며, 바운스 강도는 계속 `MainMenuScreen`에서 조절합니다.
 
 ## UI 작업 방법
 

@@ -30,7 +30,11 @@ namespace RhythmDojo.UI
         }
         private void Changed(int option) { audio.SelectBufferOption(option); Refresh(); }
         private void Apply() { audio.ApplyBufferSize(); Refresh(); }
-        private void Back() => navigation.ShowSelection();
+        private void Back()
+        {
+            if (navigation is ISettingsReturnNavigation returning) returning.ReturnFromSettings();
+            else navigation.ShowSelection();
+        }
         private void Refresh()
         {
             var actual = audio.Actual;

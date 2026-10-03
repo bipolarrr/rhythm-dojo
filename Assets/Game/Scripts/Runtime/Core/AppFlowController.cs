@@ -10,7 +10,7 @@ using RhythmDojo.Services;
 
 namespace RhythmDojo.Core
 {
-    public sealed class AppFlowController : MonoBehaviour, IAppNavigation, IEditorPlaytestService
+    public sealed class AppFlowController : MonoBehaviour, IAppNavigation, IEditorPlaytestService, ISettingsReturnNavigation
     {
         public const string SelectionPath = "Assets/Game/Scenes/SongSelection.unity";
         public const string GameplayPath = "Assets/Game/Scenes/Gameplay.unity";
@@ -18,6 +18,7 @@ namespace RhythmDojo.Core
         [SerializeField] private GameSettings settings;
         private readonly CancellationTokenSource lifetime = new CancellationTokenSource();
         private string editorSessionId, returnScenePath;
+        private string settingsReturnPath = SelectionPath;
         private Action<string> returned;
         public GameSettings Settings => settings;
         public SongLibrary Library { get; private set; }
@@ -138,7 +139,19 @@ namespace RhythmDojo.Core
         public void ShowSettings()
         {
             if (Transitioning || !SceneManager.GetSceneByPath(SelectionPath).isLoaded) return;
+            settingsReturnPath = SelectionPath;
             Load(SettingsPath);
+        }
+        public void ShowTitleSettings()
+        {
+            if (Transitioning || !SceneManager.GetSceneByPath("Assets/Game/Scenes/Title.unity").isLoaded) return;
+            settingsReturnPath = "Assets/Game/Scenes/Title.unity";
+            Load(SettingsPath);
+        }
+        public void ReturnFromSettings()
+        {
+            if (Transitioning) return;
+            ClearEditorReturn(); Load(settingsReturnPath);
         }
         private void Load(string path)
         {
