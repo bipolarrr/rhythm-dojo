@@ -2,7 +2,9 @@ using System;
 using System.Linq;
 using RhythmDojo.Gameplay;
 using RhythmDojo.UI;
+using RhythmDojo.Authoring;
 using UnityEditor;
+using UnityEditor.Events;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -43,10 +45,12 @@ namespace RhythmDojo.EditorTools
                 new Vector2(0, -52), Vector2.zero, Surface);
 
             string[] captions = { "파일", "설정", "도구", "테스트" };
+            var menuButtons = new Button[captions.Length];
             for (int i = 0; i < captions.Length; i++)
             {
                 var button = UiElements.Button(captions[i], canvas.transform, captions[i],
                     new Vector2(28 + i * 118, -9), new Vector2(108, 34));
+                menuButtons[i] = button;
                 button.GetComponent<Image>().color = new Color(0.18f, 0.21f, 0.27f);
                 var label = button.GetComponentInChildren<Text>();
                 label.color = Color.white;
@@ -85,24 +89,99 @@ namespace RhythmDojo.EditorTools
             var noteLayer = new GameObject("Notes", typeof(RectTransform)).GetComponent<RectTransform>();
             noteLayer.SetParent(grid, false);
             Stretch(noteLayer, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            grid.gameObject.AddComponent<ChartEditorScreen>().Configure(mode, noteLayer);
+            var screen = grid.gameObject.AddComponent<ChartEditorScreen>();
+            screen.Configure(mode, noteLayer);
 
-            StretchPanel("Preview Space", content, new Vector2(0.62f, 0), Vector2.one,
+            var sidebar = StretchPanel("Preview Space", content, new Vector2(0.62f, 0), Vector2.one,
                 new Vector2(10, 0), Vector2.zero, Surface);
+            UiElements.Label("Help", sidebar, "좌클릭: 노트 배치\n위로 드래그: 롱노트\n우클릭: 삭제\n휠: 이동 / Ctrl + 휠: 확대\n\n파일 → 음원 가져오기\n설정 → 제목과 BPM 적용\n테스트 → 실제 플레이\n플레이 종료 시 편집 화면으로 복귀",
+                new Vector2(18, -18), new Vector2(380, 290), 19);
             var footer = StretchPanel("Progress Space", canvas.transform, Vector2.zero, new Vector2(1, 0),
                 new Vector2(28, 18), new Vector2(-28, 169), Surface);
             var progress = UiElements.Label("Progress Label", footer, "BPM 및 노래 진행 상황",
-                new Vector2(22, -20), new Vector2(760, 42), 22);
+                new Vector2(22, -20), new Vector2(1150, 112), 18);
             progress.color = new Color(0.8f, 0.83f, 0.88f);
+            BuildMenus(canvas, screen, progress, menuButtons);
 
             UiElements.EventSystem(AssetDatabase.LoadAssetAtPath<UnityEngine.InputSystem.InputActionAsset>(
                 "Assets/InputSystem_Actions.inputactions"));
             GameSceneValidator.Validate(scene);
             if (!EditorSceneManager.SaveScene(scene, ScenePath)) throw new InvalidOperationException("Could not save chart editor scene.");
             var scenes = EditorBuildSettings.scenes;
-            if (!scenes.Any(item => item.path == ScenePath))
-                EditorBuildSettings.scenes = scenes.Concat(new[] { new EditorBuildSettingsScene(ScenePath, true) }).ToArray();
+            EditorBuildSettings.scenes = scenes.Where(item => item.path != ScenePath)
+                .Concat(new[] { new EditorBuildSettingsScene(ScenePath, true) }).ToArray();
             Debug.Log("Rhythm Dojo: chart editor scene generated.");
+        }
+
+        private static void BuildMenus(Canvas canvas, ChartEditorScreen screen, Text status, Button[] buttons)
+        {
+            var menu = canvas.gameObject.AddComponent<ChartEditorMenu>();
+            var controls = canvas.gameObject.AddComponent<CanvasGroup>();
+            SceneBuilder.Wire(menu, "screen", screen);
+            SceneBuilder.Wire(menu, "status", status);
+            SceneBuilder.Wire(menu, "controls", controls);
+            var file = MenuPanel("File Panel", canvas.transform, 390);
+            var settings = MenuPanel("Settings Panel", canvas.transform, 470);
+            var tools = MenuPanel("Tools Panel", canvas.transform, 210);
+            SceneBuilder.Wire(menu, "filePanel", file.gameObject);
+            SceneBuilder.Wire(menu, "settingsPanel", settings.gameObject);
+            SceneBuilder.Wire(menu, "toolsPanel", tools.gameObject);
+            SceneBuilder.Wire(menu, "projectId", Field(file, "Project ID", "곡 ID (불러오기)", 20));
+            ActionButton(file, "Save", "저장", 104, menu.Save);
+            ActionButton(file, "Load", "불러오기 (현재 작업 자동 저장)", 148, menu.Load);
+            SceneBuilder.Wire(menu, "audioPath", Field(file, "Audio Path", "음원 파일 전체 경로 (WAV / OGG / MP3)", 210));
+            ActionButton(file, "Import Audio", "음원 가져오기", 294, menu.ImportAudio);
+            UiElements.Label("Storage Hint", file, "저장 위치는 저장 완료 후 아래에 표시됩니다.",
+                new Vector2(16, -348), new Vector2(480, 28), 16);
+            SceneBuilder.Wire(menu, "title", Field(settings, "Title", "곡 제목", 12));
+            SceneBuilder.Wire(menu, "artist", Field(settings, "Artist", "아티스트", 88));
+            SceneBuilder.Wire(menu, "bpm", Field(settings, "BPM", "시작 BPM (이후 BPM 변경점은 유지)", 164));
+            SceneBuilder.Wire(menu, "offset", Field(settings, "Offset", "오디오 오프셋 (초)", 240));
+            SceneBuilder.Wire(menu, "duration", Field(settings, "Duration", "채보 종료 시간 (초)", 316));
+            ActionButton(settings, "Apply Settings", "설정 적용", 408, menu.ApplySettings);
+            SceneBuilder.Wire(menu, "undo", ActionButton(tools, "Undo", "실행 취소", 18, menu.Undo));
+            SceneBuilder.Wire(menu, "redo", ActionButton(tools, "Redo", "다시 실행", 72, menu.Redo));
+            ActionButton(tools, "Reset View", "처음 위치 / 기본 확대", 126, menu.ResetView);
+            UnityEventTools.AddPersistentListener(buttons[0].onClick, menu.ToggleFile);
+            UnityEventTools.AddPersistentListener(buttons[1].onClick, menu.ToggleSettings);
+            UnityEventTools.AddPersistentListener(buttons[2].onClick, menu.ToggleTools);
+            UnityEventTools.AddPersistentListener(buttons[3].onClick, menu.Playtest);
+            file.gameObject.SetActive(false); settings.gameObject.SetActive(false); tools.gameObject.SetActive(false);
+            var composition = new GameObject("Chart Editor Composition").AddComponent<ChartEditorCompositionRoot>();
+            SceneBuilder.Wire(composition, "settings", SceneResources.Require<GameSettings>(TestContentBuilder.SettingsPath));
+            SceneBuilder.Wire(composition, "screen", screen);
+            SceneBuilder.Wire(composition, "menu", menu);
+        }
+
+        private static RectTransform MenuPanel(string name, Transform parent, float height)
+        {
+            var go = new GameObject(name, typeof(RectTransform), typeof(Image));
+            go.transform.SetParent(parent, false);
+            var rect = (RectTransform)go.transform;
+            UiElements.Position(rect, new Vector2(28, -56), new Vector2(520, height));
+            go.GetComponent<Image>().color = Surface;
+            return rect;
+        }
+
+        private static InputField Field(Transform parent, string name, string caption, float y)
+        {
+            UiElements.Label(name + " Label", parent, caption, new Vector2(16, -y), new Vector2(488, 25), 17);
+            var go = DefaultControls.CreateInputField(new DefaultControls.Resources());
+            go.name = name;
+            go.transform.SetParent(parent, false);
+            UiElements.Position((RectTransform)go.transform, new Vector2(16, -y - 28), new Vector2(488, 36));
+            foreach (var text in go.GetComponentsInChildren<Text>(true))
+            { text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf"); text.fontSize = 17; }
+            var input = go.GetComponent<InputField>();
+            ((Text)input.placeholder).text = caption;
+            return input;
+        }
+
+        private static Button ActionButton(Transform parent, string name, string caption, float y, UnityEngine.Events.UnityAction action)
+        {
+            var button = UiElements.Button(name, parent, caption, new Vector2(16, -y), new Vector2(488, 36));
+            UnityEventTools.AddPersistentListener(button.onClick, action);
+            return button;
         }
 
         private static RectTransform StretchPanel(string name, Transform parent, Vector2 anchorMin,

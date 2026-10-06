@@ -261,6 +261,8 @@ namespace RhythmDojo.Tests
             yield return null;
             InputSystem.QueueStateEvent(mouse, new MouseState { position = point });
             yield return null;
+            // UI release callbacks schedule note destruction at the end of the frame.
+            yield return null;
         }
 
         private static IEnumerator Drag(Mouse mouse, Vector2 start, Vector2 end)
@@ -274,6 +276,7 @@ namespace RhythmDojo.Tests
             InputSystem.QueueStateEvent(mouse, new MouseState { position = end }.WithButton(MouseButton.Left));
             yield return null;
             InputSystem.QueueStateEvent(mouse, new MouseState { position = end });
+            yield return null;
             yield return null;
         }
 

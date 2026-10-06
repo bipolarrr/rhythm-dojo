@@ -23,7 +23,8 @@ namespace RhythmDojo.EditorTools
             SaveGameplay(content); Save(ScenePresentationBuilder.Selection(content), SelectionPath);
             Save(ScenePresentationBuilder.Settings(content), SettingsPath);
             Save(ScenePresentationBuilder.Bootstrap(content), BootstrapPath); RegisterScenes();
-            AssetDatabase.SaveAssets(); Debug.Log("Rhythm Dojo: four scenes generated and validated.");
+            ChartEditorSceneBuilder.Build();
+            AssetDatabase.SaveAssets(); Debug.Log("Rhythm Dojo: five scenes generated and validated.");
         }
         [MenuItem("Game Tools/Scenes/Build Bootstrap")]
         public static void BuildBootstrap()
@@ -70,4 +71,3 @@ namespace RhythmDojo.EditorTools
         }
     }
 }
-

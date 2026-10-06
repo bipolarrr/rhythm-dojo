@@ -1,6 +1,17 @@
 # 채보 프로젝트 v1
 
-`Application/SongProject.cs`와 `EditorSession.cs`는 Unity/JSON 의존성이 없는 편집 API다. 기존 `SongDocument`와 `ISongDocumentStore`는 단일 채보 재생/저장 계약으로 유지한다. 실제 편집 화면, 곡 목록 등록과 외부 음원 디코딩은 이 작업에 포함하지 않는다.
+`Application/SongProject.cs`와 `EditorSession.cs`는 Unity/JSON 의존성이 없는 편집 API다. 기존 `SongDocument`와 `ISongDocumentStore`는 단일 채보 재생/저장 계약으로 유지한다.
+
+## 차트 에디터 화면
+
+**Game Tools > Scenes > Build Chart Editor** 또는 **Build All Scenes**로 씬을 생성한 뒤 `Assets/Game/Scenes/ChartEditor.unity`를 열고 Play Mode에서 사용한다. 메뉴의 영구 이벤트 연결과 입력 필드는 `ChartEditorSceneBuilder`에서 생성한다.
+
+- **파일**: 현재 프로젝트 저장, 곡 UUID로 저장한 프로젝트 불러오기, WAV/OGG/MP3 전체 파일 경로로 음원 가져오기. 저장 완료 시 실제 경로를 표시한다. 불러오기 전 현재 변경 내용을 자동 저장하며, 불러오기 실패 시 현재 세션을 유지한다.
+- **설정**: 제목, 아티스트, 시작 BPM, 오디오 오프셋, 채보 종료 시간을 입력한 뒤 적용한다. 시작 BPM을 바꿔도 이후 템포 변경점과 기존 노트의 초 단위 시간은 유지한다. 그리드는 전체 템포 맵을 반영한다.
+- **도구**: 실행 취소, 다시 실행, 처음 위치와 기본 확대 배율로 복귀.
+- **테스트**: 제목·음원·노트 등 기존 재생 규칙을 검증한 뒤 실제 Gameplay로 전환한다. 게임의 복귀 버튼/Escape로 돌아오면 미저장 편집 세션과 Undo 이력이 유지된다. Play Mode를 종료하면 메모리 세션은 사라지므로 보존할 작업은 먼저 저장한다.
+
+현재 화면은 활성 4레인 채보를 편집한다. 채보 추가/선택, 템포 변경점 추가 UI, 파일 선택 대화상자, 저장 프로젝트의 곡 목록 등록은 제공하지 않는다. 여러 채보가 있는 프로젝트를 열면 첫 채보를 편집하고 나머지는 저장 시 보존한다. 템포 맵이 유효하지 않거나 첫 채보가 4레인 모드와 일치하지 않는 초안은 화면에서 열 수 없으며 파일 저장 API 자체는 기존 초안 계약을 유지한다.
 
 ## 파일 계약
 

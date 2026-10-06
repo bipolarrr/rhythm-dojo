@@ -17,7 +17,6 @@ namespace RhythmDojo.UI
         private const int MaxBeatLines = 34;
         private const int BeatsPerWheelStep = 4;
         private const float NoteHeight = 7f;
-        private const double SecondsPerBeat = 0.5;
         private const double DefaultChartDuration = 8.5;
 
         [SerializeField] private GameModeDefinition mode;
@@ -36,6 +35,11 @@ namespace RhythmDojo.UI
 
         public int VisibleBeats => visibleBeats;
         public float ScrollBeatOffset => scrollBeatOffset;
+        public EditorSession Session => session;
+        public Guid ChartId => chartId;
+        public GameModeDefinition Mode => mode;
+        public bool IsBusy { get; set; }
+        private TempoMap tempo;
 
         public void Configure(GameModeDefinition gameMode, RectTransform notes)
         {
@@ -51,7 +55,64 @@ namespace RhythmDojo.UI
             session = new EditorSession(new SongProject());
             session.Edit(edit => chartId = edit.AddChart("Normal", mode.name, mode.LaneCount, DefaultChartDuration));
             PrepareBeatLines();
+            SetSession(ChartEditorMenu.TakeReturningSession() ?? session);
+        }
+
+        public void SetSession(EditorSession replacement)
+        {
+            var snapshot = replacement.Snapshot;
+            var chart = Array.Find(snapshot.Charts, c => c.Id == replacement.ActiveChartId);
+            if (chart == null || chart.ModeId != mode.name || chart.LaneCount != mode.LaneCount)
+                throw new InvalidOperationException("이 에디터에서는 4레인 채보를 열 수 있습니다.");
+            var timing = new TempoMap(snapshot.TempoPoints);
+            if (session != null) session.Changed -= RefreshSession;
+            session = replacement;
+            chartId = chart.Id;
+            tempo = timing;
+            session.Changed += RefreshSession;
+            ResetView();
+        }
+
+        private void OnDestroy() { if (session != null) session.Changed -= RefreshSession; }
+
+        private void RefreshSession()
+        {
+            tempo = new TempoMap(session.Snapshot.TempoPoints);
             RefreshBeatLines();
+            RefreshNotes();
+        }
+
+        public void ResetView()
+        {
+            pressing = false;
+            if (preview) Destroy(preview.gameObject);
+            preview = null;
+            visibleBeats = DefaultVisibleBeats;
+            scrollBeatOffset = 0;
+            RefreshSession();
+        }
+
+        private double TimeAtBeat(double beat)
+        {
+            double accumulated = 0;
+            for (int i = 0; i < tempo.Count - 1; i++)
+            {
+                double segment = (tempo[i + 1].StartTimeSeconds - tempo[i].StartTimeSeconds) * tempo[i].Bpm / 60;
+                if (beat < accumulated + segment)
+                    return tempo[i].StartTimeSeconds + (beat - accumulated) * 60 / tempo[i].Bpm;
+                accumulated += segment;
+            }
+            var last = tempo[tempo.Count - 1];
+            return last.StartTimeSeconds + (beat - accumulated) * 60 / last.Bpm;
+        }
+
+        private double BeatAtTime(double time)
+        {
+            double beat = 0;
+            int segment = tempo.FindSegment(time);
+            for (int i = 0; i < segment; i++)
+                beat += (tempo[i + 1].StartTimeSeconds - tempo[i].StartTimeSeconds) * tempo[i].Bpm / 60;
+            return beat + (time - tempo[segment].StartTimeSeconds) * tempo[segment].Bpm / 60;
         }
 
         private void OnRectTransformDimensionsChange()
@@ -63,7 +124,7 @@ namespace RhythmDojo.UI
 
         public void OnScroll(PointerEventData eventData)
         {
-            if (eventData.scrollDelta.y == 0) return;
+            if (IsBusy || eventData.scrollDelta.y == 0) return;
             var keyboard = Keyboard.current;
             if (keyboard == null || (!keyboard.leftCtrlKey.isPressed && !keyboard.rightCtrlKey.isPressed))
             {
@@ -125,7 +186,7 @@ namespace RhythmDojo.UI
 
         public void OnPointerDown(PointerEventData eventData)
         {
-            if (eventData.button != PointerEventData.InputButton.Left || !TryGetPoint(eventData, out var point)) return;
+            if (IsBusy || eventData.button != PointerEventData.InputButton.Left || !TryGetPoint(eventData, out var point)) return;
             var grid = (RectTransform)transform;
             pressing = true;
             pressPointerId = eventData.pointerId;
@@ -137,14 +198,14 @@ namespace RhythmDojo.UI
             var image = marker.GetComponent<Image>();
             image.color = mode.GetLane(pressLane).color * new Color(1, 1, 1, 0.55f);
             image.raycastTarget = false;
-            PositionMarker(preview, pressLane, pressBeat * SecondsPerBeat, pressBeat * SecondsPerBeat);
+            PositionMarker(preview, pressLane, TimeAtBeat(pressBeat), TimeAtBeat(pressBeat));
         }
 
         public void OnDrag(PointerEventData eventData)
         {
             if (!pressing || eventData.pointerId != pressPointerId || !preview) return;
             int endBeat = Mathf.Max(pressBeat, BeatAtPointer(eventData));
-            PositionMarker(preview, pressLane, pressBeat * SecondsPerBeat, endBeat * SecondsPerBeat);
+            PositionMarker(preview, pressLane, TimeAtBeat(pressBeat), TimeAtBeat(endBeat));
         }
 
         public void OnPointerUp(PointerEventData eventData)
@@ -155,36 +216,35 @@ namespace RhythmDojo.UI
             if (preview) Destroy(preview.gameObject);
             preview = null;
             int endBeat = Mathf.Max(pressBeat, BeatAtPointer(eventData));
-            double startTime = pressBeat * SecondsPerBeat;
-            double endTime = endBeat * SecondsPerBeat;
+            if (IsBusy) return;
+            double startTime = TimeAtBeat(pressBeat);
+            double endTime = TimeAtBeat(endBeat);
             bool isHold = endBeat > pressBeat;
             var overlaps = Array.FindAll(session.GetNotes(chartId), note => note.Data.Lane == pressLane &&
                 note.Data.StartTime <= endTime && note.Data.EndTime >= startTime);
             if (Array.Exists(overlaps, note => !isHold || note.Data.Kind == NoteKind.Hold)) return;
 
-            double completion = session.Snapshot.Charts[0].CompletionTimeSeconds;
+            double completion = Array.Find(session.Snapshot.Charts, c => c.Id == chartId).CompletionTimeSeconds;
             session.Edit(edit =>
             {
                 foreach (var note in overlaps) edit.DeleteNote(chartId, note.Id);
                 if (endTime >= completion)
-                    edit.SetChartSettings(chartId, mode.name, mode.LaneCount, endTime + SecondsPerBeat);
+                    edit.SetChartSettings(chartId, mode.name, mode.LaneCount, TimeAtBeat(endBeat + 1));
                 edit.AddNote(chartId, isHold ? NoteData.Hold(pressLane, startTime, endTime) :
                     NoteData.Tap(pressLane, startTime));
             });
-            RefreshNotes();
         }
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            if (eventData.button != PointerEventData.InputButton.Right || !TryGetPoint(eventData, out var point)) return;
+            if (IsBusy || eventData.button != PointerEventData.InputButton.Right || !TryGetPoint(eventData, out var point)) return;
             var grid = (RectTransform)transform;
             int lane = Mathf.FloorToInt(point.x / grid.rect.width * mode.LaneCount);
-            double time = BeatAt(point.y) * SecondsPerBeat;
+            double time = TimeAtBeat(BeatAt(point.y));
             var existing = Array.Find(session.GetNotes(chartId), note => note.Data.Lane == lane &&
                 note.Data.StartTime <= time && note.Data.EndTime >= time);
             if (existing.Id == 0) return;
             session.Edit(edit => edit.DeleteNote(chartId, existing.Id));
-            RefreshNotes();
         }
 
         private bool TryGetPoint(PointerEventData eventData, out Vector2 point)
@@ -216,8 +276,8 @@ namespace RhythmDojo.UI
             for (int i = noteLayer.childCount - 1; i >= 0; i--)
                 Destroy(noteLayer.GetChild(i).gameObject);
 
-            double viewStart = scrollBeatOffset * SecondsPerBeat;
-            double viewEnd = (scrollBeatOffset + visibleBeats) * SecondsPerBeat;
+            double viewStart = TimeAtBeat(scrollBeatOffset);
+            double viewEnd = TimeAtBeat(scrollBeatOffset + visibleBeats);
             foreach (var note in session.GetNotes(chartId))
             {
                 if (note.Data.EndTime < viewStart || note.Data.StartTime > viewEnd) continue;
@@ -235,8 +295,8 @@ namespace RhythmDojo.UI
         private void PositionMarker(RectTransform rect, int lane, double startTime, double endTime)
         {
             float laneWidth = noteLayer.rect.width / mode.LaneCount;
-            float startBeat = (float)(startTime / SecondsPerBeat);
-            float endBeat = (float)(endTime / SecondsPerBeat);
+            float startBeat = (float)BeatAtTime(startTime);
+            float endBeat = (float)BeatAtTime(endTime);
             rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(0, 1);
             rect.anchoredPosition = new Vector2(lane * laneWidth + laneWidth * 0.1f,
                 -noteLayer.rect.height + (endBeat - scrollBeatOffset) * noteLayer.rect.height / visibleBeats +
