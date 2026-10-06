@@ -40,6 +40,8 @@ namespace RhythmDojo.EditorTools
         [MenuItem("Game Tools/Verification/Verify Foundation (Play Mode and Player Build)")]
         public static void RunAll() => Begin("", true);
 
+        public static void RunTestsOnly() => Begin("", false, true);
+
         [MenuItem("Game Tools/Verification/Verify UI Actions")]
         public static void RunUi() => Begin("UI", false);
 
@@ -49,7 +51,7 @@ namespace RhythmDojo.EditorTools
         [MenuItem("Game Tools/Verification/Verify Authoring Actions")]
         public static void RunAuthoring() => Begin("Authoring", false);
 
-        private static void Begin(string category, bool build)
+        private static void Begin(string category, bool build, bool includeEditMode = false)
         {
             if (SessionState.GetBool(ActiveKey, false) || EditorApplication.isPlayingOrWillChangePlaymode || RunnerIsBusy())
                 throw new InvalidOperationException("Finish the current verification and exit Play Mode first.");
@@ -62,7 +64,7 @@ namespace RhythmDojo.EditorTools
             SessionState.SetString(Prefix + "Category", category);
             SessionState.SetBool(Prefix + "Build", build);
             SessionState.SetBool(Prefix + "Failed", false);
-            SessionState.SetInt(Prefix + "Phase", build ? 0 : 1);
+            SessionState.SetInt(Prefix + "Phase", build || includeEditMode ? 0 : 1);
             SessionState.SetBool(ActiveKey, true);
             EditorSceneManager.playModeStartScene = null;
             SessionState.SetBool(Prefix + "Pending", true);

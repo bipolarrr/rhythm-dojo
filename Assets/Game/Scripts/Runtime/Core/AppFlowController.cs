@@ -10,7 +10,7 @@ using RhythmDojo.Services;
 
 namespace RhythmDojo.Core
 {
-    public sealed class AppFlowController : MonoBehaviour, IAppNavigation, IEditorPlaytestService, ISettingsReturnNavigation
+    public sealed class AppFlowController : MonoBehaviour, IAppNavigation, IEditorPlaytestService, ISettingsReturnNavigation, ITitleNavigation
     {
         public const string SelectionPath = "Assets/Game/Scenes/SongSelection.unity";
         public const string GameplayPath = "Assets/Game/Scenes/Gameplay.unity";
@@ -24,6 +24,8 @@ namespace RhythmDojo.Core
         public SongLibrary Library { get; private set; }
         public SongSelectionService Selection { get; private set; }
         public AudioSettingsService Audio { get; private set; }
+        public ISelectionPreferences Preferences { get; private set; }
+        public bool IsEditorPlaytest => returned != null;
         public PlayRequest CurrentRequest { get; private set; }
         public bool Transitioning { get; private set; }
         // Compatibility facade for existing integration callers. Screens use injected services.
@@ -51,7 +53,10 @@ namespace RhythmDojo.Core
             var flow = new GameObject("App Flow").AddComponent<AppFlowController>();
             flow.settings = settings;
             flow.Library = new SongLibrary(); flow.Library.Register(new BuiltInSongProvider(settings.catalog));
-            flow.Selection = new SongSelectionService(settings, flow.Library);
+            flow.Preferences = new SelectionPreferences();
+            flow.Selection = new SongSelectionService(settings, flow.Library, flow.Preferences);
+            if (flow.Library.Find("demo-melody") != null)
+                flow.Selection.UpdateSelection("demo-melody", flow.SelectedDifficulty, flow.SelectedScrollMode, flow.SelectedMultiplier);
             flow.Audio = new AudioSettingsService(() => !flow.Transitioning && SceneManager.GetSceneByPath(SettingsPath).isLoaded);
             DontDestroyOnLoad(flow.gameObject); return flow;
         }
@@ -90,6 +95,7 @@ namespace RhythmDojo.Core
                 throw new InvalidOperationException("Select a song before requesting playback.");
             var songId = Selection.SelectedSongId;
             var difficulty = SelectedDifficulty; var scrollMode = SelectedScrollMode; var multiplier = SelectedMultiplier;
+            int timingOffsetMs = Preferences.TimingOffsetMs;
             Transitioning = true;
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, lifetime.Token);
             PlayableSong song = null;
@@ -97,7 +103,7 @@ namespace RhythmDojo.Core
             {
                 song = await Library.LoadAsync(songId, linked.Token);
                 linked.Token.ThrowIfCancellationRequested();
-                var request = new PlayRequest(song, difficulty, scrollMode, multiplier);
+                var request = new PlayRequest(song, difficulty, scrollMode, multiplier, timingOffsetMs);
                 ReleaseRequest(); CurrentRequest = request; song = null;
                 ClearEditorReturn(); Load(GameplayPath);
             }
@@ -113,6 +119,7 @@ namespace RhythmDojo.Core
                 string.IsNullOrWhiteSpace(returnPath) || returnPath == GameplayPath || !UnityEngine.Application.CanStreamedLevelBeLoaded(returnPath))
                 throw new ArgumentException("Document, loader, editor session and registered return scene are required.");
             var difficulty = SelectedDifficulty; var scrollMode = SelectedScrollMode; var multiplier = SelectedMultiplier;
+            int timingOffsetMs = Preferences.TimingOffsetMs;
             Transitioning = true;
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, lifetime.Token);
             PlayableSong song = null;
@@ -120,7 +127,7 @@ namespace RhythmDojo.Core
             {
                 song = await loader.LoadAsync(document.Copy(), linked.Token);
                 linked.Token.ThrowIfCancellationRequested();
-                var request = new PlayRequest(song, difficulty, scrollMode, multiplier);
+                var request = new PlayRequest(song, difficulty, scrollMode, multiplier, timingOffsetMs);
                 ReleaseRequest(); CurrentRequest = request; song = null;
                 editorSessionId = sessionId; returnScenePath = returnPath; returned = onReturned;
                 Load(GameplayPath);
@@ -135,6 +142,11 @@ namespace RhythmDojo.Core
         {
             if (Transitioning) return;
             ClearEditorReturn(); Load(SelectionPath);
+        }
+        public void ShowTitle()
+        {
+            if (Transitioning) return;
+            ClearEditorReturn(); Load("Assets/Game/Scenes/Title.unity");
         }
         public void ShowSettings()
         {

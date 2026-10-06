@@ -11,6 +11,7 @@ Tests live in `Assets/Game/Tests/{Domain,EditMode,PlayMode}`. Scenes, settings, 
 Use Unity **6000.3.23f1**. Open `Assets/Game/Scenes/Bootstrap.unity` and enter Play Mode to run locally.
 
 - **Game Tools > Scenes > Build All Scenes** regenerates authoritative scenes. Make lasting layout changes in builders.
+- Do not add standalone Open scene commands to Game Tools or other custom editor menus. Open existing scenes through the Project window; scene builders may open the scenes they generate.
 - **Game Tools > Content > Prepare Default and Verification Content** prepares resources and recreates verification charts; use deliberately.
 - **Game Tools > Verification > Verify Foundation (Play Mode and Player Build)** runs integration checks and builds `Builds/Windows/RhythmDojo.exe`.
 
@@ -34,3 +35,7 @@ Use Unity Test Framework 1.6.0 with NUnit. Name fixtures `*Tests` and methods af
 ## Commit & Pull Request Guidelines
 
 Use concise imperative commit subjects. PRs should explain the behavior change, link relevant issues, report test/build results, and include screenshots for visual changes. Coordinate shared-contract changes with affected owners.
+
+## Naming preservation
+
+Do not rename existing variables, fields, properties, parameters, or files. Preserve existing functionality and interfaces; add new names only for new functionality.

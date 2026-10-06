@@ -28,7 +28,7 @@ namespace RhythmDojo.Tests
         {
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
             var selection = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
-            selection.songList.value = 1;
+            UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>().SelectSong("tempo-pulse");
             selection.multiplierList.value = 4;
             yield return Click(selection.settingsButton);
             yield return Await(() => UnityEngine.Object.FindFirstObjectByType<SettingsScreen>());
@@ -38,7 +38,7 @@ namespace RhythmDojo.Tests
             yield return null;
             Assert.That(flow.SelectedSongIndex, Is.EqualTo(1));
             Assert.That(flow.SelectedMultiplier, Is.EqualTo(1.5));
-            Assert.That(UnityEngine.Object.FindFirstObjectByType<SongSelectionView>().songList.value, Is.EqualTo(1));
+            Assert.That(flow.Selection.SelectedSongId, Is.EqualTo("tempo-pulse"));
         }
 
         [UnityTest]

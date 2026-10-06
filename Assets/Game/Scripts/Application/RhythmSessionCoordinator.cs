@@ -59,7 +59,8 @@ namespace RhythmDojo.Application
             if (disposed) return;
             // Input System Dynamic dispatch precedes the Unity controller's timeout sweep.
             if (clock.Running) songTime = clock.SongTime;
-            Session.Advance(songTime); presenter.Render(Session, songTime);
+            double sweepTime = songTime - (clock is IInputTimingClock calibrated ? Math.Max(0, calibrated.InputTimingOffsetSeconds) : 0);
+            Session.Advance(sweepTime); presenter.Render(Session, songTime);
             if (Session.State == SessionState.Completed && clock.Running) clock.Stop();
         }
         public void LoseFocus()

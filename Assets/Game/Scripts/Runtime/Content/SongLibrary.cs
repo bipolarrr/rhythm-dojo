@@ -19,11 +19,12 @@ namespace RhythmDojo.Content
         public double MinBpm { get; }
         public double MaxBpm { get; }
         public string Error { get; }
+        public UnityEngine.Sprite Cover { get; }
         public SongEntry(string id, string title, string artist, double duration, int notes, int lanes,
-            double minBpm, double maxBpm, string error = null)
+            double minBpm, double maxBpm, string error = null, UnityEngine.Sprite cover = null)
         { Id = id; Title = title; Artist = artist; Duration = duration; NoteCount = notes;
-            LaneCount = lanes; MinBpm = minBpm; MaxBpm = maxBpm; Error = error; }
-        public SongEntry WithError(string error) => new SongEntry(Id, Title, Artist, Duration, NoteCount, LaneCount, MinBpm, MaxBpm, error);
+            LaneCount = lanes; MinBpm = minBpm; MaxBpm = maxBpm; Error = error; Cover = cover; }
+        public SongEntry WithError(string error) => new SongEntry(Id, Title, Artist, Duration, NoteCount, LaneCount, MinBpm, MaxBpm, error, Cover);
     }
     public interface ISongProvider
     {
@@ -98,7 +99,7 @@ namespace RhythmDojo.Content
                 if (error != null) { entries.Add(new SongEntry(song ? song.SongId : null, song ? song.Title : "Missing song", "", 0, 0, 0, 0, 0, error)); continue; }
                 var tempo = song.Timing.ToTempoMap();
                 entries.Add(new SongEntry(song.SongId, song.Title, song.Artist, song.AudioClip.length, song.Chart.Count,
-                    song.Mode.LaneCount, tempo.MinBpm, tempo.MaxBpm));
+                    song.Mode.LaneCount, tempo.MinBpm, tempo.MaxBpm, cover: song.Cover));
             }
             return entries;
         }

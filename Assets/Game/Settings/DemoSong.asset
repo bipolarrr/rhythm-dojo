@@ -10,18 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 72a3cc72ae1769a40976e58178a19abb, type: 3}
-  m_Name: TempoSong
+  m_Name: DemoSong
   m_EditorClassIdentifier: Game.Runtime::RhythmDojo.Gameplay.SongDefinition
-  songId: tempo-pulse
-  title: Tempo Shift
-  artist: Aster
-  audioClip: {fileID: 8300000, guid: 234a43dc3bde23e4b8650cad17f7e4d3, type: 3}
-  chart: {fileID: 11400000, guid: 9798c3c7a4d0ecf41b0f8fd036f2b859, type: 2}
+  songId: demo-melody
+  title: "\uC784\uC2DC \uACE1 / Demo Melody"
+  artist: Yuna
+  audioClip: {fileID: 8300000, guid: 5d0fe480c09cce54886ab647ca277217, type: 3}
+  chart: {fileID: 11400000, guid: 619f318267aac454a89041f03a06c9b0, type: 2}
   mode: {fileID: 11400000, guid: b4b0e178a2cd7eb4fa7dedd0f10a62cb, type: 2}
+  cover: {fileID: 21300000, guid: e5448957bea3ef64ca8887c98263db62, type: 3}
   timing:
     chartAudioOffsetSeconds: 0
     tempoPoints:
     - startTimeSeconds: 0
-      bpm: 150
-    - startTimeSeconds: 6
-      bpm: 180
+      bpm: 120

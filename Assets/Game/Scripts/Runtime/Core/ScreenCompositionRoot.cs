@@ -22,7 +22,7 @@ namespace RhythmDojo.Core
         private void Start()
         {
             Validate(); var flow = AppFlowController.Create(settings);
-            if (selection) selection.Initialize(settings, flow.Selection, flow);
+            if (selection) selection.Initialize(settings, flow.Selection, flow, flow.Preferences);
             if (audioSettings) audioSettings.Initialize(flow.Audio, flow);
         }
     }
