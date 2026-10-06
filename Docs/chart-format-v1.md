@@ -13,6 +13,10 @@
 
 현재 화면은 활성 4레인 채보를 편집한다. 채보 추가/선택, 템포 변경점 추가 UI, 파일 선택 대화상자, 저장 프로젝트의 곡 목록 등록은 제공하지 않는다. 여러 채보가 있는 프로젝트를 열면 첫 채보를 편집하고 나머지는 저장 시 보존한다. 템포 맵이 유효하지 않거나 첫 채보가 4레인 모드와 일치하지 않는 초안은 화면에서 열 수 없으며 파일 저장 API 자체는 기존 초안 계약을 유지한다.
 
+표시는 `TempoMap`의 double 시간↔누적 박자 변환과 `BeatProjection`의 `y = 하단 + (박자 - 하단 박자) × 박자당 길이`를 사용한다. 줌은 박자당 길이만, 휠 이동은 하단 박자만 바꾼다. `ChartBeatGrid` 한 렌더러가 같은 영역에서 정수 박자선, 4박 강조선, 노트, 롱노트, 배치 미리보기를 그린다. 기존 노트는 스냅하지 않으며 새 배치 입력만 역변환 후 1박으로 스냅한다. 삭제는 경계에서 잘린 실제 노트 사각형으로 판정한다. 작은 화면에서는 선의 소수 픽셀 커버리지를 표현하며 음악 좌표 자체를 픽셀에 맞춰 이동하지 않는다.
+
+`ChartProjectionRenderingTests`는 610×337과 1280×720에서 여러 줌 및 0.5박 이동의 실제 Unity 렌더링을 `Logs/chart-projection/`에 저장한다. `BeatProjectionTests`는 시간↔박자 및 화면↔박자 왕복을 검증하고, `ChartEditorScreenTests`와 `ChartEditorMenuTests`는 입력 및 저장·불러오기·테스트 플레이 복귀를 검증한다.
+
 ## 파일 계약
 
 UTF-8(BOM 없음), LF, 2칸 들여쓰기와 마지막 줄바꿈을 사용한다. 경로는 `<persistentDataPath>/Songs/<song UUID>/project.rdchart.json`이며 음원은 같은 폴더의 `audio/<SHA-256>.<extension>`이다. 저장 루트는 생성자에서 주입한다. 동일한 문서 내용은 동일한 JSON을 생성한다. 예제는 [완성 채보](examples/complete.rdchart.json), [초안](examples/draft.rdchart.json), 구조는 [JSON Schema](rdchart-v1.schema.json)를 참고한다. 예제의 음원은 별도로 제공해야 한다.

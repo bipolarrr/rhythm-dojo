@@ -78,19 +78,13 @@ namespace RhythmDojo.EditorTools
                 StretchPanel("Lane Divider", grid, new Vector2(x, 0), new Vector2(x, 1),
                     new Vector2(-1, 0), new Vector2(1, 0), Line);
             }
-            for (int beat = 0; beat <= 16; beat++)
-            {
-                var color = beat % 4 == 0 ? new Color(0.65f, 0.61f, 0.23f) : Line;
-                float y = 1f - beat / 16f;
-                float halfHeight = beat % 4 == 0 ? 1 : 0.5f;
-                StretchPanel("Beat " + beat, grid, new Vector2(0, y), new Vector2(1, y),
-                    new Vector2(0, -halfHeight), new Vector2(0, halfHeight), color);
-            }
-            var noteLayer = new GameObject("Notes", typeof(RectTransform)).GetComponent<RectTransform>();
-            noteLayer.SetParent(grid, false);
-            Stretch(noteLayer, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            var beatGridObject = new GameObject("Beat Grid", typeof(RectTransform));
+            beatGridObject.transform.SetParent(grid, false);
+            Stretch((RectTransform)beatGridObject.transform, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            var timeline = beatGridObject.AddComponent<ChartBeatGrid>();
+            timeline.raycastTarget = false;
             var screen = grid.gameObject.AddComponent<ChartEditorScreen>();
-            screen.Configure(mode, noteLayer);
+            screen.Configure(mode, timeline);
 
             var sidebar = StretchPanel("Preview Space", content, new Vector2(0.62f, 0), Vector2.one,
                 new Vector2(10, 0), Vector2.zero, Surface);

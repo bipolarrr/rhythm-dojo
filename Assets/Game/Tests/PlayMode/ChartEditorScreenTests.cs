@@ -1,4 +1,6 @@
 using System.Collections;
+using System.Linq;
+using RhythmDojo.Gameplay;
 using NUnit.Framework;
 using RhythmDojo.UI;
 using UnityEngine;
@@ -34,14 +36,14 @@ namespace RhythmDojo.Tests
                 Assert.That(editor, Is.Not.Null);
                 Assert.That(Object.FindObjectsByType<Button>(FindObjectsSortMode.None).Length, Is.EqualTo(4));
                 var grid = (RectTransform)editor.transform;
-                var notes = grid.Find("Notes");
-                Assert.That(notes, Is.Not.Null);
+                var notes = new TimelineNotes(grid.GetComponent<ChartEditorScreen>());
+                Assert.That(grid.GetComponentInChildren<ChartBeatGrid>(), Is.Not.Null);
                 Canvas.ForceUpdateCanvases();
                 Vector2 point = RectTransformUtility.WorldToScreenPoint(null,
-                    grid.TransformPoint(new Vector3(grid.rect.width * 0.125f, -grid.rect.height * 0.51f)));
+                    grid.TransformPoint(new Vector3(grid.rect.width * 0.125f, -grid.rect.height * 0.5f)));
                 yield return Click(mouse, point, MouseButton.Left);
                 Assert.That(notes.childCount, Is.EqualTo(1));
-                Assert.That(((RectTransform)notes.GetChild(0)).rect.height, Is.EqualTo(7f).Within(0.01f));
+                Assert.That(notes.Bounds(0).height, Is.EqualTo(7f).Within(0.01f));
                 yield return Click(mouse, point, MouseButton.Left);
                 Assert.That(notes.childCount, Is.EqualTo(1));
                 yield return Click(mouse, point, MouseButton.Right);
@@ -63,7 +65,7 @@ namespace RhythmDojo.Tests
                 yield return Click(mouse, outside, MouseButton.Left);
                 Assert.That(notes.childCount, Is.EqualTo(3));
 
-                float originalY = ((RectTransform)notes.GetChild(0)).anchoredPosition.y;
+                float originalY = notes.Bounds(0).center.y;
                 yield return Scroll(mouse, point, 120);
                 Assert.That(editor.VisibleBeats, Is.EqualTo(16), "Wheel alone must not zoom.");
                 InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.LeftCtrl));
@@ -71,11 +73,11 @@ namespace RhythmDojo.Tests
                 yield return Scroll(mouse, point, 120);
                 Assert.That(editor.VisibleBeats, Is.EqualTo(12));
                 Assert.That(notes.childCount, Is.EqualTo(3));
-                Assert.That(((RectTransform)notes.GetChild(0)).anchoredPosition.y, Is.GreaterThan(originalY));
+                Assert.That(notes.Bounds(0).center.y, Is.GreaterThan(originalY));
                 yield return Scroll(mouse, point, -120);
                 Assert.That(editor.VisibleBeats, Is.EqualTo(16));
                 Assert.That(notes.childCount, Is.EqualTo(3));
-                Assert.That(((RectTransform)notes.GetChild(0)).anchoredPosition.y,
+                Assert.That(notes.Bounds(0).center.y,
                     Is.EqualTo(originalY).Within(0.01f));
 
                 yield return Scroll(mouse, point, -120);
@@ -130,20 +132,20 @@ namespace RhythmDojo.Tests
                 yield return null;
                 var editor = Object.FindFirstObjectByType<ChartEditorScreen>();
                 var grid = (RectTransform)editor.transform;
-                var notes = grid.Find("Notes");
+                var notes = new TimelineNotes(grid.GetComponent<ChartEditorScreen>());
                 Canvas.ForceUpdateCanvases();
                 Vector2 middle = RectTransformUtility.WorldToScreenPoint(null,
                     grid.TransformPoint(new Vector3(grid.rect.width * 0.125f, -grid.rect.height * 0.5f)));
                 yield return Click(mouse, middle, MouseButton.Left);
-                float originalY = ((RectTransform)notes.GetChild(0)).anchoredPosition.y;
+                float originalY = notes.Bounds(0).center.y;
 
                 yield return Scroll(mouse, middle, -120);
                 Assert.That(editor.VisibleBeats, Is.EqualTo(16));
                 Assert.That(editor.ScrollBeatOffset, Is.EqualTo(0.5f));
-                Assert.That(((RectTransform)notes.GetChild(0)).anchoredPosition.y, Is.LessThan(originalY));
+                Assert.That(notes.Bounds(0).center.y, Is.LessThan(originalY));
                 yield return Scroll(mouse, middle, 120);
                 Assert.That(editor.ScrollBeatOffset, Is.Zero);
-                Assert.That(((RectTransform)notes.GetChild(0)).anchoredPosition.y,
+                Assert.That(notes.Bounds(0).center.y,
                     Is.EqualTo(originalY).Within(0.01f));
 
                 for (int i = 0; i < 12; i++) yield return Scroll(mouse, middle, -120);
@@ -183,7 +185,7 @@ namespace RhythmDojo.Tests
                 yield return SceneManager.LoadSceneAsync("Assets/Game/Scenes/ChartEditor.unity");
                 yield return null;
                 var grid = (RectTransform)Object.FindFirstObjectByType<ChartEditorScreen>().transform;
-                var notes = grid.Find("Notes");
+                var notes = new TimelineNotes(grid.GetComponent<ChartEditorScreen>());
                 Canvas.ForceUpdateCanvases();
                 float laneX = grid.rect.width * 0.375f;
                 Vector2 start = RectTransformUtility.WorldToScreenPoint(null,
@@ -193,8 +195,8 @@ namespace RhythmDojo.Tests
                 Vector2 middle = (start + end) * 0.5f;
                 yield return Drag(mouse, start, end);
                 Assert.That(notes.childCount, Is.EqualTo(1));
-                Assert.That(notes.GetChild(0).name, Is.EqualTo("Hold Note"));
-                Assert.That(((RectTransform)notes.GetChild(0)).rect.height, Is.GreaterThan(100f));
+                Assert.That(notes.Data(0).Kind, Is.EqualTo(NoteKind.Hold));
+                Assert.That(notes.Bounds(0).height, Is.GreaterThan(100f));
                 yield return Click(mouse, middle, MouseButton.Left);
                 Assert.That(notes.childCount, Is.EqualTo(1), "A tap cannot overlap a hold in the same lane.");
                 yield return Click(mouse, middle, MouseButton.Right);
@@ -209,7 +211,7 @@ namespace RhythmDojo.Tests
                 Assert.That(notes.childCount, Is.EqualTo(4));
                 yield return Drag(mouse, start, end);
                 Assert.That(notes.childCount, Is.EqualTo(2), "The new hold replaces all overlapping taps in its lane.");
-                Assert.That(notes.GetChild(0).name, Is.EqualTo("Hold Note"));
+                Assert.That(notes.Data(0).Kind, Is.EqualTo(NoteKind.Hold));
                 yield return Drag(mouse, (start + middle) * 0.5f, (middle + end) * 0.5f);
                 Assert.That(notes.childCount, Is.EqualTo(2), "An existing hold stays when another hold overlaps it.");
                 yield return Click(mouse, middle, MouseButton.Left);
@@ -250,6 +252,24 @@ namespace RhythmDojo.Tests
                 Assert.That(preview.rect.height, Is.EqualTo(row.rect.height).Within(0.01f));
                 Assert.That(footer.rect.height, Is.EqualTo(151f).Within(0.01f));
                 Assert.That(footer.rect.width, Is.EqualTo(row.rect.width).Within(0.01f));
+            }
+        }
+
+        private sealed class TimelineNotes
+        {
+            private readonly ChartEditorScreen screen;
+            private readonly ChartBeatGrid timeline;
+            public TimelineNotes(ChartEditorScreen screen)
+            { this.screen = screen; timeline = screen.GetComponentInChildren<ChartBeatGrid>(); }
+            private NoteData[] Visible => screen.Session.GetNotes(screen.ChartId).Select(n => n.Data)
+                .Where(n => Bounds(n).height > 0).ToArray();
+            public int childCount => Visible.Length;
+            public NoteData Data(int index) => Visible[index];
+            public Rect Bounds(int index) => Bounds(Data(index));
+            private Rect Bounds(NoteData note)
+            {
+                var tempo = new TempoMap(screen.Session.Snapshot.TempoPoints);
+                return timeline.NoteBounds(note.Lane, tempo.BeatAtTime(note.StartTime), tempo.BeatAtTime(note.EndTime));
             }
         }
 

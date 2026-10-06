@@ -61,9 +61,9 @@ namespace RhythmDojo.Tests
             Assert.That(screen.Session.Snapshot.TempoPoints[0].Bpm, Is.EqualTo(60));
             screen.Session.Edit(edit => edit.AddNote(screen.ChartId, NoteData.Tap(0, 4)));
             yield return null;
-            var marker = (RectTransform)screen.transform.Find("Notes").GetChild(0);
+            var marker = screen.GetComponentInChildren<ChartBeatGrid>().NoteBounds(0, 4, 4);
             float height = ((RectTransform)screen.transform).rect.height;
-            Assert.That(marker.anchoredPosition.y, Is.EqualTo(-height + height * 4 / 16 + 3.5f).Within(0.1f));
+            Assert.That(marker.yMax, Is.EqualTo(-height + height * 4 / 16 + 3.5f).Within(0.1f));
             Click("도구"); Click("Undo");
             Assert.That(screen.Session.GetNotes(screen.ChartId), Is.Empty);
             Click("Redo");
