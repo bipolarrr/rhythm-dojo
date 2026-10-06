@@ -17,6 +17,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Game/Scenes/Settings.unity
     guid: 6afd3f24e3da42947a364e64abf39dd1
+  - enabled: 1
+    path: Assets/Game/Scenes/ChartEditor.unity
+    guid: fbf089fd355db514c8c7183c81555286
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0
