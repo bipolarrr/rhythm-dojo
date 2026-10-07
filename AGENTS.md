@@ -15,6 +15,16 @@ Use Unity **6000.3.23f1**. Open `Assets/Game/Scenes/Bootstrap.unity` and enter P
 - **Game Tools > Content > Prepare Default and Verification Content** prepares resources and recreates verification charts; use deliberately.
 - **Game Tools > Verification > Verify Foundation (Play Mode and Player Build)** runs integration checks and builds `Builds/Windows/RhythmDojo.exe`.
 
+With the project open in Unity, prefer the installed Unity CLI and Pipeline package (`com.unity.pipeline`):
+
+```powershell
+unity status --json
+unity command run_tests --mode playmode --filter SelectionBrowserTests --async_tests true --json
+unity command test_status --json
+```
+
+Poll `test_status` until completion and inspect the test summary and failures. Use `--mode editor` for EditMode tests; omit `--filter` to run the entire mode. Run one suite at a time. Results may arrive before Test Runner cleanup finishes: wait for Play Mode to exit and confirm `unity status --json` is ready before starting another run. After source changes, refresh/recompile the Editor before testing. If the package was just installed and the connection is unavailable, use **Assets > Refresh** (Ctrl+R) and wait for compilation. These commands use the running Editor; `unity test` and the batch commands below launch a separate process and require the project to be closed.
+
 For batch tests, run from the repository root in PowerShell:
 
 ```powershell

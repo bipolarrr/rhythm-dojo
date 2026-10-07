@@ -10,12 +10,64 @@ using RhythmDojo.Core;
 using RhythmDojo.UI;
 using RhythmDojo.Services;
 using RhythmDojo.Gameplay;
+using RhythmDojo.Content;
+using UnityEngine.UI;
 
 namespace RhythmDojo.Tests
 {
     [Category("UI")]
     public sealed class SelectionBrowserTests : GameplayTestContext
     {
+        private sealed class LongSongListProvider : ISongProvider
+        {
+            public IReadOnlyList<SongEntry> GetEntries() => Enumerable.Range(0, 24)
+                .Select(i => new SongEntry($"scroll-test-{i}", $"Scroll Test {i:00}", "Test", 30, 1, 4, 120, 120)).ToArray();
+            public System.Threading.Tasks.Task<PlayableSong> LoadAsync(string songId, System.Threading.CancellationToken cancellationToken)
+                => throw new System.NotSupportedException();
+        }
+
+        [UnityTest]
+        public IEnumerator KeyboardSelectionKeepsRowsVisibleWithDifferentHeightsAndSpacing()
+        {
+            var view = Object.FindFirstObjectByType<SongSelectionView>();
+            var flow = Object.FindFirstObjectByType<AppFlowController>();
+            var provider = new LongSongListProvider();
+            flow.Library.Register(provider);
+            try
+            {
+                var layout = view.rowContent.GetComponent<VerticalLayoutGroup>();
+                layout.spacing = 13;
+                for (int i = 0; i < view.Rows.Count; i++)
+                    view.Rows[i].GetComponent<LayoutElement>().preferredHeight = i % 2 == 0 ? 83 : 127;
+                Canvas.ForceUpdateCanvases();
+                EventSystem.current.SetSelectedGameObject(view.Rows[0].gameObject);
+                for (int i = 1; i < view.Rows.Count; i++)
+                {
+                    yield return Press(Key.DownArrow);
+                    AssertRowVisible(view, i);
+                }
+                for (int i = view.Rows.Count - 2; i >= 0; i--)
+                {
+                    yield return Press(Key.UpArrow);
+                    AssertRowVisible(view, i);
+                }
+            }
+            finally { flow.Library.Unregister(provider); }
+        }
+
+        private static void AssertRowVisible(SongSelectionView view, int index)
+        {
+            Assert.That(EventSystem.current.currentSelectedGameObject, Is.EqualTo(view.Rows[index].gameObject));
+            var corners = new Vector3[4];
+            ((RectTransform)view.Rows[index].transform).GetWorldCorners(corners);
+            foreach (var corner in corners)
+            {
+                float y = view.scroll.viewport.InverseTransformPoint(corner).y;
+                Assert.That(y, Is.InRange(view.scroll.viewport.rect.yMin - 1, view.scroll.viewport.rect.yMax + 1),
+                    $"Selected row {index} must remain inside the viewport.");
+            }
+        }
+
         [UnityTest]
         public IEnumerator DemoCoverAndRowsRenderAtBothResolutions()
         {

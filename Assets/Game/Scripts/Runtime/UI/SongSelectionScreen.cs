@@ -152,12 +152,17 @@ namespace RhythmDojo.UI
             {
                 Canvas.ForceUpdateCanvases();
                 float contentHeight = view.rowContent.rect.height, viewportHeight = view.scroll.viewport.rect.height;
-                float top = index * 172f, bottom = top + 170f;
+                var rowRect = (RectTransform)view.Rows[index].transform;
+                float top = view.rowContent.rect.yMax - view.rowContent.InverseTransformPoint(
+                    rowRect.TransformPoint(new Vector3(0, rowRect.rect.yMax, 0))).y;
+                float bottom = view.rowContent.rect.yMax - view.rowContent.InverseTransformPoint(
+                    rowRect.TransformPoint(new Vector3(0, rowRect.rect.yMin, 0))).y;
                 float current = view.rowContent.anchoredPosition.y;
                 if (top < current) current = top;
                 else if (bottom > current + viewportHeight) current = bottom - viewportHeight;
                 var position = view.rowContent.anchoredPosition;
                 position.y = Mathf.Clamp(current, 0, Mathf.Max(0, contentHeight - viewportHeight));
+                view.scroll.StopMovement();
                 view.rowContent.anchoredPosition = position;
             }
         }
