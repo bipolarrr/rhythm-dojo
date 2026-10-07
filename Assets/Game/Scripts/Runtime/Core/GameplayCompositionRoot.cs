@@ -25,6 +25,9 @@ namespace RhythmDojo.Core
         private AppFlowController flow;
         private bool initialized;
         private bool returnPending;
+        private bool recordSaved;
+        private int maxCombo;
+        private PlayRequest playRequest;
         private PlayableSong ownedSong;
         private GameModeDefinition runtimeMode;
         private GameplayPresentationSettings runtimePresentation;
@@ -48,6 +51,7 @@ namespace RhythmDojo.Core
         {
             if (initialized) return;
             settings = gameSettings; Validate(); flow = appFlow;
+            playRequest = request;
             var song = request.Song; song.Validate();
             runtimeMode = Instantiate(song.Mode);
             runtimePresentation = Instantiate(settings.presentation);
@@ -58,12 +62,14 @@ namespace RhythmDojo.Core
                 lastEnd + judgments.GoodWindow + RhythmSession.TimingTolerance * 2)));
             var tempo = song.Tempo;
             var scroll = settings.scroll.CreateTimeline(request.ScrollMode, tempo, request.Multiplier);
-            clock.Initialize(song.AudioClip, song.AudioOffset, settings.audio);
+            clock.Initialize(song.AudioClip, song.AudioOffset, settings.audio, request.TimingOffsetMs);
             input.Initialize(runtimeMode); notes.Configure(runtimeMode, runtimePresentation);
             playfield.Build(runtimeMode, runtimePresentation);
             controller.Initialize(chart, judgments, mode, tempo, song.Title, request.Difficulty.DisplayName,
                 request.ScrollMode, request.Multiplier, scroll, input, clock, notes);
             hud.Initialize(controller.ReadModel, runtimeMode, runtimePresentation);
+            controller.ReadModel.Judged += TrackCombo;
+            controller.ReadModel.ResetOccurred += ResetRecord;
             input.ReturnRequested += ReturnToSelection; ui.Initialize(controller.ReadModel, ReturnToSelection);
             initialized = true; input.Activate();
             if (EventSystem.current) EventSystem.current.SetSelectedGameObject(null);
@@ -72,6 +78,25 @@ namespace RhythmDojo.Core
         {
             if (returnPending) { CompleteReturn(); return; }
 
+        }
+        private void TrackCombo(JudgmentEvent result) => maxCombo = Math.Max(maxCombo, controller.ReadModel.Snapshot.Session.Combo);
+        private void ResetRecord() { maxCombo = 0; recordSaved = false; }
+        private void LateUpdate() => SaveRecord();
+        private void SaveRecord()
+        {
+            if (!initialized || recordSaved || !flow || flow.IsEditorPlaytest || playRequest == null) return;
+            var snapshot = controller.ReadModel.Snapshot.Session;
+            if (snapshot.State != SessionState.Completed) return;
+            flow.Preferences.SaveCompleted(playRequest.Song.SongId, playRequest.Difficulty.name, snapshot, maxCombo);
+            recordSaved = true;
+        }
+        private void UnbindRecord()
+        {
+            if (controller && controller.ReadModel != null)
+            {
+                controller.ReadModel.Judged -= TrackCombo;
+                controller.ReadModel.ResetOccurred -= ResetRecord;
+            }
         }
         public void ReturnToSelection()
         {
@@ -83,6 +108,7 @@ namespace RhythmDojo.Core
         private void CompleteReturn()
         {
             returnPending = false;
+            SaveRecord(); UnbindRecord();
             controller.Shutdown(); input.Shutdown(); hud.Unbind(); initialized = false;
             input.ReturnRequested -= ReturnToSelection; ui.Unbind();
             flow.ReturnFromGameplay();
@@ -91,6 +117,7 @@ namespace RhythmDojo.Core
         {
             if (input) input.ReturnRequested -= ReturnToSelection;
             if (ui) ui.Unbind();
+            UnbindRecord();
             if (controller) controller.Shutdown();
             ownedSong?.Dispose();
             if (runtimeMode) Destroy(runtimeMode);

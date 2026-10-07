@@ -1,0 +1,232 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c192ff885248966469e5072687582fac, type: 3}
+  m_Name: DemoChart
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.Gameplay.RhythmChart
+  notes:
+  - lane: 0
+    kind: 0
+    startTime: 1.5
+    endTime: 1.5
+  - lane: 1
+    kind: 0
+    startTime: 2
+    endTime: 2
+  - lane: 2
+    kind: 0
+    startTime: 2.5
+    endTime: 2.5
+  - lane: 3
+    kind: 0
+    startTime: 3
+    endTime: 3
+  - lane: 0
+    kind: 1
+    startTime: 3.5
+    endTime: 4.25
+  - lane: 1
+    kind: 0
+    startTime: 4
+    endTime: 4
+  - lane: 2
+    kind: 0
+    startTime: 4.5
+    endTime: 4.5
+  - lane: 3
+    kind: 0
+    startTime: 5
+    endTime: 5
+  - lane: 0
+    kind: 0
+    startTime: 5.5
+    endTime: 5.5
+  - lane: 1
+    kind: 0
+    startTime: 6
+    endTime: 6
+  - lane: 2
+    kind: 0
+    startTime: 6.5
+    endTime: 6.5
+  - lane: 3
+    kind: 0
+    startTime: 7
+    endTime: 7
+  - lane: 0
+    kind: 1
+    startTime: 7.5
+    endTime: 8.25
+  - lane: 1
+    kind: 0
+    startTime: 8
+    endTime: 8
+  - lane: 2
+    kind: 0
+    startTime: 8.5
+    endTime: 8.5
+  - lane: 3
+    kind: 0
+    startTime: 9
+    endTime: 9
+  - lane: 0
+    kind: 0
+    startTime: 9.5
+    endTime: 9.5
+  - lane: 1
+    kind: 0
+    startTime: 10
+    endTime: 10
+  - lane: 2
+    kind: 0
+    startTime: 10.5
+    endTime: 10.5
+  - lane: 3
+    kind: 0
+    startTime: 11
+    endTime: 11
+  - lane: 0
+    kind: 1
+    startTime: 11.5
+    endTime: 12.25
+  - lane: 1
+    kind: 0
+    startTime: 12
+    endTime: 12
+  - lane: 2
+    kind: 0
+    startTime: 12.5
+    endTime: 12.5
+  - lane: 3
+    kind: 0
+    startTime: 13
+    endTime: 13
+  - lane: 0
+    kind: 0
+    startTime: 13.5
+    endTime: 13.5
+  - lane: 1
+    kind: 0
+    startTime: 14
+    endTime: 14
+  - lane: 2
+    kind: 0
+    startTime: 14.5
+    endTime: 14.5
+  - lane: 3
+    kind: 0
+    startTime: 15
+    endTime: 15
+  - lane: 0
+    kind: 1
+    startTime: 15.5
+    endTime: 16.25
+  - lane: 1
+    kind: 0
+    startTime: 16
+    endTime: 16
+  - lane: 2
+    kind: 0
+    startTime: 16.5
+    endTime: 16.5
+  - lane: 3
+    kind: 0
+    startTime: 17
+    endTime: 17
+  - lane: 0
+    kind: 0
+    startTime: 17.5
+    endTime: 17.5
+  - lane: 1
+    kind: 0
+    startTime: 18
+    endTime: 18
+  - lane: 2
+    kind: 0
+    startTime: 18.5
+    endTime: 18.5
+  - lane: 3
+    kind: 0
+    startTime: 19
+    endTime: 19
+  - lane: 0
+    kind: 1
+    startTime: 19.5
+    endTime: 20.25
+  - lane: 1
+    kind: 0
+    startTime: 20
+    endTime: 20
+  - lane: 2
+    kind: 0
+    startTime: 20.5
+    endTime: 20.5
+  - lane: 3
+    kind: 0
+    startTime: 21
+    endTime: 21
+  - lane: 0
+    kind: 0
+    startTime: 21.5
+    endTime: 21.5
+  - lane: 1
+    kind: 0
+    startTime: 22
+    endTime: 22
+  - lane: 2
+    kind: 0
+    startTime: 22.5
+    endTime: 22.5
+  - lane: 3
+    kind: 0
+    startTime: 23
+    endTime: 23
+  - lane: 0
+    kind: 1
+    startTime: 23.5
+    endTime: 24.25
+  - lane: 1
+    kind: 0
+    startTime: 24
+    endTime: 24
+  - lane: 2
+    kind: 0
+    startTime: 24.5
+    endTime: 24.5
+  - lane: 3
+    kind: 0
+    startTime: 25
+    endTime: 25
+  - lane: 0
+    kind: 0
+    startTime: 25.5
+    endTime: 25.5
+  - lane: 1
+    kind: 0
+    startTime: 26
+    endTime: 26
+  - lane: 2
+    kind: 0
+    startTime: 26.5
+    endTime: 26.5
+  - lane: 3
+    kind: 0
+    startTime: 27
+    endTime: 27
+  - lane: 0
+    kind: 1
+    startTime: 27.5
+    endTime: 28.25
+  - lane: 1
+    kind: 0
+    startTime: 28
+    endTime: 28
+  completionTime: 30

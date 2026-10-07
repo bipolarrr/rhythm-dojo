@@ -19,14 +19,15 @@ namespace RhythmDojo.Tests
             public void Press(int lane, double time) => Pressed?.Invoke(lane,time);
             public void Release(int lane, double time) => Released?.Invoke(lane,time);
         }
-        private sealed class FakeClock : ISongClock
+        private sealed class FakeClock : ISongClock, IInputTimingClock
         {
             public double SongTime { get; set; }
             public bool Running { get; private set; }
             public int Schedules;
+            public double InputTimingOffsetSeconds { get; set; }
             public void Schedule() { Running = true; SongTime = -.15; Schedules++; }
             public void Stop() { Running = false; SongTime = 0; }
-            public double InputTimeToSongTime(double eventTime) => eventTime;
+            public double InputTimeToSongTime(double eventTime) => eventTime - InputTimingOffsetSeconds;
         }
         private sealed class FakePresenter : INotePresenter
         {
@@ -36,6 +37,17 @@ namespace RhythmDojo.Tests
             public void Render(RhythmSession session, double songTime) { }
             public void Reset() { }
             public void Clear() => Clears++;
+        }
+        [TestCase(.2, 1.2)] [TestCase(-.2, .8)]
+        public void CalibrationCorrectsInputAndDefersMissSweep(double offset, double inputTime)
+        {
+            var input = new FakeInput(); var clock = new FakeClock { InputTimingOffsetSeconds = offset };
+            using var coordinator = Coordinator(input, clock, new FakePresenter());
+            input.Start(); clock.SongTime = offset > 0 ? 1.15 : .75;
+            coordinator.Tick();
+            Assert.That(coordinator.Session.Miss, Is.Zero);
+            input.Press(0, inputTime);
+            Assert.That(coordinator.Session.Perfect, Is.EqualTo(1));
         }
         private static RhythmSessionCoordinator Coordinator(FakeInput input, FakeClock clock, FakePresenter presenter,
             ScrollMode mode = ScrollMode.Constant, double multiplier = 1, double good = .11)

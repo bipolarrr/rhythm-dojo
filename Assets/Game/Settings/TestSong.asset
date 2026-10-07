@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Runtime::RhythmDojo.Gameplay.SongDefinition
   songId: test-pulse
   title: Foundation Pulse
-  artist: Rhythm Dojo
+  artist: Mira
   audioClip: {fileID: 8300000, guid: cb139c7ea4422834b926d75bca1424ca, type: 3}
   chart: {fileID: 11400000, guid: 9056c651ce8459144851f1b182d3d6ab, type: 2}
   mode: {fileID: 11400000, guid: b4b0e178a2cd7eb4fa7dedd0f10a62cb, type: 2}
@@ -22,4 +22,4 @@ MonoBehaviour:
     chartAudioOffsetSeconds: 0
     tempoPoints:
     - startTimeSeconds: 0
-      bpm: 120
+      bpm: 100

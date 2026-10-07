@@ -31,10 +31,13 @@ namespace RhythmDojo.Tests
         protected Keyboard keyboard;
         protected Mouse mouse;
         protected AudioConfiguration originalAudio;
+        private string previousPreferences;
         [UnitySetUp]
         public IEnumerator SetUp()
         {
             System.IO.Directory.CreateDirectory("Logs");
+            previousPreferences = PlayerPrefs.GetString(RhythmDojo.Services.SelectionPreferences.StorageKey, "");
+            PlayerPrefs.DeleteKey(RhythmDojo.Services.SelectionPreferences.StorageKey);
             originalAudio = AudioSettings.GetConfiguration();
             original = InputSystem.settings;
             priorEditorBehavior = original.editorInputBehaviorInPlayMode; priorBackgroundBehavior = original.backgroundBehavior;
@@ -45,10 +48,16 @@ namespace RhythmDojo.Tests
             yield return SceneManager.LoadSceneAsync("Assets/Game/Scenes/Bootstrap.unity");
             yield return Await(()=>UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>());
             yield return null;
+            UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>().SelectSong("test-pulse");
+            var selectionView = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
+            EventSystem.current.SetSelectedGameObject(selectionView.Rows.First(r => r.Entry.Id == "test-pulse").gameObject);
         }
         [UnityTearDown]
         public IEnumerator TearDown()
         {
+            if (string.IsNullOrEmpty(previousPreferences)) PlayerPrefs.DeleteKey(RhythmDojo.Services.SelectionPreferences.StorageKey);
+            else PlayerPrefs.SetString(RhythmDojo.Services.SelectionPreferences.StorageKey, previousPreferences);
+            PlayerPrefs.Save();
             bool audioRestored = AudioSettings.Reset(originalAudio);
             if (keyboard != null && keyboard.added) InputSystem.RemoveDevice(keyboard);
             if (mouse != null && mouse.added) InputSystem.RemoveDevice(mouse);
@@ -57,12 +66,12 @@ namespace RhythmDojo.Tests
             yield return null;
             Assert.That(audioRestored, Is.True, "Restore original audio configuration.");
         }
-        protected static IEnumerator Await(System.Func<bool> condition)
+        protected static IEnumerator Await(System.Func<bool> condition, string message = "Scene transition timed out.")
         {
             double deadline = Time.realtimeSinceStartupAsDouble + 15;
             while (!condition())
             {
-                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline), "Scene transition timed out.");
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline), message);
                 yield return null;
             }
         }
@@ -77,8 +86,10 @@ namespace RhythmDojo.Tests
             system.RaycastAll(new PointerEventData(system) { position = point }, hits);
             Assert.That(hits.Count, Is.GreaterThan(0), "No raycast target for " + button.name);
             Assert.That(hits[0].gameObject.GetComponentInParent<Button>(), Is.EqualTo(button), "Button is obscured.");
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = point + Vector2.one }); yield return null;
             InputSystem.QueueStateEvent(mouse, new MouseState { position = point }); yield return null; yield return null;
             InputSystem.QueueStateEvent(mouse, new MouseState { position = point }.WithButton(MouseButton.Left)); yield return null; yield return null;
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = point + Vector2.one }); yield return null;
             InputSystem.QueueStateEvent(mouse, new MouseState { position = point }); yield return null; yield return null;
         }
         protected IEnumerator Press(Key key)
@@ -87,17 +98,18 @@ namespace RhythmDojo.Tests
             InputSystem.QueueStateEvent(keyboard, new KeyboardState()); yield return null;
         }
 
-        protected static void CaptureSelection(string imageName = "selection")
+        protected static void CaptureSelection(string imageName = "selection", int width = 1280, int height = 720)
         {
+            if (System.Environment.GetEnvironmentVariable("RHYTHM_DOJO_SKIP_CAPTURE") == "1") return;
             var camera = Camera.main; var canvas = UnityEngine.Object.FindFirstObjectByType<Canvas>();
-            var target = new RenderTexture(1280,720,24); var previous = RenderTexture.active;
-            var texture = new Texture2D(1280,720,TextureFormat.RGB24,false);
+            var target = new RenderTexture(width,height,24); var previous = RenderTexture.active;
+            var texture = new Texture2D(width,height,TextureFormat.RGB24,false);
             try
             {
                 camera.targetTexture=target; canvas.renderMode=RenderMode.ScreenSpaceCamera;
                 canvas.worldCamera=camera; canvas.planeDistance=1; Canvas.ForceUpdateCanvases();
                 camera.Render(); RenderTexture.active=target;
-                texture.ReadPixels(new Rect(0,0,1280,720),0,0); texture.Apply();
+                texture.ReadPixels(new Rect(0,0,width,height),0,0); texture.Apply();
                 System.IO.Directory.CreateDirectory("Logs");
                 System.IO.File.WriteAllBytes($"Logs/{imageName}.png",texture.EncodeToPNG());
             }

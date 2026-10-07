@@ -65,15 +65,10 @@ namespace RhythmDojo.Tests
         [UnityTest]
         public IEnumerator KeyboardNavigationAndStartRestartFocusLossUseActualActions()
         {
-            var dropdown = UnityEngine.Object.FindObjectsByType<Dropdown>(FindObjectsSortMode.None).Single(d=>d.name=="Song");
-            int value = dropdown.value;
-            InputSystem.QueueStateEvent(keyboard,new KeyboardState(Key.Enter)); yield return null;
-            InputSystem.QueueStateEvent(keyboard,new KeyboardState()); yield return null;
-            InputSystem.QueueStateEvent(keyboard,new KeyboardState(Key.DownArrow)); yield return null;
-            InputSystem.QueueStateEvent(keyboard,new KeyboardState()); yield return null;
-            InputSystem.QueueStateEvent(keyboard,new KeyboardState(Key.Enter)); yield return null;
-            InputSystem.QueueStateEvent(keyboard,new KeyboardState()); yield return null;
-            Assert.That(dropdown.value, Is.EqualTo(value+1));
+            var view = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
+            EventSystem.current.SetSelectedGameObject(view.Rows.First(r => r.Entry.Id == "test-pulse").gameObject);
+            yield return Press(Key.DownArrow);
+            Assert.That(UnityEngine.Object.FindFirstObjectByType<AppFlowController>().Selection.SelectedSongId, Is.EqualTo("tempo-pulse"));
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
             flow.UpdateSelection(0,flow.Settings.defaultDifficulty,ScrollMode.Constant,1); flow.PlaySelected();
             yield return Await(()=>UnityEngine.Object.FindFirstObjectByType<RhythmGameController>()); yield return null;

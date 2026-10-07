@@ -26,6 +26,10 @@ namespace RhythmDojo.Application
         void Reset();
         void Clear();
     }
+    public interface IInputTimingClock
+    {
+        double InputTimingOffsetSeconds { get; }
+    }
     public enum ReadyReason { Initial, FocusLost }
     public readonly struct GameplaySnapshot
     {

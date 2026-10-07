@@ -199,8 +199,9 @@ namespace RhythmDojo.Tests
                 var song = Settings.catalog[1]; var scroll = Settings.scroll.CreateTimeline(ScrollMode.Bpm,song.Timing.ToTempoMap(),1);
                 var hold = NoteData.Hold(0,5.2,6.8);
                 view.Render(hold,NoteState.Pending,5,scroll,song.Mode,Settings.presentation);
-                Assert.That(view.transform.Find("Head").position.z, Is.EqualTo(1.6f).Within(.0001));
-                Assert.That(view.transform.Find("Hold Body").localScale.z, Is.EqualTo(16).Within(.0001));
+                // 150 BPM gives 10 units/s before 6s; 180 BPM gives 12 units/s afterwards.
+                Assert.That(view.transform.Find("Head").position.z, Is.EqualTo(2f).Within(.0001));
+                Assert.That(view.transform.Find("Hold Body").localScale.z, Is.EqualTo(17.6f).Within(.0001));
                 view.Render(hold,NoteState.Holding,6.2,scroll,song.Mode,Settings.presentation);
                 Assert.That(view.transform.Find("Head").position.z, Is.Zero);
                 Assert.That(view.transform.Find("Hold Body").localScale.z, Is.EqualTo(7.2f).Within(.0001));

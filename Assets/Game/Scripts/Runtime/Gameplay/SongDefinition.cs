@@ -33,6 +33,9 @@ namespace RhythmDojo.Gameplay
         [SerializeField] private AudioClip audioClip;
         [SerializeField] private RhythmChart chart;
         [SerializeField] private GameModeDefinition mode;
+        [SerializeField] private Sprite cover;
+        public Sprite Cover => cover;
+        public void SetCover(Sprite value) => cover = value;
         [SerializeField] private SongTiming timing = new SongTiming();
         public string SongId => songId;
         public string Title => title;
@@ -49,7 +52,7 @@ namespace RhythmDojo.Gameplay
             chart.Validate(mode.ToRules()); _ = timing.ToTempoMap();
         }
         public void SetGeneratedDefaults(string id, string name, AudioClip clip, RhythmChart chartAsset,
-            GameModeDefinition modeAsset, SongTiming songTiming)
-        { songId = id; title = name; artist = "Rhythm Dojo"; audioClip = clip; chart = chartAsset; mode = modeAsset; timing = songTiming; }
+            GameModeDefinition modeAsset, SongTiming songTiming, string composer = "Rhythm Dojo")
+        { songId = id; title = name; artist = composer; audioClip = clip; chart = chartAsset; mode = modeAsset; timing = songTiming; }
     }
 }

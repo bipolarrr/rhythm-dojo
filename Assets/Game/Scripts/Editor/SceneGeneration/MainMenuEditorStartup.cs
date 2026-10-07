@@ -23,16 +23,6 @@ namespace RhythmDojo.EditorTools
                 ? AssetDatabase.LoadAssetAtPath<SceneAsset>(SceneBuilder.TitlePath) : null;
         }
 
-        [MenuItem("Game Tools/Scenes/Open Title")]
-        private static void OpenTitle()
-        {
-            if (EditorApplication.isPlayingOrWillChangePlaymode) return;
-            // Check every open scene, including work done after an interrupted test run.
-            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
-            EditorSceneManager.OpenScene(SceneBuilder.TitlePath);
-            Apply();
-        }
-
         [MenuItem(MenuPath)]
         private static void Toggle()
         {

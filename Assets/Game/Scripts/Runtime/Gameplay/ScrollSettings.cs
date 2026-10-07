@@ -9,7 +9,15 @@ namespace RhythmDojo.Gameplay
     {
         [SerializeField] private double baseSpeed = 8;
         [SerializeField] private double referenceBpm = 120;
-        [SerializeField] private double[] multipliers = { .5, .75, 1, 1.25, 1.5, 2 };
+        [SerializeField] private double[] multipliers = CreateDefaultMultipliers();
+        private static double[] CreateDefaultMultipliers()
+        {
+            // Preserve the existing indices for integration callers, then add the slider values.
+            var values = new System.Collections.Generic.List<double> { .5, .75, 1, 1.25, 1.5, 2 };
+            for (int i = 10; i <= 100; i++)
+                if (!values.Contains(i / 10.0)) values.Add(i / 10.0);
+            return values.ToArray();
+        }
         public int MultiplierCount => multipliers?.Length ?? 0;
         public double GetMultiplier(int index) => multipliers[index];
         public IScrollTimeline CreateTimeline(ScrollMode mode, TempoMap tempo, double multiplier)

@@ -59,18 +59,18 @@ namespace RhythmDojo.EditorTools
             tempoChart.SetGeneratedContent(new[] {
                 NoteData.Tap(0,1.5), NoteData.Tap(1,2), NoteData.Tap(2,2.5), NoteData.Tap(3,3),
                 NoteData.Hold(0,5.2,6.8), NoteData.Tap(2,6), NoteData.Tap(1,7.5), NoteData.Tap(3,9) }, 12); Dirty(tempoChart);
-            var fixedTiming = new SongTiming();
-            var variableTiming = new SongTiming { tempoPoints = new[] { new SerializedTempoPoint(0,120), new SerializedTempoPoint(6,180) } };
+            var fixedTiming = new SongTiming { tempoPoints = new[] { new SerializedTempoPoint(0,100) } };
+            var variableTiming = new SongTiming { tempoPoints = new[] { new SerializedTempoPoint(0,150), new SerializedTempoPoint(6,180) } };
             var pulse = Audio("Assets/Game/Audio/TestPulse.wav", fixedTiming.ToTempoMap());
             var variablePulse = Audio("Assets/Game/Audio/TempoPulse.wav", variableTiming.ToTempoMap());
             var song = Asset<SongDefinition>("Assets/Game/Settings/TestSong.asset", out bool newSong);
             if (newSong)
             {
                 if (legacy) fixedTiming.chartAudioOffsetSeconds = legacy.AudioOffset;
-                song.SetGeneratedDefaults("test-pulse", "Foundation Pulse", pulse, chart, mode, fixedTiming); Dirty(song);
+                song.SetGeneratedDefaults("test-pulse", "Foundation Pulse", pulse, chart, mode, fixedTiming, "Mira"); Dirty(song);
             }
             var tempoSong = Asset<SongDefinition>("Assets/Game/Settings/TempoSong.asset", out bool newTempoSong);
-            if (newTempoSong) { tempoSong.SetGeneratedDefaults("tempo-pulse", "Tempo Shift", variablePulse, tempoChart, mode, variableTiming); Dirty(tempoSong); }
+            if (newTempoSong) { tempoSong.SetGeneratedDefaults("tempo-pulse", "Tempo Shift", variablePulse, tempoChart, mode, variableTiming, "Aster"); Dirty(tempoSong); }
             var catalog = Asset<SongCatalog>("Assets/Game/Settings/SongCatalog.asset", out bool newCatalog);
             if (newCatalog) { catalog.SetGeneratedDefaults(new[] { song, tempoSong }); Dirty(catalog); }
             var settings = Asset<GameSettings>(SettingsPath, out bool newSettings);
