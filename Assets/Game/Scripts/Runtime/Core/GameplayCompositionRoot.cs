@@ -22,6 +22,7 @@ namespace RhythmDojo.Core
         [SerializeField] private PlayfieldPresenter playfield;
         [SerializeField] private RhythmHud hud;
         [SerializeField] private GameplayUiController ui;
+        [SerializeField] private GameplayHitFeedback hits;
         private AppFlowController flow;
         private bool initialized;
         private bool returnPending;
@@ -33,7 +34,7 @@ namespace RhythmDojo.Core
         private GameplayPresentationSettings runtimePresentation;
         public void Validate(bool validateGeneratedViews = false)
         {
-            if (!settings || !controller || !clock || !input || !notes || !playfield || !hud || !ui)
+            if (!settings || !controller || !clock || !input || !notes || !playfield || !hud || !ui || !hits)
                 throw new InvalidOperationException("Gameplay composition references missing. Rebuild Gameplay.");
             settings.ValidateOptions(); clock.Validate(); playfield.Validate(); hud.Validate(); ui.Validate();
             notes.Validate(validateGeneratedViews ? settings.catalog[0].Chart.ToChartData() : null);
@@ -68,6 +69,7 @@ namespace RhythmDojo.Core
             controller.Initialize(chart, judgments, mode, tempo, song.Title, request.Difficulty.DisplayName,
                 request.ScrollMode, request.Multiplier, scroll, input, clock, notes);
             hud.Initialize(controller.ReadModel, runtimeMode, runtimePresentation);
+            hits.Initialize(controller.ReadModel, runtimeMode, Camera.main, hud.GetComponent<Canvas>());
             controller.ReadModel.Judged += TrackCombo;
             controller.ReadModel.ResetOccurred += ResetRecord;
             input.ReturnRequested += ReturnToSelection; ui.Initialize(controller.ReadModel, ReturnToSelection);
@@ -109,7 +111,7 @@ namespace RhythmDojo.Core
         {
             returnPending = false;
             SaveRecord(); UnbindRecord();
-            controller.Shutdown(); input.Shutdown(); hud.Unbind(); initialized = false;
+            hits.Unbind(); controller.Shutdown(); input.Shutdown(); hud.Unbind(); initialized = false;
             input.ReturnRequested -= ReturnToSelection; ui.Unbind();
             flow.ReturnFromGameplay();
         }
@@ -118,6 +120,7 @@ namespace RhythmDojo.Core
             if (input) input.ReturnRequested -= ReturnToSelection;
             if (ui) ui.Unbind();
             UnbindRecord();
+            if (hits) hits.Unbind();
             if (controller) controller.Shutdown();
             ownedSong?.Dispose();
             if (runtimeMode) Destroy(runtimeMode);

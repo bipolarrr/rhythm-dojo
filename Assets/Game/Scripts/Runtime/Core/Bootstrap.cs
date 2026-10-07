@@ -19,13 +19,17 @@ namespace RhythmDojo.Core
             foreach (var root in gameObject.scene.GetRootGameObjects())
                 foreach (var camera in root.GetComponentsInChildren<Camera>())
                     if (camera.isActiveAndEnabled && camera.targetDisplay == 0 && !camera.targetTexture)
+                    {
+                        if (!camera.GetComponent<AudioListener>()) camera.gameObject.AddComponent<AudioListener>();
                         return camera;
+                    }
             var loadingCamera = new GameObject("Loading Camera").AddComponent<Camera>();
             loadingCamera.transform.SetParent(transform, false);
             loadingCamera.clearFlags = CameraClearFlags.SolidColor;
             loadingCamera.backgroundColor = Color.black;
             loadingCamera.cullingMask = 0;
             loadingCamera.targetDisplay = 0;
+            loadingCamera.gameObject.AddComponent<AudioListener>();
             return loadingCamera;
         }
         private void Start() { Validate(); AppFlowController.Create(settings).ShowSelection(); }

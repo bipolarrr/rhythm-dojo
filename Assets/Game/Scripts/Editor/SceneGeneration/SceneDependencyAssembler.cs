@@ -45,6 +45,7 @@ namespace RhythmDojo.EditorTools
             Wire(parts.Root, "settings", content.Settings); Wire(parts.Root, "controller", parts.Controller);
             Wire(parts.Root, "clock", parts.Clock); Wire(parts.Root, "input", parts.Input); Wire(parts.Root, "notes", parts.Notes);
             Wire(parts.Root, "playfield", parts.Playfield); Wire(parts.Root, "hud", parts.Hud); Wire(parts.Root, "ui", parts.Ui);
+            Wire(parts.Root, "hits", parts.Hits);
             Wire(parts.Hud, "view", parts.HudView); Wire(parts.Ui, "view", parts.HudView);
         }
     }
