@@ -15,7 +15,7 @@
 
 ## 메인 화면 UI 작업 시작하기
 
-메인 화면의 씬 이름은 **Title**입니다. `main`을 받은 뒤 `Assets/Game/Scenes/Title.unity`를 열거나 **Game Tools > Scenes > Open Title**을 실행하면 볼 수 있습니다. Windows 빌드도 이 화면에서 시작합니다.
+메인 화면의 씬 이름은 **Title**입니다. `main`을 받은 뒤 Project 창에서 `Assets/Game/Scenes/Title.unity`를 열면 볼 수 있습니다. Windows 빌드도 이 화면에서 시작합니다.
 
 | 작업 | 수정할 파일 (`Assets/Game` 기준) | 담당 |
 | --- | --- | --- |
@@ -77,4 +77,4 @@
 
 ## 이번 범위 밖
 
-실제 채보 편집 화면, 디스크 저장 형식, 사용자 음원 파일 선택 UI, 에디터 전용 미리듣기는 아직 구현하지 않았다. 이를 위한 데이터·서비스 계약과 메모리 구현, 실제 Gameplay 진입·복귀는 제공한다. 게임에 미구현 에디터 버튼은 추가하지 않았다.
+채보 편집 화면과 메뉴 연결은 `ChartEditorSceneBuilder`, `ChartEditorScreen`, `ChartEditorMenu`에 있다. `ChartEditorCompositionRoot`가 파일 저장소, 외부 음원 디코더, 테스트 플레이 서비스를 조립한다. 저장 형식과 사용법은 `chart-format-v1.md`를 참고한다. 사용자 음원 파일 선택 대화상자와 에디터 전용 미리듣기는 아직 구현하지 않았으며, 음원은 전체 경로 입력으로 가져온다.
