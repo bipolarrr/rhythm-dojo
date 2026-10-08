@@ -126,8 +126,8 @@ namespace RhythmDojo.UI
                 nav.selectOnLeft = null; nav.selectOnRight = null;
                 view.Rows[i].select.navigation = nav;
             }
-            view.allTab.GetComponent<Image>().color = favoritesOnly ? new Color(.14f,.22f,.28f) : new Color(.1f,.4f,.45f);
-            view.favoritesTab.GetComponent<Image>().color = favoritesOnly ? new Color(.1f,.4f,.45f) : new Color(.14f,.22f,.28f);
+            view.allTab.GetComponent<Image>().color = favoritesOnly ? new Color(.09f,.115f,.13f) : new Color(.42f,.09f,.12f);
+            view.favoritesTab.GetComponent<Image>().color = favoritesOnly ? new Color(.42f,.09f,.12f) : new Color(.09f,.115f,.13f);
             view.emptyMessage.gameObject.SetActive(visible.Count == 0);
             view.emptyMessage.text = favoritesOnly ? "즐겨찾기한 곡이 없습니다." : "등록된 곡이 없습니다.";
             if (visible.Count == 0)

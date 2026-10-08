@@ -20,11 +20,14 @@ namespace RhythmDojo.UI
             {
                 var go = new GameObject($"Lane {i} Feedback", typeof(RectTransform)); go.transform.SetParent(laneRoot, false);
                 indicators[i] = go.AddComponent<Image>(); indicators[i].color = presentation.idleColor;
+                indicators[i].raycastTarget = false;
+                var outline = go.AddComponent<Outline>(); outline.effectColor = new Color(.30f,.48f,.49f,.7f);
+                outline.effectDistance = new Vector2(1,-1);
                 var rect = (RectTransform)go.transform; rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(.5f, 0);
                 rect.anchoredPosition = new Vector2(GameModeDefinition.CenteredPosition(i, mode.LaneCount, mode.HudLaneSpacing), 28);
                 rect.sizeDelta = new Vector2(mode.HudLaneSpacing * .88f, 48);
                 var key = UiElements.Label("Key", go.transform, mode.GetLane(i).displayName, Vector2.zero, rect.sizeDelta, 26);
-                key.alignment = TextAnchor.MiddleCenter;
+                key.alignment = TextAnchor.MiddleCenter; key.color = new Color(.94f,.93f,.85f);
             }
             return indicators;
         }

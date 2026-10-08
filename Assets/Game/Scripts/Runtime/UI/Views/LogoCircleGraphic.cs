@@ -20,13 +20,16 @@ namespace RhythmDojo.UI
                 var da = new Vector2(Mathf.Cos(a), Mathf.Sin(a));
                 var db = new Vector2(Mathf.Cos(b), Mathf.Sin(b));
                 int index = helper.currentVertCount;
-                var fill = new Color(.14f, .025f, .065f, 1f) * color;
+                var fill = new Color(.025f, .035f, .045f, color.a);
                 helper.AddVert(center, fill, Vector2.zero);
                 helper.AddVert(center + da * radius * .86f, fill, Vector2.zero);
                 helper.AddVert(center + db * radius * .86f, fill, Vector2.zero);
                 helper.AddTriangle(index, index + 1, index + 2);
                 Ring(helper, center, da, db, radius * .86f, radius * .88f, color, color);
-                var glow = color; glow.a *= .5f;
+                if (i % 8 < 5)
+                    Ring(helper, center, da, db, radius * .78f, radius * .784f,
+                        new Color(.38f,.53f,.54f,.45f), new Color(.38f,.53f,.54f,.45f));
+                var glow = color; glow.a *= .18f;
                 var clear = color; clear.a = 0f;
                 Ring(helper, center, da, db, radius * .88f, radius, glow, clear);
             }
