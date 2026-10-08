@@ -53,6 +53,10 @@ namespace RhythmDojo.Tests
         [UnityTest]
         public IEnumerator GeneratedMenuAppliesTimingAndUndoRedoRestoresNotes()
         {
+            var listeners = screen.gameObject.scene.GetRootGameObjects()
+                .SelectMany(item => item.GetComponentsInChildren<AudioListener>())
+                .Count(item => item.isActiveAndEnabled);
+            Assert.That(listeners, Is.EqualTo(1), "The chart editor scene must support audio playback.");
             Click("설정");
             Assert.That(Control<InputField>("BPM").gameObject.activeInHierarchy, Is.True);
             Input("Title", "Menu test"); Input("BPM", "60"); Input("Offset", "0.25"); Input("Duration", "20");

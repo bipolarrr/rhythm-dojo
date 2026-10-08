@@ -232,7 +232,7 @@ namespace RhythmDojo.Tests
         {
             yield return SceneManager.LoadSceneAsync("Assets/Game/Scenes/ChartEditor.unity");
             yield return null;
-            var canvas = Object.FindFirstObjectByType<Canvas>();
+            var canvas = Object.FindFirstObjectByType<ChartEditorScreen>().GetComponentInParent<Canvas>();
             canvas.renderMode = RenderMode.WorldSpace;
             var root = (RectTransform)canvas.transform;
             var background = (RectTransform)root.Find("Background");

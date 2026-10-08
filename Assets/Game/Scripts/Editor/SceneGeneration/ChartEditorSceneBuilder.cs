@@ -32,6 +32,7 @@ namespace RhythmDojo.EditorTools
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             var camera = new GameObject("Main Camera").AddComponent<Camera>();
             camera.tag = "MainCamera";
+            camera.gameObject.AddComponent<AudioListener>();
             camera.clearFlags = CameraClearFlags.SolidColor;
             camera.backgroundColor = Background;
 
