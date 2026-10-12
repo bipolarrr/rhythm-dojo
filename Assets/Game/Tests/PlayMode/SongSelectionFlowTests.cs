@@ -24,6 +24,45 @@ namespace RhythmDojo.Tests
     public sealed class SongSelectionFlowTests : GameplayTestContext
     {
         [UnityTest]
+        public IEnumerator ModePopupSelectsNormalAndHardWithoutChangingGameplayOptions()
+        {
+            var view = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
+            var screen = UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>();
+            var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
+            var song = flow.Selection.SelectedSongId; var difficulty = flow.SelectedDifficulty;
+            double speed = flow.SelectedMultiplier; int timing = flow.Preferences.TimingOffsetMs;
+            Assert.That(screen.HardModeSelected, Is.False);
+            Assert.That(view.modeLabel.text, Is.EqualTo("모드: 노말"));
+            yield return Click(view.modeButton);
+            Assert.That(view.modePopup.activeSelf, Is.True);
+            Assert.That(view.settingsButton.interactable, Is.False);
+            Assert.That(view.play.interactable, Is.False);
+            view.play.onClick.Invoke(); view.settingsButton.onClick.Invoke();
+            Assert.That(flow.Transitioning, Is.False);
+            yield return Click(view.hardModeButton);
+            Assert.That(screen.HardModeSelected, Is.True);
+            Assert.That(view.modeLabel.text, Is.EqualTo("모드: 하드"));
+            Assert.That(view.modePopup.activeSelf, Is.False);
+            Assert.That(EventSystem.current.currentSelectedGameObject, Is.EqualTo(view.modeButton.gameObject));
+            yield return Click(view.modeButton); yield return Press(Key.Escape);
+            Assert.That(view.modePopup.activeSelf, Is.False); Assert.That(view.backPopup.activeSelf, Is.False);
+            Assert.That(screen.HardModeSelected, Is.True);
+            yield return Click(view.modeButton); yield return Click(view.cancelMode);
+            Assert.That(screen.HardModeSelected, Is.True);
+            yield return Click(view.modeButton);
+            Assert.That(EventSystem.current.currentSelectedGameObject, Is.EqualTo(view.hardModeButton.gameObject));
+            yield return Press(Key.LeftArrow); yield return Press(Key.Enter);
+            Assert.That(screen.HardModeSelected, Is.False); Assert.That(view.modePopup.activeSelf, Is.False);
+            Assert.That(flow.Selection.SelectedSongId, Is.EqualTo(song));
+            Assert.That(flow.SelectedDifficulty, Is.EqualTo(difficulty));
+            Assert.That(flow.SelectedMultiplier, Is.EqualTo(speed));
+            Assert.That(flow.Preferences.TimingOffsetMs, Is.EqualTo(timing));
+            var modeRect = (RectTransform)view.modeButton.transform;
+            var settingsRect = (RectTransform)view.settingsButton.transform;
+            Assert.That(modeRect.anchorMax.x, Is.LessThanOrEqualTo(settingsRect.anchorMin.x));
+        }
+
+        [UnityTest]
         public IEnumerator SongRowsKeyboardSelectionUpdatesSelectedSong()
         {
             var view = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();

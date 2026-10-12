@@ -22,6 +22,9 @@ namespace RhythmDojo.UI
         private ISelectionPreferences preferences;
         private CancellationTokenSource lifetime;
         private bool favoritesOnly, loading;
+        public bool HardModeSelected { get; private set; }
+        private HardModePreferences hardMode;
+        private bool ModalOpen => view.backPopup.activeSelf || view.modePopup.activeSelf;
         private UnityEngine.Events.UnityAction[] difficultyActions;
         public void Validate()
         {
@@ -33,8 +36,15 @@ namespace RhythmDojo.UI
         {
             Unbind(); Validate(); settings = gameSettings; selection = songs; navigation = appNavigation;
             preferences = savedPreferences ?? new SelectionPreferences();
+            hardMode = (appNavigation as RhythmDojo.Core.AppFlowController)?.HardMode ?? HardModePreferences.Load();
+            HardModeSelected = hardMode.Enabled;
             lifetime = new CancellationTokenSource(); loading = false; favoritesOnly = false;
-            view.backPopup.SetActive(false); view.SetInteractable(true);
+            view.backPopup.SetActive(false); view.modePopup.SetActive(false); view.SetInteractable(true);
+            RefreshMode();
+            view.modeButton.onClick.AddListener(ShowMode);
+            view.normalModeButton.onClick.AddListener(SelectNormalMode);
+            view.hardModeButton.onClick.AddListener(SelectHardMode);
+            view.cancelMode.onClick.AddListener(CloseMode);
             view.difficultyList.ClearOptions();
             view.difficultyList.AddOptions(settings.difficulties.Select(p => p.DisplayName).ToList());
             view.scrollModeList.ClearOptions(); view.scrollModeList.AddOptions(new List<string> { "고정 속도", "BPM 연동" });
@@ -83,10 +93,11 @@ namespace RhythmDojo.UI
                 Expanded(view.scrollModeList) || Expanded(view.sortList)) return;
             if (Keyboard.current.escapeKey.wasPressedThisFrame)
             {
-                if (view.backPopup.activeSelf) CancelBack(); else ShowBack();
+                if (view.modePopup.activeSelf) CloseMode();
+                else if (view.backPopup.activeSelf) CancelBack(); else ShowBack();
                 return;
             }
-            if (view.backPopup.activeSelf) return;
+            if (ModalOpen) return;
             var focused = EventSystem.current ? EventSystem.current.currentSelectedGameObject : null;
             if (focused != view.speedSlider.gameObject && focused != view.timingOffset.gameObject && focused != view.sortList.gameObject)
             {
@@ -103,7 +114,7 @@ namespace RhythmDojo.UI
         }
         private void RefreshLibrary()
         {
-            if (Busy) return;
+            if (Busy || ModalOpen) return;
             IEnumerable<SongEntry> entries = selection.Library.Entries;
             if (favoritesOnly) entries = entries.Where(s => preferences.IsFavorite(s.Id));
             entries = view.sortList.value == 1 ? entries.OrderBy(s => s.Artist, StringComparer.OrdinalIgnoreCase).ThenBy(s => s.Title) :
@@ -141,7 +152,7 @@ namespace RhythmDojo.UI
         }
         public void SelectSong(string songId)
         {
-            if (Busy || view.backPopup.activeSelf) return;
+            if (Busy || ModalOpen) return;
             var song = selection.Library.Find(songId); if (song == null) return;
             selection.UpdateSelection(songId, settings.difficulties[view.difficultyList.value],
                 ScrollMode.Constant, settings.scroll.GetMultiplier(view.multiplierList.value));
@@ -180,17 +191,17 @@ namespace RhythmDojo.UI
             view.details.text = song.Error == null ?
                 $"{song.Duration:0}s · {song.NoteCount} 노트 · {song.LaneCount} 레인\n↑↓ 곡 선택 · ←→ 난이도 · Enter 플레이 · Esc 뒤로가기" :
                 "재생 불가: " + song.Error;
-            view.play.interactable = song.Error == null && !Busy && !view.backPopup.activeSelf;
+            view.play.interactable = song.Error == null && !Busy && !ModalOpen;
             foreach (var row in view.Rows) row.difficulty.text = row.Entry.Error == null ? selection.SelectedDifficulty.DisplayName : "재생 불가";
         }
         private void SelectDifficulty(int value)
         {
-            if (Busy || view.backPopup.activeSelf) return;
+            if (Busy || ModalOpen) return;
             view.difficultyList.value = value;
         }
         private void Changed(int value)
         {
-            if (Busy || view.backPopup.activeSelf) return;
+            if (Busy || ModalOpen) return;
             RefreshSpeed();
             view.scrollModeList.SetValueWithoutNotify((int)ScrollMode.Constant);
             view.RefreshDifficultyButtons();
@@ -210,7 +221,7 @@ namespace RhythmDojo.UI
         }
         private void SpeedChanged(float value)
         {
-            if (Busy || view.backPopup.activeSelf) return;
+            if (Busy || ModalOpen) return;
             double rounded = Math.Round(Math.Clamp((double)value, 1, 10), 1, MidpointRounding.AwayFromZero);
             view.speedSlider.SetValueWithoutNotify((float)rounded);
             for (int i = 0; i < settings.scroll.MultiplierCount; i++)
@@ -231,7 +242,7 @@ namespace RhythmDojo.UI
         private void ShowFavorites() { favoritesOnly = true; RefreshLibrary(); FocusSelected(); }
         private void ToggleFavorite(string id)
         {
-            if (Busy || view.backPopup.activeSelf) return;
+            if (Busy || ModalOpen) return;
             preferences.ToggleFavorite(id); RefreshLibrary(); FocusSelected();
         }
         private void FocusSelected()
@@ -242,7 +253,7 @@ namespace RhythmDojo.UI
         }
         private async void Play()
         {
-            if (Busy || !view.play.interactable || view.backPopup.activeSelf) return;
+            if (Busy || !view.play.interactable || ModalOpen) return;
             SetLoading(true);
             try { await navigation.PlaySelectedAsync(lifetime.Token); }
             catch (OperationCanceledException) { if (this && lifetime != null) { SetLoading(false); RefreshLibrary(); } }
@@ -256,10 +267,37 @@ namespace RhythmDojo.UI
         {
             loading = value; view.SetInteractable(!value); view.play.interactable = !value;
         }
-        private void ShowSettings() { if (!Busy && !view.backPopup.activeSelf) navigation.ShowSettings(); }
+        private void ShowMode()
+        {
+            if (Busy || ModalOpen) return;
+            view.SetInteractable(false); view.play.interactable = false;
+            RefreshMode(); view.modePopup.SetActive(true);
+            if (EventSystem.current) EventSystem.current.SetSelectedGameObject(
+                (HardModeSelected ? view.hardModeButton : view.normalModeButton).gameObject);
+        }
+        private void SelectNormalMode() => SelectMode(false);
+        private void SelectHardMode() => SelectMode(true);
+        private void SelectMode(bool hard)
+        {
+            if (Busy || !view.modePopup.activeSelf) return;
+            HardModeSelected = hard; hardMode.Enabled = hard; hardMode.Save(); RefreshMode(); CloseMode();
+        }
+        private void RefreshMode()
+        {
+            view.modeLabel.text = HardModeSelected ? "모드: 하드" : "모드: 노말";
+            view.normalModeButton.image.color = !HardModeSelected ? new Color(.18f,.43f,.43f) : new Color(.09f,.115f,.13f);
+            view.hardModeButton.image.color = HardModeSelected ? new Color(.50f,.13f,.16f) : new Color(.09f,.115f,.13f);
+        }
+        private void CloseMode()
+        {
+            if (Busy || !view.modePopup.activeSelf) return;
+            view.modePopup.SetActive(false); view.SetInteractable(true); RefreshLibrary();
+            if (EventSystem.current) EventSystem.current.SetSelectedGameObject(view.modeButton.gameObject);
+        }
+        private void ShowSettings() { if (!Busy && !ModalOpen) navigation.ShowSettings(); }
         private void ShowBack()
         {
-            if (Busy) return;
+            if (Busy || ModalOpen) return;
             view.SetInteractable(false); view.play.interactable = false; view.backPopup.SetActive(true);
             if (EventSystem.current) EventSystem.current.SetSelectedGameObject(view.cancelBack.gameObject);
         }
@@ -288,10 +326,23 @@ namespace RhythmDojo.UI
             view.sortList.onValueChanged.RemoveListener(SortChanged);
             view.speedSlider.onValueChanged.RemoveListener(SpeedChanged);
             view.timingOffset.onValueChanged.RemoveListener(TimingChanged);
+            view.modeButton.onClick.RemoveListener(ShowMode);
+            view.normalModeButton.onClick.RemoveListener(SelectNormalMode);
+            view.hardModeButton.onClick.RemoveListener(SelectHardMode);
+            view.cancelMode.onClick.RemoveListener(CloseMode);
             view.play.onClick.RemoveListener(Play); view.settingsButton.onClick.RemoveListener(ShowSettings);
             view.back.onClick.RemoveListener(ShowBack); view.confirmBack.onClick.RemoveListener(ConfirmBack);
             view.cancelBack.onClick.RemoveListener(CancelBack); view.allTab.onClick.RemoveListener(ShowAll);
             view.favoritesTab.onClick.RemoveListener(ShowFavorites); view.ClearRows();
+        }
+        private void OnEnable()
+        {
+            if (selection == null || settings == null || preferences == null) return;
+            for (int i = 0; i < settings.scroll.MultiplierCount; i++)
+                if (Math.Abs(settings.scroll.GetMultiplier(i) - selection.SelectedMultiplier) < .0001)
+                    view.multiplierList.SetValueWithoutNotify(i);
+            view.timingOffset.SetValueWithoutNotify(preferences.TimingOffsetMs);
+            RefreshSpeed(); RefreshTiming();
         }
         private void OnDestroy() => Unbind();
     }

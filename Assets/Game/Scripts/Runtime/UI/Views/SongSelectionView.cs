@@ -15,6 +15,9 @@ namespace RhythmDojo.UI
         public Slider speedSlider;
         public Text speedLabel;
         public Button play, settingsButton, back, allTab, favoritesTab, confirmBack, cancelBack;
+        public Button modeButton, normalModeButton, hardModeButton, cancelMode;
+        public Text modeLabel;
+        public GameObject modePopup;
         public Button[] difficultyButtons;
         public GameObject[] difficultyIndicators;
         public GameObject backPopup;
@@ -28,6 +31,7 @@ namespace RhythmDojo.UI
                 !settingsButton || !album || !songTitle || !artistBpm || !record || !timingOffset ||
                 !timingLabel || !speedSlider || !speedLabel || !rowContent || !rowTemplate || !back || !allTab || !favoritesTab ||
                 !backPopup || !confirmBack || !cancelBack || !emptyMessage || !scroll ||
+                !modeButton || !normalModeButton || !hardModeButton || !cancelMode || !modeLabel || !modePopup ||
                 difficultyButtons == null || difficultyButtons.Length == 0 || Array.Exists(difficultyButtons, button => !button) ||
                 difficultyIndicators == null || difficultyIndicators.Length != difficultyButtons.Length || Array.Exists(difficultyIndicators, indicator => !indicator))
                 throw new InvalidOperationException("Song selection view references missing.");
@@ -62,7 +66,7 @@ namespace RhythmDojo.UI
         public void SetInteractable(bool value)
         {
             difficultyList.interactable = scrollModeList.interactable = multiplierList.interactable =
-                sortList.interactable = speedSlider.interactable = timingOffset.interactable = settingsButton.interactable =
+                sortList.interactable = speedSlider.interactable = timingOffset.interactable = settingsButton.interactable = modeButton.interactable =
                 back.interactable = allTab.interactable = favoritesTab.interactable = value;
             foreach (var button in difficultyButtons) button.interactable = value;
             foreach (var row in Rows) row.select.interactable = row.favorite.interactable = value;

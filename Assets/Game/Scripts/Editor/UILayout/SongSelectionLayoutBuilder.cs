@@ -71,6 +71,7 @@ namespace RhythmDojo.EditorTools
             }
             view.record = Label("Best Record", left, "기록 없음", 0, .20f, 1, .355f, 21);
             Label("Options Caption", left, "PLAY OPTIONS / 옵션", 0, .165f, 1, .20f, 16).verticalOverflow = VerticalWrapMode.Overflow;
+
             // Retain existing field names and programmatic value contracts without exposing the old controls.
             view.multiplierList = Dropdown("Scroll multiplier", left, .2f, .078f, .47f, .115f);
             view.scrollModeList = Dropdown("Scroll mode", left, .5f, .078f, .96f, .115f);
@@ -100,6 +101,8 @@ namespace RhythmDojo.EditorTools
             view.timingOffset.targetGraphic.color = new Color(.55f,.82f,.79f);
             view.timingOffset.fillRect.GetComponent<Image>().color = new Color(.25f,.43f,.44f);
             view.sortList = Dropdown("Sort", right, .52f, .921f, .985f, .985f);
+            view.modeButton = Button("Mode Switch", footer, "모드: 노말", .59f, .16f, .71f, .84f);
+            view.modeLabel = view.modeButton.GetComponentInChildren<Text>(); view.modeLabel.fontSize = 21;
             view.settingsButton = Button("Settings", footer, "설정", .725f, .16f, .815f, .84f);
             var iconObject = new GameObject("Settings Icon", typeof(RectTransform));
             iconObject.transform.SetParent(view.settingsButton.transform, false);
@@ -159,7 +162,7 @@ namespace RhythmDojo.EditorTools
             view.rowTemplate = row; row.gameObject.SetActive(false);
             view.back = Button("Back", footer, "← 뒤로", .025f, .16f, .13f, .84f);
             view.play = Button("Play", footer, "플레이  ▶", .835f, .16f, .975f, .84f);
-            view.details = Label("Details", footer, "곡 선택 · Enter 플레이 · Esc 뒤로가기", .15f, .04f, .70f, .96f, 17);
+            view.details = Label("Details", footer, "곡 선택 · Enter 플레이 · Esc 뒤로가기", .15f, .04f, .57f, .96f, 17);
             foreach (float y in new[] { .925f, .865f, .48f, .355f, .20f })
                 Panel("Divider", left, Line, 0, y, 1, y).sizeDelta = new Vector2(0, 2);
             var playGraphic = (SelectionGradientImage)view.play.targetGraphic;
@@ -173,6 +176,22 @@ namespace RhythmDojo.EditorTools
             view.confirmBack = Button("Confirm Back", dialog, "돌아가기", .07f, .13f, .47f, .36f);
             view.cancelBack = Button("Cancel Back", dialog, "취소", .53f, .13f, .93f, .36f);
             overlay.gameObject.SetActive(false);
+            var modeOverlay = Panel("Mode Popup", canvas.transform, new Color(0,0,0,.8f),0,0,1,1);
+            modeOverlay.GetComponent<Image>().raycastTarget = true; view.modePopup = modeOverlay.gameObject;
+            var modeDialog = Panel("Mode Dialog",modeOverlay,PanelColor,.32f,.33f,.68f,.67f);
+            Panel("Mode Accent",modeDialog,new Color(.46f,.78f,.76f),0,.99f,1,1);
+            Label("Mode Title",modeDialog,"모드 선택",.07f,.70f,.80f,.94f,30);
+            view.normalModeButton = Button("Normal Mode",modeDialog,"노말",.07f,.27f,.47f,.61f);
+            view.hardModeButton = Button("Hard Mode",modeDialog,"하드",.53f,.27f,.93f,.61f);
+            view.cancelMode = Button("Close Mode",modeDialog,"닫기",.69f,.06f,.93f,.20f);
+            view.cancelMode.GetComponentInChildren<Text>().fontSize = 18;
+            var modeNav = view.normalModeButton.navigation; modeNav.mode = Navigation.Mode.Explicit;
+            modeNav.selectOnRight = view.hardModeButton; modeNav.selectOnDown = view.cancelMode; view.normalModeButton.navigation = modeNav;
+            modeNav = view.hardModeButton.navigation; modeNav.mode = Navigation.Mode.Explicit;
+            modeNav.selectOnLeft = view.normalModeButton; modeNav.selectOnDown = view.cancelMode; view.hardModeButton.navigation = modeNav;
+            modeNav = view.cancelMode.navigation; modeNav.mode = Navigation.Mode.Explicit;
+            modeNav.selectOnUp = view.normalModeButton; view.cancelMode.navigation = modeNav;
+            view.modePopup.SetActive(false);
             view.Validate(); return view;
         }
         private static RectTransform GradientPanel(string name, Transform parent, Color from, Color to,
