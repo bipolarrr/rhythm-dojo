@@ -23,8 +23,10 @@ namespace RhythmDojo.EditorTools
             Guard(); var content = SceneResources.Load();
             SaveGameplay(content); Save(ScenePresentationBuilder.Selection(content), SelectionPath);
             Save(ScenePresentationBuilder.Settings(content), SettingsPath);
-            Save(ScenePresentationBuilder.Bootstrap(content), BootstrapPath); BuildTitle();
-            AssetDatabase.SaveAssets(); Debug.Log("Rhythm Dojo: five scenes generated and validated.");
+            Save(ScenePresentationBuilder.Bootstrap(content), BootstrapPath);
+            ChartEditorSceneBuilder.Build();
+            BuildTitle();
+            AssetDatabase.SaveAssets(); Debug.Log("Rhythm Dojo: six scenes generated and validated.");
         }
         [MenuItem("Game Tools/Scenes/Build Title")]
         public static void BuildTitle()
@@ -86,4 +88,3 @@ namespace RhythmDojo.EditorTools
         }
     }
 }
-

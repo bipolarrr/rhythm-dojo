@@ -28,12 +28,12 @@ namespace RhythmDojo.UI
         }
         public void SetSelected(bool selected)
         {
-            background.color = selected ? Color.white : new Color(.045f, .17f, .19f, .64f);
+            background.color = selected ? Color.white : new Color(.07f, .085f, .10f, .95f);
             if (background is SelectionGradientImage gradient)
             {
                 gradient.useGradient = selected;
-                gradient.leftColor = new Color(.015f, .63f, .91f);
-                gradient.rightColor = new Color(.71f, .13f, .94f);
+                gradient.leftColor = new Color(.40f, .07f, .10f);
+                gradient.rightColor = new Color(.13f, .065f, .08f);
                 gradient.SetVerticesDirty();
             }
         }

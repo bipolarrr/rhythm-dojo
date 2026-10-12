@@ -79,6 +79,8 @@ namespace RhythmDojo.Tests
         protected IEnumerator Click(Button button)
         {
             Assert.That(button.isActiveAndEnabled && button.interactable, Is.True, "Button must accept input.");
+            // Newly loaded or reactivated graphics register with the canvas at the end of the frame.
+            yield return null;
             Canvas.ForceUpdateCanvases(); var rect = (RectTransform)button.transform;
             Vector2 point = RectTransformUtility.WorldToScreenPoint(null, rect.TransformPoint(rect.rect.center));
             var hits = new System.Collections.Generic.List<RaycastResult>();

@@ -126,8 +126,8 @@ namespace RhythmDojo.UI
                 nav.selectOnLeft = null; nav.selectOnRight = null;
                 view.Rows[i].select.navigation = nav;
             }
-            view.allTab.GetComponent<Image>().color = favoritesOnly ? new Color(.14f,.22f,.28f) : new Color(.1f,.4f,.45f);
-            view.favoritesTab.GetComponent<Image>().color = favoritesOnly ? new Color(.1f,.4f,.45f) : new Color(.14f,.22f,.28f);
+            view.allTab.GetComponent<Image>().color = favoritesOnly ? new Color(.09f,.115f,.13f) : new Color(.42f,.09f,.12f);
+            view.favoritesTab.GetComponent<Image>().color = favoritesOnly ? new Color(.42f,.09f,.12f) : new Color(.09f,.115f,.13f);
             view.emptyMessage.gameObject.SetActive(visible.Count == 0);
             view.emptyMessage.text = favoritesOnly ? "즐겨찾기한 곡이 없습니다." : "등록된 곡이 없습니다.";
             if (visible.Count == 0)
@@ -152,12 +152,17 @@ namespace RhythmDojo.UI
             {
                 Canvas.ForceUpdateCanvases();
                 float contentHeight = view.rowContent.rect.height, viewportHeight = view.scroll.viewport.rect.height;
-                float top = index * 172f, bottom = top + 170f;
+                var rowRect = (RectTransform)view.Rows[index].transform;
+                float top = view.rowContent.rect.yMax - view.rowContent.InverseTransformPoint(
+                    rowRect.TransformPoint(new Vector3(0, rowRect.rect.yMax, 0))).y;
+                float bottom = view.rowContent.rect.yMax - view.rowContent.InverseTransformPoint(
+                    rowRect.TransformPoint(new Vector3(0, rowRect.rect.yMin, 0))).y;
                 float current = view.rowContent.anchoredPosition.y;
                 if (top < current) current = top;
                 else if (bottom > current + viewportHeight) current = bottom - viewportHeight;
                 var position = view.rowContent.anchoredPosition;
                 position.y = Mathf.Clamp(current, 0, Mathf.Max(0, contentHeight - viewportHeight));
+                view.scroll.StopMovement();
                 view.rowContent.anchoredPosition = position;
             }
         }

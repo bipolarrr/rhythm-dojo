@@ -126,6 +126,18 @@ Close any Editor using this project before running batch checks:
 
 Wait for each Editor process to exit before launching the next. Do not add `-quit` to test or asynchronous integration runs.
 
+## Tests in an open Editor
+
+Unity CLI and the pinned `com.unity.pipeline` package can run tests in the already open Editor. From the repository root:
+
+```powershell
+unity status --json
+unity command run_tests --mode playmode --filter SelectionBrowserTests --async_tests true --json
+unity command test_status --json
+```
+
+Repeat `test_status` until the run completes, then inspect `summary` and `results`. Use `--mode editor` for EditMode tests, or omit `--filter` to run all tests in that mode. Run one suite at a time. After completion, wait for Play Mode to exit and check `unity status --json` before starting the next suite; results may arrive before Editor cleanup finishes. Tests use the open Editor and can switch scenes and enter Play Mode; save your work first. After editing scripts, refresh/recompile before running tests. If a newly installed package is not reachable, choose **Assets > Refresh** (Ctrl+R) and wait for compilation. `unity test` is a separate batch workflow and requires this project to be closed in the Editor.
+
 ## Deferred performance work
 
 Views are created for the whole small chart when Gameplay loads; judgment still scans the chart. No pooling, lane cursor or active-range optimization is claimed.

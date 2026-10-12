@@ -26,6 +26,7 @@ namespace RhythmDojo.EditorTools
         public RhythmHud Hud;
         public GameplayHudView HudView;
         public GameplayUiController Ui;
+        public GameplayHitFeedback Hits;
     }
     public static class ScenePresentationBuilder
     {
@@ -60,6 +61,7 @@ namespace RhythmDojo.EditorTools
             parts.HudView = GameplayHudLayoutBuilder.Build();
             parts.Hud = parts.HudView.gameObject.AddComponent<RhythmHud>();
             parts.Ui = parts.HudView.gameObject.AddComponent<GameplayUiController>();
+            parts.Hits = parts.HudView.gameObject.AddComponent<GameplayHitFeedback>();
             UiElements.EventSystem(AssetDatabase.LoadAssetAtPath<UnityEngine.InputSystem.InputActionAsset>("Assets/InputSystem_Actions.inputactions")); return parts;
         }
         public static void Preview(GameplaySceneParts parts, GeneratedContent content)
@@ -77,6 +79,7 @@ namespace RhythmDojo.EditorTools
             content.ReloadAfterSceneChange();
             var camera = new GameObject("Main Camera").AddComponent<Camera>(); camera.tag = "MainCamera";
             camera.clearFlags = CameraClearFlags.SolidColor; camera.backgroundColor = new Color(.025f,.035f,.065f);
+            camera.gameObject.AddComponent<AudioListener>();
             SceneDependencyAssembler.Assemble(SongSelectionLayoutBuilder.Build(), content.Settings);
             UiElements.EventSystem(AssetDatabase.LoadAssetAtPath<UnityEngine.InputSystem.InputActionAsset>("Assets/InputSystem_Actions.inputactions")); return scene;
         }
@@ -86,6 +89,7 @@ namespace RhythmDojo.EditorTools
             content.ReloadAfterSceneChange();
             var camera = new GameObject("Main Camera").AddComponent<Camera>(); camera.tag = "MainCamera";
             camera.clearFlags = CameraClearFlags.SolidColor; camera.backgroundColor = new Color(.025f,.035f,.065f);
+            camera.gameObject.AddComponent<AudioListener>();
             SceneDependencyAssembler.Assemble(SettingsLayoutBuilder.Build(), content.Settings);
             UiElements.EventSystem(AssetDatabase.LoadAssetAtPath<UnityEngine.InputSystem.InputActionAsset>("Assets/InputSystem_Actions.inputactions"));
             return scene;

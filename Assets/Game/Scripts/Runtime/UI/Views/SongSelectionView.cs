@@ -34,8 +34,8 @@ namespace RhythmDojo.UI
         }
         public static Color DifficultyColor(int index)
         {
-            return index == 0 ? new Color(.97f, .76f, .20f) :
-                index == 1 ? new Color(1f, .34f, .32f) : new Color(.75f, .38f, 1f);
+            return index == 0 ? new Color(.86f, .87f, .80f) :
+                index == 1 ? new Color(.95f, .29f, .28f) : new Color(.46f, .78f, .76f);
         }
         public void RefreshDifficultyButtons()
         {
@@ -44,7 +44,7 @@ namespace RhythmDojo.UI
                 var button = difficultyButtons[i];
                 bool selected = i == difficultyList.value;
                 var color = DifficultyColor(i);
-                button.GetComponent<Image>().color = selected ? Color.Lerp(new Color(.035f, .10f, .13f), color, .55f) : new Color(.045f, .13f, .16f);
+                button.GetComponent<Image>().color = selected ? Color.Lerp(new Color(.04f, .055f, .065f), color, .55f) : new Color(.075f, .09f, .105f);
                 button.GetComponent<Outline>().enabled = selected;
                 button.GetComponentInChildren<Text>().text = i < difficultyList.options.Count ? difficultyList.options[i].text : "";
                 difficultyIndicators[i].SetActive(selected);

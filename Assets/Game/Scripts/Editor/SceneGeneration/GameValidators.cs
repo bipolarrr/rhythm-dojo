@@ -16,6 +16,13 @@ namespace RhythmDojo.EditorTools
     {
         public static void Validate(Scene scene)
         {
+            int listeners = 0;
+            foreach (var root in scene.GetRootGameObjects())
+                foreach (var listener in root.GetComponentsInChildren<AudioListener>())
+                    if (listener.isActiveAndEnabled) listeners++;
+            if (listeners != 1)
+                throw new InvalidOperationException("Each game scene must have exactly one active AudioListener: " + scene.name);
+
             foreach (var root in scene.GetRootGameObjects())
                 foreach (var transform in root.GetComponentsInChildren<Transform>(true))
                 {

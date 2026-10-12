@@ -165,7 +165,7 @@ namespace RhythmDojo.EditorTools
             var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
             {
                 scenes = new[] { SceneBuilder.TitlePath, SceneBuilder.BootstrapPath, SceneBuilder.SelectionPath,
-                    SceneBuilder.GameplayPath, SceneBuilder.SettingsPath },
+                    SceneBuilder.GameplayPath, SceneBuilder.SettingsPath, ChartEditorSceneBuilder.ScenePath },
                 locationPathName = "Builds/Windows/RhythmDojo.exe",
                 target = BuildTarget.StandaloneWindows64,
                 options = BuildOptions.None

@@ -17,10 +17,25 @@ namespace RhythmDojo.EditorTools
             var canvas = UiElements.Canvas("Main Menu");
             canvas.GetComponent<CanvasScaler>().matchWidthOrHeight = .5f;
             var view = canvas.gameObject.AddComponent<MainMenuView>();
+            var wall = Panel("Dojo Wall", canvas.transform, new Color(.025f, .035f, .045f));
+            Stretch(wall.rectTransform); wall.raycastTarget = false;
+            var architecture = new GameObject("Dojo Architecture", typeof(RectTransform), typeof(DojoBackdropGraphic));
+            architecture.transform.SetParent(canvas.transform, false);
+            Stretch((RectTransform)architecture.transform);
+            architecture.GetComponent<DojoBackdropGraphic>().raycastTarget = false;
+            var brand = Label("Dojo Brand", canvas.transform, "RHYTHM DOJO", font, 20);
+            Anchor(brand.rectTransform, new Vector2(0, 1), new Vector2(150, -48), new Vector2(230, 40));
+            brand.alignment = TextAnchor.MiddleLeft; brand.color = new Color(.82f,.85f,.84f);
+            var session = Label("Training Session", canvas.transform, "리듬 수련소  /  4 KEY", font, 18);
+            Anchor(session.rectTransform, new Vector2(1, 1), new Vector2(-170,-48), new Vector2(270,40));
+            session.color = new Color(.55f,.64f,.66f);
+            var philosophy = Label("Training Philosophy", canvas.transform, "집중    /    반복    /    완주", font, 18);
+            Anchor(philosophy.rectTransform, new Vector2(.5f,0), new Vector2(0,48), new Vector2(500,40));
+            philosophy.color = new Color(.55f,.64f,.66f);
             var logoObject = new GameObject("Logo", typeof(RectTransform));
             logoObject.transform.SetParent(canvas.transform, false);
             var circle = logoObject.AddComponent<LogoCircleGraphic>();
-            circle.color = new Color(1f, .22f, .35f);
+            circle.color = new Color(.96f, .25f, .26f);
             view.logo = logoObject.AddComponent<Button>();
             view.logo.targetGraphic = circle;
             var logoNavigation = view.logo.navigation; logoNavigation.mode = Navigation.Mode.None; view.logo.navigation = logoNavigation;
@@ -28,10 +43,16 @@ namespace RhythmDojo.EditorTools
 
             view.title = Label("Title", view.logo.transform, "리듬 도장", font, 48);
             Anchor(view.title.rectTransform, new Vector2(.5f, .5f), Vector2.zero, new Vector2(270, 90));
-            view.title.gameObject.AddComponent<TextGlow>().Configure(new Color(1f, .22f, .35f, .65f), 8f);
+            view.title.color = new Color(.95f,.94f,.88f);
+            var discipline = Label("Discipline", view.logo.transform, "R H Y T H M   /   D O J O", font, 14);
+            Anchor(discipline.rectTransform, new Vector2(.5f,.5f), new Vector2(0,66), new Vector2(280,35));
+            discipline.color = new Color(.66f,.73f,.73f);
+            var mantra = Label("Practice Motto", view.logo.transform, "박자를 단련하다", font, 18);
+            Anchor(mantra.rectTransform, new Vector2(.5f,.5f), new Vector2(0,-66), new Vector2(260,35));
+            mantra.color = new Color(.66f,.73f,.73f);
             view.startPrompt = Label("Start Prompt", view.logo.transform, "Click to Start", font, 24);
             Anchor(view.startPrompt.rectTransform, new Vector2(.5f, .5f), new Vector2(0, -205), new Vector2(340, 50));
-            view.startPrompt.gameObject.AddComponent<TextGlow>().Configure(new Color(1f, .22f, .35f, .55f), 5f);
+            view.startPrompt.color = new Color(.86f,.89f,.85f);
 
             var menu = new GameObject("Menu Buttons", typeof(RectTransform), typeof(CanvasGroup));
             menu.transform.SetParent(canvas.transform, false);
@@ -98,10 +119,10 @@ namespace RhythmDojo.EditorTools
 
         private static Button MenuButton(string name, Transform parent, string caption, Font font, float x)
         {
-            var button = Button(name, parent, new Color(.22f, .035f, .075f));
+            var button = Button(name, parent, new Color(.12f, .055f, .065f));
             Anchor((RectTransform)button.transform, new Vector2(.5f, .5f), new Vector2(x, 0), new Vector2(190, 76));
             var border = button.gameObject.AddComponent<Outline>();
-            border.effectColor = new Color(1f, .22f, .35f, .8f); border.effectDistance = new Vector2(1, -1);
+            border.effectColor = new Color(.94f, .25f, .26f, .8f); border.effectDistance = new Vector2(1, -1);
             var captionText = Label("Caption", button.transform, caption, font, 28);
             Stretch(captionText.rectTransform);
             return button;

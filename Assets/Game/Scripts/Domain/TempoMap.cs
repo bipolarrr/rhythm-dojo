@@ -13,6 +13,7 @@ namespace RhythmDojo.Gameplay
     public sealed class TempoMap
     {
         private readonly TempoPoint[] points;
+        private readonly double[] beats;
         public int Count => points.Length;
         public TempoPoint this[int index] => points[index];
         public double MinBpm { get; }
@@ -31,6 +32,9 @@ namespace RhythmDojo.Gameplay
                 previous = point.StartTimeSeconds; min = Math.Min(min, point.Bpm); max = Math.Max(max, point.Bpm);
             }
             MinBpm = min; MaxBpm = max;
+            beats = new double[points.Length];
+            for (int i = 1; i < points.Length; i++)
+                beats[i] = beats[i - 1] + (points[i].StartTimeSeconds - points[i - 1].StartTimeSeconds) * points[i - 1].Bpm / 60;
         }
         public int FindSegment(double time)
         {
@@ -44,5 +48,23 @@ namespace RhythmDojo.Gameplay
             return low;
         }
         public double BpmAt(double time) => points[FindSegment(time)].Bpm;
+
+        public double BeatAtTime(double time)
+        {
+            int segment = FindSegment(time);
+            return beats[segment] + (time - points[segment].StartTimeSeconds) * points[segment].Bpm / 60;
+        }
+
+        public double TimeAtBeat(double beat)
+        {
+            if (!double.IsFinite(beat)) throw new ArgumentOutOfRangeException(nameof(beat));
+            int low = 0, high = points.Length - 1;
+            while (low < high)
+            {
+                int middle = (low + high + 1) / 2;
+                if (beats[middle] <= beat) low = middle; else high = middle - 1;
+            }
+            return points[low].StartTimeSeconds + (beat - beats[low]) * 60 / points[low].Bpm;
+        }
     }
 }
