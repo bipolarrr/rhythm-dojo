@@ -147,6 +147,7 @@ namespace RhythmDojo.Tests
 
         private static void Capture(Camera camera, RenderTexture target, string path)
         {
+            if (System.Environment.GetEnvironmentVariable("RHYTHM_DOJO_SKIP_CAPTURE") == "1") return;
             var previous = RenderTexture.active;
             var texture = new Texture2D(target.width, target.height, TextureFormat.RGB24, false);
             try

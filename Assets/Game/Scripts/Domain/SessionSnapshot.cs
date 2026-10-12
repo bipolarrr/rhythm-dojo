@@ -9,8 +9,18 @@ namespace RhythmDojo.Gameplay
         public int Combo { get; }
         public int Resolved => Perfect + Good + Miss;
         public int TotalNotes { get; }
+        public int Health { get; }
+        public double HealthRatio { get; }
         public SessionSnapshot(SessionState state, int perfect, int good, int miss, int combo, int totalNotes)
-        { State = state; Perfect = perfect; Good = good; Miss = miss; Combo = combo; TotalNotes = totalNotes; }
+            : this(state, perfect, good, miss, combo, totalNotes, RhythmSession.MaximumHealth) { }
+        public SessionSnapshot(SessionState state, int perfect, int good, int miss, int combo, int totalNotes, int health)
+            : this(state, perfect, good, miss, combo, totalNotes, health, (double)health / RhythmSession.MaximumHealth) { }
+        public SessionSnapshot(SessionState state, int perfect, int good, int miss, int combo, int totalNotes, int health, double healthRatio)
+        {
+            State = state; Perfect = perfect; Good = good; Miss = miss; Combo = combo; TotalNotes = totalNotes;
+            Health = System.Math.Clamp(health, 0, RhythmSession.MaximumHealth);
+            HealthRatio = double.IsFinite(healthRatio) ? System.Math.Clamp(healthRatio, 0, 1) : (double)Health / RhythmSession.MaximumHealth;
+        }
     }
     public readonly struct JudgmentEvent
     {

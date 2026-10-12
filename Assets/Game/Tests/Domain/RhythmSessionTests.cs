@@ -8,6 +8,32 @@ namespace RhythmDojo.Tests
     {
         private static RhythmSession Session(params NoteData[] notes) => new RhythmSession(new ChartData(notes, 12),
             new JudgmentSettings(.05, .11), new GameModeRules(4));
+        [Test]
+        public void HealthRecoversOnJudgmentsAndHoldIsCountedOnlyOnce()
+        {
+            var s = Session(NoteData.Tap(0,1), NoteData.Tap(0,2), NoteData.Tap(0,3), NoteData.Hold(1,4,5));
+            Assert.That(s.Health, Is.EqualTo(100)); s.Start();
+            s.Advance(1.2); Assert.That(s.Snapshot.Health, Is.EqualTo(90));
+            s.PressLane(0,2); s.ReleaseLane(0,2.01); Assert.That(s.Health, Is.EqualTo(92));
+            s.PressLane(0,3.08); s.ReleaseLane(0,3.09); Assert.That(s.Health, Is.EqualTo(93));
+            s.PressLane(1,4); Assert.That(s.Health, Is.EqualTo(93));
+            s.ReleaseLane(1,5); Assert.That(s.Health, Is.EqualTo(95));
+            s.ReleaseLane(1,5); s.Advance(12); Assert.That(s.Health, Is.EqualTo(95));
+            s.Start(); s.PressLane(0,1); Assert.That(s.Health, Is.EqualTo(100));
+        }
+        [Test]
+        public void ZeroHealthFreezesRemainingNotesAndRestartRestoresFullHealth()
+        {
+            var notes = new NoteData[12];
+            for (int i=0; i<notes.Length; i++) notes[i] = NoteData.Tap(i%4, .5+i*.5);
+            var s = Session(notes); s.Start(); s.Advance(12);
+            Assert.That(s.Health, Is.Zero); Assert.That(s.State, Is.EqualTo(SessionState.GameOver));
+            Assert.That(s.Miss, Is.EqualTo(10)); Assert.That(s.GetState(10), Is.EqualTo(NoteState.Pending));
+            s.Advance(20); s.PressLane(2,5.5); s.ReleaseLane(2,5.6);
+            Assert.That(s.Miss, Is.EqualTo(10)); Assert.That(s.Health, Is.Zero);
+            s.Start(); Assert.That(s.Health, Is.EqualTo(100)); Assert.That(s.Resolved, Is.Zero);
+            Assert.That(s.State, Is.EqualTo(SessionState.Playing));
+        }
         [TestCase(-.05, Judgment.Perfect)] [TestCase(.05, Judgment.Perfect)]
         [TestCase(-.05001, Judgment.Good)] [TestCase(.05001, Judgment.Good)]
         [TestCase(-.11, Judgment.Good)] [TestCase(.11, Judgment.Good)]

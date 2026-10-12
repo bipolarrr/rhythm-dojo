@@ -32,10 +32,13 @@ namespace RhythmDojo.Tests
         protected Mouse mouse;
         protected AudioConfiguration originalAudio;
         private string previousPreferences;
+        private string previousHardMode;
         [UnitySetUp]
         public IEnumerator SetUp()
         {
             System.IO.Directory.CreateDirectory("Logs");
+            previousHardMode=PlayerPrefs.GetString(RhythmDojo.Services.HardModePreferences.StorageKey, "");
+            PlayerPrefs.DeleteKey(RhythmDojo.Services.HardModePreferences.StorageKey);
             previousPreferences = PlayerPrefs.GetString(RhythmDojo.Services.SelectionPreferences.StorageKey, "");
             PlayerPrefs.DeleteKey(RhythmDojo.Services.SelectionPreferences.StorageKey);
             originalAudio = AudioSettings.GetConfiguration();
@@ -55,6 +58,8 @@ namespace RhythmDojo.Tests
         [UnityTearDown]
         public IEnumerator TearDown()
         {
+            if (string.IsNullOrEmpty(previousHardMode)) PlayerPrefs.DeleteKey(RhythmDojo.Services.HardModePreferences.StorageKey);
+            else PlayerPrefs.SetString(RhythmDojo.Services.HardModePreferences.StorageKey,previousHardMode);
             if (string.IsNullOrEmpty(previousPreferences)) PlayerPrefs.DeleteKey(RhythmDojo.Services.SelectionPreferences.StorageKey);
             else PlayerPrefs.SetString(RhythmDojo.Services.SelectionPreferences.StorageKey, previousPreferences);
             PlayerPrefs.Save();
@@ -69,13 +74,13 @@ namespace RhythmDojo.Tests
         protected static IEnumerator Await(System.Func<bool> condition, string message = "Scene transition timed out.")
         {
             double deadline = Time.realtimeSinceStartupAsDouble + 15;
-            while (!condition())
+            while (!condition() || (UnityEngine.Object.FindFirstObjectByType<AppFlowController>() is AppFlowController flow && flow.Transitioning))
             {
                 Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline), message);
                 yield return null;
             }
         }
-        protected static Button ButtonNamed(string name) => UnityEngine.Object.FindObjectsByType<Button>(FindObjectsSortMode.None).Single(b => b.name == name);
+        protected static Button ButtonNamed(string name) => UnityEngine.Object.FindObjectsByType<Button>(FindObjectsSortMode.None).Single(b => b.name == name && b.gameObject.scene == SceneManager.GetActiveScene());
         protected IEnumerator Click(Button button)
         {
             Assert.That(button.isActiveAndEnabled && button.interactable, Is.True, "Button must accept input.");

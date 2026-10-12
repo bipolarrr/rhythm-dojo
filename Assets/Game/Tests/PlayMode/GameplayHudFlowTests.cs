@@ -42,6 +42,41 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        public IEnumerator HealthDepletionShowsGameOverFreezesNotesAndSpaceRestarts()
+        {
+            yield return LoadGameplay();
+            var game = UnityEngine.Object.FindFirstObjectByType<RhythmGameController>();
+            var view = UnityEngine.Object.FindFirstObjectByType<GameplayHudView>();
+            yield return Press(Key.Space);
+            game.Session.Advance(9);
+            yield return null; yield return null;
+            Assert.That(game.Session.State, Is.EqualTo(SessionState.GameOver));
+            Assert.That(view.gameOverPanel.activeSelf, Is.True);
+            Assert.That(view.gameOverText.text, Is.EqualTo("GAME OVER"));
+            Assert.That(view.healthFill.rectTransform.anchorMax.x, Is.Zero);
+            Assert.That(view.healthLabel.text, Does.Contain("0 / 100"));
+            Assert.That(game.Clock.Running, Is.False);
+            Assert.That(UnityEngine.Object.FindFirstObjectByType<RhythmDojo.Audio.SongClock>().GetComponent<AudioSource>().isPlaying, Is.False);
+            double frozen = game.ReadModel.Snapshot.SongTime;
+            double frozenClock = game.Clock.SongTime;
+            var notes = UnityEngine.Object.FindObjectsByType<RhythmDojo.Presentation.NoteView>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            var positions = notes.Select(note => note.transform.position).ToArray();
+            int resolved = game.Session.Resolved;
+            yield return new WaitForSecondsRealtime(.2f);
+            Assert.That(game.ReadModel.Snapshot.SongTime, Is.EqualTo(frozen));
+            Assert.That(game.Clock.SongTime, Is.EqualTo(frozenClock));
+            Assert.That(game.Session.Resolved, Is.EqualTo(resolved));
+            for (int i=0; i<notes.Length; i++) Assert.That(notes[i].transform.position, Is.EqualTo(positions[i]));
+            yield return Press(Key.Space); yield return null;
+            Assert.That(game.Session.Health, Is.EqualTo(100)); Assert.That(game.Clock.Running, Is.True);
+            Assert.That(view.gameOverPanel.activeSelf, Is.False);
+            Assert.That(view.healthFill.rectTransform.anchorMax.x, Is.EqualTo(1));
+            game.Session.Advance(9); yield return null; yield return null;
+            yield return Press(Key.Escape);
+            yield return Await(() => UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>());
+        }
+
+        [UnityTest]
         public IEnumerator TrainingFeedbackTracksHoldMissPeakComboAndFocusReset()
         {
             yield return LoadGameplay();
@@ -80,6 +115,11 @@ namespace RhythmDojo.Tests
             yield return new WaitForSecondsRealtime(1.12f);
             Assert.That(view.judgment.text,Is.EqualTo("FINISH"));
             Assert.That(view.judgmentGroup.alpha,Is.EqualTo(1));
+            Assert.That(view.gameOverPanel.activeSelf, Is.True);
+            Assert.That(view.gameOverText.text, Is.EqualTo("GAME CLEAR"));
+            Assert.That(view.gameOverText.color.g, Is.GreaterThan(view.gameOverText.color.r));
+            model.Set(SessionState.Ready,0,0,0,0); model.Reset();
+            Assert.That(view.gameOverPanel.activeSelf, Is.False);
         }
 
         [UnityTest]
@@ -99,6 +139,8 @@ namespace RhythmDojo.Tests
         {
             yield return LoadGameplay();
             yield return Press(Key.Space);
+            yield return Await(() => UnityEngine.Object.FindFirstObjectByType<RhythmGameController>().Session.State == SessionState.Playing);
+            yield return null; // Let the UI Update observe the input-driven state change.
             var view = UnityEngine.Object.FindFirstObjectByType<GameplayHudView>();
             Assert.That(view.returnButton.gameObject.activeSelf, Is.False);
             yield return Press(Key.Escape);
@@ -112,6 +154,15 @@ namespace RhythmDojo.Tests
             yield return LoadGameplay();
             var game = UnityEngine.Object.FindFirstObjectByType<RhythmGameController>();
             yield return Press(Key.Space);
+            var inputs = new System.Collections.Generic.List<(double time,int lane,bool press)>();
+            for (int i=0; i<game.Chart.Count; i++)
+            {
+                var note = game.Chart[i]; inputs.Add((note.StartTime,note.Lane,true));
+                inputs.Add((note.Kind == NoteKind.Hold ? note.EndTime : note.StartTime+.01,note.Lane,false));
+            }
+            foreach (var input in inputs.OrderBy(item=>item.time).ThenBy(item=>item.press))
+                if (input.press) game.Session.PressLane(input.lane,input.time); else game.Session.ReleaseLane(input.lane,input.time);
+            game.Session.Advance(game.Chart.CompletionTime);
             double deadline = Time.realtimeSinceStartupAsDouble + game.Chart.CompletionTime + 10;
             while (game.Session.State != SessionState.Completed)
             {
@@ -120,6 +171,9 @@ namespace RhythmDojo.Tests
             }
             yield return null;
             var view = UnityEngine.Object.FindFirstObjectByType<GameplayHudView>();
+            Assert.That(game.Session.Resolved, Is.EqualTo(game.Chart.Count));
+            Assert.That(view.gameOverPanel.activeSelf, Is.True);
+            Assert.That(view.gameOverText.text, Is.EqualTo("GAME CLEAR"));
             Assert.That(view.returnButton.gameObject.activeSelf, Is.True);
             yield return Click(view.returnButton);
             yield return Await(() => UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>());

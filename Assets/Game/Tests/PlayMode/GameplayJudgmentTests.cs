@@ -152,8 +152,14 @@ namespace RhythmDojo.Tests
         {
             yield return LoadSong();
             yield return Press(Key.Space);
-            yield return Completed();
-            Assert.That(game.Session.Miss, Is.EqualTo(18));
+            double deadline = Time.realtimeSinceStartupAsDouble + game.Chart.CompletionTime + 10;
+            while (game.Session.State != SessionState.GameOver)
+            {
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                yield return null;
+            }
+            Assert.That(game.Session.Health, Is.Zero);
+            Assert.That(game.Session.Miss, Is.EqualTo(10));
             Assert.That(game.Session.Combo, Is.Zero);
         }
 

@@ -4,12 +4,19 @@ namespace RhythmDojo.Gameplay
 {
     public enum Judgment { Perfect, Good, Miss }
     public enum NoteState { Pending, Holding, Completed, Missed }
-    public enum SessionState { Ready, Playing, Completed }
+    public enum SessionState { Ready, Playing, Completed, GameOver }
 
     // Pure lane/time simulation. No transforms, input devices, audio or editor APIs.
     public sealed class RhythmSession
     {
         public const double TimingTolerance = 1e-9;
+        public const int MaximumHealth = 100;
+        public const int PerfectHealthRecovery = 2;
+        public const int GoodHealthRecovery = 1;
+        public const int MissHealthDamage = 10;
+        public int Health { get; private set; }
+        private readonly HardModeHealthRules hardModeRules;
+        private double remainingHealth;
         private readonly ChartData chart;
         private readonly JudgmentSettings config;
         private readonly NoteState[] states;
@@ -17,7 +24,7 @@ namespace RhythmDojo.Gameplay
         private readonly int[] active;
         private readonly bool[] held;
         public int LaneCount => held.Length;
-        public SessionSnapshot Snapshot => new SessionSnapshot(State, Perfect, Good, Miss, Combo, chart.Count);
+        public SessionSnapshot Snapshot => new SessionSnapshot(State, Perfect, Good, Miss, Combo, chart.Count, Health, remainingHealth / MaximumHealth);
         public SessionState State { get; private set; }
         public int Perfect { get; private set; }
         public int Good { get; private set; }
@@ -31,7 +38,10 @@ namespace RhythmDojo.Gameplay
         public bool IsHeld(int lane) => held[lane];
 
         public RhythmSession(ChartData chart, JudgmentSettings config, GameModeRules mode)
+            : this(chart, config, mode, null) { }
+        public RhythmSession(ChartData chart, JudgmentSettings config, GameModeRules mode, HardModeHealthRules healthRules)
         {
+            hardModeRules = healthRules;
             if (chart == null) throw new ArgumentNullException(nameof(chart));
             chart.Validate(mode); config.Validate();
             this.chart = chart; this.config = config;
@@ -43,6 +53,7 @@ namespace RhythmDojo.Gameplay
             Array.Clear(states, 0, states.Length); Array.Clear(heads, 0, heads.Length);
             Array.Clear(held, 0, held.Length);
             for (int i = 0; i < active.Length; i++) active[i] = -1;
+            Health = MaximumHealth; remainingHealth = MaximumHealth;
             Perfect = Good = Miss = Combo = 0; LastTimingError = 0; State = SessionState.Ready;
         }
         public void Start() { Reset(); State = SessionState.Playing; }
@@ -93,22 +104,44 @@ namespace RhythmDojo.Gameplay
             if (State != SessionState.Playing) return;
             for (int i = 0; i < chart.Count; i++)
             {
+                if (State != SessionState.Playing) break;
                 var n = chart[i];
                 if (states[i] == NoteState.Pending && songTime > n.StartTime + config.GoodWindow + TimingTolerance)
                     Resolve(i, Judgment.Miss, songTime - n.StartTime);
                 else if (states[i] == NoteState.Holding && songTime > n.EndTime + config.GoodWindow + TimingTolerance)
                     Resolve(i, heads[i], songTime - n.EndTime);
             }
-            if (songTime >= chart.CompletionTime && Resolved == chart.Count)
+            if (State == SessionState.Playing && songTime >= chart.CompletionTime && Resolved == chart.Count)
             { State = SessionState.Completed; Array.Clear(held, 0, held.Length); }
         }
         private void Resolve(int i, Judgment grade, double error)
         {
-            if (states[i] == NoteState.Completed || states[i] == NoteState.Missed) return;
+            if (State != SessionState.Playing || states[i] == NoteState.Completed || states[i] == NoteState.Missed) return;
             if (active[chart[i].Lane] == i) active[chart[i].Lane] = -1;
             states[i] = grade == Judgment.Miss ? NoteState.Missed : NoteState.Completed;
             if (grade == Judgment.Perfect) Perfect++; else if (grade == Judgment.Good) Good++; else Miss++;
             Combo = grade == Judgment.Miss ? 0 : Combo + 1;
+            if (hardModeRules == null)
+            {
+                Health = Math.Clamp(Health + (grade == Judgment.Perfect ? PerfectHealthRecovery :
+                    grade == Judgment.Good ? GoodHealthRecovery : -MissHealthDamage), 0, MaximumHealth);
+                remainingHealth = Health;
+            }
+            else
+            {
+                var rule = hardModeRules.GetRule(grade);
+                if (rule.Action == HealthRuleAction.GameOver) remainingHealth = 0;
+                else if (rule.Action == HealthRuleAction.Damage) remainingHealth -= (double)MaximumHealth / rule.LossCount;
+                // A fractional loss must not round to zero before the configured hit count.
+                if (remainingHealth < 1e-8) remainingHealth = 0;
+                remainingHealth = Math.Clamp(remainingHealth, 0, MaximumHealth);
+                Health = (int)Math.Ceiling(Math.Max(0, remainingHealth - 1e-8));
+            }
+            if (Health == 0)
+            {
+                State = SessionState.GameOver;
+                Array.Clear(held, 0, held.Length);
+            }
             LastTimingError = error; Judged?.Invoke(new JudgmentEvent(i, chart[i], grade, error));
         }
     }

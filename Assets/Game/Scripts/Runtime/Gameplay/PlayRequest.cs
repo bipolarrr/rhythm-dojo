@@ -10,8 +10,14 @@ namespace RhythmDojo.Gameplay
         public ScrollMode ScrollMode { get; }
         public double Multiplier { get; }
         public int TimingOffsetMs { get; }
+        public HardModeHealthRules HardModeRules { get; }
+        public bool IsHardMode => HardModeRules != null;
         public PlayRequest(PlayableSong song, DifficultyProfile difficulty, ScrollMode scrollMode, double multiplier, int timingOffsetMs = 0)
+            : this(song, difficulty, scrollMode, multiplier, timingOffsetMs, null) { }
+        public PlayRequest(PlayableSong song, DifficultyProfile difficulty, ScrollMode scrollMode, double multiplier,
+            int timingOffsetMs, HardModeHealthRules healthRules)
         {
+            HardModeRules = healthRules;
             if (song == null || !difficulty) throw new System.ArgumentNullException("Selected song/difficulty missing.");
             song.Validate(); difficulty.Validate();
             if (!System.Enum.IsDefined(typeof(ScrollMode), scrollMode) || !double.IsFinite(multiplier) || multiplier <= 0)

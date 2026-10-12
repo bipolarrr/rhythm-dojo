@@ -67,6 +67,7 @@ namespace RhythmDojo.UI
             view.judgmentGroup.alpha = 1; view.judgmentGroup.transform.localScale = Vector3.one;
             view.judgment.fontSize = 31; view.judgment.text = "READY"; view.judgment.color = Cyan;
             view.timing.text = "박자에 집중하세요";
+            RefreshHealth(model.Snapshot.Session);
         }
         private void LateUpdate()
         {
@@ -78,11 +79,24 @@ namespace RhythmDojo.UI
                 var tint = indicators[i].color;
                 keyLabels[i].color = tint.r * .2126f + tint.g * .7152f + tint.b * .0722f > .55f ? new Color(.025f,.035f,.045f) : Cream;
             }
+            RefreshHealth(model.Snapshot.Session);
             AnimateFeedback(now);
             if (now < nextTextRefresh) return;
             nextTextRefresh = now + settings.hudRefreshInterval;
             view.status.text = RhythmHudFormatter.Format(model.Snapshot, recent);
             RefreshTrainingDisplay(model.Snapshot, now);
+        }
+        private void RefreshHealth(SessionSnapshot snapshot)
+        {
+            float fraction = Mathf.Clamp01((float)snapshot.HealthRatio);
+            view.healthFill.rectTransform.anchorMax = new Vector2(fraction, 1);
+            view.healthFill.color = fraction <= .25f ? Red : fraction <= .5f ? Gold : Cyan;
+            view.healthLabel.color = view.healthFill.color;
+            view.healthLabel.text = $"체력  {snapshot.HealthRatio * RhythmSession.MaximumHealth:0.##} / {RhythmSession.MaximumHealth}";
+            bool completed = snapshot.State == SessionState.Completed;
+            view.gameOverPanel.SetActive(completed || snapshot.State == SessionState.GameOver);
+            view.gameOverText.text = completed ? "GAME CLEAR" : "GAME OVER";
+            view.gameOverText.color = completed ? Cyan : Red;
         }
         private void AnimateFeedback(double now)
         {
@@ -100,6 +114,7 @@ namespace RhythmDojo.UI
             view.songDetails.text = $"{snapshot.DifficultyName}  /  {model.LaneCount} KEY\nBPM {snapshot.CurrentBpm:0.##}  ·  {(snapshot.ScrollMode == ScrollMode.Bpm ? "BPM" : "고정")} {snapshot.ScrollMultiplier:0.##}x";
             view.sessionState.text = s.State == SessionState.Ready ?
                 snapshot.ReadyReason == ReadyReason.FocusLost ? "SPACE로 다시 시작" : "SPACE로 수련 시작" :
+                s.State == SessionState.GameOver ? "GAME OVER · SPACE로 다시 도전" :
                 s.State == SessionState.Completed ? "수련 완료 · 다시 도전!" : "수련 중";
             if (displayedCombo != s.Combo)
             {

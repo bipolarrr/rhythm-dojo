@@ -26,6 +26,10 @@ namespace RhythmDojo.Application
         void Reset();
         void Clear();
     }
+    public interface IPausableSongClock
+    {
+        void Pause();
+    }
     public interface IInputTimingClock
     {
         double InputTimingOffsetSeconds { get; }

@@ -38,6 +38,23 @@ namespace RhythmDojo.Tests
             public void Reset() { }
             public void Clear() => Clears++;
         }
+        [Test]
+        public void GameOverStopsClockAndKeepsPresentationTimeUntilRestart()
+        {
+            var input = new FakeInput(); var clock = new FakeClock(); var presenter = new FakePresenter();
+            var notes = new NoteData[12];
+            for (int i=0; i<notes.Length; i++) notes[i] = NoteData.Tap(i%4, .5+i*.5);
+            var tempo = new TempoMap(new[] { new TempoPoint(0,120) });
+            using var c = new RhythmSessionCoordinator(new ChartData(notes,8),new JudgmentSettings(.05,.11),
+                new GameModeRules(4),tempo,"Test","Normal",ScrollMode.Constant,1,
+                new ConstantScrollTimeline(8,1),input,clock,presenter);
+            input.Start(); clock.SongTime = 5.2; c.Tick();
+            Assert.That(c.Session.State, Is.EqualTo(SessionState.GameOver)); Assert.That(clock.Running, Is.False);
+            double frozen = c.Snapshot.SongTime;
+            clock.SongTime = 9; c.Tick(); input.Press(0,6);
+            Assert.That(c.Snapshot.SongTime, Is.EqualTo(frozen)); Assert.That(c.Session.Miss, Is.EqualTo(10));
+            input.Start(); Assert.That(c.Session.Health, Is.EqualTo(100)); Assert.That(clock.Running, Is.True);
+        }
         [TestCase(.2, 1.2)] [TestCase(-.2, .8)]
         public void CalibrationCorrectsInputAndDefersMissSweep(double offset, double inputTime)
         {

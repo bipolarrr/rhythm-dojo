@@ -48,6 +48,10 @@ namespace RhythmDojo.EditorTools
             view.bestCombo = Label("Best Combo",feedback,"BEST  0",.06f,.49f,.94f,.57f,13);
             view.bestCombo.alignment=TextAnchor.MiddleCenter; view.bestCombo.color=Muted;
             Panel("Feedback Divider",feedback,new Color(.20f,.27f,.29f),.12f,.44f,.88f,.444f);
+            view.healthLabel = Label("Health Value",feedback,"체력  100 / 100",.12f,.385f,.88f,.43f,13);
+            view.healthLabel.color = Cyan;
+            var healthTrack = Panel("Health Track",feedback,new Color(.10f,.15f,.17f),.12f,.335f,.88f,.37f);
+            view.healthFill = Panel("Health Fill",healthTrack,Cyan,0,0,1,1).GetComponent<Image>();
             var judgmentRoot = new GameObject("Judgment Feedback",typeof(RectTransform),typeof(CanvasGroup));
             judgmentRoot.transform.SetParent(feedback,false); Bounds((RectTransform)judgmentRoot.transform,0,.04f,1,.30f);
             view.judgmentGroup=judgmentRoot.GetComponent<CanvasGroup>();
@@ -75,6 +79,13 @@ namespace RhythmDojo.EditorTools
             var outline=view.returnButton.gameObject.AddComponent<Outline>(); outline.effectColor=Red; outline.effectDistance=new Vector2(1,-1);
             var caption=view.returnButton.GetComponentInChildren<Text>(); caption.font=font; caption.fontSize=16; caption.color=Cream;
             caption.verticalOverflow=VerticalWrapMode.Overflow;
+            var gameOverRoot = Panel("Game Over Overlay",canvas.transform,new Color(0,0,0,.62f),0,0,1,1);
+            view.gameOverPanel = gameOverRoot.gameObject;
+            view.gameOverText = Label("Game Over Title",gameOverRoot,"GAME OVER",.15f,.44f,.85f,.60f,58);
+            view.gameOverText.alignment = TextAnchor.MiddleCenter; view.gameOverText.color = Red;
+            var gameOverHint = Label("Game Over Hint",gameOverRoot,"SPACE  다시 도전   /   ESC  곡 선택",.15f,.36f,.85f,.44f,20);
+            gameOverHint.alignment = TextAnchor.MiddleCenter; gameOverHint.color = Cream;
+            view.gameOverPanel.SetActive(false);
             return view;
         }
         private static RectTransform Card(string name,Transform parent,float x0,float y0,float x1,float y1,Color accent)

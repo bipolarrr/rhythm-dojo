@@ -66,8 +66,8 @@ namespace RhythmDojo.Core
             clock.Initialize(song.AudioClip, song.AudioOffset, settings.audio, request.TimingOffsetMs);
             input.Initialize(runtimeMode); notes.Configure(runtimeMode, runtimePresentation);
             playfield.Build(runtimeMode, runtimePresentation);
-            controller.Initialize(chart, judgments, mode, tempo, song.Title, request.Difficulty.DisplayName,
-                request.ScrollMode, request.Multiplier, scroll, input, clock, notes);
+            controller.Initialize(chart, judgments, mode, tempo, song.Title, request.Difficulty.DisplayName + (request.IsHardMode ? " · HARD" : ""),
+                request.ScrollMode, request.Multiplier, scroll, input, clock, notes, request.HardModeRules);
             hud.Initialize(controller.ReadModel, runtimeMode, runtimePresentation);
             hits.Initialize(controller.ReadModel, runtimeMode, Camera.main, hud.GetComponent<Canvas>());
             controller.ReadModel.Judged += TrackCombo;

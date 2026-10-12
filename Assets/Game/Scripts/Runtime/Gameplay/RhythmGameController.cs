@@ -15,10 +15,14 @@ namespace RhythmDojo.Gameplay
         public void Initialize(ChartData chart, JudgmentSettings settings, GameModeRules mode, TempoMap tempo,
             string title, string difficulty, ScrollMode scrollMode, double multiplier, IScrollTimeline scroll,
             ILaneInput input, ISongClock clock, INotePresenter presenter)
+            => Initialize(chart, settings, mode, tempo, title, difficulty, scrollMode, multiplier, scroll, input, clock, presenter, null);
+        public void Initialize(ChartData chart, JudgmentSettings settings, GameModeRules mode, TempoMap tempo,
+            string title, string difficulty, ScrollMode scrollMode, double multiplier, IScrollTimeline scroll,
+            ILaneInput input, ISongClock clock, INotePresenter presenter, HardModeHealthRules healthRules)
         {
             Shutdown(); Chart = chart; Clock = clock; Input = input;
             coordinator = new RhythmSessionCoordinator(chart, settings, mode, tempo, title, difficulty,
-                scrollMode, multiplier, scroll, input, clock, presenter);
+                scrollMode, multiplier, scroll, input, clock, presenter, healthRules);
         }
         public void StartSession() => coordinator?.Start();
         private void Update() => coordinator?.Tick();

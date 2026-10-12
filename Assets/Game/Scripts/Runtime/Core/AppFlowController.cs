@@ -25,6 +25,7 @@ namespace RhythmDojo.Core
         public SongSelectionService Selection { get; private set; }
         public AudioSettingsService Audio { get; private set; }
         public ISelectionPreferences Preferences { get; private set; }
+        public HardModePreferences HardMode { get; private set; }
         public bool IsEditorPlaytest => returned != null;
         public PlayRequest CurrentRequest { get; private set; }
         public bool Transitioning { get; private set; }
@@ -53,7 +54,7 @@ namespace RhythmDojo.Core
             var flow = new GameObject("App Flow").AddComponent<AppFlowController>();
             flow.settings = settings;
             flow.Library = new SongLibrary(); flow.Library.Register(new BuiltInSongProvider(settings.catalog));
-            flow.Preferences = new SelectionPreferences();
+            flow.Preferences = new SelectionPreferences(); flow.HardMode = HardModePreferences.Load();
             flow.Selection = new SongSelectionService(settings, flow.Library, flow.Preferences);
             if (flow.Library.Find("demo-melody") != null)
                 flow.Selection.UpdateSelection("demo-melody", flow.SelectedDifficulty, flow.SelectedScrollMode, flow.SelectedMultiplier);
@@ -96,6 +97,7 @@ namespace RhythmDojo.Core
             var songId = Selection.SelectedSongId;
             var difficulty = SelectedDifficulty; var scrollMode = SelectedScrollMode; var multiplier = SelectedMultiplier;
             int timingOffsetMs = Preferences.TimingOffsetMs;
+            var healthRules = HardMode.Enabled ? HardMode.CreateRules() : null;
             Transitioning = true;
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, lifetime.Token);
             PlayableSong song = null;
@@ -103,7 +105,7 @@ namespace RhythmDojo.Core
             {
                 song = await Library.LoadAsync(songId, linked.Token);
                 linked.Token.ThrowIfCancellationRequested();
-                var request = new PlayRequest(song, difficulty, scrollMode, multiplier, timingOffsetMs);
+                var request = new PlayRequest(song, difficulty, scrollMode, multiplier, timingOffsetMs, healthRules);
                 ReleaseRequest(); CurrentRequest = request; song = null;
                 ClearEditorReturn(); Load(GameplayPath);
             }
@@ -120,6 +122,7 @@ namespace RhythmDojo.Core
                 throw new ArgumentException("Document, loader, editor session and registered return scene are required.");
             var difficulty = SelectedDifficulty; var scrollMode = SelectedScrollMode; var multiplier = SelectedMultiplier;
             int timingOffsetMs = Preferences.TimingOffsetMs;
+            var healthRules = HardMode.Enabled ? HardMode.CreateRules() : null;
             Transitioning = true;
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, lifetime.Token);
             PlayableSong song = null;
@@ -127,7 +130,7 @@ namespace RhythmDojo.Core
             {
                 song = await loader.LoadAsync(document.Copy(), linked.Token);
                 linked.Token.ThrowIfCancellationRequested();
-                var request = new PlayRequest(song, difficulty, scrollMode, multiplier, timingOffsetMs);
+                var request = new PlayRequest(song, difficulty, scrollMode, multiplier, timingOffsetMs, healthRules);
                 ReleaseRequest(); CurrentRequest = request; song = null;
                 editorSessionId = sessionId; returnScenePath = returnPath; returned = onReturned;
                 Load(GameplayPath);
