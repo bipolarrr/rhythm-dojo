@@ -24,6 +24,8 @@ namespace RhythmDojo.Core
         private void Start()
         {
             Validate();
+            var presentation = RhythmDojo.Services.PresentationPreferences.Current ?? RhythmDojo.Services.PresentationPreferences.Load();
+            AudioListener.volume = presentation.masterVolume;
             TitleMusicPlayer music = null;
             if (titleMusic)
             {

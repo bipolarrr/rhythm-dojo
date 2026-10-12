@@ -12,6 +12,7 @@ namespace RhythmDojo.Audio
         private bool initialized;
         private bool paused;
         private double pausedSongTime;
+        private float playbackVolume;
         public double ScheduledStartDspTime { get; private set; }
         public bool Running { get; private set; }
         public double InputTimingOffsetSeconds { get; private set; }
@@ -20,7 +21,7 @@ namespace RhythmDojo.Audio
         {
             if (!source || !clip || !settings || !double.IsFinite(chartOffset))
                 throw new InvalidOperationException("SongClock dependencies missing.");
-            Stop(); settings.Validate(); source.clip = clip; source.volume = settings.Volume;
+            Stop(); settings.Validate(); source.clip = clip; playbackVolume = settings.Volume; RefreshVolume();
             source.playOnAwake = false; source.spatialBlend = 0;
             offset = chartOffset; InputTimingOffsetSeconds = Mathf.Clamp(timingOffsetMs, -200, 200) / 1000.0;
             lead = settings.ScheduleLeadTime; initialized = true;
@@ -30,6 +31,7 @@ namespace RhythmDojo.Audio
         public void Schedule()
         {
             if (!initialized) throw new InvalidOperationException("SongClock is not initialized.");
+            RefreshVolume();
             paused = false;
             source.Stop(); ScheduledStartDspTime = AudioSettings.dspTime + lead;
             source.PlayScheduled(ScheduledStartDspTime); Running = true;
@@ -44,6 +46,19 @@ namespace RhythmDojo.Audio
             Running = false;
         }
         public void Stop() { if (source) source.Stop(); Running = false; paused = false; pausedSongTime = 0; }
-        private void OnDisable() => Stop();
+        private void RefreshVolume()
+        {
+            if (source) source.volume = playbackVolume * (RhythmDojo.Services.PresentationPreferences.Current ?? RhythmDojo.Services.PresentationPreferences.Load()).gameplayVolume;
+        }
+        private void OnEnable()
+        {
+            RhythmDojo.Services.PresentationPreferences.Changed += RefreshVolume;
+            if (initialized) RefreshVolume();
+        }
+        private void OnDisable()
+        {
+            RhythmDojo.Services.PresentationPreferences.Changed -= RefreshVolume;
+            Stop();
+        }
     }
 }

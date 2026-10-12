@@ -137,10 +137,14 @@ namespace RhythmDojo.Tests
             yield return Click(view.back); yield return Press(Key.RightArrow);
             Assert.That(view.difficultyList.value, Is.EqualTo(1));
             yield return Click(view.cancelBack);
-            EventSystem.current.SetSelectedGameObject(view.speedSlider.gameObject);
-            float speed = view.speedSlider.value;
+            yield return Click(view.settingsButton);
+            yield return Await(() => UnityEngine.Object.FindFirstObjectByType<SettingsView>()); yield return null;
+            var settingsView = UnityEngine.Object.FindFirstObjectByType<SettingsView>();
+            yield return Click(settingsView.gameplayTab);
+            EventSystem.current.SetSelectedGameObject(settingsView.speedSlider.gameObject);
+            float speed = settingsView.speedSlider.value;
             yield return Press(Key.RightArrow);
-            Assert.That(view.speedSlider.value, Is.EqualTo(speed + .1f).Within(.0001));
+            Assert.That(settingsView.speedSlider.value, Is.EqualTo(speed + .1f).Within(.0001));
             Assert.That(view.difficultyList.value, Is.EqualTo(1));
         }
         [UnityTest]
@@ -150,23 +154,39 @@ namespace RhythmDojo.Tests
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
             Assert.That(view.scrollModeList.gameObject.activeSelf, Is.False);
             Assert.That(view.multiplierList.gameObject.activeSelf, Is.False);
-            Assert.That(view.speedSlider.minValue, Is.EqualTo(1)); Assert.That(view.speedSlider.maxValue, Is.EqualTo(10));
+            Assert.That(view.speedSlider.gameObject.activeInHierarchy, Is.False);
+            Assert.That(view.speedLabel.gameObject.activeInHierarchy, Is.False);
+            Assert.That(view.timingOffset.gameObject.activeInHierarchy, Is.False);
+            Assert.That(view.timingLabel.gameObject.activeInHierarchy, Is.False);
+            yield return Click(view.settingsButton);
+            yield return Await(() => UnityEngine.Object.FindFirstObjectByType<SettingsView>(), "Speed test: enter settings"); yield return null;
+            var settingsView = UnityEngine.Object.FindFirstObjectByType<SettingsView>();
+            yield return Click(settingsView.gameplayTab);
+            Assert.That(settingsView.speedSlider.minValue, Is.EqualTo(1)); Assert.That(settingsView.speedSlider.maxValue, Is.EqualTo(10));
             for (int i = 10; i <= 100; i++)
             {
-                view.speedSlider.value = i / 10f;
+                settingsView.speedSlider.value = i / 10f;
                 Assert.That(flow.SelectedMultiplier, Is.EqualTo(i / 10.0).Within(.0001));
                 Assert.That(flow.Preferences.Multiplier, Is.EqualTo(i / 10.0).Within(.0001));
             }
-            view.speedSlider.value = 6.74f;
+            settingsView.speedSlider.value = 6.74f;
+            Assert.That(settingsView.speedSlider.value, Is.EqualTo(6.7f).Within(.0001));
+            Assert.That(settingsView.speedLabel.text, Does.Contain("6.7"));
+            settingsView.timingOffset.value = 125;
+            yield return Click(settingsView.back);
+            yield return Await(() => !UnityEngine.Object.FindFirstObjectByType<SettingsView>(), "Speed test: return to selection"); yield return null;
             Assert.That(view.speedSlider.value, Is.EqualTo(6.7f).Within(.0001));
-            Assert.That(view.speedLabel.text, Does.Contain("6.7"));
-            view.timingOffset.value = 125;
+            // Selecting another song or difficulty must not overwrite the popup's saved speed.
+            UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>().SelectSong("tempo-pulse");
+            view.difficultyList.value = 0;
+            Assert.That(flow.SelectedMultiplier, Is.EqualTo(6.7).Within(.0001));
             yield return Click(view.settingsButton);
-            yield return Await(() => UnityEngine.Object.FindFirstObjectByType<SettingsView>(), "Speed test: enter settings"); yield return null;
-            yield return Click(UnityEngine.Object.FindFirstObjectByType<SettingsView>().back);
-            yield return Await(() => UnityEngine.Object.FindFirstObjectByType<SongSelectionView>(), "Speed test: return to selection"); yield return null;
-            view = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
-            Assert.That(view.speedSlider.value, Is.EqualTo(6.7f).Within(.0001));
+            yield return Await(() => UnityEngine.Object.FindFirstObjectByType<SettingsView>()); yield return null;
+            settingsView = UnityEngine.Object.FindFirstObjectByType<SettingsView>();
+            Assert.That(settingsView.speedSlider.value, Is.EqualTo(6.7f).Within(.0001));
+            Assert.That(settingsView.timingOffset.value, Is.EqualTo(125));
+            yield return Click(settingsView.back);
+            yield return Await(() => !UnityEngine.Object.FindFirstObjectByType<SettingsView>()); yield return null;
             yield return Click(view.play);
             yield return Await(() => UnityEngine.Object.FindFirstObjectByType<RhythmGameController>(), "Speed test: enter gameplay; " + view.details.text); yield return null;
             Assert.That(flow.CurrentRequest.Multiplier, Is.EqualTo(6.7).Within(.0001));

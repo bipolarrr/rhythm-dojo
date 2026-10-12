@@ -222,7 +222,13 @@ namespace RhythmDojo.Tests
                 yield return null;
             }
             yield return null;
-            Assert.That(UnityEngine.Object.FindFirstObjectByType<MainMenuView>().menuPanel.gameObject.activeSelf, Is.False);
+            Assert.That(UnityEngine.Object.FindFirstObjectByType<MainMenuView>(), Is.SameAs(view));
+            Assert.That(view.menuPanel.gameObject.activeSelf, Is.True, "Popup preserves the expanded title menu.");
+            Assert.That(screen.enabled, Is.True);
+            Assert.That(view.start.interactable, Is.True);
+            yield return Click(view.logo);
+            yield return new WaitForSecondsRealtime(.3f);
+            Assert.That(view.menuPanel.gameObject.activeSelf, Is.False);
         }
 
         private static void AssertHasDisplayCamera()

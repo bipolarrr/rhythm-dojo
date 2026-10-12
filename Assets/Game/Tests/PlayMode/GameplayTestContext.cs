@@ -32,13 +32,23 @@ namespace RhythmDojo.Tests
         protected Mouse mouse;
         protected AudioConfiguration originalAudio;
         private string previousPreferences;
+        private string previousPresentation;
         private string previousHardMode;
+        private float previousMasterVolume, previousLodBias, previousShadowDistance;
+        private int previousFrameRate, previousMipLimit, previousVsync;
+        private AnisotropicFiltering previousFiltering;
         [UnitySetUp]
         public IEnumerator SetUp()
         {
             System.IO.Directory.CreateDirectory("Logs");
             previousHardMode=PlayerPrefs.GetString(RhythmDojo.Services.HardModePreferences.StorageKey, "");
             PlayerPrefs.DeleteKey(RhythmDojo.Services.HardModePreferences.StorageKey);
+            previousPresentation = PlayerPrefs.GetString(RhythmDojo.Services.PresentationPreferences.StorageKey, "");
+            PlayerPrefs.DeleteKey(RhythmDojo.Services.PresentationPreferences.StorageKey);
+            previousMasterVolume = AudioListener.volume; previousFrameRate = UnityEngine.Application.targetFrameRate;
+            previousLodBias=QualitySettings.lodBias; previousShadowDistance=QualitySettings.shadowDistance;
+            previousMipLimit=QualitySettings.globalTextureMipmapLimit; previousVsync=QualitySettings.vSyncCount;
+            previousFiltering=QualitySettings.anisotropicFiltering;
             previousPreferences = PlayerPrefs.GetString(RhythmDojo.Services.SelectionPreferences.StorageKey, "");
             PlayerPrefs.DeleteKey(RhythmDojo.Services.SelectionPreferences.StorageKey);
             originalAudio = AudioSettings.GetConfiguration();
@@ -62,6 +72,13 @@ namespace RhythmDojo.Tests
             else PlayerPrefs.SetString(RhythmDojo.Services.HardModePreferences.StorageKey,previousHardMode);
             if (string.IsNullOrEmpty(previousPreferences)) PlayerPrefs.DeleteKey(RhythmDojo.Services.SelectionPreferences.StorageKey);
             else PlayerPrefs.SetString(RhythmDojo.Services.SelectionPreferences.StorageKey, previousPreferences);
+            if (string.IsNullOrEmpty(previousPresentation)) PlayerPrefs.DeleteKey(RhythmDojo.Services.PresentationPreferences.StorageKey);
+            else PlayerPrefs.SetString(RhythmDojo.Services.PresentationPreferences.StorageKey, previousPresentation);
+            RhythmDojo.Services.PresentationPreferences.Load();
+            AudioListener.volume=previousMasterVolume; UnityEngine.Application.targetFrameRate=previousFrameRate;
+            QualitySettings.lodBias=previousLodBias; QualitySettings.shadowDistance=previousShadowDistance;
+            QualitySettings.globalTextureMipmapLimit=previousMipLimit; QualitySettings.vSyncCount=previousVsync;
+            QualitySettings.anisotropicFiltering=previousFiltering;
             PlayerPrefs.Save();
             bool audioRestored = AudioSettings.Reset(originalAudio);
             if (keyboard != null && keyboard.added) InputSystem.RemoveDevice(keyboard);

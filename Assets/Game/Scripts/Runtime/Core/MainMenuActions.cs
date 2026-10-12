@@ -22,6 +22,8 @@ namespace RhythmDojo.Core
             catch { Transitioning = false; throw; }
         }
 
+        public void ResumeFromSettings() => Transitioning = false;
+
         public void StartGame()
         {
             if (Transitioning) return;

@@ -117,10 +117,13 @@ namespace RhythmDojo.Tests
         public IEnumerator TimingAndOptionsSurviveSettingsAndSceneReturn()
         {
             var view = Object.FindFirstObjectByType<SongSelectionView>();
-            view.timingOffset.value = 125; view.multiplierList.value = 4;
             yield return Click(view.settingsButton);
             yield return Await(() => Object.FindFirstObjectByType<SettingsView>()); yield return null;
-            yield return Click(Object.FindFirstObjectByType<SettingsView>().back);
+            var settingsView = Object.FindFirstObjectByType<SettingsView>();
+            yield return Click(settingsView.gameplayTab);
+            settingsView.timingOffset.value = 125; settingsView.speedSlider.value = 1.5f;
+            yield return Click(settingsView.back);
+            yield return Await(() => !Object.FindFirstObjectByType<SettingsView>());
             yield return Await(() => Object.FindFirstObjectByType<SongSelectionView>()); yield return null;
             view = Object.FindFirstObjectByType<SongSelectionView>();
             Assert.That(view.timingOffset.value, Is.EqualTo(125));

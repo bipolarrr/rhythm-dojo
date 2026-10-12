@@ -69,8 +69,7 @@ namespace RhythmDojo.EditorTools
                 view.difficultyIndicators[i] = indicator.gameObject;
                 indicator.gameObject.SetActive(false);
             }
-            view.record = Label("Best Record", left, "기록 없음", 0, .20f, 1, .355f, 21);
-            Label("Options Caption", left, "PLAY OPTIONS / 옵션", 0, .165f, 1, .20f, 16).verticalOverflow = VerticalWrapMode.Overflow;
+            view.record = Label("Best Record", left, "기록 없음", 0, .03f, 1, .355f, 21);
 
             // Retain existing field names and programmatic value contracts without exposing the old controls.
             view.multiplierList = Dropdown("Scroll multiplier", left, .2f, .078f, .47f, .115f);
@@ -100,6 +99,8 @@ namespace RhythmDojo.EditorTools
             foreach (var image in sliderObject.GetComponentsInChildren<Image>()) image.color = Line;
             view.timingOffset.targetGraphic.color = new Color(.55f,.82f,.79f);
             view.timingOffset.fillRect.GetComponent<Image>().color = new Color(.25f,.43f,.44f);
+            view.speedLabel.gameObject.SetActive(false); view.speedSlider.gameObject.SetActive(false);
+            view.timingLabel.gameObject.SetActive(false); view.timingOffset.gameObject.SetActive(false);
             view.sortList = Dropdown("Sort", right, .52f, .921f, .985f, .985f);
             view.modeButton = Button("Mode Switch", footer, "모드: 노말", .59f, .16f, .71f, .84f);
             view.modeLabel = view.modeButton.GetComponentInChildren<Text>(); view.modeLabel.fontSize = 21;

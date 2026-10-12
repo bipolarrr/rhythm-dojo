@@ -70,7 +70,7 @@ namespace RhythmDojo.UI
                 var nav = view.difficultyButtons[i].navigation; nav.mode = Navigation.Mode.Explicit;
                 nav.selectOnLeft = null;
                 nav.selectOnRight = null;
-                nav.selectOnDown = view.speedSlider; nav.selectOnUp = view.allTab;
+                nav.selectOnDown = view.settingsButton; nav.selectOnUp = view.allTab;
                 view.difficultyButtons[i].navigation = nav;
             }
             view.difficultyList.onValueChanged.AddListener(Changed);

@@ -23,7 +23,7 @@ namespace RhythmDojo.Audio
             source.loop = true;
             source.spatialBlend = 0f;
             source.pitch = 1f;
-            source.volume = settings.Volume;
+            source.volume = settings.Volume * (PresentationPreferences.Current ?? PresentationPreferences.Load()).backgroundVolume;
             source.clip = settings.MusicClip;
             initialized = true;
             if (isActiveAndEnabled) Restart();
@@ -36,7 +36,8 @@ namespace RhythmDojo.Audio
             if (settings.MusicClip) source.PlayScheduled(startDspTime);
         }
 
-        private void OnEnable() { if (initialized) Restart(); }
-        private void OnDisable() { if (source) source.Stop(); }
+        private void RefreshVolume() { if (source && settings) source.volume = settings.Volume * PresentationPreferences.Current.backgroundVolume; }
+        private void OnEnable() { PresentationPreferences.Changed += RefreshVolume; if (initialized) { RefreshVolume(); Restart(); } }
+        private void OnDisable() { PresentationPreferences.Changed -= RefreshVolume; if (source) source.Stop(); }
     }
 }

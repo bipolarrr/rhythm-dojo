@@ -113,6 +113,13 @@ namespace RhythmDojo.UI
             menuExpanded = !menuExpanded;
         }
 
+        public void ResumeFromSettings()
+        {
+            if (actions is RhythmDojo.Core.MainMenuActions mainMenuActions) mainMenuActions.ResumeFromSettings();
+            starting = false;
+            view.SetMenuInteractable(true);
+        }
+
         private void OpenSettings()
         {
             if (Busy || !menuExpanded || view.quitPopup.activeSelf) return;

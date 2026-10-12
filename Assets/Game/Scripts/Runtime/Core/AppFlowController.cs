@@ -1,5 +1,9 @@
 using System;
 using System.Threading;
+using System.Collections.Generic;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
+using RhythmDojo.UI;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -19,6 +23,8 @@ namespace RhythmDojo.Core
         private readonly CancellationTokenSource lifetime = new CancellationTokenSource();
         private string editorSessionId, returnScenePath;
         private string settingsReturnPath = SelectionPath;
+        private readonly List<Behaviour> settingsSuspended = new List<Behaviour>();
+        private GameObject settingsPreviousFocus;
         private Action<string> returned;
         public GameSettings Settings => settings;
         public SongLibrary Library { get; private set; }
@@ -55,6 +61,10 @@ namespace RhythmDojo.Core
             flow.settings = settings;
             flow.Library = new SongLibrary(); flow.Library.Register(new BuiltInSongProvider(settings.catalog));
             flow.Preferences = new SelectionPreferences(); flow.HardMode = HardModePreferences.Load();
+            var presentation = PresentationPreferences.Load();
+            bool hasPresentation = PlayerPrefs.HasKey(PresentationPreferences.StorageKey);
+            presentation.SaveAudio();
+            presentation.ApplyGraphics(hasPresentation);
             flow.Selection = new SongSelectionService(settings, flow.Library, flow.Preferences);
             if (flow.Library.Find("demo-melody") != null)
                 flow.Selection.UpdateSelection("demo-melody", flow.SelectedDifficulty, flow.SelectedScrollMode, flow.SelectedMultiplier);
@@ -66,6 +76,16 @@ namespace RhythmDojo.Core
         private void SceneLoaded(Scene scene, LoadSceneMode mode)
         {
             Transitioning = false;
+            if (scene.path == SettingsPath && settingsSuspended.Count > 0)
+            {
+                foreach (var root in scene.GetRootGameObjects())
+                {
+                    foreach (var camera in root.GetComponentsInChildren<Camera>()) camera.enabled = false;
+                    // The background scene supplies the listener while this additive popup is open.
+                    foreach (var listener in root.GetComponentsInChildren<AudioListener>()) listener.enabled = false;
+                }
+                SceneManager.SetActiveScene(scene);
+            }
             if (scene.path == GameplayPath && CurrentRequest != null)
                 FindFirstObjectByType<GameplayCompositionRoot>().Initialize(CurrentRequest, Settings, this);
             else if (scene.path != GameplayPath)
@@ -155,18 +175,62 @@ namespace RhythmDojo.Core
         {
             if (Transitioning || !SceneManager.GetSceneByPath(SelectionPath).isLoaded) return;
             settingsReturnPath = SelectionPath;
-            Load(SettingsPath);
+            OpenSettingsPopup();
         }
         public void ShowTitleSettings()
         {
             if (Transitioning || !SceneManager.GetSceneByPath("Assets/Game/Scenes/Title.unity").isLoaded) return;
             settingsReturnPath = "Assets/Game/Scenes/Title.unity";
-            Load(SettingsPath);
+            OpenSettingsPopup();
         }
         public void ReturnFromSettings()
         {
             if (Transitioning) return;
-            ClearEditorReturn(); Load(settingsReturnPath);
+            ClearEditorReturn();
+            if (settingsSuspended.Count == 0) { Load(settingsReturnPath); return; }
+            Transitioning = true;
+            var operation = SceneManager.UnloadSceneAsync(SettingsPath);
+            operation.completed += completed =>
+            {
+                foreach (var component in settingsSuspended)
+                {
+                    if (!component) continue;
+                    component.enabled = true;
+                    if (component is MainMenuScreen menu) menu.ResumeFromSettings();
+                }
+                settingsSuspended.Clear();
+                var scene = SceneManager.GetSceneByPath(settingsReturnPath);
+                if (scene.IsValid() && scene.isLoaded) SceneManager.SetActiveScene(scene);
+                if (EventSystem.current && settingsPreviousFocus) EventSystem.current.SetSelectedGameObject(settingsPreviousFocus);
+                Transitioning = false;
+            };
+        }
+        private void OpenSettingsPopup()
+        {
+            if (SceneManager.GetSceneByPath(SettingsPath).isLoaded) return;
+            settingsPreviousFocus = EventSystem.current ? EventSystem.current.currentSelectedGameObject : null;
+            var scene = SceneManager.GetSceneByPath(settingsReturnPath);
+            foreach (var root in scene.GetRootGameObjects())
+                foreach (var component in root.GetComponentsInChildren<Behaviour>())
+                    if (component.enabled && (component is SongSelectionScreen || component is MainMenuScreen ||
+                        component is GraphicRaycaster || component is EventSystem || component is BaseInputModule))
+                    { settingsSuspended.Add(component); component.enabled = false; }
+            Transitioning = true;
+            try
+            {
+                if (SceneManager.LoadSceneAsync(SettingsPath, LoadSceneMode.Additive) == null)
+                    throw new InvalidOperationException("Cannot open settings popup.");
+            }
+            catch
+            {
+                foreach (var component in settingsSuspended)
+                {
+                    if (!component) continue;
+                    component.enabled = true;
+                    if (component is MainMenuScreen menu) menu.ResumeFromSettings();
+                }
+                settingsSuspended.Clear(); Transitioning = false; throw;
+            }
         }
         private void Load(string path)
         {
