@@ -103,15 +103,15 @@ namespace RhythmDojo.Tests
             Object.FindFirstObjectByType<SongSelectionScreen>().SelectSong("tempo-pulse");
             view.sortList.value = 2; yield return null;
             Assert.That(flow.Selection.SelectedSongId, Is.EqualTo("tempo-pulse"));
-            Assert.That(view.Rows.Select(r => r.Entry.Id), Is.EqualTo(new[] { "test-pulse", "demo-melody", "tempo-pulse" }));
-            Assert.That(view.Rows.Select(r => r.Entry.MinBpm).Distinct().Count(), Is.EqualTo(3));
+            Assert.That(view.Rows.Select(r => r.Entry.Id), Is.EqualTo(flow.Library.Entries.OrderBy(s => s.MinBpm).ThenBy(s => s.Title).Select(s => s.Id)));
+            Assert.That(view.Rows.Select(r => r.Entry.MinBpm).Distinct().Count(), Is.EqualTo(flow.Library.Entries.Select(s => s.MinBpm).Distinct().Count()));
             Assert.That(view.Rows.All(r => r.bpm && !string.IsNullOrEmpty(r.bpm.text)), Is.True);
             view.sortList.value = 1; yield return null;
-            Assert.That(view.Rows.Select(r => r.Entry.Id), Is.EqualTo(new[] { "tempo-pulse", "test-pulse", "demo-melody" }));
-            Assert.That(view.Rows.Select(r => r.Entry.Artist).Distinct().Count(), Is.EqualTo(3));
+            Assert.That(view.Rows.Select(r => r.Entry.Id), Is.EqualTo(flow.Library.Entries.OrderBy(s => s.Artist, System.StringComparer.OrdinalIgnoreCase).ThenBy(s => s.Title).Select(s => s.Id)));
+            Assert.That(view.Rows.Select(r => r.Entry.Artist).Distinct().Count(), Is.EqualTo(flow.Library.Entries.Select(s => s.Artist).Distinct().Count()));
             Assert.That(flow.Selection.SelectedSongId, Is.EqualTo("tempo-pulse"));
             view.sortList.value = 0; yield return null;
-            Assert.That(view.Rows.Select(r => r.Entry.Id), Is.EqualTo(new[] { "test-pulse", "tempo-pulse", "demo-melody" }));
+            Assert.That(view.Rows.Select(r => r.Entry.Id), Is.EqualTo(flow.Library.Entries.OrderBy(s => s.Title, System.StringComparer.OrdinalIgnoreCase).Select(s => s.Id)));
         }
         [UnityTest]
         public IEnumerator TimingAndOptionsSurviveSettingsAndSceneReturn()
@@ -167,9 +167,9 @@ namespace RhythmDojo.Tests
                 else game.Session.ReleaseLane(input.lane, input.time);
             game.Session.Advance(game.Chart.CompletionTime + 1);
             yield return null; yield return null;
-            var best = new SelectionPreferences().FindRecord("demo-melody", flow.SelectedDifficulty.name);
+            var best = new SelectionPreferences().FindRecord("demo-melody", RecordIdentity.Rules(flow.CurrentRequest.Song.ChartId, flow.CurrentRequest.Song.Revision, flow.CurrentRequest.Rules));
             Assert.That(best, Is.Not.Null); Assert.That(best.score, Is.EqualTo(1000000));
-            Assert.That(best.maxCombo, Is.EqualTo(54));
+            Assert.That(best.maxCombo, Is.EqualTo(game.Session.Snapshot.TotalNotes));
             Object.FindFirstObjectByType<GameplayCompositionRoot>().ReturnToSelection();
             yield return Await(() => Object.FindFirstObjectByType<SongSelectionView>(), "Record test: return to selection"); yield return null;
             Assert.That(Object.FindFirstObjectByType<SongSelectionView>().record.text, Does.Contain("1,000,000"));

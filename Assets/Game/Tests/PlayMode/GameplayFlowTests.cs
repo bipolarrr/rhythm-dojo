@@ -24,6 +24,18 @@ namespace RhythmDojo.Tests
     public sealed class GameplayFlowTests : GameplayTestContext
     {
         [UnityTest]
+        public IEnumerator DirectGameplaySceneUsesCopiedPlayRules()
+        {
+            var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
+            var rules = flow.Rules.Snapshot; rules.GaugeFailure = GaugeFailureMode.Continue; flow.Rules.Update(rules);
+            yield return SceneManager.LoadSceneAsync(AppFlowController.GameplayPath); yield return null;
+            var game = UnityEngine.Object.FindFirstObjectByType<RhythmGameController>();
+            Assert.That(game.Session.Snapshot.TotalNotes, Is.GreaterThan(game.Chart.Count));
+            game.StartSession(); game.Session.Advance(9);
+            Assert.That(game.Session.Failure.Failed, Is.True);
+            Assert.That(game.Session.State, Is.EqualTo(SessionState.Playing));
+        }
+        [UnityTest]
         public IEnumerator SixLaneDefinitionDrivesAllUnityAdapters()
         {
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>(); var originalCatalog = flow.Settings.catalog;

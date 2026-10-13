@@ -55,11 +55,12 @@ namespace RhythmDojo.Tests
             Assert.That(c.Snapshot.SongTime, Is.EqualTo(frozen)); Assert.That(c.Session.Miss, Is.EqualTo(10));
             input.Start(); Assert.That(c.Session.Health, Is.EqualTo(100)); Assert.That(clock.Running, Is.True);
         }
-        [TestCase(.2, 1.2)] [TestCase(-.2, .8)]
-        public void CalibrationCorrectsInputAndDefersMissSweep(double offset, double inputTime)
+        [TestCase(.2, 1.2, JudgmentProfile.Warmup)] [TestCase(-.2, .8, JudgmentProfile.Warmup)]
+        [TestCase(.2, 1.2, JudgmentProfile.Sparring)] [TestCase(-.2, .8, JudgmentProfile.Sparring)]
+        public void CalibrationCorrectsInputAndDefersMissSweep(double offset, double inputTime, JudgmentProfile profile)
         {
             var input = new FakeInput(); var clock = new FakeClock { InputTimingOffsetSeconds = offset };
-            using var coordinator = Coordinator(input, clock, new FakePresenter());
+            using var coordinator = Coordinator(input, clock, new FakePresenter(), rules: new PlayRules { Profile = profile });
             input.Start(); clock.SongTime = offset > 0 ? 1.15 : .75;
             coordinator.Tick();
             Assert.That(coordinator.Session.Miss, Is.Zero);
@@ -67,12 +68,12 @@ namespace RhythmDojo.Tests
             Assert.That(coordinator.Session.Perfect, Is.EqualTo(1));
         }
         private static RhythmSessionCoordinator Coordinator(FakeInput input, FakeClock clock, FakePresenter presenter,
-            ScrollMode mode = ScrollMode.Constant, double multiplier = 1, double good = .11)
+            ScrollMode mode = ScrollMode.Constant, double multiplier = 1, double good = .11, PlayRules rules = null)
         {
             var tempo = new TempoMap(new[] { new TempoPoint(0,120), new TempoPoint(6,180) });
             IScrollTimeline scroll = mode == ScrollMode.Bpm ? new BpmScrollTimeline(tempo,8,120,multiplier) : new ConstantScrollTimeline(8,multiplier);
             return new RhythmSessionCoordinator(new ChartData(new[] { NoteData.Tap(0,1), NoteData.Hold(1,5.2,6.8) },8),
-                new JudgmentSettings(.05,good),new GameModeRules(4),tempo,"Test","Standard",mode,multiplier,scroll,input,clock,presenter);
+                new JudgmentSettings(.05,good),new GameModeRules(4),tempo,"Test","Standard",mode,multiplier,scroll,input,clock,presenter,null,rules);
         }
         [TestCase(ScrollMode.Constant,.5)] [TestCase(ScrollMode.Constant,2)]
         [TestCase(ScrollMode.Bpm,.5)] [TestCase(ScrollMode.Bpm,2)]

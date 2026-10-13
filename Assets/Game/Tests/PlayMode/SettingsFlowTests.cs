@@ -212,7 +212,7 @@ namespace RhythmDojo.Tests
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
             var selection = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
             UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>().SelectSong("tempo-pulse");
-            selection.multiplierList.value = 4;
+            flow.Selection.UpdateSelection(flow.Selection.SelectedSongId, flow.SelectedDifficulty, flow.SelectedScrollMode, 1.5);
             yield return Click(selection.settingsButton);
             yield return Await(() => UnityEngine.Object.FindFirstObjectByType<SettingsScreen>());
             yield return null;

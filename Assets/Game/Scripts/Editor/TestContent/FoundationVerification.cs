@@ -48,6 +48,9 @@ namespace RhythmDojo.EditorTools
         [MenuItem("Game Tools/Verification/Verify Gameplay Actions")]
         public static void RunGameplay() => Begin("Gameplay", false);
 
+        [MenuItem("Game Tools/Verification/Playtest Health and Results")]
+        public static void RunHealthAndResults() => Begin("HealthPlaytest", false);
+
         [MenuItem("Game Tools/Verification/Verify Authoring Actions")]
         public static void RunAuthoring() => Begin("Authoring", false);
 

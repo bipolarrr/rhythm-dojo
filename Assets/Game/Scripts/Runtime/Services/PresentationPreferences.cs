@@ -38,10 +38,13 @@ namespace RhythmDojo.Services
         }
         public void SaveAudio()
         {
-            AudioListener.volume = masterVolume;
-            Save(); Changed?.Invoke();
+            ApplyAudio(); Save();
         }
+        public void ApplyAudio() { AudioListener.volume = masterVolume; Changed?.Invoke(); }
+        public void SaveValues() => Save();
         public void ApplyGraphics(bool resize = true)
+        { ApplyGraphicsValues(resize); Save(); }
+        public void ApplyGraphicsValues(bool resize = true)
         {
             QualitySettings.vSyncCount = 0;
             UnityEngine.Application.targetFrameRate = FrameRates[frameRate];
@@ -50,7 +53,6 @@ namespace RhythmDojo.Services
                 if (UnityEngine.Application.isEditor) DisplaySizeRequested?.Invoke(DisplaySize);
                 else Screen.SetResolution(DisplaySize.x, DisplaySize.y, FullScreenMode.Windowed);
             }
-            Save();
         }
         private void Save() { PlayerPrefs.SetString(StorageKey, JsonUtility.ToJson(this)); PlayerPrefs.Save(); }
     }

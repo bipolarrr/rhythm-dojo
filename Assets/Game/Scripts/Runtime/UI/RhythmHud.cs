@@ -46,7 +46,7 @@ namespace RhythmDojo.UI
         {
             judgmentAt = Time.unscaledTimeAsDouble; showingJudgment = true; nextTextRefresh = 0;
             maximumCombo = Math.Max(maximumCombo, model.Snapshot.Session.Combo);
-            view.judgment.text = (hold ? "HOLD · " : "") + result.Grade.ToString().ToUpperInvariant();
+            view.judgment.text = (hold ? "HOLD · " : "") + JudgmentDisplay.Label(result.Grade);
             view.judgment.fontSize = hold ? 23 : 31;
             view.judgment.color = result.Grade == Judgment.Miss ? Red : result.Grade == Judgment.Perfect ? Cyan : Gold;
             double milliseconds = result.ErrorSeconds * 1000;
@@ -92,11 +92,14 @@ namespace RhythmDojo.UI
             view.healthFill.rectTransform.anchorMax = new Vector2(fraction, 1);
             view.healthFill.color = fraction <= .25f ? Red : fraction <= .5f ? Gold : Cyan;
             view.healthLabel.color = view.healthFill.color;
-            view.healthLabel.text = $"체력  {snapshot.HealthRatio * RhythmSession.MaximumHealth:0.##} / {RhythmSession.MaximumHealth}";
+            view.healthLabel.text = snapshot.Mode == RhythmDojo.Gameplay.PlayMode.Gauge ?
+                $"체력  {snapshot.HealthRatio * snapshot.MaximumHealth:0.##} / {snapshot.MaximumHealth}" :
+                $"Challenge · Hmm... {snapshot.Good} / Nope. {snapshot.Miss}";
             bool completed = snapshot.State == SessionState.Completed;
             view.gameOverPanel.SetActive(completed || snapshot.State == SessionState.GameOver);
-            view.gameOverText.text = completed ? "GAME CLEAR" : "GAME OVER";
-            view.gameOverText.color = completed ? Cyan : Red;
+            view.gameOverText.text = completed && !snapshot.Failure.Failed ? "GAME CLEAR" : "GAME OVER";
+            view.gameOverText.color = completed && !snapshot.Failure.Failed ? Cyan : Red;
+            if (snapshot.Failure.Failed && snapshot.State == SessionState.Playing) view.healthLabel.text = "FAILED · 끝까지 진행";
         }
         private void AnimateFeedback(double now)
         {
@@ -115,17 +118,17 @@ namespace RhythmDojo.UI
             view.sessionState.text = s.State == SessionState.Ready ?
                 snapshot.ReadyReason == ReadyReason.FocusLost ? "SPACE로 다시 시작" : "SPACE로 수련 시작" :
                 s.State == SessionState.GameOver ? "GAME OVER · SPACE로 다시 도전" :
-                s.State == SessionState.Completed ? "수련 완료 · 다시 도전!" : "수련 중";
+                s.State == SessionState.Completed ? "수련 완료 · 다시 도전!" : s.Failure.Failed ? "FAILED · 끝까지 진행" : "수련 중";
             if (displayedCombo != s.Combo)
             {
                 displayedCombo = s.Combo; comboAt = now;
                 maximumCombo = Math.Max(maximumCombo, s.Combo);
                 view.combo.text = s.Combo.ToString();
             }
-            view.combo.color = showingJudgment && view.judgment.text == "MISS" && now - judgmentAt < .35 ? Red : Cream;
+            view.combo.color = showingJudgment && view.judgment.text == JudgmentDisplay.Label(Judgment.Miss) && now - judgmentAt < .35 ? Red : Cream;
             view.bestCombo.text = $"BEST  {maximumCombo}";
-            view.counts.text = $"PERFECT    {s.Perfect}\nGOOD         {s.Good}\nMISS            {s.Miss}";
-            view.accuracy.text = s.Resolved == 0 ? "정확도  —" : $"정확도  {(s.Perfect + s.Good * .5) / s.Resolved * 100:0.0}%";
+            view.counts.text = $"Perfect    {s.Perfect}\nHmm...    {s.Good}\nNope.       {s.Miss}";
+            view.accuracy.text = s.TotalNotes == 0 ? "정확도  —" : $"정확도  {s.AccuracyRate:0.0}%";
             view.progress.text = $"처리한 노트  {s.Resolved} / {s.TotalNotes}";
             view.progressFill.rectTransform.anchorMax = new Vector2(s.TotalNotes > 0 ? Mathf.Clamp01((float)s.Resolved / s.TotalNotes) : 0, 1);
             if (s.State == SessionState.Completed && now - judgmentAt > 1)

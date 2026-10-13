@@ -23,10 +23,10 @@ namespace RhythmDojo.Authoring
             var flow = AppFlowController.Create(settings);
             menu.Initialize(store, flow, project => new DocumentSongLoader(
                 id => id == screen.Mode.name ? screen.Mode : null,
-                (audio, token) => LoadAudio(store.ResolveAudioPath(project.Id, audio), token)));
+                (audio, token) => LoadAudio(store.ResolveAudioPath(project.Id, audio), token)), flow.Library.Refresh);
         }
 
-        private static async Task<SongAudioLease> LoadAudio(string path, CancellationToken token)
+        public static async Task<SongAudioLease> LoadAudio(string path, CancellationToken token)
         {
             var extension = Path.GetExtension(path).ToLowerInvariant();
             var type = extension == ".wav" ? AudioType.WAV : extension == ".ogg" ? AudioType.OGGVORBIS : AudioType.MPEG;

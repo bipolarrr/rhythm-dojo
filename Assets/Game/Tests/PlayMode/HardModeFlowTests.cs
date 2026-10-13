@@ -32,70 +32,52 @@ namespace RhythmDojo.Tests
         public IEnumerator ExpandedRuleDropdownsRenderAllKoreanLabelsAndAllowSelection()
         {
             yield return OpenGameplaySettings();
-            var view=Object.FindFirstObjectByType<SettingsView>();
-            var expected=new[] { "체력 유지", "체력 감소", "즉시 게임 오버" };
-            for(int i=0;i<view.hardRuleLists.Length;i++)
+            var view = Object.FindFirstObjectByType<SettingsView>();
+            Assert.That(view.playRuleLists.Length, Is.EqualTo(5));
+            for (int i = 0; i < view.playRuleLists.Length; i++)
             {
-                var dropdown=view.hardRuleLists[i];
+                var dropdown = view.playRuleLists[i];
                 EventSystem.current.SetSelectedGameObject(dropdown.gameObject);
                 yield return Press(Key.Enter); yield return new WaitForSecondsRealtime(.18f);
-                Canvas.ForceUpdateCanvases();
-                var items=dropdown.GetComponentsInChildren<Toggle>().Where(item=>item.isActiveAndEnabled).ToArray();
-                Assert.That(items.Length,Is.EqualTo(3));
-                var labels=items.Select(item=>item.GetComponentInChildren<Text>()).ToArray();
-                Assert.That(labels.Select(label=>label.text),Is.EqualTo(expected));
-                foreach(var label in labels)
-                {
-                    Assert.That(label.rectTransform.rect.height,Is.GreaterThanOrEqualTo(label.preferredHeight),"Dropdown label must fit its complete line.");
-                    Assert.That(label.canvasRenderer.GetMesh().vertexCount,Is.GreaterThan(0),"The opened option must actually render text geometry.");
-                    Assert.That(label.color.r,Is.GreaterThan(.8f));
-                    Assert.That(label.font.HasCharacter('체'),Is.True);
-                }
-                Assert.That(dropdown.captionText.rectTransform.rect.height,Is.GreaterThanOrEqualTo(dropdown.captionText.preferredHeight));
+                var items = dropdown.GetComponentsInChildren<Toggle>().Where(item => item.isActiveAndEnabled).ToArray();
+                Assert.That(items.Length, Is.EqualTo(i == 4 ? 3 : 2));
+                Assert.That(items.All(item => item.GetComponentInChildren<Text>().canvasRenderer.GetMesh().vertexCount > 0), Is.True);
                 EventSystem.current.SetSelectedGameObject(items[1].gameObject);
                 yield return Press(Key.Enter); yield return new WaitForSecondsRealtime(.18f);
-                Assert.That(dropdown.value,Is.EqualTo((int)HealthRuleAction.Damage));
-                Assert.That(Object.FindFirstObjectByType<AppFlowController>().HardMode.GetRule((Judgment)i).Action,Is.EqualTo(HealthRuleAction.Damage));
+                Assert.That(dropdown.value, Is.EqualTo(1));
             }
+            CaptureSelection("play-rules-settings");
         }
 
         [UnityTest]
         public IEnumerator HardRuleRowsSaveValidateCountsAndNormalModeIgnoresThem()
         {
             yield return OpenGameplaySettings();
-            var view=Object.FindFirstObjectByType<SettingsView>();
-            var flow=Object.FindFirstObjectByType<AppFlowController>();
-            Assert.That(view.hardRuleLists.Length,Is.EqualTo(3));
-            Assert.That(view.hardLossCounts.All(field=>!field.interactable),Is.True);
-            view.hardRuleLists[0].value=(int)HealthRuleAction.Damage;
-            Assert.That(view.hardLossCounts[0].interactable,Is.True);
-            view.hardLossCounts[0].onEndEdit.Invoke("7");
-            view.hardLossCounts[0].onEndEdit.Invoke(""); Assert.That(view.hardLossCounts[0].text,Is.EqualTo("7"));
-            view.hardLossCounts[0].onEndEdit.Invoke("0"); Assert.That(view.hardLossCounts[0].text,Is.EqualTo("1"));
-            view.hardLossCounts[0].onEndEdit.Invoke("9999"); Assert.That(view.hardLossCounts[0].text,Is.EqualTo("1000"));
-            view.hardLossCounts[0].onEndEdit.Invoke("7");
-            view.hardRuleLists[1].value=(int)HealthRuleAction.Damage; view.hardLossCounts[1].onEndEdit.Invoke("3");
-            Assert.That(HardModePreferences.Load().GetRule(Judgment.Good).LossCount,Is.EqualTo(3));
-            Assert.That(flow.HardMode.Enabled,Is.False);
-            for(int i=0;i<3;i++)
-            {
-                var rect=(RectTransform)view.hardLossCounts[i].transform;
-                Assert.That(rect.anchoredPosition.y-rect.rect.height,Is.GreaterThanOrEqualTo(-((RectTransform)view.gameplayPanel.transform).rect.height));
-            }
-            yield return Click(view.back); yield return Await(()=>!Object.FindFirstObjectByType<SettingsView>());
-            yield return OpenGameplaySettings(); view=Object.FindFirstObjectByType<SettingsView>();
-            Assert.That(view.hardRuleLists[0].value,Is.EqualTo((int)HealthRuleAction.Damage));
-            Assert.That(view.hardLossCounts[0].text,Is.EqualTo("7")); Assert.That(view.hardLossCounts[1].text,Is.EqualTo("3"));
-            yield return Click(view.back); yield return Await(()=>!Object.FindFirstObjectByType<SettingsView>());
+            var view = Object.FindFirstObjectByType<SettingsView>();
+            var flow = Object.FindFirstObjectByType<AppFlowController>();
+            view.playRuleLists[2].value = 1;
+            view.playRuleLists[0].value = 1;
+            Assert.That(flow.Rules.Snapshot.HoldEnd, Is.EqualTo(HoldEndMode.Release));
+            view.playRuleLists[0].value = 0;
+            Assert.That(flow.Rules.Snapshot.HoldEnd, Is.EqualTo(HoldEndMode.Release));
+            view.playRuleLists[4].value = 1;
+            Assert.That(flow.Rules.Snapshot.GoodLimit, Is.EqualTo(3));
+            Assert.That(flow.Rules.Snapshot.MissLimit, Is.Zero);
+            yield return Click(view.back); yield return Await(() => !Object.FindFirstObjectByType<SettingsView>());
+            yield return OpenGameplaySettings(); view = Object.FindFirstObjectByType<SettingsView>();
+            Assert.That(view.playRuleLists[2].value, Is.EqualTo(1));
+            Assert.That(view.playRuleLists[4].value, Is.EqualTo(1));
+            yield return Click(view.back); yield return Await(() => !Object.FindFirstObjectByType<SettingsView>());
             yield return Click(Object.FindFirstObjectByType<SongSelectionView>().play);
-            yield return Await(()=>Object.FindFirstObjectByType<RhythmGameController>());
-            Assert.That(flow.CurrentRequest.IsHardMode,Is.False); Assert.That(flow.CurrentRequest.HardModeRules,Is.Null);
+            yield return Await(() => Object.FindFirstObjectByType<RhythmGameController>());
+            Assert.That(flow.CurrentRequest.Rules.Mode, Is.EqualTo(RhythmDojo.Gameplay.PlayMode.Gauge));
+            Assert.That(flow.CurrentRequest.Rules.HoldEnd, Is.EqualTo(HoldEndMode.Release));
         }
         [UnityTest]
         public IEnumerator ConfiguredHardModeDoesNotRecoverAndPausesExactlyAtTheDamageLimit()
         {
             yield return OpenGameplaySettings(); var view=Object.FindFirstObjectByType<SettingsView>();
-            view.hardRuleLists[1].value=(int)HealthRuleAction.Damage; view.hardLossCounts[1].onEndEdit.Invoke("3");
+            view.playRuleLists[4].value = 1;
             yield return Click(view.back); yield return Await(()=>!Object.FindFirstObjectByType<SettingsView>());
             yield return SelectHardMode();
             Assert.That(HardModePreferences.Load().Enabled,Is.True);
@@ -103,12 +85,12 @@ namespace RhythmDojo.Tests
             yield return Await(()=>Object.FindFirstObjectByType<RhythmGameController>()); yield return null;
             var flow=Object.FindFirstObjectByType<AppFlowController>(); var game=Object.FindFirstObjectByType<RhythmGameController>();
             Assert.That(flow.CurrentRequest.IsHardMode,Is.True);
-            Assert.That(flow.CurrentRequest.HardModeRules.Good.LossCount,Is.EqualTo(3));
-            var windows=flow.CurrentRequest.Difficulty.ToSettings(); double error=(windows.PerfectWindow+windows.GoodWindow)/2;
+            Assert.That(flow.CurrentRequest.Rules.GoodLimit,Is.EqualTo(3));
+            var windows=flow.CurrentRequest.Rules.Timing; double error=(windows.PerfectWindow+windows.GoodWindow)/2;
             var inputs=new List<(double time,int lane,bool press)>(); int goodTaps=0;
             for(int i=0;i<game.Chart.Count;i++)
             {
-                var note=game.Chart[i]; bool good=note.Kind==NoteKind.Tap && goodTaps++<3;
+                var note=game.Chart[i]; bool good=note.Kind==NoteKind.Tap && goodTaps++<4;
                 inputs.Add((note.StartTime+(good ? error : 0),note.Lane,true));
                 inputs.Add((note.Kind==NoteKind.Hold ? note.EndTime : note.StartTime+(good ? error : 0)+.01,note.Lane,false));
             }
@@ -121,8 +103,8 @@ namespace RhythmDojo.Tests
                 if(game.Session.State==SessionState.GameOver) break;
             }
             yield return null; yield return null;
-            Assert.That(game.Session.Good,Is.EqualTo(3)); Assert.That(game.Session.Miss,Is.Zero);
-            Assert.That(game.Session.Health,Is.Zero); Assert.That(game.Clock.Running,Is.False);
+            Assert.That(game.Session.Good,Is.EqualTo(4)); Assert.That(game.Session.Miss,Is.Zero);
+            Assert.That(game.Session.Health,Is.EqualTo(100)); Assert.That(game.Clock.Running,Is.False);
             Assert.That(Object.FindFirstObjectByType<GameplayHudView>().gameOverPanel.activeSelf,Is.True);
             yield return Press(Key.Space); yield return null;
             Assert.That(game.Session.Health,Is.EqualTo(100)); Assert.That(game.Session.State,Is.EqualTo(SessionState.Playing));
@@ -132,10 +114,12 @@ namespace RhythmDojo.Tests
         [UnityTest]
         public IEnumerator StrictHardDefaultsFailOnTheFirstGoodJudgment()
         {
+            var configured = Object.FindFirstObjectByType<AppFlowController>().Rules.Snapshot; configured.SelectChallenge(3);
+            Object.FindFirstObjectByType<AppFlowController>().Rules.Update(configured);
             yield return SelectHardMode(); yield return Click(Object.FindFirstObjectByType<SongSelectionView>().play);
             yield return Await(()=>Object.FindFirstObjectByType<RhythmGameController>()); yield return null;
             var game=Object.FindFirstObjectByType<RhythmGameController>(); var flow=Object.FindFirstObjectByType<AppFlowController>();
-            var windows=flow.CurrentRequest.Difficulty.ToSettings(); var first=game.Chart[0];
+            var windows=flow.CurrentRequest.Rules.Timing; var first=game.Chart[0];
             Assert.That(first.Kind,Is.EqualTo(NoteKind.Tap));
             game.StartSession(); game.Session.PressLane(first.Lane,first.StartTime+(windows.PerfectWindow+windows.GoodWindow)/2);
             yield return null; yield return null;

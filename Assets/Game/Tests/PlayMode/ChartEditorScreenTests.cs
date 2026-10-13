@@ -34,7 +34,7 @@ namespace RhythmDojo.Tests
                 yield return null;
                 var editor = Object.FindFirstObjectByType<ChartEditorScreen>();
                 Assert.That(editor, Is.Not.Null);
-                Assert.That(Object.FindObjectsByType<Button>(FindObjectsSortMode.None).Length, Is.EqualTo(4));
+                Assert.That(Object.FindObjectsByType<Button>(FindObjectsSortMode.None).Length, Is.EqualTo(8));
                 var grid = (RectTransform)editor.transform;
                 var notes = new TimelineNotes(grid.GetComponent<ChartEditorScreen>());
                 Assert.That(grid.GetComponentInChildren<ChartBeatGrid>(), Is.Not.Null);

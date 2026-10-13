@@ -45,7 +45,8 @@ namespace RhythmDojo.Core
             {
                 flow = AppFlowController.Create(settings);
                 ownedSong = SongAssetAdapter.Load(settings.catalog[0]);
-                Initialize(new PlayRequest(ownedSong, settings.defaultDifficulty, ScrollMode.Constant, 1), settings, flow);
+                Initialize(new PlayRequest(ownedSong, settings.defaultDifficulty, ScrollMode.Constant, 1,
+                    flow.Preferences.TimingOffsetMs, null, flow.Rules.Snapshot), settings, flow);
             }
         }
         public void Initialize(PlayRequest request, GameSettings gameSettings, AppFlowController appFlow)
@@ -56,7 +57,7 @@ namespace RhythmDojo.Core
             var song = request.Song; song.Validate();
             runtimeMode = Instantiate(song.Mode);
             runtimePresentation = Instantiate(settings.presentation);
-            var mode = runtimeMode.ToRules(); var chart = song.Chart; var judgments = request.Difficulty.ToSettings();
+            var mode = runtimeMode.ToRules(); var chart = song.Chart; var judgments = request.Rules?.Timing ?? request.Difficulty.ToSettings();
             double lastEnd = 0;
             for (int i = 0; i < chart.Count; i++) lastEnd = Math.Max(lastEnd, chart[i].EndTime);
             chart = chart.WithCompletionTime(Math.Max(chart.CompletionTime, Math.Max(song.AudioClip.length + song.AudioOffset,
@@ -66,8 +67,12 @@ namespace RhythmDojo.Core
             clock.Initialize(song.AudioClip, song.AudioOffset, settings.audio, request.TimingOffsetMs);
             input.Initialize(runtimeMode); notes.Configure(runtimeMode, runtimePresentation);
             playfield.Build(runtimeMode, runtimePresentation);
-            controller.Initialize(chart, judgments, mode, tempo, song.Title, request.Difficulty.DisplayName + (request.IsHardMode ? " · HARD" : ""),
-                request.ScrollMode, request.Multiplier, scroll, input, clock, notes, request.HardModeRules);
+            string ruleLabel = request.Rules == null ? request.Difficulty.DisplayName : request.Difficulty.DisplayName + " · " +
+                (request.Rules.Profile == JudgmentProfile.Warmup ? "준비운동" : "대련") + " · " +
+                (request.Rules.Mode == RhythmDojo.Gameplay.PlayMode.Gauge ? "Gauge" : "Challenge " + request.Rules.ChallengePreset) + " · " +
+                (request.Rules.HoldEnd == HoldEndMode.Automatic ? "롱노트 자동" : "끝 입력 판정");
+            controller.Initialize(chart, judgments, mode, tempo, song.Title, ruleLabel,
+                request.ScrollMode, request.Multiplier, scroll, input, clock, notes, request.HardModeRules, request.Rules);
             hud.Initialize(controller.ReadModel, runtimeMode, runtimePresentation);
             hits.Initialize(controller.ReadModel, runtimeMode, Camera.main, hud.GetComponent<Canvas>());
             controller.ReadModel.Judged += TrackCombo;
@@ -89,7 +94,9 @@ namespace RhythmDojo.Core
             if (!initialized || recordSaved || !flow || flow.IsEditorPlaytest || playRequest == null) return;
             var snapshot = controller.ReadModel.Snapshot.Session;
             if (snapshot.State != SessionState.Completed) return;
-            flow.Preferences.SaveCompleted(playRequest.Song.SongId, playRequest.Difficulty.name, snapshot, maxCombo);
+            if (playRequest.Rules != null && flow.Preferences is RhythmDojo.Services.SelectionPreferences records)
+                records.SaveCompleted(playRequest.Song.SongId, RecordIdentity.Rules(playRequest.Song.ChartId, playRequest.Song.Revision, playRequest.Rules), snapshot, maxCombo, playRequest.Rules);
+            else flow.Preferences.SaveCompleted(playRequest.Song.SongId, playRequest.Difficulty.name, snapshot, maxCombo);
             recordSaved = true;
         }
         private void UnbindRecord()

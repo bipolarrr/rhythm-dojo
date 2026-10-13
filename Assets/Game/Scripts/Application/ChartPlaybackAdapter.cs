@@ -32,7 +32,7 @@ namespace RhythmDojo.Application
                     throw new ProjectValidationException(path + $".notes[{i}]", "Overlapping notes.", c.Id, i);
                 ends[n.Lane] = n.EndTime;
             }
-            var document = new SongDocument { SongId = p.Id.ToString("D"), Title = p.Title, Artist = p.Artist,
+            var document = new SongDocument { SongId = p.Id.ToString("D"), ChartId = c.Id.ToString("D"), Title = p.Title, Artist = p.Artist,
                 AudioId = p.Audio, ModeId = c.ModeId, AudioOffset = p.AudioOffsetSeconds,
                 CompletionTime = c.CompletionTimeSeconds, Notes = c.Notes, TempoPoints = p.TempoPoints };
             document.Validate(mode);

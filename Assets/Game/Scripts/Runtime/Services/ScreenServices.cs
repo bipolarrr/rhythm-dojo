@@ -23,6 +23,11 @@ namespace RhythmDojo.Services
         ISongLibrary Library { get; }
         void UpdateSelection(string songId, DifficultyProfile difficulty, ScrollMode mode, double multiplier);
     }
+    public interface ISelectionOptions
+    {
+        System.Collections.Generic.IReadOnlyList<DifficultyProfile> DifficultyOptions { get; }
+        System.Collections.Generic.IReadOnlyList<double> SpeedOptions { get; }
+    }
     public readonly struct AudioState
     {
         public readonly int BufferSize, BufferCount, SampleRate;

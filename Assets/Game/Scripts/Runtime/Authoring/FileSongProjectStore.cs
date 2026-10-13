@@ -17,6 +17,23 @@ namespace RhythmDojo.Authoring
         private readonly SongProjectJson json = new SongProjectJson();
         private static readonly Encoding Utf8 = new UTF8Encoding(false, true);
         public FileSongProjectStore(string songsRoot) { root = Path.GetFullPath(songsRoot); }
+        public Guid[] ListSongIds()
+        {
+            RejectLinks(root);
+            if (!Directory.Exists(root)) return Array.Empty<Guid>();
+            var ids = new System.Collections.Generic.List<Guid>();
+            foreach (string folder in Directory.GetDirectories(root))
+                if (Guid.TryParseExact(Path.GetFileName(folder), "D", out Guid id) && File.Exists(Path.Combine(folder, FileName))) ids.Add(id);
+            return ids.ToArray();
+        }
+        public SongProject Read(Guid songId, bool importVersion1 = false)
+        {
+            string path = Path.Combine(GetSongFolder(songId), FileName); RejectLinks(path);
+            string text = File.ReadAllText(path, Utf8);
+            var project = importVersion1 ? json.ImportVersion1(text) : json.Deserialize(text);
+            ProjectValidation.Require(project.Id == songId, "song.id", "Document UUID does not match folder UUID.");
+            return project;
+        }
         public string GetSongFolder(Guid songId)
         {
             ProjectValidation.Require(songId != Guid.Empty, "song.id", "Nonempty UUID required.");

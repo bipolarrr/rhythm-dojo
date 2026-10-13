@@ -25,6 +25,7 @@ namespace RhythmDojo.Core
         private string settingsReturnPath = SelectionPath;
         private readonly List<Behaviour> settingsSuspended = new List<Behaviour>();
         private GameObject settingsPreviousFocus;
+        private ModalInputScope settingsInputScope;
         private Action<string> returned;
         public GameSettings Settings => settings;
         public SongLibrary Library { get; private set; }
@@ -32,6 +33,7 @@ namespace RhythmDojo.Core
         public AudioSettingsService Audio { get; private set; }
         public ISelectionPreferences Preferences { get; private set; }
         public HardModePreferences HardMode { get; private set; }
+        public IPlayRulesService Rules { get; private set; }
         public bool IsEditorPlaytest => returned != null;
         public PlayRequest CurrentRequest { get; private set; }
         public bool Transitioning { get; private set; }
@@ -60,7 +62,10 @@ namespace RhythmDojo.Core
             var flow = new GameObject("App Flow").AddComponent<AppFlowController>();
             flow.settings = settings;
             flow.Library = new SongLibrary(); flow.Library.Register(new BuiltInSongProvider(settings.catalog));
+            flow.Library.Register(new ProjectSongProvider(new RhythmDojo.Authoring.FileSongProjectStore(
+                System.IO.Path.Combine(UnityEngine.Application.persistentDataPath, "Songs")), settings.catalog[0].Mode));
             flow.Preferences = new SelectionPreferences(); flow.HardMode = HardModePreferences.Load();
+            flow.Rules = new PlayRulesService();
             var presentation = PresentationPreferences.Load();
             bool hasPresentation = PlayerPrefs.HasKey(PresentationPreferences.StorageKey);
             presentation.SaveAudio();
@@ -76,7 +81,7 @@ namespace RhythmDojo.Core
         private void SceneLoaded(Scene scene, LoadSceneMode mode)
         {
             Transitioning = false;
-            if (scene.path == SettingsPath && settingsSuspended.Count > 0)
+            if (scene.path == SettingsPath && settingsInputScope != null)
             {
                 foreach (var root in scene.GetRootGameObjects())
                 {
@@ -118,14 +123,15 @@ namespace RhythmDojo.Core
             var difficulty = SelectedDifficulty; var scrollMode = SelectedScrollMode; var multiplier = SelectedMultiplier;
             int timingOffsetMs = Preferences.TimingOffsetMs;
             var healthRules = HardMode.Enabled ? HardMode.CreateRules() : null;
+            var rules = Rules.Snapshot;
             Transitioning = true;
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, lifetime.Token);
             PlayableSong song = null;
             try
             {
-                song = await Library.LoadAsync(songId, linked.Token);
+                song = await Library.LoadChartAsync(songId, (ChartSlot)Array.IndexOf(settings.difficulties, difficulty), linked.Token);
                 linked.Token.ThrowIfCancellationRequested();
-                var request = new PlayRequest(song, difficulty, scrollMode, multiplier, timingOffsetMs, healthRules);
+                var request = new PlayRequest(song, difficulty, scrollMode, multiplier, timingOffsetMs, healthRules, rules);
                 ReleaseRequest(); CurrentRequest = request; song = null;
                 ClearEditorReturn(); Load(GameplayPath);
             }
@@ -143,6 +149,7 @@ namespace RhythmDojo.Core
             var difficulty = SelectedDifficulty; var scrollMode = SelectedScrollMode; var multiplier = SelectedMultiplier;
             int timingOffsetMs = Preferences.TimingOffsetMs;
             var healthRules = HardMode.Enabled ? HardMode.CreateRules() : null;
+            var rules = Rules.Snapshot;
             Transitioning = true;
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, lifetime.Token);
             PlayableSong song = null;
@@ -150,7 +157,7 @@ namespace RhythmDojo.Core
             {
                 song = await loader.LoadAsync(document.Copy(), linked.Token);
                 linked.Token.ThrowIfCancellationRequested();
-                var request = new PlayRequest(song, difficulty, scrollMode, multiplier, timingOffsetMs, healthRules);
+                var request = new PlayRequest(song, difficulty, scrollMode, multiplier, timingOffsetMs, healthRules, rules);
                 ReleaseRequest(); CurrentRequest = request; song = null;
                 editorSessionId = sessionId; returnScenePath = returnPath; returned = onReturned;
                 Load(GameplayPath);
@@ -187,34 +194,20 @@ namespace RhythmDojo.Core
         {
             if (Transitioning) return;
             ClearEditorReturn();
-            if (settingsSuspended.Count == 0) { Load(settingsReturnPath); return; }
+            if (settingsInputScope == null) { Load(settingsReturnPath); return; }
             Transitioning = true;
-            var operation = SceneManager.UnloadSceneAsync(SettingsPath);
-            operation.completed += completed =>
+            try
             {
-                foreach (var component in settingsSuspended)
-                {
-                    if (!component) continue;
-                    component.enabled = true;
-                    if (component is MainMenuScreen menu) menu.ResumeFromSettings();
-                }
-                settingsSuspended.Clear();
-                var scene = SceneManager.GetSceneByPath(settingsReturnPath);
-                if (scene.IsValid() && scene.isLoaded) SceneManager.SetActiveScene(scene);
-                if (EventSystem.current && settingsPreviousFocus) EventSystem.current.SetSelectedGameObject(settingsPreviousFocus);
-                Transitioning = false;
-            };
+                settingsInputScope.Close(() => SceneManager.UnloadSceneAsync(SettingsPath),
+                    () => { Transitioning = false; settingsInputScope = null; });
+            }
+            catch { Transitioning = false; throw; }
         }
         private void OpenSettingsPopup()
         {
             if (SceneManager.GetSceneByPath(SettingsPath).isLoaded) return;
-            settingsPreviousFocus = EventSystem.current ? EventSystem.current.currentSelectedGameObject : null;
             var scene = SceneManager.GetSceneByPath(settingsReturnPath);
-            foreach (var root in scene.GetRootGameObjects())
-                foreach (var component in root.GetComponentsInChildren<Behaviour>())
-                    if (component.enabled && (component is SongSelectionScreen || component is MainMenuScreen ||
-                        component is GraphicRaycaster || component is EventSystem || component is BaseInputModule))
-                    { settingsSuspended.Add(component); component.enabled = false; }
+            settingsInputScope = new ModalInputScope(scene);
             Transitioning = true;
             try
             {
@@ -223,13 +216,7 @@ namespace RhythmDojo.Core
             }
             catch
             {
-                foreach (var component in settingsSuspended)
-                {
-                    if (!component) continue;
-                    component.enabled = true;
-                    if (component is MainMenuScreen menu) menu.ResumeFromSettings();
-                }
-                settingsSuspended.Clear(); Transitioning = false; throw;
+                Transitioning = false; settingsInputScope.Dispose(); settingsInputScope = null; throw;
             }
         }
         private void Load(string path)

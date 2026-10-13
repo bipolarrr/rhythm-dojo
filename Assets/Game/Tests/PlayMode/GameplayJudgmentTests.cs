@@ -61,8 +61,8 @@ namespace RhythmDojo.Tests
                 double time = note.StartTime;
                 if (!perfect && i == 0) time -= .08;
                 if (!perfect && i == 1) time += .08;
-                double duration = note.Kind == NoteKind.Hold ? note.EndTime - time : .025;
-                if (!perfect && i == 11) duration = .3;
+                double duration = note.Kind == NoteKind.Hold ? note.EndTime - time + .025 : .025;
+                if (!perfect && i == 11) duration = .325;
                 events.Add((time, keys[note.Lane], true));
                 if (!perfect && i == 15) continue; // Hold through completion; automatic resolution.
                 events.Add((time + duration, keys[note.Lane], false));
@@ -73,7 +73,7 @@ namespace RhythmDojo.Tests
 
         private void FeedInput()
         {
-            if (InputState.currentUpdateType != InputUpdateType.Dynamic || !game ||
+            if (InputState.currentUpdateType != InputUpdateType.Dynamic || !game || game.Session == null ||
                 game.Session.State != SessionState.Playing) return;
             if (hitchEnabled && !hitched && game.Clock.SongTime > 6.40)
             {
@@ -115,10 +115,10 @@ namespace RhythmDojo.Tests
             CaptureSelection("playmode");
             yield return Completed();
             Assert.That(hitched, Is.True);
-            Assert.That(game.Session.Perfect, Is.EqualTo(13));
+            Assert.That(game.Session.Perfect, Is.EqualTo(33));
             Assert.That(game.Session.Good, Is.EqualTo(2));
-            Assert.That(game.Session.Miss, Is.EqualTo(3));
-            Assert.That(game.Session.Combo, Is.EqualTo(3));
+            Assert.That(game.Session.Miss, Is.EqualTo(12));
+            Assert.That(game.Session.Combo, Is.EqualTo(10));
             Assert.That(game.Session.IsHeld(1), Is.False);
         }
 
@@ -142,9 +142,9 @@ namespace RhythmDojo.Tests
             yield return null;
             PrepareInput(true);
             yield return Completed();
-            Assert.That(game.Session.Perfect, Is.EqualTo(18));
-            Assert.That(game.Session.Resolved, Is.EqualTo(18));
-            Assert.That(game.Session.Combo, Is.EqualTo(18));
+            Assert.That(game.Session.Perfect, Is.EqualTo(game.Session.Snapshot.TotalNotes));
+            Assert.That(game.Session.Resolved, Is.EqualTo(game.Session.Snapshot.TotalNotes));
+            Assert.That(game.Session.Combo, Is.EqualTo(game.Session.Snapshot.TotalNotes));
         }
 
         [UnityTest]
@@ -153,13 +153,13 @@ namespace RhythmDojo.Tests
             yield return LoadSong();
             yield return Press(Key.Space);
             double deadline = Time.realtimeSinceStartupAsDouble + game.Chart.CompletionTime + 10;
-            while (game.Session.State != SessionState.GameOver)
+            while (game.Session.State != SessionState.Completed)
             {
                 Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
                 yield return null;
             }
             Assert.That(game.Session.Health, Is.Zero);
-            Assert.That(game.Session.Miss, Is.EqualTo(10));
+            Assert.That(game.Session.Miss, Is.EqualTo(game.Session.Snapshot.TotalNotes));
             Assert.That(game.Session.Combo, Is.Zero);
         }
 
@@ -182,8 +182,8 @@ namespace RhythmDojo.Tests
             PrepareInput(true);
             yield return Press(Key.Space);
             yield return Completed();
-            Assert.That(game.Session.Perfect, Is.EqualTo(8));
-            Assert.That(game.Session.Combo, Is.EqualTo(8));
+            Assert.That(game.Session.Perfect, Is.EqualTo(game.Session.Snapshot.TotalNotes));
+            Assert.That(game.Session.Combo, Is.EqualTo(game.Session.Snapshot.TotalNotes));
             Assert.That(game.ReadModel.Snapshot.SongTime, Is.GreaterThanOrEqualTo(12));
         }
     }

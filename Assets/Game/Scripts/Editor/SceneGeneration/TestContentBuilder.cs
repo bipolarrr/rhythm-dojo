@@ -29,7 +29,7 @@ namespace RhythmDojo.EditorTools
         public const string SettingsPath = "Assets/Game/Settings/GameSettings.asset";
         public const string VariableChartPath = "Assets/Game/Settings/TempoChart.asset";
         [MenuItem("Game Tools/Content/Prepare Default and Verification Content")]
-        public static void PrepareMenu() => Prepare();
+        public static void PrepareMenu() { Prepare(); VerificationProjectBuilder.Prepare(); }
         public static GeneratedContent Prepare()
         {
             foreach (string folder in new[] { "Scenes", "Settings", "Materials", "Audio", "Prefabs" })

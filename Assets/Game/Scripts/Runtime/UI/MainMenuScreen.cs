@@ -5,7 +5,7 @@ using RhythmDojo.Services;
 
 namespace RhythmDojo.UI
 {
-    public sealed class MainMenuScreen : MonoBehaviour
+    public sealed class MainMenuScreen : MonoBehaviour, IModalInputParticipant
     {
         [SerializeField] private MainMenuView view;
         [Header("Title Beat Bounce")]
@@ -119,6 +119,7 @@ namespace RhythmDojo.UI
             starting = false;
             view.SetMenuInteractable(true);
         }
+        public void ResumeAfterModal() => ResumeFromSettings();
 
         private void OpenSettings()
         {

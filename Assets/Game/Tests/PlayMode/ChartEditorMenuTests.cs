@@ -124,6 +124,10 @@ namespace RhythmDojo.Tests
             }
             Click("파일"); Input("Audio Path", wav); Click("Import Audio"); yield return Idle();
             Assert.That(session.Snapshot.Audio, Does.StartWith("audio/"));
+            screen.SelectSlot((int)ChartSlot.Easy);
+            session.Edit(edit => edit.AddNote(screen.ChartId, NoteData.Tap(1, .5)));
+            screen.SelectSlot((int)ChartSlot.Hard);
+            var activeChartId = screen.ChartId;
             session.Edit(edit => { edit.SetMetadata("Playtest", "Test"); edit.AddNote(screen.ChartId, NoteData.Tap(0, 1)); });
             Click("파일");
             yield return null;
@@ -141,9 +145,12 @@ namespace RhythmDojo.Tests
             yield return null;
             screen = Object.FindFirstObjectByType<ChartEditorScreen>();
             Assert.That(screen.Session, Is.SameAs(session));
+            Assert.That(screen.ChartId, Is.EqualTo(activeChartId));
+            Assert.That(session.Snapshot.Charts.Length, Is.EqualTo(3));
             Assert.That(session.IsDirty, Is.True);
             session.Undo();
             Assert.That(session.GetNotes(screen.ChartId), Is.Empty);
+            session.Redo(); Assert.That(session.GetNotes(screen.ChartId).Length, Is.EqualTo(1));
             Assert.That(flow.CurrentRequest, Is.Null);
         }
     }

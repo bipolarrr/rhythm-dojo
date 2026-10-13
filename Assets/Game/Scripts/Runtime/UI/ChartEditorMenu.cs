@@ -27,6 +27,8 @@ namespace RhythmDojo.UI
         private Func<SongProject, ISongDocumentLoader> loaderFactory;
         private EditorSession observed;
         private bool leavingForPlaytest;
+        private Action saved;
+        [SerializeField] private Text activeChart;
         private readonly CancellationTokenSource lifetime = new CancellationTokenSource();
         private static EditorSession returningSession;
         public bool IsInitialized => store != null;
@@ -42,11 +44,12 @@ namespace RhythmDojo.UI
         }
 
         public void Initialize(FileSongProjectStore projectStore, IEditorPlaytestService service,
-            Func<SongProject, ISongDocumentLoader> createLoader)
+            Func<SongProject, ISongDocumentLoader> createLoader, Action saved = null)
         {
             store = projectStore;
             playtest = service;
             loaderFactory = createLoader;
+            this.saved = saved;
             Observe();
             FillSettings();
             ShowStatus("파일에서 음원을 가져오고 노트를 배치하세요.");
@@ -65,6 +68,7 @@ namespace RhythmDojo.UI
         {
             undo.interactable = observed.CanUndo;
             redo.interactable = observed.CanRedo;
+            if (activeChart) activeChart.text = "채보: " + Array.Find(observed.Snapshot.Charts, c => c.Id == observed.ActiveChartId)?.Slot;
         }
 
         private void OnDestroy()
@@ -122,6 +126,7 @@ namespace RhythmDojo.UI
         public void Save() => RunAsync(async () =>
         {
             await screen.Session.SaveAsync(store, lifetime.Token);
+            saved?.Invoke();
             ShowStatus("저장 완료: " + Path.Combine(store.GetSongFolder(screen.Session.Snapshot.Id), FileSongProjectStore.FileName));
         });
 
@@ -135,6 +140,14 @@ namespace RhythmDojo.UI
             screen.SetSession(replacement);
             Observe(); FillSettings();
             ShowStatus("불러왔습니다. 이전 작업은 자동 저장했습니다.");
+        });
+        public void ImportLegacy() => RunAsync(async () =>
+        {
+            if (!Guid.TryParse(projectId.text, out Guid id)) throw new InvalidOperationException("가져올 곡 ID를 입력하세요.");
+            var replacement = new EditorSession(store.Read(id, true));
+            if (screen.Session.IsDirty) await screen.Session.SaveAsync(store, lifetime.Token);
+            screen.SetSession(replacement); Observe(); FillSettings();
+            ShowStatus("v1 가져오기 완료. ID와 편집 데이터를 유지합니다. 저장하면 v2 형식으로 기록합니다.");
         });
 
         public void ImportAudio() => RunAsync(async () =>

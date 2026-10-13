@@ -7,6 +7,7 @@ using RhythmDojo.Gameplay;
 
 namespace RhythmDojo.Application
 {
+    public enum ChartSlot { Easy, Standard, Hard }
     // Detached authoring snapshots; EditorSession never exposes its owned instances.
     public sealed class SongProject
     {
@@ -21,13 +22,14 @@ namespace RhythmDojo.Application
     }
     public sealed class ChartDocument
     {
+        public ChartSlot? Slot;
         public Guid Id = Guid.NewGuid();
         public string Name = "", ModeId = "";
         public int LaneCount;
         public double CompletionTimeSeconds;
         public NoteData[] Notes = Array.Empty<NoteData>();
         public ChartDocument Copy() => new ChartDocument { Id = Id, Name = Name, ModeId = ModeId,
-            LaneCount = LaneCount, CompletionTimeSeconds = CompletionTimeSeconds, Notes = (NoteData[])Notes.Clone() };
+            LaneCount = LaneCount, CompletionTimeSeconds = CompletionTimeSeconds, Notes = (NoteData[])Notes.Clone(), Slot = Slot };
     }
     public interface ISongProjectStore
     {
@@ -77,10 +79,12 @@ namespace RhythmDojo.Application
                     $"timing.tempoPoints[{i}]", "Finite numbers required.");
             Require(p.Charts != null, "charts", "Array required.");
             var ids = new HashSet<Guid> { p.Id };
+            var slots = new HashSet<ChartSlot>();
             for (int i = 0; i < p.Charts.Length; i++)
             {
                 var c = p.Charts[i]; string path = $"charts[{i}]";
                 Require(c != null, path, "Chart required.");
+                Require(!c.Slot.HasValue || (Enum.IsDefined(typeof(ChartSlot), c.Slot.Value) && slots.Add(c.Slot.Value)), path + ".slot", "Unique Easy, Standard or Hard slot required.");
                 Require(c.Id != Guid.Empty && ids.Add(c.Id), path + ".id", "Unique nonempty UUID required.");
                 Require(c.Name != null && c.ModeId != null, path, "Name and modeId must be strings.");
                 Require(double.IsFinite(c.CompletionTimeSeconds), path + ".completionTimeSeconds", "Finite number required.");
@@ -104,7 +108,7 @@ namespace RhythmDojo.Application
             a.Id == b.Id && a.Title == b.Title && a.Artist == b.Artist && a.Audio == b.Audio &&
             a.AudioOffsetSeconds == b.AudioOffsetSeconds && a.TempoPoints.SequenceEqual(b.TempoPoints) &&
             a.Charts.Length == b.Charts.Length && a.Charts.Zip(b.Charts, (x, y) => x.Id == y.Id && x.Name == y.Name &&
-                x.ModeId == y.ModeId && x.LaneCount == y.LaneCount && x.CompletionTimeSeconds == y.CompletionTimeSeconds &&
+                x.ModeId == y.ModeId && x.Slot == y.Slot && x.LaneCount == y.LaneCount && x.CompletionTimeSeconds == y.CompletionTimeSeconds &&
                 x.Notes.SequenceEqual(y.Notes)).All(equal => equal);
     }
 }

@@ -12,6 +12,8 @@ namespace RhythmDojo.Services
         public string songId, difficulty;
         public int score, maxCombo;
         public double rate;
+        public bool failed, gaugeClear;
+        public int challengeAchievements;
         public string Rank => rate >= 95 ? "S" : rate >= 90 ? "A" : rate >= 80 ? "B" : rate >= 70 ? "C" : "D";
     }
 
@@ -40,17 +42,19 @@ namespace RhythmDojo.Services
             public int timingOffsetMs;
             public List<string> favorites = new List<string>();
             public List<SongRecord> records = new List<SongRecord>();
+            public int recordVersion;
         }
         private readonly string key;
         private Data data;
         public SelectionPreferences(string storageKey = StorageKey)
         {
             key = storageKey;
-            try { data = JsonUtility.FromJson<Data>(PlayerPrefs.GetString(key, "")); }
+            try { data = key == null ? new Data() : JsonUtility.FromJson<Data>(PlayerPrefs.GetString(key, "")); }
             catch (ArgumentException) { data = null; }
             data ??= new Data();
             data.favorites ??= new List<string>();
             data.records ??= new List<SongRecord>();
+            if (data.recordVersion != 2) { data.records.Clear(); data.recordVersion = 2; Save(); }
             if (!Enum.IsDefined(typeof(ScrollMode), data.scrollMode)) data.scrollMode = ScrollMode.Constant;
             if (!double.IsFinite(data.multiplier) || data.multiplier <= 0) data.multiplier = 1;
             data.timingOffsetMs = Mathf.Clamp(data.timingOffsetMs, -200, 200);
@@ -67,18 +71,29 @@ namespace RhythmDojo.Services
             Save();
         }
         public SongRecord FindRecord(string id, string difficulty) =>
-            data.records.Find(r => r != null && r.songId == id && r.difficulty == difficulty);
+            data.records.Find(r => r != null && r.songId == id && r.difficulty == difficulty && !r.failed);
+        public SongRecord FindFailedRecord(string id, string difficulty) =>
+            data.records.Find(r => r != null && r.songId == id && r.difficulty == difficulty && r.failed);
         public void SaveCompleted(string id, string difficulty, SessionSnapshot snapshot, int maxCombo)
         {
             if (snapshot.State != SessionState.Completed || snapshot.TotalNotes <= 0 || string.IsNullOrEmpty(id)) return;
-            double rate = (snapshot.Perfect + snapshot.Good * .5) / snapshot.TotalNotes * 100;
-            int score = (int)Math.Round(rate * 10000, MidpointRounding.AwayFromZero);
-            var record = FindRecord(id, difficulty);
+            double rate = snapshot.AccuracyRate;
+            int score = ScoreRules.Score(rate);
+            var record = snapshot.Failure.Failed ? FindFailedRecord(id, difficulty) : FindRecord(id, difficulty);
             if (record != null && (record.score > score || (record.score == score && record.maxCombo >= maxCombo))) return;
-            if (record == null) { record = new SongRecord { songId = id, difficulty = difficulty }; data.records.Add(record); }
+            if (record == null) { record = new SongRecord { songId = id, difficulty = difficulty, failed = snapshot.Failure.Failed }; data.records.Add(record); }
             record.score = score; record.rate = rate; record.maxCombo = maxCombo; Save();
         }
-        public void Save() { PlayerPrefs.SetString(key, JsonUtility.ToJson(data)); PlayerPrefs.Save(); }
+        public void Save() { if (key == null) return; PlayerPrefs.SetString(key, JsonUtility.ToJson(data)); PlayerPrefs.Save(); }
+        public void SaveCompleted(string id, string difficulty, SessionSnapshot snapshot, int maxCombo, PlayRules rules)
+        {
+            SaveCompleted(id, difficulty, snapshot, maxCombo);
+            if (snapshot.State != SessionState.Completed || snapshot.Failure.Failed) return;
+            var record = FindRecord(id, difficulty); if (record == null) return;
+            if (rules.Mode == RhythmDojo.Gameplay.PlayMode.Gauge) record.gaugeClear = true;
+            else record.challengeAchievements |= 1 << (rules.ChallengePreset - 1);
+            Save();
+        }
     }
 
     public interface ITitleNavigation

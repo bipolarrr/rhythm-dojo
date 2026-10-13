@@ -116,6 +116,12 @@ namespace RhythmDojo.Application
             State.Notes.Add(chart.Id, new List<EditorNote>()); return chart.Id;
         }
         public void RenameChart(Guid id, string name) { Chart(id).Name = name; }
+        public void SetChartSlot(Guid id, ChartSlot? slot) { Chart(id).Slot = slot; }
+        public Guid AddChartSlot(ChartSlot slot, string modeId, int laneCount, double completionTime = 0)
+        {
+            Guid id = AddChart(slot.ToString(), modeId, laneCount, completionTime);
+            SetChartSlot(id, slot); return id;
+        }
         public void SetChartSettings(Guid id, string modeId, int laneCount, double completionTime)
         { var c = Chart(id); c.ModeId = modeId; c.LaneCount = laneCount; c.CompletionTimeSeconds = completionTime; }
         public void DeleteChart(Guid id)

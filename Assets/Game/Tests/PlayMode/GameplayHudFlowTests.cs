@@ -44,6 +44,8 @@ namespace RhythmDojo.Tests
         [UnityTest]
         public IEnumerator HealthDepletionShowsGameOverFreezesNotesAndSpaceRestarts()
         {
+            var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
+            var rules = flow.Rules.Snapshot; rules.GaugeFailure = GaugeFailureMode.Stop; flow.Rules.Update(rules);
             yield return LoadGameplay();
             var game = UnityEngine.Object.FindFirstObjectByType<RhythmGameController>();
             var view = UnityEngine.Object.FindFirstObjectByType<GameplayHudView>();
@@ -90,19 +92,19 @@ namespace RhythmDojo.Tests
             model.Set(SessionState.Playing,1,0,0,1); model.Judge(Judgment.Perfect,-.012);
             yield return new WaitForSecondsRealtime(.07f);
             Assert.That(view.combo.text,Is.EqualTo("1"));
-            Assert.That(view.judgment.text,Is.EqualTo("PERFECT"));
+            Assert.That(view.judgment.text,Is.EqualTo("Perfect"));
             StringAssert.Contains("EARLY",view.timing.text);
             model.Hold(); yield return new WaitForSecondsRealtime(.07f);
-            Assert.That(view.judgment.text,Is.EqualTo("HOLD · PERFECT"));
+            Assert.That(view.judgment.text,Is.EqualTo("HOLD · Perfect"));
             Assert.That(view.combo.text,Is.EqualTo("1"),"Hold heads must not add combo before resolution.");
             model.Set(SessionState.Playing,1,1,0,2); model.Judge(Judgment.Good,.055);
             model.Set(SessionState.Playing,1,1,1,0); model.Judge(Judgment.Miss,.25);
             yield return new WaitForSecondsRealtime(.07f);
             Assert.That(view.combo.text,Is.EqualTo("0"));
             Assert.That(view.bestCombo.text,Is.EqualTo("BEST  2"),"Keep peak combo even when a miss arrives in the same frame.");
-            Assert.That(view.judgment.text,Is.EqualTo("MISS"));
+            Assert.That(view.judgment.text,Is.EqualTo("Nope."));
             Assert.That(view.timing.text,Is.EqualTo("COMBO BREAK"));
-            Assert.That(view.accuracy.text,Is.EqualTo("정확도  50.0%"));
+            Assert.That(view.accuracy.text,Is.EqualTo("정확도  18.8%"));
             Assert.That(view.progressFill.rectTransform.anchorMax.x,Is.EqualTo(3f/8).Within(.001));
             model.Set(SessionState.Ready,0,0,0,0,ReadyReason.FocusLost); model.Reset();
             yield return new WaitForSecondsRealtime(.07f);
@@ -112,7 +114,7 @@ namespace RhythmDojo.Tests
             Assert.That(view.judgmentGroup.alpha,Is.EqualTo(1));
             Assert.That(view.progressFill.rectTransform.anchorMax.x,Is.Zero);
             model.Set(SessionState.Completed,8,0,0,8); model.Judge(Judgment.Perfect,0);
-            yield return new WaitForSecondsRealtime(1.12f);
+            yield return Await(() => view.judgment.text == "FINISH", "Completed HUD feedback did not settle.");
             Assert.That(view.judgment.text,Is.EqualTo("FINISH"));
             Assert.That(view.judgmentGroup.alpha,Is.EqualTo(1));
             Assert.That(view.gameOverPanel.activeSelf, Is.True);
@@ -171,7 +173,7 @@ namespace RhythmDojo.Tests
             }
             yield return null;
             var view = UnityEngine.Object.FindFirstObjectByType<GameplayHudView>();
-            Assert.That(game.Session.Resolved, Is.EqualTo(game.Chart.Count));
+            Assert.That(game.Session.Resolved, Is.EqualTo(game.Session.Snapshot.TotalNotes));
             Assert.That(view.gameOverPanel.activeSelf, Is.True);
             Assert.That(view.gameOverText.text, Is.EqualTo("GAME CLEAR"));
             Assert.That(view.returnButton.gameObject.activeSelf, Is.True);

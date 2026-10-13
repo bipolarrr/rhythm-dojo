@@ -11,6 +11,8 @@ namespace RhythmDojo.Content
         private Action release;
         private bool disposed;
         public string SongId { get; }
+        public string ChartId { get; }
+        public string Revision { get; }
         public string Title { get; }
         public string Artist { get; }
         public ChartData Chart { get; }
@@ -26,6 +28,8 @@ namespace RhythmDojo.Content
             if (!mode) throw new InvalidOperationException("ModeId: mode missing.");
             var snapshot = document.Copy(); snapshot.Validate(mode.ToRules());
             SongId = snapshot.SongId; Title = snapshot.Title; Artist = snapshot.Artist;
+            ChartId = snapshot.ChartId ?? snapshot.SongId + ":standard";
+            Revision = RecordIdentity.Chart(snapshot);
             Chart = new ChartData(snapshot.Notes, snapshot.CompletionTime);
             Tempo = new TempoMap(snapshot.TempoPoints); AudioOffset = snapshot.AudioOffset;
             AudioClip = audio; Mode = UnityEngine.Object.Instantiate(mode); release = releaseAudio;

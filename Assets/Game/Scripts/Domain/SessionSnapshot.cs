@@ -11,14 +11,24 @@ namespace RhythmDojo.Gameplay
         public int TotalNotes { get; }
         public int Health { get; }
         public double HealthRatio { get; }
+        public FailureSnapshot Failure { get; }
+        public double AccuracyRate { get; }
+        public int MaximumHealth { get; }
+        public PlayMode Mode { get; }
         public SessionSnapshot(SessionState state, int perfect, int good, int miss, int combo, int totalNotes)
             : this(state, perfect, good, miss, combo, totalNotes, RhythmSession.MaximumHealth) { }
         public SessionSnapshot(SessionState state, int perfect, int good, int miss, int combo, int totalNotes, int health)
             : this(state, perfect, good, miss, combo, totalNotes, health, (double)health / RhythmSession.MaximumHealth) { }
         public SessionSnapshot(SessionState state, int perfect, int good, int miss, int combo, int totalNotes, int health, double healthRatio)
+            : this(state, perfect, good, miss, combo, totalNotes, health, healthRatio, default) { }
+        public SessionSnapshot(SessionState state, int perfect, int good, int miss, int combo, int totalNotes, int health, double healthRatio, FailureSnapshot failure, PlayRules rules = null)
         {
+            Failure = failure;
+            MaximumHealth = rules?.MaximumHealth ?? RhythmSession.MaximumHealth;
+            Mode = rules?.Mode ?? PlayMode.Gauge;
+            AccuracyRate = ScoreRules.Rate(perfect, good, miss, totalNotes, rules ?? new PlayRules());
             State = state; Perfect = perfect; Good = good; Miss = miss; Combo = combo; TotalNotes = totalNotes;
-            Health = System.Math.Clamp(health, 0, RhythmSession.MaximumHealth);
+            Health = System.Math.Max(health, 0);
             HealthRatio = double.IsFinite(healthRatio) ? System.Math.Clamp(healthRatio, 0, 1) : (double)Health / RhythmSession.MaximumHealth;
         }
     }

@@ -62,4 +62,8 @@ namespace RhythmDojo.Application
         event Action<HoldStartedEvent> HoldStarted;
         event Action ResetOccurred;
     }
+    public interface IFailureReadModel
+    {
+        event Action<FailureSnapshot> Failed;
+    }
 }

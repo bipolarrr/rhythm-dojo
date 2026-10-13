@@ -15,7 +15,7 @@ namespace RhythmDojo.Authoring
         private sealed class FileDto
         {
             [JsonProperty("format", Order = 0)] public string Format = "rhythm-dojo-chart";
-            [JsonProperty("version", Order = 1)] public int Version = 1;
+            [JsonProperty("version", Order = 1)] public int Version = 2;
             [JsonProperty("song", Order = 2)] public SongDto Song;
             [JsonProperty("timing", Order = 3)] public TimingDto Timing;
             [JsonProperty("charts", Order = 4)] public ChartDto[] Charts;
@@ -43,6 +43,7 @@ namespace RhythmDojo.Authoring
         [JsonObject(MemberSerialization.OptIn)]
         private sealed class ChartDto
         {
+            [JsonProperty("slot", Order = 6)] public string Slot;
             [JsonProperty("id", Order = 0)] public string Id;
             [JsonProperty("name", Order = 1)] public string Name;
             [JsonProperty("modeId", Order = 2)] public string Mode;
@@ -64,12 +65,15 @@ namespace RhythmDojo.Authoring
             var dto = new FileDto { Song = new SongDto { Id = p.Id.ToString("D"), Title = p.Title, Artist = p.Artist, Audio = p.Audio },
                 Timing = new TimingDto { Offset = p.AudioOffsetSeconds, Points = p.TempoPoints.Select(t => new TempoDto { Time = t.StartTimeSeconds, Bpm = t.Bpm }).ToArray() },
                 Charts = p.Charts.Select(c => new ChartDto { Id = c.Id.ToString("D"), Name = c.Name, Mode = c.ModeId,
-                    Lanes = c.LaneCount, Completion = c.CompletionTimeSeconds,
+                    Lanes = c.LaneCount, Completion = c.CompletionTimeSeconds, Slot = c.Slot?.ToString(),
                     Notes = c.Notes.Select(n => new NoteDto { Kind = n.Kind == NoteKind.Tap ? "tap" : "hold", Lane = n.Lane,
                         Time = n.StartTime, End = n.Kind == NoteKind.Hold ? n.EndTime : (double?)null }).ToArray() }).ToArray() };
             return JsonConvert.SerializeObject(dto, Formatting.Indented).Replace("\r\n", "\n") + "\n";
         }
         public SongProject Deserialize(string json)
+            => DeserializeVersion(json, false);
+        public SongProject ImportVersion1(string json) => DeserializeVersion(json, true);
+        private SongProject DeserializeVersion(string json, bool importVersion1)
         {
             try
             {
@@ -79,7 +83,8 @@ namespace RhythmDojo.Authoring
                 if (reader.Read()) Fail("$", "Unexpected trailing content.");
                 Fields(root, "format", "version", "song", "timing", "charts");
                 if (String(root["format"]) != "rhythm-dojo-chart") Fail("format", "Unsupported format.");
-                if (Integer(root["version"]) != 1) Fail("version", "Unsupported version.");
+                int version = Integer(root["version"]);
+                if (version != (importVersion1 ? 1 : 2)) Fail("version", "Expected v2. Use ImportVersion1 for legacy projects.");
                 var song = root["song"]; Fields(song, "id", "title", "artist", "audio");
                 var timing = root["timing"]; Fields(timing, "audioOffsetSeconds", "tempoPoints");
                 var p = new SongProject { Id = Id(song["id"]), Title = String(song["title"]), Artist = String(song["artist"]),
@@ -87,8 +92,10 @@ namespace RhythmDojo.Authoring
                     AudioOffsetSeconds = Number(timing["audioOffsetSeconds"]),
                     TempoPoints = Array(timing["tempoPoints"]).Select(t => { Fields(t, "timeSeconds", "bpm"); return new TempoPoint(Number(t["timeSeconds"]), Number(t["bpm"])); }).ToArray(),
                     Charts = Array(root["charts"]).Select(c => {
-                        Fields(c, "id", "name", "modeId", "laneCount", "completionTimeSeconds", "notes");
+                        Fields(c, version == 1 ? new[] { "id", "name", "modeId", "laneCount", "completionTimeSeconds", "notes" } :
+                            new[] { "id", "name", "modeId", "laneCount", "completionTimeSeconds", "notes", "slot" });
                         return new ChartDocument { Id = Id(c["id"]), Name = String(c["name"]), ModeId = String(c["modeId"]),
+                            Slot = version == 1 || c["slot"].Type == JTokenType.Null ? (ChartSlot?)null : ParseSlot(c["slot"]),
                             LaneCount = Integer(c["laneCount"]), CompletionTimeSeconds = Number(c["completionTimeSeconds"]),
                             Notes = Array(c["notes"]).Select(n => {
                                 if (n.Type != JTokenType.Object) Fail(n.Path, "Object required.");
@@ -99,11 +106,19 @@ namespace RhythmDojo.Authoring
                                     NoteData.Hold(Integer(n["lane"]), Number(n["timeSeconds"]), Number(n["endTimeSeconds"]));
                             }).ToArray() };
                     }).ToArray() };
+                if (importVersion1 && p.Charts.Length == 1) p.Charts[0].Slot = ChartSlot.Standard;
                 return ProjectValidation.Normalize(p);
             }
             catch (JsonException e) { throw new ProjectValidationException("$", e.Message); }
         }
         private static void Fail(string path, string message) => throw new ProjectValidationException(path, message);
+        private static ChartSlot ParseSlot(JToken token)
+        {
+            string value = String(token);
+            if (!Enum.TryParse(value, out ChartSlot slot) || slot.ToString() != value || !Enum.IsDefined(typeof(ChartSlot), slot))
+                throw new ProjectValidationException(token.Path, "Expected Easy, Standard or Hard.");
+            return slot;
+        }
         private static void Fields(JToken token, params string[] names)
         {
             if (!(token is JObject obj)) { Fail(token?.Path ?? "$", "Object required."); return; }

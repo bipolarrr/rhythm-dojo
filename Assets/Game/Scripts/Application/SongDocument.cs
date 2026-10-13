@@ -10,6 +10,7 @@ namespace RhythmDojo.Application
     public sealed class SongDocument
     {
         public string SongId;
+        public string ChartId;
         public string Title;
         public string Artist;
         public string ModeId;
@@ -21,7 +22,7 @@ namespace RhythmDojo.Application
 
         public SongDocument Copy() => new SongDocument
         {
-            SongId = SongId, Title = Title, Artist = Artist, ModeId = ModeId, AudioId = AudioId,
+            SongId = SongId, ChartId = ChartId, Title = Title, Artist = Artist, ModeId = ModeId, AudioId = AudioId,
             AudioOffset = AudioOffset, CompletionTime = CompletionTime,
             TempoPoints = TempoPoints == null ? null : (TempoPoint[])TempoPoints.Clone(),
             Notes = Notes == null ? null : (NoteData[])Notes.Clone()

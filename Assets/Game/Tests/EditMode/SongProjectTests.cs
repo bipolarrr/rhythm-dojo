@@ -98,9 +98,9 @@ namespace RhythmDojo.Tests
             var p = Example(); string text = json.Serialize(p);
             switch (failure)
             {
-                case "version": text = text.Replace("\"version\": 1", "\"version\": 2"); break;
+                case "version": text = text.Replace("\"version\": 2", "\"version\": 99"); break;
                 case "field": text = text.Replace("\"artist\":", "\"unknown\":"); break;
-                case "duplicateKey": text = text.Replace("\"version\": 1", "\"version\": 1, \"version\": 1"); break;
+                case "duplicateKey": text = text.Replace("\"version\": 2", "\"version\": 2, \"version\": 2"); break;
                 case "kind": text = text.Replace("\"tap\"", "\"mine\""); break;
                 case "duplicateId": text = text.Replace(p.Charts[1].Id.ToString(), p.Charts[0].Id.ToString()); break;
                 case "id": text = text.Replace(p.Id.ToString(), "bad"); break;
@@ -128,7 +128,7 @@ namespace RhythmDojo.Tests
         [Test] public void PublishedExamplesLoad()
         {
             foreach (var path in Directory.GetFiles("Docs/examples", "*.rdchart.json"))
-                Assert.That(json.Deserialize(File.ReadAllText(path)), Is.Not.Null);
+                Assert.That(json.ImportVersion1(File.ReadAllText(path)), Is.Not.Null);
         }
         [Test] public async Task CancellationFailureAndConcurrentStoresPreserveCommittedFiles()
         {

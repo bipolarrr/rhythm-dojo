@@ -22,7 +22,7 @@ namespace RhythmDojo.Services
         public HardModePreferences(string storageKey = StorageKey)
         {
             key = storageKey;
-            try { data = JsonUtility.FromJson<Data>(PlayerPrefs.GetString(key, "")); }
+            try { data = key == null ? new Data() : JsonUtility.FromJson<Data>(PlayerPrefs.GetString(key, "")); }
             catch (ArgumentException) { data = null; }
             data ??= new Data();
             for (int i = 0; i < 3; i++)
@@ -56,6 +56,6 @@ namespace RhythmDojo.Services
         }
         public HardModeHealthRules CreateRules() => new HardModeHealthRules(
             GetRule(Judgment.Perfect), GetRule(Judgment.Good), GetRule(Judgment.Miss));
-        public void Save() { PlayerPrefs.SetString(key, JsonUtility.ToJson(data)); PlayerPrefs.Save(); }
+        public void Save() { if (key == null) return; PlayerPrefs.SetString(key, JsonUtility.ToJson(data)); PlayerPrefs.Save(); }
     }
 }

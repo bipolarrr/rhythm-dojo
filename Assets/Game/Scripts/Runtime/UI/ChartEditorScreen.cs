@@ -49,7 +49,7 @@ namespace RhythmDojo.UI
                 throw new InvalidOperationException("Chart editor requires a four-lane mode and timeline renderer.");
 
             session = new EditorSession(new SongProject());
-            session.Edit(edit => chartId = edit.AddChart("Normal", mode.name, mode.LaneCount, DefaultChartDuration));
+            session.Edit(edit => chartId = edit.AddChartSlot(ChartSlot.Standard, mode.name, mode.LaneCount, DefaultChartDuration));
             SetSession(ChartEditorMenu.TakeReturningSession() ?? session);
         }
 
@@ -72,9 +72,33 @@ namespace RhythmDojo.UI
 
         private void RefreshSession()
         {
+            if (session.ActiveChartId.HasValue) chartId = session.ActiveChartId.Value;
             tempo = new TempoMap(session.Snapshot.TempoPoints);
             RefreshBeatLines();
             RefreshNotes();
+        }
+        public void SelectSlot(int value)
+        {
+            if (IsBusy || value < 0 || value > 2) return;
+            var slot = (ChartSlot)value;
+            var chart = Array.Find(session.Snapshot.Charts, c => c.Slot == slot);
+            Guid id = chart?.Id ?? Guid.Empty;
+            var activeChart = Array.Find(session.Snapshot.Charts, c => c.Id == session.ActiveChartId);
+            if (id == Guid.Empty && activeChart != null && !activeChart.Slot.HasValue)
+            {
+                id = activeChart.Id; session.Edit(edit => edit.SetChartSlot(id, slot));
+            }
+            if (id == Guid.Empty)
+                session.Edit(edit => id = edit.AddChartSlot(slot, mode.name, mode.LaneCount, DefaultChartDuration));
+            pressing = false; beatGrid.SetPreview(-1); session.SelectChart(id);
+        }
+        public void SelectNextChart()
+        {
+            if (IsBusy) return;
+            var charts = session.Snapshot.Charts;
+            if (charts.Length == 0) return;
+            int index = Array.FindIndex(charts, c => c.Id == session.ActiveChartId);
+            pressing = false; beatGrid.SetPreview(-1); session.SelectChart(charts[(index + 1) % charts.Length].Id);
         }
 
         public void ResetView()

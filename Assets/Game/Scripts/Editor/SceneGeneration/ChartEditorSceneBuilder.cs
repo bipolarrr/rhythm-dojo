@@ -86,9 +86,17 @@ namespace RhythmDojo.EditorTools
             timeline.raycastTarget = false;
             var screen = grid.gameObject.AddComponent<ChartEditorScreen>();
             screen.Configure(mode, timeline);
+            for (int i = 0; i < 3; i++)
+            {
+                var button = UiElements.Button("Chart Slot " + i, canvas.transform, new[] { "Easy", "Standard", "Hard" }[i] + " 선택 / 추가",
+                    new Vector2(510 + i * 180, -9), new Vector2(170,34));
+                UnityEventTools.AddIntPersistentListener(button.onClick, screen.SelectSlot, i);
+            }
 
             var sidebar = StretchPanel("Preview Space", content, new Vector2(0.62f, 0), Vector2.one,
                 new Vector2(10, 0), Vector2.zero, Surface);
+            var nextChart = UiElements.Button("Next Chart", sidebar, "다음 채보 (미지정 포함)", new Vector2(18,-305), new Vector2(330,36));
+            UnityEventTools.AddPersistentListener(nextChart.onClick, screen.SelectNextChart);
             UiElements.Label("Help", sidebar, "좌클릭: 노트 배치\n위로 드래그: 롱노트\n우클릭: 삭제\n휠: 이동 / Ctrl + 휠: 확대\n\n파일 → 음원 가져오기\n설정 → 제목과 BPM 적용\n테스트 → 실제 플레이\n플레이 종료 시 편집 화면으로 복귀",
                 new Vector2(18, -18), new Vector2(380, 290), 19);
             var footer = StretchPanel("Progress Space", canvas.transform, Vector2.zero, new Vector2(1, 0),
@@ -115,7 +123,8 @@ namespace RhythmDojo.EditorTools
             SceneBuilder.Wire(menu, "screen", screen);
             SceneBuilder.Wire(menu, "status", status);
             SceneBuilder.Wire(menu, "controls", controls);
-            var file = MenuPanel("File Panel", canvas.transform, 390);
+            SceneBuilder.Wire(menu, "activeChart", UiElements.Label("Active Chart", canvas.transform, "", new Vector2(1060,-12), new Vector2(210,30), 18));
+            var file = MenuPanel("File Panel", canvas.transform, 440);
             var settings = MenuPanel("Settings Panel", canvas.transform, 470);
             var tools = MenuPanel("Tools Panel", canvas.transform, 210);
             SceneBuilder.Wire(menu, "filePanel", file.gameObject);
@@ -124,6 +133,7 @@ namespace RhythmDojo.EditorTools
             SceneBuilder.Wire(menu, "projectId", Field(file, "Project ID", "곡 ID (불러오기)", 20));
             ActionButton(file, "Save", "저장", 104, menu.Save);
             ActionButton(file, "Load", "불러오기 (현재 작업 자동 저장)", 148, menu.Load);
+            ActionButton(file, "Import Legacy", "v1 프로젝트 가져오기 (곡 ID)", 390, menu.ImportLegacy);
             SceneBuilder.Wire(menu, "audioPath", Field(file, "Audio Path", "음원 파일 전체 경로 (WAV / OGG / MP3)", 210));
             ActionButton(file, "Import Audio", "음원 가져오기", 294, menu.ImportAudio);
             UiElements.Label("Storage Hint", file, "저장 위치는 저장 완료 후 아래에 표시됩니다.",

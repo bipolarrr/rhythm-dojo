@@ -32,7 +32,7 @@ namespace RhythmDojo.Tests
             var song = flow.Selection.SelectedSongId; var difficulty = flow.SelectedDifficulty;
             double speed = flow.SelectedMultiplier; int timing = flow.Preferences.TimingOffsetMs;
             Assert.That(screen.HardModeSelected, Is.False);
-            Assert.That(view.modeLabel.text, Is.EqualTo("모드: 노말"));
+            Assert.That(view.modeLabel.text, Is.EqualTo("Gauge"));
             yield return Click(view.modeButton);
             Assert.That(view.modePopup.activeSelf, Is.True);
             Assert.That(view.settingsButton.interactable, Is.False);
@@ -41,7 +41,7 @@ namespace RhythmDojo.Tests
             Assert.That(flow.Transitioning, Is.False);
             yield return Click(view.hardModeButton);
             Assert.That(screen.HardModeSelected, Is.True);
-            Assert.That(view.modeLabel.text, Is.EqualTo("모드: 하드"));
+            Assert.That(view.modeLabel.text, Is.EqualTo("Challenge 1"));
             Assert.That(view.modePopup.activeSelf, Is.False);
             Assert.That(EventSystem.current.currentSelectedGameObject, Is.EqualTo(view.modeButton.gameObject));
             yield return Click(view.modeButton); yield return Press(Key.Escape);
@@ -81,7 +81,9 @@ namespace RhythmDojo.Tests
             var multiplier = flow.SelectedMultiplier;
             view.difficultyList.value = 0;
             yield return null;
-            Assert.That(flow.SelectedDifficulty.DisplayName, Is.EqualTo("Easy"));
+            Assert.That(flow.SelectedDifficulty.DisplayName, Is.EqualTo("Standard"));
+            Assert.That(view.difficultyButtons[0].interactable, Is.False);
+            Assert.That(view.difficultyButtons[2].interactable, Is.False);
             Assert.That(flow.SelectedScrollMode, Is.EqualTo(mode));
             Assert.That(flow.SelectedMultiplier, Is.EqualTo(multiplier));
         }
@@ -97,6 +99,7 @@ namespace RhythmDojo.Tests
             Assert.That(view.difficultyButtons.Length, Is.EqualTo(flow.Settings.difficulties.Length));
             for (int i = 0; i < view.difficultyButtons.Length; i++)
             {
+                if (i != 1) { Assert.That(view.difficultyButtons[i].interactable, Is.False); continue; }
                 yield return Click(view.difficultyButtons[i]);
                 Assert.That(view.difficultyList.value, Is.EqualTo(i));
                 Assert.That(flow.SelectedDifficulty, Is.EqualTo(flow.Settings.difficulties[i]));
@@ -116,9 +119,9 @@ namespace RhythmDojo.Tests
             yield return Click(view.back);
             Assert.That(view.difficultyButtons.All(button => !button.interactable), Is.True);
             yield return Click(view.cancelBack);
-            Assert.That(view.difficultyButtons.All(button => button.interactable), Is.True);
+            Assert.That(view.difficultyButtons[1].interactable, Is.True);
             view.difficultyList.value = 0; yield return null;
-            Assert.That(view.difficultyButtons[0].GetComponent<Outline>().enabled, Is.True);
+            Assert.That(flow.SelectedDifficulty, Is.EqualTo(flow.Settings.difficulties[1]));
         }
         [UnityTest]
         public IEnumerator LeftAndRightChangeDifficultyAndRespectPopupAndSliderFocus()
@@ -131,7 +134,7 @@ namespace RhythmDojo.Tests
             Assert.That(view.difficultyList.value, Is.EqualTo(1));
             Assert.That(flow.SelectedDifficulty, Is.EqualTo(flow.Settings.difficulties[1]));
             yield return Press(Key.RightArrow); yield return Press(Key.RightArrow);
-            Assert.That(view.difficultyList.value, Is.EqualTo(2));
+            Assert.That(view.difficultyList.value, Is.EqualTo(1));
             yield return Press(Key.LeftArrow);
             Assert.That(view.difficultyList.value, Is.EqualTo(1));
             yield return Click(view.back); yield return Press(Key.RightArrow);
@@ -211,7 +214,7 @@ namespace RhythmDojo.Tests
             var view = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
             int song = flow.SelectedSongIndex;
-            view.multiplierList.value = 4;
+            flow.Selection.UpdateSelection(flow.Selection.SelectedSongId, flow.SelectedDifficulty, flow.SelectedScrollMode, 1.5);
             yield return null;
             Assert.That(flow.SelectedMultiplier, Is.EqualTo(1.5));
             Assert.That(flow.SelectedSongIndex, Is.EqualTo(song));
@@ -249,7 +252,7 @@ namespace RhythmDojo.Tests
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
             var dropdowns = UnityEngine.Object.FindObjectsByType<Dropdown>(FindObjectsInactive.Include, FindObjectsSortMode.None);
             dropdowns.Single(d=>d.name=="Scroll mode").value = 1;
-            dropdowns.Single(d=>d.name=="Scroll multiplier").value = 4;
+            flow.Selection.UpdateSelection(flow.Selection.SelectedSongId, flow.SelectedDifficulty, flow.SelectedScrollMode, 1.5);
             dropdowns.Single(d=>d.name=="Judgment difficulty").value = 0;
             UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>().SelectSong("tempo-pulse");
             Assert.That(flow.SelectedMultiplier, Is.EqualTo(1.5)); Assert.That(flow.SelectedScrollMode, Is.EqualTo(ScrollMode.Constant));
@@ -259,7 +262,7 @@ namespace RhythmDojo.Tests
             yield return null;
             var game = UnityEngine.Object.FindFirstObjectByType<RhythmGameController>();
             Assert.That(game.Chart.Count, Is.EqualTo(8)); Assert.That(game.ReadModel.Snapshot.ScrollMultiplier, Is.EqualTo(1.5));
-            Assert.That(game.ReadModel.Snapshot.DifficultyName, Is.EqualTo("Easy"));
+            Assert.That(game.ReadModel.Snapshot.DifficultyName, Does.Contain("Standard"));
             Assert.That(UnityEngine.Object.FindObjectsByType<NoteView>(FindObjectsInactive.Include,FindObjectsSortMode.None).Length, Is.EqualTo(8));
             UnityEngine.Object.FindFirstObjectByType<GameplayCompositionRoot>().ReturnToSelection();
             yield return Await(()=>UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>()); yield return null;

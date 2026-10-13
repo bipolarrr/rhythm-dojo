@@ -34,6 +34,7 @@ namespace RhythmDojo.Tests
         private string previousPreferences;
         private string previousPresentation;
         private string previousHardMode;
+        private string previousRules;
         private float previousMasterVolume, previousLodBias, previousShadowDistance;
         private int previousFrameRate, previousMipLimit, previousVsync;
         private AnisotropicFiltering previousFiltering;
@@ -41,6 +42,8 @@ namespace RhythmDojo.Tests
         public IEnumerator SetUp()
         {
             System.IO.Directory.CreateDirectory("Logs");
+            previousRules = PlayerPrefs.GetString(RhythmDojo.Services.PlayRulesService.StorageKey, "");
+            PlayerPrefs.DeleteKey(RhythmDojo.Services.PlayRulesService.StorageKey);
             previousHardMode=PlayerPrefs.GetString(RhythmDojo.Services.HardModePreferences.StorageKey, "");
             PlayerPrefs.DeleteKey(RhythmDojo.Services.HardModePreferences.StorageKey);
             previousPresentation = PlayerPrefs.GetString(RhythmDojo.Services.PresentationPreferences.StorageKey, "");
@@ -68,6 +71,8 @@ namespace RhythmDojo.Tests
         [UnityTearDown]
         public IEnumerator TearDown()
         {
+            if (string.IsNullOrEmpty(previousRules)) PlayerPrefs.DeleteKey(RhythmDojo.Services.PlayRulesService.StorageKey);
+            else PlayerPrefs.SetString(RhythmDojo.Services.PlayRulesService.StorageKey, previousRules);
             if (string.IsNullOrEmpty(previousHardMode)) PlayerPrefs.DeleteKey(RhythmDojo.Services.HardModePreferences.StorageKey);
             else PlayerPrefs.SetString(RhythmDojo.Services.HardModePreferences.StorageKey,previousHardMode);
             if (string.IsNullOrEmpty(previousPreferences)) PlayerPrefs.DeleteKey(RhythmDojo.Services.SelectionPreferences.StorageKey);
@@ -125,13 +130,18 @@ namespace RhythmDojo.Tests
         protected static void CaptureSelection(string imageName = "selection", int width = 1280, int height = 720)
         {
             if (System.Environment.GetEnvironmentVariable("RHYTHM_DOJO_SKIP_CAPTURE") == "1") return;
-            var camera = Camera.main; var canvas = UnityEngine.Object.FindFirstObjectByType<Canvas>();
+            var camera = Camera.main;
+            var canvases = UnityEngine.Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None)
+                .Where(canvas => canvas.isRootCanvas && canvas.renderMode == RenderMode.ScreenSpaceOverlay)
+                .Select(canvas => (canvas, canvas.worldCamera, canvas.planeDistance)).ToArray();
             var target = new RenderTexture(width,height,24); var previous = RenderTexture.active;
             var texture = new Texture2D(width,height,TextureFormat.RGB24,false);
             try
             {
-                camera.targetTexture=target; canvas.renderMode=RenderMode.ScreenSpaceCamera;
-                canvas.worldCamera=camera; canvas.planeDistance=1; Canvas.ForceUpdateCanvases();
+                camera.targetTexture=target;
+                foreach (var item in canvases)
+                { item.canvas.renderMode=RenderMode.ScreenSpaceCamera; item.canvas.worldCamera=camera; item.canvas.planeDistance=1; }
+                Canvas.ForceUpdateCanvases();
                 camera.Render(); RenderTexture.active=target;
                 texture.ReadPixels(new Rect(0,0,width,height),0,0); texture.Apply();
                 System.IO.Directory.CreateDirectory("Logs");
@@ -139,7 +149,9 @@ namespace RhythmDojo.Tests
             }
             finally
             {
-                camera.targetTexture=null; canvas.renderMode=RenderMode.ScreenSpaceOverlay; canvas.worldCamera=null;
+                camera.targetTexture=null;
+                foreach (var item in canvases)
+                { item.canvas.renderMode=RenderMode.ScreenSpaceOverlay; item.canvas.worldCamera=item.worldCamera; item.canvas.planeDistance=item.planeDistance; }
                 RenderTexture.active=previous; target.Release(); UnityEngine.Object.Destroy(target); UnityEngine.Object.Destroy(texture);
                 Canvas.ForceUpdateCanvases();
             }

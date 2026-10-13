@@ -22,8 +22,9 @@ namespace RhythmDojo.Core
         private void Start()
         {
             Validate(); var flow = AppFlowController.Create(settings);
-            if (selection) selection.Initialize(settings, flow.Selection, flow, flow.Preferences);
-            if (audioSettings) audioSettings.Initialize(flow.Audio, flow, settings, flow.Selection, flow.Preferences);
+            if (selection) selection.Initialize(settings, flow.Selection, flow, flow.Preferences, flow.HardMode, flow.Rules);
+            if (audioSettings) audioSettings.Initialize(flow.Audio, flow, settings, flow.Selection, flow.Preferences, flow.HardMode, flow.Rules,
+                RhythmDojo.Services.PresentationPreferences.Current);
         }
     }
 }

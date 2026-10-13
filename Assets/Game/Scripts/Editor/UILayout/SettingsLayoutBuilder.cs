@@ -64,6 +64,17 @@ namespace RhythmDojo.EditorTools
             view.hardModeHint = UiElements.Label("Hard Mode Help",view.gameplayPanel.transform,
                 "하드 모드에서만 적용 · 체력 감소 5회 = 판정마다 20 감소 · 자동 저장",
                 new Vector2(0,-338),new Vector2(700,34),14);
+            foreach (Transform child in view.gameplayPanel.transform)
+                if (child.GetComponent<RectTransform>().anchoredPosition.y <= -162) child.gameObject.SetActive(false);
+            view.playRuleLists = new Dropdown[5];
+            var ruleLabels = new[] { "판정", "플레이", "롱노트 끝", "Gauge 실패", "Challenge" };
+            for (int i = 0; i < view.playRuleLists.Length; i++)
+            {
+                float y = -164 - i * 39;
+                UiElements.Label("Play Rule " + i, view.gameplayPanel.transform, ruleLabels[i], new Vector2(0,y), new Vector2(215,34), 18);
+                view.playRuleLists[i] = UiElements.Dropdown("Play Rule Option " + i, view.gameplayPanel.transform, new Vector2(230,y), new Vector2(470,34));
+                StyleHardRuleDropdown(view.playRuleLists[i]);
+            }
             view.masterLabel = UiElements.Label("Master Volume Label", view.soundPanel.transform, "전체 소리 100%", Vector2.zero, new Vector2(680,38), 24);
             view.masterVolume = Volume("Master Volume", view.soundPanel.transform, -60);
             view.backgroundLabel = UiElements.Label("Background Volume Label", view.soundPanel.transform, "배경음악 100%", new Vector2(0,-114), new Vector2(680,38), 24);

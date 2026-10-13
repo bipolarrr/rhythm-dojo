@@ -15,6 +15,7 @@ namespace RhythmDojo.UI
         public Slider speedSlider, timingOffset;
         public Text speedLabel, timingLabel;
         public Dropdown[] hardRuleLists;
+        public Dropdown[] playRuleLists;
         public InputField[] hardLossCounts;
         public Text hardModeHint;
         public GameObject soundPanel, graphicsPanel;
@@ -29,6 +30,7 @@ namespace RhythmDojo.UI
                 !masterVolume || !backgroundVolume || !gameplayVolume || !masterLabel || !backgroundLabel || !gameplayLabel ||
                 !aspectList || !resolutionList || !fpsList || !displayState || !gameplayTab || !gameplayPanel ||
                 !speedSlider || !timingOffset || !speedLabel || !timingLabel || !hardModeHint ||
+                playRuleLists == null || playRuleLists.Length != 5 || Array.Exists(playRuleLists, value => !value) ||
                 hardRuleLists == null || hardRuleLists.Length != 3 || Array.Exists(hardRuleLists, value => !value) ||
                 hardLossCounts == null || hardLossCounts.Length != 3 || Array.Exists(hardLossCounts, value => !value))
                 throw new InvalidOperationException("Settings view references missing.");

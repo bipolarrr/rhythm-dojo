@@ -13,10 +13,12 @@ using RhythmDojo.Services;
 
 namespace RhythmDojo.UI
 {
-    public sealed class SongSelectionScreen : MonoBehaviour
+    public sealed class SongSelectionScreen : MonoBehaviour, IModalInputParticipant
     {
         [SerializeField] private SongSelectionView view;
         private GameSettings settings;
+        private DifficultyProfile[] difficultyOptions;
+        private double[] speedOptions;
         private ISongSelectionService selection;
         private IAppNavigation navigation;
         private ISelectionPreferences preferences;
@@ -24,6 +26,7 @@ namespace RhythmDojo.UI
         private bool favoritesOnly, loading;
         public bool HardModeSelected { get; private set; }
         private HardModePreferences hardMode;
+        private IPlayRulesService rules;
         private bool ModalOpen => view.backPopup.activeSelf || view.modePopup.activeSelf;
         private UnityEngine.Events.UnityAction[] difficultyActions;
         public void Validate()
@@ -32,11 +35,14 @@ namespace RhythmDojo.UI
             view.Validate();
         }
         public void Initialize(GameSettings gameSettings, ISongSelectionService songs, IAppNavigation appNavigation,
-            ISelectionPreferences savedPreferences = null)
+            ISelectionPreferences savedPreferences = null, HardModePreferences hardMode = null, IPlayRulesService rules = null)
         {
             Unbind(); Validate(); settings = gameSettings; selection = songs; navigation = appNavigation;
-            preferences = savedPreferences ?? new SelectionPreferences();
-            hardMode = (appNavigation as RhythmDojo.Core.AppFlowController)?.HardMode ?? HardModePreferences.Load();
+            difficultyOptions = songs is ISelectionOptions options ? options.DifficultyOptions.ToArray() : gameSettings.difficulties.ToArray();
+            speedOptions = songs is ISelectionOptions speeds ? speeds.SpeedOptions.ToArray() : Enumerable.Range(0, gameSettings.scroll.MultiplierCount).Select(gameSettings.scroll.GetMultiplier).ToArray();
+            preferences = savedPreferences ?? new SelectionPreferences(null);
+            this.hardMode = hardMode ?? new HardModePreferences(null); hardMode = this.hardMode;
+            this.rules = rules;
             HardModeSelected = hardMode.Enabled;
             lifetime = new CancellationTokenSource(); loading = false; favoritesOnly = false;
             view.backPopup.SetActive(false); view.modePopup.SetActive(false); view.SetInteractable(true);
@@ -46,17 +52,17 @@ namespace RhythmDojo.UI
             view.hardModeButton.onClick.AddListener(SelectHardMode);
             view.cancelMode.onClick.AddListener(CloseMode);
             view.difficultyList.ClearOptions();
-            view.difficultyList.AddOptions(settings.difficulties.Select(p => p.DisplayName).ToList());
+            view.difficultyList.AddOptions(difficultyOptions.Select(p => p.DisplayName).ToList());
             view.scrollModeList.ClearOptions(); view.scrollModeList.AddOptions(new List<string> { "고정 속도", "BPM 연동" });
             view.multiplierList.ClearOptions();
-            view.multiplierList.AddOptions(Enumerable.Range(0, settings.scroll.MultiplierCount)
-                .Select(i => $"{settings.scroll.GetMultiplier(i):0.##}x").ToList());
+            view.multiplierList.AddOptions(Enumerable.Range(0, speedOptions.Length)
+                .Select(i => $"{speedOptions[i]:0.##}x").ToList());
             view.sortList.ClearOptions(); view.sortList.AddOptions(new List<string> { "정렬 : 제목", "정렬 : 작곡가", "정렬 : BPM" });
             view.sortList.SetValueWithoutNotify(0);
-            view.difficultyList.SetValueWithoutNotify(Array.IndexOf(settings.difficulties, selection.SelectedDifficulty));
+            view.difficultyList.SetValueWithoutNotify(Array.IndexOf(difficultyOptions, selection.SelectedDifficulty));
             view.scrollModeList.SetValueWithoutNotify((int)ScrollMode.Constant);
-            for (int i = 0; i < settings.scroll.MultiplierCount; i++)
-                if (settings.scroll.GetMultiplier(i) == selection.SelectedMultiplier) view.multiplierList.SetValueWithoutNotify(i);
+            for (int i = 0; i < speedOptions.Length; i++)
+                if (speedOptions[i] == selection.SelectedMultiplier) view.multiplierList.SetValueWithoutNotify(i);
             RefreshSpeed();
             view.speedSlider.onValueChanged.AddListener(SpeedChanged);
             view.timingOffset.SetValueWithoutNotify(preferences.TimingOffsetMs); RefreshTiming();
@@ -105,7 +111,7 @@ namespace RhythmDojo.UI
                     Keyboard.current.leftArrowKey.wasPressedThisFrame ? -1 : 0;
                 if (direction != 0)
                 {
-                    SelectDifficulty(Mathf.Clamp(view.difficultyList.value + direction, 0, view.difficultyButtons.Length - 1));
+                    SelectDifficulty(Mathf.Clamp(Array.IndexOf(difficultyOptions, selection.SelectedDifficulty) + direction, 0, view.difficultyButtons.Length - 1));
                     if (EventSystem.current && view.difficultyButtons.Any(button => button.gameObject == focused))
                         EventSystem.current.SetSelectedGameObject(view.difficultyButtons[view.difficultyList.value].gameObject);
                 }
@@ -154,8 +160,13 @@ namespace RhythmDojo.UI
         {
             if (Busy || ModalOpen) return;
             var song = selection.Library.Find(songId); if (song == null) return;
-            selection.UpdateSelection(songId, settings.difficulties[view.difficultyList.value],
-                ScrollMode.Constant, settings.scroll.GetMultiplier(view.multiplierList.value));
+            var difficulty = selection.SelectedDifficulty;
+            int slot = Array.IndexOf(difficultyOptions, difficulty);
+            if (!song.Charts.Any(c => (int)c.Slot == slot) && song.Charts.Count > 0)
+                difficulty = difficultyOptions[(int)song.Charts[0].Slot];
+            selection.UpdateSelection(songId, difficulty, ScrollMode.Constant, selection.SelectedMultiplier);
+            view.difficultyList.SetValueWithoutNotify(Array.IndexOf(difficultyOptions, difficulty));
+            view.RefreshDifficultyButtons();
             RefreshDetails(song);
             int index = view.Rows.FindIndex(r => r.Entry.Id == songId);
             foreach (var row in view.Rows) row.SetSelected(row.Entry.Id == songId);
@@ -179,25 +190,46 @@ namespace RhythmDojo.UI
         }
         private void RefreshDetails(SongEntry song)
         {
+            var chart = song.Charts.FirstOrDefault(c => (int)c.Slot == Array.IndexOf(difficultyOptions, selection.SelectedDifficulty));
             view.songTitle.text = song.Title;
             string bpm = song.MinBpm == song.MaxBpm ? $"{song.MinBpm:0.##}" : $"{song.MinBpm:0.##}–{song.MaxBpm:0.##}";
             view.artistBpm.text = $"{song.Artist}  /  BPM {bpm}";
             view.album.sprite = song.Cover ? song.Cover : view.fallbackCover;
             if (view.album.sprite) view.album.GetComponent<AspectRatioFitter>().aspectRatio =
                 view.album.sprite.rect.width / view.album.sprite.rect.height;
-            var best = preferences.FindRecord(song.Id, selection.SelectedDifficulty.name);
+            string recordKey = chart != null && rules != null ? RecordIdentity.Rules(chart.Id, chart.Revision, rules.Snapshot) : selection.SelectedDifficulty.name;
+            var best = preferences.FindRecord(song.Id, recordKey);
             view.record.text = best == null ? "스코어     —             랭크  —\n레이트     —\n최대 콤보  —\n기록 없음" :
                 $"스코어     {best.score:N0}       랭크  {best.Rank}\n레이트     {best.rate:0.00}%\n최대 콤보  {best.maxCombo}";
+            if (preferences is SelectionPreferences records)
+            {
+                if (best != null)
+                    view.record.text += $"\n<size=14>Gauge {(best.gaugeClear ? "CLEAR" : "—")} · Challenge " +
+                        string.Join(" / ", Enumerable.Range(1, 3).Select(i => (best.challengeAchievements & (1 << (i - 1))) != 0 ? i.ToString() : "—")) + "</size>";
+                var failed = records.FindFailedRecord(song.Id, recordKey);
+                if (failed != null) view.record.text += $"\n<size=14><color=#888888>실패 완주 {failed.score:N0} · {failed.rate:0.00}%</color></size>";
+            }
             view.details.text = song.Error == null ?
-                $"{song.Duration:0}s · {song.NoteCount} 노트 · {song.LaneCount} 레인\n↑↓ 곡 선택 · ←→ 난이도 · Enter 플레이 · Esc 뒤로가기" :
+                $"{chart?.Duration ?? song.Duration:0}s · {chart?.NoteCount ?? song.NoteCount} 노트 · {song.LaneCount} 레인\n↑↓ 곡 선택 · ←→ 난이도 · Enter 플레이 · Esc 뒤로가기" :
                 "재생 불가: " + song.Error;
             view.play.interactable = song.Error == null && !Busy && !ModalOpen;
-            foreach (var row in view.Rows) row.difficulty.text = row.Entry.Error == null ? selection.SelectedDifficulty.DisplayName : "재생 불가";
+            view.play.interactable &= chart != null && chart.Error == null;
+            if (chart?.Error != null) view.details.text = "재생 불가: " + chart.Error;
+            for (int i = 0; i < view.difficultyButtons.Length; i++)
+                view.difficultyButtons[i].interactable = !Busy && !ModalOpen && song.Charts.Any(c => (int)c.Slot == i);
+            foreach (var row in view.Rows)
+            {
+                var available = row.Entry.Charts.FirstOrDefault(c => (int)c.Slot == Array.IndexOf(difficultyOptions, selection.SelectedDifficulty));
+                row.difficulty.text = row.Entry.Error != null || available?.Error != null ? "재생 불가" : available == null ? "채보 없음" : selection.SelectedDifficulty.DisplayName;
+            }
         }
         private void SelectDifficulty(int value)
         {
             if (Busy || ModalOpen) return;
-            view.difficultyList.value = value;
+            var song = selection.Library.Find(selection.SelectedSongId);
+            if (song == null || !song.Charts.Any(c => (int)c.Slot == value)) return;
+            selection.UpdateSelection(song.Id, difficultyOptions[value], selection.SelectedScrollMode, selection.SelectedMultiplier);
+            view.difficultyList.SetValueWithoutNotify(value); view.RefreshDifficultyButtons(); RefreshDetails(song);
         }
         private void Changed(int value)
         {
@@ -205,17 +237,17 @@ namespace RhythmDojo.UI
             RefreshSpeed();
             view.scrollModeList.SetValueWithoutNotify((int)ScrollMode.Constant);
             view.RefreshDifficultyButtons();
-            preferences.Difficulty = settings.difficulties[view.difficultyList.value].name;
+            preferences.Difficulty = selection.SelectedDifficulty.name;
             preferences.ScrollMode = ScrollMode.Constant;
-            preferences.Multiplier = settings.scroll.GetMultiplier(view.multiplierList.value);
+            preferences.Multiplier = selection.SelectedMultiplier;
             preferences.Save();
             if (view.Rows.Count != 0) SelectSong(selection.SelectedSongId);
         }
         private void RefreshSpeed()
         {
-            double value = Math.Round(Math.Clamp(settings.scroll.GetMultiplier(view.multiplierList.value), 1, 10), 1, MidpointRounding.AwayFromZero);
-            for (int i = 0; i < settings.scroll.MultiplierCount; i++)
-                if (Math.Abs(settings.scroll.GetMultiplier(i) - value) < .0001) view.multiplierList.SetValueWithoutNotify(i);
+            double value = selection.SelectedMultiplier;
+            for (int i = 0; i < speedOptions.Length; i++)
+                if (Math.Abs(speedOptions[i] - value) < .0001) view.multiplierList.SetValueWithoutNotify(i);
             view.speedSlider.SetValueWithoutNotify((float)value);
             view.speedLabel.text = $"속도  {value:0.0}x";
         }
@@ -224,10 +256,11 @@ namespace RhythmDojo.UI
             if (Busy || ModalOpen) return;
             double rounded = Math.Round(Math.Clamp((double)value, 1, 10), 1, MidpointRounding.AwayFromZero);
             view.speedSlider.SetValueWithoutNotify((float)rounded);
-            for (int i = 0; i < settings.scroll.MultiplierCount; i++)
-                if (Math.Abs(settings.scroll.GetMultiplier(i) - rounded) < .0001)
+            for (int i = 0; i < speedOptions.Length; i++)
+                if (Math.Abs(speedOptions[i] - rounded) < .0001)
                 {
                     view.multiplierList.SetValueWithoutNotify(i);
+                    selection.UpdateSelection(selection.SelectedSongId, selection.SelectedDifficulty, ScrollMode.Constant, rounded);
                     Changed(i);
                     return;
                 }
@@ -281,10 +314,19 @@ namespace RhythmDojo.UI
         {
             if (Busy || !view.modePopup.activeSelf) return;
             HardModeSelected = hard; hardMode.Enabled = hard; hardMode.Save(); RefreshMode(); CloseMode();
+            if (rules != null) { var snapshot = rules.Snapshot; snapshot.Mode = hard ? RhythmDojo.Gameplay.PlayMode.Challenge : RhythmDojo.Gameplay.PlayMode.Gauge; rules.Update(snapshot); RefreshMode(); }
         }
         private void RefreshMode()
         {
             view.modeLabel.text = HardModeSelected ? "모드: 하드" : "모드: 노말";
+            if (rules != null)
+            {
+                var snapshot = rules.Snapshot;
+                HardModeSelected = snapshot.Mode == RhythmDojo.Gameplay.PlayMode.Challenge;
+                view.modeLabel.text = HardModeSelected ? "Challenge " + snapshot.ChallengePreset : "Gauge";
+                view.normalModeButton.GetComponentInChildren<Text>().text = "Gauge";
+                view.hardModeButton.GetComponentInChildren<Text>().text = "Challenge";
+            }
             view.normalModeButton.image.color = !HardModeSelected ? new Color(.18f,.43f,.43f) : new Color(.09f,.115f,.13f);
             view.hardModeButton.image.color = HardModeSelected ? new Color(.50f,.13f,.16f) : new Color(.09f,.115f,.13f);
         }
@@ -338,12 +380,19 @@ namespace RhythmDojo.UI
         private void OnEnable()
         {
             if (selection == null || settings == null || preferences == null) return;
-            for (int i = 0; i < settings.scroll.MultiplierCount; i++)
-                if (Math.Abs(settings.scroll.GetMultiplier(i) - selection.SelectedMultiplier) < .0001)
+            for (int i = 0; i < speedOptions.Length; i++)
+                if (Math.Abs(speedOptions[i] - selection.SelectedMultiplier) < .0001)
                     view.multiplierList.SetValueWithoutNotify(i);
             view.timingOffset.SetValueWithoutNotify(preferences.TimingOffsetMs);
             RefreshSpeed(); RefreshTiming();
+            RefreshMode();
         }
         private void OnDestroy() => Unbind();
+        public void ResumeAfterModal()
+        {
+            RefreshMode();
+            var song = selection.Library.Find(selection.SelectedSongId);
+            if (song != null) RefreshDetails(song);
+        }
     }
 }

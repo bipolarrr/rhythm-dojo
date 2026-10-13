@@ -11,7 +11,7 @@ namespace RhythmDojo.Authoring
         public static SongProject Copy(SongDefinition source, string importedAudioPath = null, string chartName = "Normal")
         {
             if (!source) throw new ArgumentNullException(nameof(source));
-            var chart = source.Chart ? new ChartDocument { Name = chartName, ModeId = source.Mode ? source.Mode.name : "",
+            var chart = source.Chart ? new ChartDocument { Slot = ChartSlot.Standard, Name = chartName, ModeId = source.Mode ? source.Mode.name : "",
                 LaneCount = source.Mode ? source.Mode.LaneCount : 0, CompletionTimeSeconds = source.Chart.CompletionTime,
                 Notes = Enumerable.Range(0, source.Chart.Count).Select(i => source.Chart[i]).ToArray() } : null;
             return ProjectValidation.Normalize(new SongProject { Title = source.Title ?? "", Artist = source.Artist ?? "",

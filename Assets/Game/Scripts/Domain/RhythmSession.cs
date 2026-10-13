@@ -16,6 +16,9 @@ namespace RhythmDojo.Gameplay
         public const int MissHealthDamage = 10;
         public int Health { get; private set; }
         private readonly HardModeHealthRules hardModeRules;
+        private readonly RuleSession ruleSession;
+        public FailureSnapshot Failure => ruleSession?.Failure ?? default;
+        public event Action<FailureSnapshot> Failed;
         private double remainingHealth;
         private readonly ChartData chart;
         private readonly JudgmentSettings config;
@@ -24,7 +27,7 @@ namespace RhythmDojo.Gameplay
         private readonly int[] active;
         private readonly bool[] held;
         public int LaneCount => held.Length;
-        public SessionSnapshot Snapshot => new SessionSnapshot(State, Perfect, Good, Miss, Combo, chart.Count, Health, remainingHealth / MaximumHealth);
+        public SessionSnapshot Snapshot => ruleSession?.Snapshot ?? new SessionSnapshot(State, Perfect, Good, Miss, Combo, chart.Count, Health, remainingHealth / MaximumHealth);
         public SessionState State { get; private set; }
         public int Perfect { get; private set; }
         public int Good { get; private set; }
@@ -34,8 +37,24 @@ namespace RhythmDojo.Gameplay
         public double LastTimingError { get; private set; }
         public event Action<JudgmentEvent> Judged;
         public event Action<HoldStartedEvent> HoldStarted;
-        public NoteState GetState(int index) => states[index];
-        public bool IsHeld(int lane) => held[lane];
+        public NoteState GetState(int index) => ruleSession?.GetState(index) ?? states[index];
+        public bool IsHeld(int lane) => ruleSession?.IsHeld(lane) ?? held[lane];
+
+        public RhythmSession(ChartData chart, GameModeRules mode, TempoMap tempo, PlayRules rules)
+            : this(chart, rules.Timing, mode)
+        {
+            ruleSession = new RuleSession(chart, mode, tempo, rules);
+            ruleSession.Judged += result => { SyncRules(); Judged?.Invoke(result); };
+            ruleSession.HoldStarted += result => HoldStarted?.Invoke(result);
+            ruleSession.Failed += result => { SyncRules(); Failed?.Invoke(result); };
+            SyncRules();
+        }
+        private void SyncRules()
+        {
+            State = ruleSession.State; Perfect = ruleSession.Perfect; Good = ruleSession.Good;
+            Miss = ruleSession.Miss; Combo = ruleSession.Combo; Health = ruleSession.Health;
+            LastTimingError = ruleSession.LastTimingError;
+        }
 
         public RhythmSession(ChartData chart, JudgmentSettings config, GameModeRules mode)
             : this(chart, config, mode, null) { }
@@ -50,13 +69,14 @@ namespace RhythmDojo.Gameplay
         }
         public void Reset()
         {
+            if (ruleSession != null) { ruleSession.Reset(); SyncRules(); return; }
             Array.Clear(states, 0, states.Length); Array.Clear(heads, 0, heads.Length);
             Array.Clear(held, 0, held.Length);
             for (int i = 0; i < active.Length; i++) active[i] = -1;
             Health = MaximumHealth; remainingHealth = MaximumHealth;
             Perfect = Good = Miss = Combo = 0; LastTimingError = 0; State = SessionState.Ready;
         }
-        public void Start() { Reset(); State = SessionState.Playing; }
+        public void Start() { if (ruleSession != null) { ruleSession.Start(); SyncRules(); return; } Reset(); State = SessionState.Playing; }
         public Judgment Grade(double error) => Math.Abs(error) <= config.PerfectWindow + TimingTolerance
             ? Judgment.Perfect : Math.Abs(error) <= config.GoodWindow + TimingTolerance ? Judgment.Good : Judgment.Miss;
         private void ValidateInput(int lane, double time)
@@ -66,6 +86,7 @@ namespace RhythmDojo.Gameplay
         public void PressLane(int lane, double songTime)
         {
             ValidateInput(lane, songTime);
+            if (ruleSession != null) { ruleSession.PressLane(lane, songTime); SyncRules(); return; }
             if (State != SessionState.Playing || held[lane]) return;
             Advance(songTime);
             if (State != SessionState.Playing) return;
@@ -91,6 +112,7 @@ namespace RhythmDojo.Gameplay
         public void ReleaseLane(int lane, double songTime)
         {
             ValidateInput(lane, songTime);
+            if (ruleSession != null) { ruleSession.ReleaseLane(lane, songTime); SyncRules(); return; }
             if (State != SessionState.Playing) return;
             // Advance first: a release after the late tail window cannot downgrade a completed hold.
             Advance(songTime); held[lane] = false;
@@ -101,6 +123,7 @@ namespace RhythmDojo.Gameplay
         public void Advance(double songTime)
         {
             if (!double.IsFinite(songTime)) throw new ArgumentOutOfRangeException(nameof(songTime));
+            if (ruleSession != null) { ruleSession.Advance(songTime); SyncRules(); return; }
             if (State != SessionState.Playing) return;
             for (int i = 0; i < chart.Count; i++)
             {
