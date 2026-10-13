@@ -3,16 +3,16 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
-using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.LowLevel;
-using UnityEngine.TestTools;
 using RhythmDojo.Application;
 using RhythmDojo.Audio;
 using RhythmDojo.Core;
 using RhythmDojo.Gameplay;
 using RhythmDojo.Presentation;
 using RhythmDojo.UI;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
+using UnityEngine.TestTools;
 
 namespace RhythmDojo.Tests
 {
@@ -20,10 +20,12 @@ namespace RhythmDojo.Tests
     public sealed class GameplayJudgmentTests : GameplayTestContext
     {
         private RhythmGameController game;
-        private readonly List<(double time, Key key, bool press)> events = new List<(double, Key, bool)>();
+        private readonly List<(double time, Key key, bool press)> events =
+            new List<(double, Key, bool)>();
         private readonly HashSet<Key> held = new HashSet<Key>();
         private int nextEvent;
-        private bool hitchEnabled, hitched;
+        private bool hitchEnabled,
+            hitched;
 
         [UnityTearDown]
         public IEnumerator StopFeeding()
@@ -39,7 +41,9 @@ namespace RhythmDojo.Tests
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
             flow.UpdateSelection(index, flow.Settings.defaultDifficulty, scroll, 1);
             flow.PlaySelected();
-            yield return Await(() => UnityEngine.Object.FindFirstObjectByType<RhythmGameController>());
+            yield return Await(() =>
+                UnityEngine.Object.FindFirstObjectByType<RhythmGameController>()
+            );
             yield return null;
             game = UnityEngine.Object.FindFirstObjectByType<RhythmGameController>();
             Assert.That(game.Session.State, Is.EqualTo(SessionState.Ready));
@@ -53,39 +57,99 @@ namespace RhythmDojo.Tests
         {
             events.Clear();
             nextEvent = 0;
+
             var keys = new[] { Key.D, Key.F, Key.J, Key.K };
+
             for (int i = 0; i < game.Chart.Count; i++)
             {
                 var note = game.Chart[i];
-                if (!perfect && (i == 3 || i == 14)) continue;
+
+                if (!perfect && (i == 3 || i == 14))
+                {
+                    continue;
+                }
+
                 double time = note.StartTime;
-                if (!perfect && i == 0) time -= .08;
-                if (!perfect && i == 1) time += .08;
-                double duration = note.Kind == NoteKind.Hold ? note.EndTime - time + .025 : .025;
-                if (!perfect && i == 11) duration = .325;
+
+                if (!perfect && i == 0)
+                {
+                    time -= .08;
+                }
+
+                if (!perfect && i == 1)
+                {
+                    time += .08;
+                }
+
+                double duration;
+
+                if (note.Kind == NoteKind.Hold)
+                {
+                    duration = note.EndTime - time + .025;
+                }
+                else
+                {
+                    duration = .025;
+                }
+
+                if (!perfect && i == 11)
+                {
+                    duration = .325;
+                }
+
                 events.Add((time, keys[note.Lane], true));
-                if (!perfect && i == 15) continue; // Hold through completion; automatic resolution.
+
+                if (!perfect && i == 15)
+                {
+                    continue;
+                    // Hold through completion; automatic resolution.
+                }
+
                 events.Add((time + duration, keys[note.Lane], false));
             }
+
             events.Sort((a, b) => a.time.CompareTo(b.time));
             InputSystem.onBeforeUpdate += FeedInput;
         }
 
         private void FeedInput()
         {
-            if (InputState.currentUpdateType != InputUpdateType.Dynamic || !game || game.Session == null ||
-                game.Session.State != SessionState.Playing) return;
+            if (
+                (InputState.currentUpdateType != InputUpdateType.Dynamic || !game)
+                || game.Session == null
+            )
+            {
+                return;
+            }
+
+            if (game.Session.State != SessionState.Playing)
+            {
+                return;
+            }
+
             if (hitchEnabled && !hitched && game.Clock.SongTime > 6.40)
             {
                 hitched = true;
                 System.Threading.Thread.Sleep(180);
             }
+
             double time = game.Clock.SongTime;
+
             while (nextEvent < events.Count && time >= events[nextEvent].time)
             {
                 var input = events[nextEvent++];
-                if (input.press) held.Add(input.key); else held.Remove(input.key);
-                double timestamp = Time.realtimeSinceStartupAsDouble - (game.Clock.SongTime - input.time);
+
+                if (input.press)
+                {
+                    held.Add(input.key);
+                }
+                else
+                {
+                    held.Remove(input.key);
+                }
+
+                double timestamp =
+                    Time.realtimeSinceStartupAsDouble - (game.Clock.SongTime - input.time);
                 InputSystem.QueueStateEvent(keyboard, new KeyboardState(held.ToArray()), timestamp);
             }
         }
@@ -93,9 +157,14 @@ namespace RhythmDojo.Tests
         private IEnumerator Completed()
         {
             double deadline = Time.realtimeSinceStartupAsDouble + game.Chart.CompletionTime + 10;
+
             while (game.Session.State != SessionState.Completed)
             {
-                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline), "Song did not complete.");
+                Assert.That(
+                    Time.realtimeSinceStartupAsDouble,
+                    Is.LessThan(deadline),
+                    "Song did not complete."
+                );
                 yield return null;
             }
         }
@@ -108,8 +177,19 @@ namespace RhythmDojo.Tests
             hitchEnabled = true;
             yield return Press(Key.Space);
             yield return Await(() => game.Clock.SongTime > 4.4);
-            Assert.That(UnityEngine.Object.FindFirstObjectByType<SongClock>().GetComponent<AudioSource>().isPlaying, Is.True);
-            var note = UnityEngine.Object.FindObjectsByType<NoteView>(FindObjectsInactive.Include, FindObjectsSortMode.None)
+            Assert.That(
+                UnityEngine
+                    .Object.FindFirstObjectByType<SongClock>()
+                    .GetComponent<AudioSource>()
+                    .isPlaying,
+                Is.True
+            );
+
+            var note = UnityEngine
+                .Object.FindObjectsByType<NoteView>(
+                    FindObjectsInactive.Include,
+                    FindObjectsSortMode.None
+                )
                 .Single(view => view.name.StartsWith("Note 04", StringComparison.Ordinal));
             Assert.That(note.transform.Find("Head").position.z, Is.EqualTo(0).Within(.001));
             CaptureSelection("playmode");
@@ -127,7 +207,9 @@ namespace RhythmDojo.Tests
         {
             yield return LoadSong();
             yield return Press(Key.Space);
-            yield return Await(() => game.Session.Resolved > 0); // A missed note gives the restart something to clear.
+            yield return Await(() => game.Session.Resolved > 0);
+
+            // A missed note gives the restart something to clear.
             InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.F));
             yield return null;
             Assert.That(game.Session.IsHeld(1), Is.True);
@@ -137,7 +219,11 @@ namespace RhythmDojo.Tests
             Assert.That(game.Session.IsHeld(1), Is.False);
             InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.F));
             yield return null;
-            Assert.That(game.Session.IsHeld(1), Is.False, "Held input stays blocked until released.");
+            Assert.That(
+                game.Session.IsHeld(1),
+                Is.False,
+                "Held input stays blocked until released."
+            );
             InputSystem.QueueStateEvent(keyboard, new KeyboardState());
             yield return null;
             PrepareInput(true);
@@ -152,12 +238,15 @@ namespace RhythmDojo.Tests
         {
             yield return LoadSong();
             yield return Press(Key.Space);
+
             double deadline = Time.realtimeSinceStartupAsDouble + game.Chart.CompletionTime + 10;
+
             while (game.Session.State != SessionState.Completed)
             {
                 Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
                 yield return null;
             }
+
             Assert.That(game.Session.Health, Is.Zero);
             Assert.That(game.Session.Miss, Is.EqualTo(game.Session.Snapshot.TotalNotes));
             Assert.That(game.Session.Combo, Is.Zero);

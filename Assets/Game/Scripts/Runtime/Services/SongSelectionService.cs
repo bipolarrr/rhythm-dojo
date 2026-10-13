@@ -9,47 +9,116 @@ namespace RhythmDojo.Services
     {
         private readonly GameSettings settings;
         private readonly ISelectionPreferences preferences;
+
         public ISongLibrary Library { get; }
         public string SelectedSongId { get; private set; }
         public DifficultyProfile SelectedDifficulty { get; private set; }
         public ScrollMode SelectedScrollMode { get; private set; }
         public double SelectedMultiplier { get; private set; } = 1;
-        public System.Collections.Generic.IReadOnlyList<DifficultyProfile> DifficultyOptions => settings.difficulties;
+
+        public System.Collections.Generic.IReadOnlyList<DifficultyProfile> DifficultyOptions =>
+            settings.difficulties;
+
         public System.Collections.Generic.IReadOnlyList<double> SpeedOptions
         {
             get
             {
                 var values = new double[settings.scroll.MultiplierCount];
-                for (int i = 0; i < values.Length; i++) values[i] = settings.scroll.GetMultiplier(i);
+
+                for (int i = 0; i < values.Length; i++)
+                {
+                    values[i] = settings.scroll.GetMultiplier(i);
+                }
+
                 return values;
             }
         }
-        public ChartSlot SelectedSlot => (ChartSlot)Array.IndexOf(settings.difficulties, SelectedDifficulty);
-        public SongSelectionService(GameSettings settings, ISongLibrary library, ISelectionPreferences savedPreferences = null)
+
+        public ChartSlot SelectedSlot =>
+            (ChartSlot)Array.IndexOf(settings.difficulties, SelectedDifficulty);
+
+        public SongSelectionService(
+            GameSettings settings,
+            ISongLibrary library,
+            ISelectionPreferences savedPreferences = null
+        )
         {
-            this.settings = settings; Library = library; preferences = savedPreferences; SelectedDifficulty = settings.defaultDifficulty;
+            this.settings = settings;
+            Library = library;
+            preferences = savedPreferences;
+            SelectedDifficulty = settings.defaultDifficulty;
+
             if (preferences != null)
             {
                 foreach (var profile in settings.difficulties)
-                    if (profile.name == preferences.Difficulty) SelectedDifficulty = profile;
+                {
+                    if (profile.name == preferences.Difficulty)
+                    {
+                        SelectedDifficulty = profile;
+                    }
+                }
+
                 SelectedScrollMode = preferences.ScrollMode;
+
                 for (int i = 0; i < settings.scroll.MultiplierCount; i++)
-                    if (settings.scroll.GetMultiplier(i) == preferences.Multiplier) SelectedMultiplier = preferences.Multiplier;
+                {
+                    if (settings.scroll.GetMultiplier(i) == preferences.Multiplier)
+                    {
+                        SelectedMultiplier = preferences.Multiplier;
+                    }
+                }
             }
-            SelectedSongId = library.Entries.Count > 0 ? library.Entries[0].Id : null;
+
+            if (library.Entries.Count > 0)
+            {
+                SelectedSongId = library.Entries[0].Id;
+            }
+            else
+            {
+                SelectedSongId = null;
+            }
         }
-        public void UpdateSelection(string songId, DifficultyProfile difficulty, ScrollMode mode, double multiplier)
+
+        public void UpdateSelection(
+            string songId,
+            DifficultyProfile difficulty,
+            ScrollMode mode,
+            double multiplier
+        )
         {
-            if (Library.Find(songId) == null) throw new ArgumentException("Song not registered.");
-            if (Array.IndexOf(settings.difficulties, difficulty) < 0) throw new ArgumentException("Unregistered difficulty.");
+            if (Library.Find(songId) == null)
+            {
+                throw new ArgumentException("Song not registered.");
+            }
+
+            if (Array.IndexOf(settings.difficulties, difficulty) < 0)
+            {
+                throw new ArgumentException("Unregistered difficulty.");
+            }
+
             bool known = false;
-            for (int i = 0; i < settings.scroll.MultiplierCount; i++) known |= settings.scroll.GetMultiplier(i) == multiplier;
-            if (!known || !Enum.IsDefined(typeof(ScrollMode), mode)) throw new ArgumentException("Invalid scroll selection.");
-            SelectedSongId = songId; SelectedDifficulty = difficulty; SelectedScrollMode = mode; SelectedMultiplier = multiplier;
+
+            for (int i = 0; i < settings.scroll.MultiplierCount; i++)
+            {
+                known |= settings.scroll.GetMultiplier(i) == multiplier;
+            }
+
+            if (!known || !Enum.IsDefined(typeof(ScrollMode), mode))
+            {
+                throw new ArgumentException("Invalid scroll selection.");
+            }
+
+            SelectedSongId = songId;
+            SelectedDifficulty = difficulty;
+            SelectedScrollMode = mode;
+            SelectedMultiplier = multiplier;
+
             if (preferences != null)
             {
-                preferences.Difficulty = difficulty.name; preferences.ScrollMode = mode;
-                preferences.Multiplier = multiplier; preferences.Save();
+                preferences.Difficulty = difficulty.name;
+                preferences.ScrollMode = mode;
+                preferences.Multiplier = multiplier;
+                preferences.Save();
             }
         }
     }

@@ -4,10 +4,14 @@ $root = Split-Path -Parent $PSScriptRoot
 Push-Location -LiteralPath $root
 try {
     & git rev-parse --git-dir *> $null
-    if ($LASTEXITCODE -ne 0) { throw 'Run this script inside a clone of the GitHub repository.' }
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Run this script inside a clone of the GitHub repository.'
+    }
     $versionText = Get-Content -LiteralPath 'ProjectSettings/ProjectVersion.txt' -Raw
     $version = [regex]::Match($versionText, '(?m)^m_EditorVersion: (\S+)').Groups[1].Value
-    if (!$version) { throw 'Cannot determine the Unity project version.' }
+    if (!$version) {
+        throw 'Cannot determine the Unity project version.'
+    }
     if (!$UnityYamlMergePath) {
         $UnityYamlMergePath = Join-Path $env:ProgramFiles "Unity/Hub/Editor/$version/Editor/Data/Tools/UnityYAMLMerge.exe"
     }
@@ -16,7 +20,9 @@ try {
     }
     $executable = (Resolve-Path -LiteralPath $UnityYamlMergePath).Path.Replace('\', '/')
     $hooks = & git config --get core.hooksPath
-    if ($hooks -and $hooks -ne '.githooks') { throw "Existing hooksPath '$hooks' must be integrated, not overwritten." }
+    if ($hooks -and $hooks -ne '.githooks') {
+        throw "Existing hooksPath '$hooks' must be integrated, not overwritten."
+    }
     if ((Get-Content ProjectSettings/EditorSettings.asset -Raw) -notmatch 'm_SerializationMode: 2') {
         throw 'Enable Force Text serialization in Unity before continuing.'
     }
@@ -37,8 +43,12 @@ try {
             $value = $value.Replace('"', '\"')
         }
         & git config --local --replace-all $key $value
-        if ($LASTEXITCODE -ne 0) { throw "Cannot configure $key" }
+        if ($LASTEXITCODE -ne 0) {
+            throw "Cannot configure $key"
+        }
     }
     Write-Host "Unity $version merge driver and staged-meta hook configured locally."
 }
-finally { Pop-Location }
+finally {
+    Pop-Location
+}

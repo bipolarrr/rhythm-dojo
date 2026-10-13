@@ -10,9 +10,17 @@ namespace RhythmDojo.Tests
         {
 #if UNITY_EDITOR
             const string key = "RhythmDojo.MainMenu.TestRun";
-            if (UnityEditor.SessionState.GetBool(key, false)) return;
+
+            if (UnityEditor.SessionState.GetBool(key, false))
+            {
+                return;
+            }
+
             var current = UnityEditor.SceneManagement.EditorSceneManager.playModeStartScene;
-            UnityEditor.SessionState.SetString(key + ".Previous", UnityEditor.AssetDatabase.GetAssetPath(current));
+            UnityEditor.SessionState.SetString(
+                key + ".Previous",
+                UnityEditor.AssetDatabase.GetAssetPath(current)
+            );
             UnityEditor.SessionState.SetBool(key, true);
             UnityEditor.SceneManagement.EditorSceneManager.playModeStartScene = null;
 #endif
@@ -22,10 +30,16 @@ namespace RhythmDojo.Tests
         {
 #if UNITY_EDITOR
             const string key = "RhythmDojo.MainMenu.TestRun";
-            if (!UnityEditor.SessionState.GetBool(key, false)) return;
+
+            if (!UnityEditor.SessionState.GetBool(key, false))
+            {
+                return;
+            }
+
             UnityEditor.SceneManagement.EditorSceneManager.playModeStartScene =
                 UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEditor.SceneAsset>(
-                    UnityEditor.SessionState.GetString(key + ".Previous", ""));
+                    UnityEditor.SessionState.GetString(key + ".Previous", "")
+                );
             UnityEditor.SessionState.SetBool(key, false);
 #endif
         }

@@ -14,134 +14,534 @@ namespace RhythmDojo.Authoring
         [JsonObject(MemberSerialization.OptIn)]
         private sealed class FileDto
         {
-            [JsonProperty("format", Order = 0)] public string Format = "rhythm-dojo-chart";
-            [JsonProperty("version", Order = 1)] public int Version = 2;
-            [JsonProperty("song", Order = 2)] public SongDto Song;
-            [JsonProperty("timing", Order = 3)] public TimingDto Timing;
-            [JsonProperty("charts", Order = 4)] public ChartDto[] Charts;
+            [JsonProperty("format", Order = 0)]
+            public string Format = "rhythm-dojo-chart";
+
+            [JsonProperty("version", Order = 1)]
+            public int Version = 2;
+
+            [JsonProperty("song", Order = 2)]
+            public SongDto Song;
+
+            [JsonProperty("timing", Order = 3)]
+            public TimingDto Timing;
+
+            [JsonProperty("charts", Order = 4)]
+            public ChartDto[] Charts;
         }
+
         [JsonObject(MemberSerialization.OptIn)]
         private sealed class SongDto
         {
-            [JsonProperty("id", Order = 0)] public string Id;
-            [JsonProperty("title", Order = 1)] public string Title;
-            [JsonProperty("artist", Order = 2)] public string Artist;
-            [JsonProperty("audio", Order = 3)] public string Audio;
+            [JsonProperty("id", Order = 0)]
+            public string Id;
+
+            [JsonProperty("title", Order = 1)]
+            public string Title;
+
+            [JsonProperty("artist", Order = 2)]
+            public string Artist;
+
+            [JsonProperty("audio", Order = 3)]
+            public string Audio;
         }
+
         [JsonObject(MemberSerialization.OptIn)]
         private sealed class TimingDto
         {
-            [JsonProperty("audioOffsetSeconds", Order = 0)] public double Offset;
-            [JsonProperty("tempoPoints", Order = 1)] public TempoDto[] Points;
+            [JsonProperty("audioOffsetSeconds", Order = 0)]
+            public double Offset;
+
+            [JsonProperty("tempoPoints", Order = 1)]
+            public TempoDto[] Points;
         }
+
         [JsonObject(MemberSerialization.OptIn)]
         private sealed class TempoDto
         {
-            [JsonProperty("timeSeconds", Order = 0)] public double Time;
-            [JsonProperty("bpm", Order = 1)] public double Bpm;
+            [JsonProperty("timeSeconds", Order = 0)]
+            public double Time;
+
+            [JsonProperty("bpm", Order = 1)]
+            public double Bpm;
         }
+
         [JsonObject(MemberSerialization.OptIn)]
         private sealed class ChartDto
         {
-            [JsonProperty("slot", Order = 6)] public string Slot;
-            [JsonProperty("id", Order = 0)] public string Id;
-            [JsonProperty("name", Order = 1)] public string Name;
-            [JsonProperty("modeId", Order = 2)] public string Mode;
-            [JsonProperty("laneCount", Order = 3)] public int Lanes;
-            [JsonProperty("completionTimeSeconds", Order = 4)] public double Completion;
-            [JsonProperty("notes", Order = 5)] public NoteDto[] Notes;
+            [JsonProperty("slot", Order = 6)]
+            public string Slot;
+
+            [JsonProperty("id", Order = 0)]
+            public string Id;
+
+            [JsonProperty("name", Order = 1)]
+            public string Name;
+
+            [JsonProperty("modeId", Order = 2)]
+            public string Mode;
+
+            [JsonProperty("laneCount", Order = 3)]
+            public int Lanes;
+
+            [JsonProperty("completionTimeSeconds", Order = 4)]
+            public double Completion;
+
+            [JsonProperty("notes", Order = 5)]
+            public NoteDto[] Notes;
         }
+
         [JsonObject(MemberSerialization.OptIn)]
         private sealed class NoteDto
         {
-            [JsonProperty("kind", Order = 0)] public string Kind;
-            [JsonProperty("lane", Order = 1)] public int Lane;
-            [JsonProperty("timeSeconds", Order = 2)] public double Time;
-            [JsonProperty("endTimeSeconds", Order = 3, NullValueHandling = NullValueHandling.Ignore)] public double? End;
+            [JsonProperty("kind", Order = 0)]
+            public string Kind;
+
+            [JsonProperty("lane", Order = 1)]
+            public int Lane;
+
+            [JsonProperty("timeSeconds", Order = 2)]
+            public double Time;
+
+            [JsonProperty(
+                "endTimeSeconds",
+                Order = 3,
+                NullValueHandling = NullValueHandling.Ignore
+            )]
+            public double? End;
         }
+
         public string Serialize(SongProject project)
         {
             var p = ProjectValidation.Normalize(project);
-            var dto = new FileDto { Song = new SongDto { Id = p.Id.ToString("D"), Title = p.Title, Artist = p.Artist, Audio = p.Audio },
-                Timing = new TimingDto { Offset = p.AudioOffsetSeconds, Points = p.TempoPoints.Select(t => new TempoDto { Time = t.StartTimeSeconds, Bpm = t.Bpm }).ToArray() },
-                Charts = p.Charts.Select(c => new ChartDto { Id = c.Id.ToString("D"), Name = c.Name, Mode = c.ModeId,
-                    Lanes = c.LaneCount, Completion = c.CompletionTimeSeconds, Slot = c.Slot?.ToString(),
-                    Notes = c.Notes.Select(n => new NoteDto { Kind = n.Kind == NoteKind.Tap ? "tap" : "hold", Lane = n.Lane,
-                        Time = n.StartTime, End = n.Kind == NoteKind.Hold ? n.EndTime : (double?)null }).ToArray() }).ToArray() };
-            return JsonConvert.SerializeObject(dto, Formatting.Indented).Replace("\r\n", "\n") + "\n";
+            var dto = new FileDto
+            {
+                Song = new SongDto
+                {
+                    Id = p.Id.ToString("D"),
+                    Title = p.Title,
+                    Artist = p.Artist,
+                    Audio = p.Audio,
+                },
+                Timing = new TimingDto
+                {
+                    Offset = p.AudioOffsetSeconds,
+                    Points = p
+                        .TempoPoints.Select(t => new TempoDto
+                        {
+                            Time = t.StartTimeSeconds,
+                            Bpm = t.Bpm,
+                        })
+                        .ToArray(),
+                },
+                Charts = p
+                    .Charts.Select(c => new ChartDto
+                    {
+                        Id = c.Id.ToString("D"),
+                        Name = c.Name,
+                        Mode = c.ModeId,
+                        Lanes = c.LaneCount,
+                        Completion = c.CompletionTimeSeconds,
+                        Slot = c.Slot?.ToString(),
+                        Notes = c
+                            .Notes.Select(n => new NoteDto
+                            {
+                                Kind = (
+                                    n.Kind switch
+                                    {
+                                        NoteKind.Tap => "tap",
+                                        _ => "hold",
+                                    }
+                                ),
+                                Lane = n.Lane,
+                                Time = n.StartTime,
+                                End = (
+                                    n.Kind switch
+                                    {
+                                        NoteKind.Hold => n.EndTime,
+                                        _ => (double?)null,
+                                    }
+                                ),
+                            })
+                            .ToArray(),
+                    })
+                    .ToArray(),
+            };
+
+            return JsonConvert.SerializeObject(dto, Formatting.Indented).Replace("\r\n", "\n")
+                + "\n";
         }
-        public SongProject Deserialize(string json)
-            => DeserializeVersion(json, false);
+
+        public SongProject Deserialize(string json) => DeserializeVersion(json, false);
+
         public SongProject ImportVersion1(string json) => DeserializeVersion(json, true);
+
         private SongProject DeserializeVersion(string json, bool importVersion1)
         {
             try
             {
-                using var reader = new JsonTextReader(new StringReader(json)) { DateParseHandling = DateParseHandling.None, MaxDepth = 64 };
-                var root = JToken.Load(reader, new JsonLoadSettings { DuplicatePropertyNameHandling = DuplicatePropertyNameHandling.Error,
-                    CommentHandling = CommentHandling.Load, LineInfoHandling = LineInfoHandling.Load });
-                if (reader.Read()) Fail("$", "Unexpected trailing content.");
+                using var reader = new JsonTextReader(new StringReader(json))
+                {
+                    DateParseHandling = DateParseHandling.None,
+                    MaxDepth = 64,
+                };
+                var root = JToken.Load(
+                    reader,
+                    new JsonLoadSettings
+                    {
+                        DuplicatePropertyNameHandling = DuplicatePropertyNameHandling.Error,
+                        CommentHandling = CommentHandling.Load,
+                        LineInfoHandling = LineInfoHandling.Load,
+                    }
+                );
+
+                if (reader.Read())
+                {
+                    Fail("$", "Unexpected trailing content.");
+                }
+
                 Fields(root, "format", "version", "song", "timing", "charts");
-                if (String(root["format"]) != "rhythm-dojo-chart") Fail("format", "Unsupported format.");
+
+                if (String(root["format"]) != "rhythm-dojo-chart")
+                {
+                    Fail("format", "Unsupported format.");
+                }
+
                 int version = Integer(root["version"]);
-                if (version != (importVersion1 ? 1 : 2)) Fail("version", "Expected v2. Use ImportVersion1 for legacy projects.");
-                var song = root["song"]; Fields(song, "id", "title", "artist", "audio");
-                var timing = root["timing"]; Fields(timing, "audioOffsetSeconds", "tempoPoints");
-                var p = new SongProject { Id = Id(song["id"]), Title = String(song["title"]), Artist = String(song["artist"]),
-                    Audio = song["audio"].Type == JTokenType.Null ? null : String(song["audio"]),
+
+                if (importVersion1)
+                {
+                    if (version != 1)
+                    {
+                        Fail("version", "Expected v2. Use ImportVersion1 for legacy projects.");
+                    }
+                }
+                else if (version != 2)
+                {
+                    Fail("version", "Expected v2. Use ImportVersion1 for legacy projects.");
+                }
+
+                var song = root["song"];
+                Fields(song, "id", "title", "artist", "audio");
+
+                var timing = root["timing"];
+                Fields(timing, "audioOffsetSeconds", "tempoPoints");
+
+                var p = new SongProject
+                {
+                    Id = Id(song["id"]),
+                    Title = String(song["title"]),
+                    Artist = String(song["artist"]),
+                    Audio = (
+                        song["audio"].Type switch
+                        {
+                            JTokenType.Null => null,
+                            _ => String(song["audio"]),
+                        }
+                    ),
                     AudioOffsetSeconds = Number(timing["audioOffsetSeconds"]),
-                    TempoPoints = Array(timing["tempoPoints"]).Select(t => { Fields(t, "timeSeconds", "bpm"); return new TempoPoint(Number(t["timeSeconds"]), Number(t["bpm"])); }).ToArray(),
-                    Charts = Array(root["charts"]).Select(c => {
-                        Fields(c, version == 1 ? new[] { "id", "name", "modeId", "laneCount", "completionTimeSeconds", "notes" } :
-                            new[] { "id", "name", "modeId", "laneCount", "completionTimeSeconds", "notes", "slot" });
-                        return new ChartDocument { Id = Id(c["id"]), Name = String(c["name"]), ModeId = String(c["modeId"]),
-                            Slot = version == 1 || c["slot"].Type == JTokenType.Null ? (ChartSlot?)null : ParseSlot(c["slot"]),
-                            LaneCount = Integer(c["laneCount"]), CompletionTimeSeconds = Number(c["completionTimeSeconds"]),
-                            Notes = Array(c["notes"]).Select(n => {
-                                if (n.Type != JTokenType.Object) Fail(n.Path, "Object required.");
-                                var kind = String(n["kind"]);
-                                if (kind != "tap" && kind != "hold") Fail(n.Path + ".kind", "Unknown note kind.");
-                                Fields(n, kind == "tap" ? new[] { "kind", "lane", "timeSeconds" } : new[] { "kind", "lane", "timeSeconds", "endTimeSeconds" });
-                                return kind == "tap" ? NoteData.Tap(Integer(n["lane"]), Number(n["timeSeconds"])) :
-                                    NoteData.Hold(Integer(n["lane"]), Number(n["timeSeconds"]), Number(n["endTimeSeconds"]));
-                            }).ToArray() };
-                    }).ToArray() };
-                if (importVersion1 && p.Charts.Length == 1) p.Charts[0].Slot = ChartSlot.Standard;
+                    TempoPoints = Array(timing["tempoPoints"])
+                        .Select(t =>
+                        {
+                            Fields(t, "timeSeconds", "bpm");
+
+                            return new TempoPoint(Number(t["timeSeconds"]), Number(t["bpm"]));
+                        })
+                        .ToArray(),
+                    Charts = Array(root["charts"])
+                        .Select(c =>
+                        {
+                            Fields(
+                                c,
+                                (
+                                    version switch
+                                    {
+                                        1 => new[]
+                                        {
+                                            "id",
+                                            "name",
+                                            "modeId",
+                                            "laneCount",
+                                            "completionTimeSeconds",
+                                            "notes",
+                                        },
+                                        _ => new[]
+                                        {
+                                            "id",
+                                            "name",
+                                            "modeId",
+                                            "laneCount",
+                                            "completionTimeSeconds",
+                                            "notes",
+                                            "slot",
+                                        },
+                                    }
+                                )
+                            );
+
+                            if (version == 1 || c["slot"].Type == JTokenType.Null)
+                            {
+                                return new ChartDocument
+                                {
+                                    Id = Id(c["id"]),
+                                    Name = String(c["name"]),
+                                    ModeId = String(c["modeId"]),
+                                    Slot = ((ChartSlot?)null),
+                                    LaneCount = Integer(c["laneCount"]),
+                                    CompletionTimeSeconds = Number(c["completionTimeSeconds"]),
+                                    Notes = Array(c["notes"])
+                                        .Select(n =>
+                                        {
+                                            if (n.Type != JTokenType.Object)
+                                            {
+                                                Fail(n.Path, "Object required.");
+                                            }
+
+                                            var kind = String(n["kind"]);
+
+                                            if (kind != "tap" && kind != "hold")
+                                            {
+                                                Fail(n.Path + ".kind", "Unknown note kind.");
+                                            }
+
+                                            Fields(
+                                                n,
+                                                (
+                                                    kind switch
+                                                    {
+                                                        "tap" => new[]
+                                                        {
+                                                            "kind",
+                                                            "lane",
+                                                            "timeSeconds",
+                                                        },
+                                                        _ => new[]
+                                                        {
+                                                            "kind",
+                                                            "lane",
+                                                            "timeSeconds",
+                                                            "endTimeSeconds",
+                                                        },
+                                                    }
+                                                )
+                                            );
+
+                                            if (kind == "tap")
+                                            {
+                                                return NoteData.Tap(
+                                                    Integer(n["lane"]),
+                                                    Number(n["timeSeconds"])
+                                                );
+                                            }
+                                            else
+                                            {
+                                                return NoteData.Hold(
+                                                    Integer(n["lane"]),
+                                                    Number(n["timeSeconds"]),
+                                                    Number(n["endTimeSeconds"])
+                                                );
+                                            }
+                                        })
+                                        .ToArray(),
+                                };
+                            }
+                            else
+                            {
+                                return new ChartDocument
+                                {
+                                    Id = Id(c["id"]),
+                                    Name = String(c["name"]),
+                                    ModeId = String(c["modeId"]),
+                                    Slot = ParseSlot(c["slot"]),
+                                    LaneCount = Integer(c["laneCount"]),
+                                    CompletionTimeSeconds = Number(c["completionTimeSeconds"]),
+                                    Notes = Array(c["notes"])
+                                        .Select(n =>
+                                        {
+                                            if (n.Type != JTokenType.Object)
+                                            {
+                                                Fail(n.Path, "Object required.");
+                                            }
+
+                                            var kind = String(n["kind"]);
+
+                                            if (kind != "tap" && kind != "hold")
+                                            {
+                                                Fail(n.Path + ".kind", "Unknown note kind.");
+                                            }
+
+                                            Fields(
+                                                n,
+                                                (
+                                                    kind switch
+                                                    {
+                                                        "tap" => new[]
+                                                        {
+                                                            "kind",
+                                                            "lane",
+                                                            "timeSeconds",
+                                                        },
+                                                        _ => new[]
+                                                        {
+                                                            "kind",
+                                                            "lane",
+                                                            "timeSeconds",
+                                                            "endTimeSeconds",
+                                                        },
+                                                    }
+                                                )
+                                            );
+
+                                            if (kind == "tap")
+                                            {
+                                                return NoteData.Tap(
+                                                    Integer(n["lane"]),
+                                                    Number(n["timeSeconds"])
+                                                );
+                                            }
+                                            else
+                                            {
+                                                return NoteData.Hold(
+                                                    Integer(n["lane"]),
+                                                    Number(n["timeSeconds"]),
+                                                    Number(n["endTimeSeconds"])
+                                                );
+                                            }
+                                        })
+                                        .ToArray(),
+                                };
+                            }
+                        })
+                        .ToArray(),
+                };
+
+                if (importVersion1 && p.Charts.Length == 1)
+                {
+                    p.Charts[0].Slot = ChartSlot.Standard;
+                }
+
                 return ProjectValidation.Normalize(p);
             }
-            catch (JsonException e) { throw new ProjectValidationException("$", e.Message); }
+            catch (JsonException e)
+            {
+                throw new ProjectValidationException("$", e.Message);
+            }
         }
-        private static void Fail(string path, string message) => throw new ProjectValidationException(path, message);
+
+        private static void Fail(string path, string message) =>
+            throw new ProjectValidationException(path, message);
+
         private static ChartSlot ParseSlot(JToken token)
         {
             string value = String(token);
-            if (!Enum.TryParse(value, out ChartSlot slot) || slot.ToString() != value || !Enum.IsDefined(typeof(ChartSlot), slot))
-                throw new ProjectValidationException(token.Path, "Expected Easy, Standard or Hard.");
+
+            if (!Enum.TryParse(value, out ChartSlot slot) || slot.ToString() != value)
+            {
+                throw new ProjectValidationException(
+                    token.Path,
+                    "Expected Easy, Standard or Hard."
+                );
+            }
+
+            if (!Enum.IsDefined(typeof(ChartSlot), slot))
+            {
+                throw new ProjectValidationException(
+                    token.Path,
+                    "Expected Easy, Standard or Hard."
+                );
+            }
+
             return slot;
         }
+
         private static void Fields(JToken token, params string[] names)
         {
-            if (!(token is JObject obj)) { Fail(token?.Path ?? "$", "Object required."); return; }
-            foreach (var property in obj.Properties()) if (!names.Contains(property.Name)) Fail(property.Path, "Unknown field.");
-            foreach (var name in names) if (obj.Property(name) == null) Fail(obj.Path + "." + name, "Required field missing.");
+            if (!(token is JObject obj))
+            {
+                Fail(token?.Path ?? "$", "Object required.");
+
+                return;
+            }
+
+            foreach (var property in obj.Properties())
+            {
+                if (!names.Contains(property.Name))
+                {
+                    Fail(property.Path, "Unknown field.");
+                }
+            }
+
+            foreach (var name in names)
+            {
+                if (obj.Property(name) == null)
+                {
+                    Fail(obj.Path + "." + name, "Required field missing.");
+                }
+            }
         }
+
         private static JArray Array(JToken token)
-        { if (!(token is JArray)) Fail(token.Path, "Array required."); return (JArray)token; }
+        {
+            if (!(token is JArray))
+            {
+                Fail(token.Path, "Array required.");
+            }
+
+            return (JArray)token;
+        }
+
         private static string String(JToken token)
-        { if (token == null || token.Type != JTokenType.String) Fail(token?.Path ?? "$", "String required."); return (string)token; }
+        {
+            if (token == null || token.Type != JTokenType.String)
+            {
+                Fail(token?.Path ?? "$", "String required.");
+            }
+
+            return (string)token;
+        }
+
         private static Guid Id(JToken token)
-        { if (!Guid.TryParseExact(String(token), "D", out var id) || id == Guid.Empty) Fail(token.Path, "Nonempty UUID required."); return id; }
+        {
+            if (!Guid.TryParseExact(String(token), "D", out var id) || id == Guid.Empty)
+            {
+                Fail(token.Path, "Nonempty UUID required.");
+            }
+
+            return id;
+        }
+
         private static double Number(JToken token)
         {
-            if (token.Type != JTokenType.Float && token.Type != JTokenType.Integer) Fail(token.Path, "Number required.");
+            if (token.Type != JTokenType.Float && token.Type != JTokenType.Integer)
+            {
+                Fail(token.Path, "Number required.");
+            }
+
             double number = (double)token;
-            if (!double.IsFinite(number)) Fail(token.Path, "Finite number required."); return number;
+
+            if (!double.IsFinite(number))
+            {
+                Fail(token.Path, "Finite number required.");
+            }
+
+            return number;
         }
+
         private static int Integer(JToken token)
         {
-            if (token.Type != JTokenType.Integer) Fail(token.Path, "Integer required.");
+            if (token.Type != JTokenType.Integer)
+            {
+                Fail(token.Path, "Integer required.");
+            }
+
             var number = Number(token);
-            if (number < int.MinValue || number > int.MaxValue) Fail(token.Path, "Integer out of range."); return (int)number;
+
+            if (number < int.MinValue || number > int.MaxValue)
+            {
+                Fail(token.Path, "Integer out of range.");
+            }
+
+            return (int)number;
         }
     }
 }

@@ -10,10 +10,14 @@ function Write-TestFile([string]$path, [string]$content) {
 }
 function Git([string[]]$arguments) {
     if ($PSVersionTable.PSVersion -lt [version]'7.3' -or $PSNativeCommandArgumentPassing -eq 'Legacy') {
-        $arguments = @($arguments | ForEach-Object { $_.Replace('"', '\"') })
+        $arguments = @($arguments | ForEach-Object {
+            $_.Replace('"', '\"')
+        })
     }
     & git.exe @arguments | Out-Host
-    if ($LASTEXITCODE -ne 0) { throw "git failed: $arguments" }
+    if ($LASTEXITCODE -ne 0) {
+        throw "git failed: $arguments"
+    }
 }
 function New-Case([string]$name) {
     $path = Join-Path $testRoot $name
@@ -41,8 +45,12 @@ try {
         Write-TestFile (Join-Path $case 'Assets/A.cs.meta') "fileFormatVersion: 2`nguid: 11111111111111111111111111111111`n"
         Git @('add', '.')
         switch ($name) {
-            'missing' { Git @('rm', '--cached', 'Assets/A.cs.meta') }
-            'orphan' { Git @('rm', '--cached', 'Assets/A.cs') }
+            'missing' {
+                Git @('rm', '--cached', 'Assets/A.cs.meta')
+            }
+            'orphan' {
+                Git @('rm', '--cached', 'Assets/A.cs')
+            }
             'duplicate' {
                 Write-TestFile (Join-Path $case 'Assets/B.cs') '// asset B'
                 Copy-Item -LiteralPath 'Assets/A.cs.meta' -Destination 'Assets/B.cs.meta'
@@ -67,11 +75,21 @@ try {
             }
         }
         switch ($name) {
-            'missing' { Check-Meta $false 'Missing asset meta' }
-            'orphan' { Check-Meta $false 'Orphan meta' }
-            'duplicate' { Check-Meta $false 'Duplicate GUID' }
-            'missing-folder' { Check-Meta $false 'Missing folder meta' }
-            default { Check-Meta $true }
+            'missing' {
+                Check-Meta $false 'Missing asset meta'
+            }
+            'orphan' {
+                Check-Meta $false 'Orphan meta'
+            }
+            'duplicate' {
+                Check-Meta $false 'Duplicate GUID'
+            }
+            'missing-folder' {
+                Check-Meta $false 'Missing folder meta'
+            }
+            default {
+                Check-Meta $true
+            }
         }
         if ($name -eq 'missing') {
             [void][IO.Directory]::CreateDirectory((Join-Path $case 'Tools'))
@@ -82,13 +100,17 @@ try {
             $ErrorActionPreference = 'Continue'
             $output = & git.exe commit -m 'Must be rejected' 2>&1
             $ErrorActionPreference = 'Stop'
-            if ($LASTEXITCODE -eq 0 -or ($output -join "`n") -notlike '*Missing asset meta*') { throw 'Pre-commit hook did not reject invalid index.' }
+            if ($LASTEXITCODE -eq 0 -or ($output -join "`n") -notlike '*Missing asset meta*') {
+                throw 'Pre-commit hook did not reject invalid index.'
+            }
         }
         Write-Host "PASS meta: $name"
     }
     Set-Location -LiteralPath $projectRoot
     $driver = & git.exe config --local --get merge.unityyamlmerge.driver
-    if (!$driver) { throw 'Configure the project merge driver first.' }
+    if (!$driver) {
+        throw 'Configure the project merge driver first.'
+    }
     $prefab = Get-Content -LiteralPath 'Assets/Game/Prefabs/TapNote.prefab' -Raw
     $case = New-Case 'merge'
     Write-TestFile (Join-Path $case '.gitattributes') "*.prefab merge=unityyamlmerge`n"
@@ -104,7 +126,9 @@ try {
     Git @('commit', '-qam', 'Local name')
     Git @('merge', '--no-edit', 'incoming')
     $merged = Get-Content -LiteralPath 'Test.prefab' -Raw
-    if ($merged -notmatch 'm_Name: RenamedNote' -or $merged -notmatch 'm_Layer: 8') { throw 'Merge lost an independent change.' }
+    if ($merged -notmatch 'm_Name: RenamedNote' -or $merged -notmatch 'm_Layer: 8') {
+        throw 'Merge lost an independent change.'
+    }
     Write-Host 'PASS merge: independent changes retained'
     Git @('switch', '-qc', 'conflicting')
     Write-TestFile (Join-Path $case 'Test.prefab') $merged.Replace('m_Name: RenamedNote', 'm_Name: IncomingConflict')
@@ -115,9 +139,15 @@ try {
     $ErrorActionPreference = 'Continue'
     $output = & git.exe merge --no-edit conflicting 2>&1
     $ErrorActionPreference = 'Stop'
-    if ($LASTEXITCODE -eq 0) { throw 'Conflicting merge unexpectedly succeeded.' }
-    if (!(& git.exe ls-files --unmerged)) { throw 'Conflict not retained in the index.' }
+    if ($LASTEXITCODE -eq 0) {
+        throw 'Conflicting merge unexpectedly succeeded.'
+    }
+    if (!(& git.exe ls-files --unmerged)) {
+        throw 'Conflict not retained in the index.'
+    }
     Write-Host 'PASS merge: unresolved conflict retained'
     Write-Host "All setup checks passed. Isolated fixtures retained at $testRoot"
 }
-finally { Pop-Location }
+finally {
+    Pop-Location
+}
