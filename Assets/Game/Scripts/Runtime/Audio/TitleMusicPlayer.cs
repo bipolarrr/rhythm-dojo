@@ -1,6 +1,6 @@
 using System;
-using UnityEngine;
 using RhythmDojo.Services;
+using UnityEngine;
 
 namespace RhythmDojo.Audio
 {
@@ -15,28 +15,83 @@ namespace RhythmDojo.Audio
 
         public void Initialize(TitleMusicSettings musicSettings)
         {
-            if (!musicSettings) throw new ArgumentNullException(nameof(musicSettings));
+            if (!musicSettings)
+            {
+                throw new ArgumentNullException(nameof(musicSettings));
+            }
+
             musicSettings.Validate();
             settings = musicSettings;
-            if (!source) source = gameObject.AddComponent<AudioSource>();
+
+            if (!source)
+            {
+                source = gameObject.AddComponent<AudioSource>();
+            }
+
             source.playOnAwake = false;
             source.loop = true;
             source.spatialBlend = 0f;
             source.pitch = 1f;
-            source.volume = settings.Volume;
+            source.volume =
+                settings.Volume
+                * (
+                    PresentationPreferences.Current ?? PresentationPreferences.Load()
+                ).backgroundVolume;
             source.clip = settings.MusicClip;
             initialized = true;
-            if (isActiveAndEnabled) Restart();
+
+            if (isActiveAndEnabled)
+            {
+                Restart();
+            }
         }
 
         private void Restart()
         {
             source.Stop();
-            startDspTime = AudioSettings.dspTime + (settings.MusicClip ? .15d : 0d);
-            if (settings.MusicClip) source.PlayScheduled(startDspTime);
+
+            if (settings.MusicClip)
+            {
+                startDspTime = AudioSettings.dspTime + .15d;
+            }
+            else
+            {
+                startDspTime = AudioSettings.dspTime + 0d;
+            }
+
+            if (settings.MusicClip)
+            {
+                source.PlayScheduled(startDspTime);
+            }
         }
 
-        private void OnEnable() { if (initialized) Restart(); }
-        private void OnDisable() { if (source) source.Stop(); }
+        private void RefreshVolume()
+        {
+            if (source && settings)
+            {
+                source.volume = settings.Volume * PresentationPreferences.Current.backgroundVolume;
+            }
+        }
+
+        private void OnEnable()
+        {
+            PresentationPreferences.Changed += RefreshVolume;
+
+            if (initialized)
+            {
+                RefreshVolume();
+                Restart();
+            }
+        }
+
+        private void OnDisable()
+        {
+            PresentationPreferences.Changed -= RefreshVolume;
+
+            if (source)
+            {
+                source.Stop();
+            }
+        }
     }
 }

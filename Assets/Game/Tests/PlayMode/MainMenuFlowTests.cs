@@ -2,15 +2,15 @@ using System;
 using System.Collections;
 using System.IO;
 using NUnit.Framework;
+using RhythmDojo.Core;
+using RhythmDojo.Services;
+using RhythmDojo.UI;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
-using RhythmDojo.Core;
-using RhythmDojo.Services;
-using RhythmDojo.UI;
 
 namespace RhythmDojo.Tests
 {
@@ -29,10 +29,27 @@ namespace RhythmDojo.Tests
         private sealed class Actions : IMainMenuActions
         {
             public bool Transitioning { get; set; }
-            public int Starts, Quits, Settings;
-            public void StartGame() { Starts++; Transitioning = true; }
-            public void ShowSettings() { Settings++; Transitioning = true; }
-            public void QuitGame() { Quits++; }
+
+            public int Starts,
+                Quits,
+                Settings;
+
+            public void StartGame()
+            {
+                Starts++;
+                Transitioning = true;
+            }
+
+            public void ShowSettings()
+            {
+                Settings++;
+                Transitioning = true;
+            }
+
+            public void QuitGame()
+            {
+                Quits++;
+            }
         }
 
         [UnitySetUp]
@@ -41,9 +58,12 @@ namespace RhythmDojo.Tests
             input = InputSystem.settings;
             editorBehavior = input.editorInputBehaviorInPlayMode;
             backgroundBehavior = input.backgroundBehavior;
-            input.editorInputBehaviorInPlayMode = InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+            input.editorInputBehaviorInPlayMode = InputSettings
+                .EditorInputBehaviorInPlayMode
+                .AllDeviceInputAlwaysGoesToGameView;
             input.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
-            mouse = InputSystem.AddDevice<Mouse>(); mouse.MakeCurrent();
+            mouse = InputSystem.AddDevice<Mouse>();
+            mouse.MakeCurrent();
             yield return SceneManager.LoadSceneAsync("Assets/Game/Scenes/Title.unity");
             yield return null;
             view = UnityEngine.Object.FindFirstObjectByType<MainMenuView>();
@@ -54,34 +74,59 @@ namespace RhythmDojo.Tests
         [UnityTearDown]
         public IEnumerator TearDown()
         {
-            if (mouse != null && mouse.added) InputSystem.RemoveDevice(mouse);
+            if (mouse != null && mouse.added)
+            {
+                InputSystem.RemoveDevice(mouse);
+            }
+
             input.editorInputBehaviorInPlayMode = editorBehavior;
             input.backgroundBehavior = backgroundBehavior;
+
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
-            if (flow) UnityEngine.Object.Destroy(flow.gameObject);
+
+            if (flow)
+            {
+                UnityEngine.Object.Destroy(flow.gameObject);
+            }
+
             yield return null;
         }
 
         private IEnumerator ClickAt(Vector2 point)
         {
             InputSystem.QueueStateEvent(mouse, new MouseState { position = point });
-            yield return null; yield return null;
+            yield return null;
+            yield return null;
             InputSystem.QueueStateEvent(mouse, new MouseState { position = point, buttons = 1 });
-            yield return null; yield return null;
+            yield return null;
+            yield return null;
             InputSystem.QueueStateEvent(mouse, new MouseState { position = point });
-            yield return null; yield return null;
+            yield return null;
+            yield return null;
         }
 
         private IEnumerator Click(Button button)
         {
             Canvas.ForceUpdateCanvases();
+
             var rect = (RectTransform)button.transform;
-            Vector2 point = RectTransformUtility.WorldToScreenPoint(null, rect.TransformPoint(rect.rect.center));
-            var hits = new System.Collections.Generic.List<UnityEngine.EventSystems.RaycastResult>();
+            Vector2 point = RectTransformUtility.WorldToScreenPoint(
+                null,
+                rect.TransformPoint(rect.rect.center)
+            );
+            var hits =
+                new System.Collections.Generic.List<UnityEngine.EventSystems.RaycastResult>();
             var events = UnityEngine.EventSystems.EventSystem.current;
-            events.RaycastAll(new UnityEngine.EventSystems.PointerEventData(events) { position = point }, hits);
+            events.RaycastAll(
+                new UnityEngine.EventSystems.PointerEventData(events) { position = point },
+                hits
+            );
             Assert.That(hits.Count, Is.GreaterThan(0), "No raycast hit for " + button.name);
-            Assert.That(hits[0].gameObject.GetComponentInParent<Button>(), Is.EqualTo(button), "Wrong raycast target for " + button.name);
+            Assert.That(
+                hits[0].gameObject.GetComponentInParent<Button>(),
+                Is.EqualTo(button),
+                "Wrong raycast target for " + button.name
+            );
             yield return ClickAt(point);
         }
 
@@ -96,7 +141,8 @@ namespace RhythmDojo.Tests
         [UnityTest]
         public IEnumerator SettingsRequestsSettingsWithoutStartingTheGame()
         {
-            var actions = new Actions(); screen.Initialize(actions);
+            var actions = new Actions();
+            screen.Initialize(actions);
             yield return OpenMenu();
             yield return Click(view.settings);
             Assert.That(actions.Settings, Is.EqualTo(1));
@@ -109,29 +155,42 @@ namespace RhythmDojo.Tests
         [UnityTest]
         public IEnumerator QuitPopupBlocksBackgroundAndNoRestoresMenu()
         {
-            var actions = new Actions(); screen.Initialize(actions);
+            var actions = new Actions();
+            screen.Initialize(actions);
             yield return OpenMenu();
+
             for (int repeat = 0; repeat < 2; repeat++)
             {
                 yield return Click(view.quit);
                 Assert.That(view.quitPopup.activeSelf, Is.True);
-                Assert.That(view.start.interactable || view.settings.interactable || view.quit.interactable, Is.False);
+                Assert.That(
+                    view.start.interactable || view.settings.interactable || view.quit.interactable,
+                    Is.False
+                );
                 yield return ClickAt(new Vector2(Screen.width * .2f, Screen.height * .8f));
                 Assert.That(actions.Starts, Is.Zero);
                 Assert.That(view.quitPopup.activeSelf, Is.True);
                 yield return Click(view.cancelQuit);
                 Assert.That(view.quitPopup.activeSelf, Is.False);
-                Assert.That(view.start.interactable && view.settings.interactable && view.quit.interactable, Is.True);
+                Assert.That(
+                    view.start.interactable && view.settings.interactable && view.quit.interactable,
+                    Is.True
+                );
             }
         }
 
         [UnityTest]
         public IEnumerator YesRequestsQuitExactlyOnceWithoutStarting()
         {
-            var actions = new Actions(); screen.Initialize(actions);
+            var actions = new Actions();
+            screen.Initialize(actions);
             yield return OpenMenu();
             yield return Click(view.quit);
-            Assert.That(view.quitPopup.activeSelf, Is.True, "Quit popup must open before confirming.");
+            Assert.That(
+                view.quitPopup.activeSelf,
+                Is.True,
+                "Quit popup must open before confirming."
+            );
             yield return Click(view.confirmQuit);
             view.confirmQuit.onClick.Invoke();
             Assert.That(actions.Quits, Is.EqualTo(1));
@@ -141,8 +200,11 @@ namespace RhythmDojo.Tests
         [UnityTest]
         public IEnumerator LogoExpandsMenuAndPlayStartsOnceWithoutDuplicateListeners()
         {
-            var oldActions = new Actions(); screen.Initialize(oldActions);
-            var actions = new Actions(); screen.Initialize(actions);
+            var oldActions = new Actions();
+            screen.Initialize(oldActions);
+
+            var actions = new Actions();
+            screen.Initialize(actions);
             yield return ClickAt(new Vector2(Screen.width * .3f, Screen.height * .7f));
             Assert.That(actions.Starts, Is.Zero);
             yield return OpenMenu();
@@ -157,24 +219,45 @@ namespace RhythmDojo.Tests
         public IEnumerator StartLoadsBootstrapThenExistingSongSelection()
         {
             bool bootstrapLoaded = false;
-            UnityEngine.Events.UnityAction<Scene, LoadSceneMode> loaded = (scene, mode) => { if (scene.path == MainMenuActions.BootstrapScenePath) { bootstrapLoaded = true; AssertHasDisplayCamera(); } };
+            UnityEngine.Events.UnityAction<Scene, LoadSceneMode> loaded = (scene, mode) =>
+            {
+                if (scene.path == MainMenuActions.BootstrapScenePath)
+                {
+                    bootstrapLoaded = true;
+                    AssertHasDisplayCamera();
+                }
+            };
             SceneManager.sceneLoaded += loaded;
+
             try
             {
                 yield return OpenMenu();
                 yield return Click(view.start);
+
                 double deadline = Time.realtimeSinceStartupAsDouble + 20;
+
                 while (!UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>())
                 {
                     AssertHasDisplayCamera();
-                    Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline), "Song selection transition timed out.");
+                    Assert.That(
+                        Time.realtimeSinceStartupAsDouble,
+                        Is.LessThan(deadline),
+                        "Song selection transition timed out."
+                    );
                     yield return null;
                 }
+
                 AssertHasDisplayCamera();
                 Assert.That(bootstrapLoaded, Is.True);
-                Assert.That(SceneManager.GetActiveScene().path, Does.EndWith("/SongSelection.unity"));
+                Assert.That(
+                    SceneManager.GetActiveScene().path,
+                    Does.EndWith("/SongSelection.unity")
+                );
             }
-            finally { SceneManager.sceneLoaded -= loaded; }
+            finally
+            {
+                SceneManager.sceneLoaded -= loaded;
+            }
         }
 
         [UnityTest]
@@ -193,7 +276,8 @@ namespace RhythmDojo.Tests
         [UnityTest]
         public IEnumerator LogoCanCollapseMenuAndHiddenButtonsCannotStart()
         {
-            var actions = new Actions(); screen.Initialize(actions);
+            var actions = new Actions();
+            screen.Initialize(actions);
             yield return OpenMenu();
             yield return Click(view.logo);
             yield return new WaitForSecondsRealtime(.35f);
@@ -207,34 +291,62 @@ namespace RhythmDojo.Tests
         {
             yield return OpenMenu();
             yield return Click(view.settings);
+
             double deadline = Time.realtimeSinceStartupAsDouble + 20d;
+
             while (!UnityEngine.Object.FindFirstObjectByType<SettingsScreen>())
             {
                 Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
                 yield return null;
             }
+
             yield return null;
+
             var settingsView = UnityEngine.Object.FindFirstObjectByType<SettingsView>();
             settingsView.back.onClick.Invoke();
+
             while (SceneManager.GetActiveScene().path != "Assets/Game/Scenes/Title.unity")
             {
                 Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
                 yield return null;
             }
+
             yield return null;
-            Assert.That(UnityEngine.Object.FindFirstObjectByType<MainMenuView>().menuPanel.gameObject.activeSelf, Is.False);
+            Assert.That(UnityEngine.Object.FindFirstObjectByType<MainMenuView>(), Is.SameAs(view));
+            Assert.That(
+                view.menuPanel.gameObject.activeSelf,
+                Is.True,
+                "Popup preserves the expanded title menu."
+            );
+            Assert.That(screen.enabled, Is.True);
+            Assert.That(view.start.interactable, Is.True);
+            yield return Click(view.logo);
+            yield return new WaitForSecondsRealtime(.3f);
+            Assert.That(view.menuPanel.gameObject.activeSelf, Is.False);
         }
 
         private static void AssertHasDisplayCamera()
         {
-            Assert.That(System.Array.Exists(Camera.allCameras, camera =>
-                camera.isActiveAndEnabled && camera.targetDisplay == 0 && !camera.targetTexture),
-                Is.True, "Display 1 must have a rendering camera throughout the transition.");
+            Assert.That(
+                System.Array.Exists(
+                    Camera.allCameras,
+                    camera =>
+                        camera.isActiveAndEnabled
+                        && camera.targetDisplay == 0
+                        && !camera.targetTexture
+                ),
+                Is.True,
+                "Display 1 must have a rendering camera throughout the transition."
+            );
         }
 
         private void Capture(string path, int width = 1280, int height = 720)
         {
-            if (System.Environment.GetEnvironmentVariable("RHYTHM_DOJO_SKIP_CAPTURE") == "1") return;
+            if (System.Environment.GetEnvironmentVariable("RHYTHM_DOJO_SKIP_CAPTURE") == "1")
+            {
+                return;
+            }
+
             var camera = Camera.main;
             var canvas = view.GetComponent<Canvas>();
             var target = new RenderTexture(width, height, 24);
@@ -243,21 +355,34 @@ namespace RhythmDojo.Tests
             var priorScale = canvas.scaleFactor;
             var priorScaler = scaler.enabled;
             var texture = new Texture2D(width, height, TextureFormat.RGB24, false);
+
             try
             {
-                scaler.enabled = false; canvas.scaleFactor = Mathf.Sqrt(width / 1280f * height / 720f);
-                camera.targetTexture = target; canvas.renderMode = RenderMode.ScreenSpaceCamera;
-                canvas.worldCamera = camera; canvas.planeDistance = 1;
-                Canvas.ForceUpdateCanvases(); camera.Render(); RenderTexture.active = target;
-                texture.ReadPixels(new Rect(0, 0, width, height), 0, 0); texture.Apply();
-                Directory.CreateDirectory("Logs"); File.WriteAllBytes(path, texture.EncodeToPNG());
+                scaler.enabled = false;
+                canvas.scaleFactor = Mathf.Sqrt(width / 1280f * height / 720f);
+                camera.targetTexture = target;
+                canvas.renderMode = RenderMode.ScreenSpaceCamera;
+                canvas.worldCamera = camera;
+                canvas.planeDistance = 1;
+                Canvas.ForceUpdateCanvases();
+                camera.Render();
+                RenderTexture.active = target;
+                texture.ReadPixels(new Rect(0, 0, width, height), 0, 0);
+                texture.Apply();
+                Directory.CreateDirectory("Logs");
+                File.WriteAllBytes(path, texture.EncodeToPNG());
             }
             finally
             {
-                canvas.renderMode = RenderMode.ScreenSpaceOverlay; canvas.worldCamera = null;
-                camera.targetTexture = null; RenderTexture.active = previous;
-                canvas.scaleFactor = priorScale; scaler.enabled = priorScaler;
-                target.Release(); UnityEngine.Object.Destroy(target); UnityEngine.Object.Destroy(texture);
+                canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+                canvas.worldCamera = null;
+                camera.targetTexture = null;
+                RenderTexture.active = previous;
+                canvas.scaleFactor = priorScale;
+                scaler.enabled = priorScaler;
+                target.Release();
+                UnityEngine.Object.Destroy(target);
+                UnityEngine.Object.Destroy(texture);
                 Canvas.ForceUpdateCanvases();
             }
         }

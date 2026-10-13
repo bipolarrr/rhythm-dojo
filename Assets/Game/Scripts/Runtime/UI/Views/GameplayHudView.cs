@@ -21,12 +21,48 @@ namespace RhythmDojo.UI
         public Text progress;
         public Image progressFill;
         public CanvasGroup judgmentGroup;
+        public Image healthFill;
+        public Text healthLabel;
+        public GameObject gameOverPanel;
+        public Text gameOverText;
+
         public void Validate()
         {
-            if (!status || !lanes || !returnButton) throw new InvalidOperationException("HUD view references missing.");
-            if (!songTitle || !songDetails || !sessionState || !combo || !bestCombo || !judgment ||
-                !timing || !counts || !accuracy || !progress || !progressFill || !judgmentGroup)
+            if (!status || !lanes || !returnButton)
+            {
+                throw new InvalidOperationException("HUD view references missing.");
+            }
+
+            if ((!songTitle || !songDetails) || !sessionState)
+            {
                 throw new InvalidOperationException("Training HUD references missing.");
+            }
+
+            if ((!combo || !bestCombo) || !judgment)
+            {
+                throw new InvalidOperationException("Training HUD references missing.");
+            }
+
+            if ((!timing || !counts) || !accuracy)
+            {
+                throw new InvalidOperationException("Training HUD references missing.");
+            }
+
+            if ((!progress || !progressFill) || !judgmentGroup)
+            {
+                throw new InvalidOperationException("Training HUD references missing.");
+            }
+
+            if ((!healthFill || !healthLabel) || !gameOverPanel)
+            {
+                throw new InvalidOperationException("Training HUD references missing.");
+            }
+
+            if (!gameOverText)
+            {
+                throw new InvalidOperationException("Training HUD references missing.");
+            }
+
             lanes.Validate();
         }
     }

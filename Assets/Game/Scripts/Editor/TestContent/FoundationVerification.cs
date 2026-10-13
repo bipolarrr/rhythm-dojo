@@ -18,16 +18,24 @@ namespace RhythmDojo.EditorTools
         public const string ActiveKey = "RhythmDojo.Verification.Active";
         private const string Prefix = "RhythmDojo.Verification.";
         private const string ReportPath = "Logs/verification.txt";
+
         // In the pinned Test Framework 1.6.0, RunFinished precedes scene/settings cleanup
         // and there is no public job-completed callback. Wait for the runner's job state,
         // rather than exiting/building early or guessing a number of editor frames.
         private static readonly MethodInfo isRunActive = typeof(TestRunnerApi).GetMethod(
-            "IsRunActive", BindingFlags.Static | BindingFlags.NonPublic);
+            "IsRunActive",
+            BindingFlags.Static | BindingFlags.NonPublic
+        );
 
         private static bool RunnerIsBusy()
         {
             if (isRunActive == null)
-                throw new InvalidOperationException("Test Framework job-state API changed. Update the verification adapter before running tests.");
+            {
+                throw new InvalidOperationException(
+                    "Test Framework job-state API changed. Update the verification adapter before running tests."
+                );
+            }
+
             return (bool)isRunActive.Invoke(null, null);
         }
 
@@ -48,23 +56,58 @@ namespace RhythmDojo.EditorTools
         [MenuItem("Game Tools/Verification/Verify Gameplay Actions")]
         public static void RunGameplay() => Begin("Gameplay", false);
 
+        [MenuItem("Game Tools/Verification/Playtest Health and Results")]
+        public static void RunHealthAndResults() => Begin("HealthPlaytest", false);
+
         [MenuItem("Game Tools/Verification/Verify Authoring Actions")]
         public static void RunAuthoring() => Begin("Authoring", false);
 
         private static void Begin(string category, bool build, bool includeEditMode = false)
         {
-            if (SessionState.GetBool(ActiveKey, false) || EditorApplication.isPlayingOrWillChangePlaymode || RunnerIsBusy())
-                throw new InvalidOperationException("Finish the current verification and exit Play Mode first.");
-            if (!UnityEngine.Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
+            if (
+                SessionState.GetBool(ActiveKey, false)
+                || EditorApplication.isPlayingOrWillChangePlaymode
+            )
+            {
+                throw new InvalidOperationException(
+                    "Finish the current verification and exit Play Mode first."
+                );
+            }
+
+            if (RunnerIsBusy())
+            {
+                throw new InvalidOperationException(
+                    "Finish the current verification and exit Play Mode first."
+                );
+            }
+
+            if (
+                !UnityEngine.Application.isBatchMode
+                && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()
+            )
+            {
                 return;
+            }
 
             Directory.CreateDirectory("Logs");
             File.WriteAllText(ReportPath, $"Verification started: {DateTime.UtcNow:O}\n");
-            SessionState.SetString(Prefix + "PreviousStart", AssetDatabase.GetAssetPath(EditorSceneManager.playModeStartScene));
+            SessionState.SetString(
+                Prefix + "PreviousStart",
+                AssetDatabase.GetAssetPath(EditorSceneManager.playModeStartScene)
+            );
             SessionState.SetString(Prefix + "Category", category);
             SessionState.SetBool(Prefix + "Build", build);
             SessionState.SetBool(Prefix + "Failed", false);
-            SessionState.SetInt(Prefix + "Phase", build || includeEditMode ? 0 : 1);
+
+            if (build || includeEditMode)
+            {
+                SessionState.SetInt(Prefix + "Phase", 0);
+            }
+            else
+            {
+                SessionState.SetInt(Prefix + "Phase", 1);
+            }
+
             SessionState.SetBool(ActiveKey, true);
             EditorSceneManager.playModeStartScene = null;
             SessionState.SetBool(Prefix + "Pending", true);
@@ -72,34 +115,82 @@ namespace RhythmDojo.EditorTools
 
         private static void Continue()
         {
-            if (!SessionState.GetBool(ActiveKey, false) || !SessionState.GetBool(Prefix + "Pending", false) ||
-                EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling) return;
+            if (
+                !SessionState.GetBool(ActiveKey, false)
+                || !SessionState.GetBool(Prefix + "Pending", false)
+            )
+            {
+                return;
+            }
+
+            if (EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling)
+            {
+                return;
+            }
 
             try
             {
-                if (RunnerIsBusy()) return;
+                if (RunnerIsBusy())
+                {
+                    return;
+                }
+
                 SessionState.SetBool(Prefix + "Pending", false);
+
                 int phase = SessionState.GetInt(Prefix + "Phase", 0);
-                if (SessionState.GetBool(Prefix + "Failed", false)) { Finish(false); return; }
+
+                if (SessionState.GetBool(Prefix + "Failed", false))
+                {
+                    Finish(false);
+
+                    return;
+                }
+
                 if (phase == 2)
                 {
-                    if (SessionState.GetBool(Prefix + "Build", false)) BuildPlayer();
+                    if (SessionState.GetBool(Prefix + "Build", false))
+                    {
+                        BuildPlayer();
+                    }
+
                     Finish(true);
+
                     return;
                 }
 
                 string category = SessionState.GetString(Prefix + "Category", "");
-                var filter = new Filter
+                var filter = new Filter();
+
+                if (phase == 0)
                 {
-                    testMode = phase == 0 ? TestMode.EditMode : TestMode.PlayMode,
-                    assemblyNames = phase == 0
-                        ? new[] { "Game.Domain.Tests", "Game.EditMode.Tests" }
-                        : new[] { "Game.PlayMode.Tests" },
-                    categoryNames = string.IsNullOrEmpty(category) ? null : new[] { category }
-                };
+                    filter.testMode = TestMode.EditMode;
+                    filter.assemblyNames = new[] { "Game.Domain.Tests", "Game.EditMode.Tests" };
+                }
+                else
+                {
+                    filter.testMode = TestMode.PlayMode;
+                    filter.assemblyNames = new[] { "Game.PlayMode.Tests" };
+                }
+
+                if (string.IsNullOrEmpty(category))
+                {
+                    filter.categoryNames = null;
+                }
+                else
+                {
+                    filter.categoryNames = new[] { category };
+                }
+
                 var api = ScriptableObject.CreateInstance<TestRunnerApi>();
-                try { api.Execute(new ExecutionSettings(filter)); }
-                finally { UnityEngine.Object.DestroyImmediate(api); }
+
+                try
+                {
+                    api.Execute(new ExecutionSettings(filter));
+                }
+                finally
+                {
+                    UnityEngine.Object.DestroyImmediate(api);
+                }
             }
             catch (Exception error)
             {
@@ -112,46 +203,112 @@ namespace RhythmDojo.EditorTools
         private static void Finish(bool passed)
         {
             EditorSceneManager.playModeStartScene = AssetDatabase.LoadAssetAtPath<SceneAsset>(
-                SessionState.GetString(Prefix + "PreviousStart", ""));
+                SessionState.GetString(Prefix + "PreviousStart", "")
+            );
             SessionState.SetBool(ActiveKey, false);
             SessionState.SetBool(Prefix + "Pending", false);
             SessionState.SetBool(Prefix + "Failed", !passed);
-            File.AppendAllText(ReportPath, passed ? "PASS: verification completed.\n" : "FAIL: verification stopped; see XML results.\n");
-            Debug.Log($"Rhythm Dojo verification {(passed ? "passed" : "failed")}: {ReportPath}");
-            if (UnityEngine.Application.isBatchMode) EditorApplication.Exit(passed ? 0 : 1);
+
+            if (passed)
+            {
+                File.AppendAllText(ReportPath, "PASS: verification completed.\n");
+            }
+            else
+            {
+                File.AppendAllText(ReportPath, "FAIL: verification stopped; see XML results.\n");
+            }
+
+            if (passed)
+            {
+                Debug.Log($"Rhythm Dojo verification passed: {ReportPath}");
+            }
+            else
+            {
+                Debug.Log($"Rhythm Dojo verification failed: {ReportPath}");
+            }
+
+            if (UnityEngine.Application.isBatchMode)
+            {
+                if (passed)
+                {
+                    EditorApplication.Exit(0);
+                }
+                else
+                {
+                    EditorApplication.Exit(1);
+                }
+            }
         }
 
         private sealed class Results : IErrorCallbacks
         {
             public void RunStarted(ITestAdaptor testsToRun) { }
+
             public void TestStarted(ITestAdaptor test) { }
 
             public void TestFinished(ITestResultAdaptor result)
             {
-                if (!SessionState.GetBool(ActiveKey, false) || result.Test.IsSuite) return;
-                File.AppendAllText(ReportPath, $"{result.ResultState}: {result.FullName}\n{result.Message}\n");
+                if (!SessionState.GetBool(ActiveKey, false) || result.Test.IsSuite)
+                {
+                    return;
+                }
+
+                File.AppendAllText(
+                    ReportPath,
+                    $"{result.ResultState}: {result.FullName}\n{result.Message}\n"
+                );
             }
 
             public void RunFinished(ITestResultAdaptor result)
             {
-                if (!SessionState.GetBool(ActiveKey, false)) return;
+                if (!SessionState.GetBool(ActiveKey, false))
+                {
+                    return;
+                }
+
                 int phase = SessionState.GetInt(Prefix + "Phase", 0);
                 string category = SessionState.GetString(Prefix + "Category", "");
-                string name = phase == 0 ? "editmode" : string.IsNullOrEmpty(category) ? "playmode" : category.ToLowerInvariant();
+                string name;
+
+                if (phase == 0)
+                {
+                    name = "editmode";
+                }
+                else if (string.IsNullOrEmpty(category))
+                {
+                    name = "playmode";
+                }
+                else
+                {
+                    name = category.ToLowerInvariant();
+                }
+
                 TestRunnerApi.SaveResultToFile(result, $"Logs/verification-{name}.xml");
-                bool passed = result.ResultState == "Passed" && result.PassCount > 0 &&
-                    result.FailCount == 0 && result.SkipCount == 0 && result.InconclusiveCount == 0;
-                File.AppendAllText(ReportPath,
-                    $"{name}: {result.PassCount} passed, {result.FailCount} failed, {result.SkipCount} skipped, {result.InconclusiveCount} inconclusive.\n");
+
+                bool passed =
+                    result.ResultState == "Passed"
+                    && result.PassCount > 0
+                    && result.FailCount == 0
+                    && result.SkipCount == 0
+                    && result.InconclusiveCount == 0;
+                File.AppendAllText(
+                    ReportPath,
+                    $"{name}: {result.PassCount} passed, {result.FailCount} failed, {result.SkipCount} skipped, {result.InconclusiveCount} inconclusive.\n"
+                );
                 SessionState.SetBool(Prefix + "Failed", !passed);
                 SessionState.SetInt(Prefix + "Phase", phase + 1);
+
                 // Continue waits for all runner cleanup tasks, including after leaving Play Mode.
                 SessionState.SetBool(Prefix + "Pending", true);
             }
 
             public void OnError(string message)
             {
-                if (!SessionState.GetBool(ActiveKey, false)) return;
+                if (!SessionState.GetBool(ActiveKey, false))
+                {
+                    return;
+                }
+
                 File.AppendAllText(ReportPath, $"FAIL: Test Runner: {message}\n");
                 SessionState.SetBool(Prefix + "Failed", true);
                 SessionState.SetBool(Prefix + "Pending", true);
@@ -162,16 +319,32 @@ namespace RhythmDojo.EditorTools
         public static void BuildPlayer()
         {
             Directory.CreateDirectory("Builds/Windows");
-            var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
-            {
-                scenes = new[] { SceneBuilder.TitlePath, SceneBuilder.BootstrapPath, SceneBuilder.SelectionPath,
-                    SceneBuilder.GameplayPath, SceneBuilder.SettingsPath, ChartEditorSceneBuilder.ScenePath },
-                locationPathName = "Builds/Windows/RhythmDojo.exe",
-                target = BuildTarget.StandaloneWindows64,
-                options = BuildOptions.None
-            });
+
+            var report = BuildPipeline.BuildPlayer(
+                new BuildPlayerOptions
+                {
+                    scenes = new[]
+                    {
+                        SceneBuilder.TitlePath,
+                        SceneBuilder.BootstrapPath,
+                        SceneBuilder.SelectionPath,
+                        SceneBuilder.GameplayPath,
+                        SceneBuilder.SettingsPath,
+                        ChartEditorSceneBuilder.ScenePath,
+                    },
+                    locationPathName = "Builds/Windows/RhythmDojo.exe",
+                    target = BuildTarget.StandaloneWindows64,
+                    options = BuildOptions.None,
+                }
+            );
+
             if (report.summary.result != BuildResult.Succeeded)
-                throw new InvalidOperationException("Standalone player build: " + report.summary.result);
+            {
+                throw new InvalidOperationException(
+                    "Standalone player build: " + report.summary.result
+                );
+            }
+
             Directory.CreateDirectory("Logs");
             File.AppendAllText(ReportPath, "PASS: Windows standalone build (Title entry point).\n");
         }

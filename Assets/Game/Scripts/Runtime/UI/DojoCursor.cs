@@ -10,7 +10,8 @@ namespace RhythmDojo.UI
     public sealed class DojoCursor : MonoBehaviour
     {
         private static DojoCursor instance;
-        private Texture2D normalTexture, hoverTexture;
+        private Texture2D normalTexture,
+            hoverTexture;
         private Texture2D currentTexture;
         private PointerEventData pointer;
         private EventSystem pointerSystem;
@@ -23,7 +24,11 @@ namespace RhythmDojo.UI
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Install()
         {
-            if (instance) return;
+            if (instance)
+            {
+                return;
+            }
+
             var cursorObject = new GameObject("Dojo Cursor");
             DontDestroyOnLoad(cursorObject);
             instance = cursorObject.AddComponent<DojoCursor>();
@@ -38,9 +43,14 @@ namespace RhythmDojo.UI
 
         private void Update()
         {
-            if (Mouse.current == null || !UnityEngine.Application.isFocused) return;
+            if (Mouse.current == null || !UnityEngine.Application.isFocused)
+            {
+                return;
+            }
+
             bool interactive = false;
             var system = EventSystem.current;
+
             if (system)
             {
                 if (pointerSystem != system)
@@ -48,8 +58,12 @@ namespace RhythmDojo.UI
                     pointerSystem = system;
                     pointer = new PointerEventData(system);
                 }
-                pointer.Reset(); pointer.position = Mouse.current.position.ReadValue();
-                hits.Clear(); system.RaycastAll(pointer, hits);
+
+                pointer.Reset();
+                pointer.position = Mouse.current.position.ReadValue();
+                hits.Clear();
+                system.RaycastAll(pointer, hits);
+
                 // Respect the front-most hit, including modal blockers and disabled controls.
                 if (hits.Count > 0)
                 {
@@ -57,27 +71,59 @@ namespace RhythmDojo.UI
                     interactive = control && control.IsActive() && control.IsInteractable();
                 }
             }
-            Apply(interactive && hoverTexture ? hoverTexture : normalTexture);
+
+            if (interactive && hoverTexture)
+            {
+                Apply(hoverTexture);
+            }
+            else
+            {
+                Apply(normalTexture);
+            }
         }
 
         private void Apply(Texture2D texture)
         {
-            if (currentTexture == texture) return;
-            Cursor.SetCursor(texture, texture ? Hotspot : Vector2.zero, CursorMode.Auto);
+            if (currentTexture == texture)
+            {
+                return;
+            }
+
+            if (texture)
+            {
+                Cursor.SetCursor(texture, Hotspot, CursorMode.Auto);
+            }
+            else
+            {
+                Cursor.SetCursor(texture, Vector2.zero, CursorMode.Auto);
+            }
+
             currentTexture = texture;
         }
 
         private void OnApplicationFocus(bool focused)
         {
             currentTexture = null;
-            Cursor.SetCursor(focused ? normalTexture : null, focused ? Hotspot : Vector2.zero, CursorMode.Auto);
+
+            if (focused)
+            {
+                Cursor.SetCursor(normalTexture, Hotspot, CursorMode.Auto);
+            }
+            else
+            {
+                Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+            }
         }
 
         private void OnDisable()
         {
             Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
             currentTexture = null;
-            if (instance == this) instance = null;
+
+            if (instance == this)
+            {
+                instance = null;
+            }
         }
     }
 }

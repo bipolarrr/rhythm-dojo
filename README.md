@@ -144,9 +144,9 @@ Views are created for the whole small chart when Gameplay loads; judgment still 
 
 When an authored full song is available, profile a Windows Development Build before adding lane/time cursors, distance-based active ranges and tap/hold pools. Active ranges must use the scroll timeline, including BPM changes, and preserve visible hold bodies. Keep the linear implementation as a result/event-order oracle and target zero steady-state GC allocations in judging and note rendering.
 
-The headless editor core supports multiple charts per song, transactional editing, 100-command Undo/Redo, UTF-8 JSON v1 storage, content-hashed audio import and conversion to the existing playback document. See [the file format and API guide](Docs/chart-format-v1.md), [JSON Schema](Docs/rdchart-v1.schema.json) and [examples](Docs/examples).
+The headless editor core supports multiple charts per song, transactional editing, 100-command Undo/Redo, UTF-8 JSON v2 storage with explicit v1 import, content-hashed audio import and conversion to the existing playback document. See [the file format and API guide](Docs/chart-format-v1.md), [JSON Schema](Docs/rdchart-v2.schema.json) and [examples](Docs/examples).
 
-Tempo ramps, stops, reverse scroll, separate SV events, the chart editor UI, user-song catalog registration, external audio decoding, pause, calibration UI and saved records remain future work.
+Tempo ramps, stops, reverse scroll, separate SV events and pause remain future work. The editor supports Easy/Standard/Hard slots, saved-song discovery, imported audio, timing calibration and versioned records.
 
 
 
@@ -164,3 +164,13 @@ when you want to run the currently open scene. PlayMode tests temporarily
 suspend this setting and restore it when the test run finishes.
 
 Title scene generation (Game Tools > Scenes > Build Title) saves and opens Title as the only scene. Bootstrap includes a black loading camera so asynchronous scene transitions keep Display 1 rendering.
+
+## Play rules and verification
+
+Chart difficulty selects different chart data. Built-in songs have Standard only; missing slots are disabled. In Settings → Gameplay choose Warmup (Perfect ±50 ms, Hmm... ±100 ms) or Sparring (±16/±50 ms), Gauge/Challenge, automatic/release hold tails, Gauge failure continuation and Challenge 1–3 independently. Rules are copied into each play request and reused on restart.
+
+Gauge starts at 100, loses 10 per Nope., and recovers 2 per Perfect from combo 10 onward. Hmm... extends combo without healing. A continued failure stays failed at zero health. Challenges stop on the first judgment exceeding their independent limits (1: unlimited Hmm... / 1 Nope.; 2: 3 / 0; 3: 0 / 0). Long notes count a head, tempo-aware quarter-beat interior checks and one tail. Releasing breaks combo; missed checks remain missed after regrabbing.
+
+Completed successful and failed scores are stored separately under chart-content and judgment-rule identities. Gauge and Challenge share scores but have separate achievements. Old score data is cleared on record-version upgrade while selection options, timing calibration, favorites and audio settings remain intact.
+
+**Game Tools → Verification → Playtest Health and Results** runs timestamped keyboard scenarios and writes CSV judgment logs, XML results and screenshots under `Logs/`. **Prepare Default and Verification Content** also recreates a saved three-chart verification project; ordinary scene generation does not replace user charts. Foundation verification runs EditMode, PlayMode and the Windows player build.

@@ -1,123 +1,479 @@
 using System;
+using RhythmDojo.UI;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
-using RhythmDojo.UI;
 
 namespace RhythmDojo.EditorTools
 {
     public static class SettingsLayoutBuilder
     {
-        private static Font font;
-        private static readonly Color Ink = new Color(.025f, .035f, .045f);
-        private static readonly Color Card = new Color(.055f, .068f, .08f);
-        private static readonly Color Red = new Color(.94f, .25f, .26f);
-        private static readonly Color Cyan = new Color(.46f, .78f, .76f);
+        private static readonly Color accent = new Color(.27f, .82f, .88f);
 
         public static SettingsView Build()
         {
-            font = AssetDatabase.LoadAssetAtPath<Font>(MainMenuLayoutBuilder.FontPath);
-            if (!font) throw new InvalidOperationException("Settings Korean font missing.");
-            var canvas = UiElements.Canvas("Settings"); var view = canvas.gameObject.AddComponent<SettingsView>();
-            var scaler = canvas.GetComponent<CanvasScaler>();
-            scaler.referenceResolution = new Vector2(1920, 1080); scaler.matchWidthOrHeight = .5f;
-            var wall = Panel("Dojo Wall", canvas.transform, Ink, 0, 0, 1, 1);
-            var architecture = new GameObject("Dojo Architecture", typeof(RectTransform), typeof(DojoBackdropGraphic));
-            architecture.transform.SetParent(wall, false); Bounds((RectTransform)architecture.transform,0,0,1,1);
-            architecture.GetComponent<DojoBackdropGraphic>().raycastTarget = false;
-            var header = Panel("Header", canvas.transform, new Color(.035f,.045f,.055f),0,.92f,1,1);
-            Label("Brand", header, "RHYTHM DOJO  /  리듬 도장", .025f,0,.36f,1,25);
-            Label("Section", header, "설정  /  SETTINGS", .50f,0,.78f,1,23);
-            Panel("Header Accent", header, Red,.025f,0,.325f,.035f);
-            Label("Title", canvas.transform, "수련 환경 설정", .08f,.82f,.70f,.90f,40);
-            Label("Subtitle", canvas.transform, "나에게 맞는 오디오 응답으로 박자를 단련하세요.", .08f,.77f,.92f,.82f,22).color = new Color(.65f,.72f,.73f);
+            var canvas = UiElements.Canvas("Settings");
+            canvas.sortingOrder = 100;
 
-            var controls = Panel("Buffer Controls", canvas.transform, Card,.08f,.42f,.47f,.75f);
-            Panel("Control Accent", controls, Red,0,.98f,1,1);
-            Label("Buffer Label", controls, "01  /  오디오 버퍼", .045f,.75f,.95f,.94f,27);
-            Label("Buffer Description", controls, "Unity DSP buffer size", .045f,.60f,.95f,.75f,20).color = new Color(.65f,.72f,.73f);
-            view.bufferList = UiElements.Dropdown("DSP Buffer", controls, Vector2.zero, Vector2.zero);
-            Bounds((RectTransform)view.bufferList.transform,.065f,.31f,.935f,.56f);
-            view.bufferList.GetComponent<Image>().color = new Color(.11f,.14f,.16f);
-            foreach (var text in view.bufferList.GetComponentsInChildren<Text>(true))
-            { text.font=font; text.fontSize=22; text.color=Color.white; text.verticalOverflow=VerticalWrapMode.Overflow; }
-            foreach (var image in view.bufferList.template.GetComponentsInChildren<Image>(true))
-                image.color = new Color(.11f,.14f,.16f);
-            view.bufferList.captionText.rectTransform.offsetMin = new Vector2(20,4);
-            view.bufferList.captionText.rectTransform.offsetMax = new Vector2(-42,-4);
-            var arrow = view.bufferList.transform.Find("Arrow");
-            if (arrow) arrow.GetComponent<Image>().enabled = false;
-            var chevron = Label("Expand Indicator", view.bufferList.transform, "▾", .90f,0,.99f,1,24);
-            chevron.alignment = TextAnchor.MiddleCenter; chevron.color = Cyan;
-            chevron.rectTransform.offsetMin = chevron.rectTransform.offsetMax = Vector2.zero;
-            view.bufferList.template.sizeDelta = new Vector2(view.bufferList.template.sizeDelta.x, 260);
-            var dropdownItem = view.bufferList.template.Find("Viewport/Content/Item") as RectTransform;
-            if (dropdownItem) dropdownItem.sizeDelta = new Vector2(dropdownItem.sizeDelta.x, 48);
-            var dropdownContent = view.bufferList.template.Find("Viewport/Content") as RectTransform;
-            if (dropdownContent) dropdownContent.sizeDelta = new Vector2(dropdownContent.sizeDelta.x, 48);
-            Label("Apply Hint", controls, "값을 선택한 뒤 ‘적용’을 누르세요.", .045f,.08f,.95f,.25f,19).color = new Color(.65f,.72f,.73f);
+            var view = canvas.gameObject.AddComponent<SettingsView>();
+            var shade = Panel(
+                "Modal Shade",
+                canvas.transform,
+                Vector2.zero,
+                new Vector2(1280, 720),
+                new Color(0, 0, 0, .48f)
+            );
+            shade.GetComponent<RectTransform>().anchorMin = Vector2.zero;
+            shade.GetComponent<RectTransform>().anchorMax = Vector2.one;
+            shade.GetComponent<RectTransform>().offsetMin = shade
+                .GetComponent<RectTransform>()
+                .offsetMax = Vector2.zero;
 
-            var monitor = Panel("Audio Monitor",canvas.transform,Card,.50f,.42f,.92f,.75f);
-            Panel("Monitor Accent",monitor,Cyan,0,.98f,1,1);
-            Label("Monitor Label",monitor,"02  /  현재 오디오 상태",.045f,.75f,.95f,.94f,27);
-            view.actualState = Label("Actual Audio State", monitor, "", .045f,.08f,.95f,.69f,25);
-            view.actualState.color = new Color(.78f,.87f,.85f);
-            var feedback = Panel("Status Panel",canvas.transform,new Color(.07f,.085f,.10f),.08f,.32f,.92f,.39f);
-            Panel("Status Accent",feedback,Cyan,0,0,.003f,1);
-            view.status = Label("Audio Status",feedback,"",.015f,0,.985f,1,19);
-            var guidance = Panel("Practice Guidance",canvas.transform,Card,.08f,.13f,.92f,.29f);
-            Label("Guidance Heading",guidance,"BUFFER GUIDE / 버퍼 안내",.015f,.65f,.98f,.95f,18).color = Cyan;
-            Label("Help", guidance,
-                "작은 버퍼는 응답이 빨라지지만 소리가 끊길 수 있습니다. Unity가 지원하는 크기로 조정될 수 있습니다.\n" +
-                "Default는 앱 시작 시의 버퍼 크기를 복원합니다. 선택한 값은 앱이 실행되는 동안 유지됩니다.\n" +
-                "이 설정은 Unity 믹서 버퍼에 적용되며, ASIO 드라이버의 버퍼를 변경하지 않습니다.",
-                .015f,.05f,.98f,.66f,19).color = new Color(.65f,.72f,.73f);
+            var popup = Panel(
+                "Settings Popup",
+                canvas.transform,
+                new Vector2(130, -65),
+                new Vector2(1020, 590),
+                new Color(.015f, .02f, .025f, .88f)
+            );
+            UiElements.Label(
+                "Title",
+                popup.transform,
+                "설정",
+                new Vector2(32, -24),
+                new Vector2(700, 45),
+                32
+            );
+            Panel(
+                "Header Line",
+                popup.transform,
+                new Vector2(30, -84),
+                new Vector2(960, 2),
+                new Color(1, 1, 1, .14f)
+            );
+            view.soundTab = Tab("Sound Tab", popup.transform, "사운드", new Vector2(28, -108));
+            view.graphicsTab = Tab(
+                "Graphics Tab",
+                popup.transform,
+                "그래픽",
+                new Vector2(28, -175)
+            );
+            view.gameplayTab = Tab(
+                "Gameplay Tab",
+                popup.transform,
+                "게임플레이",
+                new Vector2(28, -242)
+            );
+            Panel(
+                "Tab Divider",
+                popup.transform,
+                new Vector2(202, -104),
+                new Vector2(2, 380),
+                new Color(1, 1, 1, .14f)
+            );
+            view.soundPanel = Panel(
+                "Sound Panel",
+                popup.transform,
+                new Vector2(238, -110),
+                new Vector2(740, 380),
+                Color.clear
+            );
+            view.graphicsPanel = Panel(
+                "Graphics Panel",
+                popup.transform,
+                new Vector2(238, -104),
+                new Vector2(740, 390),
+                Color.clear
+            );
+            view.gameplayPanel = Panel(
+                "Gameplay Panel",
+                popup.transform,
+                new Vector2(238, -110),
+                new Vector2(740, 380),
+                Color.clear
+            );
+            view.speedLabel = UiElements.Label(
+                "Speed Caption",
+                view.gameplayPanel.transform,
+                "속도  1.0x",
+                Vector2.zero,
+                new Vector2(700, 32),
+                21
+            );
+            view.speedSlider = Volume("Note Speed", view.gameplayPanel.transform, -42);
 
-            var footer = Panel("Footer",canvas.transform,Ink,0,0,1,.085f);
-            Label("Training Philosophy",footer,"집중    /    반복    /    완주",.07f,.1f,.50f,.9f,19).color = new Color(.55f,.64f,.66f);
-            view.apply = Button("Apply",footer,"적용",.62f,.16f,.76f,.84f,true);
-            view.back = Button("Back",footer,"뒤로  →",.78f,.16f,.92f,.84f,false);
-            var bufferNavigation = view.bufferList.navigation;
-            bufferNavigation.mode = Navigation.Mode.Explicit; bufferNavigation.selectOnDown=view.apply;
-            view.bufferList.navigation=bufferNavigation;
-            var applyNavigation = view.apply.navigation;
-            applyNavigation.mode=Navigation.Mode.Explicit; applyNavigation.selectOnUp=view.bufferList;
-            applyNavigation.selectOnRight=view.back; view.apply.navigation=applyNavigation;
-            var backNavigation = view.back.navigation;
-            backNavigation.mode=Navigation.Mode.Explicit; backNavigation.selectOnUp=view.bufferList;
-            backNavigation.selectOnLeft=view.apply; view.back.navigation=backNavigation;
-            view.Validate(); return view;
+            var speedObject = view.speedSlider.gameObject;
+            var speedFill = view.speedSlider.fillRect;
+            var speedHandle = view.speedSlider.handleRect;
+            var speedGraphic = view.speedSlider.targetGraphic;
+            UnityEngine.Object.DestroyImmediate(view.speedSlider);
+
+            // Replace the default slider with the existing 0.1-step keyboard control.
+            view.speedSlider = speedObject.AddComponent<SteppedSpeedSlider>();
+            view.speedSlider.fillRect = speedFill;
+            view.speedSlider.handleRect = speedHandle;
+            view.speedSlider.targetGraphic = speedGraphic;
+            view.speedSlider.wholeNumbers = false;
+            view.speedSlider.minValue = 1;
+            view.speedSlider.maxValue = 10;
+            view.timingLabel = UiElements.Label(
+                "Timing Caption",
+                view.gameplayPanel.transform,
+                "입력 타이밍 보정  0 ms",
+                new Vector2(0, -82),
+                new Vector2(700, 32),
+                21
+            );
+            view.timingOffset = Volume("Input Timing Offset", view.gameplayPanel.transform, -124);
+            view.timingOffset.minValue = -200;
+            view.timingOffset.maxValue = 200;
+            UiElements.Label(
+                "Hard Mode Heading",
+                view.gameplayPanel.transform,
+                "하드 모드 설정  ·  회복 없음",
+                new Vector2(0, -162),
+                new Vector2(700, 28),
+                20
+            );
+            view.hardRuleLists = new Dropdown[3];
+            view.hardLossCounts = new InputField[3];
+
+            var grades = new[] { "Perfect", "Good", "Miss" };
+
+            for (int i = 0; i < grades.Length; i++)
+            {
+                float y = -202 - i * 44;
+                UiElements.Label(
+                    grades[i] + " Rule Label",
+                    view.gameplayPanel.transform,
+                    grades[i],
+                    new Vector2(0, y),
+                    new Vector2(120, 34),
+                    20
+                );
+                view.hardRuleLists[i] = UiElements.Dropdown(
+                    grades[i] + " Health Rule",
+                    view.gameplayPanel.transform,
+                    new Vector2(128, y),
+                    new Vector2(330, 34)
+                );
+                StyleHardRuleDropdown(view.hardRuleLists[i]);
+
+                var countObject = DefaultControls.CreateInputField(new DefaultControls.Resources());
+                countObject.name = grades[i] + " Loss Count";
+                countObject.transform.SetParent(view.gameplayPanel.transform, false);
+                UiElements.Position(
+                    (RectTransform)countObject.transform,
+                    new Vector2(480, y),
+                    new Vector2(105, 34)
+                );
+                view.hardLossCounts[i] = countObject.GetComponent<InputField>();
+                view.hardLossCounts[i].contentType = InputField.ContentType.IntegerNumber;
+                view.hardLossCounts[i].characterLimit = 4;
+
+                foreach (var text in countObject.GetComponentsInChildren<Text>(true))
+                {
+                    text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+                    text.fontSize = 18;
+                    text.alignment = TextAnchor.MiddleCenter;
+                }
+
+                UiElements.Label(
+                    grades[i] + " Count Unit",
+                    view.gameplayPanel.transform,
+                    "회",
+                    new Vector2(595, y),
+                    new Vector2(90, 34),
+                    18
+                );
+            }
+
+            view.hardModeHint = UiElements.Label(
+                "Hard Mode Help",
+                view.gameplayPanel.transform,
+                "하드 모드에서만 적용 · 체력 감소 5회 = 판정마다 20 감소 · 자동 저장",
+                new Vector2(0, -338),
+                new Vector2(700, 34),
+                14
+            );
+
+            foreach (Transform child in view.gameplayPanel.transform)
+            {
+                if (child.GetComponent<RectTransform>().anchoredPosition.y <= -162)
+                {
+                    child.gameObject.SetActive(false);
+                }
+            }
+
+            view.playRuleLists = new Dropdown[5];
+
+            var ruleLabels = new[] { "판정", "플레이", "롱노트 끝", "Gauge 실패", "Challenge" };
+
+            for (int i = 0; i < view.playRuleLists.Length; i++)
+            {
+                float y = -164 - i * 39;
+                UiElements.Label(
+                    "Play Rule " + i,
+                    view.gameplayPanel.transform,
+                    ruleLabels[i],
+                    new Vector2(0, y),
+                    new Vector2(215, 34),
+                    18
+                );
+                view.playRuleLists[i] = UiElements.Dropdown(
+                    "Play Rule Option " + i,
+                    view.gameplayPanel.transform,
+                    new Vector2(230, y),
+                    new Vector2(470, 34)
+                );
+                StyleHardRuleDropdown(view.playRuleLists[i]);
+            }
+
+            view.masterLabel = UiElements.Label(
+                "Master Volume Label",
+                view.soundPanel.transform,
+                "전체 소리 100%",
+                Vector2.zero,
+                new Vector2(680, 38),
+                24
+            );
+            view.masterVolume = Volume("Master Volume", view.soundPanel.transform, -60);
+            view.backgroundLabel = UiElements.Label(
+                "Background Volume Label",
+                view.soundPanel.transform,
+                "배경음악 100%",
+                new Vector2(0, -114),
+                new Vector2(680, 38),
+                24
+            );
+            view.backgroundVolume = Volume("Background Volume", view.soundPanel.transform, -174);
+            view.gameplayLabel = UiElements.Label(
+                "Gameplay Volume Label",
+                view.soundPanel.transform,
+                "플레이 음악 100%",
+                new Vector2(0, -228),
+                new Vector2(680, 38),
+                24
+            );
+            view.gameplayVolume = Volume("Gameplay Volume", view.soundPanel.transform, -288);
+
+            var parent = view.graphicsPanel.transform;
+            Caption(parent, "화면 비율", 0);
+            view.aspectList = UiElements.Dropdown(
+                "Aspect Ratio",
+                parent,
+                new Vector2(230, 0),
+                new Vector2(470, 40)
+            );
+            Caption(parent, "해상도", -54);
+            view.resolutionList = UiElements.Dropdown(
+                "Resolution",
+                parent,
+                new Vector2(230, -54),
+                new Vector2(470, 40)
+            );
+            Caption(parent, "FPS", -108);
+            view.fpsList = UiElements.Dropdown(
+                "Frame Rate",
+                parent,
+                new Vector2(230, -108),
+                new Vector2(470, 40)
+            );
+            view.qualityButtons = System.Array.Empty<Button>();
+            view.qualityLabels = System.Array.Empty<Text>();
+            Caption(parent, "DSP 버퍼", -162);
+            view.bufferList = UiElements.Dropdown(
+                "DSP Buffer",
+                parent,
+                new Vector2(230, -162),
+                new Vector2(470, 40)
+            );
+            view.displayState = UiElements.Label(
+                "Display State",
+                parent,
+                "",
+                new Vector2(0, -216),
+                new Vector2(700, 50),
+                17
+            );
+            view.actualState = UiElements.Label(
+                "Actual Audio State",
+                parent,
+                "",
+                new Vector2(0, -276),
+                new Vector2(700, 45),
+                16
+            );
+            view.status = UiElements.Label(
+                "Audio Status",
+                parent,
+                "",
+                new Vector2(0, -326),
+                new Vector2(700, 40),
+                14
+            );
+            view.apply = Tab("Apply", popup.transform, "적용", new Vector2(640, -514));
+            view.back = Tab("Back", popup.transform, "닫기", new Vector2(816, -514));
+
+            var nav = view.bufferList.navigation;
+            nav.mode = Navigation.Mode.Explicit;
+            nav.selectOnUp = view.fpsList;
+            nav.selectOnDown = view.apply;
+            view.bufferList.navigation = nav;
+            nav = view.apply.navigation;
+            nav.mode = Navigation.Mode.Explicit;
+            nav.selectOnUp = view.bufferList;
+            nav.selectOnRight = view.back;
+            view.apply.navigation = nav;
+            nav = view.back.navigation;
+            nav.mode = Navigation.Mode.Explicit;
+            nav.selectOnLeft = view.apply;
+            nav.selectOnUp = view.graphicsTab;
+            view.back.navigation = nav;
+            nav = view.speedSlider.navigation;
+            nav.mode = Navigation.Mode.Explicit;
+            nav.selectOnUp = view.gameplayTab;
+            nav.selectOnDown = view.timingOffset;
+            view.speedSlider.navigation = nav;
+            nav = view.timingOffset.navigation;
+            nav.mode = Navigation.Mode.Explicit;
+            nav.selectOnUp = view.speedSlider;
+            nav.selectOnDown = view.apply;
+            view.timingOffset.navigation = nav;
+            view.soundPanel.SetActive(true);
+            view.graphicsPanel.SetActive(false);
+            view.gameplayPanel.SetActive(false);
+
+            return view;
         }
 
-        private static RectTransform Panel(string name, Transform parent, Color color, float x0,float y0,float x1,float y1)
+        private static void StyleHardRuleDropdown(Dropdown dropdown)
         {
-            var go = new GameObject(name,typeof(RectTransform),typeof(SelectionGradientImage));
-            go.transform.SetParent(parent,false);
-            var image=go.GetComponent<Image>(); image.color=color; image.raycastTarget=false;
-            var rect=(RectTransform)go.transform; Bounds(rect,x0,y0,x1,y1); return rect;
+            var font = AssetDatabase.LoadAssetAtPath<Font>(MainMenuLayoutBuilder.FontPath);
+
+            if (!font)
+            {
+                throw new InvalidOperationException("Settings Korean font missing.");
+            }
+
+            var background = new Color(.09f, .115f, .13f);
+            dropdown.GetComponent<Image>().color = background;
+
+            foreach (var image in dropdown.template.GetComponentsInChildren<Image>(true))
+            {
+                image.color = background;
+            }
+
+            foreach (var text in dropdown.GetComponentsInChildren<Text>(true))
+            {
+                text.font = font;
+                text.fontSize = 18;
+                text.color = Color.white;
+                text.alignment = TextAnchor.MiddleLeft;
+                text.horizontalOverflow = HorizontalWrapMode.Overflow;
+                text.verticalOverflow = VerticalWrapMode.Overflow;
+            }
+
+            dropdown.captionText.rectTransform.offsetMin = new Vector2(12, 0);
+            dropdown.captionText.rectTransform.offsetMax = new Vector2(-32, 0);
+            dropdown.template.sizeDelta = new Vector2(dropdown.template.sizeDelta.x, 140);
+
+            var content = dropdown.template.Find("Viewport/Content") as RectTransform;
+            var item = dropdown.template.Find("Viewport/Content/Item") as RectTransform;
+
+            if (!content || !item)
+            {
+                throw new InvalidOperationException("Hard rule dropdown template missing.");
+            }
+
+            content.sizeDelta = new Vector2(content.sizeDelta.x, 44);
+            item.sizeDelta = new Vector2(item.sizeDelta.x, 44);
+            dropdown.itemText.rectTransform.offsetMin = new Vector2(28, 2);
+            dropdown.itemText.rectTransform.offsetMax = new Vector2(-12, -2);
+
+            var arrow = dropdown.transform.Find("Arrow");
+
+            if (arrow)
+            {
+                arrow.GetComponent<Image>().enabled = false;
+            }
+
+            var indicator = UiElements.Label(
+                "Rule Expand Indicator",
+                dropdown.transform,
+                "▾",
+                new Vector2(302, -3),
+                new Vector2(20, 28),
+                18
+            );
+            indicator.font = font;
+            indicator.color = accent;
+            indicator.alignment = TextAnchor.MiddleCenter;
+            indicator.verticalOverflow = VerticalWrapMode.Overflow;
         }
-        private static Text Label(string name,Transform parent,string caption,float x0,float y0,float x1,float y1,int size)
+
+        private static void Caption(Transform parent, string caption, float y) =>
+            UiElements.Label(
+                caption + " Label",
+                parent,
+                caption,
+                new Vector2(0, y - 4),
+                new Vector2(215, 36),
+                23
+            );
+
+        private static GameObject Panel(
+            string name,
+            Transform parent,
+            Vector2 position,
+            Vector2 size,
+            Color color
+        )
         {
-            var text=UiElements.Label(name,parent,caption,Vector2.zero,Vector2.zero,size);
-            text.font=font; text.alignment=TextAnchor.MiddleLeft; text.raycastTarget=false;
-            text.horizontalOverflow=HorizontalWrapMode.Wrap; text.verticalOverflow=VerticalWrapMode.Truncate;
-            Bounds(text.rectTransform,x0,y0,x1,y1);
-            text.rectTransform.offsetMin=new Vector2(12,4); text.rectTransform.offsetMax=new Vector2(-12,-4);
-            return text;
+            var go = new GameObject(name, typeof(RectTransform), typeof(Image));
+            go.transform.SetParent(parent, false);
+            UiElements.Position((RectTransform)go.transform, position, size);
+            go.GetComponent<Image>().color = color;
+            go.GetComponent<Image>().raycastTarget = color.a > 0;
+
+            return go;
         }
-        private static Button Button(string name,Transform parent,string caption,float x0,float y0,float x1,float y1,bool primary)
+
+        private static Button Tab(string name, Transform parent, string caption, Vector2 position)
         {
-            var rect=Panel(name,parent,new Color(.09f,.115f,.13f),x0,y0,x1,y1);
-            var image=rect.GetComponent<SelectionGradientImage>(); image.raycastTarget=true;
-            if (primary) { image.color=Color.white; image.useGradient=true; image.leftColor=new Color(.82f,.15f,.19f); image.rightColor=new Color(.55f,.075f,.12f); }
-            var button=rect.gameObject.AddComponent<Button>(); button.targetGraphic=image;
-            var text=Label("Caption",rect,caption,0,0,1,1,24); text.alignment=TextAnchor.MiddleCenter;
+            var button = UiElements.Button(name, parent, caption, position, new Vector2(158, 52));
+            button.image.color = new Color(.13f, .17f, .20f, .95f);
+
+            var text = button.GetComponentInChildren<Text>();
+            text.color = Color.white;
+            text.fontSize = 23;
+
+            var colors = button.colors;
+            colors.highlightedColor = new Color(.5f, .9f, .95f);
+            colors.selectedColor = new Color(.5f, .9f, .95f);
+            button.colors = colors;
+
             return button;
         }
-        private static void Bounds(RectTransform rect,float x0,float y0,float x1,float y1)
+
+        private static Slider Volume(string name, Transform parent, float y)
         {
-            rect.anchorMin=new Vector2(x0,y0); rect.anchorMax=new Vector2(x1,y1);
-            rect.pivot=new Vector2(.5f,.5f); rect.offsetMin=rect.offsetMax=Vector2.zero;
+            var go = DefaultControls.CreateSlider(new DefaultControls.Resources());
+            go.name = name;
+            go.transform.SetParent(parent, false);
+            UiElements.Position(
+                (RectTransform)go.transform,
+                new Vector2(0, y),
+                new Vector2(700, 26)
+            );
+
+            var slider = go.GetComponent<Slider>();
+            slider.minValue = 0;
+            slider.maxValue = 100;
+            slider.wholeNumbers = true;
+            slider.fillRect.GetComponent<Image>().color = accent;
+
+            return slider;
         }
     }
 }

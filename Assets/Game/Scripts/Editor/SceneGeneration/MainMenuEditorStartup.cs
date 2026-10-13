@@ -9,7 +9,9 @@ namespace RhythmDojo.EditorTools
     {
         public const string TestRunKey = "RhythmDojo.MainMenu.TestRun";
         private const string MenuPath = "Game Tools/Scenes/Start Play Mode From Title";
-        private static string PreferenceKey => "RhythmDojo.MainMenu.Start:" + UnityEngine.Application.dataPath;
+
+        private static string PreferenceKey =>
+            "RhythmDojo.MainMenu.Start:" + UnityEngine.Application.dataPath;
 
         static MainMenuEditorStartup()
         {
@@ -18,9 +20,29 @@ namespace RhythmDojo.EditorTools
 
         public static void Apply()
         {
-            if (EditorApplication.isPlayingOrWillChangePlaymode || SessionState.GetBool(TestRunKey, false) || SessionState.GetBool(FoundationVerification.ActiveKey, false)) return;
-            EditorSceneManager.playModeStartScene = EditorPrefs.GetBool(PreferenceKey, true)
-                ? AssetDatabase.LoadAssetAtPath<SceneAsset>(SceneBuilder.TitlePath) : null;
+            if (
+                EditorApplication.isPlayingOrWillChangePlaymode
+                || SessionState.GetBool(TestRunKey, false)
+            )
+            {
+                return;
+            }
+
+            if (SessionState.GetBool(FoundationVerification.ActiveKey, false))
+            {
+                return;
+            }
+
+            if (EditorPrefs.GetBool(PreferenceKey, true))
+            {
+                EditorSceneManager.playModeStartScene = AssetDatabase.LoadAssetAtPath<SceneAsset>(
+                    SceneBuilder.TitlePath
+                );
+            }
+            else
+            {
+                EditorSceneManager.playModeStartScene = null;
+            }
         }
 
         [MenuItem(MenuPath)]
@@ -34,6 +56,7 @@ namespace RhythmDojo.EditorTools
         private static bool ValidateToggle()
         {
             Menu.SetChecked(MenuPath, EditorPrefs.GetBool(PreferenceKey, true));
+
             return !EditorApplication.isPlayingOrWillChangePlaymode;
         }
     }

@@ -1,23 +1,34 @@
 using System;
+using RhythmDojo.Services;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using RhythmDojo.Services;
 
 namespace RhythmDojo.UI
 {
-    public sealed class MainMenuScreen : MonoBehaviour
+    public sealed class MainMenuScreen : MonoBehaviour, IModalInputParticipant
     {
-        [SerializeField] private MainMenuView view;
+        [SerializeField]
+        private MainMenuView view;
+
         [Header("Title Beat Bounce")]
-        [SerializeField, Min(1f)] private float beatsPerMinute = 120f;
-        [SerializeField, Range(0f, .3f)] private float titleBounceAmount = .08f;
-        [SerializeField, Range(0f, .3f)] private float promptBounceAmount = .05f;
+        [SerializeField, Min(1f)]
+        private float beatsPerMinute = 120f;
+
+        [SerializeField, Range(0f, .3f)]
+        private float titleBounceAmount = .08f;
+
+        [SerializeField, Range(0f, .3f)]
+        private float promptBounceAmount = .05f;
+
         [Tooltip("Fraction of each beat used to return to the original size.")]
-        [SerializeField, Range(.1f, 1f)] private float bounceDurationInBeats = .65f;
+        [SerializeField, Range(.1f, 1f)]
+        private float bounceDurationInBeats = .65f;
         private IMainMenuActions actions;
         private IMainMenuBeatClock beatClock;
-        private bool starting, quitting;
-        private Vector3 titleScale, promptScale;
+        private bool starting,
+            quitting;
+        private Vector3 titleScale,
+            promptScale;
         private double beatStartTime;
         private bool bounceInitialized;
         private bool menuExpanded;
@@ -25,11 +36,18 @@ namespace RhythmDojo.UI
 
         public void Validate()
         {
-            if (!view) throw new InvalidOperationException("Main menu view missing.");
+            if (!view)
+            {
+                throw new InvalidOperationException("Main menu view missing.");
+            }
+
             view.Validate();
         }
 
-        public void Initialize(IMainMenuActions menuActions, IMainMenuBeatClock menuBeatClock = null)
+        public void Initialize(
+            IMainMenuActions menuActions,
+            IMainMenuBeatClock menuBeatClock = null
+        )
         {
             Unbind();
             Validate();
@@ -40,7 +58,8 @@ namespace RhythmDojo.UI
             actions = menuActions ?? throw new ArgumentNullException(nameof(menuActions));
             beatClock = menuBeatClock;
             starting = quitting = false;
-            menuExpanded = false; expansion = 0f;
+            menuExpanded = false;
+            expansion = 0f;
             view.SetExpansion(0f);
             view.menuPanel.gameObject.SetActive(false);
             view.quitPopup.SetActive(false);
@@ -58,47 +77,97 @@ namespace RhythmDojo.UI
 
         private void Update()
         {
-            if (!bounceInitialized) return;
-            expansion = Mathf.MoveTowards(expansion, menuExpanded ? 1f : 0f, Time.unscaledDeltaTime / .25f);
+            if (!bounceInitialized)
+            {
+                return;
+            }
+
+            if (menuExpanded)
+            {
+                expansion = Mathf.MoveTowards(expansion, 1f, Time.unscaledDeltaTime / .25f);
+            }
+            else
+            {
+                expansion = Mathf.MoveTowards(expansion, 0f, Time.unscaledDeltaTime / .25f);
+            }
+
             view.SetExpansion(expansion);
             view.menuPanel.gameObject.SetActive(expansion > 0f || menuExpanded);
+
             if (Busy || view.quitPopup.activeSelf)
             {
                 RestoreScale();
+
                 return;
             }
 
             // Absolute audio time keeps both labels on the same beat without frame drift.
-            double beats = beatClock != null ? beatClock.BeatPosition :
-                Math.Max(0, AudioSettings.dspTime - beatStartTime) * Math.Max(1f, beatsPerMinute) / 60d;
+            double beats;
+
+            if (beatClock != null)
+            {
+                beats = beatClock.BeatPosition;
+            }
+            else
+            {
+                beats =
+                    Math.Max(0, AudioSettings.dspTime - beatStartTime)
+                    * Math.Max(1f, beatsPerMinute)
+                    / 60d;
+            }
+
             if (beats < 0)
             {
                 RestoreScale();
+
                 return;
             }
+
             float phase = (float)(beats - Math.Floor(beats));
             float progress = Mathf.Clamp01(phase / Mathf.Clamp(bounceDurationInBeats, .1f, 1f));
             float bounce = 1f - Mathf.SmoothStep(0f, 1f, progress);
-            view.logo.transform.localScale = titleScale * (1f + bounce * Mathf.Clamp(titleBounceAmount, 0f, .3f));
-            view.startPrompt.rectTransform.localScale = promptScale * (1f + bounce * Mathf.Clamp(promptBounceAmount, 0f, .3f));
+            view.logo.transform.localScale =
+                titleScale * (1f + bounce * Mathf.Clamp(titleBounceAmount, 0f, .3f));
+            view.startPrompt.rectTransform.localScale =
+                promptScale * (1f + bounce * Mathf.Clamp(promptBounceAmount, 0f, .3f));
         }
 
         private void RestoreScale()
         {
-            if (!bounceInitialized || !view) return;
-            if (view.logo) view.logo.transform.localScale = titleScale;
-            if (view.startPrompt) view.startPrompt.rectTransform.localScale = promptScale;
+            if (!bounceInitialized || !view)
+            {
+                return;
+            }
+
+            if (view.logo)
+            {
+                view.logo.transform.localScale = titleScale;
+            }
+
+            if (view.startPrompt)
+            {
+                view.startPrompt.rectTransform.localScale = promptScale;
+            }
         }
 
         private void OnEnable() => beatStartTime = AudioSettings.dspTime;
+
         private void OnDisable() => RestoreScale();
 
         private void StartGame()
         {
-            if (Busy || !menuExpanded || view.quitPopup.activeSelf) return;
+            if (Busy || !menuExpanded || view.quitPopup.activeSelf)
+            {
+                return;
+            }
+
             starting = true;
             view.SetMenuInteractable(false);
-            try { actions.StartGame(); }
+
+            try
+            {
+                actions.StartGame();
+            }
             catch (Exception error)
             {
                 starting = false;
@@ -109,41 +178,88 @@ namespace RhythmDojo.UI
 
         private void ToggleMenu()
         {
-            if (Busy || view.quitPopup.activeSelf) return;
+            if (Busy || view.quitPopup.activeSelf)
+            {
+                return;
+            }
+
             menuExpanded = !menuExpanded;
         }
 
+        public void ResumeFromSettings()
+        {
+            if (actions is RhythmDojo.Core.MainMenuActions mainMenuActions)
+            {
+                mainMenuActions.ResumeFromSettings();
+            }
+
+            starting = false;
+            view.SetMenuInteractable(true);
+        }
+
+        public void ResumeAfterModal() => ResumeFromSettings();
+
         private void OpenSettings()
         {
-            if (Busy || !menuExpanded || view.quitPopup.activeSelf) return;
-            starting = true; view.SetMenuInteractable(false);
-            try { actions.ShowSettings(); }
+            if (Busy || !menuExpanded || view.quitPopup.activeSelf)
+            {
+                return;
+            }
+
+            starting = true;
+            view.SetMenuInteractable(false);
+
+            try
+            {
+                actions.ShowSettings();
+            }
             catch (Exception error)
             {
-                starting = false; view.SetMenuInteractable(true); Debug.LogException(error, this);
+                starting = false;
+                view.SetMenuInteractable(true);
+                Debug.LogException(error, this);
             }
         }
 
         private void ShowQuit()
         {
-            if (Busy || !menuExpanded) return;
+            if (Busy || !menuExpanded)
+            {
+                return;
+            }
+
             view.SetMenuInteractable(false);
             view.quitPopup.SetActive(true);
+
             if (EventSystem.current)
+            {
                 EventSystem.current.SetSelectedGameObject(view.cancelQuit.gameObject);
+            }
         }
 
         private void CancelQuit()
         {
-            if (Busy) return;
+            if (Busy)
+            {
+                return;
+            }
+
             view.quitPopup.SetActive(false);
             view.SetMenuInteractable(true);
-            if (EventSystem.current) EventSystem.current.SetSelectedGameObject(null);
+
+            if (EventSystem.current)
+            {
+                EventSystem.current.SetSelectedGameObject(null);
+            }
         }
 
         private void ConfirmQuit()
         {
-            if (Busy || !view.quitPopup.activeSelf) return;
+            if (Busy || !view.quitPopup.activeSelf)
+            {
+                return;
+            }
+
             quitting = true;
             view.confirmQuit.interactable = view.cancelQuit.interactable = false;
             actions.QuitGame();
@@ -152,7 +268,12 @@ namespace RhythmDojo.UI
         private void Unbind()
         {
             RestoreScale();
-            if (!view) return;
+
+            if (!view)
+            {
+                return;
+            }
+
             view.start.onClick.RemoveListener(StartGame);
             view.logo.onClick.RemoveListener(ToggleMenu);
             view.settings.onClick.RemoveListener(OpenSettings);

@@ -10,6 +10,7 @@ namespace RhythmDojo.Application
     public sealed class SongDocument
     {
         public string SongId;
+        public string ChartId;
         public string Title;
         public string Artist;
         public string ModeId;
@@ -19,25 +20,79 @@ namespace RhythmDojo.Application
         public TempoPoint[] TempoPoints = Array.Empty<TempoPoint>();
         public NoteData[] Notes = Array.Empty<NoteData>();
 
-        public SongDocument Copy() => new SongDocument
+        public SongDocument Copy()
         {
-            SongId = SongId, Title = Title, Artist = Artist, ModeId = ModeId, AudioId = AudioId,
-            AudioOffset = AudioOffset, CompletionTime = CompletionTime,
-            TempoPoints = TempoPoints == null ? null : (TempoPoint[])TempoPoints.Clone(),
-            Notes = Notes == null ? null : (NoteData[])Notes.Clone()
-        };
+            return new SongDocument
+            {
+                SongId = SongId,
+                ChartId = ChartId,
+                Title = Title,
+                Artist = Artist,
+                ModeId = ModeId,
+                AudioId = AudioId,
+                AudioOffset = AudioOffset,
+                CompletionTime = CompletionTime,
+                TempoPoints = (
+                    TempoPoints switch
+                    {
+                        null => null,
+                        _ => (TempoPoint[])TempoPoints.Clone(),
+                    }
+                ),
+                Notes = (
+                    Notes switch
+                    {
+                        null => null,
+                        _ => (NoteData[])Notes.Clone(),
+                    }
+                ),
+            };
+        }
 
         public void Validate(GameModeRules mode)
         {
-            if (string.IsNullOrWhiteSpace(SongId)) throw new InvalidOperationException("SongId: required.");
-            if (string.IsNullOrWhiteSpace(Title)) throw new InvalidOperationException("Title: required.");
-            if (string.IsNullOrWhiteSpace(ModeId)) throw new InvalidOperationException("ModeId: required.");
-            if (string.IsNullOrWhiteSpace(AudioId)) throw new InvalidOperationException("AudioId: required.");
-            if (!double.IsFinite(AudioOffset)) throw new InvalidOperationException("AudioOffset: must be finite.");
-            try { _ = new TempoMap(TempoPoints); }
-            catch (Exception e) { throw new InvalidOperationException("TempoPoints: " + e.Message, e); }
-            try { new ChartData(Notes, CompletionTime).Validate(mode); }
-            catch (Exception e) { throw new InvalidOperationException("Notes/CompletionTime: " + e.Message, e); }
+            if (string.IsNullOrWhiteSpace(SongId))
+            {
+                throw new InvalidOperationException("SongId: required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(Title))
+            {
+                throw new InvalidOperationException("Title: required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(ModeId))
+            {
+                throw new InvalidOperationException("ModeId: required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(AudioId))
+            {
+                throw new InvalidOperationException("AudioId: required.");
+            }
+
+            if (!double.IsFinite(AudioOffset))
+            {
+                throw new InvalidOperationException("AudioOffset: must be finite.");
+            }
+
+            try
+            {
+                _ = new TempoMap(TempoPoints);
+            }
+            catch (Exception e)
+            {
+                throw new InvalidOperationException("TempoPoints: " + e.Message, e);
+            }
+
+            try
+            {
+                new ChartData(Notes, CompletionTime).Validate(mode);
+            }
+            catch (Exception e)
+            {
+                throw new InvalidOperationException("Notes/CompletionTime: " + e.Message, e);
+            }
         }
     }
 

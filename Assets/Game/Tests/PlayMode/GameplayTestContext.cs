@@ -3,20 +3,20 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using UnityEngine;
-using UnityEngine.SceneManagement;
-using UnityEngine.TestTools;
-using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.LowLevel;
-using UnityEngine.UI;
-using UnityEngine.EventSystems;
 using RhythmDojo.Application;
-using RhythmDojo.Core;
 using RhythmDojo.Audio;
+using RhythmDojo.Content;
+using RhythmDojo.Core;
 using RhythmDojo.Gameplay;
 using RhythmDojo.Presentation;
 using RhythmDojo.UI;
-using RhythmDojo.Content;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
+using UnityEngine.SceneManagement;
+using UnityEngine.TestTools;
+using UnityEngine.UI;
 
 namespace RhythmDojo.Tests
 {
@@ -24,7 +24,6 @@ namespace RhythmDojo.Tests
     [PostBuildCleanup(typeof(TestRunStartup))]
     public abstract class GameplayTestContext
     {
-
         protected InputSettings original;
         protected InputSettings.EditorInputBehaviorInPlayMode priorEditorBehavior;
         protected InputSettings.BackgroundBehavior priorBackgroundBehavior;
@@ -32,96 +31,297 @@ namespace RhythmDojo.Tests
         protected Mouse mouse;
         protected AudioConfiguration originalAudio;
         private string previousPreferences;
+        private string previousPresentation;
+        private string previousHardMode;
+        private string previousRules;
+        private float previousMasterVolume,
+            previousLodBias,
+            previousShadowDistance;
+        private int previousFrameRate,
+            previousMipLimit,
+            previousVsync;
+        private AnisotropicFiltering previousFiltering;
+
         [UnitySetUp]
         public IEnumerator SetUp()
         {
             System.IO.Directory.CreateDirectory("Logs");
-            previousPreferences = PlayerPrefs.GetString(RhythmDojo.Services.SelectionPreferences.StorageKey, "");
+            previousRules = PlayerPrefs.GetString(
+                RhythmDojo.Services.PlayRulesService.StorageKey,
+                ""
+            );
+            PlayerPrefs.DeleteKey(RhythmDojo.Services.PlayRulesService.StorageKey);
+            previousHardMode = PlayerPrefs.GetString(
+                RhythmDojo.Services.HardModePreferences.StorageKey,
+                ""
+            );
+            PlayerPrefs.DeleteKey(RhythmDojo.Services.HardModePreferences.StorageKey);
+            previousPresentation = PlayerPrefs.GetString(
+                RhythmDojo.Services.PresentationPreferences.StorageKey,
+                ""
+            );
+            PlayerPrefs.DeleteKey(RhythmDojo.Services.PresentationPreferences.StorageKey);
+            previousMasterVolume = AudioListener.volume;
+            previousFrameRate = UnityEngine.Application.targetFrameRate;
+            previousLodBias = QualitySettings.lodBias;
+            previousShadowDistance = QualitySettings.shadowDistance;
+            previousMipLimit = QualitySettings.globalTextureMipmapLimit;
+            previousVsync = QualitySettings.vSyncCount;
+            previousFiltering = QualitySettings.anisotropicFiltering;
+            previousPreferences = PlayerPrefs.GetString(
+                RhythmDojo.Services.SelectionPreferences.StorageKey,
+                ""
+            );
             PlayerPrefs.DeleteKey(RhythmDojo.Services.SelectionPreferences.StorageKey);
             originalAudio = AudioSettings.GetConfiguration();
             original = InputSystem.settings;
-            priorEditorBehavior = original.editorInputBehaviorInPlayMode; priorBackgroundBehavior = original.backgroundBehavior;
-            original.editorInputBehaviorInPlayMode = InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+            priorEditorBehavior = original.editorInputBehaviorInPlayMode;
+            priorBackgroundBehavior = original.backgroundBehavior;
+            original.editorInputBehaviorInPlayMode = InputSettings
+                .EditorInputBehaviorInPlayMode
+                .AllDeviceInputAlwaysGoesToGameView;
             original.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
-            keyboard = InputSystem.AddDevice<Keyboard>(); keyboard.MakeCurrent();
-            mouse = InputSystem.AddDevice<Mouse>(); mouse.MakeCurrent();
+            keyboard = InputSystem.AddDevice<Keyboard>();
+            keyboard.MakeCurrent();
+            mouse = InputSystem.AddDevice<Mouse>();
+            mouse.MakeCurrent();
             yield return SceneManager.LoadSceneAsync("Assets/Game/Scenes/Bootstrap.unity");
-            yield return Await(()=>UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>());
+            yield return Await(() =>
+                UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>()
+            );
             yield return null;
-            UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>().SelectSong("test-pulse");
+            UnityEngine
+                .Object.FindFirstObjectByType<SongSelectionScreen>()
+                .SelectSong("test-pulse");
+
             var selectionView = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
-            EventSystem.current.SetSelectedGameObject(selectionView.Rows.First(r => r.Entry.Id == "test-pulse").gameObject);
+            EventSystem.current.SetSelectedGameObject(
+                selectionView.Rows.First(r => r.Entry.Id == "test-pulse").gameObject
+            );
         }
+
         [UnityTearDown]
         public IEnumerator TearDown()
         {
-            if (string.IsNullOrEmpty(previousPreferences)) PlayerPrefs.DeleteKey(RhythmDojo.Services.SelectionPreferences.StorageKey);
-            else PlayerPrefs.SetString(RhythmDojo.Services.SelectionPreferences.StorageKey, previousPreferences);
+            if (string.IsNullOrEmpty(previousRules))
+            {
+                PlayerPrefs.DeleteKey(RhythmDojo.Services.PlayRulesService.StorageKey);
+            }
+            else
+            {
+                PlayerPrefs.SetString(
+                    RhythmDojo.Services.PlayRulesService.StorageKey,
+                    previousRules
+                );
+            }
+
+            if (string.IsNullOrEmpty(previousHardMode))
+            {
+                PlayerPrefs.DeleteKey(RhythmDojo.Services.HardModePreferences.StorageKey);
+            }
+            else
+            {
+                PlayerPrefs.SetString(
+                    RhythmDojo.Services.HardModePreferences.StorageKey,
+                    previousHardMode
+                );
+            }
+
+            if (string.IsNullOrEmpty(previousPreferences))
+            {
+                PlayerPrefs.DeleteKey(RhythmDojo.Services.SelectionPreferences.StorageKey);
+            }
+            else
+            {
+                PlayerPrefs.SetString(
+                    RhythmDojo.Services.SelectionPreferences.StorageKey,
+                    previousPreferences
+                );
+            }
+
+            if (string.IsNullOrEmpty(previousPresentation))
+            {
+                PlayerPrefs.DeleteKey(RhythmDojo.Services.PresentationPreferences.StorageKey);
+            }
+            else
+            {
+                PlayerPrefs.SetString(
+                    RhythmDojo.Services.PresentationPreferences.StorageKey,
+                    previousPresentation
+                );
+            }
+
+            RhythmDojo.Services.PresentationPreferences.Load();
+            AudioListener.volume = previousMasterVolume;
+            UnityEngine.Application.targetFrameRate = previousFrameRate;
+            QualitySettings.lodBias = previousLodBias;
+            QualitySettings.shadowDistance = previousShadowDistance;
+            QualitySettings.globalTextureMipmapLimit = previousMipLimit;
+            QualitySettings.vSyncCount = previousVsync;
+            QualitySettings.anisotropicFiltering = previousFiltering;
             PlayerPrefs.Save();
+
             bool audioRestored = AudioSettings.Reset(originalAudio);
-            if (keyboard != null && keyboard.added) InputSystem.RemoveDevice(keyboard);
-            if (mouse != null && mouse.added) InputSystem.RemoveDevice(mouse);
-            original.editorInputBehaviorInPlayMode = priorEditorBehavior; original.backgroundBehavior = priorBackgroundBehavior;
-            var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>(); if (flow) UnityEngine.Object.Destroy(flow.gameObject);
+
+            if (keyboard != null && keyboard.added)
+            {
+                InputSystem.RemoveDevice(keyboard);
+            }
+
+            if (mouse != null && mouse.added)
+            {
+                InputSystem.RemoveDevice(mouse);
+            }
+
+            original.editorInputBehaviorInPlayMode = priorEditorBehavior;
+            original.backgroundBehavior = priorBackgroundBehavior;
+
+            var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
+
+            if (flow)
+            {
+                UnityEngine.Object.Destroy(flow.gameObject);
+            }
+
             yield return null;
             Assert.That(audioRestored, Is.True, "Restore original audio configuration.");
         }
-        protected static IEnumerator Await(System.Func<bool> condition, string message = "Scene transition timed out.")
+
+        protected static IEnumerator Await(
+            System.Func<bool> condition,
+            string message = "Scene transition timed out."
+        )
         {
             double deadline = Time.realtimeSinceStartupAsDouble + 15;
-            while (!condition())
+
+            while (
+                !condition()
+                || UnityEngine.Object.FindFirstObjectByType<AppFlowController>()
+                    is AppFlowController flow
+                    && flow.Transitioning
+            )
             {
                 Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline), message);
                 yield return null;
             }
         }
-        protected static Button ButtonNamed(string name) => UnityEngine.Object.FindObjectsByType<Button>(FindObjectsSortMode.None).Single(b => b.name == name);
+
+        protected static Button ButtonNamed(string name) =>
+            UnityEngine
+                .Object.FindObjectsByType<Button>(FindObjectsSortMode.None)
+                .Single(b => b.name == name && b.gameObject.scene == SceneManager.GetActiveScene());
+
         protected IEnumerator Click(Button button)
         {
-            Assert.That(button.isActiveAndEnabled && button.interactable, Is.True, "Button must accept input.");
+            Assert.That(
+                button.isActiveAndEnabled && button.interactable,
+                Is.True,
+                "Button must accept input."
+            );
+
             // Newly loaded or reactivated graphics register with the canvas at the end of the frame.
             yield return null;
-            Canvas.ForceUpdateCanvases(); var rect = (RectTransform)button.transform;
-            Vector2 point = RectTransformUtility.WorldToScreenPoint(null, rect.TransformPoint(rect.rect.center));
+            Canvas.ForceUpdateCanvases();
+
+            var rect = (RectTransform)button.transform;
+            Vector2 point = RectTransformUtility.WorldToScreenPoint(
+                null,
+                rect.TransformPoint(rect.rect.center)
+            );
             var hits = new System.Collections.Generic.List<RaycastResult>();
             var system = EventSystem.current;
             system.RaycastAll(new PointerEventData(system) { position = point }, hits);
             Assert.That(hits.Count, Is.GreaterThan(0), "No raycast target for " + button.name);
-            Assert.That(hits[0].gameObject.GetComponentInParent<Button>(), Is.EqualTo(button), "Button is obscured.");
-            InputSystem.QueueStateEvent(mouse, new MouseState { position = point + Vector2.one }); yield return null;
-            InputSystem.QueueStateEvent(mouse, new MouseState { position = point }); yield return null; yield return null;
-            InputSystem.QueueStateEvent(mouse, new MouseState { position = point }.WithButton(MouseButton.Left)); yield return null; yield return null;
-            InputSystem.QueueStateEvent(mouse, new MouseState { position = point + Vector2.one }); yield return null;
-            InputSystem.QueueStateEvent(mouse, new MouseState { position = point }); yield return null; yield return null;
-        }
-        protected IEnumerator Press(Key key)
-        {
-            InputSystem.QueueStateEvent(keyboard, new KeyboardState(key)); yield return null;
-            InputSystem.QueueStateEvent(keyboard, new KeyboardState()); yield return null;
+            Assert.That(
+                hits[0].gameObject.GetComponentInParent<Button>(),
+                Is.EqualTo(button),
+                "Button is obscured."
+            );
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = point + Vector2.one });
+            yield return null;
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = point });
+            yield return null;
+            yield return null;
+            InputSystem.QueueStateEvent(
+                mouse,
+                new MouseState { position = point }.WithButton(MouseButton.Left)
+            );
+            yield return null;
+            yield return null;
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = point + Vector2.one });
+            yield return null;
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = point });
+            yield return null;
+            yield return null;
         }
 
-        protected static void CaptureSelection(string imageName = "selection", int width = 1280, int height = 720)
+        protected IEnumerator Press(Key key)
         {
-            if (System.Environment.GetEnvironmentVariable("RHYTHM_DOJO_SKIP_CAPTURE") == "1") return;
-            var camera = Camera.main; var canvas = UnityEngine.Object.FindFirstObjectByType<Canvas>();
-            var target = new RenderTexture(width,height,24); var previous = RenderTexture.active;
-            var texture = new Texture2D(width,height,TextureFormat.RGB24,false);
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState(key));
+            yield return null;
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+            yield return null;
+        }
+
+        protected static void CaptureSelection(
+            string imageName = "selection",
+            int width = 1280,
+            int height = 720
+        )
+        {
+            if (System.Environment.GetEnvironmentVariable("RHYTHM_DOJO_SKIP_CAPTURE") == "1")
+            {
+                return;
+            }
+
+            var camera = Camera.main;
+            var canvases = UnityEngine
+                .Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None)
+                .Where(canvas =>
+                    canvas.isRootCanvas && canvas.renderMode == RenderMode.ScreenSpaceOverlay
+                )
+                .Select(canvas => (canvas, canvas.worldCamera, canvas.planeDistance))
+                .ToArray();
+            var target = new RenderTexture(width, height, 24);
+            var previous = RenderTexture.active;
+            var texture = new Texture2D(width, height, TextureFormat.RGB24, false);
+
             try
             {
-                camera.targetTexture=target; canvas.renderMode=RenderMode.ScreenSpaceCamera;
-                canvas.worldCamera=camera; canvas.planeDistance=1; Canvas.ForceUpdateCanvases();
-                camera.Render(); RenderTexture.active=target;
-                texture.ReadPixels(new Rect(0,0,width,height),0,0); texture.Apply();
+                camera.targetTexture = target;
+
+                foreach (var item in canvases)
+                {
+                    item.canvas.renderMode = RenderMode.ScreenSpaceCamera;
+                    item.canvas.worldCamera = camera;
+                    item.canvas.planeDistance = 1;
+                }
+
+                Canvas.ForceUpdateCanvases();
+                camera.Render();
+                RenderTexture.active = target;
+                texture.ReadPixels(new Rect(0, 0, width, height), 0, 0);
+                texture.Apply();
                 System.IO.Directory.CreateDirectory("Logs");
-                System.IO.File.WriteAllBytes($"Logs/{imageName}.png",texture.EncodeToPNG());
+                System.IO.File.WriteAllBytes($"Logs/{imageName}.png", texture.EncodeToPNG());
             }
             finally
             {
-                camera.targetTexture=null; canvas.renderMode=RenderMode.ScreenSpaceOverlay; canvas.worldCamera=null;
-                RenderTexture.active=previous; target.Release(); UnityEngine.Object.Destroy(target); UnityEngine.Object.Destroy(texture);
+                camera.targetTexture = null;
+
+                foreach (var item in canvases)
+                {
+                    item.canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+                    item.canvas.worldCamera = item.worldCamera;
+                    item.canvas.planeDistance = item.planeDistance;
+                }
+
+                RenderTexture.active = previous;
+                target.Release();
+                UnityEngine.Object.Destroy(target);
+                UnityEngine.Object.Destroy(texture);
                 Canvas.ForceUpdateCanvases();
             }
         }
-
     }
 }

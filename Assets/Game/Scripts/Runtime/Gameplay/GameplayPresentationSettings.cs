@@ -29,14 +29,52 @@ namespace RhythmDojo.Gameplay
         public Color highwayColor = new Color(.055f, .075f, .11f);
         public Color railColor = new Color(.2f, .27f, .35f);
         public Color judgmentLineColor = Color.white;
+
         public void Validate()
         {
-            foreach (float value in new[] { headSize.x, headSize.y, headSize.z, bodyWidth, bodyHeight,
-                minimumBodyLength, highwayLength, railWidth, railHeight, judgmentLineDepth, judgmentLineHeight })
-                if (!float.IsFinite(value) || value <= 0) throw new InvalidOperationException("Invalid presentation dimensions.");
-            if (!double.IsFinite(flashDuration) || flashDuration <= 0 || !double.IsFinite(hudRefreshInterval) || hudRefreshInterval <= 0 ||
-                !float.IsFinite(headHeight) || !float.IsFinite(bodyElevation) || !float.IsFinite(highwayCenter) ||
-                !float.IsFinite(laneGap) || laneGap < 0) throw new InvalidOperationException("Invalid presentation timing or position.");
+            foreach (
+                float value in new[]
+                {
+                    headSize.x,
+                    headSize.y,
+                    headSize.z,
+                    bodyWidth,
+                    bodyHeight,
+                    minimumBodyLength,
+                    highwayLength,
+                    railWidth,
+                    railHeight,
+                    judgmentLineDepth,
+                    judgmentLineHeight,
+                }
+            )
+            {
+                if (!float.IsFinite(value) || value <= 0)
+                {
+                    throw new InvalidOperationException("Invalid presentation dimensions.");
+                }
+            }
+
+            if (
+                (!double.IsFinite(flashDuration) || flashDuration <= 0)
+                || !double.IsFinite(hudRefreshInterval)
+            )
+            {
+                throw new InvalidOperationException("Invalid presentation timing or position.");
+            }
+
+            if (
+                (hudRefreshInterval <= 0 || !float.IsFinite(headHeight))
+                || !float.IsFinite(bodyElevation)
+            )
+            {
+                throw new InvalidOperationException("Invalid presentation timing or position.");
+            }
+
+            if ((!float.IsFinite(highwayCenter) || !float.IsFinite(laneGap)) || laneGap < 0)
+            {
+                throw new InvalidOperationException("Invalid presentation timing or position.");
+            }
         }
     }
 }

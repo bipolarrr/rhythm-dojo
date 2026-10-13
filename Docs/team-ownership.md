@@ -56,7 +56,7 @@
 
 ## 곡·에디터 연결 방법
 
-1. 편집 세션은 변경 가능한 `SongDocument`를 소유한다. 저장 전 불완전한 문서도 허용한다. 한 곡에 한 채보이며 시간 단위는 초, 레인은 0부터 시작한다. 오프셋의 양수는 오디오보다 채보 시간을 앞당긴다.
+1. 편집 세션은 변경 가능한 `SongDocument`를 소유한다. 저장 전 불완전한 문서도 허용한다. 재생 문서는 한 채보를 나타내고 SongProject는 Easy·Standard·Hard 슬롯을 소유한다. 시간 단위는 초, 레인은 0부터 시작한다. 오프셋의 양수는 오디오보다 채보 시간을 앞당긴다.
 2. `ISongDocumentStore`는 문서 저장·불러오기 계약이다. `MemorySongDocumentStore`는 복사와 취소 동작을 보여 주는 기준 구현이며 디스크 저장이 아니다. 파일 형식·버전·음원 가져오기 UX는 에디터 기능 작업에서 정한다. `SongDocument`는 특정 JSON 직렬화기의 wire format을 보장하지 않는다.
 3. 기본 곡은 `SongAssetAdapter`로 문서가 된다. 기본 모드 ID는 현재 모드 에셋 이름이다. 에디터의 모드 레지스트리는 이 식별자를 해석해야 한다. 외부 곡의 AudioId와 ModeId 해석은 주입한 로더가 담당한다.
 4. `DocumentSongLoader`에 모드 조회 함수와 비동기 음원 로딩 함수를 전달한다. 음원 로딩 함수는 `SongAudioLease`를 반환한다. 기본 제공 AudioClip은 해제 콜백 없이 빌리고, 직접 가져온 AudioClip은 해제 콜백에서 파괴한다. 로더와 서비스는 Unity 메인 스레드에서 호출한다.

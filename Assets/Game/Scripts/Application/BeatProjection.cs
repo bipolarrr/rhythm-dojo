@@ -11,15 +11,26 @@ namespace RhythmDojo.Application
 
         public BeatProjection(double bottomBeat, double bottom, double unitsPerBeat)
         {
-            if (!double.IsFinite(bottomBeat) || !double.IsFinite(bottom) ||
-                !double.IsFinite(unitsPerBeat) || unitsPerBeat <= 0)
+            if (
+                (!double.IsFinite(bottomBeat) || !double.IsFinite(bottom))
+                || !double.IsFinite(unitsPerBeat)
+            )
+            {
                 throw new ArgumentOutOfRangeException(nameof(unitsPerBeat));
+            }
+
+            if (unitsPerBeat <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(unitsPerBeat));
+            }
+
             BottomBeat = bottomBeat;
             Bottom = bottom;
             UnitsPerBeat = unitsPerBeat;
         }
 
         public double Project(double beat) => Bottom + (beat - BottomBeat) * UnitsPerBeat;
+
         public double Unproject(double y) => BottomBeat + (y - Bottom) / UnitsPerBeat;
     }
 }
