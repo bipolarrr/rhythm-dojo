@@ -38,6 +38,22 @@ Repeat with `PlayMode` and distinct result/log filenames. Close the project in U
 
 Follow existing C# style: four-space indentation, brace-delimited namespaces, PascalCase types/methods/properties, camelCase parameters/private fields, and `I`-prefixed interfaces. Use `RhythmDojo` namespaces and descriptive filenames. No repository formatter configuration was found. Preserve Unity `.meta` files with their assets; avoid editing generated `.csproj` files or `Library/` caches.
 
+### Branches and conditions
+
+- Avoid ternary expressions (`?:`); use explicit `if`/`else` blocks or a readable `switch`. Never introduce nested or chained ternaries. Null-conditional (`?.`), null-coalescing (`??`), and nullable type syntax are separate features and may be used normally.
+- Keep value selection readable in method arguments, object initializers, and interpolated strings too. Use explicit branches when an embedded selection makes the surrounding expression difficult to follow. Do not disguise a complex ternary as a nested switch expression.
+- Split a condition when it contains three or more logical operators (`&&`/`||`), exceeds roughly 120 characters, or combines unrelated checks. Wrapping the same large expression across several lines is not sufficient.
+- Prefer early returns, `continue`, or explicit validation guards for invalid states and missing dependencies. Follow those checks with the normal processing path. Use short nested checks for dependent conditions; aim for no more than two levels of conditional nesting within a logical step.
+- Group only closely related checks, usually two or three predicates per condition. Use a `switch` for distinct states or cases when it makes the alternatives clearer. Apply the Naming preservation rules below to all restructuring.
+- Preserve evaluation order, short-circuit behavior, null safety, `out var` scope, exceptions, and event/timing order when splitting expressions. Keep Unity object truth checks intact.
+
+### Statements and spacing
+
+- Write one statement per line. Expand inline constructors, methods, and control-flow blocks that contain multiple operations. Use braces for C# `if`, `else`, `for`, `foreach`, `while`, and `do` bodies, including single-statement bodies.
+- Separate logical steps with one blank line: input/dependency validation, local preparation, calculation, state changes, and notifications or return. Keep related assignments, subscriptions, and assertions together; do not insert a blank line after every statement.
+- Separate methods and type declarations with a blank line. Group fields and simple properties by their role, adding spacing between groups where useful.
+- Apply these readability principles to runtime code, editor tools, tests, and repository scripts. Formatting tools can assist, but manually review branching and logical grouping.
+
 ## Testing Guidelines
 
 Use Unity Test Framework 1.6.0 with NUnit. Name fixtures `*Tests` and methods after expected behavior. Cover pure rules in Domain tests, asset/editor behavior in EditMode, and lifecycle/input/UI integration in PlayMode. No coverage percentage is specified. Run affected suites; run foundation verification for scene or gameplay integration changes.
