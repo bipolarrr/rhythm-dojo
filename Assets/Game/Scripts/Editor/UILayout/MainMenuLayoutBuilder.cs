@@ -23,143 +23,52 @@ namespace RhythmDojo.EditorTools
             canvas.GetComponent<CanvasScaler>().matchWidthOrHeight = .5f;
 
             var view = canvas.gameObject.AddComponent<MainMenuView>();
-            var wall = Panel("Dojo Wall", canvas.transform, new Color(.025f, .035f, .045f));
+            view.alwaysVisibleMenu = true;
+            var wall = Panel("Dojo Wall", canvas.transform, Color.white);
             Stretch(wall.rectTransform);
+            wall.sprite = LoadSprite("TitleBackground");
             wall.raycastTarget = false;
+            // Crop to fill ultrawide/portrait windows without stretching the artwork.
+            var fit = wall.gameObject.AddComponent<AspectRatioFitter>();
+            fit.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
+            fit.aspectRatio = wall.sprite.rect.width / wall.sprite.rect.height;
 
-            var architecture = new GameObject(
-                "Dojo Architecture",
-                typeof(RectTransform),
-                typeof(DojoBackdropGraphic)
-            );
-            architecture.transform.SetParent(canvas.transform, false);
-            Stretch((RectTransform)architecture.transform);
-            architecture.GetComponent<DojoBackdropGraphic>().raycastTarget = false;
-
-            var brand = Label("Dojo Brand", canvas.transform, "RHYTHM DOJO", font, 20);
-            Anchor(
-                brand.rectTransform,
-                new Vector2(0, 1),
-                new Vector2(150, -48),
-                new Vector2(230, 40)
-            );
-            brand.alignment = TextAnchor.MiddleLeft;
-            brand.color = new Color(.82f, .85f, .84f);
-
-            var session = Label(
-                "Training Session",
-                canvas.transform,
-                "리듬 수련소  /  4 KEY",
-                font,
-                18
-            );
-            Anchor(
-                session.rectTransform,
-                new Vector2(1, 1),
-                new Vector2(-170, -48),
-                new Vector2(270, 40)
-            );
-            session.color = new Color(.55f, .64f, .66f);
-
-            var philosophy = Label(
-                "Training Philosophy",
-                canvas.transform,
-                "집중    /    반복    /    완주",
-                font,
-                18
-            );
-            Anchor(
-                philosophy.rectTransform,
-                new Vector2(.5f, 0),
-                new Vector2(0, 48),
-                new Vector2(500, 40)
-            );
-            philosophy.color = new Color(.55f, .64f, .66f);
-
-            var logoObject = new GameObject("Logo", typeof(RectTransform));
+            var logoObject = new GameObject("Logo", typeof(RectTransform), typeof(Image));
             logoObject.transform.SetParent(canvas.transform, false);
-
-            var circle = logoObject.AddComponent<LogoCircleGraphic>();
-            circle.color = new Color(.96f, .25f, .26f);
+            var logoImage = logoObject.GetComponent<Image>();
+            logoImage.sprite = LoadSprite("TitleLogo");
+            logoImage.preserveAspect = true;
+            logoImage.raycastTarget = false;
             view.logo = logoObject.AddComponent<Button>();
-            view.logo.targetGraphic = circle;
-
+            view.logo.targetGraphic = logoImage;
+            view.logo.transition = Selectable.Transition.None;
             var logoNavigation = view.logo.navigation;
             logoNavigation.mode = Navigation.Mode.None;
             view.logo.navigation = logoNavigation;
-            Anchor(
-                (RectTransform)view.logo.transform,
-                new Vector2(.5f, .5f),
-                Vector2.zero,
-                new Vector2(340, 340)
-            );
+            Anchor((RectTransform)view.logo.transform, new Vector2(.5f, .72f), Vector2.zero, new Vector2(590, 210));
             view.title = Label("Title", view.logo.transform, "리듬 도장", font, 48);
-            Anchor(
-                view.title.rectTransform,
-                new Vector2(.5f, .5f),
-                Vector2.zero,
-                new Vector2(270, 90)
-            );
-            view.title.color = new Color(.95f, .94f, .88f);
-
-            var discipline = Label(
-                "Discipline",
-                view.logo.transform,
-                "R H Y T H M   /   D O J O",
-                font,
-                14
-            );
-            Anchor(
-                discipline.rectTransform,
-                new Vector2(.5f, .5f),
-                new Vector2(0, 66),
-                new Vector2(280, 35)
-            );
-            discipline.color = new Color(.66f, .73f, .73f);
-
-            var mantra = Label("Practice Motto", view.logo.transform, "박자를 단련하다", font, 18);
-            Anchor(
-                mantra.rectTransform,
-                new Vector2(.5f, .5f),
-                new Vector2(0, -66),
-                new Vector2(260, 35)
-            );
-            mantra.color = new Color(.66f, .73f, .73f);
-            view.startPrompt = Label(
-                "Start Prompt",
-                view.logo.transform,
-                "Click to Start",
-                font,
-                24
-            );
-            Anchor(
-                view.startPrompt.rectTransform,
-                new Vector2(.5f, .5f),
-                new Vector2(0, -205),
-                new Vector2(340, 50)
-            );
-            view.startPrompt.color = new Color(.86f, .89f, .85f);
+            Anchor(view.title.rectTransform, new Vector2(.5f, .5f), Vector2.zero, new Vector2(270, 90));
+            view.title.enabled = false;
+            view.startPrompt = Label("Start Prompt", view.logo.transform, "Click to Start", font, 24);
+            view.startPrompt.enabled = false;
 
             var menu = new GameObject("Menu Buttons", typeof(RectTransform), typeof(CanvasGroup));
             menu.transform.SetParent(canvas.transform, false);
             view.menuPanel = menu.GetComponent<CanvasGroup>();
-            Anchor(
-                (RectTransform)menu.transform,
-                new Vector2(.5f, .5f),
-                new Vector2(200, 0),
-                new Vector2(660, 90)
-            );
-            view.start = MenuButton("Play", menu.transform, "플레이", font, -220);
-            view.settings = MenuButton("Settings", menu.transform, "설정", font, 0);
-            view.quit = MenuButton("Quit", menu.transform, "종료", font, 220);
-            view.SetExpansion(0f);
-            menu.SetActive(false);
+            Anchor((RectTransform)menu.transform, new Vector2(.5f, .5f), new Vector2(0, -110), new Vector2(320, 240));
+            view.start = ArtButton("Play", menu.transform, "StartButton", 78);
+            view.settings = ArtButton("Settings", menu.transform, "OptionsButton", 0);
+            view.quit = ArtButton("Quit", menu.transform, "QuitButton", -78);
+            SetNavigation(view.start, view.quit, view.settings);
+            SetNavigation(view.settings, view.start, view.quit);
+            SetNavigation(view.quit, view.settings, view.start);
+            view.SetExpansion(1f);
 
             var overlay = Panel("Quit Popup", canvas.transform, new Color(0, 0, 0, .75f));
             Stretch(overlay.rectTransform);
             view.quitPopup = overlay.gameObject;
 
-            var dialog = Panel("Dialog", overlay.transform, new Color(.09f, .09f, .09f, 1));
+            var dialog = Panel("Dialog", overlay.transform, new Color(.12f, .075f, .06f, 1));
             Anchor(
                 dialog.rectTransform,
                 new Vector2(.5f, .5f),
@@ -198,9 +107,48 @@ namespace RhythmDojo.EditorTools
                 new Vector2(105, -55)
             );
             overlay.gameObject.SetActive(false);
+            PixelOptionsStyle.ApplyQuit(view);
             view.Validate();
 
             return view;
+        }
+
+        private static Sprite LoadSprite(string name)
+        {
+            var sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Game/Art/PixelDojo/" + name + ".asset");
+            if (!sprite)
+            {
+                throw new InvalidOperationException("Pixel dojo sprite missing: " + name);
+            }
+
+            return sprite;
+        }
+
+        private static Button ArtButton(string name, Transform parent, string spriteName, float y)
+        {
+            var button = Button(name, parent, Color.white);
+            var image = button.GetComponent<Image>();
+            image.sprite = LoadSprite(spriteName);
+            image.preserveAspect = false;
+            Anchor((RectTransform)button.transform, new Vector2(.5f, .5f), new Vector2(0, y), new Vector2(300, 70));
+            var colors = button.colors;
+            colors.normalColor = new Color(.84f, .80f, .76f);
+            colors.highlightedColor = new Color(1f, .97f, .86f);
+            colors.selectedColor = colors.highlightedColor;
+            colors.pressedColor = new Color(.62f, .53f, .43f);
+            colors.disabledColor = new Color(.5f, .5f, .5f);
+            colors.fadeDuration = .06f;
+            button.colors = colors;
+            return button;
+        }
+
+        private static void SetNavigation(Button button, Button up, Button down)
+        {
+            var navigation = button.navigation;
+            navigation.mode = Navigation.Mode.Explicit;
+            navigation.selectOnUp = up;
+            navigation.selectOnDown = down;
+            button.navigation = navigation;
         }
 
         private static Image Panel(string name, Transform parent, Color color)

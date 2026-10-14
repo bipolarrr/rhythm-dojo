@@ -18,6 +18,10 @@ namespace RhythmDojo.UI
             difficulty,
             favoriteLabel;
 
+        public bool pixelTheme;
+        public Sprite legacyFallbackCover;
+        public Text indexLabel;
+
         public SongEntry Entry { get; private set; }
 
         private Action<string> choose;
@@ -57,7 +61,7 @@ namespace RhythmDojo.UI
                 difficulty.text = "재생 불가";
             }
 
-            if (entry.Cover)
+            if (entry.Cover && entry.Cover != legacyFallbackCover)
             {
                 cover.sprite = entry.Cover;
             }
@@ -87,6 +91,26 @@ namespace RhythmDojo.UI
 
         public void SetSelected(bool selected)
         {
+            if (pixelTheme)
+            {
+                background.color = Color.clear;
+                var frame = GetComponentInChildren<PixelDojoFrameGraphic>();
+                if (selected)
+                {
+                    frame.color = new Color(.98f, .85f, .62f);
+                    frame.borderColor = new Color(.76f, .25f, .11f);
+                    frame.trimColor = new Color(1, .72f, .29f);
+                }
+                else
+                {
+                    frame.color = new Color(.86f, .71f, .50f);
+                    frame.borderColor = new Color(.29f, .13f, .09f);
+                    frame.trimColor = new Color(.72f, .46f, .24f);
+                }
+                frame.SetVerticesDirty();
+                return;
+            }
+
             if (selected)
             {
                 background.color = Color.white;

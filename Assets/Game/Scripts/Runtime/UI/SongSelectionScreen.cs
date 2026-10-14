@@ -319,6 +319,10 @@ namespace RhythmDojo.UI
                 );
                 row.gameObject.SetActive(true);
                 view.Rows.Add(row);
+                if (row.indexLabel)
+                {
+                    row.indexLabel.text = view.Rows.Count.ToString("00");
+                }
             }
 
             for (int i = 0; i < view.Rows.Count; i++)
@@ -367,6 +371,20 @@ namespace RhythmDojo.UI
                 view.favoritesTab.GetComponent<Image>().color = new Color(.09f, .115f, .13f);
             }
 
+            if (view.pixelTheme)
+            {
+                var allFrame = view.allTab.GetComponentInChildren<PixelDojoFrameGraphic>();
+                var favoriteFrame = view.favoritesTab.GetComponentInChildren<PixelDojoFrameGraphic>();
+                var selectedFill = new Color(.98f, .85f, .62f);
+                var normalFill = new Color(.78f, .62f, .42f);
+                allFrame.color = selectedFill;
+                favoriteFrame.color = normalFill;
+                if (favoritesOnly)
+                {
+                    allFrame.color = normalFill;
+                    favoriteFrame.color = selectedFill;
+                }
+            }
             view.emptyMessage.gameObject.SetActive(visible.Count == 0);
 
             if (favoritesOnly)
@@ -498,8 +516,18 @@ namespace RhythmDojo.UI
             }
 
             view.artistBpm.text = $"{song.Artist}  /  BPM {bpm}";
+            if (view.pixelTheme)
+            {
+                double duration = song.Duration;
+                if (chart != null && chart.Duration.HasValue)
+                {
+                    duration = chart.Duration.Value;
+                }
+                var time = TimeSpan.FromSeconds(Math.Max(0, duration));
+                view.artistBpm.text = $"아티스트  {song.Artist}\n\nBPM  {bpm}\nPLAY TIME  {(int)time.TotalMinutes}:{time.Seconds:00}";
+            }
 
-            if (song.Cover)
+            if (song.Cover && song.Cover != view.legacyFallbackCover)
             {
                 view.album.sprite = song.Cover;
             }
@@ -929,20 +957,29 @@ namespace RhythmDojo.UI
 
             if (!HardModeSelected)
             {
-                view.normalModeButton.image.color = new Color(.18f, .43f, .43f);
+                view.normalModeButton.GetComponent<Image>().color = new Color(.48f, .32f, .18f);
             }
             else
             {
-                view.normalModeButton.image.color = new Color(.09f, .115f, .13f);
+                view.normalModeButton.GetComponent<Image>().color = new Color(.27f, .15f, .10f);
             }
 
             if (HardModeSelected)
             {
-                view.hardModeButton.image.color = new Color(.50f, .13f, .16f);
+                view.hardModeButton.GetComponent<Image>().color = new Color(.53f, .15f, .10f);
             }
             else
             {
-                view.hardModeButton.image.color = new Color(.09f, .115f, .13f);
+                view.hardModeButton.GetComponent<Image>().color = new Color(.27f, .15f, .10f);
+            }
+            if (view.pixelTheme)
+            {
+                foreach (var button in new[] { view.normalModeButton, view.hardModeButton })
+                {
+                    var frame = button.GetComponentInChildren<PixelDojoFrameGraphic>();
+                    frame.color = button.GetComponent<Image>().color;
+                    button.GetComponent<Image>().color = Color.clear;
+                }
             }
         }
 

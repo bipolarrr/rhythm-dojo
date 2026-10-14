@@ -130,8 +130,16 @@ namespace RhythmDojo.Tests
             try
             {
                 var left = (RectTransform)view.songTitle.transform.parent;
-                Assert.That(left.anchorMin, Is.EqualTo(new Vector2(.025f, .095f)));
-                Assert.That(left.anchorMax, Is.EqualTo(new Vector2(.325f, .89f)));
+                Assert.That(left.anchorMin, Is.EqualTo(new Vector2(.45f, .17f)));
+                Assert.That(left.anchorMax, Is.EqualTo(new Vector2(.86f, .815f)));
+                Assert.That(view.pixelTheme, Is.True);
+                var browser = (RectTransform)view.scroll.transform.parent;
+                Assert.That(browser.anchorMax.x, Is.LessThan(left.anchorMin.x), "The song list must stay left of the information panel.");
+                foreach (var frame in view.GetComponentsInChildren<RhythmDojo.UI.PixelDojoFrameGraphic>(true))
+                {
+                    Assert.That(frame.GetComponent<CanvasRenderer>(), Is.Not.Null);
+                    Assert.That(frame.raycastTarget, Is.False, "Decorative frames must not block UI input.");
+                }
                 Assert.That(left.offsetMin, Is.EqualTo(Vector2.zero));
                 Assert.That(left.offsetMax, Is.EqualTo(Vector2.zero));
                 Assert.That(

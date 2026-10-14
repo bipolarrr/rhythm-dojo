@@ -15,6 +15,7 @@ namespace RhythmDojo.UI
             quit,
             confirmQuit,
             cancelQuit;
+        public bool alwaysVisibleMenu;
         public CanvasGroup menuPanel;
         public Vector2 logoOpenPosition = new Vector2(-330, 0);
         public Vector2 menuOpenPosition = new Vector2(200, 0);
@@ -54,6 +55,15 @@ namespace RhythmDojo.UI
 
         public void SetExpansion(float amount)
         {
+            if (alwaysVisibleMenu)
+            {
+                menuPanel.alpha = 1f;
+                menuPanel.interactable = true;
+                menuPanel.blocksRaycasts = true;
+                startPrompt.gameObject.SetActive(false);
+                return;
+            }
+
             float eased = Mathf.SmoothStep(0f, 1f, amount);
             ((RectTransform)logo.transform).anchoredPosition = Vector2.Lerp(
                 Vector2.zero,

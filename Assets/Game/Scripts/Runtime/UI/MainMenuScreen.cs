@@ -58,10 +58,14 @@ namespace RhythmDojo.UI
             actions = menuActions ?? throw new ArgumentNullException(nameof(menuActions));
             beatClock = menuBeatClock;
             starting = quitting = false;
-            menuExpanded = false;
+            menuExpanded = view.alwaysVisibleMenu;
             expansion = 0f;
+            if (view.alwaysVisibleMenu)
+            {
+                expansion = 1f;
+            }
             view.SetExpansion(0f);
-            view.menuPanel.gameObject.SetActive(false);
+            view.menuPanel.gameObject.SetActive(view.alwaysVisibleMenu);
             view.quitPopup.SetActive(false);
             view.SetMenuInteractable(true);
             view.confirmQuit.interactable = view.cancelQuit.interactable = true;
@@ -179,6 +183,11 @@ namespace RhythmDojo.UI
         private void ToggleMenu()
         {
             if (Busy || view.quitPopup.activeSelf)
+            {
+                return;
+            }
+
+            if (view.alwaysVisibleMenu)
             {
                 return;
             }

@@ -344,6 +344,8 @@ namespace RhythmDojo.EditorTools
             view.graphicsPanel.SetActive(false);
             view.gameplayPanel.SetActive(false);
 
+            PixelOptionsStyle.Apply(view);
+
             return view;
         }
 

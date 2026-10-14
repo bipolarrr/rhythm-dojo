@@ -132,8 +132,8 @@ namespace RhythmDojo.Tests
 
         private IEnumerator OpenMenu()
         {
-            yield return Click(view.logo);
-            yield return new WaitForSecondsRealtime(.35f);
+            yield return null;
+            Assert.That(view.alwaysVisibleMenu, Is.True);
             Assert.That(view.menuPanel.alpha, Is.EqualTo(1f));
             Assert.That(view.menuPanel.blocksRaycasts, Is.True);
         }
@@ -279,11 +279,12 @@ namespace RhythmDojo.Tests
             var actions = new Actions();
             screen.Initialize(actions);
             yield return OpenMenu();
-            yield return Click(view.logo);
-            yield return new WaitForSecondsRealtime(.35f);
-            Assert.That(view.menuPanel.gameObject.activeSelf, Is.False);
-            view.start.onClick.Invoke();
-            Assert.That(actions.Starts, Is.Zero);
+            view.logo.onClick.Invoke();
+            yield return null;
+            Assert.That(view.menuPanel.gameObject.activeSelf, Is.True);
+            Assert.That(view.logo.targetGraphic.raycastTarget, Is.False);
+            yield return Click(view.start);
+            Assert.That(actions.Starts, Is.EqualTo(1));
         }
 
         [UnityTest]
@@ -320,9 +321,9 @@ namespace RhythmDojo.Tests
             );
             Assert.That(screen.enabled, Is.True);
             Assert.That(view.start.interactable, Is.True);
-            yield return Click(view.logo);
-            yield return new WaitForSecondsRealtime(.3f);
-            Assert.That(view.menuPanel.gameObject.activeSelf, Is.False);
+            view.logo.onClick.Invoke();
+            yield return null;
+            Assert.That(view.menuPanel.gameObject.activeSelf, Is.True);
         }
 
         private static void AssertHasDisplayCamera()

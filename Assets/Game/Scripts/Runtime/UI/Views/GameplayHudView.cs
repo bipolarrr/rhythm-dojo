@@ -6,6 +6,7 @@ namespace RhythmDojo.UI
 {
     public sealed class GameplayHudView : MonoBehaviour
     {
+        public bool pixelTheme;
         public Text status;
         public HudLaneLayout lanes;
         public Button returnButton;

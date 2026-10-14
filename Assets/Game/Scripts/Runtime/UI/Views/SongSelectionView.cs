@@ -17,8 +17,10 @@ namespace RhythmDojo.UI
             record,
             timingLabel,
             emptyMessage;
+        public bool pixelTheme;
         public Image album;
         public Sprite fallbackCover;
+        public Sprite legacyFallbackCover;
         public Slider timingOffset;
         public Slider speedSlider;
         public Text speedLabel;
@@ -165,6 +167,38 @@ namespace RhythmDojo.UI
                 }
 
                 difficultyIndicators[i].SetActive(selected);
+                if (pixelTheme)
+                {
+                    var frame = button.GetComponentInChildren<PixelDojoFrameGraphic>();
+                    button.GetComponent<Image>().color = Color.clear;
+                    if (selected)
+                    {
+                        frame.color = new Color(.60f, .20f, .13f);
+                        frame.borderColor = new Color(.88f, .37f, .15f);
+                        button.GetComponentInChildren<Text>().color = new Color(1, .92f, .74f);
+                    }
+                    else
+                    {
+                        frame.color = new Color(.84f, .69f, .47f);
+                        frame.borderColor = new Color(.29f, .13f, .09f);
+                        button.GetComponentInChildren<Text>().color = new Color(.25f, .13f, .09f);
+                    }
+                    var caption = button.GetComponentInChildren<Text>();
+                    switch (caption.text)
+                    {
+                        case "Easy":
+                            caption.text = "쉬움";
+                            break;
+                        case "Standard":
+                        case "Normal":
+                            caption.text = "보통";
+                            break;
+                        case "Hard":
+                            caption.text = "어려움";
+                            break;
+                    }
+                    frame.SetVerticesDirty();
+                }
             }
         }
 

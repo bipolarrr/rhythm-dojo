@@ -459,6 +459,7 @@ namespace RhythmDojo.EditorTools
             modeNav.selectOnUp = view.normalModeButton;
             view.cancelMode.navigation = modeNav;
             view.modePopup.SetActive(false);
+            PixelSongSelectionStyle.Apply(view);
             view.Validate();
 
             return view;

@@ -274,6 +274,8 @@ namespace RhythmDojo.EditorTools
             gameOverHint.color = Cream;
             view.gameOverPanel.SetActive(false);
 
+            PixelGameplayStyle.Apply(view);
+
             return view;
         }
 

@@ -88,29 +88,36 @@ namespace RhythmDojo.UI
 
             if (!graphics && !gameplay)
             {
-                view.soundTab.image.color = new Color(.15f, .46f, .5f);
+                view.soundTab.GetComponent<Image>().color = new Color(.15f, .46f, .5f);
             }
             else
             {
-                view.soundTab.image.color = new Color(.13f, .17f, .2f);
+                view.soundTab.GetComponent<Image>().color = new Color(.13f, .17f, .2f);
             }
 
             if (graphics)
             {
-                view.graphicsTab.image.color = new Color(.15f, .46f, .5f);
+                view.graphicsTab.GetComponent<Image>().color = new Color(.15f, .46f, .5f);
             }
             else
             {
-                view.graphicsTab.image.color = new Color(.13f, .17f, .2f);
+                view.graphicsTab.GetComponent<Image>().color = new Color(.13f, .17f, .2f);
             }
 
             if (gameplay)
             {
-                view.gameplayTab.image.color = new Color(.15f, .46f, .5f);
+                view.gameplayTab.GetComponent<Image>().color = new Color(.15f, .46f, .5f);
             }
             else
             {
-                view.gameplayTab.image.color = new Color(.13f, .17f, .2f);
+                view.gameplayTab.GetComponent<Image>().color = new Color(.13f, .17f, .2f);
+            }
+
+            if (view.pixelTheme)
+            {
+                StylePixelTab(view.soundTab, !graphics && !gameplay);
+                StylePixelTab(view.graphicsTab, graphics);
+                StylePixelTab(view.gameplayTab, gameplay);
             }
 
             var nav = view.apply.navigation;
@@ -129,6 +136,23 @@ namespace RhythmDojo.UI
             }
 
             view.apply.navigation = nav;
+        }
+
+        private static void StylePixelTab(Button button, bool selected)
+        {
+            button.GetComponent<Image>().color = Color.clear;
+            var frame = button.GetComponentInChildren<PixelDojoFrameGraphic>();
+            var label = button.GetComponentInChildren<Text>();
+            if (selected)
+            {
+                frame.color = new Color(.49f, .14f, .10f);
+                label.color = new Color(1f, .90f, .70f);
+            }
+            else
+            {
+                frame.color = new Color(.79f, .63f, .42f);
+                label.color = new Color(.24f, .12f, .085f);
+            }
         }
 
         private void Update()

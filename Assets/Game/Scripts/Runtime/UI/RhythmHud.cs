@@ -23,10 +23,10 @@ namespace RhythmDojo.UI
         private int displayedCombo = -1;
         private int maximumCombo;
         private bool showingJudgment;
-        private static readonly Color Cream = new Color(.94f, .93f, .85f);
-        private static readonly Color Cyan = new Color(.46f, .84f, .81f);
-        private static readonly Color Gold = new Color(1f, .77f, .42f);
-        private static readonly Color Red = new Color(.96f, .29f, .31f);
+        private Color Cream = new Color(.94f, .93f, .85f);
+        private Color Cyan = new Color(.46f, .84f, .81f);
+        private Color Gold = new Color(1f, .77f, .42f);
+        private Color Red = new Color(.96f, .29f, .31f);
 
         public void Validate()
         {
@@ -46,6 +46,14 @@ namespace RhythmDojo.UI
         {
             Unbind();
             Validate();
+            if (view.pixelTheme)
+            {
+                Cream = new Color(.98f, .86f, .65f);
+                Cyan = new Color(.70f, .86f, .61f);
+                Gold = new Color(1f, .74f, .36f);
+                Red = new Color(1f, .40f, .32f);
+            }
+
             settings = presentation;
             model = readModel;
             indicators = view.lanes.Build(mode, presentation);

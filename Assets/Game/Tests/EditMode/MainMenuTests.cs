@@ -42,10 +42,14 @@ namespace RhythmDojo.Tests
                 Assert.That(view.title.rectTransform.parent, Is.EqualTo(view.logo.transform));
                 Assert.That(view.title.rectTransform.anchorMin, Is.EqualTo(new Vector2(.5f, .5f)));
                 Assert.That(view.startPrompt.rectTransform.parent, Is.EqualTo(view.logo.transform));
-                Assert.That(view.logo.GetComponent<LogoCircleGraphic>(), Is.Not.Null);
+                Assert.That(view.logo.GetComponent<LogoCircleGraphic>(), Is.Null);
+                Assert.That(view.logo.GetComponent<UnityEngine.UI.Image>().sprite, Is.Not.Null);
+                Assert.That(view.alwaysVisibleMenu, Is.True);
+                Assert.That(view.title.enabled, Is.False);
+                Assert.That(view.logo.targetGraphic.raycastTarget, Is.False);
                 Assert.That(view.logo.GetComponent<CanvasRenderer>(), Is.Not.Null);
-                Assert.That(view.menuPanel.gameObject.activeSelf, Is.False);
-                Assert.That(view.menuPanel.blocksRaycasts, Is.False);
+                Assert.That(view.menuPanel.gameObject.activeSelf, Is.True);
+                Assert.That(view.menuPanel.blocksRaycasts, Is.True);
                 Assert.That(view.quitQuestion.text, Is.EqualTo("게임을 종료 하시겠습니까?"));
 
                 foreach (char glyph in "게임을 종료 하시겠습니까?예아니요")
@@ -73,16 +77,16 @@ namespace RhythmDojo.Tests
                 Assert.That(settingsRect.parent, Is.EqualTo(playRect.parent));
                 Assert.That(quitRect.parent, Is.EqualTo(playRect.parent));
                 Assert.That(
-                    playRect.anchoredPosition.x,
-                    Is.LessThan(settingsRect.anchoredPosition.x)
-                );
-                Assert.That(
-                    settingsRect.anchoredPosition.x,
-                    Is.LessThan(quitRect.anchoredPosition.x)
+                    playRect.anchoredPosition.y,
+                    Is.GreaterThan(settingsRect.anchoredPosition.y)
                 );
                 Assert.That(
                     settingsRect.anchoredPosition.y,
-                    Is.EqualTo(quitRect.anchoredPosition.y)
+                    Is.GreaterThan(quitRect.anchoredPosition.y)
+                );
+                Assert.That(
+                    settingsRect.anchoredPosition.x,
+                    Is.EqualTo(quitRect.anchoredPosition.x)
                 );
                 Assert.That(
                     scene
