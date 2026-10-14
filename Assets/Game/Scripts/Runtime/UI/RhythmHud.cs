@@ -207,6 +207,10 @@ namespace RhythmDojo.UI
                 else
                 {
                     indicators[i].color = settings.idleColor;
+                    if (view.pixelTheme)
+                    {
+                        indicators[i].color = Color.white;
+                    }
                 }
 
                 var tint = indicators[i].color;

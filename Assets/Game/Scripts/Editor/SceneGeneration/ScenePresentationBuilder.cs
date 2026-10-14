@@ -61,6 +61,18 @@ namespace RhythmDojo.EditorTools
             camera.backgroundColor = new Color(.025f, .035f, .065f);
             camera.gameObject.AddComponent<AudioListener>();
 
+            // The world camera renders into GameplayViewport's texture. Keep a
+            // display camera active so Unity presents the overlay canvases without
+            // reporting "No cameras rendering" in the Game view.
+            var displayCamera = new GameObject("Gameplay Display Camera").AddComponent<Camera>();
+            displayCamera.clearFlags = CameraClearFlags.SolidColor;
+            displayCamera.backgroundColor = camera.backgroundColor;
+            displayCamera.cullingMask = 0;
+            displayCamera.depth = -100;
+            displayCamera.targetDisplay = camera.targetDisplay;
+            displayCamera.allowHDR = false;
+            displayCamera.allowMSAA = false;
+
             var light = new GameObject("Key Light").AddComponent<Light>();
             light.type = LightType.Directional;
             light.intensity = 1.3f;

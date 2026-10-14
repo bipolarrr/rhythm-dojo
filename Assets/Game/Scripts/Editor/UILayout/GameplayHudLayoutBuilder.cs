@@ -173,40 +173,6 @@ namespace RhythmDojo.EditorTools
                 13
             );
             view.progress.color = Muted;
-            Label(
-                "Restart Hint",
-                canvas.transform,
-                "SPACE  시작 / 다시 도전",
-                .03f,
-                .075f,
-                .28f,
-                .115f,
-                14
-            ).color = Muted;
-            Label(
-                "Return Hint",
-                canvas.transform,
-                "ESC  곡 선택으로",
-                .03f,
-                .025f,
-                .28f,
-                .065f,
-                14
-            ).color = Muted;
-
-            var holdHint = Label(
-                "Hold Hint",
-                canvas.transform,
-                "긴 노트는 끝까지 누르세요",
-                .74f,
-                .025f,
-                .97f,
-                .075f,
-                14
-            );
-            holdHint.color = Muted;
-            holdHint.alignment = TextAnchor.MiddleRight;
-
             var laneRoot = new GameObject(
                 "Lane Feedback",
                 typeof(RectTransform)

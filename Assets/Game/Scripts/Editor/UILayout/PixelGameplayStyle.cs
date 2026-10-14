@@ -15,17 +15,23 @@ namespace RhythmDojo.EditorTools
         public static void Apply(GameplayHudView view)
         {
             view.pixelTheme = true;
+            var headingFont = AssetDatabase.LoadAssetAtPath<Font>(
+                "Assets/Game/Fonts/Mona12TextKR.ttf"
+            );
+            if (!headingFont)
+            {
+                throw new InvalidOperationException("Gameplay heading font missing.");
+            }
+
             var camera = Camera.main;
             if (!camera)
             {
                 throw new InvalidOperationException("Gameplay camera missing.");
             }
 
-            // Render behind the world notes and playfield, never over the gameplay camera.
+            // Composite the world camera inside the frame, over the supplied dojo art.
             var background = UiElements.Canvas("Pixel Dojo Gameplay Backdrop");
-            background.renderMode = RenderMode.ScreenSpaceCamera;
-            background.worldCamera = camera;
-            background.planeDistance = 100;
+            background.renderMode = RenderMode.ScreenSpaceOverlay;
             background.sortingOrder = -100;
             background.GetComponent<CanvasScaler>().matchWidthOrHeight = .5f;
             var raycaster = background.GetComponent<GraphicRaycaster>();
@@ -47,6 +53,21 @@ namespace RhythmDojo.EditorTools
             Panel("Scenery Shade", background.transform, new Color(.08f, .04f, .025f, .62f), 0, 0, 1, 1);
             var field = Panel("Training Floor Frame", background.transform, new Color(.055f, .035f, .025f), .285f, .015f, .715f, .922f);
             Frame(field, new Color(.055f, .035f, .025f), 10);
+            var scrollFrame = field.Find("Wooden Frame").GetComponent<Image>();
+            scrollFrame.sprite = DojoGameplayAssets.Scroll;
+            scrollFrame.type = Image.Type.Simple;
+            camera.backgroundColor = new Color(.055f, .035f, .025f, 0f);
+            var viewport = new GameObject("Gameplay Viewport", typeof(RectTransform), typeof(RawImage));
+            viewport.transform.SetParent(field, false);
+            var viewportRect = (RectTransform)viewport.transform;
+            Bounds(viewportRect, 0, 0, 1, .93f);
+            viewportRect.offsetMin = new Vector2(10, 10);
+            viewportRect.offsetMax = new Vector2(-10, 0);
+            viewport.GetComponent<RawImage>().raycastTarget = false;
+            viewport.AddComponent<GameplayViewport>().gameplayCamera = camera;
+            view.lanes.pixelTheme = true;
+            view.lanes.font = headingFont;
+            view.lanes.sprite = DojoGameplayAssets.Tile;
 
             var header = view.transform.Find("Training Header");
             Frame((RectTransform)header, new Color(.24f, .10f, .075f), 8);
@@ -97,26 +118,33 @@ namespace RhythmDojo.EditorTools
             {
                 outline.enabled = false;
             }
-            foreach (string name in new[] { "Restart Hint", "Return Hint", "Hold Hint" })
-            {
-                view.transform.Find(name).GetComponent<Text>().color = Cream;
-            }
-
             var result = Panel("Result Scroll", view.gameOverPanel.transform, Paper, .28f, .33f, .72f, .65f);
             Frame(result, new Color(.24f, .10f, .075f), 16);
             result.SetAsFirstSibling();
             view.gameOverText.fontStyle = FontStyle.Bold;
+            foreach (var text in view.GetComponentsInChildren<Text>(true))
+            {
+                text.font = headingFont;
+                text.fontStyle = FontStyle.Normal;
+            }
         }
 
         private static void Frame(RectTransform rect, Color fill, float width)
         {
-            var frame = new GameObject("Wooden Frame", typeof(RectTransform), typeof(PixelDojoFrameGraphic));
+            var frame = new GameObject("Wooden Frame", typeof(RectTransform), typeof(Image));
             frame.transform.SetParent(rect, false);
             frame.transform.SetAsFirstSibling();
             Bounds((RectTransform)frame.transform, 0, 0, 1, 1);
-            var graphic = frame.GetComponent<PixelDojoFrameGraphic>();
-            graphic.color = fill;
-            graphic.borderWidth = width;
+            var graphic = frame.GetComponent<Image>();
+            graphic.sprite = DojoGameplayAssets.Wood;
+            if (fill == Paper)
+            {
+                graphic.sprite = DojoGameplayAssets.Paper;
+            }
+
+            graphic.color = Color.white;
+            graphic.type = Image.Type.Sliced;
+            graphic.pixelsPerUnitMultiplier = 100 / width;
             graphic.raycastTarget = false;
             rect.GetComponent<Image>().color = Color.clear;
         }

@@ -21,14 +21,14 @@ namespace RhythmDojo.Gameplay
         public float judgmentLineHeight = .1f;
         public double flashDuration = .22;
         public double hudRefreshInterval = .05;
-        public Color perfectColor = Color.cyan;
-        public Color goodColor = Color.yellow;
-        public Color missColor = new Color(1, .22f, .3f);
-        public Color heldColor = new Color(.3f, .85f, 1);
-        public Color idleColor = new Color(.12f, .18f, .26f);
-        public Color highwayColor = new Color(.055f, .075f, .11f);
-        public Color railColor = new Color(.2f, .27f, .35f);
-        public Color judgmentLineColor = Color.white;
+        public Color perfectColor = new Color(0.64f, 0.85f, 0.72f);
+        public Color goodColor = new Color(0.97f, 0.75f, 0.39f);
+        public Color missColor = new Color(0.92f, 0.36f, 0.29f);
+        public Color heldColor = new Color(0.76f, 0.87f, 0.73f);
+        public Color idleColor = new Color(0.24f, 0.12f, 0.085f);
+        public Color highwayColor = new Color(0.085f, 0.068f, 0.058f);
+        public Color railColor = new Color(0.39f, 0.29f, 0.19f);
+        public Color judgmentLineColor = new Color(0.96f, 0.83f, 0.58f);
 
         public void Validate()
         {

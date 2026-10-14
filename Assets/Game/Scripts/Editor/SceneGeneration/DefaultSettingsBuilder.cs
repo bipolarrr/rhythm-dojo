@@ -29,10 +29,10 @@ namespace RhythmDojo.EditorTools
                 mode.SetGeneratedDefaults(
                     new[]
                     {
-                        new LaneDefinition("<Keyboard>/d", "D", new Color(.2f, .8f, 1)),
-                        new LaneDefinition("<Keyboard>/f", "F", new Color(.35f, 1, .65f)),
-                        new LaneDefinition("<Keyboard>/j", "J", new Color(1, .7f, .22f)),
-                        new LaneDefinition("<Keyboard>/k", "K", new Color(1, .35f, .65f)),
+                        new LaneDefinition("<Keyboard>/d", "D", Color.white),
+                        new LaneDefinition("<Keyboard>/f", "F", Color.white),
+                        new LaneDefinition("<Keyboard>/j", "J", Color.white),
+                        new LaneDefinition("<Keyboard>/k", "K", Color.white),
                     }
                 );
                 Dirty(mode);

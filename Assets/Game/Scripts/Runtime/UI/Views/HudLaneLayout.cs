@@ -8,6 +8,9 @@ namespace RhythmDojo.UI
     public sealed class HudLaneLayout : MonoBehaviour
     {
         public RectTransform laneRoot;
+        public bool pixelTheme;
+        public Font font;
+        public Sprite sprite;
 
         public void Validate()
         {
@@ -43,10 +46,20 @@ namespace RhythmDojo.UI
                 indicators[i] = go.AddComponent<Image>();
                 indicators[i].color = presentation.idleColor;
                 indicators[i].raycastTarget = false;
+                indicators[i].sprite = sprite;
+                indicators[i].type = Image.Type.Sliced;
+                indicators[i].pixelsPerUnitMultiplier = 15;
 
                 var outline = go.AddComponent<Outline>();
                 outline.effectColor = new Color(.30f, .48f, .49f, .7f);
                 outline.effectDistance = new Vector2(1, -1);
+                if (pixelTheme)
+                {
+                    indicators[i].color = Color.white;
+                    outline.enabled = false;
+                    outline.effectColor = new Color(.72f, .46f, .24f);
+                    outline.effectDistance = new Vector2(1, -1);
+                }
 
                 var rect = (RectTransform)go.transform;
                 rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(.5f, 0);
@@ -65,7 +78,17 @@ namespace RhythmDojo.UI
                     26
                 );
                 key.alignment = TextAnchor.MiddleCenter;
+                if (font)
+                {
+                    key.font = font;
+                }
+
                 key.color = new Color(.94f, .93f, .85f);
+                if (pixelTheme)
+                {
+                    key.color = new Color(.24f, .12f, .085f);
+                    key.fontStyle = FontStyle.Bold;
+                }
             }
 
             return indicators;

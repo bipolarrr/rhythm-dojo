@@ -27,11 +27,11 @@ MonoBehaviour:
   judgmentLineHeight: 0.1
   flashDuration: 0.22
   hudRefreshInterval: 0.05
-  perfectColor: {r: 0, g: 1, b: 1, a: 1}
-  goodColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  missColor: {r: 1, g: 0.22, b: 0.3, a: 1}
-  heldColor: {r: 0.3, g: 0.85, b: 1, a: 1}
-  idleColor: {r: 0.12, g: 0.18, b: 0.26, a: 1}
-  highwayColor: {r: 0.055, g: 0.075, b: 0.11, a: 1}
-  railColor: {r: 0.2, g: 0.27, b: 0.35, a: 1}
-  judgmentLineColor: {r: 1, g: 1, b: 1, a: 1}
+  perfectColor: {r: 0.64, g: 0.85, b: 0.72, a: 1}
+  goodColor: {r: 0.97, g: 0.75, b: 0.39, a: 1}
+  missColor: {r: 0.92, g: 0.36, b: 0.29, a: 1}
+  heldColor: {r: 0.76, g: 0.87, b: 0.73, a: 1}
+  idleColor: {r: 0.24, g: 0.12, b: 0.085, a: 1}
+  highwayColor: {r: 0.085, g: 0.068, b: 0.058, a: 1}
+  railColor: {r: 0.39, g: 0.29, b: 0.19, a: 1}
+  judgmentLineColor: {r: 0.96, g: 0.83, b: 0.58, a: 1}

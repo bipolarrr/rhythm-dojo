@@ -96,7 +96,7 @@ namespace RhythmDojo.Presentation
             for (int lane = 0; lane < laneMaterials.Length; lane++)
             {
                 laneMaterials[lane] = new Material(noteMaterial);
-                laneMaterials[lane].SetColor("_BaseColor", mode.GetLane(lane).color);
+                laneMaterials[lane].SetColor("_BaseColor", Color.white);
             }
 
             bool reusable = views != null && views.Length == chart.Count;

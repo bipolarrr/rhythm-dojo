@@ -24,6 +24,113 @@ namespace RhythmDojo.Tests
             yield return null;
         }
 
+        [UnityTest]
+        public IEnumerator GameplayKeepsDisplayCameraWhileWorldRendersIntoWindow()
+        {
+            yield return LoadGameplay();
+            Canvas.ForceUpdateCanvases();
+
+            var viewport = UnityEngine.Object.FindFirstObjectByType<GameplayViewport>();
+            var camera = viewport.gameplayCamera;
+            Assert.That(camera.targetTexture, Is.Not.Null);
+            Assert.That(Camera.main, Is.SameAs(camera));
+
+            var displayCameras = Camera.allCameras.Where(candidate =>
+                candidate.targetTexture == null && candidate.targetDisplay == camera.targetDisplay
+            ).ToArray();
+            Assert.That(displayCameras.Length, Is.EqualTo(1));
+            Assert.That(displayCameras[0].cullingMask, Is.Zero,
+                "The display camera must not render unclipped world geometry.");
+            Assert.That(displayCameras[0].GetComponent<AudioListener>(), Is.Null);
+            Assert.That(displayCameras[0].rect, Is.EqualTo(new Rect(0, 0, 1, 1)));
+        }
+
+        [UnityTest]
+        public IEnumerator GameplayWindowRendersJudgmentLineBelowCenter()
+        {
+            yield return LoadGameplay();
+            yield return new WaitForEndOfFrame();
+
+            var viewport = UnityEngine.Object.FindFirstObjectByType<GameplayViewport>();
+            var point = viewport.gameplayCamera.WorldToScreenPoint(new Vector3(.2f, .05f, 0));
+            Assert.That(point.y, Is.LessThan(Screen.height * .5f));
+
+            var capture = ScreenCapture.CaptureScreenshotAsTexture();
+            try
+            {
+                bool foundJudgmentLine = false;
+                int x = Mathf.RoundToInt(point.x);
+                int y = Mathf.RoundToInt(point.y);
+                for (int offset = -4; offset <= 4; offset++)
+                {
+                    var color = capture.GetPixel(x, y + offset);
+                    if (color.r > .65f && color.g > .5f)
+                    {
+                        if (color.b < color.g)
+                        {
+                            foundJudgmentLine = true;
+                            break;
+                        }
+                    }
+                }
+
+                System.IO.File.WriteAllBytes("Logs/gameplay-scroll-render.png", capture.EncodeToPNG());
+                Assert.That(foundJudgmentLine, Is.True,
+                    "The rendered judgment line must match its lower-screen projection, not a vertically reflected position.");
+            }
+            finally
+            {
+                UnityEngine.Object.Destroy(capture);
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator GameplayWindowPreservesProjectionAndReleasesCameraOnDisable()
+        {
+            yield return LoadGameplay();
+            yield return null;
+            Canvas.ForceUpdateCanvases();
+
+            var viewport = UnityEngine.Object.FindFirstObjectByType<GameplayViewport>();
+            Assert.That(viewport, Is.Not.Null);
+            var image = viewport.GetComponent<UnityEngine.UI.RawImage>();
+            var camera = viewport.gameplayCamera;
+            var target = camera.targetTexture;
+            Assert.That(target, Is.Not.Null);
+            Assert.That(image.texture, Is.SameAs(target));
+            Assert.That(target.IsCreated(), Is.True);
+            Assert.That(image.raycastTarget, Is.False);
+
+            // A projected judgment point must stay at the same screen position after
+            // cropping, so the HUD's world-space hit feedback remains aligned.
+            var point = camera.WorldToViewportPoint(Vector3.zero);
+            var corners = new Vector3[4];
+            image.rectTransform.GetWorldCorners(corners);
+            var min = RectTransformUtility.WorldToScreenPoint(null, corners[0]);
+            var max = RectTransformUtility.WorldToScreenPoint(null, corners[2]);
+            var uv = image.uvRect;
+            Assert.That(uv.xMin, Is.GreaterThan(0));
+            Assert.That(uv.xMax, Is.LessThan(1));
+            Assert.That(uv.yMin, Is.GreaterThan(0));
+            Assert.That(uv.yMax, Is.LessThan(1));
+            float displayedX = Mathf.LerpUnclamped(min.x, max.x, (point.x - uv.x) / uv.width);
+            float displayedY = Mathf.LerpUnclamped(min.y, max.y, (point.y - uv.y) / uv.height);
+            Assert.That(displayedX, Is.EqualTo(point.x * target.width).Within(1));
+            Assert.That(displayedY, Is.EqualTo(point.y * target.height).Within(1));
+
+            viewport.enabled = false;
+            Assert.That(camera.targetTexture, Is.Null);
+            Assert.That(image.texture, Is.Null);
+            yield return null;
+            Assert.That(target == null, Is.True, "The old render texture must be destroyed.");
+
+            viewport.enabled = true;
+            yield return null;
+            Canvas.ForceUpdateCanvases();
+            Assert.That(camera.targetTexture, Is.Not.Null);
+            Assert.That(image.texture, Is.SameAs(camera.targetTexture));
+        }
+
         private sealed class HudReadModel : IGameplayReadModel
         {
             public GameplaySnapshot Snapshot { get; set; }
