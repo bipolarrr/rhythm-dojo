@@ -23,6 +23,7 @@ namespace RhythmDojo.Application
             Audio;
         public double AudioOffsetSeconds;
         public TempoPoint[] TempoPoints = { new TempoPoint(0, 120) };
+        public BeatGridSettings Grid = new BeatGridSettings();
         public ChartDocument[] Charts = Array.Empty<ChartDocument>();
 
         public SongProject Copy() =>
@@ -34,6 +35,7 @@ namespace RhythmDojo.Application
                 Audio = Audio,
                 AudioOffsetSeconds = AudioOffsetSeconds,
                 TempoPoints = (TempoPoint[])TempoPoints.Clone(),
+                Grid = Grid.Copy(),
                 Charts = Charts.Select(c => c.Copy()).ToArray(),
             };
     }
@@ -174,6 +176,8 @@ namespace RhythmDojo.Application
                 "Finite number required."
             );
             Require(p.TempoPoints != null, "timing.tempoPoints", "Array required.");
+            Require(p.Grid != null, "timing.grid", "Grid required.");
+            p.Grid.Validate();
 
             for (int i = 0; i < p.TempoPoints.Length; i++)
             {
@@ -265,6 +269,11 @@ namespace RhythmDojo.Application
 
         public static bool ContentEquals(SongProject a, SongProject b)
         {
+            if (a.Grid.OriginSeconds != b.Grid.OriginSeconds || !a.Grid.Meters.SequenceEqual(b.Grid.Meters))
+            {
+                return false;
+            }
+
             if ((!(a.Id == b.Id) || !(a.Title == b.Title)) || !(a.Artist == b.Artist))
             {
                 return false;

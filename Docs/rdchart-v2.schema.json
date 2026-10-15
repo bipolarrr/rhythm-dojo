@@ -79,6 +79,53 @@
               }
             }
           }
+        },
+        "grid": {
+          "properties": {
+            "meters": {
+              "items": {
+                "properties": {
+                  "denominator": {
+                    "enum": [
+                      1,
+                      2,
+                      4,
+                      8,
+                      16,
+                      32
+                    ]
+                  },
+                  "timeSeconds": {
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  "numerator": {
+                    "maximum": 32,
+                    "minimum": 1,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "timeSeconds",
+                  "numerator",
+                  "denominator"
+                ],
+                "additionalProperties": false,
+                "type": "object"
+              },
+              "minItems": 1,
+              "type": "array"
+            },
+            "originSeconds": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "originSeconds",
+            "meters"
+          ],
+          "additionalProperties": false,
+          "type": "object"
         }
       }
     },

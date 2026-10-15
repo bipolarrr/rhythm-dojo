@@ -33,8 +33,10 @@ namespace RhythmDojo.UI
         private bool pressing;
         private int pressPointerId;
         private int pressLane;
-        private int pressBeat;
-        private int previewEndBeat;
+        private double pressBeat;
+        private double previewEndBeat;
+        public double SnapBeats { get; set; } = 1;
+        public bool SnapEnabled { get; set; } = true;
 
         public int VisibleBeats => visibleBeats;
 
@@ -48,7 +50,20 @@ namespace RhythmDojo.UI
 
         public bool IsBusy { get; set; }
 
-        private TempoMap tempo;
+        private BeatGridTiming tempo;
+
+        public void InitializeTimeline(RhythmDojo.Authoring.FileSongProjectStore store)
+        {
+            var timeline = GetComponent<RhythmDojo.Authoring.ChartAudioTimeline>();
+            if (timeline)
+            {
+                timeline.UseStore(store);
+                return;
+            }
+
+            timeline = gameObject.AddComponent<RhythmDojo.Authoring.ChartAudioTimeline>();
+            timeline.Initialize(this, beatGrid, store);
+        }
 
         public void Configure(GameModeDefinition gameMode, ChartBeatGrid timeline)
         {
@@ -87,7 +102,7 @@ namespace RhythmDojo.UI
                 throw new InvalidOperationException("이 에디터에서는 4레인 채보를 열 수 있습니다.");
             }
 
-            var timing = new TempoMap(snapshot.TempoPoints);
+            var timing = new BeatGridTiming(snapshot.TempoPoints, snapshot.Grid);
 
             if (session != null)
             {
@@ -116,7 +131,8 @@ namespace RhythmDojo.UI
                 chartId = session.ActiveChartId.Value;
             }
 
-            tempo = new TempoMap(session.Snapshot.TempoPoints);
+            var snapshot = session.Snapshot;
+            tempo = new BeatGridTiming(snapshot.TempoPoints, snapshot.Grid);
             RefreshBeatLines();
             RefreshNotes();
         }
@@ -179,7 +195,7 @@ namespace RhythmDojo.UI
             pressing = false;
             beatGrid.SetPreview(-1);
             visibleBeats = DefaultVisibleBeats;
-            scrollBeatOffset = 0;
+            scrollBeatOffset = tempo.BeatAtTime(0);
             RefreshSession();
         }
 
@@ -225,7 +241,8 @@ namespace RhythmDojo.UI
                 return;
             }
 
-            scrollBeatOffset = Math.Max(0, scrollBeatOffset + beats);
+            double firstBeat = tempo.BeatAtTime(0);
+            scrollBeatOffset = Math.Max(firstBeat, scrollBeatOffset + beats);
             RefreshBeatLines();
         }
 
@@ -291,7 +308,7 @@ namespace RhythmDojo.UI
                 return;
             }
 
-            int endBeat = Mathf.Max(pressBeat, BeatAtPointer(eventData));
+            double endBeat = Math.Max(pressBeat, BeatAtPointer(eventData));
             previewEndBeat = endBeat;
             beatGrid.SetPreview(pressLane, pressBeat, previewEndBeat);
         }
@@ -311,7 +328,7 @@ namespace RhythmDojo.UI
             pressing = false;
             beatGrid.SetPreview(-1);
 
-            int endBeat = Mathf.Max(pressBeat, BeatAtPointer(eventData));
+            double endBeat = Math.Max(pressBeat, BeatAtPointer(eventData));
 
             if (IsBusy)
             {
@@ -404,7 +421,7 @@ namespace RhythmDojo.UI
             return rect.rect.Contains(point);
         }
 
-        private int BeatAtPointer(PointerEventData eventData)
+        private double BeatAtPointer(PointerEventData eventData)
         {
             var rect = beatGrid.rectTransform;
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
@@ -417,18 +434,16 @@ namespace RhythmDojo.UI
             return BeatAt(Mathf.Clamp(point.y, rect.rect.yMin, rect.rect.yMax));
         }
 
-        private int BeatAt(float localY)
+        private double BeatAt(float localY)
         {
             double beat = beatGrid.Projection.Unproject(localY);
+            if (!SnapEnabled)
+            {
+                return Math.Max(scrollBeatOffset, Math.Min(scrollBeatOffset + visibleBeats, beat));
+            }
 
-            return (int)
-                Math.Max(
-                    Math.Ceiling(scrollBeatOffset),
-                    Math.Min(
-                        Math.Floor(scrollBeatOffset + visibleBeats),
-                        Math.Round(beat, MidpointRounding.AwayFromZero)
-                    )
-                );
+            double step = SnapBeats;
+            return tempo.SnapBeat(beat, step, scrollBeatOffset, scrollBeatOffset + visibleBeats);
         }
 
         private void RefreshNotes()

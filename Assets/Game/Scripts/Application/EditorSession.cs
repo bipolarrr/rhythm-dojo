@@ -287,6 +287,12 @@ namespace RhythmDojo.Application
             State.Project.TempoPoints = (TempoPoint[])points.Clone();
         }
 
+        public void SetGrid(BeatGridSettings settings)
+        {
+            settings.Validate();
+            State.Project.Grid = settings.Copy();
+        }
+
         public Guid AddChart(string name, string modeId, int laneCount, double completionTime = 0)
         {
             var chart = new ChartDocument

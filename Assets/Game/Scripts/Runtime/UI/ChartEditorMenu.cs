@@ -57,6 +57,22 @@ namespace RhythmDojo.UI
 
         public bool IsInitialized => store != null;
 
+        public void MoveStatusToFooter()
+        {
+            if (!status)
+            {
+                return;
+            }
+
+            var rect = status.rectTransform;
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = new Vector2(1, 0);
+            rect.pivot = Vector2.zero;
+            rect.offsetMin = new Vector2(16, 0);
+            rect.offsetMax = new Vector2(-16, 26);
+            status.fontSize = 14;
+        }
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetReturn() => returningSession = null;
 
@@ -82,6 +98,7 @@ namespace RhythmDojo.UI
             Observe();
             FillSettings();
             ShowStatus("파일에서 음원을 가져오고 노트를 배치하세요.");
+            screen.InitializeTimeline(projectStore);
         }
 
         private void Observe()
