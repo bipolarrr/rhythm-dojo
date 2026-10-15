@@ -572,7 +572,9 @@ namespace RhythmDojo.Authoring
         {
             Edit(() =>
             {
-                ApplyOrigin(snapshot.TempoPoints, detail.FirstVisibleGridTime + AudioOffset);
+                var points = (TempoPoint[])snapshot.TempoPoints.Clone();
+                points[0] = new TempoPoint(0, Number(bpm));
+                ApplyOrigin(points, detail.FirstVisibleGridTime + AudioOffset);
             });
         }
 

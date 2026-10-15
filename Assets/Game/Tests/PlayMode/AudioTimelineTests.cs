@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using NUnit.Framework;
+using RhythmDojo.Application;
 using RhythmDojo.Authoring;
 using RhythmDojo.Gameplay;
 using RhythmDojo.UI;
@@ -19,6 +20,59 @@ namespace RhythmDojo.Tests
     [PostBuildCleanup(typeof(TestRunStartup))]
     public sealed class AudioTimelineTests
     {
+        [UnityTest]
+        public IEnumerator GridCorrectionAppliesEnteredBpmAndPlaytestKeepsTheSameTiming()
+        {
+            yield return SceneManager.LoadSceneAsync(ChartEditorMenu.ScenePath);
+            yield return null;
+            var screen = Object.FindFirstObjectByType<ChartEditorScreen>();
+            var timeline = screen.GetComponent<ChartAudioTimeline>();
+            var canvas = screen.GetComponentInParent<Canvas>();
+            var bpm = canvas.GetComponentsInChildren<InputField>(true)
+                .Single(field => field.name == "Grid BPM");
+            var button = canvas.GetComponentsInChildren<Button>(true)
+                .Single(control => control.name == "Cursor Origin");
+            var detail = canvas.GetComponentsInChildren<AudioTimelineGraphic>()
+                .Single(wave => !wave.Overview);
+            screen.Session.Edit(edit =>
+            {
+                edit.SetTiming(0.1, new TempoPoint(0, 120));
+                edit.SetChartSettings(screen.ChartId, screen.Mode.name, screen.Mode.LaneCount, 171);
+                edit.AddNote(screen.ChartId, NoteData.Tap(0, 1));
+                edit.AddNote(screen.ChartId, NoteData.Hold(1, 149, 150));
+            });
+            screen.Scroll(64);
+            yield return null;
+            var before = screen.Session.GetNotes(screen.ChartId);
+            double origin = detail.FirstVisibleGridTime + timeline.AudioOffset;
+            bpm.text = "128";
+            button.onClick.Invoke();
+
+            Assert.That(screen.Session.Snapshot.TempoPoints[0].Bpm, Is.EqualTo(128),
+                "Grid correction must commit the BPM shown in its input field.");
+            Assert.That(timeline.Timing.TimeAtBeat(0), Is.EqualTo(origin).Within(1e-8));
+            Assert.That(timeline.Timing.TimeAtBeat(128) - origin, Is.EqualTo(60).Within(1e-8));
+            Assert.That(screen.Session.GetNotes(screen.ChartId), Is.EqualTo(before));
+            var snapshot = screen.Session.Snapshot;
+            snapshot.Title = "128 BPM playback verification";
+            snapshot.Audio = "verification.wav";
+            var document = ChartPlaybackAdapter.ToDocument(snapshot, screen.ChartId,
+                screen.Mode.name, screen.Mode.ToRules(), _ => true);
+            var tempo = new TempoMap(document.TempoPoints);
+            foreach (double time in new[] { 0.0, 30, 90, 150 })
+            {
+                double beat = timeline.Timing.BeatAtTime(time + document.AudioOffset);
+                Assert.That(timeline.Timing.TimeAtBeat(beat),
+                    Is.EqualTo(time + document.AudioOffset).Within(1e-8));
+                Assert.That(tempo.BpmAt(time), Is.EqualTo(128));
+            }
+
+            screen.Session.Undo();
+            Assert.That(screen.Session.Snapshot.TempoPoints[0].Bpm, Is.EqualTo(120));
+            Assert.That(screen.Session.Snapshot.Grid.OriginSeconds, Is.EqualTo(0));
+            Assert.That(screen.Session.GetNotes(screen.ChartId), Is.EqualTo(before));
+        }
+
         [UnityTest]
         public IEnumerator ImportedWaveformSeekingZoomPlaybackAndGridEditsShareMusicTime()
         {

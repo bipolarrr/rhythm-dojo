@@ -49,3 +49,12 @@ Not separately verified: individual OGG/MP3 files and subjective listening quali
 - UI screenshot inspected: Logs/grid-ui-updated.png. The controls end with Lock followed by Note Snap; GRID Undo, Redo and Advanced buttons are removed. The origin button is labeled '그리드 수정'.
 - These follow-up runs used isolated project copies and did not regenerate the working project's scenes. Temporary integration project was removed after verification.
 - The Windows build noted above predates these follow-up changes; no new player build was made for them.
+
+## Follow-up: entered BPM was ignored by Grid Correction
+
+- Reproduced with a regression test before the fix: entering 128 in Grid BPM and clicking '그리드 수정' left the saved tempo at 120. Results: Logs/audio-sync-repro.xml (expected failure, Expected 128 / Actual 120).
+- Grid Correction now applies the entered BPM and the leftmost visible grid origin in the same edit. The existing note times and undo behavior remain covered by the regression test, including playback-document tempo checks at 0, 30, 90 and 150 seconds.
+- Verified the user-provided Jotori / Saiki WAV locally: 44,100 Hz, stereo, 7,531,454 frames, duration 170.781269841 seconds. Its onset phase remains consistent with the specified 128 BPM across 10–160 seconds. A beat is 0.46875 seconds; the source file was not modified or added to the repository.
+- Final Unity 6000.3.23f1 PlayMode run: 13/13 passed (12 editor integration/regression tests plus one local real-file verification fixture). Results: Logs/audio-sync-final.xml. The local fixture is Logs/SaikiPlaybackVerification.cs.
+- Actual preview audio sample time versus DSP-derived editor clock after seeks to 0, 30, 90 and 150 seconds differed by at most 0.014 milliseconds in the test run. Details: Logs/saiki-playback-verification.txt. This measures internal playback/clock agreement, not physical speaker or display latency.
+- Verification ran in an isolated copy of the project; working scenes and the original audio were left untouched. No player rebuild was performed for this fix.
