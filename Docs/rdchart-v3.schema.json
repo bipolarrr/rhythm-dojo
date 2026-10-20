@@ -1,0 +1,246 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Rhythm Dojo chart project v3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "version",
+    "song",
+    "timing",
+    "charts"
+  ],
+  "properties": {
+    "format": {
+      "const": "rhythm-dojo-chart"
+    },
+    "version": {
+      "const": 3
+    },
+    "song": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "artist",
+        "audio"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "title": {
+          "type": "string"
+        },
+        "artist": {
+          "type": "string"
+        },
+        "audio": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?!/)(?!.*(?:^|/)\\.{1,2}(?:/|$))(?!.*//)(?!.*[. ](?:/|$))(?!.*?/$)[^\\\\:\\u0000-\\u001f<>\"|?*]+$"
+            }
+          ]
+        }
+      }
+    },
+    "timing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "audioOffsetSeconds",
+        "tempoPoints",
+        "grid"
+      ],
+      "properties": {
+        "audioOffsetSeconds": {
+          "type": "number"
+        },
+        "tempoPoints": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "timeSeconds",
+              "bpm"
+            ],
+            "properties": {
+              "timeSeconds": {
+                "type": "number"
+              },
+              "bpm": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "grid": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "originSeconds",
+            "meters"
+          ],
+          "properties": {
+            "originSeconds": {
+              "type": "number"
+            },
+            "meters": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "timeSeconds",
+                  "numerator",
+                  "denominator"
+                ],
+                "properties": {
+                  "timeSeconds": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "numerator": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 32
+                  },
+                  "denominator": {
+                    "enum": [
+                      1,
+                      2,
+                      4,
+                      8,
+                      16,
+                      32
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "charts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "modeId",
+          "laneCount",
+          "completionTimeSeconds",
+          "notes",
+          "slot"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "modeId": {
+            "type": "string"
+          },
+          "laneCount": {
+            "$ref": "#/$defs/int32"
+          },
+          "completionTimeSeconds": {
+            "type": "number"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/tap"
+                },
+                {
+                  "$ref": "#/$defs/hold"
+                }
+              ]
+            }
+          },
+          "slot": {
+            "enum": [
+              "Easy",
+              "Standard",
+              "Hard",
+              null
+            ]
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+      "not": {
+        "const": "00000000-0000-0000-0000-000000000000"
+      }
+    },
+    "int32": {
+      "type": "integer",
+      "minimum": -2147483648,
+      "maximum": 2147483647
+    },
+    "tap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "lane",
+        "timeSeconds"
+      ],
+      "properties": {
+        "kind": {
+          "const": "tap"
+        },
+        "lane": {
+          "$ref": "#/$defs/int32"
+        },
+        "timeSeconds": {
+          "type": "number"
+        }
+      }
+    },
+    "hold": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "lane",
+        "timeSeconds",
+        "endTimeSeconds"
+      ],
+      "properties": {
+        "kind": {
+          "const": "hold"
+        },
+        "lane": {
+          "$ref": "#/$defs/int32"
+        },
+        "timeSeconds": {
+          "type": "number"
+        },
+        "endTimeSeconds": {
+          "type": "number"
+        }
+      }
+    }
+  }
+}

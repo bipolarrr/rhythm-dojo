@@ -22,12 +22,16 @@ namespace RhythmDojo.Authoring
         [SerializeField]
         private ChartEditorMenu menu;
 
+        [SerializeField]
+        private ChartAudioTimeline timeline;
+
         private void Start()
         {
             var store = new FileSongProjectStore(
                 Path.Combine(UnityEngine.Application.persistentDataPath, "Songs")
             );
             var flow = AppFlowController.Create(settings);
+            timeline.ConfigureAudio(LoadAudio);
             menu.Initialize(
                 store,
                 flow,

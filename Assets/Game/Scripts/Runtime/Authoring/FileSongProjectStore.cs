@@ -74,6 +74,21 @@ namespace RhythmDojo.Authoring
             return project;
         }
 
+        public SongProject ReadShowcaseVersion2(Guid songId)
+        {
+            string path = Path.Combine(GetSongFolder(songId), FileName);
+            RejectLinks(path);
+
+            var project = json.ImportShowcaseVersion2(File.ReadAllText(path, Utf8));
+            ProjectValidation.Require(
+                project.Id == songId,
+                "song.id",
+                "Document UUID does not match folder UUID."
+            );
+
+            return project;
+        }
+
         public string GetSongFolder(Guid songId)
         {
             ProjectValidation.Require(songId != Guid.Empty, "song.id", "Nonempty UUID required.");

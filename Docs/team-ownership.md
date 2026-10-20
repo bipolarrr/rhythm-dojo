@@ -77,4 +77,4 @@
 
 ## 이번 범위 밖
 
-채보 편집 화면과 메뉴 연결은 `ChartEditorSceneBuilder`, `ChartEditorScreen`, `ChartEditorMenu`에 있다. `ChartEditorCompositionRoot`가 파일 저장소, 외부 음원 디코더, 테스트 플레이 서비스를 조립한다. 저장 형식과 사용법은 `chart-format-v1.md`를 참고한다. 사용자 음원 파일 선택 대화상자와 에디터 전용 미리듣기는 아직 구현하지 않았으며, 음원은 전체 경로 입력으로 가져온다.
+채보 편집 화면과 메뉴 연결은 `ChartEditorSceneBuilder`, `ChartEditorScreen`, `ChartEditorMenu`에 있다. `ChartEditorCompositionRoot`가 파일 저장소, 외부 음원 디코더, 테스트 플레이 서비스를 조립한다. 저장 형식과 사용법은 `chart-format-v1.md`를 참고한다. 음원은 전체 경로 입력으로 가져오며 파일 선택 대화상자는 아직 구현하지 않았다. 전체·상세 파형, 미리듣기, 세분 스냅과 고급 GRID는 `ChartAudioTimeline`이 담당한다. `ChartAudioTimelineLayoutBuilder`가 씬 UI와 `ChartAudioTimelineView` 참조를 생성하고, `ChartEditorCompositionRoot`가 오디오 디코더를 주입한다. 사용법은 `editor-audio-timeline.md`를 참고한다.

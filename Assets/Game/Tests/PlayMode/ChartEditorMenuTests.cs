@@ -181,6 +181,40 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        public IEnumerator FileMenuImportsShowcaseGridAndSavesVersionThree()
+        {
+            var store = new FileSongProjectStore(root);
+            menu.Initialize(store, null, null);
+            var original = screen.Session;
+            var project = original.Snapshot;
+            project.Id = Guid.NewGuid();
+            project.Grid = new BeatGridSettings
+            {
+                OriginSeconds = 0.237,
+                Meters = new[] { new MeterPoint(0, 7, 8), new MeterPoint(4, 3, 4) }
+            };
+            var folder = store.GetSongFolder(project.Id);
+            Directory.CreateDirectory(folder);
+            var path = Path.Combine(folder, FileSongProjectStore.FileName);
+            var text = new SongProjectJson().Serialize(project).Replace("\"version\": 3", "\"version\": 2");
+            File.WriteAllText(path, text);
+            Click("파일");
+            Input("Project ID", project.Id.ToString());
+            Click("Load");
+            yield return Idle();
+            Assert.That(screen.Session, Is.SameAs(original));
+            Assert.That(File.ReadAllText(path), Is.EqualTo(text));
+            Click("Import Showcase");
+            yield return Idle();
+            Assert.That(ProjectValidation.ContentEquals(project, screen.Session.Snapshot), Is.True);
+            Assert.That(File.ReadAllText(path), Is.EqualTo(text));
+            Click("Save");
+            yield return Idle();
+            Assert.That(File.ReadAllText(path), Does.Contain("\"version\": 3"));
+            Assert.That(ProjectValidation.ContentEquals(project, store.Read(project.Id)), Is.True);
+        }
+
+        [UnityTest]
         public IEnumerator ImportedAudioPlaysAndReturnsWithUnsavedSessionAndUndoHistory()
         {
             // Use the actual composed file store and decoder, and clean only this test's song folder.

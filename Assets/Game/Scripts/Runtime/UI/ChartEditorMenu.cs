@@ -57,6 +57,10 @@ namespace RhythmDojo.UI
 
         public bool IsInitialized => store != null;
 
+        [SerializeField] private GameObject advancedPanel;
+
+        public void ToggleAdvanced() => Toggle(advancedPanel);
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetReturn() => returningSession = null;
 
@@ -82,6 +86,7 @@ namespace RhythmDojo.UI
             Observe();
             FillSettings();
             ShowStatus("파일에서 음원을 가져오고 노트를 배치하세요.");
+            screen.InitializeTimeline(projectStore);
         }
 
         private void Observe()
@@ -144,6 +149,10 @@ namespace RhythmDojo.UI
             filePanel.SetActive(false);
             settingsPanel.SetActive(false);
             toolsPanel.SetActive(false);
+            if (advancedPanel)
+            {
+                advancedPanel.SetActive(false);
+            }
             panel.SetActive(open);
         }
 
@@ -291,8 +300,29 @@ namespace RhythmDojo.UI
                 Observe();
                 FillSettings();
                 ShowStatus(
-                    "v1 가져오기 완료. ID와 편집 데이터를 유지합니다. 저장하면 v2 형식으로 기록합니다."
+                    "v1 가져오기 완료. ID와 편집 데이터를 유지합니다. 저장하면 v3 형식으로 기록합니다."
                 );
+            });
+
+        public void ImportShowcase() =>
+            RunAsync(async () =>
+            {
+                if (!Guid.TryParse(projectId.text, out Guid id))
+                {
+                    throw new InvalidOperationException("가져올 곡 ID를 입력하세요.");
+                }
+
+                var replacement = new EditorSession(store.ReadShowcaseVersion2(id));
+                if (screen.Session.IsDirty)
+                {
+                    await screen.Session.SaveAsync(store, lifetime.Token);
+                }
+
+                lifetime.Token.ThrowIfCancellationRequested();
+                screen.SetSession(replacement);
+                Observe();
+                FillSettings();
+                ShowStatus("showcase v2 가져오기 완료. 그리드를 보존하며 다음 저장은 v3입니다.");
             });
 
         public void ImportAudio() =>
