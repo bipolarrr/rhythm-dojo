@@ -370,6 +370,10 @@ namespace RhythmDojo.Tests
             yield return null;
 
             var settingsView = UnityEngine.Object.FindFirstObjectByType<SettingsView>();
+            Assert.That(SceneManager.GetActiveScene().path,
+                Is.EqualTo("Assets/Game/Scenes/Title.unity"));
+            Assert.That(SceneManager.GetSceneByPath(AppFlowController.SettingsPath).isLoaded,
+                Is.False);
             Assert.That(settingsView.backdrop, Is.Not.Null);
             Assert.That(settingsView.backdrop.activeSelf, Is.False);
             Assert.That(view.entrance.gameObject.activeInHierarchy, Is.True);
