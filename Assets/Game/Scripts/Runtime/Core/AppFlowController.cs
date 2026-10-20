@@ -172,6 +172,14 @@ namespace RhythmDojo.Core
                     {
                         listener.enabled = false;
                     }
+
+                    foreach (var view in root.GetComponentsInChildren<SettingsView>())
+                    {
+                        if (view.backdrop)
+                        {
+                            view.backdrop.SetActive(settingsReturnPath != "Assets/Game/Scenes/Title.unity");
+                        }
+                    }
                 }
 
                 SceneManager.SetActiveScene(scene);

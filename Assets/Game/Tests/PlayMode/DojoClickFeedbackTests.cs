@@ -45,9 +45,12 @@ namespace RhythmDojo.Tests
             yield return null;
 
             var menu = Object.FindFirstObjectByType<MainMenuView>();
-            Assert.That(menu.menuPanel.gameObject.activeSelf, Is.True);
+            Assert.That(menu.menuPanel.gameObject.activeSelf, Is.False);
+            yield return Click(menu.logo);
+            yield return new WaitForSecondsRealtime(.3f);
             yield return Click(menu.start);
             yield return Await(() => Object.FindFirstObjectByType<SongSelectionScreen>());
+            yield return Await(() => !DojoEntranceTransition.Active);
             yield return CheckClickOutput();
             yield return Click(Object.FindFirstObjectByType<SongSelectionView>().settingsButton);
             yield return Await(() => Object.FindFirstObjectByType<SettingsScreen>());

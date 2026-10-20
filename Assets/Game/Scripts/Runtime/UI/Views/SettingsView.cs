@@ -7,6 +7,7 @@ namespace RhythmDojo.UI
     public sealed class SettingsView : MonoBehaviour
     {
         public bool pixelTheme;
+        public GameObject backdrop;
         public Dropdown bufferList;
         public Text actualState,
             status;

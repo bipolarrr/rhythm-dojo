@@ -52,7 +52,7 @@ namespace RhythmDojo.UI
             go.transform.SetParent(parent, false);
 
             var label = go.AddComponent<Text>();
-            label.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            label.font = RhythmDojo.UI.UiFontSettings.Current;
             label.text = text;
             label.fontSize = fontSize;
             label.color = Color.white;
@@ -66,7 +66,7 @@ namespace RhythmDojo.UI
         {
             foreach (var text in go.GetComponentsInChildren<Text>(true))
             {
-                text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+                text.font = RhythmDojo.UI.UiFontSettings.Current;
             }
         }
 

@@ -181,7 +181,7 @@ namespace RhythmDojo.UI
             view.judgment.fontSize = 31;
             view.judgment.text = "READY";
             view.judgment.color = Cyan;
-            view.timing.text = "박자에 집중하세요";
+            view.timing.text = "";
             RefreshHealth(model.Snapshot.Session);
         }
 
@@ -427,7 +427,7 @@ namespace RhythmDojo.UI
                     }
                     else
                     {
-                        view.timing.text = "박자에 집중하세요";
+                        view.timing.text = "";
                     }
                 }
                 else

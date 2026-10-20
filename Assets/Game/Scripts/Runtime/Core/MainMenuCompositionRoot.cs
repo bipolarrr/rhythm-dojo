@@ -56,7 +56,7 @@ namespace RhythmDojo.Core
                 music.Initialize(titleMusic);
             }
 
-            screen.Initialize(new MainMenuActions(gameSettings), music);
+            screen.Initialize(new MainMenuActions(gameSettings, screen.GetComponent<MainMenuView>()), music);
         }
     }
 }

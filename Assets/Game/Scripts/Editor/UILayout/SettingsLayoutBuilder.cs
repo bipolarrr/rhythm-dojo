@@ -173,7 +173,7 @@ namespace RhythmDojo.EditorTools
 
                 foreach (var text in countObject.GetComponentsInChildren<Text>(true))
                 {
-                    text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+                    text.font = RhythmDojo.UI.UiFontSettings.Current;
                     text.fontSize = 18;
                     text.alignment = TextAnchor.MiddleCenter;
                 }

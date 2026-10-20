@@ -19,12 +19,22 @@ namespace RhythmDojo.EditorTools
             var footer = surface.Find("Footer");
             var left = surface.Find("Song Information");
             var right = surface.Find("Song Browser");
+            view.entrancePanels = new[]
+            {
+                (RectTransform)header,
+                (RectTransform)left,
+                (RectTransform)right,
+                (RectTransform)footer,
+                (RectTransform)view.backPopup.transform,
+                (RectTransform)view.modePopup.transform
+            };
             surface.GetComponent<Image>().enabled = false;
             surface.Find("Ambient Light").gameObject.SetActive(false);
             var backdrop = new GameObject("Pixel Dojo Background", typeof(RectTransform), typeof(Image), typeof(AspectRatioFitter));
             backdrop.transform.SetParent(surface, false);
             backdrop.transform.SetAsFirstSibling();
             Bounds((RectTransform)backdrop.transform, 0, 0, 1, 1);
+            backdrop.transform.localScale = Vector3.one * DojoEntranceView.InteriorScale;
             var image = backdrop.GetComponent<Image>();
             image.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Game/Art/PixelDojo/TitleBackground.asset");
             image.raycastTarget = false;

@@ -31,7 +31,7 @@ namespace RhythmDojo.Authoring
             go.transform.SetParent(parent, false);
             Place((RectTransform)go.transform, x, y, width, height);
             var text = go.GetComponent<Text>();
-            text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            text.font = RhythmDojo.UI.UiFontSettings.Current;
             text.fontSize = 15;
             text.color = new Color(0.84f, 0.88f, 0.93f);
             text.text = caption;
@@ -111,7 +111,7 @@ namespace RhythmDojo.Authoring
 
             foreach (var text in go.GetComponentsInChildren<Text>(true))
             {
-                text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+                text.font = RhythmDojo.UI.UiFontSettings.Current;
                 text.fontSize = 14;
                 text.color = new Color(0.9f, 0.94f, 1);
             }

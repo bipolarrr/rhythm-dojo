@@ -399,7 +399,7 @@ namespace RhythmDojo.EditorTools
 
             foreach (var text in go.GetComponentsInChildren<Text>(true))
             {
-                text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+                text.font = RhythmDojo.UI.UiFontSettings.Current;
                 text.fontSize = 17;
             }
 

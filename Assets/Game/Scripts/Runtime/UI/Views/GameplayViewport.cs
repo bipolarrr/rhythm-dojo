@@ -4,7 +4,7 @@ using UnityEngine.UI;
 namespace RhythmDojo.UI
 {
     // Keep the original screen projection (including hit feedback), but expose only
-    // the portion inside the wooden frame. UI masks alone cannot clip world meshes.
+    // the portion inside the gameplay window. UI masks alone cannot clip world meshes.
     [ExecuteAlways]
     [RequireComponent(typeof(RawImage))]
     public sealed class GameplayViewport : MonoBehaviour
