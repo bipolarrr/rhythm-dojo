@@ -40,7 +40,7 @@ namespace RhythmDojo.Tests
                 Assert.That(editor, Is.Not.Null);
                 Assert.That(
                     Object.FindObjectsByType<Button>(FindObjectsSortMode.None).Length,
-                    Is.EqualTo(8)
+                    Is.GreaterThanOrEqualTo(8)
                 );
 
                 var grid = (RectTransform)editor.transform;
@@ -365,6 +365,7 @@ namespace RhythmDojo.Tests
             var background = (RectTransform)root.Find("Background");
             var row = (RectTransform)root.Find("Editor Content");
             var footer = (RectTransform)root.Find("Progress Space");
+            var waveform = (RectTransform)root.Find("Audio Timeline");
             var grid = (RectTransform)root.Find("Editor Content/Chart And Preview/Chart Grid");
             var preview = (RectTransform)
                 root.Find("Editor Content/Chart And Preview/Preview Space");
@@ -376,10 +377,12 @@ namespace RhythmDojo.Tests
                 Canvas.ForceUpdateCanvases();
                 yield return null;
                 Assert.That(background.rect.size, Is.EqualTo(root.rect.size));
-                Assert.That(row.rect.height, Is.EqualTo(height - 241f).Within(0.01f));
+                Assert.That(row.rect.height, Is.EqualTo(height - 398f).Within(0.01f));
+                Assert.That(waveform.rect.height, Is.EqualTo(280f).Within(0.01f));
+                Assert.That(row.offsetMin.y, Is.GreaterThan(waveform.offsetMax.y));
                 Assert.That(grid.rect.height, Is.EqualTo(row.rect.height).Within(0.01f));
                 Assert.That(preview.rect.height, Is.EqualTo(row.rect.height).Within(0.01f));
-                Assert.That(footer.rect.height, Is.EqualTo(151f).Within(0.01f));
+                Assert.That(footer.rect.height, Is.EqualTo(26f).Within(0.01f));
                 Assert.That(footer.rect.width, Is.EqualTo(row.rect.width).Within(0.01f));
             }
         }

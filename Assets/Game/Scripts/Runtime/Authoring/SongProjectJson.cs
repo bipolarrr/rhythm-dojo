@@ -18,7 +18,7 @@ namespace RhythmDojo.Authoring
             public string Format = "rhythm-dojo-chart";
 
             [JsonProperty("version", Order = 1)]
-            public int Version = 2;
+            public int Version = 3;
 
             [JsonProperty("song", Order = 2)]
             public SongDto Song;
@@ -49,11 +49,37 @@ namespace RhythmDojo.Authoring
         [JsonObject(MemberSerialization.OptIn)]
         private sealed class TimingDto
         {
+            [JsonProperty("grid", Order = 2)]
+            public GridDto Grid;
+
             [JsonProperty("audioOffsetSeconds", Order = 0)]
             public double Offset;
 
             [JsonProperty("tempoPoints", Order = 1)]
             public TempoDto[] Points;
+        }
+
+        [JsonObject(MemberSerialization.OptIn)]
+        private sealed class GridDto
+        {
+            [JsonProperty("originSeconds", Order = 0)]
+            public double Origin;
+
+            [JsonProperty("meters", Order = 1)]
+            public MeterDto[] Meters;
+        }
+
+        [JsonObject(MemberSerialization.OptIn)]
+        private sealed class MeterDto
+        {
+            [JsonProperty("timeSeconds", Order = 0)]
+            public double Time;
+
+            [JsonProperty("numerator", Order = 1)]
+            public int Numerator;
+
+            [JsonProperty("denominator", Order = 2)]
+            public int Denominator;
         }
 
         [JsonObject(MemberSerialization.OptIn)]
@@ -125,6 +151,7 @@ namespace RhythmDojo.Authoring
                 },
                 Timing = new TimingDto
                 {
+                    Grid = SerializeGrid(p.Grid),
                     Offset = p.AudioOffsetSeconds,
                     Points = p
                         .TempoPoints.Select(t => new TempoDto
@@ -172,11 +199,13 @@ namespace RhythmDojo.Authoring
                 + "\n";
         }
 
-        public SongProject Deserialize(string json) => DeserializeVersion(json, false);
+        public SongProject Deserialize(string json) => DeserializeVersion(json, false, false);
 
-        public SongProject ImportVersion1(string json) => DeserializeVersion(json, true);
+        public SongProject ImportVersion1(string json) => DeserializeVersion(json, true, false);
 
-        private SongProject DeserializeVersion(string json, bool importVersion1)
+        public SongProject ImportShowcaseVersion2(string json) => DeserializeVersion(json, false, true);
+
+        private SongProject DeserializeVersion(string json, bool importVersion1, bool importShowcaseVersion2)
         {
             try
             {
@@ -213,19 +242,40 @@ namespace RhythmDojo.Authoring
                 {
                     if (version != 1)
                     {
-                        Fail("version", "Expected v2. Use ImportVersion1 for legacy projects.");
+                        Fail("version", "Expected v1 for explicit legacy import.");
                     }
                 }
-                else if (version != 2)
+                else if (importShowcaseVersion2)
                 {
-                    Fail("version", "Expected v2. Use ImportVersion1 for legacy projects.");
+                    if (version != 2)
+                    {
+                        Fail("version", "Expected showcase v2 for explicit import.");
+                    }
+                }
+                else if (version != 2 && version != 3)
+                {
+                    Fail("version", "Expected v2 or v3. Use ImportVersion1 for legacy projects.");
                 }
 
                 var song = root["song"];
                 Fields(song, "id", "title", "artist", "audio");
 
                 var timing = root["timing"];
-                Fields(timing, "audioOffsetSeconds", "tempoPoints");
+                bool hasGrid = version == 3;
+
+                if (importShowcaseVersion2 && timing is JObject)
+                {
+                    hasGrid = timing["grid"] != null;
+                }
+
+                if (hasGrid)
+                {
+                    Fields(timing, "audioOffsetSeconds", "tempoPoints", "grid");
+                }
+                else
+                {
+                    Fields(timing, "audioOffsetSeconds", "tempoPoints");
+                }
 
                 var p = new SongProject
                 {
@@ -240,6 +290,7 @@ namespace RhythmDojo.Authoring
                         }
                     ),
                     AudioOffsetSeconds = Number(timing["audioOffsetSeconds"]),
+                    Grid = DeserializeGrid(timing["grid"]),
                     TempoPoints = Array(timing["tempoPoints"])
                         .Select(t =>
                         {
@@ -430,6 +481,46 @@ namespace RhythmDojo.Authoring
 
         private static void Fail(string path, string message) =>
             throw new ProjectValidationException(path, message);
+
+        private static GridDto SerializeGrid(BeatGridSettings grid)
+        {
+            return new GridDto
+            {
+                Origin = grid.OriginSeconds,
+                Meters = grid.Meters.Select(m => new MeterDto
+                {
+                    Time = m.TimeSeconds,
+                    Numerator = m.Numerator,
+                    Denominator = m.Denominator
+                }).ToArray()
+            };
+        }
+
+        private static BeatGridSettings DeserializeGrid(JToken token)
+        {
+            if (token == null)
+            {
+                return new BeatGridSettings();
+            }
+
+            Fields(token, "originSeconds", "meters");
+            var grid = new BeatGridSettings
+            {
+                OriginSeconds = Number(token["originSeconds"]),
+                Meters = Array(token["meters"]).Select(m =>
+                {
+                    Fields(m, "timeSeconds", "numerator", "denominator");
+
+                    return new MeterPoint(
+                        Number(m["timeSeconds"]),
+                        Integer(m["numerator"]),
+                        Integer(m["denominator"])
+                    );
+                }).ToArray()
+            };
+
+            return grid;
+        }
 
         private static ChartSlot ParseSlot(JToken token)
         {
