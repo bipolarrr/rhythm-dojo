@@ -34,6 +34,7 @@ namespace RhythmDojo.Core
         private readonly List<Behaviour> settingsSuspended = new List<Behaviour>();
         private GameObject settingsPreviousFocus;
         private ModalInputScope settingsInputScope;
+        private SettingsScreen settingsPopup;
         private Action<string> returned;
 
         public GameSettings Settings => settings;
@@ -142,12 +143,25 @@ namespace RhythmDojo.Core
                 );
             }
 
-            flow.Audio = new AudioSettingsService(() =>
-                !flow.Transitioning && SceneManager.GetSceneByPath(SettingsPath).isLoaded
-            );
+            flow.Audio = new AudioSettingsService(flow.CanApplyAudioSettings);
             DontDestroyOnLoad(flow.gameObject);
 
             return flow;
+        }
+
+        private bool CanApplyAudioSettings()
+        {
+            if (Transitioning)
+            {
+                return false;
+            }
+
+            if (settingsPopup && settingsPopup.gameObject.activeInHierarchy)
+            {
+                return true;
+            }
+
+            return SceneManager.GetSceneByPath(SettingsPath).isLoaded;
         }
 
         private void OnEnable() => SceneManager.sceneLoaded += SceneLoaded;
@@ -157,33 +171,6 @@ namespace RhythmDojo.Core
         private void SceneLoaded(Scene scene, LoadSceneMode mode)
         {
             Transitioning = false;
-
-            if (scene.path == SettingsPath && settingsInputScope != null)
-            {
-                foreach (var root in scene.GetRootGameObjects())
-                {
-                    foreach (var camera in root.GetComponentsInChildren<Camera>())
-                    {
-                        camera.enabled = false;
-                    }
-
-                    // The background scene supplies the listener while this additive popup is open.
-                    foreach (var listener in root.GetComponentsInChildren<AudioListener>())
-                    {
-                        listener.enabled = false;
-                    }
-
-                    foreach (var view in root.GetComponentsInChildren<SettingsView>())
-                    {
-                        if (view.backdrop)
-                        {
-                            view.backdrop.SetActive(settingsReturnPath != "Assets/Game/Scenes/Title.unity");
-                        }
-                    }
-                }
-
-                SceneManager.SetActiveScene(scene);
-            }
 
             if (scene.path == GameplayPath && CurrentRequest != null)
             {
@@ -486,24 +473,9 @@ namespace RhythmDojo.Core
                 return;
             }
 
-            Transitioning = true;
-
-            try
-            {
-                settingsInputScope.Close(
-                    () => SceneManager.UnloadSceneAsync(SettingsPath),
-                    () =>
-                    {
-                        Transitioning = false;
-                        settingsInputScope = null;
-                    }
-                );
-            }
-            catch
-            {
-                Transitioning = false;
-                throw;
-            }
+            settingsPopup.gameObject.SetActive(false);
+            settingsInputScope.Dispose();
+            settingsInputScope = null;
         }
 
         private void OpenSettingsPopup()
@@ -513,20 +485,40 @@ namespace RhythmDojo.Core
                 return;
             }
 
+            if (settingsInputScope != null)
+            {
+                return;
+            }
+
             var scene = SceneManager.GetSceneByPath(settingsReturnPath);
             settingsInputScope = new ModalInputScope(scene);
-            Transitioning = true;
 
             try
             {
-                if (SceneManager.LoadSceneAsync(SettingsPath, LoadSceneMode.Additive) == null)
+                if (!settingsPopup)
                 {
-                    throw new InvalidOperationException("Cannot open settings popup.");
+                    var prefab = Resources.Load<GameObject>("UI/SettingsPopup");
+                    if (!prefab)
+                    {
+                        throw new InvalidOperationException(
+                            "Settings popup prefab missing. Run Build Settings.");
+                    }
+
+                    settingsPopup = Instantiate(prefab, transform).GetComponent<SettingsScreen>();
                 }
+
+                settingsPopup.gameObject.SetActive(true);
+                settingsPopup.Initialize(
+                    Audio, this, settings, Selection, Preferences, HardMode, Rules,
+                    PresentationPreferences.Current);
             }
             catch
             {
-                Transitioning = false;
+                if (settingsPopup)
+                {
+                    settingsPopup.gameObject.SetActive(false);
+                }
+
                 settingsInputScope.Dispose();
                 settingsInputScope = null;
                 throw;
@@ -535,6 +527,13 @@ namespace RhythmDojo.Core
 
         private void Load(string path)
         {
+            if (settingsInputScope != null)
+            {
+                settingsPopup.gameObject.SetActive(false);
+                settingsInputScope.Dispose();
+                settingsInputScope = null;
+            }
+
             Transitioning = true;
 
             try
@@ -566,6 +565,7 @@ namespace RhythmDojo.Core
 
         private void OnDestroy()
         {
+            settingsInputScope?.Dispose();
             lifetime.Cancel();
             lifetime.Dispose();
             Audio?.Dispose();

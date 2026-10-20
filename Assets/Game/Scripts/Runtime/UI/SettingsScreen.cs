@@ -209,6 +209,8 @@ namespace RhythmDojo.UI
             view.gameplayTab.onClick.RemoveListener(ShowGameplay);
         }
 
+        private void OnDisable() => Unbind();
+
         private void OnDestroy() => Unbind();
     }
 }

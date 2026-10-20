@@ -24,6 +24,44 @@ namespace RhythmDojo.Tests
     public sealed class SettingsFlowTests : GameplayTestContext
     {
         [UnityTest]
+        public IEnumerator SettingsPopupOpensImmediatelyAndReusesInstanceWithoutLoadingScene()
+        {
+            var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
+            var selection = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
+            var scene = SceneManager.GetActiveScene();
+            int sceneCount = SceneManager.sceneCount;
+            EventSystem.current.SetSelectedGameObject(selection.settingsButton.gameObject);
+
+            flow.ShowSettings();
+            var view = UnityEngine.Object.FindFirstObjectByType<SettingsView>();
+            Assert.That(view, Is.Not.Null, "Opening must not wait for scene loading.");
+            Assert.That(view.backdrop.activeSelf, Is.False);
+            Assert.That(SceneManager.GetActiveScene(), Is.EqualTo(scene));
+            Assert.That(SceneManager.sceneCount, Is.EqualTo(sceneCount));
+            Assert.That(SceneManager.GetSceneByPath(AppFlowController.SettingsPath).isLoaded, Is.False);
+            Assert.That(selection.GetComponent<GraphicRaycaster>().enabled, Is.False);
+            flow.ShowSettings();
+            Assert.That(UnityEngine.Object.FindObjectsByType<SettingsView>(
+                FindObjectsSortMode.None).Length, Is.EqualTo(1));
+
+            flow.ReturnFromSettings();
+            Assert.That(view.gameObject.activeSelf, Is.False);
+            Assert.That(selection.GetComponent<GraphicRaycaster>().enabled, Is.True);
+            Assert.That(EventSystem.current.currentSelectedGameObject,
+                Is.SameAs(selection.settingsButton.gameObject));
+            Assert.That(flow.ApplyBufferSize(), Is.False);
+
+            flow.ShowSettings();
+            Assert.That(UnityEngine.Object.FindFirstObjectByType<SettingsView>(), Is.SameAs(view));
+            Assert.That(SceneManager.sceneCount, Is.EqualTo(sceneCount));
+            yield return Click(view.gameplayTab);
+            Assert.That(view.gameplayPanel.activeSelf, Is.True);
+            yield return Press(Key.Escape);
+            Assert.That(view.gameObject.activeSelf, Is.False);
+            Assert.That(SceneManager.GetActiveScene(), Is.EqualTo(scene));
+        }
+
+        [UnityTest]
         public IEnumerator GameplayTabPreservesAudioAndGraphicsAndSavesTimingLimits()
         {
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
@@ -454,7 +492,7 @@ namespace RhythmDojo.Tests
             yield return Press(Key.DownArrow);
             Assert.That(
                 EventSystem.current.currentSelectedGameObject,
-                Is.EqualTo(ButtonNamed("Apply").gameObject)
+                Is.EqualTo(UnityEngine.Object.FindFirstObjectByType<SettingsView>().apply.gameObject)
             );
             yield return Press(Key.Enter);
             Assert.That(
@@ -481,12 +519,12 @@ namespace RhythmDojo.Tests
             );
             Assert.That(dropdown.value, Is.EqualTo(1));
             dropdown.value = 0;
-            yield return Click(ButtonNamed("Apply"));
+            yield return Click(UnityEngine.Object.FindFirstObjectByType<SettingsView>().apply);
             Assert.That(
                 AudioSettings.GetConfiguration().dspBufferSize,
                 Is.EqualTo(flow.DefaultBufferSize)
             );
-            yield return Click(ButtonNamed("Back"));
+            yield return Click(UnityEngine.Object.FindFirstObjectByType<SettingsView>().back);
             yield return Await(() =>
                 UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>()
             );

@@ -153,7 +153,26 @@ namespace RhythmDojo.EditorTools
             camera.clearFlags = CameraClearFlags.SolidColor;
             camera.backgroundColor = new Color(.025f, .035f, .065f);
             camera.gameObject.AddComponent<AudioListener>();
-            SceneDependencyAssembler.Assemble(SettingsLayoutBuilder.Build(), content.Settings);
+            var view = SettingsLayoutBuilder.Build();
+            var screen = view.gameObject.AddComponent<SettingsScreen>();
+            SceneDependencyAssembler.Wire(screen, "view", view);
+
+            var popupInput = new GameObject("Popup Input", typeof(UnityEngine.EventSystems.EventSystem));
+            popupInput.transform.SetParent(view.transform, false);
+            popupInput.AddComponent<UnityEngine.InputSystem.UI.InputSystemUIInputModule>()
+                .AssignDefaultActions();
+
+            view.backdrop.SetActive(false);
+            view.gameObject.SetActive(false);
+            System.IO.Directory.CreateDirectory("Assets/Game/Resources/UI");
+            PrefabUtility.SaveAsPrefabAsset(
+                view.gameObject, "Assets/Game/Resources/UI/SettingsPopup.prefab");
+
+            UnityEngine.Object.DestroyImmediate(popupInput);
+            UnityEngine.Object.DestroyImmediate(screen);
+            view.backdrop.SetActive(true);
+            view.gameObject.SetActive(true);
+            SceneDependencyAssembler.Assemble(view, content.Settings);
             UiElements.EventSystem(
                 AssetDatabase.LoadAssetAtPath<UnityEngine.InputSystem.InputActionAsset>(
                     "Assets/InputSystem_Actions.inputactions"
