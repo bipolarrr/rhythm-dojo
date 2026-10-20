@@ -56,7 +56,23 @@ Follow existing C# style: four-space indentation, brace-delimited namespaces, Pa
 
 ## Testing Guidelines
 
-Use Unity Test Framework 1.6.0 with NUnit. Name fixtures `*Tests` and methods after expected behavior. Cover pure rules in Domain tests, asset/editor behavior in EditMode, and lifecycle/input/UI integration in PlayMode. No coverage percentage is specified. Run affected suites; run foundation verification for scene or gameplay integration changes.
+Use Unity Test Framework 1.6.0 with NUnit. Name fixtures `*Tests` and methods after expected behavior. Cover pure rules in Domain tests, asset/editor behavior in EditMode, and lifecycle/input/UI integration in PlayMode. No coverage percentage is specified.
+
+Choose the smallest meaningful verification scope after a coherent set of changes, not after every file edit. Full PlayMode and Foundation runs are not the default:
+
+| Change | Default verification |
+| --- | --- |
+| Documentation or comments only | Review the diff; no Unity tests |
+| Domain/Application rules | Related Domain/EditMode fixtures |
+| UI color, text, or layout | Related layout checks and visual inspection; add affected PlayMode tests when click targets or references change |
+| One screen or gameplay feature | Affected fixture or test methods |
+| Scene composition or shared navigation | Related tests plus **Verify Smoke Actions** |
+| Contracts affecting several features, verification runner, packages, or unexplained regressions | **Verify All Tests (No Build)** |
+| Build settings/platform changes or requested full delivery verification | **Verify Foundation (Play Mode and Player Build)** |
+
+Use the CLI `--filter` or Test Runner selection for affected fixtures/methods. Smoke runs four existing navigation/input/cleanup tests without full-song scenarios or a player build; it does not replace feature-specific tests. See `Docs/verification.md` for the exact selection.
+
+Do not repeat a passing run unless subsequent changes affect its coverage or new evidence warrants it. After failures, rerun the failing tests and affected scope first; expand only when the cause or impact remains unclear. Run Windows builds only for build-related changes or an explicit request. Report the executed scope, results, and reasons for omitted checks; never describe partial verification as a full pass. Keep the refresh, sequential execution, and Test Runner cleanup requirements above.
 
 ## Commit & Pull Request Guidelines
 

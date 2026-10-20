@@ -48,7 +48,11 @@ namespace RhythmDojo.EditorTools
         [MenuItem("Game Tools/Verification/Verify Foundation (Play Mode and Player Build)")]
         public static void RunAll() => Begin("", true);
 
+        [MenuItem("Game Tools/Verification/Verify All Tests (No Build)")]
         public static void RunTestsOnly() => Begin("", false, true);
+
+        [MenuItem("Game Tools/Verification/Verify Smoke Actions")]
+        public static void RunSmoke() => Begin("Smoke", false);
 
         [MenuItem("Game Tools/Verification/Verify UI Actions")]
         public static void RunUi() => Begin("UI", false);

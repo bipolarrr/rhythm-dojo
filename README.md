@@ -116,6 +116,8 @@ Results are written to `Logs/settings-editmode.xml` and `Logs/settings-playmode.
 
 The input checks temporarily adjust only in-memory focus behavior for batch mode and restore it. They do not establish human keyboard/audio latency.
 
+For everyday changes, run only the affected fixtures or test methods after a coherent set of edits. **Verify Smoke Actions** runs four existing navigation/input/cleanup tests without full-song scenarios or a build; use it alongside affected tests for scene composition or shared navigation changes. **Verify All Tests (No Build)** exposes `FoundationVerification.RunTestsOnly()` for changes to shared contracts across features, the verification runner, packages, or unexplained regressions. Reserve Foundation/player builds for build-related changes or explicit requests. Documentation-only changes need no Unity tests. Do not repeat passing checks without relevant changes or new evidence. Report the actual scope and any omitted checks; see the [scope selection guide](Docs/verification.md).
+
 Close any Editor using this project before running batch checks:
 
 ```powershell

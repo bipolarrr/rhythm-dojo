@@ -129,6 +129,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Smoke")]
         public IEnumerator KeyboardNavigationAndStartRestartFocusLossUseActualActions()
         {
             var view = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
