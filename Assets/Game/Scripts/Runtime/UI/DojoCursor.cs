@@ -3,17 +3,23 @@ using UnityEngine.InputSystem;
 
 namespace RhythmDojo.UI
 {
-    // A native cursor: it never adds a Graphic or intercepts game/UI input.
+    // Native pointer animation, with non-interactive feedback on a separate canvas.
     public sealed class DojoCursor : MonoBehaviour
     {
         private static DojoCursor instance;
         private Texture2D normalTexture,
             hoverTexture;
         private Texture2D currentTexture;
-        private static readonly Vector2 Hotspot = new Vector2(4, 4);
+        private static readonly Vector2 Hotspot = new Vector2(16, 16);
+        private Texture2D[] punchFrames;
+        private float punchElapsed = PunchDuration;
+        private const float PunchDuration = .18f;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void ResetStatics() => instance = null;
+        private static void ResetStatics()
+        {
+            instance = null;
+        }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Install()
@@ -30,9 +36,30 @@ namespace RhythmDojo.UI
 
         private void Awake()
         {
-            normalTexture = CreateCursor(Resources.Load<Texture2D>("UI/PixelDojoCursor"));
-            hoverTexture = CreateCursor(Resources.Load<Texture2D>("UI/PixelDojoCursorPressed"));
-            gameObject.AddComponent<DojoClickFeedback>();
+            normalTexture = CreateCursor(16);
+            hoverTexture = CreateCursor(12);
+            punchFrames = new[]
+            {
+                CreateCursor(18),
+                CreateCursor(16),
+                CreateCursor(14),
+                CreateCursor(12),
+                CreateCursor(14)
+            };
+            var canvasObject = new GameObject("Punch Impact", typeof(RectTransform), typeof(Canvas));
+            canvasObject.transform.SetParent(transform, false);
+            var canvas = canvasObject.GetComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.sortingOrder = 32001;
+
+            // No GraphicRaycaster: effects never participate in UI input.
+            var impactObject = new GameObject("Impact Sparks", typeof(RectTransform), typeof(DojoPunchImpact));
+            impactObject.transform.SetParent(canvasObject.transform, false);
+            var rect = (RectTransform)impactObject.transform;
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = rect.offsetMax = Vector2.zero;
+            gameObject.AddComponent<DojoClickFeedback>().Initialize(impactObject.GetComponent<DojoPunchImpact>());
         }
 
         private void Update()
@@ -40,6 +67,18 @@ namespace RhythmDojo.UI
             if (Mouse.current == null || !UnityEngine.Application.isFocused)
             {
                 return;
+            }
+
+            if (Cursor.lockState == CursorLockMode.Locked)
+            {
+                return;
+            }
+
+            punchElapsed += Time.unscaledDeltaTime;
+
+            if (Mouse.current.leftButton.wasPressedThisFrame)
+            {
+                punchElapsed = 0;
             }
 
             RefreshTexture();
@@ -52,7 +91,13 @@ namespace RhythmDojo.UI
                 return;
             }
 
-            if (Mouse.current.leftButton.isPressed && hoverTexture)
+            if (punchElapsed < PunchDuration)
+            {
+                int index = Mathf.Min(punchFrames.Length - 1,
+                    Mathf.FloorToInt(punchElapsed / PunchDuration * punchFrames.Length));
+                Apply(punchFrames[index]);
+            }
+            else if (Mouse.current.leftButton.isPressed && hoverTexture)
             {
                 Apply(hoverTexture);
             }
@@ -62,51 +107,33 @@ namespace RhythmDojo.UI
             }
         }
 
-        private static Texture2D CreateCursor(Texture2D original)
+        private static Texture2D CreateCursor(int size)
         {
-            if (!original)
-            {
-                return null;
-            }
+            // Two-pixel cells give the monochrome ring a deliberately stepped edge.
+            var output = new Color32[32 * 32];
+            var tint = new Color32(255, 241, 213, 255);
+            float outer = size * .5f;
+            float inner = outer - 2.5f;
 
-            var pixels = original.GetPixels32();
-            int left = original.width, right = 0, bottom = original.height, top = 0;
-            for (int y = 0; y < original.height; y++)
+            for (int y = 0; y < 32; y++)
             {
-                for (int x = 0; x < original.width; x++)
+                for (int x = 0; x < 32; x++)
                 {
-                    if (pixels[y * original.width + x].a < 128)
+                    float sourceX = x / 2 * 2 + 1 - 16;
+                    float sourceY = y / 2 * 2 + 1 - 16;
+                    float distance = sourceX * sourceX + sourceY * sourceY;
+
+                    if (distance > outer * outer || distance < inner * inner)
                     {
                         continue;
                     }
-                    left = Mathf.Min(left, x);
-                    right = Mathf.Max(right, x);
-                    bottom = Mathf.Min(bottom, y);
-                    top = Mathf.Max(top, y);
+
+                    output[y * 32 + x] = tint;
                 }
             }
 
-            int width = right - left + 1, height = top - bottom + 1;
-            if (width <= 0 || height <= 0)
-            {
-                return null;
-            }
-            float scale = 56f / Mathf.Max(width, height);
-            int outputWidth = Mathf.Max(1, Mathf.RoundToInt(width * scale));
-            int outputHeight = Mathf.Max(1, Mathf.RoundToInt(height * scale));
-            var output = new Color32[64 * 64];
-            for (int y = 0; y < outputHeight; y++)
-            {
-                for (int x = 0; x < outputWidth; x++)
-                {
-                    int sourceX = left + Mathf.Min(width - 1, Mathf.FloorToInt(x / scale));
-                    int sourceY = bottom + Mathf.Min(height - 1, Mathf.FloorToInt(y / scale));
-                    output[(64 - 4 - outputHeight + y) * 64 + 4 + x] = pixels[sourceY * original.width + sourceX];
-                }
-            }
-
-            var texture = new Texture2D(64, 64, TextureFormat.RGBA32, false);
-            texture.name = original.name;
+            var texture = new Texture2D(32, 32, TextureFormat.RGBA32, false);
+            texture.name = "DojoDotCursor";
             texture.filterMode = FilterMode.Point;
             texture.wrapMode = TextureWrapMode.Clamp;
             texture.SetPixels32(output);
@@ -136,10 +163,11 @@ namespace RhythmDojo.UI
         private void OnApplicationFocus(bool focused)
         {
             currentTexture = null;
+            punchElapsed = PunchDuration;
 
             if (focused)
             {
-                Cursor.SetCursor(normalTexture, Hotspot, CursorMode.Auto);
+                Apply(normalTexture);
             }
             else
             {
@@ -153,9 +181,26 @@ namespace RhythmDojo.UI
             {
                 Destroy(normalTexture);
             }
+
             if (hoverTexture)
             {
                 Destroy(hoverTexture);
+            }
+
+            if (punchFrames != null)
+            {
+                foreach (var texture in punchFrames)
+                {
+                    if (texture)
+                    {
+                        Destroy(texture);
+                    }
+                }
+            }
+
+            if (instance == this)
+            {
+                instance = null;
             }
         }
 
@@ -163,11 +208,7 @@ namespace RhythmDojo.UI
         {
             Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
             currentTexture = null;
-
-            if (instance == this)
-            {
-                instance = null;
-            }
+            punchElapsed = PunchDuration;
         }
     }
 }
