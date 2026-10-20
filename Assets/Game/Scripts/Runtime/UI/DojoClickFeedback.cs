@@ -1,59 +1,17 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.UI;
 
 namespace RhythmDojo.UI
 {
     [DisallowMultipleComponent]
     public sealed class DojoClickFeedback : MonoBehaviour
     {
-        private const int RippleCount = 8;
-        private RectTransform surface;
-        private DojoClickRippleGraphic[] ripples;
-        private int nextRipple;
+        private DojoPunchImpact impact;
         private AudioSource clickSource;
         private AudioClip clickSound;
 
         private void Awake()
         {
-            var canvasObject = new GameObject(
-                "Click Feedback",
-                typeof(RectTransform),
-                typeof(Canvas),
-                typeof(CanvasScaler)
-            );
-            canvasObject.transform.SetParent(transform, false);
-
-            var canvas = canvasObject.GetComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.sortingOrder = 32000;
-
-            var scaler = canvasObject.GetComponent<CanvasScaler>();
-            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1920, 1080);
-            scaler.matchWidthOrHeight = .5f;
-            surface = (RectTransform)canvasObject.transform;
-
-            // Deliberately no GraphicRaycaster: these visuals cannot consume a click.
-            ripples = new DojoClickRippleGraphic[RippleCount];
-
-            for (int i = 0; i < RippleCount; i++)
-            {
-                var rippleObject = new GameObject(
-                    "Click Ripple " + i,
-                    typeof(RectTransform),
-                    typeof(DojoClickRippleGraphic)
-                );
-                rippleObject.transform.SetParent(surface, false);
-
-                var rect = (RectTransform)rippleObject.transform;
-                rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(.5f, .5f);
-                rect.sizeDelta = new Vector2(150, 150);
-                ripples[i] = rippleObject.GetComponent<DojoClickRippleGraphic>();
-                ripples[i].raycastTarget = false;
-                rippleObject.SetActive(false);
-            }
-
             clickSound = Resources.Load<AudioClip>("UI/DojoClick");
             clickSource = gameObject.AddComponent<AudioSource>();
             clickSource.playOnAwake = false;
@@ -62,6 +20,11 @@ namespace RhythmDojo.UI
             clickSource.volume = .32f;
             clickSource.priority = 128;
             clickSource.ignoreListenerPause = true;
+        }
+
+        public void Initialize(DojoPunchImpact impact)
+        {
+            this.impact = impact;
         }
 
         private void Update()
@@ -99,27 +62,25 @@ namespace RhythmDojo.UI
 
         public void PlayAt(Vector2 screenPosition)
         {
-            if (!isActiveAndEnabled || !surface)
+            if (!isActiveAndEnabled)
             {
                 return;
             }
 
-            if (
-                !RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                    surface,
-                    screenPosition,
-                    null,
-                    out var point
-                )
-            )
+            if (screenPosition.x < 0 || screenPosition.x >= Screen.width)
             {
                 return;
             }
 
-            var ripple = ripples[nextRipple];
-            nextRipple = (nextRipple + 1) % RippleCount;
-            ripple.rectTransform.anchoredPosition = point;
-            ripple.Play();
+            if (screenPosition.y < 0 || screenPosition.y >= Screen.height)
+            {
+                return;
+            }
+
+            if (impact)
+            {
+                impact.PlayAt(screenPosition);
+            }
 
             if (clickSound)
             {
@@ -135,7 +96,10 @@ namespace RhythmDojo.UI
             }
         }
 
-        private void OnDisable() => Clear();
+        private void OnDisable()
+        {
+            Clear();
+        }
 
         private void Clear()
         {
@@ -144,17 +108,9 @@ namespace RhythmDojo.UI
                 clickSource.Stop();
             }
 
-            if (ripples == null)
+            if (impact)
             {
-                return;
-            }
-
-            foreach (var ripple in ripples)
-            {
-                if (ripple)
-                {
-                    ripple.gameObject.SetActive(false);
-                }
+                impact.Clear();
             }
         }
     }

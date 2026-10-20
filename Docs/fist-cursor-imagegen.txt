@@ -1,0 +1,60 @@
+Asset: Assets/Game/Resources/UI/DojoFistCursor.png
+Generator: built-in image_gen tool, transparent_background=true.
+Original generated image copied unchanged; Unity creates transparent 64x64 native cursor frames at startup.
+
+Final generation prompt:
+Use case: precise-object-edit. Edit target: attached existing upright fist cursor. Preserve the refined pixel-inspired game sprite style, dark outline, upright pointing-up composition, compact silhouette, transparent background, and bare knuckles. Make exactly these corrections: (1) It must be a RIGHT human clenched fist viewed from the BACK of the hand: THUMB ON THE VIEWER'S LEFT, index knuckle on the left and little-finger knuckle on the right. Anatomically coherent curled fingers and tucked thumb. (2) Replace the yellow-orange tan skin with a LIGHT NEUTRAL PEACH/ROSY BEIGE skin palette inspired by Ken Masters in classic fighting game sprite art: pale peach highlights, neutral pink-beige midtones, muted rosy-brown shadows. No yellow cast, no orange cast, no golden tan. (3) REMOVE ALL CLOTH FROM THE WRIST. The short wrist at bottom must be entirely bare skin. Put the white martial-arts cloth wrap ACROSS THE MIDDLE OF THE HAND/BACK OF HAND BELOW THE KNUCKLES, looping through the web between THUMB AND INDEX FINGER on the viewer's LEFT and around the palm. Show two or three clear overlapping white cloth bands across the hand's middle, leaving all four knuckles and fingers bare above the wrap and leaving the wrist bare below it. It is a central hand wrap, NOT a wristband, NOT a glove. Keep the fist upright, centered and suitable for a 48-pixel mouse cursor. No text, no arrows, no scenery, no extra hands, no effects. True transparent background.
+
+Integration:
+DojoCursor retains its existing RuntimeInitializeOnLoadMethod / DontDestroyOnLoad lifecycle.
+The native pointer is now a monochrome cream pixel ring generated in code:
+16-pixel diameter, 2-pixel cells, transparent center, center hotspot at (16, 16)
+inside a 32x32 texture. Prebuilt ring pulse frames use unscaled time.
+The generated fist image is used only for the incoming punch effect.
+DojoPunchImpact renders pooled incoming fists and impact sparks without a GraphicRaycaster.
+DojoClickFeedback routes clicks to the punch effect and supplies the existing sound.
+The legacy circular ripple is no longer instantiated.
+No scene regeneration is needed, including when entering Play Mode from individual scenes.
+
+Architecture decision:
+Runtime initialization is appropriate for this scene-independent presentation service.
+A Bootstrap-only prefab would omit the cursor when developers run other scenes directly.
+A prefab in every scene would duplicate configuration and require duplicate-instance handling.
+Keep the existing single installation point rather than introduce a second installer.
+
+White-wrap upright revision (2026-10-20):
+Replaced the image using the built-in image_gen tool and the final prompt above.
+Centered the native frames and moved the hotspot to (32, 6).
+Cursor-focused PlayMode suite rerun: 3/3 passed.
+
+Initial implementation verification (Unity 6000.3.23f1, 2026-10-20):
+Cursor-focused PlayMode suite: 3/3 passed.
+Full PlayMode suite: 86/87 passed; TempoBoundaryHoldIsPerfectWithConstantScroll
+failed during teardown because FMOD could not initialize the output device.
+Foundation EditMode stage: 167/168 passed; SceneGenerationDoesNotWriteContentAssets
+was canceled by the existing unsaved-scene protection.
+The existing EditMode tests regenerated scenes. Scenes that were clean at task start
+were restored. Gameplay.unity already had user changes and was left regenerated
+from the existing builders rather than reset to Git HEAD.
+Detailed results: Logs/fist-cursor-playmode.json and Logs/verification.txt.
+Windows standalone build: passed, Builds/Windows/RhythmDojo.exe.
+Native cursor preview: Logs/fist-cursor-native.png.
+Impact screenshot: Logs/fist-cursor-capture/fist-cursor-impact.png.
+
+Right-hand central-wrap revision (2026-10-20): Built-in image_gen edit using the previous sprite as reference. Neutral peach/rosy beige skin, right fist with thumb on viewer left, white wrap across middle of hand through thumb/index web, bare wrist. Image-only replacement; transparent alpha verified and Unity asset refreshed. Runtime code unchanged; earlier test/build results above predate this artwork revision.
+
+Random approach revision:
+Each click fixes a target at the click position. A rotated fist starts 70-110 pixels
+away in a random direction, accelerates inward for 0.1 seconds, makes contact,
+then recoils and fades. Sparks begin at contact; all feedback ends after 0.32 seconds.
+Origins are kept inside the viewport where possible. Eight fist images are pooled;
+the effect uses unscaled time and its own random generator, never gameplay RNG.
+Input is sampled only by DojoClickFeedback; no effect graphic receives raycasts.
+Verification: PixelDojoCursorTests 4/4 and DojoClickFeedbackTests 3/3 passed.
+Reports: Logs/random-punch-cursor-tests.json and Logs/random-punch-feedback-tests.json.
+No scene regeneration or player rebuild was needed for this UI-only revision.
+
+Final dot-pointer verification:
+PixelDojoCursorTests rerun after replacing the pointer with the monochrome ring:
+4/4 passed, including single-color pixels, transparent center, and punch lifecycle.
+Report: Logs/dot-cursor-tests.json.

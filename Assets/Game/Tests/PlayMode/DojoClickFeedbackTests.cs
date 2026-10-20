@@ -13,7 +13,9 @@ namespace RhythmDojo.Tests
         public IEnumerator ClickEffectDoesNotBlockSettingsAndSurvivesSceneTransition()
         {
             var feedback = Object.FindFirstObjectByType<DojoClickFeedback>();
+            var impact = Object.FindFirstObjectByType<DojoPunchImpact>();
             Assert.That(feedback, Is.Not.Null);
+            Assert.That(impact, Is.Not.Null);
 
             var selection = Object.FindFirstObjectByType<SongSelectionView>();
             var point = RectTransformUtility.WorldToScreenPoint(
@@ -29,6 +31,7 @@ namespace RhythmDojo.Tests
             yield return Click(selection.settingsButton);
             yield return Await(() => Object.FindFirstObjectByType<SettingsScreen>());
             Assert.That(Object.FindFirstObjectByType<DojoClickFeedback>(), Is.SameAs(feedback));
+            Assert.That(Object.FindFirstObjectByType<DojoPunchImpact>(), Is.SameAs(impact));
             yield return Click(Object.FindFirstObjectByType<SettingsView>().back);
             yield return Await(() => Object.FindFirstObjectByType<SongSelectionScreen>());
         }
@@ -122,26 +125,28 @@ namespace RhythmDojo.Tests
                     feedback.PlayAt(new Vector2(Screen.width * .5f + i, Screen.height * .5f));
                 }
 
-                var all = feedback.GetComponentsInChildren<DojoClickRippleGraphic>(true);
+                Assert.That(feedback.GetComponentsInChildren<DojoClickRippleGraphic>(true), Is.Empty,
+                    "The legacy circular ripple must no longer be installed.");
+                var all = feedback.GetComponentsInChildren<UnityEngine.UI.RawImage>(true);
                 Assert.That(
                     all.Length,
                     Is.InRange(1, 8),
                     "Burst effects have a fixed allocation budget."
                 );
                 Assert.That(
-                    feedback.GetComponentsInChildren<DojoClickRippleGraphic>().Length,
+                    feedback.GetComponentsInChildren<UnityEngine.UI.RawImage>().Length,
                     Is.GreaterThan(0)
                 );
                 Time.timeScale = 0;
                 yield return new WaitForSecondsRealtime(.5f);
                 Assert.That(
-                    feedback.GetComponentsInChildren<DojoClickRippleGraphic>().Length,
+                    feedback.GetComponentsInChildren<UnityEngine.UI.RawImage>().Length,
                     Is.Zero,
                     "UI feedback must expire even while gameplay time is paused."
                 );
                 feedback.PlayAt(new Vector2(Screen.width * .5f, Screen.height * .5f));
                 Assert.That(
-                    feedback.GetComponentsInChildren<DojoClickRippleGraphic>(true),
+                    feedback.GetComponentsInChildren<UnityEngine.UI.RawImage>(true),
                     Is.EquivalentTo(all),
                     "New clicks reuse existing objects."
                 );
