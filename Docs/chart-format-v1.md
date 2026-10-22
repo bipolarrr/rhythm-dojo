@@ -18,6 +18,7 @@ v3는 `timing.grid`를 필수로 추가합니다. [v3 JSON Schema](rdchart-v3.sc
 **Game Tools > Scenes > Build Chart Editor** 또는 **Build All Scenes**로 씬을 생성한 뒤 `Assets/Game/Scenes/ChartEditor.unity`를 열고 Play Mode에서 사용한다. 메뉴의 영구 이벤트 연결과 입력 필드는 `ChartEditorSceneBuilder`에서 생성한다.
 
 - **파일**: 현재 프로젝트 저장, 곡 UUID로 저장한 프로젝트 불러오기, WAV/OGG/MP3 전체 파일 경로로 음원 가져오기. 저장 완료 시 실제 경로를 표시한다. 불러오기 전 현재 변경 내용을 자동 저장하며, 불러오기 실패 시 현재 세션을 유지한다.
+- **파일 → PUPA 음원 + 채보**: 프로젝트 루트의 `LocalAudio/PUPA.wav`와 포함된 PUPA Standard 채보(929노트: 탭 900·롱노트 29, 202 BPM, 오디오 오프셋 0초)를 새 곡으로 가져온다. 현재 초안은 자동 저장하고, 새 곡은 가져온 뒤 저장 버튼으로 보관한다. 반복 가져오기도 새 곡 ID를 사용하므로 기존 PUPA 편집본을 덮어쓰지 않는다. 음원이 없으면 현재 작업을 유지하고 필요한 전체 경로를 표시한다.
 - **설정**: 제목, 아티스트, 시작 BPM, 오디오 오프셋, 채보 종료 시간을 입력한 뒤 적용한다. 시작 BPM을 바꿔도 이후 템포 변경점과 기존 노트의 초 단위 시간은 유지한다. 그리드는 전체 템포 맵을 반영한다.
 - **도구**: 실행 취소, 다시 실행, 처음 위치와 기본 확대 배율로 복귀.
 - **테스트**: 제목·음원·노트 등 기존 재생 규칙을 검증한 뒤 실제 Gameplay로 전환한다. 게임의 복귀 버튼/Escape로 돌아오면 미저장 편집 세션과 Undo 이력이 유지된다. Play Mode를 종료하면 메모리 세션은 사라지므로 보존할 작업은 먼저 저장한다.
@@ -31,6 +32,18 @@ v3는 `timing.grid`를 필수로 추가합니다. [v3 JSON Schema](rdchart-v3.sc
 오디오 파형은 공유 정점을 연결한 연속 min/max 외곽선과 그라데이션 채움, 화면 1픽셀의 알파 경계로 그린다. 64프레임 단위 피크 피라미드는 넓은 구간 조회를 가속하고, 모든 배율에서 [시작, 끝) 구간에 해당하는 샘플 시각 n/샘플레이트를 조회한다. 구간 내부의 완전한 피크 묶음만 집계하고 잘린 양 끝은 PCM 읽기 캐시로 확인한다. 전체 보기와 상세 보기의 표시 열은 음원/생성 버전/표시 구간/해상도를 키로 캐시하므로 재생 커서만 이동할 때는 재분석하지 않는다. 한 표시 픽셀당 샘플이 하나 이하이면 채움 대신 실제 샘플을 연결한 채널별 선으로 전환한다. 화면 양 끝은 인접 샘플 사이에서 선형 보간하고 음원 범위 밖의 샘플을 만들지 않는다. 최소 확대 구간은 16샘플이다. 범위 밖의 상위 피크 묶음을 포함하지 않는다. 주파수 색상은 64프레임 집계이며 진폭과 별개다. 피크 채움은 채널 전체의 진폭 범위를, 샘플 연결선은 채널별 값을 표시하므로 스테레오 반대 위상도 상쇄되지 않는다. 파형의 표시 열이나 화면 픽셀은 음악 시간의 저장 단위가 아니다. 음원 길이는 AudioClip.length 대신 샘플 수/샘플레이트로 계산한다. 미리듣기는 DSP 시계와 샘플 위치, 채보와 그리드는 double 초·박자 좌표를 사용한다. `WaveformPeaksTests`는 경계 피크·부분 마지막 블록·색상을, `AudioTimelineTests`는 탐색·확대·재생 및 화면 폭 변경 시 시간과 노트 보존을 검증한다.
 
 ## 파일 계약
+
+### 기본 제공 PUPA 채보
+
+Discord로 `PUPA.wav`를 별도 전달한다. 팀원은 저장소를 최신 상태로 받은 뒤 `Assets`, `Packages`, `ProjectSettings`와 같은 위치에 `LocalAudio` 폴더를 만들고 `PUPA.wav`를 넣는다. 예: `C:/Projects/RhythmDojo/LocalAudio/PUPA.wav`. 이 PC에서는 `C:/Users/song/RhythmDojo/LocalAudio/PUPA.wav`다. 파일 확장자만 바꾸거나 다른 버전의 음원으로 교체하면 채보와 맞지 않을 수 있으므로 전달받은 WAV를 그대로 사용한다. 기준 파일의 SHA-256은 `14bf278429c22b3d543666032dcb83f4ed82be811a4fd8e80457d43008ad36c0`이다.
+
+ChartEditor를 실행하고 **파일 → PUPA 음원 + 채보**를 누른다. `LocalAudio/` 전체와 음원 확장자는 `.gitignore`로 제외되며 음원은 `Assets`나 빌드에 포함하지 않는다. 채보 원본은 `Assets/Game/Resources/Authoring/Pupa.json`에 포함된다. 가져온 음원은 기존 곡 저장소의 `Songs/<새 곡 ID>/audio/`에 복사된다. Windows 플레이어에서 사용할 때도 실행 파일 옆 `LocalAudio/PUPA.wav`를 사용한다.
+
+채보는 BROKENPASTEL의 [PUPA 4B HD 12](https://www.youtube.com/watch?v=oeoJT20YcGM) 영상에서 기본 4레인을 옮긴 것이다. 영상의 총 932노트 중 사이드 노트 3개를 제외한다. 영상 시각에서 1.2초를 빼 WAV 기준 시각으로 저장했으며, 원본 60fps의 한 프레임 단위로 판독했다. 그리드 원점은 0.4833333333333334초이고 노트에 박자 스냅이나 동시치기 제한을 적용하지 않았다. 게임 내 Standard 슬롯은 이 게임의 저장 슬롯이며 원본 HD 난이도를 낮춘 편곡이라는 의미가 아니다.
+
+[기본 노트 판독 목록](pupa-note-provenance.csv)과 [제외한 사이드 노트](pupa-excluded-side-notes.csv)를 함께 보관한다. 프레임 번호는 위 영상의 첫 프레임을 0으로 한 60fps 기준이며, `time`·`end`는 WAV 기준 초다. `readable_frame`은 노트 형태가 보이는 프레임, `head_frame`·`tail_frame`은 판정선 도달 프레임이다. 원본 영상·스크린샷·음원은 Git에 포함하지 않는다.
+
+### JSON 저장 규칙
 
 UTF-8(BOM 없음), LF, 2칸 들여쓰기와 마지막 줄바꿈을 사용한다. 경로는 `<persistentDataPath>/Songs/<song UUID>/project.rdchart.json`이며 음원은 같은 폴더의 `audio/<SHA-256>.<extension>`이다. 저장 루트는 생성자에서 주입한다. 동일한 문서 내용은 동일한 JSON을 생성한다. 예제는 [완성 채보](examples/complete.rdchart.json), [초안](examples/draft.rdchart.json), 구조는 [JSON Schema](rdchart-v1.schema.json)를 참고한다. 예제의 음원은 별도로 제공해야 한다.
 

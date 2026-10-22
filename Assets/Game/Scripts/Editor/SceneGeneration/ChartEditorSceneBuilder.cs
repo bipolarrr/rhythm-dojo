@@ -310,11 +310,15 @@ namespace RhythmDojo.EditorTools
                 "audioPath",
                 Field(file, "Audio Path", "음원 파일 전체 경로 (WAV / OGG / MP3)", 210)
             );
-            ActionButton(file, "Import Audio", "음원 가져오기", 294, menu.ImportAudio);
+            var importAudio = ActionButton(file, "Import Audio", "음원 가져오기", 294, menu.ImportAudio);
+            ((RectTransform)importAudio.transform).sizeDelta = new Vector2(238, 36);
+            var importPupa = ActionButton(file, "Import PUPA", "PUPA 음원 + 채보", 294, menu.ImportPupa);
+            UiElements.Position((RectTransform)importPupa.transform,
+                new Vector2(266, -294), new Vector2(238, 36));
             UiElements.Label(
                 "Storage Hint",
                 file,
-                "저장 위치는 저장 완료 후 아래에 표시됩니다.",
+                "PUPA 음원 위치: LocalAudio/PUPA.wav (프로젝트 폴더)",
                 new Vector2(16, -348),
                 new Vector2(480, 28),
                 16

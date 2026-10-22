@@ -1,136 +1,56 @@
 # Rhythm Dojo
 
-For a new Windows checkout, follow [Git and Unity collaboration setup](Docs/git-unity-setup.md) to install missing tools and enable merge handling and asset/meta validation.
+Unity로 개발 중인 4레인 리듬 게임. 도장 테마의 화면과 게임 내 채보 에디터를 함께 만들고 있습니다.
 
-Unity **6000.3.23f1**, URP **17.3.0**, Input System **1.20.0**, uGUI, Test Framework **1.6.0**. No packages were added or upgraded.
+## 실행
 
-Open `Assets/Game/Scenes/Title.unity` and enter Play Mode. Click the central circular logo to reveal **Play**, **Settings** and **Quit**, then choose **Play** to enter Bootstrap and the song list. Click the logo again to collapse the menu. Settings opened from the title returns to the title when choosing Back. Select a song, judgment difficulty, scroll mode and multiplier using the mouse or keyboard navigation, then choose **Load Song**. In Gameplay, **Space** starts/restarts, **D / F / J / K** play the default lanes, and **Escape** returns to the song list. Ready and Completed also have a mouse return button. Losing focus resets play to Ready.
+- Unity **6000.3.23f1** 사용. 주요 패키지는 URP 17.3.0, Input System 1.20.0, Test Framework 1.6.0입니다.
+- 처음 저장소를 받았다면 [Git·Unity 협업 설정](Docs/git-unity-setup.md)을 참고하세요.
+- Project 창에서 `Assets/Game/Scenes/Title.unity`를 열고 Play Mode를 시작합니다. 중앙 현판을 누르면 플레이·설정·종료 메뉴가 열립니다.
+- 곡 선택부터 확인하려면 `Bootstrap.unity`를 엽니다. 다른 씬에서 바로 실행할 때는 **Game Tools > Scenes > Start Play Mode From Title**을 끕니다.
 
-**Main-screen UI work starts in `Title.unity`.** Use **Game Tools > Scenes > Open Title** to find it. Edit `Assets/Game/Scripts/Editor/UILayout/MainMenuLayoutBuilder.cs` for layout and styling, then run **Game Tools > Scenes > Build Title** to regenerate and preview the result. See the [main-screen UI workflow](Docs/team-ownership.md#메인-화면-ui-작업-시작하기) for the exact files and tests. Manual scene edits are previews; put lasting changes in the builder.
-
-From the song list, choose **Settings** to adjust the DSP buffer before playing. Choose Default, 32, 64, 128, 256, 512, 1024 or 2048 samples, then **Apply**. The screen reports the actual buffer size, buffer count and sample rate after Unity resets audio; supported sizes depend on the output device. Default requests the actual size captured at app startup. Failed resets attempt to restore the prior configuration and report the actual state. Back returns to the song list. The choice survives screen changes during this run and is never saved to assets, ProjectSettings or PlayerPrefs.
-
-This controls Unity's mixer buffer and does not select ASIO or configure an ASIO driver's buffer. A Unity DSP size of 64 samples is not an equivalent test of an ASIO device buffer of 64 samples. Follow-up tests reproduced slow DSP progression without gameplay code in a standalone Windows diagnostic player, including an empty scene at 120 FPS and a memory-generated tone with no GC allocations. See `Logs/audio-performance-audit.md` for measurements, limits and diagnostic reproduction commands.
-
-## Independent difficulty and scroll controls
-
-Difficulty changes judgment windows only. Scroll mode and multiplier never change chart timestamps or grading.
-
-| Profile | Perfect | Good |
-| --- | --- | --- |
-| Easy | ±80 ms | ±160 ms |
-| Standard | ±50 ms | ±110 ms |
-| Hard | ±35 ms | ±80 ms |
-
-Easy and Hard are initial tuning values. Standard reproduces the original rules.
-
-`ScrollSettings.asset` owns the base speed (8 units/s), reference BPM (120), and selectable multipliers (0.5, 0.75, 1, 1.25, 1.5, 2). Constant 1x is the default. Choosing another difficulty does not reset either scroll choice.
-
-Constant scroll uses `baseSpeed × multiplier`. BPM scroll uses `baseSpeed × multiplier × BPM(t) / referenceBpm`. The scroll timeline integrates distance over every tempo segment:
-
-```text
-z = DistanceBetween(currentSongTime, noteTargetTime)
-```
-
-At default settings, 120 BPM moves at 8 units/s and 180 BPM at 12 units/s. Distance from 5s to 7s across a change at 6s is 20 units, rather than the 16 units of Constant mode. Position is continuous at the boundary; velocity changes. Holds use the same integrated head/tail distances, and their head stays on the judgment line while held.
-
-## Content and settings
-
-`Assets/Game/Settings/GameSettings.asset` connects the catalog, difficulty profiles, independent scroll settings, audio settings and presentation settings.
-
-- `GameModeDefinition` owns lane count through its lane list, key bindings, labels, colors, lane spacing and HUD spacing. Session arrays, input actions, playfield geometry and HUD all derive from this definition. The product ships one four-lane mode; the structure supports other lane counts.
-- `SongDefinition` contains ID, title, artist, AudioClip, chart, mode and timing. A song currently has one chart.
-- `SongTiming` owns the chart/audio offset and ordered BPM points (`startTimeSeconds`, `bpm`). The first point must start at zero; BPM must be positive and finite. The first/last tempos extend before/after the map. Tempo timestamps use chart time, so the audio offset is not applied twice.
-- `DifficultyProfile` owns Perfect and Good windows only.
-- `AudioPlaybackSettings` owns scheduling lead and volume. Migration retains the existing 0.15s lead, rather than replacing it with the legacy script's 0.5s default.
-- `GameplayPresentationSettings` owns note/playfield dimensions and HUD feedback timing/colors.
-
-Create authored charts, songs, catalogs and settings through **Assets > Create > Rhythm Dojo**. A chart must have sorted notes, finite timestamps, valid lanes, positive hold lengths and no same-lane interval overlaps. A tap uses its start time as its end. Metadata BPM/range comes from the timing map.
-
-The existing `RhythmGameConfig.asset` remains as a legacy migration source. Gameplay no longer reads it. Generation reads and validates legacy values once only when creating Standard, scroll, audio or the default song. Existing settings and song offsets are preserved. With no legacy asset, generation uses the new defaults, including a 0.15s scheduling lead; it does not create a legacy asset. Scheduling lead is independent of the DSP buffer and has no control in this screen.
-
-Settings are captured when Gameplay loads. Judgment, chart, tempo and scroll calculations use immutable values; mode and presentation settings use runtime copies. Editing shared assets does not retune the active play. Return to the list and load again to apply edits. Selection is remembered for the current app run, without disk persistence.
-
-Two generated verification songs are registered:
-
-| Song | Chart | BPM |
-| --- | --- | --- |
-| Foundation Pulse | Original 12s / 18 notes / 3 holds | 120 |
-| Tempo Shift | 12s / 8 notes / hold at 5.2–6.8s | 120, then 180 at 6s |
-
-Their audio is reproducible pulse sound, not finished music. Tempo Shift's pulse changes tempo at the same boundary as its map.
-
-## Four-person ownership
-
-See [team ownership and integration contracts](Docs/team-ownership.md) for UI layout, UI behavior, in-game authoring, and gameplay/integration responsibilities. Layout builders now return explicit Views; screen composition injects services. Built-in assets and unsaved documents share the same playback path. The in-game editor UI and disk format remain future work.
-
-## Architecture
-
-| Assembly | Responsibility |
+| 화면 | 조작 |
 | --- | --- |
-| Game.Domain | Immutable chart/tempo data, judgment settings, lane rules, session, typed events and session snapshot |
-| Game.Application | Input/clock/presenter contracts, session coordinator, gameplay read model and scroll timelines |
-| Game.Runtime | Unity assets, component adapters, composition, presentation and UI |
-| Game.Editor | Content generation, scene generation, assembly and validation |
+| 곡 선택 | 마우스 또는 방향키로 곡·채보 선택, Enter 또는 플레이 버튼으로 진입 |
+| 게임 | Space로 시작·재시작, D / F / J / K로 노트 입력 |
+| 게임에서 나가기 | Esc로 곡 선택 복귀 |
 
-Domain and Application disable engine references and explicitly exclude Unity API dependencies. Runtime references Application and Domain; Editor references Runtime. Tests are separate and excluded from ordinary player builds.
+## 현재 구현
 
-`RhythmGameController` forwards Unity lifecycle calls to `RhythmSessionCoordinator`, which depends on `ILaneInput`, `ISongClock` and `INotePresenter`. `GameplayCompositionRoot` assigns the actual implementations. HUD consumes `IGameplayReadModel` snapshots and typed judgment/hold/reset events; UI formatting stays in `RhythmHudFormatter`.
+- **게임플레이**: 탭·롱노트, 콤보·점수·결과 표시, BPM 변화, 재시작과 포커스 상실 처리.
+- **플레이 규칙**: Warmup / Sparring 판정, Gauge / Challenge 모드, 롱노트 끝 자동·릴리스 판정. 채보 난이도와 판정 설정은 별개입니다.
+- **곡 선택**: Easy / Standard / Hard 채보 선택, 정렬, 즐겨찾기, 저장한 곡 탐색, 기록 저장. 없는 채보 슬롯은 선택할 수 없습니다.
+- **설정**: 타이틀·곡 선택 위에서 열리는 팝업. 음량, 해상도·화면 비율, FPS 제한, 노트 속도, 입력 타이밍 보정, DSP 버퍼를 조절합니다. DSP 버퍼 선택은 실행 중에만 유지됩니다.
+- **채보 에디터**: 탭·롱노트 편집, 난이도별 채보, 실행 취소·다시 실행, 저장·불러오기, 테스트 플레이와 편집 화면 복귀.
+- **음원·그리드 편집**: WAV / OGG / MP3 가져오기, 전체·상세 RGB 파형, 미리듣기, 노트 스냅, BPM·박자표·첫 박 위치 편집.
 
-`AppFlowController` owns selection and async scene transitions without a mutable global song variable. Escape requests cleanup in Update, after the input callback completes. Scene changes stop audio, dispose lane actions and unsubscribe gameplay/HUD listeners. Completed HUD retains the final song time after the clock stops.
+채보는 음원과 함께 로컬에 저장하며 현재 JSON 형식은 **v3**입니다. v2는 일반 불러오기, v1은 별도 가져오기를 지원합니다.
 
-## Timing and rules
+기본 콘텐츠는 Foundation Pulse, Tempo Shift, Demo Melody 등 테스트·데모 곡 중심입니다. 채보 에디터의 음원 가져오기는 파일 전체 경로를 입력하는 방식이며, 파일 선택 대화상자는 아직 없습니다. 긴 곡의 성능 최적화와 실제 입력·오디오 지연 측정도 남아 있습니다.
 
-Audio starts at `AudioSettings.dspTime + scheduleLeadTime`. Chart time is DSP elapsed time plus the song offset. Input event age is subtracted when converting Input System timestamps, preserving inputs queued during a slow frame. Music time is not accumulated from deltaTime; Dynamic input dispatch precedes the timeout sweep.
+## 개발할 때
 
-A press selects the nearest eligible Pending note in its lane within GoodWindow; near-exact ties prefer chart order. Repeated presses while held are ignored; empty presses do not penalize combo. Signed error is `inputSongTime - targetTime`. Each note contributes one final result. Miss resets combo.
+화면 배치는 `Assets/Game/Scripts/Editor/UILayout`의 빌더에서 수정합니다. 씬에서 직접 바꾼 내용은 재생성할 때 덮어써집니다.
 
-Hold head grading does not increment counts. Release inside the tail window produces the worse head/tail grade; an early release misses. Still-held notes finish after end + GoodWindow using their head grade. A later release cannot rejudge them. There are no ticks or extra tail scores.
+- **Game Tools > Scenes > Build All Scenes**: 전체 씬 재생성. 화면 하나만 수정했다면 해당 화면의 Build 명령을 사용합니다.
+- **Game Tools > Content > Prepare Default and Verification Content**: 기본 리소스 준비와 검증용 콘텐츠 재생성. 일반 UI 수정에는 필요하지 않습니다.
+- 채보 에디터는 `Assets/Game/Scenes/ChartEditor.unity`에서 실행합니다.
 
-Restart resets logical state and schedules new playback. Physically held keys are blocked until released. Completion waits for the chart end, audio end in chart time, and the final late judgment boundary.
+| 경로 | 내용 |
+| --- | --- |
+| `Assets/Game/Scripts/Domain` | 판정·채보·타이밍 규칙 |
+| `Assets/Game/Scripts/Application` | 게임 진행과 편집 로직, 서비스 계약 |
+| `Assets/Game/Scripts/Runtime` | Unity 연결, 화면, 오디오·입력, 채보 에디터 |
+| `Assets/Game/Scripts/Editor` | 씬·콘텐츠 생성과 검증 도구 |
+| `Assets/Game/Tests` | Domain / EditMode / PlayMode 테스트 |
+| `Docs` | 협업 규칙과 기능별 문서 |
+| `Logs`, `Builds` | 검증 결과와 빌드 출력 |
 
-## Authoritative scenes and generation
+Domain과 Application에는 Unity API를 사용하지 않습니다. 에셋을 옮길 때는 `.meta`도 함께 옮깁니다.
 
-Use **Game Tools > Scenes > Build All Scenes**, or the individual Title, Bootstrap, Gameplay, Song Selection and Settings commands. Generated scenes are authoritative outputs of the builder.
+## 검증
 
-Scene generation reads existing resources through `SceneResources`, constructs UI through the screen layout builders, and assigns dependencies through `SceneDependencyAssembler`. `SceneBuilder` controls ordering, saving and scene registration. Use **Game Tools > Content > Prepare Default and Verification Content** for initial resources or explicit verification-song regeneration; normal scene builds never regenerate song content. Default settings, test songs and presentation assets have separate preparation code.
-
-Title → Bootstrap → SongSelection → Gameplay → SongSelection. SongSelection also opens Settings and returns to the list. With **Start Play Mode From Title** disabled, starting Gameplay directly in the Editor uses Foundation Pulse / the configured default difficulty / Constant / 1x.
-
-The explicit content preparation command recreates the two named test charts from code. Authored songs/charts and existing difficulty, scroll, mode and audio settings are not overwritten. Generated materials follow the presentation settings. Primitive colliders are removed. Build settings register the five game scenes first, starting with Title, and preserve other entries. Generation checks Play Mode and unsaved scenes. Scene validation uses explicit component requirements and checks generated note views against chart kinds; note names do not affect validation. Runtime validation checks dependencies before building views for the selected song.
-
-## Verification
-
-The editor core / chart format v1 addition passed **99 Edit Mode tests, 10 Play Mode tests and the Windows x64 build** on 2026-09-28. See [project verification evidence](Logs/project-verification.md).
-
-Verified on 2026-09-28 after the team-boundary refactor: **71 Edit Mode tests and 10 Play Mode tests passed**, four scenes were recreated and remained stable on repeated generation, all five full-song integration runs passed, and the Windows x64 player built successfully. Settings tests cover mouse/keyboard navigation, actual DSP configuration, Default, retained selection, guarded application and playback/restart at 256 samples. The Windows batch environment showed slow DSP time progression at 32–128 samples despite accepting those values; audible dropouts and human input/audio latency were not measured. See `Logs/team-verification.md` for refactor evidence and `Logs/settings-verification.md` for the DSP measurements. Earlier foundation evidence remains in `Logs/refactor-verification.md`.
-
-The Unity Test Runner exposes:
-
-- **Edit Mode:** Domain/Application tests plus Unity assets, migration/defaults/preservation, explicit scene requirements, lane layout, hold rendering and repeatable generation.
-- **Play Mode:** Actual mouse click, keyboard UI navigation, DSP buffer application and measurement, restart held-key blocking, focus loss, Escape cleanup, two-song transitions and a six-lane mode across input/HUD/playfield.
-
-Results are written to `Logs/settings-editmode.xml` and `Logs/settings-playmode.xml` when run with the commands below.
-
-**Game Tools > Verification > Verify Foundation (Play Mode and Player Build)** runs all Domain/EditMode tests, then all PlayMode tests, then builds `Builds/Windows/RhythmDojo.exe` only if every test passes. The former full-song scenarios are independent `GameplayJudgmentTests`. Five-scene regeneration and stability are EditMode tests. Separate **Verify UI Actions**, **Verify Gameplay Actions**, and **Verify Authoring Actions** menus run only that category without building. Results include each action name in `Logs/verification.txt` and NUnit XML in `Logs/verification-*.xml`. See the [action verification guide](Docs/verification.md) for expected button behavior, fixtures, categories, and team workflow.
-
-The input checks temporarily adjust only in-memory focus behavior for batch mode and restore it. They do not establish human keyboard/audio latency.
-
-For everyday changes, run only the affected fixtures or test methods after a coherent set of edits. **Verify Smoke Actions** runs four existing navigation/input/cleanup tests without full-song scenarios or a build; use it alongside affected tests for scene composition or shared navigation changes. **Verify All Tests (No Build)** exposes `FoundationVerification.RunTestsOnly()` for changes to shared contracts across features, the verification runner, packages, or unexplained regressions. Reserve Foundation/player builds for build-related changes or explicit requests. Documentation-only changes need no Unity tests. Do not repeat passing checks without relevant changes or new evidence. Report the actual scope and any omitted checks; see the [scope selection guide](Docs/verification.md).
-
-Close any Editor using this project before running batch checks:
-
-```powershell
-& 'C:/Program Files/Unity/Hub/Editor/6000.3.23f1/Editor/Unity.exe' -batchmode -projectPath 'C:/Users/song/RhythmDojo' -runTests -testPlatform EditMode -testResults 'C:/Users/song/RhythmDojo/Logs/settings-editmode.xml' -logFile 'C:/Users/song/RhythmDojo/Logs/settings-editmode.log'
-& 'C:/Program Files/Unity/Hub/Editor/6000.3.23f1/Editor/Unity.exe' -batchmode -projectPath 'C:/Users/song/RhythmDojo' -runTests -testPlatform PlayMode -testResults 'C:/Users/song/RhythmDojo/Logs/settings-playmode.xml' -logFile 'C:/Users/song/RhythmDojo/Logs/settings-playmode.log'
-& 'C:/Program Files/Unity/Hub/Editor/6000.3.23f1/Editor/Unity.exe' -batchmode -projectPath 'C:/Users/song/RhythmDojo' -executeMethod RhythmDojo.EditorTools.FoundationVerification.RunAll -logFile 'C:/Users/song/RhythmDojo/Logs/settings-foundation.log'
-```
-
-Wait for each Editor process to exit before launching the next. Do not add `-quit` to test or asynchronous integration runs.
-
-## Tests in an open Editor
-
-Unity CLI and the pinned `com.unity.pipeline` package can run tests in the already open Editor. From the repository root:
+Unity가 열린 상태에서는 저장소 루트에서 Unity CLI로 관련 테스트를 실행합니다. 코드 수정 후에는 먼저 **Assets > Refresh**로 컴파일을 마칩니다.
 
 ```powershell
 unity status --json
@@ -138,41 +58,19 @@ unity command run_tests --mode playmode --filter SelectionBrowserTests --async_t
 unity command test_status --json
 ```
 
-Repeat `test_status` until the run completes, then inspect `summary` and `results`. Use `--mode editor` for EditMode tests, or omit `--filter` to run all tests in that mode. Run one suite at a time. After completion, wait for Play Mode to exit and check `unity status --json` before starting the next suite; results may arrive before Editor cleanup finishes. Tests use the open Editor and can switch scenes and enter Play Mode; save your work first. After editing scripts, refresh/recompile before running tests. If a newly installed package is not reachable, choose **Assets > Refresh** (Ctrl+R) and wait for compilation. `unity test` is a separate batch workflow and requires this project to be closed in the Editor.
+`test_status`를 반복 호출해 완료 결과와 실패 항목을 확인합니다. EditMode는 `--mode editor`를 사용합니다. 테스트는 한 번에 하나씩 실행하고, 다음 실행 전 Play Mode 종료와 `unity status`의 준비 상태를 확인합니다.
 
-## Deferred performance work
+- 일반 수정은 관련 테스트만 실행합니다. 문서만 수정했다면 diff를 검토합니다.
+- 씬 구성·공통 화면 전환을 바꾸면 관련 테스트와 **Verify Smoke Actions**를 실행합니다.
+- 여러 기능의 공통 계약을 바꾸면 **Verify All Tests (No Build)**를 실행합니다.
+- 빌드 관련 변경이나 전체 납품 검증에는 **Verify Foundation (Play Mode and Player Build)**를 사용합니다. 출력은 `Builds/Windows/RhythmDojo.exe`입니다.
 
-Views are created for the whole small chart when Gameplay loads; judgment still scans the chart. No pooling, lane cursor or active-range optimization is claimed.
+검증 메뉴는 **Game Tools > Verification**에 있습니다. 세부 실행 방법과 결과 경로는 [검증 안내](Docs/verification.md)를 참고하세요.
 
-When an authored full song is available, profile a Windows Development Build before adding lane/time cursors, distance-based active ranges and tap/hold pools. Active ranges must use the scroll timeline, including BPM changes, and preserve visible hold bodies. Keep the linear implementation as a result/event-order oracle and target zero steady-state GC allocations in judging and note rendering.
+## 관련 문서
 
-The headless editor core supports multiple charts per song, transactional editing, 100-command Undo/Redo, UTF-8 JSON v2 storage with explicit v1 import, content-hashed audio import and conversion to the existing playback document. See [the file format and API guide](Docs/chart-format-v1.md), [JSON Schema](Docs/rdchart-v2.schema.json) and [examples](Docs/examples).
-
-Tempo ramps, stops, reverse scroll, separate SV events and pause remain future work. The editor supports Easy/Standard/Hard slots, saved-song discovery, imported audio, timing calibration and versioned records.
-
-
-
-## Main menu
-Open Assets/Game/Scenes/Title.unity to preview the title screen.
-Windows builds start here. Click the background to enter Bootstrap and song selection.
-Settings is a clickable placeholder. The power button asks for confirmation;
-Yes quits the player (stops Play Mode in the editor), No returns to the menu.
-Regenerate only this scene with **Game Tools > Scenes > Build Title**.
-Layout is maintained in MainMenuLayoutBuilder. Korean text uses the bundled
-Noto Sans KR font under the SIL Open Font License (Assets/Game/Fonts/OFL.txt).
-Editor Play Mode starts from Title even when another scene is open.
-Toggle this with **Game Tools > Scenes > Start Play Mode From Title**
-when you want to run the currently open scene. PlayMode tests temporarily
-suspend this setting and restore it when the test run finishes.
-
-Title scene generation (Game Tools > Scenes > Build Title) saves and opens Title as the only scene. Bootstrap includes a black loading camera so asynchronous scene transitions keep Display 1 rendering.
-
-## Play rules and verification
-
-Chart difficulty selects different chart data. Built-in songs have Standard only; missing slots are disabled. In Settings → Gameplay choose Warmup (Perfect ±50 ms, Hmm... ±100 ms) or Sparring (±16/±50 ms), Gauge/Challenge, automatic/release hold tails, Gauge failure continuation and Challenge 1–3 independently. Rules are copied into each play request and reused on restart.
-
-Gauge starts at 100, loses 10 per Nope., and recovers 2 per Perfect from combo 10 onward. Hmm... extends combo without healing. A continued failure stays failed at zero health. Challenges stop on the first judgment exceeding their independent limits (1: unlimited Hmm... / 1 Nope.; 2: 3 / 0; 3: 0 / 0). Long notes count a head, tempo-aware quarter-beat interior checks and one tail. Releasing breaks combo; missed checks remain missed after regrabbing.
-
-Completed successful and failed scores are stored separately under chart-content and judgment-rule identities. Gauge and Challenge share scores but have separate achievements. Old score data is cleared on record-version upgrade while selection options, timing calibration, favorites and audio settings remain intact.
-
-**Game Tools → Verification → Playtest Health and Results** runs timestamped keyboard scenarios and writes CSV judgment logs, XML results and screenshots under `Logs/`. **Prepare Default and Verification Content** also recreates a saved three-chart verification project; ordinary scene generation does not replace user charts. Foundation verification runs EditMode, PlayMode and the Windows player build.
+- [팀 담당 영역과 UI 작업 방법](Docs/team-ownership.md)
+- [채보 에디터와 저장 형식](Docs/chart-format-v1.md) · [v3 JSON Schema](Docs/rdchart-v3.schema.json)
+- [파형·GRID 사용법](Docs/editor-audio-timeline.md)
+- [설정 팝업](Docs/settings-popup.md)
+- [타이틀 화면](Docs/pixel-dojo-title.md)

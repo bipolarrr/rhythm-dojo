@@ -83,17 +83,29 @@ namespace RhythmDojo.Tests
                 Assert.That(settingsRect.parent, Is.EqualTo(playRect.parent));
                 Assert.That(quitRect.parent, Is.EqualTo(playRect.parent));
                 Assert.That(
-                    playRect.anchoredPosition.y,
-                    Is.GreaterThan(settingsRect.anchoredPosition.y)
-                );
-                Assert.That(
-                    settingsRect.anchoredPosition.y,
-                    Is.GreaterThan(quitRect.anchoredPosition.y)
+                    playRect.anchoredPosition.x,
+                    Is.LessThan(settingsRect.anchoredPosition.x)
                 );
                 Assert.That(
                     settingsRect.anchoredPosition.x,
-                    Is.EqualTo(quitRect.anchoredPosition.x)
+                    Is.LessThan(quitRect.anchoredPosition.x)
                 );
+                Assert.That(
+                    settingsRect.anchoredPosition.y,
+                    Is.EqualTo(quitRect.anchoredPosition.y)
+                );
+                foreach (var button in new[] { view.start, view.settings, view.quit })
+                {
+                    Assert.That(button.GetComponent<UnityEngine.UI.Image>().sprite, Is.Null);
+                    Assert.That(button.GetComponent<UnityEngine.UI.Image>().color, Is.EqualTo(Color.white));
+                    Assert.That(button.GetComponentInChildren<UnityEngine.UI.Text>().font,
+                        Is.SameAs(UiFontSettings.Current));
+                    Assert.That(button.GetComponent<DojoBoardBreak>(), Is.Null);
+                }
+
+                Assert.That(view.start.navigation.selectOnRight, Is.SameAs(view.settings));
+                Assert.That(view.settings.navigation.selectOnRight, Is.SameAs(view.quit));
+                Assert.That(view.quit.navigation.selectOnLeft, Is.SameAs(view.settings));
                 Assert.That(
                     scene
                         .GetRootGameObjects()

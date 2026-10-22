@@ -661,7 +661,7 @@ namespace RhythmDojo.Authoring
         {
             Edit(() =>
             {
-                ApplyOrigin(snapshot.TempoPoints, detail.FirstVisibleGridTime + AudioOffset);
+                ApplyOrigin(snapshot.TempoPoints, MusicTime + AudioOffset);
             });
         }
 

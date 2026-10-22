@@ -82,7 +82,7 @@ namespace RhythmDojo.EditorTools
                 switch (button.name)
                 {
                     case "Cursor Origin":
-                        hint.Caption = "상세 파형에서 가장 왼쪽에 보이는 그리드선을 첫 마디 첫 박으로 지정합니다.";
+                        hint.Caption = "파형에서 선택한 커서 위치를 첫 마디 첫 박으로 지정합니다. 재생 중에는 버튼을 누른 순간의 재생 위치를 사용합니다.";
                         break;
                     case "Double BPM":
                     case "Half BPM":

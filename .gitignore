@@ -20,7 +20,29 @@
 *.VC.db
 .DS_Store
 Thumbs.db
+# Shared manually by the team; never import these source files into Assets.
+/LocalAudio/
 *.orig
 *.tmp
 /Assets/CodexIdeRepairTemp/
 /Assets/CodexIdeRepairTemp.meta
+
+# Local audio assets (including downloads); keep them out of repository history.
+*.[wW][aA][vV]
+*.[wW][aA][vV][eE]
+*.[mM][pP]3
+*.[oO][gG][gG]
+*.[oO][gG][aA]
+*.[fF][lL][aA][cC]
+*.[aA][iI][fF]
+*.[aA][iI][fF][fF]
+*.[aA][iI][fF][cC]
+*.[aA][aA][cC]
+*.[mM]4[aA]
+*.[mM]4[bB]
+*.[oO][pP][uU][sS]
+*.[wW][mM][aA]
+*.[aA][lL][aA][cC]
+*.[aA][pP][eE]
+*.[aA][cC]3
+*.[wW][eE][bB][mM]

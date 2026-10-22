@@ -50,6 +50,8 @@ namespace RhythmDojo.UI
         private bool leavingForPlaytest;
         private Action saved;
 
+        [SerializeField] private string pupaAudioPath = "LocalAudio/PUPA.wav";
+
         [SerializeField]
         private Text activeChart;
         private readonly CancellationTokenSource lifetime = new CancellationTokenSource();
@@ -323,6 +325,41 @@ namespace RhythmDojo.UI
                 Observe();
                 FillSettings();
                 ShowStatus("showcase v2 가져오기 완료. 그리드를 보존하며 다음 저장은 v3입니다.");
+            });
+
+        public void ImportPupa() =>
+            RunAsync(async () =>
+            {
+                string path = Path.GetFullPath(Path.Combine(
+                    UnityEngine.Application.dataPath, "..", pupaAudioPath));
+                if (!File.Exists(path))
+                {
+                    throw new FileNotFoundException("PUPA.wav를 다음 위치에 넣어주세요: " + path);
+                }
+
+                var template = Resources.Load<TextAsset>("Authoring/Pupa");
+                if (!template)
+                {
+                    throw new InvalidOperationException("PUPA 채보 리소스를 찾을 수 없습니다.");
+                }
+
+                var project = new SongProjectJson().Deserialize(template.text);
+                project.Id = Guid.NewGuid();
+                project.Audio = await store.ImportAsync(project.Id, path, lifetime.Token);
+                lifetime.Token.ThrowIfCancellationRequested();
+                var replacement = new EditorSession(project);
+                if (screen.Session.IsDirty)
+                {
+                    await screen.Session.SaveAsync(store, lifetime.Token);
+                    saved?.Invoke();
+                }
+
+                lifetime.Token.ThrowIfCancellationRequested();
+                screen.SetSession(replacement);
+                Observe();
+                FillSettings();
+                audioPath.text = path;
+                ShowStatus("PUPA 음원과 채보를 가져왔습니다. 이전 작업은 자동 저장했습니다. 저장으로 새 곡을 보관하세요.");
             });
 
         public void ImportAudio() =>

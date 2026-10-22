@@ -24,7 +24,7 @@ namespace RhythmDojo.EditorTools
 
             var view = canvas.gameObject.AddComponent<MainMenuView>();
             view.alwaysVisibleMenu = false;
-            view.logoOpenPosition = new Vector2(-220f, 0f);
+            view.logoOpenPosition = new Vector2(-250f, 0f);
             view.menuOpenPosition = new Vector2(230f, 0f);
             var entrance = new GameObject("Dojo Entrance", typeof(RectTransform));
             entrance.transform.SetParent(canvas.transform, false);
@@ -78,10 +78,10 @@ namespace RhythmDojo.EditorTools
             var menu = new GameObject("Menu Buttons", typeof(RectTransform), typeof(CanvasGroup));
             menu.transform.SetParent(canvas.transform, false);
             view.menuPanel = menu.GetComponent<CanvasGroup>();
-            Anchor((RectTransform)menu.transform, new Vector2(.5f, .5f), Vector2.zero, new Vector2(320, 300));
-            view.start = ArtButton("Play", menu.transform, "PlayBoard", 105);
-            view.settings = ArtButton("Settings", menu.transform, "SettingsBoard", 0);
-            view.quit = ArtButton("Quit", menu.transform, "QuitBoard", -105);
+            Anchor((RectTransform)menu.transform, new Vector2(.5f, .5f), Vector2.zero, new Vector2(464, 144));
+            view.start = MenuButton("Play", menu.transform, "플레이", font, -160);
+            view.settings = MenuButton("Settings", menu.transform, "설정", font, 0);
+            view.quit = MenuButton("Quit", menu.transform, "종료", font, 160);
             SetNavigation(view.start, view.quit, view.settings);
             SetNavigation(view.settings, view.start, view.quit);
             SetNavigation(view.quit, view.settings, view.start);
@@ -90,7 +90,7 @@ namespace RhythmDojo.EditorTools
             foreach (var button in new[] { view.start, view.settings, view.quit })
             {
                 var navigation = button.navigation;
-                navigation.selectOnLeft = view.logo;
+                navigation.selectOnUp = view.logo;
                 button.navigation = navigation;
             }
 
@@ -207,8 +207,8 @@ namespace RhythmDojo.EditorTools
         {
             var navigation = button.navigation;
             navigation.mode = Navigation.Mode.Explicit;
-            navigation.selectOnUp = up;
-            navigation.selectOnDown = down;
+            navigation.selectOnLeft = up;
+            navigation.selectOnRight = down;
             button.navigation = navigation;
         }
 
@@ -291,19 +291,17 @@ namespace RhythmDojo.EditorTools
             float x
         )
         {
-            var button = Button(name, parent, new Color(.12f, .055f, .065f));
+            var button = Button(name, parent, Color.white);
             Anchor(
                 (RectTransform)button.transform,
                 new Vector2(.5f, .5f),
                 new Vector2(x, 0),
-                new Vector2(190, 76)
+                new Vector2(144, 144)
             );
 
-            var border = button.gameObject.AddComponent<Outline>();
-            border.effectColor = new Color(.94f, .25f, .26f, .8f);
-            border.effectDistance = new Vector2(1, -1);
-
             var captionText = Label("Caption", button.transform, caption, font, 28);
+            captionText.color = new Color(.12f, .12f, .12f);
+            captionText.raycastTarget = false;
             Stretch(captionText.rectTransform);
 
             return button;

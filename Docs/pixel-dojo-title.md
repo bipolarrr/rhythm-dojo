@@ -1,5 +1,13 @@
 # Dojo entrance title
 
+## Temporary menu treatment
+
+The expanded menu currently uses three white 144 × 144 placeholders in a horizontal row to the right of the plaque, labeled 플레이 / 설정 / 종료 in Mona. Left/right keyboard navigation follows that row; Up returns to the plaque. These buttons use a brief input-locked press delay without the wooden fracture animation or crack sound. The original board assets and animation remain available for a later design decision. The board descriptions and captures below document that earlier treatment.
+
+![Temporary horizontal menu with Mona labels](dojo-entrance/temporary-menu.png)
+
+Verified with MainMenuTests 5/5 and MainMenuFlowTests 12/12, including a 4:3 expanded-menu capture. Full-suite and player-build checks were not repeated for this layout change.
+
 The title starts with closed wooden sliding doors. The existing game logo sits over a round carved wooden plaque. Only the logo artwork pulses with the music; the wooden plaque and start prompt retain their scale. The short knock rotation also applies only to the logo artwork. The whole plaque/logo assembly still moves left when opening the menu. Clicking or submitting the plaque gives a short wood knock and moves it left over 0.25 seconds, revealing three vertically stacked boards on the right. Clicking the plaque again collapses the menu. Transparent corners of the plaque and the background do not activate it.
 
 The boards read **플레이 / 설정 / 종료** in the artwork. A click locks the menu immediately, opens a jagged crack, and separates the original image into left/right pieces over 0.25 seconds. Settings and Quit execute only after the split. Returning from settings or canceling Quit restores all boards and the expanded menu.

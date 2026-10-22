@@ -310,6 +310,7 @@ namespace RhythmDojo.Tests
             Capture("Logs/main-menu-ultrawide.png", 2560, 1080);
             yield return OpenMenu();
             Capture("Logs/main-menu-expanded.png");
+            Capture("Logs/main-menu-expanded-4x3.png", 1024, 768);
             Capture("Logs/main-menu-expanded-ultrawide.png", 2560, 1080);
             view.logoGroup.alpha = 0f;
             view.menuPanel.alpha = 0f;
@@ -429,13 +430,9 @@ namespace RhythmDojo.Tests
             Assert.That(actions.Settings, Is.Zero);
             Assert.That(actions.Starts, Is.Zero);
             yield return new WaitForSecondsRealtime(.12f);
-            Assert.That(view.settings.GetComponent<Image>().enabled, Is.False);
-            Assert.That(view.settings.GetComponentInChildren<DojoBoardFragments>(), Is.Not.Null);
-            var fragments = view.settings.GetComponentInChildren<DojoBoardFragments>();
-            Assert.That(fragments.GetComponent<CanvasRenderer>(), Is.Not.Null);
-            Canvas.ForceUpdateCanvases();
-            var mesh = fragments.canvasRenderer.GetMesh();
-            Assert.That(mesh.vertexCount, Is.GreaterThan(0));
+            Assert.That(view.settings.GetComponent<Image>().enabled, Is.True);
+            Assert.That(view.settings.GetComponentInChildren<DojoBoardFragments>(), Is.Null);
+            Assert.That(view.settings.interactable, Is.False);
             Capture("Logs/main-menu-breaking.png");
             yield return new WaitForSecondsRealtime(.2f);
             Assert.That(actions.Settings, Is.EqualTo(1));

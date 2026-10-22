@@ -206,15 +206,19 @@ namespace RhythmDojo.UI
         private IEnumerator BreakAndInvoke(
             UnityEngine.UI.Button button, Action action, bool leaving)
         {
-            if (view.boardCrack)
-            {
-                effects.PlayOneShot(view.boardCrack, .7f);
-            }
-
             var board = button.GetComponent<DojoBoardBreak>();
             if (board)
             {
+                if (view.boardCrack)
+                {
+                    effects.PlayOneShot(view.boardCrack, .7f);
+                }
+
                 yield return board.Play();
+            }
+            else
+            {
+                yield return new WaitForSecondsRealtime(.25f);
             }
 
             if (leaving)

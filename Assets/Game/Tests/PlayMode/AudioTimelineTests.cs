@@ -7,6 +7,8 @@ using NUnit.Framework;
 using RhythmDojo.Authoring;
 using RhythmDojo.Application;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
 using RhythmDojo.Gameplay;
 using RhythmDojo.UI;
 using UnityEngine;
@@ -32,6 +34,7 @@ namespace RhythmDojo.Tests
             string root = Path.Combine(UnityEngine.Application.temporaryCachePath,
                 "AudioTimelineTests", Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(root);
+            var mouse = InputSystem.AddDevice<Mouse>();
             try
             {
                 string path = Path.Combine(root, "beats.wav");
@@ -102,17 +105,44 @@ namespace RhythmDojo.Tests
                 Assert.That(detail.FirstVisibleGridTime, Is.EqualTo(0.525).Within(1e-8));
                 Assert.That(buttons.Single(b => b.name == "Cursor Origin")
                     .GetComponentInChildren<Text>().text, Is.EqualTo("그리드 수정"));
+
+                // Select between existing grid lines through the actual UI input module.
+                double selectedTime = 0.737;
+                Rect area = detail.rectTransform.rect;
+                float x = area.xMin + (float)((selectedTime - timeline.WindowStart) / timeline.WindowDuration)
+                    * area.width;
+                yield return MouseClick(mouse, detail.rectTransform, new Vector2(x, area.center.y));
+                Assert.That(timeline.MusicTime, Is.EqualTo(selectedTime).Within(1e-5));
+                paused = timeline.MusicTime;
+                timeline.Zoom(1, paused);
+                timeline.Pan(0.42);
+                screen.GetComponent<ChartAudioTimelineView>().displayDensityControl.value = 5;
                 buttons.Single(b => b.name == "Grid Lock").onClick.Invoke();
-                buttons.Single(b => b.name == "Cursor Origin").onClick.Invoke();
+                yield return MouseClick(mouse, (RectTransform)buttons.Single(b => b.name == "Cursor Origin").transform);
                 Assert.That(timeline.Timing.TimeAtBeat(0), Is.EqualTo(0).Within(1e-8));
                 buttons.Single(b => b.name == "Grid Lock").onClick.Invoke();
-                buttons.Single(b => b.name == "Cursor Origin").onClick.Invoke();
-                Assert.That(timeline.Timing.TimeAtBeat(0), Is.EqualTo(0.625).Within(1e-8));
+                yield return MouseClick(mouse, (RectTransform)buttons.Single(b => b.name == "Cursor Origin").transform);
+                Assert.That(timeline.Timing.TimeAtBeat(0), Is.EqualTo(paused + timeline.AudioOffset).Within(1e-8));
                 Assert.That(timeline.MusicTime, Is.EqualTo(paused));
-                Assert.That(detail.FirstVisibleGridTime, Is.EqualTo(0.525).Within(1e-8));
                 Assert.That(screen.Session.GetNotes(screen.ChartId), Is.EqualTo(before));
+                yield return null;
+                Capture(screen, "Logs/grid-cursor-origin.png");
                 screen.Session.Undo();
                 Assert.That(timeline.Timing.TimeAtBeat(0), Is.EqualTo(0).Within(1e-8));
+                screen.Session.Redo();
+                Assert.That(timeline.Timing.TimeAtBeat(0), Is.EqualTo(paused + timeline.AudioOffset).Within(1e-8));
+                screen.Session.Undo();
+
+                Click(play);
+                yield return new WaitForSecondsRealtime(0.18f);
+                double beforeClick = timeline.MusicTime;
+                Click(buttons.Single(b => b.name == "Cursor Origin"));
+                double afterClick = timeline.MusicTime;
+                Assert.That(timeline.Timing.TimeAtBeat(0) - timeline.AudioOffset,
+                    Is.InRange(beforeClick, afterClick));
+                Assert.That(beforeClick, Is.GreaterThan(paused));
+                Click(play);
+                screen.Session.Undo();
                 screen.ResetView();
                 timeline.Seek(0.75);
                 yield return null;
@@ -268,6 +298,7 @@ namespace RhythmDojo.Tests
             }
             finally
             {
+                InputSystem.RemoveDevice(mouse);
                 // Unload and release the clip before the fixture removes its private files.
                 screen.Session.Edit(edit => edit.SetAudio(null));
                 if (Directory.Exists(root))
@@ -297,6 +328,19 @@ namespace RhythmDojo.Tests
             {
                 Object.Destroy(mesh);
             }
+        }
+
+        private static IEnumerator MouseClick(Mouse mouse, RectTransform rect, Vector2? local = null)
+        {
+            Canvas.ForceUpdateCanvases();
+            Vector2 point = RectTransformUtility.WorldToScreenPoint(null,
+                rect.TransformPoint(local ?? rect.rect.center));
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = point });
+            yield return null;
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = point }.WithButton(MouseButton.Left));
+            yield return null;
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = point });
+            yield return null;
         }
 
         private static void Click(Button button)
