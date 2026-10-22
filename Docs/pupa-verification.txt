@@ -1,0 +1,51 @@
+PUPA bundled chart verification — 2026-10-22
+
+Delivery
+- Template: Assets/Game/Resources/Authoring/Pupa.json (v3, audio: null).
+- Standard: 929 notes, comprising 900 taps and 29 holds; 202 BPM.
+- Audio offset: 0 seconds. Grid origin: 0.4833333333333334 seconds.
+- Source: https://www.youtube.com/watch?v=oeoJT20YcGM
+  BROKENPASTEL, [DJMAX RESPECT V] PUPA 4B HD 12, 1920x1080, 60 fps.
+- The uploader lists 932 notes. The four-lane chart preserves 929 and
+  excludes 3 side-track notes, recorded in pupa-excluded-side-notes.csv.
+- pupa-note-provenance.csv records every retained note's lane, kind,
+  WAV times, readable source frame and judgment-line boundary frames.
+  Source frames are zero-based. Video seconds = WAV seconds + 1.2.
+  Timing resolution is one source frame (1/60 second), not sub-frame.
+- No duplicate starts or overlapping notes in the same lane were found.
+- Chords were grouped from equal visible head positions, without beat
+  snapping, lane rearrangement, note removal for difficulty or chord caps.
+
+Checks executed in Unity 6000.3.23f1
+- ChartEditorMenuTests: 5/5 passed. Includes the bundled PUPA import,
+  missing-audio failure, prior-draft preservation, fresh project IDs,
+  exact template-note preservation, save/load and playtest return.
+- Smoke: 3 passed initially; keyboard navigation failed because it assumed
+  that Tempo Shift always follows Foundation Pulse, ignoring saved songs.
+  The assertion now uses the next visible row. The failing method
+  KeyboardNavigationAndStartRestartFocusLossUseActualActions passed on
+  focused rerun (1/1). The other three passing tests were not repeated.
+- Before packaging, the saved transcription was validated through the
+  existing playback adapter and compared against all reloaded notes.
+- One Undo restored the 550-note baseline; Redo restored the transcription.
+- Full chart simulation: Automatic and Release hold-end modes both reached
+  Completed, 1109 Perfect judgments, 0 Good, 0 Miss. Judgment totals include
+  this game's hold ticks and are not DJMAX's displayed combo count.
+- The staged PUPA scene addition was loaded in a Unity preview scene;
+  callback target/method, button dimensions and storage hint were checked.
+- Source and metadata compilation completed without errors.
+
+Limits
+- The real-time virtual-keyboard run was interrupted at 54.6767 seconds
+  and had input misses before interruption. It is NOT a full-song pass.
+- No full test suite or Windows build was run for this content/import change.
+- Raw frames, downloaded video, WAV, prior-project backups and detailed
+  local analysis remain under Logs/pupa-djmax; they are not Git assets.
+- The separately opened 550-note draft was backed up and saved before
+  loading the original saved PUPA project for replacement.
+
+Use
+Provide the matching WAV as LocalAudio/PUPA.wav, open ChartEditor, choose
+File > PUPA audio + chart, then Save. Each import creates a new song project.
+The template contains no audio and does not automatically register a playable
+song when the local WAV is absent. See chart-format-v1.md for setup details.
