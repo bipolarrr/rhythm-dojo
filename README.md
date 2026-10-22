@@ -1,7 +1,7 @@
 <h1 align="center">리듬도장 · Rhythm Dojo</h1>
 
 <p align="center">
-  네 개의 키로 두드리는 리듬, 직접 만드는 채보.
+  리듬게임이 뭔지 모르는 사람에게도 기초부터 심화까지 수련 할 수 있는 포근한 도장이 되고 싶습니다.
 </p>
 
 <p align="center">
