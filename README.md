@@ -1,6 +1,27 @@
-# Rhythm Dojo
+<h1 align="center">리듬도장 · Rhythm Dojo</h1>
 
-**소개** · [실행·조작](Docs/getting-started.md) · [개발 안내](Docs/development.md)
+<p align="center">
+  네 개의 키로 두드리는 리듬, 직접 만드는 채보.
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/4_KEY-RHYTHM_GAME-9e352d?style=flat-square" alt="4키 리듬 게임">
+  <img src="https://img.shields.io/badge/Unity-6000.3.23f1-333333?style=flat-square&amp;logo=unity&amp;logoColor=white" alt="Unity 6000.3.23f1">
+  <img src="https://img.shields.io/badge/상태-개발_중-b88746?style=flat-square" alt="개발 중">
+</p>
+
+<p align="center">
+  <a href="#소개">소개</a> &nbsp; / &nbsp;
+  <a href="Docs/getting-started.md">실행·조작</a> &nbsp; / &nbsp;
+  <a href="Docs/development.md">개발 안내</a> &nbsp; / &nbsp;
+  <a href="https://github.com/bipolarrr/rhythm-dojo/issues">버그·제안</a>
+</p>
+
+<p align="center">
+  <img src="Docs/dojo-entrance/closed.png" width="960" alt="리듬도장 타이틀 화면 — 나무 문 중앙의 현판을 두드려 시작">
+</p>
+
+## 소개
 
 Rhythm Dojo는 도장을 배경으로 하는 **4레인 키보드 리듬 게임**입니다. 음악에 맞춰 D · F · J · K 키로 노트를 치고, 롱노트는 길게 눌러 콤보와 점수를 쌓습니다.
 
