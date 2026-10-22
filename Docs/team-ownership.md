@@ -73,7 +73,7 @@
 - 최초 준비·검증 곡 재생성: **Game Tools > Content > Prepare Default and Verification Content**. 이 명령은 이름이 정해진 두 검증 채보를 재생성한다. `DefaultSettingsBuilder`, `TestContentBuilder`, `PresentationAssetBuilder`가 각각 설정·검증 곡·표현 리소스를 준비한다.
 - 생성된 `.unity`는 빌더 출력물이다. 수동 편집을 원본으로 삼지 않는다. 공통 `SceneBuilder`, `SceneDependencyAssembler`, 씬 등록은 ④가 통합한다.
 - 파일 이동 시 `.meta`를 함께 이동한다. 기존 씬 경로와 에셋 경로는 유지한다.
-- Unity 에디터를 닫고 README의 배치 검증을 실행한다. 새 회귀 테스트는 `TeamBoundaryTests`와 `GameplayFlowTests`에 있다.
+- 배치 검증은 Unity 에디터를 닫고 [검증 안내](verification.md)의 절차에 따라 실행한다. 새 회귀 테스트는 `TeamBoundaryTests`와 `GameplayFlowTests`에 있다.
 
 ## 이번 범위 밖
 
