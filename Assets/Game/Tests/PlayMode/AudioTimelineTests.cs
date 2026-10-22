@@ -63,6 +63,7 @@ namespace RhythmDojo.Tests
 
                 Assert.That(timeline.Peaks?.Ready, Is.True, "Imported audio should decode and generate peaks.");
                 Assert.That(timeline.Duration, Is.EqualTo(4).Within(0.001));
+                Assert.That(timeline.Duration, Is.EqualTo((44100.0 * 4 + 17) / 44100).Within(1e-12));
                 timeline.Seek(0.75);
                 Assert.That(timeline.MusicTime, Is.EqualTo(0.75).Within(0.001));
                 Assert.That(screen.ScrollBeatOffset,
@@ -91,6 +92,13 @@ namespace RhythmDojo.Tests
                 timeline.Pan(0.42);
                 var detail = screen.GetComponentInParent<Canvas>()
                     .GetComponentsInChildren<AudioTimelineGraphic>().Single(wave => !wave.Overview);
+                var originalSize = detail.rectTransform.sizeDelta;
+                detail.rectTransform.sizeDelta = originalSize + new Vector2(-137.25f, 0);
+                detail.SetVerticesDirty();
+                Canvas.ForceUpdateCanvases();
+                Assert.That(timeline.MusicTime, Is.EqualTo(paused));
+                Assert.That(screen.Session.GetNotes(screen.ChartId), Is.EqualTo(before));
+                detail.rectTransform.sizeDelta = originalSize;
                 Assert.That(detail.FirstVisibleGridTime, Is.EqualTo(0.525).Within(1e-8));
                 Assert.That(buttons.Single(b => b.name == "Cursor Origin")
                     .GetComponentInChildren<Text>().text, Is.EqualTo("그리드 수정"));
@@ -109,6 +117,7 @@ namespace RhythmDojo.Tests
                 timeline.Seek(0.75);
                 yield return null;
                 Capture(screen, "Logs/grid-timeline.png");
+                Assert.That(detail.ShowsSamples, Is.False);
                 Assert.That(buttons.Any(b => b.name == "Grid Undo"), Is.False);
                 Assert.That(buttons.Any(b => b.name == "Grid Redo"), Is.False);
                 Assert.That(buttons.Any(b => b.name == "Advanced Grid"), Is.True);
@@ -218,6 +227,44 @@ namespace RhythmDojo.Tests
                         Is.EqualTo(0).Within(1e-8), "The viewport must still start at valid chart time zero.");
                 }
 
+                for (int i = 0; i < 32; i++)
+                {
+                    timeline.Zoom(1, 0);
+                }
+
+                timeline.Seek(0.005);
+                yield return null;
+                Capture(screen, "Logs/waveform-detail.png");
+                Assert.That(detail.ShowsSamples, Is.True);
+                var beforeSampleZoom = screen.Session.Snapshot;
+                for (int i = 0; i < 24; i++)
+                {
+                    timeline.Zoom(1, 0.005);
+                }
+
+                Assert.That(timeline.MusicTime, Is.EqualTo(0.005));
+                yield return null;
+                Canvas.ForceUpdateCanvases();
+                Assert.That(detail.ShowsSamples, Is.True);
+                Assert.That(ProjectValidation.ContentEquals(beforeSampleZoom, screen.Session.Snapshot), Is.True);
+                AssertSampleVertex(detail, timeline);
+                Capture(screen, "Logs/waveform-samples.png");
+
+                timeline.Seek(1);
+                double anchor = timeline.WindowStart + timeline.WindowDuration * 0.5;
+                double fractionAfterZoom = (anchor - timeline.WindowStart) / timeline.WindowDuration;
+                for (int i = 0; i < 32; i++)
+                {
+                    timeline.Zoom(-1, anchor);
+                    Assert.That((anchor - timeline.WindowStart) / timeline.WindowDuration,
+                        Is.EqualTo(fractionAfterZoom).Within(1e-8));
+                }
+
+                yield return null;
+                Canvas.ForceUpdateCanvases();
+                Assert.That(detail.ShowsSamples, Is.False);
+                Assert.That(timeline.MusicTime, Is.EqualTo(1));
+                Assert.That(ProjectValidation.ContentEquals(beforeSampleZoom, screen.Session.Snapshot), Is.True);
             }
             finally
             {
@@ -227,6 +274,28 @@ namespace RhythmDojo.Tests
                 {
                     Directory.Delete(root, true);
                 }
+            }
+        }
+
+        private static void AssertSampleVertex(AudioTimelineGraphic detail, ChartAudioTimeline timeline)
+        {
+            var mesh = Object.Instantiate(detail.canvasRenderer.GetMesh());
+            try
+            {
+                int frame = (int)Math.Floor(timeline.WindowStart * timeline.Peaks.Frequency) + 3;
+                // Four background vertices, then four vertices per sample-line cross section.
+                // Node zero is the interpolated viewport edge; node three is this real PCM frame.
+                Vector3 center = (mesh.vertices[17] + mesh.vertices[18]) * 0.5f;
+                Rect area = detail.rectTransform.rect;
+                double time = (double)frame / timeline.Peaks.Frequency;
+                float x = area.xMin + (float)((time - timeline.WindowStart) / timeline.WindowDuration) * area.width;
+                float y = area.center.y + timeline.Peaks.Sample(frame, 0) * area.height * 0.44f;
+                Assert.That(center.x, Is.EqualTo(x).Within(0.001));
+                Assert.That(center.y, Is.EqualTo(y).Within(0.001));
+            }
+            finally
+            {
+                Object.Destroy(mesh);
             }
         }
 
@@ -241,7 +310,7 @@ namespace RhythmDojo.Tests
         private static void WriteWave(string path)
         {
             const int frequency = 44100;
-            const int frames = frequency * 4;
+            const int frames = frequency * 4 + 17;
             using var writer = new BinaryWriter(File.Create(path));
             writer.Write(System.Text.Encoding.ASCII.GetBytes("RIFF"));
             writer.Write(36 + frames * 2);

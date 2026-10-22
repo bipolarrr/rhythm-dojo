@@ -70,7 +70,18 @@ namespace RhythmDojo.Authoring
         public double WindowDuration { get; private set; } = 8;
         public double DisplayStep { get; private set; } = 0.25;
         public double AudioOffset => snapshot?.AudioOffsetSeconds ?? 0;
-        public double Duration => source?.clip?.length ?? 0;
+        public double Duration
+        {
+            get
+            {
+                if (!source || !source.clip)
+                {
+                    return 0;
+                }
+
+                return (double)source.clip.samples / source.clip.frequency;
+            }
+        }
         public bool IsBusy => !screen || screen.IsBusy || loadingAudio;
 
         public double MusicTime
@@ -486,7 +497,13 @@ namespace RhythmDojo.Authoring
 
             follow = false;
             double fraction = (anchorTime - WindowStart) / WindowDuration;
-            WindowDuration = Math.Max(0.02, Math.Min(Math.Max(8, Duration),
+            double minimumDuration = 0.001;
+            if (source.clip)
+            {
+                minimumDuration = 16.0 / source.clip.frequency;
+            }
+
+            WindowDuration = Math.Max(minimumDuration, Math.Min(Math.Max(8, Duration),
                 WindowDuration * Math.Pow(0.8, Math.Sign(steps))));
             WindowStart = Math.Max(0, anchorTime - fraction * WindowDuration);
             SyncChart(WindowStart);

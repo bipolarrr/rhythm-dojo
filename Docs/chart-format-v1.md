@@ -28,6 +28,8 @@ v3는 `timing.grid`를 필수로 추가합니다. [v3 JSON Schema](rdchart-v3.sc
 
 `ChartProjectionRenderingTests`는 610×337과 1280×720에서 여러 줌 및 0.5박 이동의 실제 Unity 렌더링을 `Logs/chart-projection/`에 저장한다. `BeatProjectionTests`는 시간↔박자 및 화면↔박자 왕복을 검증하고, `ChartEditorScreenTests`와 `ChartEditorMenuTests`는 입력 및 저장·불러오기·테스트 플레이 복귀를 검증한다.
 
+오디오 파형은 공유 정점을 연결한 연속 min/max 외곽선과 그라데이션 채움, 화면 1픽셀의 알파 경계로 그린다. 64프레임 단위 피크 피라미드는 넓은 구간 조회를 가속하고, 모든 배율에서 [시작, 끝) 구간에 해당하는 샘플 시각 n/샘플레이트를 조회한다. 구간 내부의 완전한 피크 묶음만 집계하고 잘린 양 끝은 PCM 읽기 캐시로 확인한다. 전체 보기와 상세 보기의 표시 열은 음원/생성 버전/표시 구간/해상도를 키로 캐시하므로 재생 커서만 이동할 때는 재분석하지 않는다. 한 표시 픽셀당 샘플이 하나 이하이면 채움 대신 실제 샘플을 연결한 채널별 선으로 전환한다. 화면 양 끝은 인접 샘플 사이에서 선형 보간하고 음원 범위 밖의 샘플을 만들지 않는다. 최소 확대 구간은 16샘플이다. 범위 밖의 상위 피크 묶음을 포함하지 않는다. 주파수 색상은 64프레임 집계이며 진폭과 별개다. 피크 채움은 채널 전체의 진폭 범위를, 샘플 연결선은 채널별 값을 표시하므로 스테레오 반대 위상도 상쇄되지 않는다. 파형의 표시 열이나 화면 픽셀은 음악 시간의 저장 단위가 아니다. 음원 길이는 AudioClip.length 대신 샘플 수/샘플레이트로 계산한다. 미리듣기는 DSP 시계와 샘플 위치, 채보와 그리드는 double 초·박자 좌표를 사용한다. `WaveformPeaksTests`는 경계 피크·부분 마지막 블록·색상을, `AudioTimelineTests`는 탐색·확대·재생 및 화면 폭 변경 시 시간과 노트 보존을 검증한다.
+
 ## 파일 계약
 
 UTF-8(BOM 없음), LF, 2칸 들여쓰기와 마지막 줄바꿈을 사용한다. 경로는 `<persistentDataPath>/Songs/<song UUID>/project.rdchart.json`이며 음원은 같은 폴더의 `audio/<SHA-256>.<extension>`이다. 저장 루트는 생성자에서 주입한다. 동일한 문서 내용은 동일한 JSON을 생성한다. 예제는 [완성 채보](examples/complete.rdchart.json), [초안](examples/draft.rdchart.json), 구조는 [JSON Schema](rdchart-v1.schema.json)를 참고한다. 예제의 음원은 별도로 제공해야 한다.
