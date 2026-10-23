@@ -321,6 +321,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Smoke")]
         public IEnumerator ReturnButtonInReadyStateLoadsSongSelectionAndReleasesSong()
         {
             yield return LoadGameplay();

@@ -312,6 +312,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Smoke")]
         public IEnumerator MouseClickUsesUiInputModuleToLoadSong()
         {
             CaptureSelection();

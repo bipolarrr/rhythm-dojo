@@ -18,6 +18,7 @@ namespace RhythmDojo.UI
             timingLabel,
             emptyMessage;
         public bool pixelTheme;
+        public RectTransform[] entrancePanels;
         public Image album;
         public Sprite fallbackCover;
         public Sprite legacyFallbackCover;

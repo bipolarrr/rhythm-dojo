@@ -1,0 +1,4715 @@
+{
+  "format": "rhythm-dojo-chart",
+  "version": 3,
+  "song": {
+    "id": "0349e961-3846-4eb0-bf80-63209e44e6e4",
+    "title": "PUPA",
+    "artist": "モリモリあつし",
+    "audio": null
+  },
+  "timing": {
+    "audioOffsetSeconds": 0.0,
+    "tempoPoints": [
+      {
+        "timeSeconds": 0.0,
+        "bpm": 202.0
+      }
+    ],
+    "grid": {
+      "originSeconds": 0.4833333333333334,
+      "meters": [
+        {
+          "timeSeconds": 0.0,
+          "numerator": 4,
+          "denominator": 4
+        }
+      ]
+    }
+  },
+  "charts": [
+    {
+      "id": "77c2be0e-b25c-4544-888f-e30a94d3d895",
+      "name": "Standard",
+      "modeId": "FourLaneMode",
+      "laneCount": 4,
+      "completionTimeSeconds": 131.5410625,
+      "notes": [
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 0.4833333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 0.6333333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 0.7833333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 0.7833333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 0.9333333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 1.0833333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 1.2333333333333332
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 1.2333333333333332
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 1.3833333333333335
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 1.5166666666666668
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 1.6666666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 1.6666666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 2.8499999999999996
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 3.0
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 3.166666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 3.166666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 3.3
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 3.45
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 3.6166666666666663
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 3.6166666666666663
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 3.75
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 3.8999999999999995
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 4.05
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 4.05
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 5.233333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 5.383333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 5.533333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 5.533333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 5.683333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 5.833333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 5.983333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 5.983333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 6.133333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 6.283333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 6.433333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 6.433333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 7.616666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 7.766666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 7.916666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 7.916666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 8.05
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 8.200000000000001
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 8.350000000000001
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 8.350000000000001
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 8.516666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 8.65
+        },
+        {
+          "kind": "hold",
+          "lane": 0,
+          "timeSeconds": 8.8,
+          "endTimeSeconds": 9.166666666666668
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 8.8
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 9.25
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 9.316666666666668
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 9.4
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 9.466666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 9.533333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 9.616666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 9.683333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 9.766666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 9.833333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 9.916666666666668
+        },
+        {
+          "kind": "hold",
+          "lane": 3,
+          "timeSeconds": 9.983333333333334,
+          "endTimeSeconds": 10.200000000000001
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 10.283333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 10.283333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 10.583333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 10.733333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 10.8
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 10.883333333333335
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 11.033333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 11.333333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 11.483333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 11.616666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 11.766666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 11.916666666666668
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 12.0
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 12.066666666666668
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 12.216666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 12.366666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 12.516666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 12.816666666666668
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 12.966666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 13.100000000000001
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 13.25
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 13.333333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 13.4
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 13.55
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 13.700000000000001
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 13.850000000000001
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 13.850000000000001
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 14.0
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 14.0
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 14.3
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 14.3
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 14.450000000000001
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 14.516666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 14.600000000000001
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 14.666666666666668
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 14.75
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 14.816666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 14.900000000000002
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 14.966666666666669
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 15.033333333333335
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 15.033333333333335
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 15.333333333333336
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 15.483333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 15.566666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 15.633333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 15.783333333333335
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 16.083333333333336
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 16.21666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 16.366666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 16.516666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 16.666666666666668
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 16.75
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 16.816666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 16.96666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 17.116666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 17.266666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 17.416666666666668
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 17.5
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 17.566666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 17.633333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 17.71666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 17.783333333333335
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 17.866666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 17.933333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 18.016666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 18.083333333333336
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 18.166666666666668
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 18.233333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 18.3
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 18.3
+        },
+        {
+          "kind": "hold",
+          "lane": 1,
+          "timeSeconds": 18.45,
+          "endTimeSeconds": 19.033333333333335
+        },
+        {
+          "kind": "hold",
+          "lane": 2,
+          "timeSeconds": 18.45,
+          "endTimeSeconds": 19.033333333333335
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 19.2
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 19.3
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 19.400000000000002
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 19.5
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 19.6
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 19.683333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 19.8
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 19.8
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 19.933333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 20.083333333333336
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 20.166666666666668
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 20.383333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 20.383333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 20.6
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 20.683333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 20.833333333333336
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 20.983333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 21.133333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 21.283333333333335
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 21.35
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 21.566666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 21.566666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 21.8
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 21.866666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 22.016666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 22.166666666666668
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 22.316666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 22.46666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 22.533333333333335
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 22.766666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 22.766666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 23.0
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 23.066666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 23.21666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 23.35
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 23.5
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 23.650000000000002
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 23.733333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 23.95
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 23.95
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 24.166666666666668
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 24.25
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 24.400000000000002
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 24.55
+        },
+        {
+          "kind": "hold",
+          "lane": 2,
+          "timeSeconds": 24.55,
+          "endTimeSeconds": 24.75
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 24.833333333333336
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 24.833333333333336
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 24.983333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 25.133333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 25.283333333333335
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 25.433333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 25.583333333333336
+        },
+        {
+          "kind": "hold",
+          "lane": 1,
+          "timeSeconds": 25.733333333333334,
+          "endTimeSeconds": 26.833333333333336
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 25.733333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 26.033333333333335
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 26.316666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 26.633333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 26.916666666666668
+        },
+        {
+          "kind": "hold",
+          "lane": 2,
+          "timeSeconds": 26.916666666666668,
+          "endTimeSeconds": 27.133333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 27.21666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 27.21666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 27.366666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 27.516666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 27.666666666666668
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 27.816666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 27.96666666666667
+        },
+        {
+          "kind": "hold",
+          "lane": 1,
+          "timeSeconds": 28.1,
+          "endTimeSeconds": 29.2
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 28.1
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 28.400000000000002
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 28.7
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 28.783333333333335
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 28.933333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 29.0
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 29.150000000000002
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 29.3
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 29.3
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 29.45
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 29.6
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 29.666666666666668
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 29.883333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 29.883333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 30.116666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 30.183333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 30.333333333333336
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 30.483333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 30.633333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 30.783333333333335
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 30.86666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 31.066666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 31.066666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 31.3
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 31.383333333333336
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 31.51666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 31.666666666666668
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 31.816666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 31.966666666666665
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 32.03333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 32.266666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 32.266666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 32.48333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 32.56666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 32.71666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 32.86666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 33.0
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 33.15
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 33.23333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 33.449999999999996
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 33.449999999999996
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 33.53333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 33.68333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 33.75
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 33.9
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 33.9
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 34.05
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 34.05
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 34.11666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 34.199999999999996
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 34.266666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 34.349999999999994
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 34.43333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 34.5
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 34.56666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 34.63333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 34.71666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 34.78333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 34.86666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 34.93333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 35.016666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 35.08333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 35.166666666666664
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 35.23333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 35.31666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 35.38333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 35.46666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 35.53333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 35.599999999999994
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 35.68333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 35.75
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 35.83333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 35.9
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 35.98333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 36.05
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 36.13333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 36.199999999999996
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 36.266666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 36.349999999999994
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 36.416666666666664
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 36.416666666666664
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 36.71666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 36.71666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 36.86666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 36.86666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 37.166666666666664
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 37.166666666666664
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 37.46666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 37.46666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 37.61666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 37.68333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 37.766666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 37.83333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 37.9
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 37.98333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 38.06666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 38.13333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 38.199999999999996
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 38.28333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 38.349999999999994
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 38.43333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 38.5
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 38.56666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 38.65
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 38.71666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 38.8
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 38.8
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 38.949999999999996
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 39.099999999999994
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 39.25
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 39.4
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 39.53333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 39.68333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 39.83333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 39.98333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 40.13333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 40.28333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 40.43333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 41.18333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 41.18333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 41.31666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 41.46666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 41.61666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 41.766666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 41.916666666666664
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 42.06666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 42.21666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 42.36666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 42.516666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 42.666666666666664
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 42.8
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 42.949999999999996
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 42.949999999999996
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 43.099999999999994
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 43.099999999999994
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 43.55
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 43.55
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 43.699999999999996
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 43.849999999999994
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 44.0
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 44.15
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 44.3
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 44.43333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 44.58333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 44.73333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 44.88333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 45.03333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 45.199999999999996
+        },
+        {
+          "kind": "hold",
+          "lane": 3,
+          "timeSeconds": 45.33333333333333,
+          "endTimeSeconds": 45.83333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 45.93333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 45.93333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 46.08333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 46.21666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 46.36666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 46.516666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 46.666666666666664
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 46.81666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 46.96666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 47.11666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 47.266666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 47.416666666666664
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 47.56666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 47.71666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 47.71666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 47.849999999999994
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 47.849999999999994
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 48.3
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 48.3
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 48.599999999999994
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 48.75
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 48.75
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 49.05
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 49.199999999999996
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 49.199999999999996
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 49.48333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 49.63333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 49.63333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 49.93333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 50.08333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 50.08333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 50.38333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 50.38333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 50.68333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 50.68333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 50.98333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 51.13333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 51.13333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 51.416666666666664
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 51.56666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 51.56666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 51.86666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 52.016666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 52.016666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 52.31666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 52.46666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 52.46666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 52.61666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 52.75
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 52.75
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 52.9
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 53.05
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 53.05
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 53.349999999999994
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 53.5
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 53.5
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 53.8
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 53.949999999999996
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 53.949999999999996
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 54.25
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 54.4
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 54.4
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 54.68333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 54.83333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 54.83333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 55.13333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 55.199999999999996
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 55.28333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 55.349999999999994
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 55.43333333333333
+        },
+        {
+          "kind": "hold",
+          "lane": 3,
+          "timeSeconds": 55.43333333333333,
+          "endTimeSeconds": 56.38333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 55.58333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 55.73333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 55.88333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 56.03333333333333
+        },
+        {
+          "kind": "hold",
+          "lane": 0,
+          "timeSeconds": 56.166666666666664,
+          "endTimeSeconds": 56.38333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 56.46666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 56.46666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 56.766666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 56.766666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 56.916666666666664
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 56.916666666666664
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 57.06666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 57.06666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 57.21666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 57.21666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 57.28333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 57.28333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 57.36666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 57.36666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 57.8
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 58.099999999999994
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 58.25
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 58.4
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 58.61666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 58.849999999999994
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 59.0
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 59.23333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 59.449999999999996
+        },
+        {
+          "kind": "hold",
+          "lane": 2,
+          "timeSeconds": 59.599999999999994,
+          "endTimeSeconds": 59.949999999999996
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 60.03333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 60.099999999999994
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 60.18333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 60.48333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 60.63333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 60.78333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 61.0
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 61.21666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 61.36666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 61.666666666666664
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 61.81666666666666
+        },
+        {
+          "kind": "hold",
+          "lane": 1,
+          "timeSeconds": 61.96666666666666,
+          "endTimeSeconds": 62.31666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 62.416666666666664
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 62.48333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 62.56666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 62.849999999999994
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 63.0
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 63.14999999999999
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 63.36666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 63.599999999999994
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 63.75
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 63.96666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 64.18333333333334
+        },
+        {
+          "kind": "hold",
+          "lane": 2,
+          "timeSeconds": 64.33333333333333,
+          "endTimeSeconds": 64.7
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 64.78333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 64.86666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 64.93333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 65.23333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 65.38333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 65.53333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 65.75
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 65.96666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 66.13333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 66.35
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 66.56666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 66.71666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 67.16666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 67.23333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 67.31666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 67.31666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 67.61666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 67.75
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 67.89999999999999
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 68.13333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 68.35
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 68.5
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 68.71666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 68.95
+        },
+        {
+          "kind": "hold",
+          "lane": 3,
+          "timeSeconds": 69.1,
+          "endTimeSeconds": 69.38333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 69.53333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 69.61666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 69.68333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 69.68333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 69.98333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 70.13333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 70.28333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 70.5
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 70.71666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 70.86666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 71.1
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 71.31666666666666
+        },
+        {
+          "kind": "hold",
+          "lane": 0,
+          "timeSeconds": 71.46666666666667,
+          "endTimeSeconds": 71.75
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 71.91666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 71.98333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 72.06666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 72.06666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 72.36666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 72.5
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 72.64999999999999
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 72.88333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 72.95
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 73.1
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 73.25
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 73.25
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 73.46666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 73.7
+        },
+        {
+          "kind": "hold",
+          "lane": 3,
+          "timeSeconds": 73.85,
+          "endTimeSeconds": 74.13333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 74.13333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 74.28333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 74.36666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 74.43333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 74.43333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 74.58333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 74.73333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 74.73333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 74.88333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 74.88333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 75.03333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 75.03333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 75.18333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 75.25
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 75.33333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 75.48333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 75.48333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 75.91666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 75.91666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 76.21666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 76.21666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 76.51666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 76.51666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 76.81666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 76.81666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 77.11666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 77.11666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 77.26666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 77.39999999999999
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 77.39999999999999
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 77.63333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 77.7
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 77.85
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 78.0
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 78.0
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 78.21666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 78.3
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 78.45
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 78.6
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 78.6
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 78.81666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 78.89999999999999
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 79.03333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 79.11666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 79.2
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 79.2
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 79.48333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 79.48333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 79.63333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 79.78333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 79.78333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 80.0
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 80.08333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 80.23333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 80.38333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 80.38333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 80.6
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 80.66666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 80.81666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 80.96666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 80.96666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 81.11666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 81.2
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 81.26666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 81.41666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 81.48333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 81.56666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 81.56666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 81.86666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 81.86666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 82.01666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 82.14999999999999
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 82.14999999999999
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 82.38333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 82.45
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 82.6
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 82.75
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 82.75
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 82.98333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 83.05
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 83.2
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 83.35
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 83.35
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 83.56666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 83.64999999999999
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 83.8
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 83.95
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 83.95
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 84.16666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 84.16666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 84.38333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 84.38333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 84.53333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 84.53333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 84.76666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 84.76666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 84.98333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 84.98333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 85.13333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 85.13333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 85.35
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 85.35
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 85.56666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 85.56666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 85.71666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 85.71666666666667
+        },
+        {
+          "kind": "hold",
+          "lane": 1,
+          "timeSeconds": 86.01666666666667,
+          "endTimeSeconds": 86.23333333333333
+        },
+        {
+          "kind": "hold",
+          "lane": 2,
+          "timeSeconds": 86.01666666666667,
+          "endTimeSeconds": 86.23333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 86.31666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 86.31666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 86.61666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 86.61666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 86.76666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 86.91666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 86.91666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 87.13333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 87.2
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 87.35
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 87.5
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 87.5
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 87.73333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 87.8
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 87.95
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 88.1
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 88.1
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 88.31666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 88.39999999999999
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 88.55
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 88.61666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 88.7
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 88.7
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 88.98333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 88.98333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 89.13333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 89.28333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 89.28333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 89.51666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 89.58333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 89.73333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 89.88333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 89.88333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 90.1
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 90.1
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 90.33333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 90.33333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 90.46666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 90.46666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 90.7
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 90.7
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 90.91666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 90.91666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 91.08333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 91.16666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 91.26666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 91.36666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 91.46666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 91.56666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 91.66666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 91.76666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 91.86666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 91.96666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 92.05
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 92.14999999999999
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 92.25
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 92.35
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 92.45
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 92.55
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 92.64999999999999
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 92.75
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 92.85
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 92.93333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 93.0
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 93.06666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 93.14999999999999
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 93.21666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 93.3
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 93.36666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 93.45
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 93.45
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 93.66666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 93.66666666666666
+        },
+        {
+          "kind": "hold",
+          "lane": 0,
+          "timeSeconds": 93.88333333333333,
+          "endTimeSeconds": 94.1
+        },
+        {
+          "kind": "hold",
+          "lane": 3,
+          "timeSeconds": 93.88333333333333,
+          "endTimeSeconds": 94.1
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 94.18333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 94.33333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 94.48333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 94.63333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 94.63333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 94.85
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 94.85
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 95.08333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 95.08333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 95.23333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 95.23333333333333
+        },
+        {
+          "kind": "hold",
+          "lane": 1,
+          "timeSeconds": 95.51666666666667,
+          "endTimeSeconds": 95.73333333333333
+        },
+        {
+          "kind": "hold",
+          "lane": 2,
+          "timeSeconds": 95.51666666666667,
+          "endTimeSeconds": 95.73333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 95.81666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 95.81666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 96.11666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 96.26666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 96.33333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 96.41666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 96.56666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 96.85
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 97.0
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 97.14999999999999
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 97.3
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 97.45
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 97.53333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 97.6
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 97.75
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 97.89999999999999
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 98.05
+        },
+        {
+          "kind": "hold",
+          "lane": 0,
+          "timeSeconds": 98.2,
+          "endTimeSeconds": 100.18333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 98.2
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 98.63333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 99.08333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 99.53333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 99.98333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 100.26666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 100.26666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 100.41666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 100.56666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 100.56666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 100.86666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 101.01666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 101.08333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 101.16666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 101.31666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 101.61666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 101.76666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 101.91666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 102.06666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 102.2
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 102.28333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 102.35
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 102.5
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 102.64999999999999
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 102.8
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 102.95
+        },
+        {
+          "kind": "hold",
+          "lane": 3,
+          "timeSeconds": 102.95,
+          "endTimeSeconds": 104.05
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 103.39999999999999
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 103.85
+        },
+        {
+          "kind": "hold",
+          "lane": 1,
+          "timeSeconds": 104.13333333333333,
+          "endTimeSeconds": 104.35
+        },
+        {
+          "kind": "hold",
+          "lane": 2,
+          "timeSeconds": 104.13333333333333,
+          "endTimeSeconds": 104.35
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 104.43333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 104.43333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 104.73333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 104.73333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 105.03333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 105.03333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 105.33333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 105.33333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 105.48333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 105.63333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 105.63333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 105.76666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 105.91666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 105.91666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 106.06666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 106.21666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 106.21666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 106.36666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 106.51666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 106.51666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 106.66666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 106.81666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 106.81666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 106.96666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 107.11666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 107.11666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 107.25
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 107.39999999999999
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 107.39999999999999
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 107.55
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 107.7
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 107.7
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 107.85
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 108.0
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 108.0
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 108.14999999999999
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 108.3
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 108.3
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 108.45
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 108.6
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 108.6
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 108.75
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 108.89999999999999
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 108.98333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 109.08333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 109.18333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 109.28333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 109.38333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 109.48333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 109.58333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 109.68333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 109.78333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 109.88333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 109.98333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 110.08333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 110.08333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 110.23333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 110.23333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 110.38333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 110.38333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 110.53333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 110.53333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 110.68333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 110.68333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 110.81666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 110.81666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 110.96666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 110.96666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 111.11666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 111.11666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 111.26666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 111.26666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 111.41666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 111.41666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 111.56666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 111.56666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 111.71666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 111.71666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 111.86666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 111.86666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 112.01666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 112.01666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 112.16666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 112.16666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 112.31666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 112.31666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 112.45
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 112.53333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 112.6
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 112.68333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 112.75
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 112.83333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 112.89999999999999
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 112.98333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 113.05
+        },
+        {
+          "kind": "hold",
+          "lane": 1,
+          "timeSeconds": 113.2,
+          "endTimeSeconds": 113.33333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 113.35
+        },
+        {
+          "kind": "hold",
+          "lane": 1,
+          "timeSeconds": 113.5,
+          "endTimeSeconds": 113.63333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 113.64999999999999
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 113.71666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 113.8
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 113.86666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 113.95
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 114.01666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 114.1
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 114.16666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 114.25
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 114.31666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 114.38333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 114.46666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 114.53333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 114.61666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 114.68333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 114.76666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 114.83333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 114.83333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 114.98333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 115.13333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 115.28333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 115.28333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 115.43333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 115.58333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 115.73333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 115.73333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 116.91666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 117.06666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 117.21666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 117.21666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 117.36666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 117.51666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 117.66666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 117.66666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 117.81666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 117.95
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 118.1
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 118.1
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 119.3
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 119.43333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 119.58333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 119.58333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 119.73333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 119.88333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 120.03333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 120.03333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 120.18333333333334
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 120.33333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 120.48333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 120.48333333333333
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 121.66666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 121.81666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 121.96666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 121.96666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 122.11666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 122.26666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 122.41666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 122.41666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 122.56666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 122.71666666666667
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 122.86666666666666
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 122.86666666666666
+        }
+      ],
+      "slot": "Standard"
+    }
+  ]
+}

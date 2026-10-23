@@ -1,10 +1,11 @@
+#if UNITY_EDITOR
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace RhythmDojo.Authoring
 {
-    internal static class AudioTimelineUi
+    public static class AudioTimelineUi
     {
         public static RectTransform Panel(Transform parent, string name, Color tint)
         {
@@ -30,7 +31,7 @@ namespace RhythmDojo.Authoring
             go.transform.SetParent(parent, false);
             Place((RectTransform)go.transform, x, y, width, height);
             var text = go.GetComponent<Text>();
-            text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            text.font = RhythmDojo.UI.UiFontSettings.Current;
             text.fontSize = 15;
             text.color = new Color(0.84f, 0.88f, 0.93f);
             text.text = caption;
@@ -49,7 +50,7 @@ namespace RhythmDojo.Authoring
             var text = go.GetComponentInChildren<Text>();
             text.text = caption;
             var button = go.GetComponent<Button>();
-            button.onClick.AddListener(action);
+
             return button;
         }
 
@@ -93,7 +94,7 @@ namespace RhythmDojo.Authoring
 
             dropdown.ClearOptions();
             dropdown.AddOptions(new System.Collections.Generic.List<string>(options));
-            dropdown.onValueChanged.AddListener(action);
+
             return dropdown;
         }
 
@@ -110,7 +111,7 @@ namespace RhythmDojo.Authoring
 
             foreach (var text in go.GetComponentsInChildren<Text>(true))
             {
-                text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+                text.font = RhythmDojo.UI.UiFontSettings.Current;
                 text.fontSize = 14;
                 text.color = new Color(0.9f, 0.94f, 1);
             }
@@ -130,9 +131,23 @@ namespace RhythmDojo.Authoring
             var graphic = go.AddComponent<AudioTimelineGraphic>();
             graphic.Owner = owner;
             graphic.Overview = overview;
-            graphic.InitializeLabels();
+            var labels = new Text[0];
+            if (!overview)
+            {
+                labels = new Text[24];
+                for (int i = 0; i < labels.Length; i++)
+                {
+                    labels[i] = Label(go.transform, "Beat Label " + i, "", 0, 0, 86, 19);
+                    labels[i].fontSize = 12;
+                    labels[i].gameObject.SetActive(false);
+                }
+            }
+
+            graphic.ConfigureLabels(labels);
             return graphic;
         }
     }
 
 }
+
+#endif

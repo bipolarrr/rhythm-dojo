@@ -129,9 +129,19 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Smoke")]
         public IEnumerator KeyboardNavigationAndStartRestartFocusLossUseActualActions()
         {
             var view = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
+            var visibleRows = view.Rows
+                .Where(row => row.gameObject.activeInHierarchy)
+                .OrderBy(row => row.transform.GetSiblingIndex())
+                .ToArray();
+            var nextSongId = visibleRows
+                .SkipWhile(row => row.Entry.Id != "test-pulse")
+                .Skip(1)
+                .First()
+                .Entry.Id;
             EventSystem.current.SetSelectedGameObject(
                 view.Rows.First(r => r.Entry.Id == "test-pulse").gameObject
             );
@@ -140,7 +150,7 @@ namespace RhythmDojo.Tests
                 UnityEngine
                     .Object.FindFirstObjectByType<AppFlowController>()
                     .Selection.SelectedSongId,
-                Is.EqualTo("tempo-pulse")
+                Is.EqualTo(nextSongId)
             );
 
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();

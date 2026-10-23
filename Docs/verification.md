@@ -8,13 +8,46 @@ Unity **6000.3.23f1**의 **Game Tools > Verification** 메뉴를 사용합니다
 
 | 메뉴 | 범위 | 빌드 |
 | --- | --- | --- |
+| Verify Smoke Actions | 타이틀 진입, 곡 로드, 시작/재시작/포커스, Ready 복귀의 4개 테스트 | 없음 |
+| Verify All Tests (No Build) | Domain/EditMode 전체 → PlayMode 전체 | 없음 |
 | Verify UI Actions | 타이틀, 곡 선택, 설정, 게임 HUD의 버튼/선택/화면 전환 | 없음 |
 | Verify Gameplay Actions | 입력, 판정, 재시작, 포커스, 모드 어댑터, 실제 오디오 | 없음 |
 | Verify Authoring Actions | 문서 플레이테스트, 취소, 데이터 캡처, 음원 해제 | 없음 |
 | Verify Foundation (Play Mode and Player Build) | Domain/EditMode 전체 → PlayMode 전체 → Windows 빌드 | 테스트 전체 성공 시 |
 | Build Player Only | 현재 씬으로 Windows 빌드 | 테스트 생략 |
 
-**Window > General > Test Runner**에서 개별 fixture나 테스트 하나만 선택해도 같은 검증입니다. 메뉴 전용 판정 로직은 없습니다. PlayMode의 `UI`, `Gameplay`, `Authoring` 카테고리로 범위를 선택할 수 있습니다.
+**Window > General > Test Runner**에서 개별 fixture나 테스트 하나만 선택해도 같은 검증입니다. 메뉴 전용 판정 로직은 없습니다. PlayMode의 `Smoke`, `UI`, `Gameplay`, `Authoring` 카테고리로 범위를 선택할 수 있습니다.
+
+## 변경 범위에 맞춘 실행
+
+파일을 수정할 때마다 전체 테스트를 실행하지 않습니다. 논리적으로 묶인 변경을 마친 뒤 다음 최소 범위를 선택합니다.
+
+| 변경 | 기본 검증 |
+| --- | --- |
+| 문서·주석 | diff 확인, Unity 테스트 생략 |
+| Domain/Application 규칙 | 관련 Domain/EditMode fixture |
+| UI 색상·문구·배치 | 관련 레이아웃 검사와 화면 확인. 클릭 영역·참조 변경 시 해당 PlayMode 테스트 추가 |
+| 특정 화면·게임 기능 | 해당 fixture 또는 관련 테스트 메서드 |
+| 씬 조립·공통 화면 전환 | 관련 테스트 + Smoke |
+| 여러 기능의 공통 계약·검증 실행기·패키지 변경, 원인 불명 회귀 | Verify All Tests (No Build) |
+| 빌드 설정·플랫폼 변경, 전체 배포 검증 요청 | Foundation 및 Windows 빌드 |
+
+성공 후 관련 코드가 바뀌지 않았으면 동일 검증을 반복하지 않습니다. 실패 시 실패 테스트와 영향을 받는 범위를 먼저 재검증하고, 원인이나 영향이 불명확할 때 확대합니다. 실행 범위·결과·생략 이유를 보고하며 부분 검증을 전체 성공으로 표현하지 않습니다. 빌드는 빌드 관련 변경 또는 명시적 요청 시에만 실행합니다.
+
+개별 fixture는 `unity command run_tests --mode playmode --filter GameplayHudFlowTests --async_tests true --json`처럼 선택합니다. Domain/EditMode는 `--mode editor`를 사용합니다. 소스 변경 후 재컴파일, 순차 실행, `test_status` 결과 확인과 Play Mode 종료 및 Editor ready 대기는 부분 검증에도 적용합니다.
+
+Smoke는 다음 기존 메서드에 추가된 카테고리입니다. 기존 UI/Gameplay 분류와 전체 검증에도 계속 포함됩니다.
+
+| fixture | 메서드 |
+| --- | --- |
+| MainMenuFlowTests | StartLoadsBootstrapThenExistingSongSelection |
+| SongSelectionFlowTests | MouseClickUsesUiInputModuleToLoadSong |
+| GameplayFlowTests | KeyboardNavigationAndStartRestartFocusLossUseActualActions |
+| GameplayHudFlowTests | ReturnButtonInReadyStateLoadsSongSelectionAndReleasesSong |
+
+Smoke는 곡 전체 재생·판정 시나리오를 포함하지 않으며 기능별 검증을 대체하지 않습니다. 판정·오디오 변경에는 해당 fixture를 별도로 선택합니다. 메뉴는 `FoundationVerification.RunSmoke()`를 실행하고, 빌드 없는 전체 검증은 기존 `RunTestsOnly()`를 실행합니다. 결과는 각각 `Logs/verification-smoke.xml`과 기존 전체 검증 XML에 저장합니다.
+
+## 실행 결과와 정리
 
 검증 시작 시 기존 Play Mode 시작 씬을 보관하고, 검증 중에는 Title 강제 시작을 중단합니다. 테스트가 직접 필요한 씬을 로드하며, 완료/실패 후 이전 시작 씬을 복원합니다. 에디터 자체가 강제 종료되면 정상 종료 시의 복원 절차를 실행할 수 없습니다.
 
@@ -56,7 +89,7 @@ Test Framework 1.6.0의 결과 콜백은 임시 씬/프로젝트 설정 정리�
 2. UI는 해당 화면 fixture에, 판정/입력은 Gameplay에, 문서 기능은 Authoring에 독립 테스트를 추가합니다.
 3. 입력 전 상태를 만들고 실제 동작을 수행한 뒤 화면, 서비스 상태, 해제된 리소스 등 결과를 검사합니다.
 4. 비동기 대기에는 시간 제한을 두고, 실패해도 입력 장치/오디오/이벤트 구독을 정리합니다.
-5. 관련 fixture를 먼저 실행합니다. 공통 흐름이나 씬 조립을 바꿨다면 Foundation 전체를 실행합니다.
+5. 관련 fixture를 먼저 실행합니다. 공통 흐름이나 씬 조립 변경에는 Smoke를 추가하고, 위 표의 위험도에 따라 전체 테스트나 빌드로 확대합니다.
 
 레이아웃은 빌더에 반영합니다. 테스트도 UI 객체 이름보다 View의 명시적 참조를 우선합니다. 기존 판정 수치는 검증용 차트의 계약이므로 검증용 차트를 의도적으로 바꾸면 함께 검토해야 합니다.
 

@@ -54,16 +54,13 @@ namespace RhythmDojo.UI
 
         public void InitializeTimeline(RhythmDojo.Authoring.FileSongProjectStore store)
         {
-            var timeline = GetComponent<RhythmDojo.Authoring.ChartAudioTimeline>();
-            if (timeline)
+            if (audioTimeline)
             {
-                timeline.UseStore(store);
-                return;
+                audioTimeline.Initialize(this, beatGrid, store);
             }
-
-            timeline = gameObject.AddComponent<RhythmDojo.Authoring.ChartAudioTimeline>();
-            timeline.Initialize(this, beatGrid, store);
         }
+
+        [SerializeField] private RhythmDojo.Authoring.ChartAudioTimeline audioTimeline;
 
         public void Configure(GameModeDefinition gameMode, ChartBeatGrid timeline)
         {

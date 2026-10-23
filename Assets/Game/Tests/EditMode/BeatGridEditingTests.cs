@@ -158,7 +158,10 @@ namespace RhythmDojo.Tests
         {
             var json = new SongProjectJson();
             var project = new SongProject();
-            string old = json.Serialize(project);
+            var legacy = Newtonsoft.Json.Linq.JObject.Parse(json.Serialize(project));
+            legacy["version"] = 2;
+            ((Newtonsoft.Json.Linq.JObject)legacy["timing"]).Remove("grid");
+            string old = legacy.ToString();
             Assert.That(old, Does.Not.Contain("\"grid\""));
             Assert.That(ProjectValidation.ContentEquals(project, json.Deserialize(old)), Is.True);
             project.Grid = new BeatGridSettings

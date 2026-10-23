@@ -16,6 +16,8 @@ using Object = UnityEngine.Object;
 
 namespace RhythmDojo.Tests
 {
+    [PrebuildSetup(typeof(TestRunStartup))]
+    [PostBuildCleanup(typeof(TestRunStartup))]
     public sealed class ChartEditorMenuTests
     {
         private ChartEditorScreen screen;
@@ -66,6 +68,68 @@ namespace RhythmDojo.Tests
             }
 
             Assert.That(screen && screen.IsBusy, Is.False, "Menu operation timed out.");
+        }
+
+        [UnityTest]
+        public IEnumerator PupaButtonPreservesDraftAndImportsBundledChartWithLocalAudio()
+        {
+            var store = new FileSongProjectStore(root);
+            menu.Initialize(store, null, null);
+            var original = screen.Session;
+            original.Edit(edit => edit.SetMetadata("Preserved draft", "Team"));
+            string path = Path.Combine(root, "PUPA.wav");
+            typeof(ChartEditorMenu).GetField("pupaAudioPath",
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                .SetValue(menu, path);
+            Click("파일");
+            Assert.That(Control<Button>("Import PUPA").gameObject.activeInHierarchy, Is.True);
+            Click("Import PUPA");
+            yield return Idle();
+            Assert.That(screen.Session, Is.SameAs(original));
+            Assert.That(Control<Text>("Progress Label").text, Does.Contain(Path.GetFullPath(path)));
+
+            Directory.CreateDirectory(root);
+            using (var writer = new BinaryWriter(File.Create(path)))
+            {
+                const int samples = 44100;
+                writer.Write(System.Text.Encoding.ASCII.GetBytes("RIFF"));
+                writer.Write(36 + samples * 2);
+                writer.Write(System.Text.Encoding.ASCII.GetBytes("WAVEfmt "));
+                writer.Write(16);
+                writer.Write((short)1);
+                writer.Write((short)1);
+                writer.Write(samples);
+                writer.Write(samples * 2);
+                writer.Write((short)2);
+                writer.Write((short)16);
+                writer.Write(System.Text.Encoding.ASCII.GetBytes("data"));
+                writer.Write(samples * 2);
+                writer.Write(new byte[samples * 2]);
+            }
+
+            Click("Import PUPA");
+            yield return Idle();
+            var imported = screen.Session.Snapshot;
+            Assert.That(imported.Id, Is.Not.EqualTo(original.Snapshot.Id));
+            Assert.That(imported.Title, Is.EqualTo("PUPA"));
+            Assert.That(imported.TempoPoints[0].Bpm, Is.EqualTo(202));
+            Assert.That(imported.AudioOffsetSeconds, Is.EqualTo(0));
+            Assert.That(imported.Grid.OriginSeconds, Is.EqualTo(0.4833333333333334));
+            Assert.That(imported.Charts.Single().Notes.Length, Is.EqualTo(929));
+            Assert.That(imported.Charts.Single().Notes.Count(n => n.Kind == NoteKind.Hold), Is.EqualTo(29));
+            Assert.That(imported.Charts.Single().Slot, Is.EqualTo(ChartSlot.Standard));
+            var template = new SongProjectJson().Deserialize(Resources.Load<TextAsset>("Authoring/Pupa").text);
+            Assert.That(template.Audio, Is.Null);
+            Assert.That(imported.Charts.Single().Notes, Is.EqualTo(template.Charts.Single().Notes));
+            Assert.That(store.AudioExists(imported.Id, imported.Audio), Is.True);
+            Assert.That(File.Exists(path), Is.True);
+            Assert.That(store.Read(original.Snapshot.Id).Title, Is.EqualTo("Preserved draft"));
+            Assert.That(screen.Session.IsDirty, Is.True);
+
+            Click("Import PUPA");
+            yield return Idle();
+            Assert.That(screen.Session.Snapshot.Id, Is.Not.EqualTo(imported.Id));
+            Assert.That(ProjectValidation.ContentEquals(imported, store.Read(imported.Id)), Is.True);
         }
 
         [UnityTest]
@@ -178,6 +242,40 @@ namespace RhythmDojo.Tests
                 Is.EqualTo(1),
                 "Replacing a dirty session saves its draft first."
             );
+        }
+
+        [UnityTest]
+        public IEnumerator FileMenuImportsShowcaseGridAndSavesVersionThree()
+        {
+            var store = new FileSongProjectStore(root);
+            menu.Initialize(store, null, null);
+            var original = screen.Session;
+            var project = original.Snapshot;
+            project.Id = Guid.NewGuid();
+            project.Grid = new BeatGridSettings
+            {
+                OriginSeconds = 0.237,
+                Meters = new[] { new MeterPoint(0, 7, 8), new MeterPoint(4, 3, 4) }
+            };
+            var folder = store.GetSongFolder(project.Id);
+            Directory.CreateDirectory(folder);
+            var path = Path.Combine(folder, FileSongProjectStore.FileName);
+            var text = new SongProjectJson().Serialize(project).Replace("\"version\": 3", "\"version\": 2");
+            File.WriteAllText(path, text);
+            Click("파일");
+            Input("Project ID", project.Id.ToString());
+            Click("Load");
+            yield return Idle();
+            Assert.That(screen.Session, Is.SameAs(original));
+            Assert.That(File.ReadAllText(path), Is.EqualTo(text));
+            Click("Import Showcase");
+            yield return Idle();
+            Assert.That(ProjectValidation.ContentEquals(project, screen.Session.Snapshot), Is.True);
+            Assert.That(File.ReadAllText(path), Is.EqualTo(text));
+            Click("Save");
+            yield return Idle();
+            Assert.That(File.ReadAllText(path), Does.Contain("\"version\": 3"));
+            Assert.That(ProjectValidation.ContentEquals(project, store.Read(project.Id)), Is.True);
         }
 
         [UnityTest]

@@ -1,6 +1,7 @@
 using System;
 using RhythmDojo.Gameplay;
 using RhythmDojo.Services;
+using RhythmDojo.UI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -13,10 +14,12 @@ namespace RhythmDojo.Core
         public bool Transitioning { get; private set; }
 
         private readonly GameSettings settings;
+        private readonly MainMenuView view;
 
-        public MainMenuActions(GameSettings gameSettings)
+        public MainMenuActions(GameSettings gameSettings, MainMenuView view = null)
         {
             settings = gameSettings;
+            this.view = view;
         }
 
         public void ShowSettings()
@@ -59,6 +62,12 @@ namespace RhythmDojo.Core
 
             try
             {
+                if (view && view.entrance)
+                {
+                    DojoEntranceTransition.Begin(
+                        view.entrance, view.doorSlide, view.startPrompt.font, ReturnToTitle);
+                }
+
                 if (SceneManager.LoadSceneAsync(BootstrapScenePath, LoadSceneMode.Single) == null)
                 {
                     throw new InvalidOperationException("Cannot load Bootstrap.");
@@ -66,9 +75,19 @@ namespace RhythmDojo.Core
             }
             catch
             {
+                if (DojoEntranceTransition.Active)
+                {
+                    DojoEntranceTransition.Active.Cancel();
+                }
+
                 Transitioning = false;
                 throw;
             }
+        }
+
+        private static void ReturnToTitle()
+        {
+            SceneManager.LoadSceneAsync("Assets/Game/Scenes/Title.unity", LoadSceneMode.Single);
         }
 
         public void QuitGame()

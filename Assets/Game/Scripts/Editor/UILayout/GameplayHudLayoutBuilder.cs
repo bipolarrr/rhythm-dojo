@@ -141,7 +141,7 @@ namespace RhythmDojo.EditorTools
             view.timing = Label(
                 "Judgment Timing",
                 judgmentRoot.transform,
-                "박자에 집중하세요",
+                "",
                 .03f,
                 0,
                 .97f,

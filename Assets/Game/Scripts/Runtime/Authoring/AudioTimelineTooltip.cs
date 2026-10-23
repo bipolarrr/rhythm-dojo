@@ -6,8 +6,8 @@ namespace RhythmDojo.Authoring
 {
     public sealed class AudioTimelineTooltip : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
-        public Text Target { get; set; }
-        public string Caption { get; set; }
+        [field: SerializeField] public Text Target { get; set; }
+        [field: SerializeField] public string Caption { get; set; }
 
         public void OnPointerEnter(PointerEventData data)
         {

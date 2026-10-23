@@ -3,6 +3,7 @@ using System.Collections;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using RhythmDojo.Application;
 using RhythmDojo.Content;
 using RhythmDojo.Gameplay;
@@ -15,12 +16,15 @@ namespace RhythmDojo.Authoring
     // Additive editor extension. The existing menu remains responsible for saving and playtests.
     public sealed class ChartAudioTimeline : MonoBehaviour
     {
+        [SerializeField] private ChartAudioTimelineView view;
+        private bool bound;
         private ChartEditorScreen screen;
         private ChartBeatGrid grid;
         private EditorSession observed;
         private SongProject snapshot;
         private FileSongProjectStore store;
-        private AudioSource source;
+        [SerializeField] private AudioSource source;
+        private Func<string, CancellationToken, Task<SongAudioLease>> loadAudio;
         private SongAudioLease lease;
         private CancellationTokenSource loading;
         private Coroutine building;
@@ -66,8 +70,19 @@ namespace RhythmDojo.Authoring
         public double WindowDuration { get; private set; } = 8;
         public double DisplayStep { get; private set; } = 0.25;
         public double AudioOffset => snapshot?.AudioOffsetSeconds ?? 0;
-        public double Duration => source?.clip?.length ?? 0;
-        public bool IsBusy => screen.IsBusy || loadingAudio;
+        public double Duration
+        {
+            get
+            {
+                if (!source || !source.clip)
+                {
+                    return 0;
+                }
+
+                return (double)source.clip.samples / source.clip.frequency;
+            }
+        }
+        public bool IsBusy => !screen || screen.IsBusy || loadingAudio;
 
         public double MusicTime
         {
@@ -82,66 +97,129 @@ namespace RhythmDojo.Authoring
             }
         }
 
+        public void ConfigureAudio(Func<string, CancellationToken, Task<SongAudioLease>> loadAudio)
+        {
+            this.loadAudio = loadAudio ?? throw new ArgumentNullException(nameof(loadAudio));
+        }
+
         public void Initialize(ChartEditorScreen screen, ChartBeatGrid grid, FileSongProjectStore store)
         {
+            view.ValidateReferences();
             this.screen = screen;
             this.grid = grid;
-            var canvas = screen.GetComponentInParent<Canvas>();
-            if (!canvas)
+            this.store = store;
+
+            panel = view.panel;
+            content = view.content;
+            advanced = view.advanced;
+            overview = view.overview;
+            detail = view.detail;
+            clock = view.clock;
+            message = view.message;
+            tooltip = view.tooltip;
+            ruler = view.ruler;
+            playLabel = view.playLabel;
+            bpm = view.bpm;
+            origin = view.origin;
+            nudge = view.nudge;
+            segmentTime = view.segmentTime;
+            segmentBpm = view.segmentBpm;
+            numerator = view.numerator;
+            denominator = view.denominator;
+            firstBeat = view.firstBeat;
+            secondBeat = view.secondBeat;
+            beatCount = view.beatCount;
+            segments = view.segments;
+            nudgeUnit = view.nudgeUnit;
+            BindControls();
+            audioKey = null;
+            Observe();
+        }
+
+        private void BindControls()
+        {
+            if (bound)
             {
-                enabled = false;
                 return;
             }
 
-            this.store = store;
-            source = gameObject.AddComponent<AudioSource>();
-            source.playOnAwake = false;
-            source.spatialBlend = 0;
-            source.volume = 0.65f;
-            content = screen.transform.parent?.parent as RectTransform;
-            if (content && content.parent != canvas.transform)
-            {
-                content = null;
-            }
-
-            if (content)
-            {
-                var preview = screen.transform.parent;
-                if (!preview.GetComponent<RectMask2D>())
+            bound = true;
+            view.playAudioControl.onClick.AddListener(() =>
                 {
-                    preview.gameObject.AddComponent<RectMask2D>();
+                    if (playing)
+                    {
+                        Pause();
+                    }
+                    else
+                    {
+                        Play();
+                    }
+                });
+            view.followAudioControl.onClick.AddListener(() =>
+                {
+                    follow = true;
+                    SyncChart(MusicTime);
+                });
+            view.applyGridControl.onClick.AddListener(ApplyBasic);
+            view.cursorOriginControl.onClick.AddListener(SetOrigin);
+            view.nudgeUnitsControl.onValueChanged.AddListener(_ => { });
+            view.nudgeEarlierControl.onClick.AddListener(() => Shift(-1));
+            view.nudgeLaterControl.onClick.AddListener(() => Shift(1));
+            view.doubleBPMControl.onClick.AddListener(() => ScaleBpm(2));
+            view.halfBPMControl.onClick.AddListener(() => ScaleBpm(0.5));
+            view.gridLockControl.onClick.AddListener(() =>
+            {
+                if (IsBusy)
+                {
+                    return;
                 }
 
-                var help = preview.GetComponentsInChildren<Text>().FirstOrDefault(label => label.name == "Help");
-                if (help)
+                locked = !locked;
+                view.lockLabel.text = "잠금 OFF";
+                if (locked)
                 {
-                    help.verticalOverflow = VerticalWrapMode.Truncate;
-                    help.rectTransform.anchorMin = Vector2.zero;
-                    help.rectTransform.anchorMax = new Vector2(0, 1);
-                    help.rectTransform.offsetMin = new Vector2(18, 90);
-                    help.rectTransform.offsetMax = new Vector2(398, -18);
+                    view.lockLabel.text = "잠금 ON";
                 }
-
-                foreach (var button in content.GetComponentsInChildren<Button>())
+            });
+            view.noteSnapControl.onValueChanged.AddListener(value =>
                 {
-                    var rect = (RectTransform)button.transform;
-                    rect.anchorMin = Vector2.zero;
-                    rect.anchorMax = Vector2.zero;
-                    rect.pivot = Vector2.zero;
-                    rect.anchoredPosition = new Vector2(18, 18);
-                    rect.SetAsLastSibling();
-                }
-            }
+                    if (IsBusy || locked)
+                    {
+                        return;
+                    }
 
-            BuildUi(canvas.transform);
-            var menu = canvas.GetComponent<ChartEditorMenu>();
-            if (menu)
+                    screen.SnapEnabled = value != 6;
+                    if (value < 6)
+                    {
+                        screen.SnapBeats = new[] { 1.0, 0.5, 0.25, 0.125, 1.0 / 3, 1.0 / 6 }[value];
+                    }
+                });
+            view.closeAdvancedControl.onClick.AddListener(() => advanced.SetActive(false));
+            view.tempoSegmentsControl.onValueChanged.AddListener(value =>
             {
-                menu.MoveStatusToFooter();
-            }
-
-            Observe();
+                if (!filling)
+                {
+                    selected = value;
+                    FillFields();
+                }
+            });
+            view.addTempoSegmentControl.onClick.AddListener(() => ChangeSegment(true));
+            view.applyTempoSegmentControl.onClick.AddListener(() => ChangeSegment(false));
+            view.deleteTempoSegmentControl.onClick.AddListener(DeleteSegment);
+            view.alignTempoSegmentControl.onClick.AddListener(AlignSegment);
+            view.captureFirstBeatControl.onClick.AddListener(() => Edit(() => firstBeat.text = MusicTime.ToString("R", CultureInfo.InvariantCulture), false));
+            view.captureSecondBeatControl.onClick.AddListener(() => Edit(() => secondBeat.text = MusicTime.ToString("R", CultureInfo.InvariantCulture), false));
+            view.calculateBPMControl.onClick.AddListener(CalculateBpm);
+            view.existingNotePolicyControl.onValueChanged.AddListener(value => Edit(() => preserveBeats = value == 1, false));
+            view.displayDensityControl.onValueChanged.AddListener(value => Edit(() =>
+                {
+                    DisplayStep = new[] { 1.0, 0.5, 0.25, 0.125, 1.0 / 3, 1.0 / 6 }[value];
+                    Redraw();
+                }, false));
+            view.advancedGridControl.onClick.AddListener(() => menu.ToggleAdvanced());
         }
+
+        [SerializeField] private ChartEditorMenu menu;
 
         public void UseStore(FileSongProjectStore store)
         {
@@ -165,6 +243,11 @@ namespace RhythmDojo.Authoring
             if (screen.IsBusy && playing)
             {
                 Pause();
+            }
+
+            foreach (var control in view.editControls)
+            {
+                control.interactable = !IsBusy && !locked;
             }
 
             double time = MusicTime;
@@ -277,7 +360,7 @@ namespace RhythmDojo.Authoring
             SongAudioLease loaded = null;
             try
             {
-                loaded = await ChartEditorCompositionRoot.LoadAudio(
+                loaded = await loadAudio(
                     store.ResolveAudioPath(project.Id, project.Audio), token);
                 token.ThrowIfCancellationRequested();
                 lease = loaded;
@@ -414,7 +497,13 @@ namespace RhythmDojo.Authoring
 
             follow = false;
             double fraction = (anchorTime - WindowStart) / WindowDuration;
-            WindowDuration = Math.Max(0.02, Math.Min(Math.Max(8, Duration),
+            double minimumDuration = 0.001;
+            if (source.clip)
+            {
+                minimumDuration = 16.0 / source.clip.frequency;
+            }
+
+            WindowDuration = Math.Max(minimumDuration, Math.Min(Math.Max(8, Duration),
                 WindowDuration * Math.Pow(0.8, Math.Sign(steps))));
             WindowStart = Math.Max(0, anchorTime - fraction * WindowDuration);
             SyncChart(WindowStart);
@@ -574,7 +663,7 @@ namespace RhythmDojo.Authoring
             {
                 var points = (TempoPoint[])snapshot.TempoPoints.Clone();
                 points[0] = new TempoPoint(0, Number(bpm));
-                ApplyOrigin(points, detail.FirstVisibleGridTime + AudioOffset);
+                ApplyOrigin(points, MusicTime + AudioOffset);
             });
         }
 
@@ -678,185 +767,13 @@ namespace RhythmDojo.Authoring
             }, false);
         }
 
-        private void BuildUi(Transform parent)
-        {
-            panel = AudioTimelineUi.Panel(parent, "Audio Timeline", new Color(0.075f, 0.09f, 0.12f));
-            panel.anchorMin = Vector2.zero;
-            panel.anchorMax = new Vector2(1, 0);
-            panel.pivot = Vector2.zero;
-            Resize(0);
-            var resize = AudioTimelineUi.Panel(panel, "Resize Timeline", new Color(0.23f, 0.3f, 0.38f));
-            AudioTimelineUi.Place(resize, 0, 0, 0, 5);
-            resize.anchorMax = Vector2.one;
-            resize.anchorMin = new Vector2(0, 1);
-            resize.offsetMin = new Vector2(0, -5);
-            resize.offsetMax = Vector2.zero;
-            resize.gameObject.AddComponent<AudioTimelineResize>().Owner = this;
-            playLabel = AudioTimelineUi.Button(panel, "Play Audio", "재생 / Play", 12, 10, 130,
-                () =>
-                {
-                    if (playing)
-                    {
-                        Pause();
-                    }
-                    else
-                    {
-                        Play();
-                    }
-                }).GetComponentInChildren<Text>();
-            AudioTimelineUi.Button(panel, "Follow Audio", "재생 따라가기", 150, 10, 140,
-                () =>
-                {
-                    follow = true;
-                    SyncChart(MusicTime);
-                });
-            clock = AudioTimelineUi.Label(panel, "Audio Clock", "", 305, 10, 280);
-            ruler = AudioTimelineUi.Label(panel, "Musical Position", "", 590, 10, 630);
-            overview = AudioTimelineUi.Wave(panel, "Full Song Waveform", 12, 48, 36, this, true);
-            detail = AudioTimelineUi.Wave(panel, "Detailed Waveform", 12, 90, 72, this, false);
-            detail.rectTransform.anchorMin = Vector2.zero;
-            detail.rectTransform.offsetMin = new Vector2(12, 118);
-            bpm = AudioTimelineUi.Field(panel, "Grid BPM", "BPM", 12, 173, 76, "120");
-            origin = AudioTimelineUi.Field(panel, "Grid Origin", "첫 박 위치 ms (+뒤로)", 96, 173, 145, "0");
-            AudioTimelineUi.Button(panel, "Apply Grid", "적용", 249, 192, 55, ApplyBasic);
-            AudioTimelineUi.Button(panel, "Cursor Origin", "그리드 수정", 310, 192, 112, SetOrigin);
-            nudge = AudioTimelineUi.Field(panel, "Grid Nudge", "미세 이동량", 430, 173, 75, "1");
-            nudgeUnit = AudioTimelineUi.Dropdown(panel, "Nudge Units", 512, 192, 65, new[] { "ms", "박" }, _ => { });
-            AudioTimelineUi.Button(panel, "Nudge Earlier", "←", 583, 192, 36, () => Shift(-1));
-            AudioTimelineUi.Button(panel, "Nudge Later", "→", 625, 192, 36, () => Shift(1));
-            AudioTimelineUi.Button(panel, "Double BPM", "×2", 667, 192, 43, () => ScaleBpm(2));
-            AudioTimelineUi.Button(panel, "Half BPM", "÷2", 716, 192, 43, () => ScaleBpm(0.5));
-            AudioTimelineUi.Button(panel, "Grid Lock", "잠금 OFF", 767, 192, 95, () =>
-            {
-                locked = !locked;
-            }).onClick.AddListener(() => UpdateToggleLabel("Grid Lock", locked, "잠금"));
-            AudioTimelineUi.Dropdown(panel, "Note Snap", 870, 192, 90,
-                new[] { "1/4", "1/8", "1/16", "1/32", "1/8T", "1/16T", "OFF" }, value =>
-                {
-                    screen.SnapEnabled = value != 6;
-                    if (value < 6)
-                    {
-                        screen.SnapBeats = new[] { 1.0, 0.5, 0.25, 0.125, 1.0 / 3, 1.0 / 6 }[value];
-                    }
-                });
-            message = AudioTimelineUi.Label(panel, "Timeline Status", "", 12, 234, 1200);
-            tooltip = AudioTimelineUi.Label(panel, "Timeline Tooltip", "", 12, 258, 1200, 16);
-            tooltip.fontSize = 12;
-            foreach (RectTransform rect in panel)
-            {
-                if (rect.anchorMin.y != 1 || rect.anchorMax.y != 1)
-                {
-                    continue;
-                }
-
-                if (-rect.anchoredPosition.y < 173)
-                {
-                    continue;
-                }
-
-                rect.anchorMin = new Vector2(rect.anchorMin.x, 0);
-                rect.anchorMax = new Vector2(rect.anchorMax.x, 0);
-                rect.anchoredPosition += new Vector2(0, panelHeight);
-            }
-
-            BuildAdvanced();
-            Resize(0);
-            foreach (var button in panel.GetComponentsInChildren<Button>(true))
-            {
-                var hint = button.gameObject.AddComponent<AudioTimelineTooltip>();
-                hint.Target = tooltip;
-                hint.Caption = button.GetComponentInChildren<Text>().text;
-                switch (button.name)
-                {
-                    case "Cursor Origin":
-                        hint.Caption = "상세 파형에서 가장 왼쪽에 보이는 그리드선을 첫 마디 첫 박으로 지정합니다.";
-                        break;
-                    case "Double BPM":
-                    case "Half BPM":
-                        hint.Caption = "모든 템포 구간의 BPM을 배수로 조정합니다.";
-                        break;
-                    case "Nudge Earlier":
-                    case "Nudge Later":
-                        hint.Caption = "그리드 첫 박을 이동합니다. +는 음원 뒤쪽, −는 앞쪽입니다.";
-                        break;
-                    case "Apply Tempo Segment":
-                        hint.Caption = "선택한 템포 구간의 시작 시점, BPM, 박자표를 함께 적용합니다.";
-                        break;
-                }
-            }
-        }
-
-        private void UpdateToggleLabel(string name, bool value, string caption)
-        {
-            string state = " OFF";
-            if (value)
-            {
-                state = " ON";
-            }
-
-            panel.GetComponentsInChildren<Button>(true).First(b => b.name == name)
-                .GetComponentInChildren<Text>().text = caption + state;
-        }
-
-        private void BuildAdvanced()
-        {
-            var rect = AudioTimelineUi.Panel(panel, "Advanced Grid Panel", new Color(0.09f, 0.115f, 0.155f));
-            rect.anchorMin = new Vector2(0, 1);
-            rect.anchorMax = new Vector2(1, 1);
-            rect.pivot = new Vector2(0, 0);
-            rect.offsetMin = new Vector2(0, 6);
-            rect.offsetMax = new Vector2(0, 330);
-            advanced = rect.gameObject;
-            AudioTimelineUi.Label(rect, "Advanced Heading", "고급 GRID · 시간은 음원상의 초 · 첫 변경점은 채보 시간 0 고정", 16, 10, 1050);
-            AudioTimelineUi.Button(rect, "Close Advanced", "닫기", 1102, 10, 110, () => advanced.SetActive(false));
-            segments = AudioTimelineUi.Dropdown(rect, "Tempo Segments", 16, 48, 350, new[] { "0" }, value =>
-            {
-                if (!filling)
-                {
-                    selected = value;
-                    FillFields();
-                }
-            });
-            segmentTime = AudioTimelineUi.Field(rect, "Segment Time", "변경점 위치 s", 16, 88, 166, "0");
-            segmentBpm = AudioTimelineUi.Field(rect, "Segment BPM", "구간 BPM", 190, 88, 176, "120");
-            numerator = AudioTimelineUi.Field(rect, "Meter Numerator", "박자표 분자", 16, 148, 166, "4");
-            denominator = AudioTimelineUi.Field(rect, "Meter Denominator", "박자표 분모", 190, 148, 176, "4");
-            AudioTimelineUi.Button(rect, "Add Tempo Segment", "커서에 구간 추가", 16, 218, 170, () => ChangeSegment(true));
-            AudioTimelineUi.Button(rect, "Apply Tempo Segment", "선택 구간 적용 / 이동", 194, 218, 172, () => ChangeSegment(false));
-            AudioTimelineUi.Button(rect, "Delete Tempo Segment", "선택 구간 삭제", 16, 266, 170, DeleteSegment);
-            AudioTimelineUi.Button(rect, "Align Tempo Segment", "커서 = 구간 첫 박", 194, 266, 172, AlignSegment);
-            AudioTimelineUi.Label(rect, "BPM Calculator Heading", "두 실제 박 위치로 BPM 계산 (4분음표 기준)", 400, 48, 395);
-            firstBeat = AudioTimelineUi.Field(rect, "First Actual Beat", "A: 실제 박 s", 400, 88, 140, "0");
-            secondBeat = AudioTimelineUi.Field(rect, "Second Actual Beat", "B: 실제 박 s", 548, 88, 140, "1");
-            AudioTimelineUi.Button(rect, "Capture First Beat", "커서 → A", 400, 148, 140,
-                () => firstBeat.text = MusicTime.ToString("R", CultureInfo.InvariantCulture));
-            AudioTimelineUi.Button(rect, "Capture Second Beat", "커서 → B", 548, 148, 140,
-                () => secondBeat.text = MusicTime.ToString("R", CultureInfo.InvariantCulture));
-            beatCount = AudioTimelineUi.Field(rect, "Beat Interval Count", "A–B 사이 박 간격 수", 400, 195, 180, "2");
-            AudioTimelineUi.Button(rect, "Calculate BPM", "BPM 계산 → 구간 입력", 400, 266, 288, CalculateBpm);
-            AudioTimelineUi.Label(rect, "Note Policy Heading", "기존 노트 처리", 730, 48, 455);
-            AudioTimelineUi.Dropdown(rect, "Existing Note Policy", 730, 88, 465,
-                new[] { "기본: 노트 음악 시간 유지", "노트 박자 유지 (노트 시간 변경)" }, value => preserveBeats = value == 1);
-            AudioTimelineUi.Label(rect, "Grid Density Heading", "표시 밀도 (노트 스냅과 별도)", 730, 148, 465);
-            AudioTimelineUi.Dropdown(rect, "Display Density", 730, 185, 220,
-                new[] { "1/4", "1/8", "1/16", "1/32", "1/8T", "1/16T" }, value =>
-                {
-                    DisplayStep = new[] { 1.0, 0.5, 0.25, 0.125, 1.0 / 3, 1.0 / 6 }[value];
-                    Redraw();
-                }).SetValueWithoutNotify(2);
-            AudioTimelineUi.Label(rect, "Note Policy Help",
-                "롱노트 양 끝과 모든 채보에 동일 적용\n자동 스냅 없음 · Undo/Redo로 복원\n오디오 오프셋은 기존 설정 메뉴에서 별도 편집",
-                730, 234, 465, 74);
-            advanced.SetActive(false);
-        }
-
         public void Resize(float delta)
         {
-            var canvas = GetComponentInParent<Canvas>();
+            var canvas = view.canvas;
             float max = 480;
             if (canvas)
             {
-                max = Math.Max(280, ((RectTransform)canvas.transform).rect.height - 240);
+                max = Math.Max(280, canvas.rect.height - 240);
             }
 
             panelHeight = Mathf.Clamp(panelHeight + delta, 280, max);
@@ -869,7 +786,7 @@ namespace RhythmDojo.Authoring
 
             if (advanced && canvas)
             {
-                float available = ((RectTransform)canvas.transform).rect.height - panel.offsetMax.y - 58;
+                float available = canvas.rect.height - panel.offsetMax.y - 58;
                 float bottom = Math.Min(6, available - 324);
                 var rect = (RectTransform)advanced.transform;
                 rect.offsetMin = new Vector2(0, bottom);
@@ -898,10 +815,6 @@ namespace RhythmDojo.Authoring
             }
 
             lease?.Dispose();
-            if (panel)
-            {
-                Destroy(panel.gameObject);
-            }
         }
     }
 }

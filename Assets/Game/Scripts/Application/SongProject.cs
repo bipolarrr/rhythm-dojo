@@ -177,7 +177,22 @@ namespace RhythmDojo.Application
             );
             Require(p.TempoPoints != null, "timing.tempoPoints", "Array required.");
             Require(p.Grid != null, "timing.grid", "Grid required.");
-            p.Grid.Validate();
+            Require(double.IsFinite(p.Grid.OriginSeconds), "timing.grid.originSeconds", "Finite number required.");
+            Require(p.Grid.Meters != null, "timing.grid.meters", "Array required.");
+            Require(p.Grid.Meters.Length > 0, "timing.grid.meters", "At least one meter required.");
+            Require(p.Grid.Meters[0].TimeSeconds == 0, "timing.grid.meters[0].timeSeconds", "First meter must start at zero.");
+            double previous = -1;
+            for (int i = 0; i < p.Grid.Meters.Length; i++)
+            {
+                var point = p.Grid.Meters[i];
+                string path = $"timing.grid.meters[{i}]";
+                Require(double.IsFinite(point.TimeSeconds), path + ".timeSeconds", "Finite number required.");
+                Require(point.TimeSeconds > previous, path + ".timeSeconds", "Distinct increasing times required.");
+                Require(point.Numerator >= 1 && point.Numerator <= 32, path + ".numerator", "Integer from 1 to 32 required.");
+                Require(point.Denominator >= 1 && point.Denominator <= 32, path + ".denominator", "Power of two up to 32 required.");
+                Require((point.Denominator & (point.Denominator - 1)) == 0, path + ".denominator", "Power of two required.");
+                previous = point.TimeSeconds;
+            }
 
             for (int i = 0; i < p.TempoPoints.Length; i++)
             {

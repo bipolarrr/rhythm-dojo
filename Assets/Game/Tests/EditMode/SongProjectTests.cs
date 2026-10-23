@@ -103,6 +103,113 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        public void NewSavesAlwaysIncludeV3GridAndImportsKeepGrid()
+        {
+            var p = Example();
+            var saved = Newtonsoft.Json.Linq.JObject.Parse(json.Serialize(p));
+            Assert.That((int)saved["version"], Is.EqualTo(3));
+            Assert.That((double)saved["timing"]["grid"]["originSeconds"], Is.Zero);
+
+            p.Grid = new BeatGridSettings
+            {
+                OriginSeconds = .237,
+                Meters = new[] { new MeterPoint(0, 7, 8), new MeterPoint(9.125, 3, 4) }
+            };
+            saved = Newtonsoft.Json.Linq.JObject.Parse(json.Serialize(p));
+            saved["version"] = 2;
+            string showcase = saved.ToString();
+            var error = Assert.Throws<ProjectValidationException>(() => json.Deserialize(showcase));
+            Assert.That(error.FieldPath, Is.EqualTo("timing.grid"));
+            var imported = json.ImportShowcaseVersion2(showcase);
+            Assert.That(ProjectValidation.ContentEquals(imported, p), Is.True);
+            Assert.That((int)Newtonsoft.Json.Linq.JObject.Parse(json.Serialize(imported))["version"], Is.EqualTo(3));
+            Assert.Throws<ProjectValidationException>(() => json.ImportVersion1(showcase));
+            Assert.Throws<ProjectValidationException>(() => json.ImportShowcaseVersion2(json.Serialize(p)));
+        }
+
+        [Test]
+        public async Task LegacyReadsPreserveFileBytesAndDefaultGridUntilExplicitSave()
+        {
+            var p = Example();
+            var legacy = Newtonsoft.Json.Linq.JObject.Parse(json.Serialize(p));
+            legacy["version"] = 2;
+            ((Newtonsoft.Json.Linq.JObject)legacy["timing"]).Remove("grid");
+            string text = legacy.ToString();
+            string folder = store.GetSongFolder(p.Id);
+            Directory.CreateDirectory(folder);
+            string path = Path.Combine(folder, FileSongProjectStore.FileName);
+            File.WriteAllText(path, text);
+            byte[] original = File.ReadAllBytes(path);
+
+            var loaded = await store.LoadAsync(p.Id, default);
+            Assert.That(ProjectValidation.ContentEquals(p, loaded), Is.True);
+            Assert.That(ProjectValidation.ContentEquals(p, store.Read(p.Id)), Is.True);
+            Assert.That(ProjectValidation.ContentEquals(p, store.ReadShowcaseVersion2(p.Id)), Is.True);
+            Assert.That(File.ReadAllBytes(path), Is.EqualTo(original));
+            await store.SaveAsync(loaded, default);
+            Assert.That((int)Newtonsoft.Json.Linq.JObject.Parse(File.ReadAllText(path))["version"], Is.EqualTo(3));
+
+            legacy["timing"]["grid"] = Newtonsoft.Json.Linq.JObject.Parse(json.Serialize(p))["timing"]["grid"];
+            legacy["timing"]["grid"]["originSeconds"] = .5;
+            File.WriteAllText(path, legacy.ToString());
+            original = File.ReadAllBytes(path);
+            Assert.That(store.ReadShowcaseVersion2(p.Id).Grid.OriginSeconds, Is.EqualTo(.5));
+            Assert.That(File.ReadAllBytes(path), Is.EqualTo(original));
+        }
+
+        [TestCase("missing", "timing.grid")]
+        [TestCase("null", "timing.grid")]
+        [TestCase("origin", "timing.grid.originSeconds")]
+        [TestCase("unknown", "timing.grid.extra")]
+        [TestCase("empty", "timing.grid.meters")]
+        [TestCase("first", "timing.grid.meters[0].timeSeconds")]
+        [TestCase("numerator", "timing.grid.meters[0].numerator")]
+        [TestCase("denominator", "timing.grid.meters[0].denominator")]
+        [TestCase("order", "timing.grid.meters[1].timeSeconds")]
+        [TestCase("meterUnknown", "timing.grid.meters[0].extra")]
+        public void GridErrorsReportExactPaths(string failure, string path)
+        {
+            var saved = Newtonsoft.Json.Linq.JObject.Parse(json.Serialize(Example()));
+            var grid = (Newtonsoft.Json.Linq.JObject)saved["timing"]["grid"];
+            switch (failure)
+            {
+                case "missing":
+                    ((Newtonsoft.Json.Linq.JObject)saved["timing"]).Remove("grid");
+                    break;
+                case "null":
+                    saved["timing"]["grid"] = null;
+                    break;
+                case "origin":
+                    grid["originSeconds"] = "bad";
+                    break;
+                case "unknown":
+                    grid["extra"] = 1;
+                    break;
+                case "empty":
+                    grid["meters"] = new Newtonsoft.Json.Linq.JArray();
+                    break;
+                case "first":
+                    grid["meters"][0]["timeSeconds"] = 1;
+                    break;
+                case "numerator":
+                    grid["meters"][0]["numerator"] = 0;
+                    break;
+                case "denominator":
+                    grid["meters"][0]["denominator"] = 3;
+                    break;
+                case "order":
+                    ((Newtonsoft.Json.Linq.JArray)grid["meters"]).Add(grid["meters"][0].DeepClone());
+                    break;
+                case "meterUnknown":
+                    grid["meters"][0]["extra"] = 1;
+                    break;
+            }
+
+            var error = Assert.Throws<ProjectValidationException>(() => json.Deserialize(saved.ToString()));
+            Assert.That(error.FieldPath, Is.EqualTo(path));
+        }
+
+        [Test]
         public async Task EmptyDraftSavesButCannotPlay()
         {
             var p = new SongProject { Charts = new[] { new ChartDocument() } };
@@ -274,13 +381,13 @@ namespace RhythmDojo.Tests
             switch (failure)
             {
                 case "version":
-                    text = text.Replace("\"version\": 2", "\"version\": 99");
+                    text = text.Replace("\"version\": 3", "\"version\": 99");
                     break;
                 case "field":
                     text = text.Replace("\"artist\":", "\"unknown\":");
                     break;
                 case "duplicateKey":
-                    text = text.Replace("\"version\": 2", "\"version\": 2, \"version\": 2");
+                    text = text.Replace("\"version\": 3", "\"version\": 3, \"version\": 3");
                     break;
                 case "kind":
                     text = text.Replace("\"tap\"", "\"mine\"");
@@ -349,7 +456,12 @@ namespace RhythmDojo.Tests
         {
             foreach (var path in Directory.GetFiles("Docs/examples", "*.rdchart.json"))
             {
-                Assert.That(json.ImportVersion1(File.ReadAllText(path)), Is.Not.Null);
+                var imported = json.ImportVersion1(File.ReadAllText(path));
+                Assert.That(imported.Grid.OriginSeconds, Is.Zero);
+                Assert.That(imported.Grid.Meters.Length, Is.EqualTo(1));
+                Assert.That(imported.Grid.Meters[0].Numerator, Is.EqualTo(4));
+                Assert.That(imported.Grid.Meters[0].Denominator, Is.EqualTo(4));
+                Assert.That(ProjectValidation.ContentEquals(imported, json.Deserialize(json.Serialize(imported))), Is.True);
             }
         }
 

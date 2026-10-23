@@ -1,10 +1,10 @@
 {
   "name": "Game.EditMode.Tests",
-  "references": ["Game.Domain", "Game.Application", "Game.Runtime", "Game.Editor", "Unity.InputSystem", "Unity.ugui"],
+  "references": ["Game.Domain", "Game.Application", "Game.Runtime", "Game.Editor", "Unity.InputSystem", "Unity.ugui", "Unity.Newtonsoft.Json"],
   "includePlatforms": ["Editor"],
   "optionalUnityReferences": ["TestAssemblies"],
   "overrideReferences": true,
-  "precompiledReferences": ["nunit.framework.dll"],
+  "precompiledReferences": ["nunit.framework.dll", "Newtonsoft.Json.dll"],
   "autoReferenced": false,
   "defineConstraints": ["UNITY_INCLUDE_TESTS"]
 }

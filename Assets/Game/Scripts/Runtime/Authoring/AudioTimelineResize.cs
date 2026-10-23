@@ -5,7 +5,7 @@ namespace RhythmDojo.Authoring
 {
     public sealed class AudioTimelineResize : MonoBehaviour, IDragHandler
     {
-        public ChartAudioTimeline Owner { get; set; }
+        [field: SerializeField] public ChartAudioTimeline Owner { get; set; }
 
         public void OnDrag(PointerEventData data)
         {

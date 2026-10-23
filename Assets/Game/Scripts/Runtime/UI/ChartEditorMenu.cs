@@ -50,6 +50,8 @@ namespace RhythmDojo.UI
         private bool leavingForPlaytest;
         private Action saved;
 
+        [SerializeField] private string pupaAudioPath = "LocalAudio/PUPA.wav";
+
         [SerializeField]
         private Text activeChart;
         private readonly CancellationTokenSource lifetime = new CancellationTokenSource();
@@ -57,21 +59,9 @@ namespace RhythmDojo.UI
 
         public bool IsInitialized => store != null;
 
-        public void MoveStatusToFooter()
-        {
-            if (!status)
-            {
-                return;
-            }
+        [SerializeField] private GameObject advancedPanel;
 
-            var rect = status.rectTransform;
-            rect.anchorMin = Vector2.zero;
-            rect.anchorMax = new Vector2(1, 0);
-            rect.pivot = Vector2.zero;
-            rect.offsetMin = new Vector2(16, 0);
-            rect.offsetMax = new Vector2(-16, 26);
-            status.fontSize = 14;
-        }
+        public void ToggleAdvanced() => Toggle(advancedPanel);
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetReturn() => returningSession = null;
@@ -161,6 +151,10 @@ namespace RhythmDojo.UI
             filePanel.SetActive(false);
             settingsPanel.SetActive(false);
             toolsPanel.SetActive(false);
+            if (advancedPanel)
+            {
+                advancedPanel.SetActive(false);
+            }
             panel.SetActive(open);
         }
 
@@ -308,8 +302,64 @@ namespace RhythmDojo.UI
                 Observe();
                 FillSettings();
                 ShowStatus(
-                    "v1 가져오기 완료. ID와 편집 데이터를 유지합니다. 저장하면 v2 형식으로 기록합니다."
+                    "v1 가져오기 완료. ID와 편집 데이터를 유지합니다. 저장하면 v3 형식으로 기록합니다."
                 );
+            });
+
+        public void ImportShowcase() =>
+            RunAsync(async () =>
+            {
+                if (!Guid.TryParse(projectId.text, out Guid id))
+                {
+                    throw new InvalidOperationException("가져올 곡 ID를 입력하세요.");
+                }
+
+                var replacement = new EditorSession(store.ReadShowcaseVersion2(id));
+                if (screen.Session.IsDirty)
+                {
+                    await screen.Session.SaveAsync(store, lifetime.Token);
+                }
+
+                lifetime.Token.ThrowIfCancellationRequested();
+                screen.SetSession(replacement);
+                Observe();
+                FillSettings();
+                ShowStatus("showcase v2 가져오기 완료. 그리드를 보존하며 다음 저장은 v3입니다.");
+            });
+
+        public void ImportPupa() =>
+            RunAsync(async () =>
+            {
+                string path = Path.GetFullPath(Path.Combine(
+                    UnityEngine.Application.dataPath, "..", pupaAudioPath));
+                if (!File.Exists(path))
+                {
+                    throw new FileNotFoundException("PUPA.wav를 다음 위치에 넣어주세요: " + path);
+                }
+
+                var template = Resources.Load<TextAsset>("Authoring/Pupa");
+                if (!template)
+                {
+                    throw new InvalidOperationException("PUPA 채보 리소스를 찾을 수 없습니다.");
+                }
+
+                var project = new SongProjectJson().Deserialize(template.text);
+                project.Id = Guid.NewGuid();
+                project.Audio = await store.ImportAsync(project.Id, path, lifetime.Token);
+                lifetime.Token.ThrowIfCancellationRequested();
+                var replacement = new EditorSession(project);
+                if (screen.Session.IsDirty)
+                {
+                    await screen.Session.SaveAsync(store, lifetime.Token);
+                    saved?.Invoke();
+                }
+
+                lifetime.Token.ThrowIfCancellationRequested();
+                screen.SetSession(replacement);
+                Observe();
+                FillSettings();
+                audioPath.text = path;
+                ShowStatus("PUPA 음원과 채보를 가져왔습니다. 이전 작업은 자동 저장했습니다. 저장으로 새 곡을 보관하세요.");
             });
 
         public void ImportAudio() =>

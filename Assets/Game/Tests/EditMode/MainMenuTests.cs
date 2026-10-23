@@ -38,18 +38,24 @@ namespace RhythmDojo.Tests
                     .SelectMany(root => root.GetComponentsInChildren<MainMenuView>())
                     .Single();
                 Assert.That(view.title.text, Is.EqualTo("리듬 도장"));
-                Assert.That(view.startPrompt.text, Is.EqualTo("Click to Start"));
+                Assert.That(view.startPrompt.text, Is.EqualTo("두드려 시작"));
                 Assert.That(view.title.rectTransform.parent, Is.EqualTo(view.logo.transform));
                 Assert.That(view.title.rectTransform.anchorMin, Is.EqualTo(new Vector2(.5f, .5f)));
                 Assert.That(view.startPrompt.rectTransform.parent, Is.EqualTo(view.logo.transform));
                 Assert.That(view.logo.GetComponent<LogoCircleGraphic>(), Is.Null);
                 Assert.That(view.logo.GetComponent<UnityEngine.UI.Image>().sprite, Is.Not.Null);
-                Assert.That(view.alwaysVisibleMenu, Is.True);
+                Assert.That(view.alwaysVisibleMenu, Is.False);
                 Assert.That(view.title.enabled, Is.False);
-                Assert.That(view.logo.targetGraphic.raycastTarget, Is.False);
+                Assert.That(view.logo.targetGraphic.raycastTarget, Is.True);
                 Assert.That(view.logo.GetComponent<CanvasRenderer>(), Is.Not.Null);
-                Assert.That(view.menuPanel.gameObject.activeSelf, Is.True);
-                Assert.That(view.menuPanel.blocksRaycasts, Is.True);
+                Assert.That(view.menuPanel.gameObject.activeSelf, Is.False);
+                Assert.That(view.menuPanel.blocksRaycasts, Is.False);
+                Assert.That(view.entrance.leftDoor, Is.Not.Null);
+                Assert.That(view.entrance.rightDoor, Is.Not.Null);
+                Assert.That(view.knock, Is.Not.Null);
+                Assert.That(view.boardCrack, Is.Not.Null);
+                Assert.That(view.doorSlide, Is.Not.Null);
+                Assert.That(view.logo.GetComponent<DojoPlaqueHitArea>(), Is.Not.Null);
                 Assert.That(view.quitQuestion.text, Is.EqualTo("게임을 종료 하시겠습니까?"));
 
                 foreach (char glyph in "게임을 종료 하시겠습니까?예아니요")
@@ -77,17 +83,29 @@ namespace RhythmDojo.Tests
                 Assert.That(settingsRect.parent, Is.EqualTo(playRect.parent));
                 Assert.That(quitRect.parent, Is.EqualTo(playRect.parent));
                 Assert.That(
-                    playRect.anchoredPosition.y,
-                    Is.GreaterThan(settingsRect.anchoredPosition.y)
-                );
-                Assert.That(
-                    settingsRect.anchoredPosition.y,
-                    Is.GreaterThan(quitRect.anchoredPosition.y)
+                    playRect.anchoredPosition.x,
+                    Is.LessThan(settingsRect.anchoredPosition.x)
                 );
                 Assert.That(
                     settingsRect.anchoredPosition.x,
-                    Is.EqualTo(quitRect.anchoredPosition.x)
+                    Is.LessThan(quitRect.anchoredPosition.x)
                 );
+                Assert.That(
+                    settingsRect.anchoredPosition.y,
+                    Is.EqualTo(quitRect.anchoredPosition.y)
+                );
+                foreach (var button in new[] { view.start, view.settings, view.quit })
+                {
+                    Assert.That(button.GetComponent<UnityEngine.UI.Image>().sprite, Is.Null);
+                    Assert.That(button.GetComponent<UnityEngine.UI.Image>().color, Is.EqualTo(Color.white));
+                    Assert.That(button.GetComponentInChildren<UnityEngine.UI.Text>().font,
+                        Is.SameAs(UiFontSettings.Current));
+                    Assert.That(button.GetComponent<DojoBoardBreak>(), Is.Null);
+                }
+
+                Assert.That(view.start.navigation.selectOnRight, Is.SameAs(view.settings));
+                Assert.That(view.settings.navigation.selectOnRight, Is.SameAs(view.quit));
+                Assert.That(view.quit.navigation.selectOnLeft, Is.SameAs(view.settings));
                 Assert.That(
                     scene
                         .GetRootGameObjects()

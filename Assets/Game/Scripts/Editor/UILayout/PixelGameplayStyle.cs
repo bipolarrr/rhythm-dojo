@@ -29,7 +29,7 @@ namespace RhythmDojo.EditorTools
                 throw new InvalidOperationException("Gameplay camera missing.");
             }
 
-            // Composite the world camera inside the frame, over the supplied dojo art.
+            // Composite the world camera over the dojo art, with the lanes entering below the ceiling.
             var background = UiElements.Canvas("Pixel Dojo Gameplay Backdrop");
             background.renderMode = RenderMode.ScreenSpaceOverlay;
             background.sortingOrder = -100;
@@ -51,16 +51,12 @@ namespace RhythmDojo.EditorTools
             fit.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
             fit.aspectRatio = image.sprite.rect.width / image.sprite.rect.height;
             Panel("Scenery Shade", background.transform, new Color(.08f, .04f, .025f, .62f), 0, 0, 1, 1);
-            var field = Panel("Training Floor Frame", background.transform, new Color(.055f, .035f, .025f), .285f, .015f, .715f, .922f);
-            Frame(field, new Color(.055f, .035f, .025f), 10);
-            var scrollFrame = field.Find("Wooden Frame").GetComponent<Image>();
-            scrollFrame.sprite = DojoGameplayAssets.Scroll;
-            scrollFrame.type = Image.Type.Simple;
+            var field = Panel("Training Floor Frame", background.transform, Color.clear, .285f, .015f, .715f, .80f);
             camera.backgroundColor = new Color(.055f, .035f, .025f, 0f);
             var viewport = new GameObject("Gameplay Viewport", typeof(RectTransform), typeof(RawImage));
             viewport.transform.SetParent(field, false);
             var viewportRect = (RectTransform)viewport.transform;
-            Bounds(viewportRect, 0, 0, 1, .93f);
+            Bounds(viewportRect, 0, 0, 1, 1);
             viewportRect.offsetMin = new Vector2(10, 10);
             viewportRect.offsetMax = new Vector2(-10, 0);
             viewport.GetComponent<RawImage>().raycastTarget = false;

@@ -382,7 +382,7 @@ namespace RhythmDojo.Tests
                 Assert.That(row.offsetMin.y, Is.GreaterThan(waveform.offsetMax.y));
                 Assert.That(grid.rect.height, Is.EqualTo(row.rect.height).Within(0.01f));
                 Assert.That(preview.rect.height, Is.EqualTo(row.rect.height).Within(0.01f));
-                Assert.That(footer.rect.height, Is.EqualTo(151f).Within(0.01f));
+                Assert.That(footer.rect.height, Is.EqualTo(26f).Within(0.01f));
                 Assert.That(footer.rect.width, Is.EqualTo(row.rect.width).Within(0.01f));
             }
         }

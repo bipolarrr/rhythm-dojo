@@ -103,7 +103,7 @@ namespace RhythmDojo.EditorTools
                 typeof(RectTransform)
             ).GetComponent<RectTransform>();
             row.SetParent(canvas.transform, false);
-            Stretch(row, Vector2.zero, Vector2.one, new Vector2(28, 183), new Vector2(-28, -58));
+            Stretch(row, Vector2.zero, Vector2.one, new Vector2(28, 340), new Vector2(-28, -58));
 
             var tool = StretchPanel(
                 "Tool Space",
@@ -193,11 +193,12 @@ namespace RhythmDojo.EditorTools
                 Vector2.zero,
                 Surface
             );
+            sidebar.gameObject.AddComponent<RectMask2D>();
             var nextChart = UiElements.Button(
                 "Next Chart",
                 sidebar,
                 "다음 채보 (미지정 포함)",
-                new Vector2(18, -305),
+                new Vector2(18, -250),
                 new Vector2(330, 36)
             );
             UnityEventTools.AddPersistentListener(nextChart.onClick, screen.SelectNextChart);
@@ -206,8 +207,8 @@ namespace RhythmDojo.EditorTools
                 sidebar,
                 "좌클릭: 노트 배치\n위로 드래그: 롱노트\n우클릭: 삭제\n휠: 이동 / Ctrl + 휠: 확대\n\n파일 → 음원 가져오기\n설정 → 제목과 BPM 적용\n테스트 → 실제 플레이\n플레이 종료 시 편집 화면으로 복귀",
                 new Vector2(18, -18),
-                new Vector2(380, 290),
-                19
+                new Vector2(380, 225),
+                16
             );
 
             var footer = StretchPanel(
@@ -216,19 +217,28 @@ namespace RhythmDojo.EditorTools
                 Vector2.zero,
                 new Vector2(1, 0),
                 new Vector2(28, 18),
-                new Vector2(-28, 169),
+                new Vector2(-28, 44),
                 Surface
             );
             var progress = UiElements.Label(
                 "Progress Label",
                 footer,
                 "BPM 및 노래 진행 상황",
-                new Vector2(22, -20),
-                new Vector2(1150, 112),
+                new Vector2(16, 0),
+                new Vector2(1150, 26),
                 18
             );
             progress.color = new Color(0.8f, 0.83f, 0.88f);
-            BuildMenus(canvas, screen, progress, menuButtons);
+            var audioTimeline = screen.gameObject.AddComponent<ChartAudioTimeline>();
+            var source = screen.gameObject.AddComponent<AudioSource>();
+            source.playOnAwake = false;
+            source.spatialBlend = 0;
+            source.volume = 0.65f;
+            SceneBuilder.Wire(audioTimeline, "source", source);
+            var view = ChartAudioTimelineLayoutBuilder.Build(canvas.transform, row, audioTimeline);
+            SceneBuilder.Wire(audioTimeline, "view", view);
+            SceneBuilder.Wire(screen, "audioTimeline", audioTimeline);
+            BuildMenus(canvas, screen, progress, menuButtons, audioTimeline, view);
             UiElements.EventSystem(
                 AssetDatabase.LoadAssetAtPath<UnityEngine.InputSystem.InputActionAsset>(
                     "Assets/InputSystem_Actions.inputactions"
@@ -253,12 +263,16 @@ namespace RhythmDojo.EditorTools
             Canvas canvas,
             ChartEditorScreen screen,
             Text status,
-            Button[] buttons
+            Button[] buttons,
+            ChartAudioTimeline audioTimeline,
+            ChartAudioTimelineView view
         )
         {
             var menu = canvas.gameObject.AddComponent<ChartEditorMenu>();
             var controls = canvas.gameObject.AddComponent<CanvasGroup>();
             SceneBuilder.Wire(menu, "screen", screen);
+            SceneBuilder.Wire(menu, "advancedPanel", view.advanced);
+            SceneBuilder.Wire(audioTimeline, "menu", menu);
             SceneBuilder.Wire(menu, "status", status);
             SceneBuilder.Wire(menu, "controls", controls);
             SceneBuilder.Wire(
@@ -274,7 +288,7 @@ namespace RhythmDojo.EditorTools
                 )
             );
 
-            var file = MenuPanel("File Panel", canvas.transform, 440);
+            var file = MenuPanel("File Panel", canvas.transform, 490);
             var settings = MenuPanel("Settings Panel", canvas.transform, 470);
             var tools = MenuPanel("Tools Panel", canvas.transform, 210);
             SceneBuilder.Wire(menu, "filePanel", file.gameObject);
@@ -290,16 +304,21 @@ namespace RhythmDojo.EditorTools
                 390,
                 menu.ImportLegacy
             );
+            ActionButton(file, "Import Showcase", "showcase v2 가져오기 (곡 ID)", 436, menu.ImportShowcase);
             SceneBuilder.Wire(
                 menu,
                 "audioPath",
                 Field(file, "Audio Path", "음원 파일 전체 경로 (WAV / OGG / MP3)", 210)
             );
-            ActionButton(file, "Import Audio", "음원 가져오기", 294, menu.ImportAudio);
+            var importAudio = ActionButton(file, "Import Audio", "음원 가져오기", 294, menu.ImportAudio);
+            ((RectTransform)importAudio.transform).sizeDelta = new Vector2(238, 36);
+            var importPupa = ActionButton(file, "Import PUPA", "PUPA 음원 + 채보", 294, menu.ImportPupa);
+            UiElements.Position((RectTransform)importPupa.transform,
+                new Vector2(266, -294), new Vector2(238, 36));
             UiElements.Label(
                 "Storage Hint",
                 file,
-                "저장 위치는 저장 완료 후 아래에 표시됩니다.",
+                "PUPA 음원 위치: LocalAudio/PUPA.wav (프로젝트 폴더)",
                 new Vector2(16, -348),
                 new Vector2(480, 28),
                 16
@@ -347,6 +366,7 @@ namespace RhythmDojo.EditorTools
             );
             SceneBuilder.Wire(composition, "screen", screen);
             SceneBuilder.Wire(composition, "menu", menu);
+            SceneBuilder.Wire(composition, "timeline", audioTimeline);
         }
 
         private static RectTransform MenuPanel(string name, Transform parent, float height)
@@ -383,7 +403,7 @@ namespace RhythmDojo.EditorTools
 
             foreach (var text in go.GetComponentsInChildren<Text>(true))
             {
-                text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+                text.font = RhythmDojo.UI.UiFontSettings.Current;
                 text.fontSize = 17;
             }
 

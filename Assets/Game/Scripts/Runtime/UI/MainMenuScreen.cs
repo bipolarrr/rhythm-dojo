@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using RhythmDojo.Services;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -18,7 +19,7 @@ namespace RhythmDojo.UI
         private float titleBounceAmount = .08f;
 
         [SerializeField, Range(0f, .3f)]
-        private float promptBounceAmount = .05f;
+        private float promptBounceAmount = 0f;
 
         [Tooltip("Fraction of each beat used to return to the original size.")]
         [SerializeField, Range(.1f, 1f)]
@@ -33,6 +34,8 @@ namespace RhythmDojo.UI
         private bool bounceInitialized;
         private bool menuExpanded;
         private float expansion;
+        private AudioSource effects;
+        private float knockTime;
 
         public void Validate()
         {
@@ -49,9 +52,12 @@ namespace RhythmDojo.UI
             IMainMenuBeatClock menuBeatClock = null
         )
         {
+            StopAllCoroutines();
             Unbind();
             Validate();
-            titleScale = view.logo.transform.localScale;
+            view.RestoreBoards();
+            view.logoArtwork.localRotation = Quaternion.identity;
+            titleScale = view.logoArtwork.localScale;
             promptScale = view.startPrompt.rectTransform.localScale;
             beatStartTime = AudioSettings.dspTime;
             bounceInitialized = true;
@@ -75,6 +81,16 @@ namespace RhythmDojo.UI
             view.quit.onClick.AddListener(ShowQuit);
             view.confirmQuit.onClick.AddListener(ConfirmQuit);
             view.cancelQuit.onClick.AddListener(CancelQuit);
+            if (!effects)
+            {
+                effects = gameObject.AddComponent<AudioSource>();
+                effects.playOnAwake = false;
+            }
+
+            if (EventSystem.current)
+            {
+                EventSystem.current.SetSelectedGameObject(view.logo.gameObject);
+            }
         }
 
         private bool Busy => actions == null || starting || quitting || actions.Transitioning;
@@ -83,6 +99,12 @@ namespace RhythmDojo.UI
         {
             if (!bounceInitialized)
             {
+                return;
+            }
+
+            if (starting)
+            {
+                RestoreScale();
                 return;
             }
 
@@ -97,6 +119,12 @@ namespace RhythmDojo.UI
 
             view.SetExpansion(expansion);
             view.menuPanel.gameObject.SetActive(expansion > 0f || menuExpanded);
+            if (knockTime > 0f)
+            {
+                knockTime = Mathf.Max(0f, knockTime - Time.unscaledDeltaTime);
+                float angle = Mathf.Sin(knockTime * 65f) * knockTime * 10f;
+                view.logoArtwork.localRotation = Quaternion.Euler(0f, 0f, angle);
+            }
 
             if (Busy || view.quitPopup.activeSelf)
             {
@@ -130,7 +158,7 @@ namespace RhythmDojo.UI
             float phase = (float)(beats - Math.Floor(beats));
             float progress = Mathf.Clamp01(phase / Mathf.Clamp(bounceDurationInBeats, .1f, 1f));
             float bounce = 1f - Mathf.SmoothStep(0f, 1f, progress);
-            view.logo.transform.localScale =
+            view.logoArtwork.localScale =
                 titleScale * (1f + bounce * Mathf.Clamp(titleBounceAmount, 0f, .3f));
             view.startPrompt.rectTransform.localScale =
                 promptScale * (1f + bounce * Mathf.Clamp(promptBounceAmount, 0f, .3f));
@@ -143,9 +171,9 @@ namespace RhythmDojo.UI
                 return;
             }
 
-            if (view.logo)
+            if (view.logoArtwork)
             {
-                view.logo.transform.localScale = titleScale;
+                view.logoArtwork.localScale = titleScale;
             }
 
             if (view.startPrompt)
@@ -165,16 +193,55 @@ namespace RhythmDojo.UI
                 return;
             }
 
+            if (expansion < .99f)
+            {
+                return;
+            }
+
             starting = true;
             view.SetMenuInteractable(false);
+            StartCoroutine(BreakAndInvoke(view.start, actions.StartGame, true));
+        }
+
+        private IEnumerator BreakAndInvoke(
+            UnityEngine.UI.Button button, Action action, bool leaving)
+        {
+            var board = button.GetComponent<DojoBoardBreak>();
+            if (board)
+            {
+                if (view.boardCrack)
+                {
+                    effects.PlayOneShot(view.boardCrack, .7f);
+                }
+
+                yield return board.Play();
+            }
+            else
+            {
+                yield return new WaitForSecondsRealtime(.25f);
+            }
+
+            if (leaving)
+            {
+                float elapsed = 0f;
+                while (elapsed < .15f)
+                {
+                    elapsed += Time.unscaledDeltaTime;
+                    float alpha = 1f - Mathf.Clamp01(elapsed / .15f);
+                    view.logoGroup.alpha = alpha;
+                    view.menuPanel.alpha = alpha;
+                    yield return null;
+                }
+            }
 
             try
             {
-                actions.StartGame();
+                action();
             }
             catch (Exception error)
             {
                 starting = false;
+                view.RestoreBoards();
                 view.SetMenuInteractable(true);
                 Debug.LogException(error, this);
             }
@@ -193,6 +260,31 @@ namespace RhythmDojo.UI
             }
 
             menuExpanded = !menuExpanded;
+            knockTime = .18f;
+            if (view.knock)
+            {
+                effects.PlayOneShot(view.knock, .6f);
+            }
+
+            StartCoroutine(FocusMenuAfterExpansion());
+        }
+
+        private IEnumerator FocusMenuAfterExpansion()
+        {
+            yield return new WaitForSecondsRealtime(.26f);
+            if (Busy || view.quitPopup.activeSelf || !EventSystem.current)
+            {
+                yield break;
+            }
+
+            if (menuExpanded)
+            {
+                EventSystem.current.SetSelectedGameObject(view.start.gameObject);
+            }
+            else
+            {
+                EventSystem.current.SetSelectedGameObject(view.logo.gameObject);
+            }
         }
 
         public void ResumeFromSettings()
@@ -203,6 +295,7 @@ namespace RhythmDojo.UI
             }
 
             starting = false;
+            view.RestoreBoards();
             view.SetMenuInteractable(true);
         }
 
@@ -215,19 +308,14 @@ namespace RhythmDojo.UI
                 return;
             }
 
+            if (expansion < .99f)
+            {
+                return;
+            }
+
             starting = true;
             view.SetMenuInteractable(false);
-
-            try
-            {
-                actions.ShowSettings();
-            }
-            catch (Exception error)
-            {
-                starting = false;
-                view.SetMenuInteractable(true);
-                Debug.LogException(error, this);
-            }
+            StartCoroutine(BreakAndInvoke(view.settings, actions.ShowSettings, false));
         }
 
         private void ShowQuit()
@@ -237,7 +325,19 @@ namespace RhythmDojo.UI
                 return;
             }
 
+            if (expansion < .99f)
+            {
+                return;
+            }
+
             view.SetMenuInteractable(false);
+            starting = true;
+            StartCoroutine(BreakAndInvoke(view.quit, OpenQuitPopup, false));
+        }
+
+        private void OpenQuitPopup()
+        {
+            starting = false;
             view.quitPopup.SetActive(true);
 
             if (EventSystem.current)
@@ -254,11 +354,12 @@ namespace RhythmDojo.UI
             }
 
             view.quitPopup.SetActive(false);
+            view.RestoreBoards();
             view.SetMenuInteractable(true);
 
             if (EventSystem.current)
             {
-                EventSystem.current.SetSelectedGameObject(null);
+                EventSystem.current.SetSelectedGameObject(view.quit.gameObject);
             }
         }
 

@@ -20,6 +20,25 @@ namespace RhythmDojo.UI
         public Vector2 logoOpenPosition = new Vector2(-330, 0);
         public Vector2 menuOpenPosition = new Vector2(200, 0);
         public GameObject quitPopup;
+        public DojoEntranceView entrance;
+        public CanvasGroup logoGroup;
+        public RectTransform logoArtwork;
+        public AudioClip knock,
+            boardCrack,
+            doorSlide;
+
+        public void RestoreBoards()
+        {
+            foreach (var board in GetComponentsInChildren<DojoBoardBreak>(true))
+            {
+                board.Restore();
+            }
+
+            if (logoGroup)
+            {
+                logoGroup.alpha = 1f;
+            }
+        }
 
         public void Validate()
         {
@@ -41,6 +60,16 @@ namespace RhythmDojo.UI
             if (!cancelQuit || !quitPopup)
             {
                 throw new InvalidOperationException("Main menu view references missing.");
+            }
+
+            if (!entrance || !logoGroup || !logoArtwork)
+            {
+                throw new InvalidOperationException("Dojo entrance references missing.");
+            }
+
+            if (!entrance.leftDoor || !entrance.rightDoor || !entrance.frame)
+            {
+                throw new InvalidOperationException("Dojo door references missing.");
             }
         }
 

@@ -22,7 +22,7 @@ Use case: stylized-concept. Asset type: production Unity nine-sliced game UI woo
 
 ### GameplayScroll
 
-Generated with the built-in image_gen tool and saved as `Assets/Game/Art/DojoGameplay/GameplayScroll.png`. `GameplayScroll.asset` uses the full image. The central gameplay frame displays this sprite without slicing; the transparent world camera renders the notes above it.
+Generated with the built-in image_gen tool and saved as `Assets/Game/Art/DojoGameplay/GameplayScroll.png`. `GameplayScroll.asset` uses the full image. This experiment is retained as an unused asset. Gameplay now renders the lanes directly over the dojo scenery, with their upper edge cropped into the sky below the ceiling.
 
 Final prompt:
 

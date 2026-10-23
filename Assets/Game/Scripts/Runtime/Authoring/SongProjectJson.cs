@@ -18,7 +18,7 @@ namespace RhythmDojo.Authoring
             public string Format = "rhythm-dojo-chart";
 
             [JsonProperty("version", Order = 1)]
-            public int Version = 2;
+            public int Version = 3;
 
             [JsonProperty("song", Order = 2)]
             public SongDto Song;
@@ -49,7 +49,7 @@ namespace RhythmDojo.Authoring
         [JsonObject(MemberSerialization.OptIn)]
         private sealed class TimingDto
         {
-            [JsonProperty("grid", Order = 2, NullValueHandling = NullValueHandling.Ignore)]
+            [JsonProperty("grid", Order = 2)]
             public GridDto Grid;
 
             [JsonProperty("audioOffsetSeconds", Order = 0)]
@@ -199,11 +199,13 @@ namespace RhythmDojo.Authoring
                 + "\n";
         }
 
-        public SongProject Deserialize(string json) => DeserializeVersion(json, false);
+        public SongProject Deserialize(string json) => DeserializeVersion(json, false, false);
 
-        public SongProject ImportVersion1(string json) => DeserializeVersion(json, true);
+        public SongProject ImportVersion1(string json) => DeserializeVersion(json, true, false);
 
-        private SongProject DeserializeVersion(string json, bool importVersion1)
+        public SongProject ImportShowcaseVersion2(string json) => DeserializeVersion(json, false, true);
+
+        private SongProject DeserializeVersion(string json, bool importVersion1, bool importShowcaseVersion2)
         {
             try
             {
@@ -240,20 +242,28 @@ namespace RhythmDojo.Authoring
                 {
                     if (version != 1)
                     {
-                        Fail("version", "Expected v2. Use ImportVersion1 for legacy projects.");
+                        Fail("version", "Expected v1 for explicit legacy import.");
                     }
                 }
-                else if (version != 2)
+                else if (importShowcaseVersion2)
                 {
-                    Fail("version", "Expected v2. Use ImportVersion1 for legacy projects.");
+                    if (version != 2)
+                    {
+                        Fail("version", "Expected showcase v2 for explicit import.");
+                    }
+                }
+                else if (version != 2 && version != 3)
+                {
+                    Fail("version", "Expected v2 or v3. Use ImportVersion1 for legacy projects.");
                 }
 
                 var song = root["song"];
                 Fields(song, "id", "title", "artist", "audio");
 
                 var timing = root["timing"];
-                bool hasGrid = false;
-                if (version == 2 && timing is JObject)
+                bool hasGrid = version == 3;
+
+                if (importShowcaseVersion2 && timing is JObject)
                 {
                     hasGrid = timing["grid"] != null;
                 }
@@ -474,15 +484,6 @@ namespace RhythmDojo.Authoring
 
         private static GridDto SerializeGrid(BeatGridSettings grid)
         {
-            if (grid.OriginSeconds == 0 && grid.Meters.Length == 1)
-            {
-                var meter = grid.Meters[0];
-                if (meter.Numerator == 4 && meter.Denominator == 4)
-                {
-                    return null;
-                }
-            }
-
             return new GridDto
             {
                 Origin = grid.OriginSeconds,
@@ -509,18 +510,14 @@ namespace RhythmDojo.Authoring
                 Meters = Array(token["meters"]).Select(m =>
                 {
                     Fields(m, "timeSeconds", "numerator", "denominator");
-                    return new MeterPoint(Number(m["timeSeconds"]),
-                        Integer(m["numerator"]), Integer(m["denominator"]));
+
+                    return new MeterPoint(
+                        Number(m["timeSeconds"]),
+                        Integer(m["numerator"]),
+                        Integer(m["denominator"])
+                    );
                 }).ToArray()
             };
-            try
-            {
-                grid.Validate();
-            }
-            catch (ArgumentException e)
-            {
-                Fail(token.Path, e.Message);
-            }
 
             return grid;
         }

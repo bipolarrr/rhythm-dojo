@@ -30,6 +30,11 @@ namespace RhythmDojo.Tests
             {
                 Title = "Three chart integration",
                 Artist = "Verification",
+                Grid = new BeatGridSettings
+                {
+                    OriginSeconds = .237,
+                    Meters = new[] { new MeterPoint(0, 7, 8), new MeterPoint(6, 3, 4) }
+                },
                 Charts = Enumerable
                     .Range(0, 3)
                     .Select(i => new ChartDocument
@@ -61,6 +66,10 @@ namespace RhythmDojo.Tests
                 var saved = store.SaveAsync(project, default);
                 yield return new WaitUntil(() => saved.IsCompleted);
                 saved.GetAwaiter().GetResult();
+                string path = Path.Combine(store.GetSongFolder(project.Id), FileSongProjectStore.FileName);
+                string original = File.ReadAllText(path);
+                Assert.That(original, Does.Contain("\"version\": 3"));
+                Assert.That(ProjectValidation.ContentEquals(project, store.Read(project.Id)), Is.True);
                 flow.Library.Register(provider);
 
                 for (int i = 0; i < 3; i++)
@@ -88,6 +97,9 @@ namespace RhythmDojo.Tests
                     yield return Await(() => Object.FindFirstObjectByType<SongSelectionScreen>());
                     yield return null;
                 }
+
+                Assert.That(File.ReadAllText(path), Is.EqualTo(original));
+                Assert.That(ProjectValidation.ContentEquals(project, store.Read(project.Id)), Is.True);
 
                 project.Charts[2].Notes = Array.Empty<NoteData>();
                 saved = store.SaveAsync(project, default);

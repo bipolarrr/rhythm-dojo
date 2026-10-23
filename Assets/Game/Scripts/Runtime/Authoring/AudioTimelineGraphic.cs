@@ -10,32 +10,45 @@ namespace RhythmDojo.Authoring
     public sealed class AudioTimelineGraphic : MaskableGraphic,
         IPointerDownHandler, IPointerUpHandler, IDragHandler, IScrollHandler
     {
-        public ChartAudioTimeline Owner { get; set; }
-        public bool Overview { get; set; }
+        [field: SerializeField] public ChartAudioTimeline Owner { get; set; }
+        [field: SerializeField] public bool Overview { get; set; }
         private double dragTime;
         private double dragStart;
         private bool dragged;
-        private Text[] labels;
+        [SerializeField] private Text[] labels;
         private double[] labelBeats;
         private float lastWidth;
         private RhythmDojo.Gameplay.BeatGridTiming labelTiming;
+        private WaveformPeaks cachedPeaks;
+        private int cachedRevision;
+        private double cachedStart;
+        private double cachedDuration;
+        private Vector2[] columnPeaks;
+        private Color[] columnColors;
+        private readonly List<Vector2> samplePoints = new List<Vector2>();
+
+        public bool ShowsSamples { get; private set; }
+
+        public void ConfigureLabels(Text[] labels)
+        {
+            this.labels = labels;
+            InitializeLabels();
+        }
 
         public void InitializeLabels()
         {
-            if (Overview)
-            {
-                return;
-            }
-
-            labels = new Text[24];
+            labels ??= Array.Empty<Text>();
             labelBeats = new double[labels.Length];
-            for (int i = 0; i < labels.Length; i++)
+            for (int i = 0; i < labelBeats.Length; i++)
             {
-                labels[i] = AudioTimelineUi.Label(transform, "Beat Label " + i, "", 0, 0, 86, 19);
-                labels[i].fontSize = 12;
-                labels[i].gameObject.SetActive(false);
                 labelBeats[i] = double.NaN;
             }
+        }
+
+        protected override void Awake()
+        {
+            base.Awake();
+            InitializeLabels();
         }
 
         private void LateUpdate()
@@ -49,7 +62,12 @@ namespace RhythmDojo.Authoring
 
         public void RefreshLabels()
         {
-            if (labels == null || Owner.Timing == null)
+            if (labels == null || !Owner)
+            {
+                return;
+            }
+
+            if (labels.Length == 0 || Owner.Timing == null)
             {
                 return;
             }
@@ -181,22 +199,25 @@ namespace RhythmDojo.Authoring
 
             AddRect(vertices, area, new Color(0.025f, 0.035f, 0.05f));
             int columns = Math.Min(1500, Mathf.CeilToInt(area.width));
-            float width = area.width / columns;
             double start = StartTime;
             double duration = Duration;
             if (Owner.Peaks != null && Owner.Peaks.Ready)
             {
-                for (int i = 0; i < columns; i++)
+                int resolution = Math.Min(1500, Mathf.CeilToInt(area.width * canvas.scaleFactor));
+                resolution = Math.Max(1, Math.Min(resolution, 4000 / Owner.Peaks.Channels));
+                ShowsSamples = duration * Owner.Peaks.Frequency <= resolution;
+                if (ShowsSamples)
                 {
-                    var peak = Owner.Peaks.Range(start + duration * i / columns,
-                        start + duration * (i + 1) / columns);
-                    float low = area.center.y + peak.x * area.height * 0.44f;
-                    float high = area.center.y + peak.y * area.height * 0.44f;
-                    Color tint = Owner.Peaks.ColorRange(start + duration * i / columns,
-                        start + duration * (i + 1) / columns);
-                    AddRect(vertices, new Rect(area.xMin + i * width, low, width,
-                        Math.Max(0.6f, high - low)), tint);
+                    AddSamples(vertices, area, start, duration);
                 }
+                else
+                {
+                    AddWaveform(vertices, area, resolution, start, duration);
+                }
+            }
+            else
+            {
+                ShowsSamples = false;
             }
 
             if (Overview)
@@ -248,6 +269,151 @@ namespace RhythmDojo.Authoring
         private static float X(double time, Rect area, double start, double duration)
         {
             return area.xMin + (float)Math.Max(0, Math.Min(1, (time - start) / duration)) * area.width;
+        }
+
+        private void AddWaveform(VertexHelper vertices, Rect area, int columns, double start, double duration)
+        {
+            CacheColumns(columns, start, duration);
+            float feather = 1 / Math.Max(0.01f, canvas.scaleFactor);
+            int first = vertices.currentVertCount;
+            // Shared vertices form a continuous envelope, with a one-screen-pixel alpha fringe.
+            // Only the display is sampled in columns; pointer and music time remain continuous.
+            for (int i = 0; i <= columns; i++)
+            {
+                var peak = columnPeaks[i];
+                float low = area.center.y + peak.x * area.height * 0.44f;
+                float high = area.center.y + peak.y * area.height * 0.44f;
+                float x = area.xMin + area.width * i / columns;
+                Color tint = columnColors[i];
+                float edge = Math.Min(feather, (high - low) * 0.25f);
+                AddWaveVertex(vertices, x, low - feather, tint, 0);
+                AddWaveVertex(vertices, x, low, tint, 0.95f);
+                AddWaveVertex(vertices, x, Math.Min(area.center.y, low + edge), tint, 0.65f);
+                AddWaveVertex(vertices, x, area.center.y, tint, 0.3f);
+                AddWaveVertex(vertices, x, Math.Max(area.center.y, high - edge), tint, 0.65f);
+                AddWaveVertex(vertices, x, high, tint, 0.95f);
+                AddWaveVertex(vertices, x, high + feather, tint, 0);
+                if (i == 0)
+                {
+                    continue;
+                }
+
+                int previous = first + (i - 1) * 7;
+                for (int band = 0; band < 6; band++)
+                {
+                    int index = previous + band;
+                    vertices.AddTriangle(index, index + 1, index + 8);
+                    vertices.AddTriangle(index, index + 8, index + 7);
+                }
+            }
+        }
+
+        private void CacheColumns(int columns, double start, double duration)
+        {
+            bool sameAudio = cachedPeaks == Owner.Peaks && cachedRevision == Owner.Peaks.Revision;
+            bool sameWindow = cachedStart == start && cachedDuration == duration;
+            if (sameAudio && sameWindow)
+            {
+                if (columnPeaks != null && columnPeaks.Length == columns + 1)
+                {
+                    return;
+                }
+            }
+
+            if (columnPeaks == null || columnPeaks.Length != columns + 1)
+            {
+                columnPeaks = new Vector2[columns + 1];
+                columnColors = new Color[columns + 1];
+            }
+
+            for (int i = 0; i <= columns; i++)
+            {
+                double left = start + duration * Math.Max(0, i - 0.5) / columns;
+                double right = start + duration * Math.Min(columns, i + 0.5) / columns;
+                columnPeaks[i] = Owner.Peaks.Range(left, right);
+                columnColors[i] = Owner.Peaks.ColorRange(left, right);
+            }
+
+            cachedPeaks = Owner.Peaks;
+            cachedRevision = Owner.Peaks.Revision;
+            cachedStart = start;
+            cachedDuration = duration;
+        }
+
+        private void AddSamples(VertexHelper vertices, Rect area, double start, double duration)
+        {
+            var peaks = Owner.Peaks;
+            double first = Math.Max(0, start * peaks.Frequency);
+            double last = Math.Min(peaks.SampleCount - 1, (start + duration) * peaks.Frequency);
+            if (last <= first)
+            {
+                return;
+            }
+
+            for (int channel = 0; channel < peaks.Channels; channel++)
+            {
+                samplePoints.Clear();
+                AddSamplePoint(area, start, duration, first, channel);
+                for (int frame = (int)Math.Floor(first) + 1; frame < last; frame++)
+                {
+                    AddSamplePoint(area, start, duration, frame, channel);
+                }
+
+                AddSamplePoint(area, start, duration, last, channel);
+                Color tint = Color.HSVToRGB((0.12f + channel * 0.47f) % 1, 0.65f, 1);
+                AddSampleLine(vertices, area, tint);
+            }
+        }
+
+        private void AddSamplePoint(Rect area, double start, double duration, double frame, int channel)
+        {
+            var peaks = Owner.Peaks;
+            int lower = (int)Math.Floor(frame);
+            int upper = Math.Min(peaks.SampleCount - 1, lower + 1);
+            float value = Mathf.Lerp(peaks.Sample(lower, channel), peaks.Sample(upper, channel),
+                (float)(frame - lower));
+            float x = X(frame / peaks.Frequency, area, start, duration);
+            samplePoints.Add(new Vector2(x, area.center.y + value * area.height * 0.44f));
+        }
+
+        private void AddSampleLine(VertexHelper vertices, Rect area, Color tint)
+        {
+            float feather = 1 / Math.Max(0.01f, canvas.scaleFactor);
+            int first = vertices.currentVertCount;
+            for (int i = 0; i < samplePoints.Count; i++)
+            {
+                Vector2 tangent = samplePoints[Math.Min(i + 1, samplePoints.Count - 1)]
+                    - samplePoints[Math.Max(0, i - 1)];
+                Vector2 normal = new Vector2(-tangent.y, tangent.x).normalized * feather;
+                AddLineVertex(vertices, area, samplePoints[i] - normal * 1.5f, tint, 0);
+                AddLineVertex(vertices, area, samplePoints[i] - normal * 0.5f, tint, 1);
+                AddLineVertex(vertices, area, samplePoints[i] + normal * 0.5f, tint, 1);
+                AddLineVertex(vertices, area, samplePoints[i] + normal * 1.5f, tint, 0);
+                if (i == 0)
+                {
+                    continue;
+                }
+
+                int previous = first + (i - 1) * 4;
+                for (int band = 0; band < 3; band++)
+                {
+                    int index = previous + band;
+                    vertices.AddTriangle(index, index + 1, index + 5);
+                    vertices.AddTriangle(index, index + 5, index + 4);
+                }
+            }
+        }
+
+        private static void AddLineVertex(VertexHelper vertices, Rect area, Vector2 point, Color tint, float alpha)
+        {
+            AddWaveVertex(vertices, Mathf.Clamp(point.x, area.xMin, area.xMax),
+                Mathf.Clamp(point.y, area.yMin, area.yMax), tint, alpha);
+        }
+
+        private static void AddWaveVertex(VertexHelper vertices, float x, float y, Color tint, float alpha)
+        {
+            tint.a = alpha;
+            vertices.AddVert(new Vector3(x, y), tint, Vector2.zero);
         }
 
         private static void AddRect(VertexHelper vertices, Rect area, Color tint)

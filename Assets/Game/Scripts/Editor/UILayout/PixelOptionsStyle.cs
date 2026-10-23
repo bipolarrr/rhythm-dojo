@@ -16,6 +16,7 @@ namespace RhythmDojo.EditorTools
         {
             view.pixelTheme = true;
             var backdrop = new GameObject("Pixel Dojo Backdrop", typeof(RectTransform), typeof(Image), typeof(AspectRatioFitter));
+            view.backdrop = backdrop;
             backdrop.transform.SetParent(view.transform, false);
             backdrop.transform.SetAsFirstSibling();
             Stretch((RectTransform)backdrop.transform);

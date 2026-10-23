@@ -8,7 +8,7 @@ namespace RhythmDojo.EditorTools
 {
     public static class MainMenuLayoutBuilder
     {
-        public const string FontPath = "Assets/Game/Fonts/NotoSansKR-Regular.otf";
+        public const string FontPath = "Assets/Game/Fonts/Mona12TextKR.ttf";
 
         public static MainMenuView Build()
         {
@@ -23,46 +23,79 @@ namespace RhythmDojo.EditorTools
             canvas.GetComponent<CanvasScaler>().matchWidthOrHeight = .5f;
 
             var view = canvas.gameObject.AddComponent<MainMenuView>();
-            view.alwaysVisibleMenu = true;
-            var wall = Panel("Dojo Wall", canvas.transform, Color.white);
+            view.alwaysVisibleMenu = false;
+            view.logoOpenPosition = new Vector2(-250f, 0f);
+            view.menuOpenPosition = new Vector2(230f, 0f);
+            var entrance = new GameObject("Dojo Entrance", typeof(RectTransform));
+            entrance.transform.SetParent(canvas.transform, false);
+            Stretch((RectTransform)entrance.transform);
+            var entranceFit = entrance.AddComponent<AspectRatioFitter>();
+            entranceFit.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
+            view.entrance = entrance.AddComponent<DojoEntranceView>();
+            var wall = Panel("Dojo Wall", entrance.transform, Color.white);
             Stretch(wall.rectTransform);
             wall.sprite = LoadSprite("TitleBackground");
+            entranceFit.aspectRatio = wall.sprite.rect.width / wall.sprite.rect.height;
             wall.raycastTarget = false;
             // Crop to fill ultrawide/portrait windows without stretching the artwork.
             var fit = wall.gameObject.AddComponent<AspectRatioFitter>();
             fit.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
             fit.aspectRatio = wall.sprite.rect.width / wall.sprite.rect.height;
+            BuildEntrance(view.entrance);
+            view.knock = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Game/Audio/DojoKnock.wav");
+            view.boardCrack = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Game/Audio/DojoBoardCrack.wav");
+            view.doorSlide = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Game/Audio/DojoDoorSlide.wav");
 
             var logoObject = new GameObject("Logo", typeof(RectTransform), typeof(Image));
             logoObject.transform.SetParent(canvas.transform, false);
             var logoImage = logoObject.GetComponent<Image>();
-            logoImage.sprite = LoadSprite("TitleLogo");
+            logoImage.sprite = DojoEntranceAssets.Load("RoundPlaque");
             logoImage.preserveAspect = true;
-            logoImage.raycastTarget = false;
+            logoImage.raycastTarget = true;
+            logoObject.AddComponent<DojoPlaqueHitArea>();
+            view.logoGroup = logoObject.AddComponent<CanvasGroup>();
             view.logo = logoObject.AddComponent<Button>();
             view.logo.targetGraphic = logoImage;
             view.logo.transition = Selectable.Transition.None;
             var logoNavigation = view.logo.navigation;
-            logoNavigation.mode = Navigation.Mode.None;
+            logoNavigation.mode = Navigation.Mode.Explicit;
             view.logo.navigation = logoNavigation;
-            Anchor((RectTransform)view.logo.transform, new Vector2(.5f, .72f), Vector2.zero, new Vector2(590, 210));
+            Anchor((RectTransform)view.logo.transform, new Vector2(.5f, .5f), Vector2.zero, new Vector2(360, 360));
+            var logoArt = Panel("Game Logo", logoObject.transform, Color.white);
+            logoArt.sprite = LoadSprite("TitleLogo");
+            logoArt.preserveAspect = true;
+            logoArt.raycastTarget = false;
+            view.logoArtwork = logoArt.rectTransform;
+            Anchor(logoArt.rectTransform, new Vector2(.5f, .5f), new Vector2(0, 12), new Vector2(420, 150));
             view.title = Label("Title", view.logo.transform, "리듬 도장", font, 48);
             Anchor(view.title.rectTransform, new Vector2(.5f, .5f), Vector2.zero, new Vector2(270, 90));
             view.title.enabled = false;
-            view.startPrompt = Label("Start Prompt", view.logo.transform, "Click to Start", font, 24);
-            view.startPrompt.enabled = false;
+            view.startPrompt = Label("Start Prompt", view.logo.transform, "두드려 시작", font, 20);
+            view.startPrompt.color = new Color(1f, .88f, .64f);
+            Anchor(view.startPrompt.rectTransform, new Vector2(.5f, .5f), new Vector2(0, -110), new Vector2(250, 40));
+            view.startPrompt.raycastTarget = false;
 
             var menu = new GameObject("Menu Buttons", typeof(RectTransform), typeof(CanvasGroup));
             menu.transform.SetParent(canvas.transform, false);
             view.menuPanel = menu.GetComponent<CanvasGroup>();
-            Anchor((RectTransform)menu.transform, new Vector2(.5f, .5f), new Vector2(0, -110), new Vector2(320, 240));
-            view.start = ArtButton("Play", menu.transform, "StartButton", 78);
-            view.settings = ArtButton("Settings", menu.transform, "OptionsButton", 0);
-            view.quit = ArtButton("Quit", menu.transform, "QuitButton", -78);
+            Anchor((RectTransform)menu.transform, new Vector2(.5f, .5f), Vector2.zero, new Vector2(464, 144));
+            view.start = MenuButton("Play", menu.transform, "플레이", font, -160);
+            view.settings = MenuButton("Settings", menu.transform, "설정", font, 0);
+            view.quit = MenuButton("Quit", menu.transform, "종료", font, 160);
             SetNavigation(view.start, view.quit, view.settings);
             SetNavigation(view.settings, view.start, view.quit);
             SetNavigation(view.quit, view.settings, view.start);
-            view.SetExpansion(1f);
+            logoNavigation.selectOnRight = view.start;
+            view.logo.navigation = logoNavigation;
+            foreach (var button in new[] { view.start, view.settings, view.quit })
+            {
+                var navigation = button.navigation;
+                navigation.selectOnUp = view.logo;
+                button.navigation = navigation;
+            }
+
+            view.SetExpansion(0f);
+            view.menuPanel.gameObject.SetActive(false);
 
             var overlay = Panel("Quit Popup", canvas.transform, new Color(0, 0, 0, .75f));
             Stretch(overlay.rectTransform);
@@ -124,13 +157,41 @@ namespace RhythmDojo.EditorTools
             return sprite;
         }
 
+        private static void BuildEntrance(DojoEntranceView entrance)
+        {
+            var left = Panel("Left Door", entrance.transform, Color.white);
+            left.sprite = DojoEntranceAssets.Load("DoorPanel");
+            left.raycastTarget = false;
+            left.rectTransform.anchorMin = Vector2.zero;
+            left.rectTransform.anchorMax = new Vector2(.5f, 1f);
+            left.rectTransform.offsetMin = left.rectTransform.offsetMax = Vector2.zero;
+            entrance.leftDoor = left.rectTransform;
+
+            var right = Panel("Right Door", entrance.transform, Color.white);
+            right.sprite = left.sprite;
+            right.raycastTarget = false;
+            right.rectTransform.anchorMin = new Vector2(.5f, 0f);
+            right.rectTransform.anchorMax = Vector2.one;
+            right.rectTransform.offsetMin = right.rectTransform.offsetMax = Vector2.zero;
+            right.rectTransform.localScale = new Vector3(-1f, 1f, 1f);
+            entrance.rightDoor = right.rectTransform;
+
+            var frame = Panel("Entrance Frame", entrance.transform, Color.white);
+            frame.sprite = DojoEntranceAssets.Load("EntranceFrame");
+            frame.raycastTarget = false;
+            Stretch(frame.rectTransform);
+            entrance.frame = frame.gameObject.AddComponent<CanvasGroup>();
+            entrance.SetOpening(0f);
+        }
+
         private static Button ArtButton(string name, Transform parent, string spriteName, float y)
         {
             var button = Button(name, parent, Color.white);
             var image = button.GetComponent<Image>();
-            image.sprite = LoadSprite(spriteName);
+            image.sprite = DojoEntranceAssets.Load(spriteName);
             image.preserveAspect = false;
-            Anchor((RectTransform)button.transform, new Vector2(.5f, .5f), new Vector2(0, y), new Vector2(300, 70));
+            Anchor((RectTransform)button.transform, new Vector2(.5f, .5f), new Vector2(0, y), new Vector2(320, 78));
+            button.gameObject.AddComponent<DojoBoardBreak>();
             var colors = button.colors;
             colors.normalColor = new Color(.84f, .80f, .76f);
             colors.highlightedColor = new Color(1f, .97f, .86f);
@@ -146,8 +207,8 @@ namespace RhythmDojo.EditorTools
         {
             var navigation = button.navigation;
             navigation.mode = Navigation.Mode.Explicit;
-            navigation.selectOnUp = up;
-            navigation.selectOnDown = down;
+            navigation.selectOnLeft = up;
+            navigation.selectOnRight = down;
             button.navigation = navigation;
         }
 
@@ -230,19 +291,17 @@ namespace RhythmDojo.EditorTools
             float x
         )
         {
-            var button = Button(name, parent, new Color(.12f, .055f, .065f));
+            var button = Button(name, parent, Color.white);
             Anchor(
                 (RectTransform)button.transform,
                 new Vector2(.5f, .5f),
                 new Vector2(x, 0),
-                new Vector2(190, 76)
+                new Vector2(144, 144)
             );
 
-            var border = button.gameObject.AddComponent<Outline>();
-            border.effectColor = new Color(.94f, .25f, .26f, .8f);
-            border.effectDistance = new Vector2(1, -1);
-
             var captionText = Label("Caption", button.transform, caption, font, 28);
+            captionText.color = new Color(.12f, .12f, .12f);
+            captionText.raycastTarget = false;
             Stretch(captionText.rectTransform);
 
             return button;

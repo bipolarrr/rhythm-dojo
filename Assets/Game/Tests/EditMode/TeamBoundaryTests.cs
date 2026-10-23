@@ -257,6 +257,9 @@ namespace RhythmDojo.Tests
         [Test]
         public void SceneGenerationDoesNotWriteContentAssets()
         {
+            // Earlier fixtures may leave a dirty temporary scene. Give this builder test its own scene.
+            EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+
             var files = new[]
             {
                 "Assets/Game/Settings",
