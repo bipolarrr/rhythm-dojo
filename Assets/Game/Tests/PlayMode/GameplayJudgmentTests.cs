@@ -134,6 +134,7 @@ namespace RhythmDojo.Tests
             }
 
             double time = game.Clock.SongTime;
+            double realtime = Time.realtimeSinceStartupAsDouble;
 
             while (nextEvent < events.Count && time >= events[nextEvent].time)
             {
@@ -148,8 +149,9 @@ namespace RhythmDojo.Tests
                     held.Remove(input.key);
                 }
 
-                double timestamp =
-                    Time.realtimeSinceStartupAsDouble - (game.Clock.SongTime - input.time);
+                // Sample the two clocks once for the batch. Re-sampling each chord key
+                // can round its timestamp backwards and make Input System discard it.
+                double timestamp = realtime - (time - input.time);
                 InputSystem.QueueStateEvent(keyboard, new KeyboardState(held.ToArray()), timestamp);
             }
         }
