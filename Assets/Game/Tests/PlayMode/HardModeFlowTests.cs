@@ -111,6 +111,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Results")]
         public IEnumerator ConfiguredHardModeDoesNotRecoverAndPausesExactlyAtTheDamageLimit()
         {
             yield return OpenGameplaySettings();
@@ -210,18 +211,21 @@ namespace RhythmDojo.Tests
                 }
             }
 
+            yield return Await(() => Object.FindFirstObjectByType<ResultsScreen>());
             yield return null;
+            var result = Object.FindFirstObjectByType<AppFlowController>().LastResult;
+            Assert.That(result.Session.Good, Is.EqualTo(4));
+            Assert.That(result.Session.Miss, Is.Zero);
+            Assert.That(result.Session.Health, Is.EqualTo(100));
+            Assert.That(Object.FindFirstObjectByType<RhythmDojo.Audio.SongClock>(), Is.Null);
+            Assert.That(Object.FindFirstObjectByType<ResultsView>().outcome.text, Is.EqualTo("FAILED"));
+            yield return Click(Object.FindFirstObjectByType<ResultsView>().backButton);
+            yield return Await(() => Object.FindFirstObjectByType<SongSelectionScreen>());
+            yield return Click(Object.FindFirstObjectByType<SongSelectionView>().play);
+            yield return Await(() => Object.FindFirstObjectByType<RhythmGameController>());
             yield return null;
-            Assert.That(game.Session.Good, Is.EqualTo(4));
-            Assert.That(game.Session.Miss, Is.Zero);
-            Assert.That(game.Session.Health, Is.EqualTo(100));
-            Assert.That(game.Clock.Running, Is.False);
-            Assert.That(
-                Object.FindFirstObjectByType<GameplayHudView>().gameOverPanel.activeSelf,
-                Is.True
-            );
+            game = Object.FindFirstObjectByType<RhythmGameController>();
             yield return Press(Key.Space);
-            yield return null;
             Assert.That(game.Session.Health, Is.EqualTo(100));
             Assert.That(game.Session.State, Is.EqualTo(SessionState.Playing));
             yield return Press(Key.Escape);
@@ -233,6 +237,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Results")]
         public IEnumerator StrictHardDefaultsFailOnTheFirstGoodJudgment()
         {
             var configured = Object.FindFirstObjectByType<AppFlowController>().Rules.Snapshot;
@@ -253,11 +258,10 @@ namespace RhythmDojo.Tests
                 first.Lane,
                 first.StartTime + (windows.PerfectWindow + windows.GoodWindow) / 2
             );
-            yield return null;
-            yield return null;
-            Assert.That(game.Session.Good, Is.EqualTo(1));
-            Assert.That(game.Session.State, Is.EqualTo(SessionState.GameOver));
-            Assert.That(game.Clock.Running, Is.False);
+            yield return Await(() => Object.FindFirstObjectByType<ResultsScreen>());
+            Assert.That(flow.LastResult.Session.Good, Is.EqualTo(1));
+            Assert.That(flow.LastResult.Session.State, Is.EqualTo(SessionState.GameOver));
+            Assert.That(Object.FindFirstObjectByType<RhythmDojo.Audio.SongClock>(), Is.Null);
         }
     }
 }

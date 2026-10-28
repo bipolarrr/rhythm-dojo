@@ -24,6 +24,7 @@ namespace RhythmDojo.Tests
     public sealed class AuthoringFlowTests : GameplayTestContext
     {
         [UnityTest]
+        [Category("Results")]
         public IEnumerator UnsavedDocumentPlaytestReturnsSessionAndReleasesAudio()
         {
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
@@ -70,7 +71,15 @@ namespace RhythmDojo.Tests
             Assert.That(game.ReadModel.Snapshot.SongTitle, Is.EqualTo("Unsaved song"));
             Assert.That(flow.CurrentRequest.Song.Chart[0].Lane, Is.Zero);
             Assert.That(releases, Is.Zero);
-            UnityEngine.Object.FindFirstObjectByType<GameplayCompositionRoot>().ReturnToSelection();
+            game.StartSession();
+            game.Session.Advance(game.Chart.CompletionTime + 1);
+            yield return Await(() => UnityEngine.Object.FindFirstObjectByType<ResultsScreen>());
+            yield return null;
+            Assert.That(flow.IsEditorPlaytest, Is.True);
+            Assert.That(returned, Is.Null);
+            Assert.That(flow.LastResult.Title, Is.EqualTo("Unsaved song"));
+            Assert.That(releases, Is.EqualTo(1));
+            yield return Click(UnityEngine.Object.FindFirstObjectByType<ResultsView>().backButton);
             yield return Await(() => returned != null);
             yield return null;
             Assert.That(returned, Is.EqualTo("editor-session-42"));

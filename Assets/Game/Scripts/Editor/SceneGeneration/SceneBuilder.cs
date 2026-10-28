@@ -15,6 +15,7 @@ namespace RhythmDojo.EditorTools
         public const string SelectionPath = "Assets/Game/Scenes/SongSelection.unity";
         public const string GameplayPath = "Assets/Game/Scenes/Gameplay.unity";
         public const string SettingsPath = "Assets/Game/Scenes/Settings.unity";
+        public const string ResultsPath = "Assets/Game/Scenes/Results.unity";
         public const string ChartPath = "Assets/Game/Settings/TestChart.asset";
         public const string ConfigPath = "Assets/Game/Settings/RhythmGameConfig.asset";
 
@@ -29,9 +30,10 @@ namespace RhythmDojo.EditorTools
             Save(ScenePresentationBuilder.Settings(content), SettingsPath);
             Save(ScenePresentationBuilder.Bootstrap(content), BootstrapPath);
             ChartEditorSceneBuilder.Build();
+            BuildResults();
             BuildTitle();
             AssetDatabase.SaveAssets();
-            Debug.Log("Rhythm Dojo: six scenes generated and validated.");
+            Debug.Log("Rhythm Dojo: seven scenes generated and validated.");
         }
 
         [MenuItem("Game Tools/Scenes/Build Title")]
@@ -87,6 +89,33 @@ namespace RhythmDojo.EditorTools
             Guard();
             Save(ScenePresentationBuilder.Settings(SceneResources.Load()), SettingsPath);
             RegisterScenes();
+        }
+
+        [MenuItem("Game Tools/Scenes/Build Results")]
+        public static void BuildResults()
+        {
+            Guard();
+            var content = SceneResources.Load();
+            var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            content.ReloadAfterSceneChange();
+            var camera = new GameObject("Main Camera").AddComponent<Camera>();
+            camera.tag = "MainCamera";
+            camera.clearFlags = CameraClearFlags.SolidColor;
+            camera.backgroundColor = new Color(.055f, .075f, .11f);
+            camera.gameObject.AddComponent<AudioListener>();
+            var view = ResultsLayoutBuilder.Build();
+            var screen = view.gameObject.AddComponent<RhythmDojo.UI.ResultsScreen>();
+            Wire(screen, "view", view);
+            Wire(screen, "settings", content.Settings);
+            Wire(screen, "review", view.review.GetComponent<RhythmDojo.UI.ResultsChartReview>());
+            RhythmDojo.UI.UiElements.EventSystem(
+                AssetDatabase.LoadAssetAtPath<UnityEngine.InputSystem.InputActionAsset>(
+                    "Assets/InputSystem_Actions.inputactions"
+                )
+            );
+            Save(scene, ResultsPath);
+            RegisterScenes();
+            AssetDatabase.SaveAssets();
         }
 
         private static void Guard()
@@ -151,6 +180,7 @@ namespace RhythmDojo.EditorTools
                 SelectionPath,
                 GameplayPath,
                 SettingsPath,
+                ResultsPath,
             };
             var other = EditorBuildSettings.scenes.Where(s => !paths.Contains(s.path));
             EditorBuildSettings.scenes = paths

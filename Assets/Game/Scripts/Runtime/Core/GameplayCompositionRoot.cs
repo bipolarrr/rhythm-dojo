@@ -14,6 +14,8 @@ namespace RhythmDojo.Core
 {
     public sealed class GameplayCompositionRoot : MonoBehaviour
     {
+        private const double ResultTransitionDelaySeconds = 1;
+
         [SerializeField]
         private GameSettings settings;
 
@@ -44,7 +46,10 @@ namespace RhythmDojo.Core
         private bool initialized;
         private bool returnPending;
         private bool recordSaved;
+        private double resultTransitionTime = -1;
         private int maxCombo;
+        private readonly System.Collections.Generic.List<JudgmentEvent> judgments =
+            new System.Collections.Generic.List<JudgmentEvent>();
         private PlayRequest playRequest;
         private PlayableSong ownedSong;
         private GameModeDefinition runtimeMode;
@@ -142,15 +147,12 @@ namespace RhythmDojo.Core
                 lastEnd = Math.Max(lastEnd, chart[i].EndTime);
             }
 
-            chart = chart.WithCompletionTime(
-                Math.Max(
-                    chart.CompletionTime,
-                    Math.Max(
-                        song.AudioClip.length + song.AudioOffset,
-                        lastEnd + judgments.GoodWindow + RhythmSession.TimingTolerance * 2
-                    )
-                )
-            );
+            // Keep every head/tail judgment window, but cap empty outros after the last note.
+            double finalJudgmentTime =
+                lastEnd + judgments.GoodWindow + RhythmSession.TimingTolerance * 2;
+            double completionTime = Math.Max(chart.CompletionTime, song.AudioClip.length + song.AudioOffset);
+            completionTime = Math.Min(completionTime, finalJudgmentTime + ResultTransitionDelaySeconds);
+            chart = chart.WithCompletionTime(Math.Max(finalJudgmentTime, completionTime));
 
             var tempo = song.Tempo;
             var scroll = settings.scroll.CreateTimeline(
@@ -250,16 +252,85 @@ namespace RhythmDojo.Core
             }
         }
 
-        private void TrackCombo(JudgmentEvent result) =>
+        private void TrackCombo(JudgmentEvent result)
+        {
+            judgments.Add(result);
             maxCombo = Math.Max(maxCombo, controller.ReadModel.Snapshot.Session.Combo);
+        }
 
         private void ResetRecord()
         {
+            resultTransitionTime = -1;
             maxCombo = 0;
+            judgments.Clear();
             recordSaved = false;
         }
 
-        private void LateUpdate() => SaveRecord();
+        private void LateUpdate()
+        {
+            SaveRecord();
+
+            if (!initialized || !flow || flow.Transitioning)
+            {
+                return;
+            }
+
+            if (playRequest == null)
+            {
+                return;
+            }
+
+            var snapshot = controller.ReadModel.Snapshot.Session;
+
+            if (snapshot.State != SessionState.Completed && snapshot.State != SessionState.GameOver)
+            {
+                resultTransitionTime = -1;
+                return;
+            }
+
+            // Let the HUD display GAME CLEAR / GAME OVER before unloading Gameplay.
+            // Use real time because failure pauses the song clock.
+            if (resultTransitionTime < 0)
+            {
+                resultTransitionTime = Time.realtimeSinceStartupAsDouble + ResultTransitionDelaySeconds;
+                return;
+            }
+
+            if (Time.realtimeSinceStartupAsDouble < resultTransitionTime)
+            {
+                return;
+            }
+
+            var laneLabels = new string[runtimeMode.LaneCount];
+
+            for (int i = 0; i < laneLabels.Length; i++)
+            {
+                laneLabels[i] = runtimeMode.GetLane(i).displayName;
+            }
+
+            var noteStates = new NoteState[controller.Chart.Count];
+
+            for (int i = 0; i < noteStates.Length; i++)
+            {
+                noteStates[i] = controller.ReadModel.GetNoteState(i);
+            }
+
+            var result = new PlayResult(
+                playRequest.Song.Title,
+                playRequest.Song.Artist,
+                playRequest.Difficulty.DisplayName,
+                flow.Library.Find(playRequest.Song.SongId)?.Cover,
+                snapshot,
+                maxCombo,
+                controller.Chart,
+                playRequest.Song.Tempo,
+                laneLabels,
+                judgments,
+                noteStates
+            );
+            ShutdownGameplay();
+            flow.ShowResults(result);
+        }
 
         private void SaveRecord()
         {
@@ -335,6 +406,12 @@ namespace RhythmDojo.Core
         {
             returnPending = false;
             SaveRecord();
+            ShutdownGameplay();
+            flow.ReturnFromGameplay();
+        }
+
+        private void ShutdownGameplay()
+        {
             UnbindRecord();
             hits.Unbind();
             controller.Shutdown();
@@ -343,7 +420,6 @@ namespace RhythmDojo.Core
             initialized = false;
             input.ReturnRequested -= ReturnToSelection;
             ui.Unbind();
-            flow.ReturnFromGameplay();
         }
 
         private void OnDestroy()

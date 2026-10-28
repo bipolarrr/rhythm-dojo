@@ -187,6 +187,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Results")]
         public IEnumerator HealthDepletionShowsGameOverFreezesNotesAndSpaceRestarts()
         {
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
@@ -196,56 +197,30 @@ namespace RhythmDojo.Tests
             yield return LoadGameplay();
 
             var game = UnityEngine.Object.FindFirstObjectByType<RhythmGameController>();
-            var view = UnityEngine.Object.FindFirstObjectByType<GameplayHudView>();
             yield return Press(Key.Space);
             game.Session.Advance(9);
+            yield return Await(() => UnityEngine.Object.FindFirstObjectByType<ResultsScreen>());
             yield return null;
-            yield return null;
-            Assert.That(game.Session.State, Is.EqualTo(SessionState.GameOver));
-            Assert.That(view.gameOverPanel.activeSelf, Is.True);
-            Assert.That(view.gameOverText.text, Is.EqualTo("GAME OVER"));
-            Assert.That(view.healthFill.rectTransform.anchorMax.x, Is.Zero);
-            Assert.That(view.healthLabel.text, Does.Contain("0 / 100"));
-            Assert.That(game.Clock.Running, Is.False);
-            Assert.That(
-                UnityEngine
-                    .Object.FindFirstObjectByType<RhythmDojo.Audio.SongClock>()
-                    .GetComponent<AudioSource>()
-                    .isPlaying,
-                Is.False
-            );
-
-            double frozen = game.ReadModel.Snapshot.SongTime;
-            double frozenClock = game.Clock.SongTime;
-            var notes = UnityEngine.Object.FindObjectsByType<RhythmDojo.Presentation.NoteView>(
-                FindObjectsInactive.Include,
-                FindObjectsSortMode.None
-            );
-            var positions = notes.Select(note => note.transform.position).ToArray();
-            int resolved = game.Session.Resolved;
+            var view = UnityEngine.Object.FindFirstObjectByType<ResultsView>();
+            Assert.That(flow.LastResult.Session.State, Is.EqualTo(SessionState.GameOver));
+            Assert.That(view.outcome.text, Is.EqualTo("FAILED"));
+            Assert.That(flow.LastResult.Session.Health, Is.Zero);
+            Assert.That(UnityEngine.Object.FindFirstObjectByType<RhythmDojo.Audio.SongClock>(), Is.Null);
+            Assert.That(UnityEngine.Object.FindObjectsByType<RhythmDojo.Presentation.NoteView>(FindObjectsSortMode.None), Is.Empty);
+            int resolved = flow.LastResult.Session.Resolved;
             yield return new WaitForSecondsRealtime(.2f);
-            Assert.That(game.ReadModel.Snapshot.SongTime, Is.EqualTo(frozen));
-            Assert.That(game.Clock.SongTime, Is.EqualTo(frozenClock));
-            Assert.That(game.Session.Resolved, Is.EqualTo(resolved));
+            Assert.That(flow.LastResult.Session.Resolved, Is.EqualTo(resolved));
 
-            for (int i = 0; i < notes.Length; i++)
-            {
-                Assert.That(notes[i].transform.position, Is.EqualTo(positions[i]));
-            }
-
+            // Retry through song selection now that a finished play owns a separate scene.
+            yield return Click(view.backButton);
+            yield return Await(() => UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>());
+            yield return LoadGameplay();
+            game = UnityEngine.Object.FindFirstObjectByType<RhythmGameController>();
             yield return Press(Key.Space);
-            yield return null;
             Assert.That(game.Session.Health, Is.EqualTo(100));
             Assert.That(game.Clock.Running, Is.True);
-            Assert.That(view.gameOverPanel.activeSelf, Is.False);
-            Assert.That(view.healthFill.rectTransform.anchorMax.x, Is.EqualTo(1));
-            game.Session.Advance(9);
-            yield return null;
-            yield return null;
             yield return Press(Key.Escape);
-            yield return Await(() =>
-                UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>()
-            );
+            yield return Await(() => UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>());
         }
 
         [UnityTest]
@@ -364,6 +339,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Results")]
         public IEnumerator ReturnButtonReappearsAfterCompletionAndLoadsSongSelection()
         {
             yield return LoadGameplay();
@@ -405,23 +381,15 @@ namespace RhythmDojo.Tests
             }
 
             game.Session.Advance(game.Chart.CompletionTime);
-
-            double deadline = Time.realtimeSinceStartupAsDouble + game.Chart.CompletionTime + 10;
-
-            while (game.Session.State != SessionState.Completed)
-            {
-                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
-                yield return null;
-            }
-
+            yield return Await(() => UnityEngine.Object.FindFirstObjectByType<ResultsScreen>());
             yield return null;
 
-            var view = UnityEngine.Object.FindFirstObjectByType<GameplayHudView>();
-            Assert.That(game.Session.Resolved, Is.EqualTo(game.Session.Snapshot.TotalNotes));
-            Assert.That(view.gameOverPanel.activeSelf, Is.True);
-            Assert.That(view.gameOverText.text, Is.EqualTo("GAME CLEAR"));
-            Assert.That(view.returnButton.gameObject.activeSelf, Is.True);
-            yield return Click(view.returnButton);
+            var view = UnityEngine.Object.FindFirstObjectByType<ResultsView>();
+            var result = UnityEngine.Object.FindFirstObjectByType<AppFlowController>().LastResult;
+            Assert.That(result.Session.Resolved, Is.EqualTo(result.Session.TotalNotes));
+            Assert.That(view.outcome.text, Is.EqualTo("CLEAR"));
+            Assert.That(view.backButton.gameObject.activeSelf, Is.True);
+            yield return Click(view.backButton);
             yield return Await(() =>
                 UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>()
             );
