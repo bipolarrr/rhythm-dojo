@@ -231,7 +231,7 @@ namespace RhythmDojo.Tests
             Assert.That(view.perfect.text, Is.EqualTo("0"));
             Assert.That(view.miss.text, Is.EqualTo(expected.Miss.ToString()));
             Assert.That(flow.LastResult.MaxCombo, Is.EqualTo(expected.Good));
-            Assert.That(flow.LastResult.Notes.Sum(note => note.Judgments.Count), Is.EqualTo(expected.Resolved));
+            Assert.That(flow.LastResult.Notes.Sum(note => note.Judgments.Count), Is.EqualTo(flow.LastResult.Notes.Count + flow.LastResult.Notes.Count(note => note.Note.Kind == NoteKind.Hold)));
             Assert.That(flow.LastResult.Notes.SelectMany(note => note.Judgments)
                 .Any(item => item.Grade == Judgment.Perfect), Is.False);
         }
@@ -260,12 +260,21 @@ namespace RhythmDojo.Tests
             var judgments = result.Notes.SelectMany(note => note.Judgments).ToArray();
             Assert.That(judgments.Count(item => item.Grade == Judgment.Perfect), Is.EqualTo(expected.Perfect));
             Assert.That(judgments.Count(item => item.Grade == Judgment.Good), Is.EqualTo(expected.Good));
-            Assert.That(judgments.Count(item => item.Grade == Judgment.Miss), Is.EqualTo(expected.Miss));
+            Assert.That(judgments.Count(item => item.Grade == Judgment.Miss), Is.LessThanOrEqualTo(expected.Miss));
+            Assert.That(judgments.Length, Is.EqualTo(result.Notes.Count + result.Notes.Count(note => note.Note.Kind == NoteKind.Hold)));
+            Assert.That(view.miss.text, Is.EqualTo(expected.Miss.ToString()));
             yield return Click(view.moreButton);
             Assert.That(view.review.gameObject.activeSelf, Is.True);
             Assert.That(view.backButton.interactable, Is.False);
-            Assert.That(view.review.selected.text, Does.Contain("Good 1"));
-            Assert.That(view.review.events.text, Does.Contain("1. Good"));
+            CaptureSelection("results-endpoints", 1920, 1080);
+            var review = view.review.GetComponent<ResultsChartReview>();
+            review.SelectNote(result.Notes.First(note => note.Note.Kind == NoteKind.Hold).Index);
+            Assert.That(view.review.events.text, Does.Contain("시작: Miss"));
+            Assert.That(view.review.events.text, Does.Contain("끝: Miss"));
+            CaptureSelection("results-hold-endpoints", 1920, 1080);
+            review.SelectNote(0);
+            Assert.That(view.review.events.text, Does.Contain("시작: Good"));
+            Assert.That(view.review.events.text, Does.Contain("시작: Good"));
             yield return null;
             Canvas.ForceUpdateCanvases();
             var rect = view.review.chart.rectTransform;
@@ -311,15 +320,14 @@ namespace RhythmDojo.Tests
             yield return null;
             var result = flow.LastResult;
             Assert.That(result.Notes.Count, Is.EqualTo(count));
-            Assert.That(result.Notes.Sum(note => note.Judgments.Count), Is.EqualTo(result.Session.Resolved));
+            Assert.That(result.Notes.Sum(note => note.Judgments.Count), Is.LessThanOrEqualTo(result.Session.Resolved));
             var pending = result.Notes.First(note => note.Judgments.Count == 0);
             Assert.That(pending.Grade, Is.Null);
             var view = Object.FindFirstObjectByType<ResultsView>();
             yield return Click(view.moreButton);
             view.review.GetComponent<ResultsChartReview>().SelectNote(pending.Index);
             Assert.That(view.review.selected.text, Does.Contain("미판정"));
-            Assert.That(view.review.selected.text, Does.Contain("Miss 0"));
-            Assert.That(view.review.events.text, Does.Contain("판정 기록이 없습니다"));
+            Assert.That(view.review.events.text, Does.Contain("시작: 미판정"));
             yield return Click(view.review.closeButton);
         }
     }

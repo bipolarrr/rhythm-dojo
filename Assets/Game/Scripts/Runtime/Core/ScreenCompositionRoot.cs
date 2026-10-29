@@ -17,23 +17,38 @@ namespace RhythmDojo.Core
         [SerializeField]
         private SettingsScreen audioSettings;
 
+        [SerializeField]
+        private ResultsScreen results;
+
         public void Validate()
         {
-            if (!settings || !selection && !audioSettings)
+            int count = 0;
+            if (selection)
             {
-                throw new InvalidOperationException(
-                    "Screen composition requires settings and exactly one screen."
-                );
+                count++;
             }
 
-            if (selection && audioSettings)
+            if (audioSettings)
             {
-                throw new InvalidOperationException(
-                    "Screen composition requires settings and exactly one screen."
-                );
+                count++;
+            }
+
+            if (results)
+            {
+                count++;
+            }
+
+            if (!settings || count != 1)
+            {
+                throw new InvalidOperationException("Screen composition requires settings and exactly one screen.");
             }
 
             settings.ValidateOptions();
+
+            if (results)
+            {
+                results.Validate();
+            }
 
             if (selection)
             {
@@ -51,6 +66,11 @@ namespace RhythmDojo.Core
             Validate();
 
             var flow = AppFlowController.Create(settings);
+
+            if (results)
+            {
+                results.Initialize(flow.LastResult, flow.ReturnFromGameplay);
+            }
 
             if (selection)
             {

@@ -12,6 +12,59 @@ namespace RhythmDojo.Tests
     public sealed class PlayResultReviewTests
     {
         [Test]
+        public void FixedSnapshotSurvivesResetAndKeepsAggregateMaintenanceMisses()
+        {
+            var chart = new ChartData(new[] { NoteData.Hold(0, 1, 10), NoteData.Tap(1, 12) }, 13);
+            var tempo = new TempoMap(new[] { new TempoPoint(0, 120) });
+            var session = new RhythmSession(chart, new GameModeRules(2), tempo, new PlayRules());
+            session.Start();
+            session.PressLane(0, 1);
+            session.ReleaseLane(0, 2);
+            session.PressLane(0, 3);
+            session.Advance(10);
+            var result = new PlayResult("Song", "Artist", "Hard", null, session.Snapshot, 1,
+                chart, tempo, new[] { "D", "F" }, session);
+            session.Reset();
+            Assert.That(result.Session.Miss, Is.GreaterThan(0));
+            Assert.That(result.Notes[0].Grade, Is.EqualTo(Judgment.Perfect));
+            Assert.That(result.Notes[0].Judgments, Is.SameAs(result.Notes[0]));
+            Assert.That(result.Notes[0].Judgments.Count, Is.EqualTo(2));
+            Assert.That(result.Notes[1].Start, Is.Null);
+            Assert.That(session.GetNoteJudgments(0).Start, Is.Null);
+        }
+
+        [Test]
+        public void ReinitializeBindsOnceAndDisplayControlsTheReview()
+        {
+            var scene = EditorSceneManager.OpenScene(EditorTools.SceneBuilder.ResultsPath, OpenSceneMode.Additive);
+            try
+            {
+                var view = scene.GetRootGameObjects().SelectMany(root => root.GetComponentsInChildren<ResultsView>()).Single();
+                var screen = view.GetComponent<ResultsScreen>();
+                int returns = 0;
+                screen.Initialize(null, () => returns++);
+                screen.Initialize(null, () => returns++);
+                view.backButton.onClick.Invoke();
+                Assert.That(returns, Is.EqualTo(1));
+                Assert.That(view.moreButton.interactable, Is.False);
+                var chart = new ChartData(new[] { NoteData.Tap(0, 1) }, 2);
+                var tempo = new TempoMap(new[] { new TempoPoint(0, 120) });
+                var session = new RhythmSession(chart, new GameModeRules(1), tempo, new PlayRules());
+                var result = new PlayResult("Replacement", "", "", null, session.Snapshot, 0,
+                    chart, tempo, new[] { "D" }, session);
+                screen.Display(result);
+                view.moreButton.onClick.Invoke();
+                Assert.That(view.review.GetComponent<ResultsChartReview>().Result, Is.SameAs(result));
+                view.review.closeButton.onClick.Invoke();
+                Assert.That(view.backButton.interactable, Is.True);
+            }
+            finally
+            {
+                EditorSceneManager.CloseScene(scene, true);
+            }
+        }
+
+        [Test]
         public void SnapshotKeepsEveryNoteAndEveryHoldJudgmentWithoutBorrowingLists()
         {
             var chart = new ChartData(new[] { NoteData.Tap(0, 1), NoteData.Hold(1, 2, 4), NoteData.Tap(0, 8) }, 10);
@@ -59,9 +112,8 @@ namespace RhythmDojo.Tests
                 var review = view.review.GetComponent<ResultsChartReview>();
                 review.Show(result);
                 Assert.That(view.review.lanes.text, Does.Contain("K"));
-                view.review.eventPosition.value = view.review.eventPosition.maxValue;
-                Assert.That(view.review.events.text, Does.Contain("200. Perfect"));
-                Assert.That(view.review.events.text, Does.Not.Contain("\n1. Perfect"));
+                Assert.That(view.review.events.text, Does.Contain("끝: Perfect"));
+                Assert.That(view.review.events.text, Does.Contain("시작: Perfect"));
                 review.SelectNote(1);
                 Assert.That(view.review.selected.text, Does.Contain("미판정"));
                 Assert.That(view.review.chart.FirstBeat, Is.GreaterThan(0));
@@ -71,7 +123,7 @@ namespace RhythmDojo.Tests
                 Assert.That(view.review.chart.HitTest(bounds.center), Is.EqualTo(1));
                 review.SelectNote(0);
                 Assert.That(view.review.chart.FirstBeat, Is.LessThanOrEqualTo(2));
-                Assert.That(view.review.selected.text, Does.Contain("Perfect 200"));
+                Assert.That(view.review.selected.text, Does.Contain("롱노트"));
                 review.Close();
                 Assert.That(view.review.gameObject.activeSelf, Is.False);
             }

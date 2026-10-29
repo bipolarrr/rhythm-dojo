@@ -49,7 +49,7 @@ namespace RhythmDojo.Gameplay
 
     public sealed class PlayRules
     {
-        public const int CurrentVersion = 2;
+        public const int CurrentVersion = 3;
         public const double DefaultPerfectWeight = 1;
         public const double DefaultGoodWeight = .5;
         public const double DefaultMissWeight = 0;

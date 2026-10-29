@@ -229,6 +229,11 @@ namespace RhythmDojo.EditorTools
                 StyleHardRuleDropdown(view.playRuleLists[i]);
             }
 
+            UiElements.Label(
+                "Hold End Help", view.gameplayPanel.transform,
+                "Automatic: 재입력 허용 · 끝에서 누르고 있으면 자동 판정\nRelease: 조기 해제·시작 Miss 후 복구 불가 · 남은 유지 판정 Miss",
+                new Vector2(0, -365), new Vector2(700, 64), 17);
+
             view.masterLabel = UiElements.Label(
                 "Master Volume Label",
                 view.soundPanel.transform,

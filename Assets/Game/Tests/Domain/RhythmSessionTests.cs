@@ -14,6 +14,26 @@ namespace RhythmDojo.Tests
             );
 
         [Test]
+        public void LegacyHoldRecordsStartAndFinalWithoutChangingScoreCount()
+        {
+            var s = Session(NoteData.Hold(0, 1, 2), NoteData.Hold(1, 3, 4));
+            s.Start();
+            s.PressLane(0, 1.08);
+            Assert.That(s.Resolved, Is.Zero);
+            Assert.That(s.GetNoteJudgments(0).Start.Value.Grade, Is.EqualTo(Judgment.Good));
+            Assert.That(s.GetNoteJudgments(0).End, Is.Null);
+            s.ReleaseLane(0, 2);
+            Assert.That(s.GetNoteJudgments(0).End.Value.Grade, Is.EqualTo(Judgment.Good));
+            Assert.That(s.Resolved, Is.EqualTo(1));
+            s.Advance(5);
+            Assert.That(s.GetNoteJudgments(1).Start.Value.Grade, Is.EqualTo(Judgment.Miss));
+            Assert.That(s.GetNoteJudgments(1).End, Is.Null);
+            s.Reset();
+            Assert.That(s.GetNoteJudgments(0).Start, Is.Null);
+            Assert.That(s.GetNoteJudgments(0).End, Is.Null);
+        }
+
+        [Test]
         public void HealthRecoversOnJudgmentsAndHoldIsCountedOnlyOnce()
         {
             var s = Session(

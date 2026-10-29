@@ -1,3 +1,4 @@
+using System;
 using System.Globalization;
 using RhythmDojo.Core;
 using RhythmDojo.Gameplay;
@@ -8,17 +9,15 @@ namespace RhythmDojo.UI
     public sealed class ResultsScreen : MonoBehaviour
     {
         [SerializeField]
-        private GameSettings settings;
-
-        [SerializeField]
         private ResultsView view;
         [SerializeField]
         private ResultsChartReview review;
-        private AppFlowController flow;
+        private Action flow;
+        private PlayResult result;
 
         public void Validate()
         {
-            if (!settings || !view || !review)
+            if (!view || !review)
             {
                 throw new System.InvalidOperationException("Results screen references missing.");
             }
@@ -26,18 +25,21 @@ namespace RhythmDojo.UI
             view.Validate();
         }
 
-        private void Start()
+        public void Initialize(PlayResult result, Action onReturn)
         {
             Validate();
-            flow = AppFlowController.Create(settings);
+            OnDestroy();
+            flow = onReturn;
             view.backButton.onClick.AddListener(Back);
             view.moreButton.onClick.AddListener(OpenReview);
             review.Closed += ReviewClosed;
-            Display(flow.LastResult);
+            Display(result);
         }
 
         public void Display(PlayResult result)
         {
+            this.result = result;
+            review.Close();
             view.moreButton.interactable = result?.Chart != null;
             view.cover.enabled = false;
             view.coverPlaceholder.gameObject.SetActive(true);
@@ -79,12 +81,12 @@ namespace RhythmDojo.UI
 
         private void Back()
         {
-            flow.ReturnFromGameplay();
+            flow?.Invoke();
         }
 
         private void OpenReview()
         {
-            review.Show(flow.LastResult);
+            review.Show(result);
             view.backButton.interactable = false;
             view.moreButton.interactable = false;
         }
@@ -92,7 +94,7 @@ namespace RhythmDojo.UI
         private void ReviewClosed()
         {
             view.backButton.interactable = true;
-            view.moreButton.interactable = flow.LastResult?.Chart != null;
+            view.moreButton.interactable = result?.Chart != null;
 
             if (UnityEngine.EventSystems.EventSystem.current)
             {
@@ -104,7 +106,12 @@ namespace RhythmDojo.UI
         {
             var keyboard = UnityEngine.InputSystem.Keyboard.current;
 
-            if (flow && keyboard != null && keyboard.escapeKey.wasPressedThisFrame)
+            if (flow == null || keyboard == null)
+            {
+                return;
+            }
+
+            if (keyboard.escapeKey.wasPressedThisFrame)
             {
                 if (view.review.gameObject.activeSelf)
                 {

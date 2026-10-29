@@ -48,6 +48,7 @@ namespace RhythmDojo.EditorTools
             view.moreButton = Button("More", surface, "더보기", .555f, .027f, .75f, .115f);
             view.outcome = Label("Outcome", surface, "플레이 결과", .79f, .69f, .975f, .82f, 45);
             view.outcome.alignment = TextAnchor.MiddleCenter;
+            Label("Aggregate Help", surface, "전체 판정 집계에는 유지 판정 포함", .155f, .39f, .725f, .435f, 21);
             view.review = BuildReview(surface);
             view.Validate();
 
@@ -72,7 +73,7 @@ namespace RhythmDojo.EditorTools
             view.position = Slider("Chart Position", panel, .07f, .13f, .63f, .17f);
             view.range = Label("Review Range", panel, "", .07f, .075f, .63f, .12f, 21);
             Label("Review Legend", panel,
-                "<color=#38D4B8>Perfect</color>  <color=#FFC54D>Good</color>  <color=#FF5966>Miss</color>  <color=#808794>미판정</color>  · 롱노트 색상: 가장 낮은 판정",
+                "<color=#38D4B8>Perfect</color>  <color=#FFC54D>Good</color>  <color=#FF5966>Miss</color>  <color=#808794>미판정</color>  · 롱노트 색상: 시작·끝 중 낮은 판정",
                 .07f, .02f, .75f, .07f, 21);
             view.zoom = UiElements.Dropdown("Review Zoom", panel, Vector2.zero, Vector2.zero);
             Place((RectTransform)view.zoom.transform, .67f, .84f, .94f, .89f);
@@ -90,8 +91,6 @@ namespace RhythmDojo.EditorTools
             view.selected.alignment = TextAnchor.UpperLeft;
             view.events = Label("Judgment Events", panel, "", .67f, .23f, .96f, .62f, 22);
             view.events.alignment = TextAnchor.UpperLeft;
-            view.eventPosition = Slider("Judgment Event Position", panel, .67f, .18f, .96f, .22f);
-            view.eventPosition.wholeNumbers = true;
             view.previousButton = Button("Previous Note", panel, "이전 노트", .67f, .1f, .81f, .16f);
             view.nextButton = Button("Next Note", panel, "다음 노트", .82f, .1f, .96f, .16f);
             Label("Review Help", panel, "노트 클릭: 상세 판정  /  Escape: 결과로 복귀", .67f, .055f, .97f, .095f, 18);

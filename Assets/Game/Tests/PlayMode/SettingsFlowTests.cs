@@ -56,6 +56,7 @@ namespace RhythmDojo.Tests
             Assert.That(SceneManager.sceneCount, Is.EqualTo(sceneCount));
             yield return Click(view.gameplayTab);
             Assert.That(view.gameplayPanel.activeSelf, Is.True);
+            CaptureSelection("settings-hold-rules", 1920, 1080);
             yield return Press(Key.Escape);
             Assert.That(view.gameObject.activeSelf, Is.False);
             Assert.That(SceneManager.GetActiveScene(), Is.EqualTo(scene));

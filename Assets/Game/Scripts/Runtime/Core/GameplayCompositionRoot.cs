@@ -48,8 +48,6 @@ namespace RhythmDojo.Core
         private bool recordSaved;
         private double resultTransitionTime = -1;
         private int maxCombo;
-        private readonly System.Collections.Generic.List<JudgmentEvent> judgments =
-            new System.Collections.Generic.List<JudgmentEvent>();
         private PlayRequest playRequest;
         private PlayableSong ownedSong;
         private GameModeDefinition runtimeMode;
@@ -254,7 +252,6 @@ namespace RhythmDojo.Core
 
         private void TrackCombo(JudgmentEvent result)
         {
-            judgments.Add(result);
             maxCombo = Math.Max(maxCombo, controller.ReadModel.Snapshot.Session.Combo);
         }
 
@@ -262,7 +259,6 @@ namespace RhythmDojo.Core
         {
             resultTransitionTime = -1;
             maxCombo = 0;
-            judgments.Clear();
             recordSaved = false;
         }
 
@@ -308,13 +304,6 @@ namespace RhythmDojo.Core
                 laneLabels[i] = runtimeMode.GetLane(i).displayName;
             }
 
-            var noteStates = new NoteState[controller.Chart.Count];
-
-            for (int i = 0; i < noteStates.Length; i++)
-            {
-                noteStates[i] = controller.ReadModel.GetNoteState(i);
-            }
-
             var result = new PlayResult(
                 playRequest.Song.Title,
                 playRequest.Song.Artist,
@@ -325,8 +314,7 @@ namespace RhythmDojo.Core
                 controller.Chart,
                 playRequest.Song.Tempo,
                 laneLabels,
-                judgments,
-                noteStates
+                controller.Session
             );
             ShutdownGameplay();
             flow.ShowResults(result);

@@ -104,10 +104,7 @@ namespace RhythmDojo.EditorTools
             camera.backgroundColor = new Color(.055f, .075f, .11f);
             camera.gameObject.AddComponent<AudioListener>();
             var view = ResultsLayoutBuilder.Build();
-            var screen = view.gameObject.AddComponent<RhythmDojo.UI.ResultsScreen>();
-            Wire(screen, "view", view);
-            Wire(screen, "settings", content.Settings);
-            Wire(screen, "review", view.review.GetComponent<RhythmDojo.UI.ResultsChartReview>());
+            SceneDependencyAssembler.Assemble(view, content.Settings);
             RhythmDojo.UI.UiElements.EventSystem(
                 AssetDatabase.LoadAssetAtPath<UnityEngine.InputSystem.InputActionAsset>(
                     "Assets/InputSystem_Actions.inputactions"

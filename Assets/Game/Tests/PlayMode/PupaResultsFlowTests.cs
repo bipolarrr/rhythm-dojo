@@ -90,7 +90,7 @@ namespace RhythmDojo.Tests
             Assert.That(flow.LastResult.Session.State, Is.EqualTo(SessionState.Completed));
             Assert.That(flow.LastResult.Notes.Count, Is.EqualTo(929));
             Assert.That(flow.LastResult.Notes.Sum(note => note.Judgments.Count),
-                Is.EqualTo(flow.LastResult.Session.TotalNotes));
+                Is.EqualTo(flow.LastResult.Notes.Count + flow.LastResult.Notes.Count(note => note.Note.Kind == NoteKind.Hold)));
         }
 
         [UnityTest]
@@ -353,7 +353,8 @@ namespace RhythmDojo.Tests
             Assert.That(flow.LastResult.Chart.CompletionTime, Is.EqualTo(lastEnd + rules.Timing.GoodWindow + 1).Within(.001));
             Assert.That(flow.LastResult.Session.Resolved, Is.EqualTo(flow.LastResult.Session.TotalNotes));
             Assert.That(flow.LastResult.Notes.Count, Is.EqualTo(929));
-            Assert.That(flow.LastResult.Notes.Sum(note => note.Judgments.Count), Is.EqualTo(flow.LastResult.Session.TotalNotes));
+            Assert.That(flow.LastResult.Notes.Sum(note => note.Judgments.Count),
+                Is.EqualTo(flow.LastResult.Notes.Count + flow.LastResult.Notes.Count(note => note.Note.Kind == NoteKind.Hold)));
             Assert.That(Object.FindFirstObjectByType<SongClock>(), Is.Null);
         }
     }

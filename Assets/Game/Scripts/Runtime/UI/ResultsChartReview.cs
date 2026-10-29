@@ -1,6 +1,5 @@
 using System;
 using System.Globalization;
-using System.Linq;
 using System.Text;
 using RhythmDojo.Core;
 using RhythmDojo.Gameplay;
@@ -15,7 +14,6 @@ namespace RhythmDojo.UI
         private PlayResult result;
         private bool bound;
         private int selectedIndex;
-        private const int EventsPerPage = 12;
 
         public PlayResult Result => result;
         public int SelectedIndex => selectedIndex;
@@ -65,7 +63,6 @@ namespace RhythmDojo.UI
             view.previousButton.onClick.AddListener(Previous);
             view.nextButton.onClick.AddListener(Next);
             view.position.onValueChanged.AddListener(PositionChanged);
-            view.eventPosition.onValueChanged.AddListener(EventsChanged);
             view.zoom.onValueChanged.AddListener(ZoomChanged);
             view.chart.NoteSelected += SelectNote;
             view.chart.Scrolled += Scroll;
@@ -74,7 +71,6 @@ namespace RhythmDojo.UI
         private void Previous() => SelectNote(selectedIndex - 1);
         private void Next() => SelectNote(selectedIndex + 1);
         private void PositionChanged(float value) => RefreshWindow();
-        private void EventsChanged(float value) => RefreshEvents();
         private void ZoomChanged(int value) => RefreshWindow();
 
         private void Scroll(float value)
@@ -135,14 +131,9 @@ namespace RhythmDojo.UI
             }
 
             view.selected.text = string.Format(CultureInfo.InvariantCulture,
-                "노트 #{0}  ·  {1} 레인  ·  {2}\n{3:F3}초 – {4:F3}초  /  {5:0.###}박\n{6}\nPerfect {7}   Good {8}   Miss {9}",
+                "노트 #{0}  ·  {1} 레인  ·  {2}\n{3:F3}초 – {4:F3}초  /  {5:0.###}박\n{6}",
                 selectedIndex + 1, result.LaneLabels[note.Note.Lane], kind,
-                note.Note.StartTime, note.Note.EndTime, beat, state,
-                note.Judgments.Count(item => item.Grade == Judgment.Perfect),
-                note.Judgments.Count(item => item.Grade == Judgment.Good),
-                note.Judgments.Count(item => item.Grade == Judgment.Miss));
-            view.eventPosition.maxValue = Math.Max(0, note.Judgments.Count - EventsPerPage);
-            view.eventPosition.SetValueWithoutNotify(0);
+                note.Note.StartTime, note.Note.EndTime, beat, state);
             view.previousButton.interactable = selectedIndex > 0;
             view.nextButton.interactable = selectedIndex < result.Notes.Count - 1;
             RefreshEvents();
@@ -155,31 +146,31 @@ namespace RhythmDojo.UI
                 return;
             }
 
-            var judgments = result.Notes[selectedIndex].Judgments;
-            var text = new StringBuilder("판정 순서 · 롱노트는 유지/끝 판정 포함\n");
-            int first = (int)view.eventPosition.value;
+            var judgments = result.Notes[selectedIndex];
+            var text = new StringBuilder("시작·끝 판정\n");
+            AppendJudgment(text, "시작", judgments.Start);
 
-            for (int i = first; i < Math.Min(judgments.Count, first + EventsPerPage); i++)
+            if (judgments.Note.Kind == NoteKind.Hold)
             {
-                var judgment = judgments[i];
-                text.Append(i + 1).Append(". ").Append(judgment.Grade);
-
-                if (judgment.Grade != Judgment.Miss)
-                {
-                    text.Append("  · 오차 ").Append((judgment.ErrorSeconds * 1000)
-                        .ToString("+0.0;-0.0;0.0", CultureInfo.InvariantCulture)).Append(" ms");
-                }
-
-                text.AppendLine();
+                AppendJudgment(text, "끝", judgments.End);
             }
 
-            if (judgments.Count == 0)
-            {
-                text.Append("이 노트의 판정 기록이 없습니다.");
-            }
-
+            text.Append("\n유지 판정은 전체 집계에만 포함됩니다.\n노트 색상은 시작·끝 중 낮은 판정입니다.");
             view.events.text = text.ToString();
-            view.eventPosition.interactable = judgments.Count > EventsPerPage;
+        }
+
+        private static void AppendJudgment(StringBuilder text, string label, JudgmentEvent? judgment)
+        {
+            text.Append(label).Append(": ");
+            if (!judgment.HasValue)
+            {
+                text.AppendLine("미판정");
+                return;
+            }
+
+            text.Append(judgment.Value.Grade).Append("  · 오차 ")
+                .Append((judgment.Value.ErrorSeconds * 1000)
+                    .ToString("+0.0;-0.0;0.0", CultureInfo.InvariantCulture)).AppendLine(" ms");
         }
 
         private void OnDestroy()
@@ -193,7 +184,6 @@ namespace RhythmDojo.UI
             view.previousButton.onClick.RemoveListener(Previous);
             view.nextButton.onClick.RemoveListener(Next);
             view.position.onValueChanged.RemoveListener(PositionChanged);
-            view.eventPosition.onValueChanged.RemoveListener(EventsChanged);
             view.zoom.onValueChanged.RemoveListener(ZoomChanged);
             view.chart.NoteSelected -= SelectNote;
             view.chart.Scrolled -= Scroll;

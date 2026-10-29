@@ -13,7 +13,6 @@ namespace RhythmDojo.UI
         public Text selected;
         public Text events;
         public Slider position;
-        public Slider eventPosition;
         public Dropdown zoom;
         public Button closeButton;
         public Button previousButton;
@@ -31,7 +30,7 @@ namespace RhythmDojo.UI
                 throw new InvalidOperationException("Result review labels missing.");
             }
 
-            if (!position || !eventPosition || !zoom)
+            if (!position || !zoom)
             {
                 throw new InvalidOperationException("Result review navigation missing.");
             }
