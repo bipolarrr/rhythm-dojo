@@ -146,3 +146,9 @@ Unity 6000.3.23f1에서 갱신·컴파일 후 순차 실행했다. 선택 검증
 ![일반 노트 상세](verification-images/results-tap-endpoint.png)
 
 ![Automatic/Release 설정 설명](verification-images/settings-hold-rules-v3.png)
+
+## 플레이 없이 결과 UI 미리보기
+
+Edit Mode에서 **Game Tools > Preview > Results**를 누르면 샘플 결과가 있는 Results 씬으로 바로 Play Mode를 시작한다. 실제 곡을 플레이하거나 Title 시작 옵션을 끌 필요가 없다. 더보기와 노트 선택을 그대로 사용할 수 있으며 Perfect/Good/Miss, 유지 Miss가 있는 롱노트를 포함한다. **Results (Game Over)**는 Release 조기 해제로 실패하고 이후 노트가 미판정인 예시다.
+
+미리보기는 에디터 전용 샘플을 화면에만 주입하므로 최고 기록이나 마지막 실제 플레이 결과를 저장하지 않는다. Play Mode를 종료하면 원래 작업 씬과 Play Mode 시작 씬 설정으로 돌아온다. 미리보기 메뉴는 Play Mode와 전체 검증 실행 중에는 비활성화된다.

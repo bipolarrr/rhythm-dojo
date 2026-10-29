@@ -28,6 +28,11 @@ namespace RhythmDojo.EditorTools
                 return;
             }
 
+            if (SessionState.GetBool(ResultsPreview.ActiveKey, false))
+            {
+                return;
+            }
+
             if (SessionState.GetBool(FoundationVerification.ActiveKey, false))
             {
                 return;
