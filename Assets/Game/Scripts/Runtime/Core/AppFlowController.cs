@@ -24,6 +24,7 @@ namespace RhythmDojo.Core
         public const string SelectionPath = "Assets/Game/Scenes/SongSelection.unity";
         public const string GameplayPath = "Assets/Game/Scenes/Gameplay.unity";
         public const string SettingsPath = "Assets/Game/Scenes/Settings.unity";
+        public const string ResultsPath = "Assets/Game/Scenes/Results.unity";
 
         [SerializeField]
         private GameSettings settings;
@@ -49,6 +50,7 @@ namespace RhythmDojo.Core
         public bool IsEditorPlaytest => returned != null;
 
         public PlayRequest CurrentRequest { get; private set; }
+        public PlayResult LastResult { get; private set; }
         public bool Transitioning { get; private set; }
 
         // Compatibility facade for existing integration callers. Screens use injected services.
@@ -280,6 +282,7 @@ namespace RhythmDojo.Core
                 );
                 ReleaseRequest();
                 CurrentRequest = request;
+                LastResult = null;
                 song = null;
                 ClearEditorReturn();
                 Load(GameplayPath);
@@ -380,6 +383,7 @@ namespace RhythmDojo.Core
                 CurrentRequest = request;
                 song = null;
                 editorSessionId = sessionId;
+                LastResult = null;
                 returnScenePath = returnPath;
                 returned = onReturned;
                 Load(GameplayPath);
@@ -408,6 +412,17 @@ namespace RhythmDojo.Core
                     )
                 );
             }
+        }
+
+        public void ShowResults(PlayResult result)
+        {
+            if (Transitioning)
+            {
+                return;
+            }
+
+            LastResult = result ?? throw new ArgumentNullException(nameof(result));
+            Load(ResultsPath);
         }
 
         public void ShowSelection()

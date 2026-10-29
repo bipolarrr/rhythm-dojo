@@ -19,9 +19,11 @@ namespace RhythmDojo.Tests
 {
     // Real scenes, DSP clock and timestamped keyboard input; no assigned health or result states.
     [Category("Gameplay"), Category("HealthPlaytest")]
+    [Category("Results")]
     public sealed class GameplayHealthPlaytestTests : GameplayTestContext
     {
         private RhythmGameController game;
+        private RhythmSession session;
         private GameplayHudView view;
         private readonly List<(double time, Key key, bool press)> events =
             new List<(double, Key, bool)>();
@@ -96,15 +98,16 @@ namespace RhythmDojo.Tests
             );
             yield return null;
             game = UnityEngine.Object.FindFirstObjectByType<RhythmGameController>();
+            session = game.Session;
             view = UnityEngine.Object.FindFirstObjectByType<GameplayHudView>();
-            Assert.That(game.Session.State, Is.EqualTo(SessionState.Ready));
+            Assert.That(session.State, Is.EqualTo(SessionState.Ready));
             game.ReadModel.Judged += RecordJudgment;
             InputSystem.onBeforeUpdate += FeedInput;
         }
 
         private void RecordJudgment(JudgmentEvent result)
         {
-            var snapshot = game.Session.Snapshot;
+            var snapshot = session.Snapshot;
             judgments.Add((result.Grade, snapshot.Health, snapshot.HealthRatio));
             evidence.Add(
                 string.Format(
@@ -164,13 +167,13 @@ namespace RhythmDojo.Tests
         {
             if (
                 (InputState.currentUpdateType != InputUpdateType.Dynamic || !game)
-                || game.Session == null
+                || session == null
             )
             {
                 return;
             }
 
-            if (game.Session.State != SessionState.Playing)
+            if (session.State != SessionState.Playing)
             {
                 return;
             }
@@ -197,16 +200,16 @@ namespace RhythmDojo.Tests
         private IEnumerator CheckHealth(int health, string capture)
         {
             yield return null;
-            Assert.That(game.Session.Health, Is.EqualTo(health));
+            Assert.That(session.Health, Is.EqualTo(health));
             Assert.That(
                 view.healthFill.rectTransform.anchorMax.x,
-                Is.EqualTo((float)game.Session.Snapshot.HealthRatio).Within(.001)
+                Is.EqualTo((float)session.Snapshot.HealthRatio).Within(.001)
             );
             Assert.That(
                 view.healthLabel.text,
                 Does.Contain(
                     (
-                        game.Session.Snapshot.Mode switch
+                        session.Snapshot.Mode switch
                         {
                             RhythmDojo.Gameplay.PlayMode.Gauge => health + " / 100",
                             _ => "Challenge",
@@ -215,41 +218,43 @@ namespace RhythmDojo.Tests
                 )
             );
             Assert.That(view.gameOverPanel.activeSelf, Is.False);
-            CaptureSelection("health-playtest-" + capture);
         }
 
         private IEnumerator CheckResult(SessionState state, string capture)
         {
-            yield return Await(() => game.Session.State == state, "Expected result: " + state);
+            yield return Await(() => UnityEngine.Object.FindFirstObjectByType<ResultsScreen>(), "Expected result: " + state);
             yield return null;
-            Assert.That(view.gameOverPanel.activeSelf, Is.True);
+            var result = UnityEngine.Object.FindFirstObjectByType<AppFlowController>().LastResult;
+            Assert.That(result.Session.State, Is.EqualTo(state));
+            Assert.That(result.Session.Resolved, Is.EqualTo(session.Resolved));
+            var resultView = UnityEngine.Object.FindFirstObjectByType<ResultsView>();
 
-            if (state == SessionState.Completed && !game.Session.Failure.Failed)
+            if (state == SessionState.Completed && !session.Failure.Failed)
             {
-                Assert.That(view.gameOverText.text, Is.EqualTo("GAME CLEAR"));
+                Assert.That(resultView.outcome.text, Is.EqualTo("CLEAR"));
             }
             else
             {
-                Assert.That(view.gameOverText.text, Is.EqualTo("GAME OVER"));
+                Assert.That(resultView.outcome.text, Is.EqualTo("FAILED"));
             }
 
-            Assert.That(game.Clock.Running, Is.False);
-            Assert.That(
-                UnityEngine
-                    .Object.FindFirstObjectByType<SongClock>()
-                    .GetComponent<AudioSource>()
-                    .isPlaying,
-                Is.False
-            );
-            CaptureSelection("health-playtest-" + capture);
+            Assert.That(UnityEngine.Object.FindFirstObjectByType<SongClock>(), Is.Null);
+            int resolved = session.Resolved;
+            yield return new WaitForSecondsRealtime(.2f);
+            Assert.That(result.Session.Resolved, Is.EqualTo(resolved));
+        }
 
-            int resolved = game.Session.Resolved;
-            double songTime = game.ReadModel.Snapshot.SongTime;
-
-            // Keep the result visible for review while also checking that gameplay stopped.
-            yield return new WaitForSecondsRealtime(2);
-            Assert.That(game.Session.Resolved, Is.EqualTo(resolved));
-            Assert.That(game.ReadModel.Snapshot.SongTime, Is.EqualTo(songTime));
+        private IEnumerator RestartFromResults()
+        {
+            yield return Click(UnityEngine.Object.FindFirstObjectByType<ResultsView>().backButton);
+            yield return Await(() => UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>());
+            UnityEngine.Object.FindFirstObjectByType<AppFlowController>().PlaySelected();
+            yield return Await(() => UnityEngine.Object.FindFirstObjectByType<RhythmGameController>());
+            yield return null;
+            game = UnityEngine.Object.FindFirstObjectByType<RhythmGameController>();
+            session = game.Session;
+            view = UnityEngine.Object.FindFirstObjectByType<GameplayHudView>();
+            yield return Press(Key.Space);
         }
 
         [UnityTest]
@@ -258,18 +263,18 @@ namespace RhythmDojo.Tests
             yield return LoadGameplay("normal-clear");
             PrepareInput(2, 3);
             yield return Press(Key.Space);
-            yield return Await(() => game.Session.Miss == 2);
+            yield return Await(() => session.Miss == 2);
             yield return CheckHealth(80, "normal-damage");
-            yield return Await(() => game.Session.Perfect == 1);
+            yield return Await(() => session.Perfect == 1);
             yield return CheckHealth(80, "before-recovery-combo");
-            yield return Await(() => game.Session.Good == 1);
+            yield return Await(() => session.Good == 1);
             yield return CheckHealth(80, "good-no-recovery");
             yield return CheckResult(SessionState.Completed, "normal-clear");
-            Assert.That(game.Session.Perfect, Is.EqualTo(game.Session.Snapshot.TotalNotes - 3));
-            Assert.That(game.Session.Good, Is.EqualTo(1));
-            Assert.That(game.Session.Miss, Is.EqualTo(2));
+            Assert.That(session.Perfect, Is.EqualTo(session.Snapshot.TotalNotes - 3));
+            Assert.That(session.Good, Is.EqualTo(1));
+            Assert.That(session.Miss, Is.EqualTo(2));
             Assert.That(
-                game.Session.Health,
+                session.Health,
                 Is.EqualTo(100),
                 "Recovery must cap at maximum health."
             );
@@ -289,17 +294,17 @@ namespace RhythmDojo.Tests
             yield return LoadGameplay("normal-game-over");
             yield return Press(Key.Space);
             yield return CheckResult(SessionState.GameOver, "normal-game-over");
-            Assert.That(game.Session.Miss, Is.EqualTo(10));
-            Assert.That(game.Session.Health, Is.Zero);
-            Assert.That(view.healthFill.rectTransform.anchorMax.x, Is.Zero);
+            Assert.That(session.Miss, Is.EqualTo(10));
+            Assert.That(session.Health, Is.Zero);
+            Assert.That(UnityEngine.Object.FindFirstObjectByType<AppFlowController>().LastResult.Session.Health, Is.Zero);
             Assert.That(
                 judgments.Select(item => item.health),
                 Is.EqualTo(Enumerable.Range(0, 10).Select(i => 90 - i * 10))
             );
-            yield return Press(Key.Space);
+            yield return RestartFromResults();
             yield return CheckHealth(100, "restart");
-            Assert.That(game.Session.State, Is.EqualTo(SessionState.Playing));
-            Assert.That(game.Session.Resolved, Is.Zero);
+            Assert.That(session.State, Is.EqualTo(SessionState.Playing));
+            Assert.That(session.Resolved, Is.Zero);
             Assert.That(game.Clock.Running, Is.True);
         }
 
@@ -309,8 +314,8 @@ namespace RhythmDojo.Tests
             yield return LoadGameplay("hard-miss", true);
             yield return Press(Key.Space);
             yield return CheckResult(SessionState.GameOver, "hard-miss");
-            Assert.That(game.Session.Miss, Is.EqualTo(1));
-            Assert.That(game.Session.Health, Is.EqualTo(100));
+            Assert.That(session.Miss, Is.EqualTo(1));
+            Assert.That(session.Health, Is.EqualTo(100));
         }
 
         [UnityTest]
@@ -319,13 +324,13 @@ namespace RhythmDojo.Tests
             yield return LoadGameplay("hard-good", true);
             PrepareInput(0, 1);
             yield return Press(Key.Space);
-            yield return Await(() => game.Session.Perfect == 1);
+            yield return Await(() => session.Perfect == 1);
             yield return CheckHealth(100, "hard-perfect");
             yield return CheckResult(SessionState.GameOver, "hard-good");
-            Assert.That(game.Session.Perfect, Is.EqualTo(1));
-            Assert.That(game.Session.Good, Is.EqualTo(1));
-            Assert.That(game.Session.Miss, Is.Zero);
-            Assert.That(game.Session.Health, Is.EqualTo(100));
+            Assert.That(session.Perfect, Is.EqualTo(1));
+            Assert.That(session.Good, Is.EqualTo(1));
+            Assert.That(session.Miss, Is.Zero);
+            Assert.That(session.Health, Is.EqualTo(100));
         }
 
         [UnityTest]
@@ -333,14 +338,13 @@ namespace RhythmDojo.Tests
         {
             yield return LoadGameplay("hard-three-misses", true, true);
             yield return Press(Key.Space);
-            yield return Await(() => game.Session.Miss == 1);
+            yield return Await(() => session.Miss == 1);
             yield return null;
             Assert.That(view.healthFill.rectTransform.anchorMax.x, Is.EqualTo(1f).Within(.001));
-            CaptureSelection("health-playtest-hard-fractional-damage");
             yield return CheckResult(SessionState.GameOver, "hard-three-misses");
             Assert.That(judgments.Select(item => item.health), Is.EqualTo(new[] { 100, 100, 100 }));
             Assert.That(judgments[1].ratio, Is.EqualTo(1));
-            Assert.That(game.Session.Miss, Is.EqualTo(3));
+            Assert.That(session.Miss, Is.EqualTo(3));
         }
 
         [UnityTearDown]
@@ -375,20 +379,19 @@ namespace RhythmDojo.Tests
             yield return LoadGameplay("failed-completion", continues: true);
 
             int failures = 0;
-            game.Session.Failed += _ => failures++;
+            session.Failed += _ => failures++;
             PrepareInput(10);
             yield return Press(Key.Space);
-            yield return Await(() => game.Session.Failure.Failed);
-            Assert.That(game.Session.State, Is.EqualTo(SessionState.Playing));
+            yield return Await(() => session.Failure.Failed);
+            Assert.That(session.State, Is.EqualTo(SessionState.Playing));
             yield return new WaitForSecondsRealtime(.1f);
             Assert.That(view.healthLabel.text, Does.Contain("FAILED"));
-            CaptureSelection("health-playtest-failed-continuing");
             yield return CheckResult(SessionState.Completed, "failed-completion");
-            Assert.That(game.Session.Health, Is.Zero);
+            Assert.That(session.Health, Is.Zero);
             Assert.That(failures, Is.EqualTo(1));
-            Assert.That(game.Session.Perfect, Is.GreaterThan(0));
-            yield return Press(Key.Space);
-            Assert.That(game.Session.Failure.Failed, Is.False);
+            Assert.That(session.Perfect, Is.GreaterThan(0));
+            yield return RestartFromResults();
+            Assert.That(session.Failure.Failed, Is.False);
         }
 
         [UnityTest]
@@ -406,12 +409,11 @@ namespace RhythmDojo.Tests
             events.Add((note.EndTime - .3, key, true));
             events.Sort((a, b) => a.time.CompareTo(b.time));
             yield return Press(Key.Space);
-            yield return Await(() => game.Session.Miss > 0);
-            CaptureSelection("health-playtest-hold-regrab-missed-check");
+            yield return Await(() => session.Miss > 0);
             yield return CheckResult(SessionState.Completed, "hold-regrab");
-            Assert.That(game.Session.Miss, Is.GreaterThan(0));
-            Assert.That(game.Session.Resolved, Is.EqualTo(game.Session.Snapshot.TotalNotes));
-            Assert.That(game.Session.GetState(index), Is.EqualTo(NoteState.Completed));
+            Assert.That(session.Miss, Is.GreaterThan(0));
+            Assert.That(session.Resolved, Is.EqualTo(session.Snapshot.TotalNotes));
+            Assert.That(session.GetState(index), Is.EqualTo(NoteState.Completed));
         }
     }
 }

@@ -17,9 +17,11 @@ using UnityEngine.TestTools;
 namespace RhythmDojo.Tests
 {
     [Category("Gameplay")]
+    [Category("Results")]
     public sealed class GameplayJudgmentTests : GameplayTestContext
     {
         private RhythmGameController game;
+        private RhythmSession completedSession;
         private readonly List<(double time, Key key, bool press)> events =
             new List<(double, Key, bool)>();
         private readonly HashSet<Key> held = new HashSet<Key>();
@@ -134,6 +136,7 @@ namespace RhythmDojo.Tests
             }
 
             double time = game.Clock.SongTime;
+            double realtime = Time.realtimeSinceStartupAsDouble;
 
             while (nextEvent < events.Count && time >= events[nextEvent].time)
             {
@@ -148,17 +151,19 @@ namespace RhythmDojo.Tests
                     held.Remove(input.key);
                 }
 
-                double timestamp =
-                    Time.realtimeSinceStartupAsDouble - (game.Clock.SongTime - input.time);
+                // Sample the two clocks once for the batch. Re-sampling each chord key
+                // can round its timestamp backwards and make Input System discard it.
+                double timestamp = realtime - (time - input.time);
                 InputSystem.QueueStateEvent(keyboard, new KeyboardState(held.ToArray()), timestamp);
             }
         }
 
         private IEnumerator Completed()
         {
+            completedSession = game.Session;
             double deadline = Time.realtimeSinceStartupAsDouble + game.Chart.CompletionTime + 10;
 
-            while (game.Session.State != SessionState.Completed)
+            while (completedSession.State != SessionState.Completed)
             {
                 Assert.That(
                     Time.realtimeSinceStartupAsDouble,
@@ -173,6 +178,8 @@ namespace RhythmDojo.Tests
         public IEnumerator TimestampedLaneActionsJudgeMixedRunDespiteFrameHitch()
         {
             yield return LoadSong();
+            var observed = new List<JudgmentEvent>();
+            game.ReadModel.Judged += observed.Add;
             PrepareInput(false);
             hitchEnabled = true;
             yield return Press(Key.Space);
@@ -192,14 +199,14 @@ namespace RhythmDojo.Tests
                 )
                 .Single(view => view.name.StartsWith("Note 04", StringComparison.Ordinal));
             Assert.That(note.transform.Find("Head").position.z, Is.EqualTo(0).Within(.001));
-            CaptureSelection("playmode");
             yield return Completed();
             Assert.That(hitched, Is.True);
-            Assert.That(game.Session.Perfect, Is.EqualTo(33));
-            Assert.That(game.Session.Good, Is.EqualTo(2));
-            Assert.That(game.Session.Miss, Is.EqualTo(12));
-            Assert.That(game.Session.Combo, Is.EqualTo(10));
-            Assert.That(game.Session.IsHeld(1), Is.False);
+            Assert.That(completedSession.Perfect, Is.EqualTo(33), string.Join("\n",
+                observed.Select(result => $"{result.NoteIndex}: {result.Grade} {result.ErrorSeconds:R}")));
+            Assert.That(completedSession.Good, Is.EqualTo(2));
+            Assert.That(completedSession.Miss, Is.EqualTo(12));
+            Assert.That(completedSession.Combo, Is.EqualTo(10));
+            Assert.That(completedSession.IsHeld(1), Is.False);
         }
 
         [UnityTest]
@@ -228,9 +235,9 @@ namespace RhythmDojo.Tests
             yield return null;
             PrepareInput(true);
             yield return Completed();
-            Assert.That(game.Session.Perfect, Is.EqualTo(game.Session.Snapshot.TotalNotes));
-            Assert.That(game.Session.Resolved, Is.EqualTo(game.Session.Snapshot.TotalNotes));
-            Assert.That(game.Session.Combo, Is.EqualTo(game.Session.Snapshot.TotalNotes));
+            Assert.That(completedSession.Perfect, Is.EqualTo(completedSession.Snapshot.TotalNotes));
+            Assert.That(completedSession.Resolved, Is.EqualTo(completedSession.Snapshot.TotalNotes));
+            Assert.That(completedSession.Combo, Is.EqualTo(completedSession.Snapshot.TotalNotes));
         }
 
         [UnityTest]
@@ -238,18 +245,19 @@ namespace RhythmDojo.Tests
         {
             yield return LoadSong();
             yield return Press(Key.Space);
+            completedSession = game.Session;
 
             double deadline = Time.realtimeSinceStartupAsDouble + game.Chart.CompletionTime + 10;
 
-            while (game.Session.State != SessionState.Completed)
+            while (completedSession.State != SessionState.Completed)
             {
                 Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
                 yield return null;
             }
 
-            Assert.That(game.Session.Health, Is.Zero);
-            Assert.That(game.Session.Miss, Is.EqualTo(game.Session.Snapshot.TotalNotes));
-            Assert.That(game.Session.Combo, Is.Zero);
+            Assert.That(completedSession.Health, Is.Zero);
+            Assert.That(completedSession.Miss, Is.EqualTo(completedSession.Snapshot.TotalNotes));
+            Assert.That(completedSession.Combo, Is.Zero);
         }
 
         [UnityTest]
@@ -271,9 +279,9 @@ namespace RhythmDojo.Tests
             PrepareInput(true);
             yield return Press(Key.Space);
             yield return Completed();
-            Assert.That(game.Session.Perfect, Is.EqualTo(game.Session.Snapshot.TotalNotes));
-            Assert.That(game.Session.Combo, Is.EqualTo(game.Session.Snapshot.TotalNotes));
-            Assert.That(game.ReadModel.Snapshot.SongTime, Is.GreaterThanOrEqualTo(12));
+            Assert.That(completedSession.Perfect, Is.EqualTo(completedSession.Snapshot.TotalNotes));
+            Assert.That(completedSession.Combo, Is.EqualTo(completedSession.Snapshot.TotalNotes));
+            Assert.That(completedSession.State, Is.EqualTo(SessionState.Completed));
         }
     }
 }

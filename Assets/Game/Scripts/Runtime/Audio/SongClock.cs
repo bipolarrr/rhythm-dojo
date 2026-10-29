@@ -15,6 +15,9 @@ namespace RhythmDojo.Audio
         private bool paused;
         private double pausedSongTime;
         private float playbackVolume;
+        private double dspRealtimeOffset;
+        private double clockSampleRealtime;
+        private int clockSampleFrame = -1;
 
         public double ScheduledStartDspTime { get; private set; }
         public bool Running { get; private set; }
@@ -26,7 +29,7 @@ namespace RhythmDojo.Audio
             {
                 if (Running)
                 {
-                    return AudioSettings.dspTime - ScheduledStartDspTime + offset;
+                    return InterpolatedDspTime() - ScheduledStartDspTime + offset;
                 }
                 else if (paused)
                 {
@@ -87,13 +90,35 @@ namespace RhythmDojo.Audio
             RefreshVolume();
             paused = false;
             source.Stop();
-            ScheduledStartDspTime = AudioSettings.dspTime + lead;
+            double dsp = AudioSettings.dspTime;
+            clockSampleRealtime = Time.realtimeSinceStartupAsDouble;
+            clockSampleFrame = Time.frameCount;
+            dspRealtimeOffset = dsp - clockSampleRealtime;
+            ScheduledStartDspTime = dsp + lead;
             source.PlayScheduled(ScheduledStartDspTime);
             Running = true;
         }
 
         public double InputTimeToSongTime(double eventTime) =>
             SongTime - (Time.realtimeSinceStartupAsDouble - eventTime) - InputTimingOffsetSeconds;
+
+        private double InterpolatedDspTime()
+        {
+            double realtime = Time.realtimeSinceStartupAsDouble;
+
+            if (clockSampleFrame != Time.frameCount)
+            {
+                // DSP time advances in audio blocks. Follow its long-term rate without
+                // passing block-sized jumps into presentation or timestamped judgments.
+                double elapsed = Math.Max(0, realtime - clockSampleRealtime);
+                double target = AudioSettings.dspTime - realtime;
+                dspRealtimeOffset += (target - dspRealtimeOffset) * (1 - Math.Exp(-elapsed));
+                clockSampleRealtime = realtime;
+                clockSampleFrame = Time.frameCount;
+            }
+
+            return realtime + dspRealtimeOffset;
+        }
 
         public void Pause()
         {

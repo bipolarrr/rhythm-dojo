@@ -8,7 +8,7 @@
     "audio": null
   },
   "timing": {
-    "audioOffsetSeconds": 0.0,
+    "audioOffsetSeconds": -0.02,
     "tempoPoints": [
       {
         "timeSeconds": 0.0,

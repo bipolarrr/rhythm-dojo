@@ -43,6 +43,8 @@ namespace RhythmDojo.Gameplay
             held;
         private readonly NoteState[] states;
         private int next;
+        private readonly NoteJudgmentRecord[] records;
+        private readonly bool[] broken;
 
         public SessionState State { get; private set; }
         public int Perfect { get; private set; }
@@ -71,12 +73,14 @@ namespace RhythmDojo.Gameplay
         public event Action<HoldStartedEvent> HoldStarted;
         public event Action<FailureSnapshot> Failed;
 
-        public RuleSession(ChartData chart, GameModeRules mode, TempoMap tempo, PlayRules rules)
+        public RuleSession(ChartData chart, GameModeRules mode, TempoMap tempo, PlayRules rules, NoteJudgmentRecord[] records)
         {
             chart.Validate(mode);
             rules.Validate();
             this.chart = chart;
             this.rules = rules.Copy();
+            this.records = records;
+            broken = new bool[chart.Count];
             heads = new bool[chart.Count];
             tails = new bool[chart.Count];
             states = new NoteState[chart.Count];
@@ -159,8 +163,12 @@ namespace RhythmDojo.Gameplay
 
         public NoteState GetState(int index) => states[index];
 
+        public NoteJudgmentRecord GetNoteJudgments(int index) => records[index];
+
         public void Reset()
         {
+            Array.Clear(records, 0, records.Length);
+            Array.Clear(broken, 0, broken.Length);
             Array.Clear(heads, 0, heads.Length);
             Array.Clear(tails, 0, tails.Length);
             Array.Clear(states, 0, states.Length);
@@ -248,7 +256,7 @@ namespace RhythmDojo.Gameplay
                     states[best] = NoteState.Completed;
                 }
 
-                Apply(best, grade, time - note.StartTime, time);
+                Apply(best, grade, time - note.StartTime, time, 0);
 
                 if (note.Kind == NoteKind.Hold)
                 {
@@ -285,7 +293,17 @@ namespace RhythmDojo.Gameplay
             {
                 var note = chart[i];
 
-                if ((note.Kind != NoteKind.Hold || note.Lane != lane) || tails[i])
+                if (State != SessionState.Playing)
+                {
+                    break;
+                }
+
+                if (note.Kind != NoteKind.Hold || note.Lane != lane)
+                {
+                    continue;
+                }
+
+                if (tails[i] || broken[i])
                 {
                     continue;
                 }
@@ -315,11 +333,21 @@ namespace RhythmDojo.Gameplay
                         states[i] = NoteState.Completed;
                     }
 
-                    Apply(i, grade, error, time);
+                    Apply(i, grade, error, time, 2);
                 }
                 else if (time < note.EndTime)
                 {
-                    Combo = 0;
+                    if (rules.HoldEnd == HoldEndMode.Release && heads[i])
+                    {
+                        broken[i] = true;
+                        tails[i] = true;
+                        states[i] = NoteState.Missed;
+                        Apply(i, Judgment.Miss, error, time, 2);
+                    }
+                    else
+                    {
+                        Combo = 0;
+                    }
                 }
             }
         }
@@ -379,11 +407,16 @@ namespace RhythmDojo.Gameplay
                         states[i] = NoteState.Missed;
                     }
 
-                    Apply(i, Judgment.Miss, check.Time - note.StartTime, check.Time);
+                    if (note.Kind == NoteKind.Hold && rules.HoldEnd == HoldEndMode.Release)
+                    {
+                        broken[i] = true;
+                    }
+
+                    Apply(i, Judgment.Miss, check.Time - note.StartTime, check.Time, 0);
                 }
                 else if (check.Part == 1)
                 {
-                    if (HeldAt(note.Lane, check.Time))
+                    if (!broken[i] && HeldAt(note.Lane, check.Time))
                     {
                         Apply(i, Judgment.Perfect, 0, check.Time);
                     }
@@ -421,7 +454,7 @@ namespace RhythmDojo.Gameplay
                         states[i] = NoteState.Completed;
                     }
 
-                    Apply(i, grade, check.Time - note.EndTime, check.Time);
+                    Apply(i, grade, check.Time - note.EndTime, check.Time, 2);
                 }
             }
 
@@ -435,8 +468,19 @@ namespace RhythmDojo.Gameplay
             }
         }
 
-        private void Apply(int i, Judgment grade, double error, double time)
+        private void Apply(int i, Judgment grade, double error, double time, int part = 1)
         {
+            var judgment = new JudgmentEvent(i, chart[i], grade, error);
+
+            if (part == 0 && !records[i].Start.HasValue)
+            {
+                records[i] = new NoteJudgmentRecord(judgment, records[i].End);
+            }
+            else if (part == 2 && !records[i].End.HasValue)
+            {
+                records[i] = new NoteJudgmentRecord(records[i].Start, judgment);
+            }
+
             if (grade == Judgment.Perfect)
             {
                 Perfect++;

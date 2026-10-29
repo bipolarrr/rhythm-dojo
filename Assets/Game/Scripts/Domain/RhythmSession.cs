@@ -47,6 +47,7 @@ namespace RhythmDojo.Gameplay
         private readonly ChartData chart;
         private readonly JudgmentSettings config;
         private readonly NoteState[] states;
+        private readonly NoteJudgmentRecord[] records;
         private readonly Judgment[] heads;
         private readonly int[] active;
         private readonly bool[] held;
@@ -81,12 +82,15 @@ namespace RhythmDojo.Gameplay
 
         public NoteState GetState(int index) => ruleSession?.GetState(index) ?? states[index];
 
+        public NoteJudgmentRecord GetNoteJudgments(int index) =>
+            ruleSession?.GetNoteJudgments(index) ?? records[index];
+
         public bool IsHeld(int lane) => ruleSession?.IsHeld(lane) ?? held[lane];
 
         public RhythmSession(ChartData chart, GameModeRules mode, TempoMap tempo, PlayRules rules)
             : this(chart, rules.Timing, mode)
         {
-            ruleSession = new RuleSession(chart, mode, tempo, rules);
+            ruleSession = new RuleSession(chart, mode, tempo, rules, records);
             ruleSession.Judged += result =>
             {
                 SyncRules();
@@ -133,6 +137,7 @@ namespace RhythmDojo.Gameplay
             config.Validate();
             this.chart = chart;
             this.config = config;
+            records = new NoteJudgmentRecord[chart.Count];
             states = new NoteState[chart.Count];
             heads = new Judgment[chart.Count];
             active = new int[mode.LaneCount];
@@ -150,6 +155,7 @@ namespace RhythmDojo.Gameplay
                 return;
             }
 
+            Array.Clear(records, 0, records.Length);
             Array.Clear(states, 0, states.Length);
             Array.Clear(heads, 0, heads.Length);
             Array.Clear(held, 0, held.Length);
@@ -274,6 +280,8 @@ namespace RhythmDojo.Gameplay
             {
                 states[best] = NoteState.Holding;
                 heads[best] = grade;
+                records[best] = new NoteJudgmentRecord(
+                    new JudgmentEvent(best, chart[best], grade, signed), null);
                 active[lane] = best;
                 HoldStarted?.Invoke(
                     new HoldStartedEvent(new JudgmentEvent(best, chart[best], grade, signed))
@@ -378,6 +386,17 @@ namespace RhythmDojo.Gameplay
             )
             {
                 return;
+            }
+
+            var judgment = new JudgmentEvent(i, chart[i], grade, error);
+
+            if (states[i] == NoteState.Holding)
+            {
+                records[i] = new NoteJudgmentRecord(records[i].Start, judgment);
+            }
+            else
+            {
+                records[i] = new NoteJudgmentRecord(judgment, null);
             }
 
             if (active[chart[i].Lane] == i)

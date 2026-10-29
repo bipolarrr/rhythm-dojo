@@ -21,6 +21,16 @@ namespace RhythmDojo.EditorTools
             Wire(root, "selection", screen);
         }
 
+        public static void Assemble(ResultsView view, GameSettings settings)
+        {
+            var screen = view.gameObject.AddComponent<ResultsScreen>();
+            Wire(screen, "view", view);
+            Wire(screen, "review", view.review.GetComponent<ResultsChartReview>());
+            var root = view.gameObject.AddComponent<ScreenCompositionRoot>();
+            Wire(root, "settings", settings);
+            Wire(root, "results", screen);
+        }
+
         public static void Assemble(SettingsView view, GameSettings settings)
         {
             var screen = view.gameObject.AddComponent<SettingsScreen>();

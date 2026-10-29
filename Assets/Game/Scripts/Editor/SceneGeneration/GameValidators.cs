@@ -96,6 +96,11 @@ namespace RhythmDojo.EditorTools
                 {
                     settings.Validate();
                 }
+
+                foreach (var results in root.GetComponentsInChildren<ResultsScreen>(true))
+                {
+                    results.Validate();
+                }
             }
         }
     }
