@@ -44,6 +44,36 @@ namespace RhythmDojo.Core
 
         public void ResumeFromSettings() => Transitioning = false;
 
+        public void ShowChartEditor()
+        {
+            if (Transitioning)
+            {
+                return;
+            }
+
+            if (!UnityEngine.Application.CanStreamedLevelBeLoaded(ChartEditorMenu.ScenePath))
+            {
+                throw new InvalidOperationException("Chart editor scene is not registered in Build Settings.");
+            }
+
+            Transitioning = true;
+
+            try
+            {
+                if (SceneManager.LoadSceneAsync(ChartEditorMenu.ScenePath, LoadSceneMode.Single) == null)
+                {
+                    throw new InvalidOperationException("Cannot load ChartEditor.");
+                }
+            }
+            catch
+            {
+                Transitioning = false;
+                throw;
+            }
+        }
+
+        public void ShowChartWorkspace() => ShowChartEditor();
+
         public void StartGame()
         {
             if (Transitioning)

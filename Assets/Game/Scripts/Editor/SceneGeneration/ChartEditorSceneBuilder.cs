@@ -22,6 +22,11 @@ namespace RhythmDojo.EditorTools
         [MenuItem("Game Tools/Scenes/Build Chart Editor")]
         public static void Build()
         {
+            WorkspaceSceneBuilder.Build();
+        }
+
+        internal static void BuildBase()
+        {
             if (EditorApplication.isPlayingOrWillChangePlaymode)
             {
                 throw new InvalidOperationException(

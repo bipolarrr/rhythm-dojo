@@ -6,6 +6,8 @@ namespace RhythmDojo.Services
 
         void StartGame();
         void ShowSettings();
+        void ShowChartEditor();
+        void ShowChartWorkspace();
         void QuitGame();
     }
 }

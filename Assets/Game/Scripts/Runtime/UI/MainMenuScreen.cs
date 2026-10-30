@@ -78,6 +78,11 @@ namespace RhythmDojo.UI
             view.start.onClick.AddListener(StartGame);
             view.logo.onClick.AddListener(ToggleMenu);
             view.settings.onClick.AddListener(OpenSettings);
+            view.chartEditor.onClick.AddListener(OpenChartEditor);
+            if (view.chartWorkspace)
+            {
+                view.chartWorkspace.onClick.AddListener(OpenChartWorkspace);
+            }
             view.quit.onClick.AddListener(ShowQuit);
             view.confirmQuit.onClick.AddListener(ConfirmQuit);
             view.cancelQuit.onClick.AddListener(CancelQuit);
@@ -318,6 +323,49 @@ namespace RhythmDojo.UI
             StartCoroutine(BreakAndInvoke(view.settings, actions.ShowSettings, false));
         }
 
+        private void OpenChartEditor()
+        {
+            if (Busy || view.quitPopup.activeSelf)
+            {
+                return;
+            }
+
+            starting = true;
+            view.SetMenuInteractable(false);
+
+            try
+            {
+                actions.ShowChartEditor();
+            }
+            catch (Exception error)
+            {
+                starting = false;
+                view.SetMenuInteractable(true);
+                Debug.LogException(error, this);
+            }
+        }
+
+        private void OpenChartWorkspace()
+        {
+            if (Busy || view.quitPopup.activeSelf)
+            {
+                return;
+            }
+
+            starting = true;
+            view.SetMenuInteractable(false);
+            try
+            {
+                actions.ShowChartWorkspace();
+            }
+            catch (Exception error)
+            {
+                starting = false;
+                view.SetMenuInteractable(true);
+                Debug.LogException(error, this);
+            }
+        }
+
         private void ShowQuit()
         {
             if (Busy || !menuExpanded)
@@ -387,6 +435,11 @@ namespace RhythmDojo.UI
             view.start.onClick.RemoveListener(StartGame);
             view.logo.onClick.RemoveListener(ToggleMenu);
             view.settings.onClick.RemoveListener(OpenSettings);
+            view.chartEditor.onClick.RemoveListener(OpenChartEditor);
+            if (view.chartWorkspace)
+            {
+                view.chartWorkspace.onClick.RemoveListener(OpenChartWorkspace);
+            }
             view.quit.onClick.RemoveListener(ShowQuit);
             view.confirmQuit.onClick.RemoveListener(ConfirmQuit);
             view.cancelQuit.onClick.RemoveListener(CancelQuit);

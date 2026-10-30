@@ -83,6 +83,35 @@ namespace RhythmDojo.Authoring
             }
         }
         public bool IsBusy => !screen || screen.IsBusy || loadingAudio;
+        public bool IsPlaying => playing;
+        public AudioClip PreviewClip => source.clip;
+        public float PreviewVolume
+        {
+            get => source.volume;
+            set => source.volume = Mathf.Clamp01(value);
+        }
+
+        public float PreviewSpeed { get; private set; } = 1f;
+
+        public void SetPreviewSpeed(float value)
+        {
+            bool resume = playing;
+            Pause();
+            PreviewSpeed = Mathf.Clamp(value, .5f, 1f);
+            source.pitch = PreviewSpeed;
+            if (resume)
+            {
+                Play();
+            }
+        }
+
+        public void PlayPreview() => Play();
+        public void PausePreview() => Pause();
+        public void StopPreview()
+        {
+            Pause();
+            Seek(0);
+        }
 
         public double MusicTime
         {
@@ -90,7 +119,7 @@ namespace RhythmDojo.Authoring
             {
                 if (playing)
                 {
-                    return Math.Min(Duration, playbackStart + Math.Max(0, AudioSettings.dspTime - playbackDsp));
+                    return Math.Min(Duration, playbackStart + Math.Max(0, AudioSettings.dspTime - playbackDsp) * PreviewSpeed);
                 }
 
                 return pausedTime;
@@ -185,6 +214,13 @@ namespace RhythmDojo.Authoring
                 {
                     if (IsBusy || locked)
                     {
+                        return;
+                    }
+
+                    if (view.extendedQuantization)
+                    {
+                        screen.SnapEnabled = true;
+                        screen.SnapBeats = 4.0 / new[] { 4, 8, 12, 16, 24, 32, 48, 64, 96, 192 }[value];
                         return;
                     }
 

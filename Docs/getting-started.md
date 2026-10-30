@@ -7,6 +7,8 @@
 - Unity **6000.3.23f1** 사용. 주요 패키지는 URP 17.3.0, Input System 1.20.0, Test Framework 1.6.0입니다.
 - 처음 저장소를 받았다면 [Git·Unity 협업 설정](git-unity-setup.md)을 참고하세요.
 - Project 창에서 `Assets/Game/Scenes/Title.unity`를 열고 Play Mode를 시작합니다. 중앙 현판을 누르면 플레이·설정·종료 메뉴가 열립니다.
+- 타이틀 오른쪽 아래 **채보 에디터** 버튼을 누르면 편집 화면으로 바로 이동합니다.
+- **채보 에디터**는 기존 확장 에디터의 파일·리소스·선택 편집·자동 BPM·추가 재생 기능을 통합한 기본 편집 화면입니다. [사용 안내](extended-chart-editor.md)를 참고하세요.
 - 곡 선택부터 확인하려면 `Bootstrap.unity`를 엽니다. 다른 씬에서 바로 실행할 때는 **Game Tools > Scenes > Start Play Mode From Title**을 끕니다.
 
 | 화면 | 조작 |

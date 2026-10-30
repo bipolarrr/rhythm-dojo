@@ -50,6 +50,16 @@ namespace RhythmDojo.Tests
             {
                 Quits++;
             }
+
+            public void ShowChartEditor()
+            {
+                Transitioning = true;
+            }
+
+            public void ShowChartWorkspace()
+            {
+                Transitioning = true;
+            }
         }
 
         [UnitySetUp]
@@ -133,6 +143,40 @@ namespace RhythmDojo.Tests
                 "Wrong raycast target for " + button.name
             );
             yield return ClickAt(point);
+        }
+
+        [UnityTest]
+        public IEnumerator ChartEditorButtonLoadsEditorWithoutExpandingMenu()
+        {
+            Assert.That(view.menuPanel.gameObject.activeSelf, Is.False);
+            Assert.That(view.chartEditor.interactable, Is.True);
+            yield return Click(view.chartEditor);
+            float deadline = Time.realtimeSinceStartup + 10f;
+            while (SceneManager.GetActiveScene().path != ChartEditorMenu.ScenePath)
+            {
+                Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline));
+                yield return null;
+            }
+
+            yield return null;
+            Assert.That(UnityEngine.Object.FindFirstObjectByType<ChartEditorMenu>(), Is.Not.Null);
+        }
+
+        [UnityTest]
+        public IEnumerator ExtendedEditorButtonOpensSeparateWorkspace()
+        {
+            Assert.That(view.menuPanel.gameObject.activeSelf, Is.False);
+            Assert.That(view.chartWorkspace, Is.Null);
+            yield return Click(view.chartEditor);
+            float deadline = Time.realtimeSinceStartup + 10f;
+            while (SceneManager.GetActiveScene().path != RhythmDojo.Authoring.WorkspaceEditor.ScenePath)
+            {
+                Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline));
+                yield return null;
+            }
+
+            yield return null;
+            Assert.That(UnityEngine.Object.FindFirstObjectByType<RhythmDojo.Authoring.WorkspaceEditor>(), Is.Not.Null);
         }
 
         private IEnumerator OpenMenu()

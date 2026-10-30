@@ -58,6 +58,15 @@ namespace RhythmDojo.UI
         private static EditorSession returningSession;
 
         public bool IsInitialized => store != null;
+        public FileSongProjectStore Store => store;
+        public void NotifySaved() => saved?.Invoke();
+
+        public void ReplaceSession(EditorSession replacement)
+        {
+            screen.SetSession(replacement);
+            Observe();
+            FillSettings();
+        }
 
         [SerializeField] private GameObject advancedPanel;
 
@@ -385,7 +394,9 @@ namespace RhythmDojo.UI
                 ShowStatus("음원을 가져왔습니다: " + Path.GetFileName(path));
             });
 
-        public void Playtest() =>
+        public void Playtest() => PlaytestFrom(0, false);
+
+        public void PlaytestFrom(double startTime, bool automatic) =>
             RunAsync(async () =>
             {
                 var snapshot = screen.Session.Snapshot;
@@ -396,6 +407,13 @@ namespace RhythmDojo.UI
                     screen.Mode.ToRules(),
                     audio => store.AudioExists(snapshot.Id, audio)
                 );
+                if (startTime > 0)
+                {
+                    document.Notes = Array.FindAll(document.Notes,
+                        note => note.StartTime >= startTime + document.AudioOffset);
+                }
+
+                WorkspacePlaytest.Prepare(startTime, automatic);
                 returningSession = screen.Session;
 
                 try
@@ -404,7 +422,7 @@ namespace RhythmDojo.UI
                         document,
                         loaderFactory(snapshot),
                         snapshot.Id.ToString("D"),
-                        ScenePath,
+                        gameObject.scene.path,
                         Returned,
                         lifetime.Token
                     );
@@ -412,6 +430,7 @@ namespace RhythmDojo.UI
                 }
                 catch
                 {
+                    WorkspacePlaytest.Cancel();
                     returningSession = null;
                     throw;
                 }

@@ -26,6 +26,9 @@ namespace RhythmDojo.UI
 
         [SerializeField]
         private ChartBeatGrid beatGrid;
+
+        [SerializeField]
+        private RhythmDojo.Application.ChartSlot initialSlot = RhythmDojo.Application.ChartSlot.Standard;
         private EditorSession session;
         private Guid chartId;
         private int visibleBeats = DefaultVisibleBeats;
@@ -37,6 +40,10 @@ namespace RhythmDojo.UI
         private double previewEndBeat;
         public double SnapBeats { get; set; } = 1;
         public bool SnapEnabled { get; set; } = true;
+        public Func<PointerEventData, bool> PointerTool { get; set; }
+        public Action<PointerEventData> DragTool { get; set; }
+        public Action<PointerEventData> ReleaseTool { get; set; }
+        public bool MinimumHoldOnClick { get; set; }
 
         public int VisibleBeats => visibleBeats;
 
@@ -80,7 +87,7 @@ namespace RhythmDojo.UI
             session = new EditorSession(new SongProject());
             session.Edit(edit =>
                 chartId = edit.AddChartSlot(
-                    ChartSlot.Standard,
+                    initialSlot,
                     mode.name,
                     mode.LaneCount,
                     DefaultChartDuration
@@ -277,6 +284,11 @@ namespace RhythmDojo.UI
 
         public void OnPointerDown(PointerEventData eventData)
         {
+            if (!IsBusy && PointerTool != null && PointerTool(eventData))
+            {
+                return;
+            }
+
             if (IsBusy || eventData.button != PointerEventData.InputButton.Left)
             {
                 return;
@@ -300,6 +312,7 @@ namespace RhythmDojo.UI
 
         public void OnDrag(PointerEventData eventData)
         {
+            DragTool?.Invoke(eventData);
             if (!pressing || eventData.pointerId != pressPointerId)
             {
                 return;
@@ -312,6 +325,7 @@ namespace RhythmDojo.UI
 
         public void OnPointerUp(PointerEventData eventData)
         {
+            ReleaseTool?.Invoke(eventData);
             if (!pressing || eventData.pointerId != pressPointerId)
             {
                 return;
@@ -330,6 +344,11 @@ namespace RhythmDojo.UI
             if (IsBusy)
             {
                 return;
+            }
+
+            if (MinimumHoldOnClick && endBeat == pressBeat)
+            {
+                endBeat = pressBeat + SnapBeats;
             }
 
             double startTime = TimeAtBeat(pressBeat);

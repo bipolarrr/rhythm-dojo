@@ -17,6 +17,7 @@ namespace RhythmDojo.UI
         private GameModeDefinition mode;
         private EditorNote[] notes = Array.Empty<EditorNote>();
         private int previewLane = -1;
+        private NoteData[] previewNotes = Array.Empty<NoteData>();
         private double previewStart,
             previewEnd;
         private readonly Dictionary<int, Color> lineRows = new Dictionary<int, Color>();
@@ -25,6 +26,7 @@ namespace RhythmDojo.UI
         private static readonly BeatGridTiming DefaultTiming = new BeatGridTiming(
             new[] { new TempoPoint(0, 120) }, new BeatGridSettings());
         public double? PlayheadTime { get; set; }
+        public HashSet<long> SelectedNoteIds { get; set; }
 
         public BeatProjection Projection =>
             new BeatProjection(
@@ -55,9 +57,17 @@ namespace RhythmDojo.UI
 
         public void SetPreview(int lane, double startBeat = 0, double endBeat = 0)
         {
+            previewNotes = Array.Empty<NoteData>();
             previewLane = lane;
             previewStart = startBeat;
             previewEnd = endBeat;
+            SetVerticesDirty();
+        }
+
+        public void SetNotePreviews(NoteData[] source)
+        {
+            previewLane = -1;
+            previewNotes = source;
             SetVerticesDirty();
         }
 
@@ -183,6 +193,12 @@ namespace RhythmDojo.UI
 
             foreach (var note in notes)
             {
+                Color noteColor = mode.GetLane(note.Data.Lane).color;
+                if (SelectedNoteIds != null && SelectedNoteIds.Contains(note.Id))
+                {
+                    noteColor = new Color(1f, .7f, .18f);
+                }
+
                 AddRect(
                     vertices,
                     NoteBounds(
@@ -190,7 +206,7 @@ namespace RhythmDojo.UI
                         tempo.BeatAtTime(note.Data.StartTime),
                         tempo.BeatAtTime(note.Data.EndTime)
                     ),
-                    mode.GetLane(note.Data.Lane).color
+                    noteColor
                 );
             }
 
@@ -201,6 +217,12 @@ namespace RhythmDojo.UI
                     NoteBounds(previewLane, previewStart, previewEnd),
                     mode.GetLane(previewLane).color * new Color(1, 1, 1, 0.55f)
                 );
+            }
+
+            foreach (var note in previewNotes)
+            {
+                AddRect(vertices, NoteBounds(note.Lane, tempo.BeatAtTime(note.StartTime),
+                    tempo.BeatAtTime(note.EndTime)), new Color(1f, .7f, .18f, .55f));
             }
 
             if (PlayheadTime.HasValue)

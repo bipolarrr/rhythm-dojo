@@ -16,6 +16,8 @@ namespace RhythmDojo.UI
             confirmQuit,
             cancelQuit;
         public bool alwaysVisibleMenu;
+        public Button chartEditor;
+        public Button chartWorkspace;
         public CanvasGroup menuPanel;
         public Vector2 logoOpenPosition = new Vector2(-330, 0);
         public Vector2 menuOpenPosition = new Vector2(200, 0);
@@ -62,6 +64,11 @@ namespace RhythmDojo.UI
                 throw new InvalidOperationException("Main menu view references missing.");
             }
 
+            if (!chartEditor)
+            {
+                throw new InvalidOperationException("Chart editor button missing.");
+            }
+
             if (!entrance || !logoGroup || !logoArtwork)
             {
                 throw new InvalidOperationException("Dojo entrance references missing.");
@@ -75,6 +82,11 @@ namespace RhythmDojo.UI
 
         public void SetMenuInteractable(bool value)
         {
+            chartEditor.interactable = value;
+            if (chartWorkspace)
+            {
+                chartWorkspace.interactable = value;
+            }
             logo.interactable =
                 start.interactable =
                 settings.interactable =

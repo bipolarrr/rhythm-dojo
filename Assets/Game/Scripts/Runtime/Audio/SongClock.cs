@@ -15,6 +15,17 @@ namespace RhythmDojo.Audio
         private bool paused;
         private double pausedSongTime;
         private float playbackVolume;
+        private double editorStartPosition;
+
+        public void SetEditorStartPosition(double time)
+        {
+            if (!double.IsFinite(time) || time < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(time));
+            }
+
+            editorStartPosition = time;
+        }
 
         public double ScheduledStartDspTime { get; private set; }
         public bool Running { get; private set; }
@@ -57,6 +68,7 @@ namespace RhythmDojo.Audio
             }
 
             Stop();
+            editorStartPosition = 0;
             settings.Validate();
             source.clip = clip;
             playbackVolume = settings.Volume;
@@ -87,8 +99,11 @@ namespace RhythmDojo.Audio
             RefreshVolume();
             paused = false;
             source.Stop();
-            ScheduledStartDspTime = AudioSettings.dspTime + lead;
-            source.PlayScheduled(ScheduledStartDspTime);
+            double scheduledAudio = AudioSettings.dspTime + lead;
+            ScheduledStartDspTime = scheduledAudio - editorStartPosition;
+            source.timeSamples = Math.Min(source.clip.samples - 1,
+                (int)(editorStartPosition * source.clip.frequency));
+            source.PlayScheduled(scheduledAudio);
             Running = true;
         }
 

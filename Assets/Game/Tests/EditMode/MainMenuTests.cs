@@ -39,6 +39,13 @@ namespace RhythmDojo.Tests
                     .Single();
                 Assert.That(view.title.text, Is.EqualTo("리듬 도장"));
                 Assert.That(view.startPrompt.text, Is.EqualTo("두드려 시작"));
+                Assert.That(view.chartEditor.GetComponentInChildren<UnityEngine.UI.Text>().text,
+                    Is.EqualTo("채보 에디터"));
+                Assert.That(view.chartWorkspace, Is.Null);
+                var chartEditorRect = (RectTransform)view.chartEditor.transform;
+                Assert.That(chartEditorRect.anchorMin, Is.EqualTo(new Vector2(1f, 0f)));
+                Assert.That(chartEditorRect.pivot, Is.EqualTo(new Vector2(1f, 0f)));
+                Assert.That(view.chartEditor.transform.parent, Is.EqualTo(view.transform));
                 Assert.That(view.title.rectTransform.parent, Is.EqualTo(view.logo.transform));
                 Assert.That(view.title.rectTransform.anchorMin, Is.EqualTo(new Vector2(.5f, .5f)));
                 Assert.That(view.startPrompt.rectTransform.parent, Is.EqualTo(view.logo.transform));

@@ -53,6 +53,7 @@ namespace RhythmDojo.Authoring
         public RectTransform canvas;
         public Text lockLabel;
         public Selectable[] editControls;
+        public bool extendedQuantization;
 
         public void ValidateReferences()
         {

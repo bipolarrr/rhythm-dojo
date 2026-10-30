@@ -97,6 +97,24 @@ namespace RhythmDojo.EditorTools
             view.SetExpansion(0f);
             view.menuPanel.gameObject.SetActive(false);
 
+            view.chartEditor = Button("Chart Editor", canvas.transform, new Color(.48f, .32f, .18f));
+            var chartEditorRect = (RectTransform)view.chartEditor.transform;
+            Anchor(chartEditorRect, new Vector2(1f, 0f), new Vector2(-24f, 24f), new Vector2(240f, 60f));
+            chartEditorRect.pivot = new Vector2(1f, 0f);
+            PixelSongSelectionStyle.Frame(chartEditorRect, new Color(.48f, .32f, .18f), 6);
+            var chartEditorCaption = Label("Caption", view.chartEditor.transform, "채보 에디터", font, 26);
+            chartEditorCaption.color = new Color(1f, .88f, .64f);
+            chartEditorCaption.raycastTarget = false;
+            Stretch(chartEditorCaption.rectTransform);
+            logoNavigation.selectOnDown = view.chartEditor;
+            view.logo.navigation = logoNavigation;
+            var chartEditorNavigation = view.chartEditor.navigation;
+            chartEditorNavigation.mode = Navigation.Mode.Explicit;
+            chartEditorNavigation.selectOnUp = view.logo;
+            view.chartEditor.navigation = chartEditorNavigation;
+
+            view.chartWorkspace = null;
+
             var overlay = Panel("Quit Popup", canvas.transform, new Color(0, 0, 0, .75f));
             Stretch(overlay.rectTransform);
             view.quitPopup = overlay.gameObject;
