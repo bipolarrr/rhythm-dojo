@@ -43,6 +43,10 @@ namespace RhythmDojo.Core
         {
             Validate();
 
+            // Discover saved songs and initialize audio/graphics before the title
+            // becomes interactive, rather than doing that work on the Play click.
+            var flow = AppFlowController.Create(gameSettings);
+
             var presentation =
                 RhythmDojo.Services.PresentationPreferences.Current
                 ?? RhythmDojo.Services.PresentationPreferences.Load();
@@ -57,6 +61,7 @@ namespace RhythmDojo.Core
             }
 
             screen.Initialize(new MainMenuActions(gameSettings, screen.GetComponent<MainMenuView>()), music);
+            flow.PrepareSelection();
         }
     }
 }

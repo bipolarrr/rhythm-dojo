@@ -48,6 +48,7 @@ namespace RhythmDojo.UI
         private Func<SongProject, ISongDocumentLoader> loaderFactory;
         private EditorSession observed;
         private bool leavingForPlaytest;
+        private bool leavingForMainMenu;
         private Action saved;
 
         [SerializeField] private string pupaAudioPath = "LocalAudio/PUPA.wav";
@@ -261,6 +262,31 @@ namespace RhythmDojo.UI
                 );
             });
 
+        public void ReturnToMainMenu() =>
+            RunAsync(async () =>
+            {
+                const string titleScenePath = "Assets/Game/Scenes/Title.unity";
+                if (!UnityEngine.Application.CanStreamedLevelBeLoaded(titleScenePath))
+                {
+                    throw new InvalidOperationException("Title scene is not registered in Build Settings.");
+                }
+
+                if (screen.Session.IsDirty)
+                {
+                    await screen.Session.SaveAsync(store, lifetime.Token);
+                    saved?.Invoke();
+                }
+
+                lifetime.Token.ThrowIfCancellationRequested();
+                returningSession = null;
+                if (UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(titleScenePath) == null)
+                {
+                    throw new InvalidOperationException("Cannot load Title.");
+                }
+
+                leavingForMainMenu = true;
+            });
+
         public void Load() =>
             RunAsync(async () =>
             {
@@ -462,7 +488,7 @@ namespace RhythmDojo.UI
             }
             finally
             {
-                if (this && !leavingForPlaytest)
+                if (this && !leavingForPlaytest && !leavingForMainMenu)
                 {
                     screen.IsBusy = false;
                     controls.interactable = true;

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -37,6 +38,22 @@ namespace RhythmDojo.Core
         private ModalInputScope settingsInputScope;
         private SettingsScreen settingsPopup;
         private Action<string> returned;
+        private bool preparingSelection;
+        private bool selectionPreparationReady;
+        private bool activatePreparedSelection;
+        private Scene preparedSelectionScene;
+        private Scene entrancePriorScene;
+        private SongSelectionScreen preparedSelectionScreen;
+        private GameObject preparationPreviousFocus;
+        private CanvasGroup selectionPreparationGroup;
+        private bool preparationInteractable;
+        private bool preparationRaycasts;
+        private readonly List<Behaviour> preparedSelectionBehaviours = new List<Behaviour>();
+        private readonly List<Canvas> preparedSelectionCanvases = new List<Canvas>();
+        private readonly List<int> preparedSelectionOrders = new List<int>();
+
+        public bool IsSelectionPrepared => selectionPreparationReady && preparedSelectionScene.isLoaded;
+
         public GameSettings Settings => settings;
 
         public SongLibrary Library { get; private set; }
@@ -173,6 +190,16 @@ namespace RhythmDojo.Core
 
         private void SceneLoaded(Scene scene, LoadSceneMode mode)
         {
+            if (scene.path != SelectionPath && scene.path != "Assets/Game/Scenes/Title.unity")
+            {
+                ClearSelectionPreparation();
+            }
+            if (scene.path == SelectionPath && preparingSelection)
+            {
+                preparedSelectionScene = scene;
+                SuspendPreparedSelection(scene);
+                return;
+            }
             Transitioning = false;
 
             if (scene.path == GameplayPath && CurrentRequest != null)
@@ -439,6 +466,171 @@ namespace RhythmDojo.Core
             Load(SelectionPath);
         }
 
+        public void PrepareSelection()
+        {
+            if (preparingSelection || IsSelectionPrepared)
+            {
+                return;
+            }
+            if (SceneManager.GetActiveScene().path != "Assets/Game/Scenes/Title.unity")
+            {
+                return;
+            }
+
+            ClearSelectionPreparation();
+            preparingSelection = true;
+            try
+            {
+                if (SceneManager.LoadSceneAsync(SelectionPath, LoadSceneMode.Additive) == null)
+                {
+                    throw new InvalidOperationException("Cannot prepare song selection.");
+                }
+            }
+            catch
+            {
+                preparingSelection = false;
+                throw;
+            }
+        }
+
+        private void SuspendPreparedSelection(Scene scene)
+        {
+            if (EventSystem.current)
+            {
+                preparationPreviousFocus = EventSystem.current.currentSelectedGameObject;
+            }
+            foreach (var root in scene.GetRootGameObjects())
+            {
+                foreach (var canvas in root.GetComponentsInChildren<Canvas>(true))
+                {
+                    if (!canvas.isRootCanvas)
+                    {
+                        continue;
+                    }
+                    preparedSelectionCanvases.Add(canvas);
+                    preparedSelectionOrders.Add(canvas.sortingOrder);
+                    // Render behind the opaque title so fonts, meshes and materials
+                    // really warm up. Disabling the canvas would defer that work.
+                    canvas.sortingOrder = -10000;
+                }
+                foreach (var behaviour in root.GetComponentsInChildren<Behaviour>(true))
+                {
+                    if (!behaviour.enabled)
+                    {
+                        continue;
+                    }
+                    bool input = behaviour is EventSystem || behaviour is GraphicRaycaster;
+                    bool output = behaviour is Camera || behaviour is AudioListener;
+                    if (input || output || behaviour is SongSelectionScreen)
+                    {
+                        preparedSelectionBehaviours.Add(behaviour);
+                        behaviour.enabled = false;
+                    }
+                }
+                var screen = root.GetComponentInChildren<SongSelectionScreen>(true);
+                if (screen)
+                {
+                    preparedSelectionScreen = screen;
+                    selectionPreparationGroup = screen.GetComponent<CanvasGroup>();
+                    if (!selectionPreparationGroup)
+                    {
+                        selectionPreparationGroup = screen.gameObject.AddComponent<CanvasGroup>();
+                    }
+                    preparationInteractable = selectionPreparationGroup.interactable;
+                    preparationRaycasts = selectionPreparationGroup.blocksRaycasts;
+                    selectionPreparationGroup.interactable = false;
+                    selectionPreparationGroup.blocksRaycasts = false;
+                }
+            }
+        }
+
+        public void SelectionInitialized(SongSelectionScreen screen)
+        {
+            if (!preparingSelection || screen != preparedSelectionScreen)
+            {
+                DojoEntranceTransition.SelectionReady(screen);
+                return;
+            }
+
+            if (EventSystem.current && preparationPreviousFocus)
+            {
+                EventSystem.current.SetSelectedGameObject(preparationPreviousFocus);
+            }
+            StartCoroutine(FinishSelectionPreparation());
+        }
+
+        private IEnumerator FinishSelectionPreparation()
+        {
+            Canvas.ForceUpdateCanvases();
+            yield return null;
+            Canvas.ForceUpdateCanvases();
+            yield return null;
+            if (!preparedSelectionScreen || !preparedSelectionScene.isLoaded)
+            {
+                ClearSelectionPreparation();
+                yield break;
+            }
+
+            preparingSelection = false;
+            selectionPreparationReady = true;
+            if (activatePreparedSelection)
+            {
+                ActivatePreparedSelection();
+            }
+        }
+
+        private void ActivatePreparedSelection()
+        {
+            var priorScene = entrancePriorScene;
+            foreach (var root in priorScene.GetRootGameObjects())
+            {
+                foreach (var behaviour in root.GetComponentsInChildren<Behaviour>(true))
+                {
+                    if (behaviour is EventSystem || behaviour is AudioListener)
+                    {
+                        behaviour.enabled = false;
+                    }
+                }
+            }
+            foreach (var behaviour in preparedSelectionBehaviours)
+            {
+                if (behaviour)
+                {
+                    behaviour.enabled = true;
+                }
+            }
+            selectionPreparationGroup.interactable = preparationInteractable;
+            selectionPreparationGroup.blocksRaycasts = preparationRaycasts;
+            // Hide entrance panels and block input before bringing the warmed canvas forward.
+            DojoEntranceTransition.SelectionReady(preparedSelectionScreen);
+            for (int i = 0; i < preparedSelectionCanvases.Count; i++)
+            {
+                preparedSelectionCanvases[i].sortingOrder = preparedSelectionOrders[i];
+            }
+            SceneManager.SetActiveScene(preparedSelectionScene);
+            var cleanup = SceneManager.UnloadSceneAsync(priorScene);
+            if (DojoEntranceTransition.Active)
+            {
+                DojoEntranceTransition.Active.WaitForSceneCleanup(cleanup);
+            }
+            Transitioning = false;
+            ClearSelectionPreparation();
+        }
+
+        private void ClearSelectionPreparation()
+        {
+            preparingSelection = false;
+            selectionPreparationReady = false;
+            activatePreparedSelection = false;
+            preparedSelectionScene = default;
+            preparedSelectionScreen = null;
+            selectionPreparationGroup = null;
+            preparationPreviousFocus = null;
+            preparedSelectionBehaviours.Clear();
+            preparedSelectionCanvases.Clear();
+            preparedSelectionOrders.Clear();
+        }
+
         public void ShowTitle()
         {
             if (Transitioning)
@@ -578,6 +770,11 @@ namespace RhythmDojo.Core
 
             try
             {
+                if (path == SelectionPath && DojoEntranceTransition.Active)
+                {
+                    LoadEntranceSelection(path);
+                    return;
+                }
                 if (SceneManager.LoadSceneAsync(path, LoadSceneMode.Single) == null)
                 {
                     throw new InvalidOperationException("Cannot load scene: " + path);
@@ -586,6 +783,70 @@ namespace RhythmDojo.Core
             catch
             {
                 Transitioning = false;
+                throw;
+            }
+        }
+
+        private void LoadEntranceSelection(string path)
+        {
+            var priorScene = SceneManager.GetActiveScene();
+            if (preparingSelection || IsSelectionPrepared)
+            {
+                entrancePriorScene = priorScene;
+                activatePreparedSelection = true;
+                if (IsSelectionPrepared)
+                {
+                    ActivatePreparedSelection();
+                }
+                return;
+            }
+            var disabled = new System.Collections.Generic.List<Behaviour>();
+            foreach (var root in priorScene.GetRootGameObjects())
+            {
+                foreach (var behaviour in root.GetComponentsInChildren<Behaviour>(true))
+                {
+                    if (!behaviour.enabled)
+                    {
+                        continue;
+                    }
+                    if (behaviour is UnityEngine.EventSystems.EventSystem || behaviour is AudioListener)
+                    {
+                        disabled.Add(behaviour);
+                        behaviour.enabled = false;
+                    }
+                }
+            }
+
+            try
+            {
+                // Additive loading avoids the automatic unused-asset collection of a
+                // single-scene replacement. Keep the title camera behind the overlay
+                // until selection has its own camera, then unload the hidden title.
+                var operation = SceneManager.LoadSceneAsync(path, LoadSceneMode.Additive);
+                if (operation == null)
+                {
+                    throw new InvalidOperationException("Cannot load scene: " + path);
+                }
+                operation.completed += _ =>
+                {
+                    var scene = SceneManager.GetSceneByPath(path);
+                    SceneManager.SetActiveScene(scene);
+                    var cleanup = SceneManager.UnloadSceneAsync(priorScene);
+                    if (DojoEntranceTransition.Active)
+                    {
+                        DojoEntranceTransition.Active.WaitForSceneCleanup(cleanup);
+                    }
+                };
+            }
+            catch
+            {
+                foreach (var behaviour in disabled)
+                {
+                    if (behaviour)
+                    {
+                        behaviour.enabled = true;
+                    }
+                }
                 throw;
             }
         }

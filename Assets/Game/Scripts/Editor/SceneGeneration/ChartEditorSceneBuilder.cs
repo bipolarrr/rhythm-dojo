@@ -244,6 +244,7 @@ namespace RhythmDojo.EditorTools
                     "Assets/InputSystem_Actions.inputactions"
                 )
             );
+            UiFontSettings.ApplyTo(canvas.transform);
             GameSceneValidator.Validate(scene);
 
             if (!EditorSceneManager.SaveScene(scene, ScenePath))
@@ -283,10 +284,29 @@ namespace RhythmDojo.EditorTools
                     canvas.transform,
                     "",
                     new Vector2(1060, -12),
-                    new Vector2(210, 30),
-                    18
+                    new Vector2(100, 30),
+                    14
                 )
             );
+
+            var returnToMainMenu = UiElements.Button(
+                "Showcase Main Menu",
+                canvas.transform,
+                "메인으로",
+                Vector2.zero,
+                new Vector2(100, 34)
+            );
+            var returnToMainMenuRect = (RectTransform)returnToMainMenu.transform;
+            returnToMainMenuRect.anchorMin = Vector2.one;
+            returnToMainMenuRect.anchorMax = Vector2.one;
+            returnToMainMenuRect.pivot = Vector2.one;
+            returnToMainMenuRect.anchoredPosition = new Vector2(-12, -9);
+            PixelSongSelectionStyle.Frame(returnToMainMenuRect, new Color(.48f, .32f, .18f), 4);
+            var returnToMainMenuLabel = returnToMainMenu.GetComponentInChildren<Text>();
+            returnToMainMenuLabel.font = AssetDatabase.LoadAssetAtPath<Font>(MainMenuLayoutBuilder.FontPath);
+            returnToMainMenuLabel.fontSize = 17;
+            returnToMainMenuLabel.color = new Color(1f, .90f, .70f);
+            UnityEventTools.AddPersistentListener(returnToMainMenu.onClick, menu.ReturnToMainMenu);
 
             var file = MenuPanel("File Panel", canvas.transform, 490);
             var settings = MenuPanel("Settings Panel", canvas.transform, 470);

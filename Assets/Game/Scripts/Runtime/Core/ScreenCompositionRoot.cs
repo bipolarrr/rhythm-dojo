@@ -82,7 +82,7 @@ namespace RhythmDojo.Core
                     flow.HardMode,
                     flow.Rules
                 );
-                DojoEntranceTransition.SelectionReady(selection);
+                flow.SelectionInitialized(selection);
             }
 
             if (audioSettings)

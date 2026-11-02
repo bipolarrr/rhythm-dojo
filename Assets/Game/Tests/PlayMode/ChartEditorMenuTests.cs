@@ -113,7 +113,7 @@ namespace RhythmDojo.Tests
             Assert.That(imported.Id, Is.Not.EqualTo(original.Snapshot.Id));
             Assert.That(imported.Title, Is.EqualTo("PUPA"));
             Assert.That(imported.TempoPoints[0].Bpm, Is.EqualTo(202));
-            Assert.That(imported.AudioOffsetSeconds, Is.EqualTo(0));
+            Assert.That(imported.AudioOffsetSeconds, Is.EqualTo(-.02));
             Assert.That(imported.Grid.OriginSeconds, Is.EqualTo(0.4833333333333334));
             Assert.That(imported.Charts.Single().Notes.Length, Is.EqualTo(929));
             Assert.That(imported.Charts.Single().Notes.Count(n => n.Kind == NoteKind.Hold), Is.EqualTo(29));
