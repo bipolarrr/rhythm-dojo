@@ -1121,7 +1121,14 @@ namespace RhythmDojo.UI
 
         public void ResumeAfterModal()
         {
+            // Presentation can lease an unbound screen before composition initializes it.
+            if (lifetime == null)
+            {
+                return;
+            }
+
             RefreshMode();
+            FocusSelected();
 
             var song = selection.Library.Find(selection.SelectedSongId);
 

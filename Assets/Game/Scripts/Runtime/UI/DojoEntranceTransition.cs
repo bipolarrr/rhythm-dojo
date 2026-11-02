@@ -21,9 +21,7 @@ namespace RhythmDojo.UI
         private Font font;
         private AudioSource audioSource;
         private AudioClip slide;
-        private bool selectionWasEnabled;
-        private bool priorInteractable;
-        private bool priorRaycasts;
+        private InputStateScope selectionInputScope;
         private RectTransform[] selectionPanels;
         private CanvasGroup[] panelGroups;
         private float[] priorAlphas;
@@ -99,8 +97,12 @@ namespace RhythmDojo.UI
             }
 
             Active.selection = screen;
-            Active.selectionWasEnabled = screen.enabled;
-            screen.enabled = false;
+            if (Active.selectionInputScope != null)
+            {
+                return;
+            }
+            Active.selectionInputScope = new InputStateScope();
+            Active.selectionInputScope.Suspend(screen);
             var group = screen.GetComponent<CanvasGroup>();
             if (!group)
             {
@@ -108,10 +110,7 @@ namespace RhythmDojo.UI
             }
 
             Active.selectionGroup = group;
-            Active.priorInteractable = group.interactable;
-            Active.priorRaycasts = group.blocksRaycasts;
-            group.interactable = false;
-            group.blocksRaycasts = false;
+            Active.selectionInputScope.Block(group);
             Active.PrepareSelectionPanels();
             if (Active.recoveryInput)
             {
@@ -248,6 +247,16 @@ namespace RhythmDojo.UI
             }
         }
 
+        public void Fail()
+        {
+            if (Failed)
+            {
+                return;
+            }
+            StopAllCoroutines();
+            ShowFailure();
+        }
+
         private void ShowFailure()
         {
             Failed = true;
@@ -313,16 +322,8 @@ namespace RhythmDojo.UI
                 raycaster.enabled = false;
             }
             SetSelectionReveal(1f);
-            if (selectionGroup)
-            {
-                selectionGroup.interactable = priorInteractable;
-                selectionGroup.blocksRaycasts = priorRaycasts;
-            }
-
-            if (selection)
-            {
-                selection.enabled = selectionWasEnabled;
-            }
+            selectionInputScope?.Dispose();
+            selectionInputScope = null;
         }
 
         private void OnDestroy()

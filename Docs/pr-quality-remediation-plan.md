@@ -93,18 +93,20 @@
 - 재현: 기존 크기와 작은 크기의 artwork 프레임을 비교한다.
 - 결정/범위: 두 로더를 유지하며 importer·sprite 생성·저장을 Editor 공통 헬퍼로 이동한다. 호출자가 crop/border를 명시하고 GUID/meta를 보존한다. PixelDojoFrameGraphic artwork는 Image.Type.Sliced와 중앙/테두리 tint 레이어를 사용하며 절차적 경로를 유지한다. UiFontSettings.Apply/ApplyTo의 글꼴 결정을 공유한다. 빌더 수정 후 영향받는 씬/프리팹만 재생성한다.
 - 검증: 테두리/중앙 tint/마스크/클릭 영역 시각 비교, 타이포그래피·레이아웃·씬 재생성 및 GUID 유지.
-- 커밋: 본 작업 커밋; 증거: Logs/pr-quality-remediation/task6*.
+- 커밋: `854318a`; 증거: Logs/pr-quality-remediation/task6*.
 - 중간 결과: 기존 렌더링 기준 1/1 통과. 첫 구현 Frame 4/4, 에셋 3/3, Typography 9/9 통과. 실제 SettingsPanel/Control의 1200×700 RGB 비교에서 변경 픽셀 0. 독립 검토가 Graphic.OnValidate → SetAllDirty → 자식 생성 경고를 재현하여 수명 수정 중이다. 로그를 무시하지 않고 Inspector 검증 경로 회귀를 추가한다. 증거: Logs/pr-quality-remediation/task6*.
 
 - 최종 결과: Frame 5/5(Inspector 회귀 포함), 에셋 3/3, Typography 9/9, SceneRegeneration 2/2, Settings 동작 1/1, PauseFlow 2/2 통과. 수정 후 RGB 변경 픽셀 0, 재컴파일·씬 복원·재생성에서 기존 검증 경고 0건. Settings/Gameplay/공용 팝업만 저장 변경으로 포함하고 기존 meta/GUID 유지. 독립 재검토 수정 요구 없음. PlayMode 종료·Editor ready 확인. 다음 행동: 작업 7 씬 준비 수명과 입력 차단.
 
-### 작업 7 — 씬 준비 수명·입력 차단: 대기
+### 작업 7 — 씬 준비 수명·입력 차단: 완료
 
 - 재현: 느린 준비 중 에디터 이동, 모달과 준비 완료 중첩, 중복 Play, 실패 후 재시도.
 - 결정/범위: ModalInputScope의 상태 보존/복원을 추출하여 중첩 소유자의 마지막 해제 때 복원한다. 준비 객체가 로드 작업/씬/차단/Canvas 순서/세대를 소유한다. 사전 준비와 클릭 로딩은 같은 활성화 경로를 사용한다. AppFlow는 이동을 조율한다. 취소 불가 로드는 무효화하고 늦은 씬은 서비스 연결/활성화 없이 언로드한다. 실패/시간 초과/이탈/재진입 상태·포커스를 복원한다. 문 연출은 초기화와 이전 씬 정리 완료 신호를 받는다.
 - 검증: 타이틀 재진입, 준비 없는 진입, 직접 씬 실행 포함; 관련 화면 테스트+Smoke, 잔류 씬/EventSystem/AudioListener/차단 상태 없음.
 - 커밋/증거: 없음 / 미실행.
-- 미해결/다음 행동: 작업 6 완료 후 수명 경로 추적.
+- 재현 결과: 기존 ModalInputScope 두 개 중 첫 소유자만 Dispose해도 SongSelectionScreen.enabled가 true로 복원돼 실패. task7-red.json에 보존. 다음 행동: 공유 상태 수명과 준비 씬 소유 객체 구현, 늦은 초기화 차단 및 회귀 테스트.
+
+- 최종 결과: ScenePreparationFlow 9/9, ProjectLibraryFlow 3/3, MainMenuFlow 19/19, Smoke 4/4 통과. 처음 타이틀 테스트의 미초기화 화면 복원 예외 2건과 독립 검토의 null 포커스 복원 지적을 수정하고 회귀를 추가했다. 초기 실패 증거를 유지하며 로그를 무시하지 않았다. 독립 재검토 수정 요구 없음. 매 실행 후 PlayMode 종료·Editor ready 확인. 씬 에셋 변경 없음. 증거: Logs/pr-quality-remediation/task7*. 커밋: 본 작업 커밋. 다음 행동: 기준 실패/외부 WAV fixture와 Windows 검증 도구를 정비한 뒤 최종 Foundation.
 
 ### 최종 통합 검증: 대기
 
@@ -115,3 +117,4 @@
 - 커밋/증거: 없음 / 미실행.
 - 미해결: 기준 BuildPlayer의 명시 scenes 목록에 Results가 누락돼 있다. EditorBuildSettings와 불일치하며 실제 플레이어 검증 전에 확인한다.
 - 다음 행동: 작업 7까지 완료 후 전체 검증·최종 검토·장부 마감.
+

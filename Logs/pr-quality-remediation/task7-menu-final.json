@@ -1,0 +1,162 @@
+{
+  "success": true,
+  "command": "command test_status",
+  "data": {
+    "command": "test_status",
+    "parameters": {},
+    "result": {
+      "status": "completed",
+      "duration": 57,
+      "summary": {
+        "total": 19,
+        "passed": 19,
+        "failed": 0,
+        "skipped": 0,
+        "inconclusive": 0
+      },
+      "results": [
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.BootstrapFallbackStillStartsWithoutATitleView",
+          "Status": "Passed",
+          "Duration": 1.9789456,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.BreakingBoardDefersActionAndBlocksOtherButtons",
+          "Status": "Passed",
+          "Duration": 2.0245568,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.CaptureMenuAndKoreanQuitPopup",
+          "Status": "Passed",
+          "Duration": 3.9141422,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.EditorStaysBehindDoorsAndOpensFromInsideTheDojo",
+          "Status": "Passed",
+          "Duration": 4.131898,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.EntranceTimeoutOffersRecoveryAndCleansUp",
+          "Status": "Passed",
+          "Duration": 2.1110202,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.EntranceWaitsForReadyAndRestoresSelectionInput",
+          "Status": "Passed",
+          "Duration": 4.9319127,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.LogoCanCollapseMenuAndHiddenButtonsCannotStart",
+          "Status": "Passed",
+          "Duration": 2.9709877,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.LogoExpandsMenuAndPlayStartsOnceWithoutDuplicateListeners",
+          "Status": "Passed",
+          "Duration": 2.0895586,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.PlaqueRejectsCornersAndKeyboardCanExpandAndStart",
+          "Status": "Passed",
+          "Duration": 4.1167568,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.PlayDismissesMenuImmediatelyWithoutWaitingForBoardDelay",
+          "Status": "Passed",
+          "Duration": 1.7957397,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.PlayOpensDoorsWithLogoHalvesAttachedUntilFullyOutsideTheDoorway",
+          "Status": "Passed",
+          "Duration": 3.0113835,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.QuitPopupBlocksBackgroundAndNoRestoresMenu",
+          "Status": "Passed",
+          "Duration": 3.036869,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.SceneLoadingCompletesBeforeDoorAnimationStarts",
+          "Status": "Passed",
+          "Duration": 4.4832846,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.SettingsRequestsSettingsWithoutStartingTheGame",
+          "Status": "Passed",
+          "Duration": 2.1100862,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.SlidingDoorsRevealDummiesAndReverseWithoutStartingEarly",
+          "Status": "Passed",
+          "Duration": 3.8403326,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.StartLoadsBootstrapThenExistingSongSelection",
+          "Status": "Passed",
+          "Duration": 4.481723,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.TitlePreparesSelectionWithoutShowingItOrStealingInput",
+          "Status": "Passed",
+          "Duration": 1.5675573,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.TitleSettingsBackReturnsToTitle",
+          "Status": "Passed",
+          "Duration": 2.1350656,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.YesRequestsQuitExactlyOnceWithoutStarting",
+          "Status": "Passed",
+          "Duration": 2.2065169,
+          "Message": null,
+          "StackTrace": null
+        }
+      ]
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "C:\\Users\\song\\RhythmDojo-pr-quality"
+    },
+    "success": true
+  },
+  "errors": [],
+  "warnings": []
+}

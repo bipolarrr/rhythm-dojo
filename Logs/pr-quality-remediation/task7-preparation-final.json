@@ -1,0 +1,92 @@
+{
+  "success": true,
+  "command": "command test_status",
+  "data": {
+    "command": "test_status",
+    "parameters": {},
+    "result": {
+      "status": "completed",
+      "duration": 18.24,
+      "summary": {
+        "total": 9,
+        "passed": 9,
+        "failed": 0,
+        "skipped": 0,
+        "inconclusive": 0
+      },
+      "results": [
+        {
+          "FullName": "RhythmDojo.Tests.ScenePreparationFlowTests.ClosingModalRestoresAnEmptyFocusAfterSelectionResume",
+          "Status": "Passed",
+          "Duration": 1.4625707,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ScenePreparationFlowTests.DelayedPreparationPreservesAnEmptyTitleFocus",
+          "Status": "Passed",
+          "Duration": 1.4700192,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ScenePreparationFlowTests.DisposingOwnerDrainsOutstandingLoadWithoutInitializingIt",
+          "Status": "Passed",
+          "Duration": 1.3282861,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ScenePreparationFlowTests.FinalOwnerRestoresOriginalStatesAndNotifiesOnceEvenAfterAnotherParticipantThrows",
+          "Status": "Passed",
+          "Duration": 0.8559658,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ScenePreparationFlowTests.InvalidatedLoadNeverInitializesAfterEditorExit",
+          "Status": "Passed",
+          "Duration": 1.8194707,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ScenePreparationFlowTests.LoadFailureAllowsColdEntranceRetry",
+          "Status": "Passed",
+          "Duration": 4.163514,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ScenePreparationFlowTests.PopupKeepsFocusWhilePreparationFinishesThenEntranceRestoresSelectionFocus",
+          "Status": "Passed",
+          "Duration": 4.0971931,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ScenePreparationFlowTests.ReentryQueuesNewGenerationUntilInvalidatedLoadIsDrained",
+          "Status": "Passed",
+          "Duration": 1.3843778,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ScenePreparationFlowTests.TimeoutDiscardsUninitializedSceneAndAllowsRetry",
+          "Status": "Passed",
+          "Duration": 1.6028285,
+          "Message": null,
+          "StackTrace": null
+        }
+      ]
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "C:\\Users\\song\\RhythmDojo-pr-quality"
+    },
+    "success": true
+  },
+  "errors": [],
+  "warnings": []
+}

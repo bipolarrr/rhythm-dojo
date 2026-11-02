@@ -133,6 +133,32 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        public IEnumerator NestedModalScopesKeepInputBlockedUntilTheLastOwnerCloses()
+        {
+            var screen = Object.FindFirstObjectByType<SongSelectionScreen>();
+            var focus = UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject;
+            var first = new ModalInputScope(screen.gameObject.scene);
+            var second = new ModalInputScope(screen.gameObject.scene);
+            try
+            {
+                Assert.That(screen.enabled, Is.False);
+                first.Dispose();
+                Assert.That(screen.enabled, Is.False, "The second owner must keep background input blocked.");
+                yield return Press(UnityEngine.InputSystem.Key.Enter);
+                Assert.That(Object.FindFirstObjectByType<AppFlowController>().Transitioning, Is.False);
+                second.Dispose();
+                Assert.That(screen.enabled, Is.True);
+                Assert.That(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject,
+                    Is.EqualTo(focus));
+            }
+            finally
+            {
+                first.Dispose();
+                second.Dispose();
+            }
+        }
+
+        [UnityTest]
         public IEnumerator ModalScopeRestoresInputAndFocusAfterOpeningFailureAndDispose()
         {
             var screen = Object.FindFirstObjectByType<SongSelectionScreen>();

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
@@ -14,19 +13,16 @@ namespace RhythmDojo.UI
 
     public sealed class ModalInputScope : IDisposable
     {
-        private readonly List<Behaviour> suspended = new List<Behaviour>();
-        private readonly GameObject focus;
         private readonly Scene scene;
+        private readonly InputStateScope state;
         private bool disposed;
 
         public static ModalInputScope Open(Scene scene, Action open)
         {
             var scope = new ModalInputScope(scene);
-
             try
             {
                 open();
-
                 return scope;
             }
             catch
@@ -39,34 +35,21 @@ namespace RhythmDojo.UI
         public ModalInputScope(Scene scene)
         {
             this.scene = scene;
-
-            if (EventSystem.current)
-            {
-                focus = EventSystem.current.currentSelectedGameObject;
-            }
-            else
-            {
-                focus = null;
-            }
-
+            state = new InputStateScope(scene);
             try
             {
                 foreach (var root in scene.GetRootGameObjects())
                 {
-                    foreach (var component in root.GetComponentsInChildren<Behaviour>())
+                    foreach (var component in root.GetComponentsInChildren<Behaviour>(true))
                     {
-                        if (component.enabled)
+                        switch (component)
                         {
-                            switch (component)
-                            {
-                                case IModalInputParticipant _:
-                                case GraphicRaycaster _:
-                                case EventSystem _:
-                                case BaseInputModule _:
-                                    suspended.Add(component);
-                                    component.enabled = false;
-                                    break;
-                            }
+                            case IModalInputParticipant _:
+                            case GraphicRaycaster _:
+                            case EventSystem _:
+                            case BaseInputModule _:
+                                state.Suspend(component);
+                                break;
                         }
                     }
                 }
@@ -80,13 +63,18 @@ namespace RhythmDojo.UI
 
         public void Close(Func<AsyncOperation> close, Action completed)
         {
-            // A failed unload leaves the modal and its background input lease intact for retry.
-            var operation =
-                close() ?? throw new InvalidOperationException("Cannot close modal scene.");
+            // A failed unload keeps the background lease intact for retry.
+            var operation = close() ?? throw new InvalidOperationException("Cannot close modal scene.");
             operation.completed += _ =>
             {
-                completed?.Invoke();
-                Dispose();
+                try
+                {
+                    completed?.Invoke();
+                }
+                finally
+                {
+                    Dispose();
+                }
             };
         }
 
@@ -96,35 +84,8 @@ namespace RhythmDojo.UI
             {
                 return;
             }
-
             disposed = true;
-
-            foreach (var component in suspended)
-            {
-                if (!component)
-                {
-                    continue;
-                }
-
-                component.enabled = true;
-
-                if (component is IModalInputParticipant participant)
-                {
-                    participant.ResumeAfterModal();
-                }
-            }
-
-            suspended.Clear();
-
-            if (scene.IsValid() && scene.isLoaded)
-            {
-                SceneManager.SetActiveScene(scene);
-            }
-
-            if (EventSystem.current && focus && focus.activeInHierarchy)
-            {
-                EventSystem.current.SetSelectedGameObject(focus);
-            }
+            state.Dispose();
         }
     }
 }
