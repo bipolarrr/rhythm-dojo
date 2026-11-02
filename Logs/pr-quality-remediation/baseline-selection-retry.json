@@ -1,0 +1,36 @@
+{
+  "success": true,
+  "command": "command test_status",
+  "data": {
+    "command": "test_status",
+    "parameters": {},
+    "result": {
+      "status": "completed",
+      "duration": 1.49,
+      "summary": {
+        "total": 1,
+        "passed": 0,
+        "failed": 1,
+        "skipped": 0,
+        "inconclusive": 0
+      },
+      "results": [
+        {
+          "FullName": "RhythmDojo.Tests.SongSelectionFlowTests.SongRowsKeyboardSelectionUpdatesSelectedSong",
+          "Status": "Failed",
+          "Duration": 1.4506999,
+          "Message": "  Expected string length 11 but was 36. Strings differ at index 0.\r\n  Expected: \"tempo-pulse\"\r\n  But was:  \"0349e961-3846-4eb0-bf80-63209e44e6e4\"\r\n  -----------^\r\n",
+          "StackTrace": "at RhythmDojo.Tests.SongSelectionFlowTests+<SongRowsKeyboardSelectionUpdatesSelectedSong>d__1.MoveNext () [0x0007b] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\PlayMode\\SongSelectionFlowTests.cs:88\r\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@bd7f943e9647\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\r\n"
+        }
+      ]
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7801,
+      "projectPath": "C:\\Users\\song\\RhythmDojo-pr-quality"
+    },
+    "success": true
+  },
+  "errors": [],
+  "warnings": []
+}

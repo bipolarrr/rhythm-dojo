@@ -1,0 +1,30 @@
+RhythmDojo.Tests.GameplayHudFlowTests.GameplayWindowRendersJudgmentLineBelowCenter
+Unhandled log message: '[Exception] Exception: UnityTest yielded WaitForEndOfFrame, which is not evoked in batchmode.'. Use UnityEngine.TestTools.LogAssert.Expect
+RhythmDojo.Tests.PixelDojoCursorTests.FistMarkWaitsForContactStaysAtTheExtendedPoseAndFadesWhilePaused
+  Expected: True
+  But was:  False
+
+RhythmDojo.Tests.PixelDojoCursorTests.NativeCursorUsesPressedArtworkOnlyWhileLeftButtonIsHeld
+  Expected: not same as <DojoHandrapV5Cursor (UnityEngine.Texture2D)>
+  But was:  <DojoHandrapV5Cursor (UnityEngine.Texture2D)>
+
+RhythmDojo.Tests.PixelDojoCursorTests.PunchFinishesAfterQuickReleaseWhilePaused
+  Expected: not same as <DojoHandrapV5Cursor (UnityEngine.Texture2D)>
+  But was:  <DojoHandrapV5Cursor (UnityEngine.Texture2D)>
+
+RhythmDojo.Tests.PixelDojoCursorTests.RepeatedClicksReuseFramesAndFocusLossRestoresTheNativePointer
+  focus=False, current=126, test=126
+  Expected: 0
+  But was:  0.200000003f
+
+RhythmDojo.Tests.ResultsFlowTests.GameOverDisplaysFailureAndEscapeDuringPlaySkipsResults
+  Scene transition timed out.
+  Expected: less than 402.03774840164397d
+  But was:  402.03896620164403d
+
+RhythmDojo.Tests.SongSelectionFlowTests.SongRowsKeyboardSelectionUpdatesSelectedSong
+  Expected string length 11 but was 36. Strings differ at index 0.
+  Expected: "tempo-pulse"
+  But was:  "0349e961-3846-4eb0-bf80-63209e44e6e4"
+  -----------^
+
