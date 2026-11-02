@@ -1,0 +1,15 @@
+{
+  "started_utc": "2026-11-02T18:46:59.898453+00:00",
+  "finished_utc": "2026-11-02T18:47:02.928624+00:00",
+  "speaker_id": "{0.0.0.00000000}.{99d735ce-8c10-4078-b76e-68ce88b6d5ba}",
+  "speaker_name": "스피커(Realtek High Definition Audio)",
+  "loopback": true,
+  "sample_rate": 48000,
+  "frames": 144000,
+  "peak": 0.047725774347782135,
+  "rms": 0.03373793885111809,
+  "dominant_hz": 440.0,
+  "power_fraction_438_to_442_hz": 0.9999999737035489,
+  "passed": true,
+  "scope": "Windows speaker loopback; does not measure acoustic speaker output or perceived quality."
+}

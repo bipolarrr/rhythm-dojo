@@ -1,0 +1,87 @@
+Mono path[0] = 'C:/Users/song/RhythmDojo-pr-quality/Builds/RemediationProbe/RemediationProbe_Data/Managed'
+Mono config path = 'C:/Users/song/RhythmDojo-pr-quality/Builds/RemediationProbe/MonoBleedingEdge/etc'
+Found 2 interfaces on host : 0) 192.168.0.238 1) 100.83.57.37
+Player connection [32064]  Target information:
+
+Player connection [32064]  * "[IP] 192.168.0.238 [Port] 55000 [Flags] 2 [Guid] 620916159 [EditorId] 4065902287 [Version] 1048832 [Id] WindowsPlayer(2,DESKTOP-8HJ31S9) [Debug] 0 [PackageName] WindowsPlayer [ProjectName] RhythmDojo" 
+
+Player connection [32064]  * "[IP] 100.83.57.37 [Port] 55000 [Flags] 2 [Guid] 620916159 [EditorId] 4065902287 [Version] 1048832 [Id] WindowsPlayer(2,DESKTOP-8HJ31S9) [Debug] 0 [PackageName] WindowsPlayer [ProjectName] RhythmDojo" 
+
+Player connection [32064] Started UDP target info broadcast (1) on [225.0.0.222:54997].
+
+Input System module state changed to: Initialized.
+[Physics::Module] Initialized fallback backend.
+[Physics::Module] Id: 0xdecafbad
+Initialize engine version: 6000.3.23f1 (09d2ecc7fb28)
+[Subsystems] Discovering subsystems at path C:/Users/song/RhythmDojo-pr-quality/Builds/RemediationProbe/RemediationProbe_Data/UnitySubsystems
+[D3D12 Device Filter] Vendor Name: NVIDIA
+[D3D12 Device Filter] Device Name: NVIDIA GeForce RTX 4060
+[D3D12 Device Filter] Driver Version: 32.0.16.1664
+[D3D12 Device Filter] Feature Level: 12.2
+[D3D12 Device Filter] Graphics Memory: 7957 MB
+[D3D12 Device Filter] Processor Count: 16
+[D3D12 Device Filter] Device Type: Discrete
+GfxDevice: creating device client; kGfxThreadingModeSplitJobs
+d3d12: failed to query info queue interface (0x80004002).
+Direct3D:
+    Version:         Direct3D 12 [level 12.2]
+    Renderer:        NVIDIA GeForce RTX 4060 (ID=0x2882)
+    Vendor:          NVIDIA
+    VRAM:            7957 MB
+    App VRAM Budget: 7189 MB
+    Driver:          32.0.16.1664
+Begin MonoManager ReloadAssembly
+- Loaded All Assemblies, in  0.300 seconds
+- Finished resetting the current domain, in  0.003 seconds
+[Physics::Module] Selected backend.
+[Physics::Module] Name: PhysX
+[Physics::Module] Id: 0xf2b8ea05
+[Physics::Module] SDK Version: 4.1.2
+[Physics::Module] Integration Version: 1.0.0
+[Physics::Module] Threading Mode: Multi-Threaded
+<RI> Initializing input.
+Using Windows.Gaming.Input
+UnloadTime: 0.663900 ms
+Unloading 6 Unused Serialized files (Serialized files now loaded: 0)
+UnloadTime: 0.571900 ms
+Unloading 5 unused Assets / (Unknown). Loaded Objects now: 2981.
+Memory consumption went from 135.9 MB to 135.9 MB.
+Total: 1.055400 ms (FindLiveObjects: 0.132700 ms CreateObjectMapping: 0.070300 ms MarkObjects: 0.827800 ms  DeleteObjects: 0.020500 ms)
+
+CaptureScreenshotAsTexture() failed to generate texture! Was method called before the 'end of frame' state was reached?
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at C:/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:35)
+UnityEngine.ScreenCapture:CaptureScreenshotAsTexture (int,UnityEngine.ScreenCapture/StereoScreenCaptureMode)
+UnityEngine.ScreenCapture:CaptureScreenshotAsTexture () (at C:/build/output/unity/unity/Modules/ScreenCapture/ScriptBindings/ScreenCapture.bindings.cs:25)
+RhythmDojo.Tests.RemediationPlayerProbe/<Capture>d__57:MoveNext () (at C:/Users/song/RhythmDojo-pr-quality/Assets/Game/Tests/PlayMode/RemediationPlayerProbeSupport.cs:431)
+RhythmDojo.Tests.RemediationPlayerProbe/<RunChecked>d__38:MoveNext () (at C:/Users/song/RhythmDojo-pr-quality/Assets/Game/Tests/PlayMode/RemediationPlayerProbeSupport.cs:98)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at C:/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+[C:/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs line 35]
+
+There can be only one active Event System.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at C:/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:35)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[]) (at C:/build/output/unity/unity/Runtime/Export/Logging/DebugLogHandler.cs:9)
+UnityEngine.Logger:Log (UnityEngine.LogType,object) (at C:/build/output/unity/unity/Runtime/Export/Logging/Logger.cs:60)
+UnityEngine.Debug:LogWarning (object) (at C:/build/output/unity/unity/Runtime/Export/Debug/Debug.bindings.cs:213)
+UnityEngine.UIElements.UIElementsRuntimeUtility:RegisterEventSystem (UnityEngine.Object) (at C:/build/output/unity/unity/Modules/UIElements/Core/UIElementsRuntimeUtility.cs:229)
+UnityEngine.UIElements.UIToolkitInteroperabilityBridge:OnEnable () (at ./Library/PackageCache/com.unity.ugui@27635d171b1a/Runtime/UGUI/EventSystem/UIElements/UIToolkitInteroperabilityBridge.cs:216)
+UnityEngine.EventSystems.EventSystem:OnEnable () (at ./Library/PackageCache/com.unity.ugui@27635d171b1a/Runtime/UGUI/EventSystem/EventSystem.cs:425)
+UnityEngine.AudioSettings:SetConfiguration (UnityEngine.AudioConfiguration)
+UnityEngine.AudioSettings:Reset (UnityEngine.AudioConfiguration) (at C:/build/output/unity/unity/Modules/Audio/Public/ScriptBindings/Audio.bindings.cs:400)
+RhythmDojo.Tests.RemediationPlayerProbe:<Cleanup>b__55_5 () (at C:/Users/song/RhythmDojo-pr-quality/Assets/Game/Tests/PlayMode/RemediationPlayerProbeSupport.cs:407)
+RhythmDojo.Tests.RemediationPlayerProbe:TryCleanup (System.Action,System.Collections.Generic.List`1<System.Exception>) (at C:/Users/song/RhythmDojo-pr-quality/Assets/Game/Tests/PlayMode/RemediationPlayerProbeSupport.cs:419)
+RhythmDojo.Tests.RemediationPlayerProbe:Cleanup () (at C:/Users/song/RhythmDojo-pr-quality/Assets/Game/Tests/PlayMode/RemediationPlayerProbeSupport.cs:407)
+RhythmDojo.Tests.RemediationPlayerProbe/<Start>d__18:MoveNext () (at C:/Users/song/RhythmDojo-pr-quality/Assets/Game/Tests/PlayMode/RemediationPlayerProbe.cs:72)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at C:/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+(Filename: C:/build/output/unity/unity/Runtime/Export/Debug/Debug.bindings.cs Line: 213)
+
+[Physics::Module] Cleanup current backend.
+[Physics::Module] Id: 0xf2b8ea05
+Input System module state changed to: ShutdownInProgress.
+Input System polling thread exited.
+Input System module state changed to: Shutdown.
+PlayerConnection::Cleanup##utp:{"type":"MemoryLeaks","version":2,"phase":"Immediate","time":1793644635028,"processId":9968,"allocatedMemory":68478,"memoryLabels":[{"Default":136},{"NewDelete":776},{"Thread":7616},{"Manager":15414},{"GfxDevice":2128},{"Audio":752},{"Serialization":520},{"JobScheduler":32768},{"String":412},{"HashMap":5120},{"PoolAlloc":192},{"CloudService":144},{"VR":1872},{"Video":144},{"NativeArray":372},{"Subsystems":96},{"CoreBusinessMetrics":120}]}

@@ -1,0 +1,28 @@
+{
+    "phase": "exercise",
+    "unity": "6000.3.23f1",
+    "platform": "WindowsPlayer",
+    "startedUtc": "2026-11-02T18:37:14.3898976Z",
+    "finishedUtc": "2026-11-02T18:37:14.8485725Z",
+    "step": "finished",
+    "error": "System.InvalidOperationException: Player framebuffer capture exists: title\r\n  at RhythmDojo.Tests.RemediationPlayerProbe.Require (System.Boolean condition, System.String description) [0x00024] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\PlayMode\\RemediationPlayerProbeSupport.cs:164 \r\n  at RhythmDojo.Tests.RemediationPlayerProbe+<Capture>d__57.MoveNext () [0x00047] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\PlayMode\\RemediationPlayerProbeSupport.cs:434 \r\n  at RhythmDojo.Tests.RemediationPlayerProbe+<RunChecked>d__38.MoveNext () [0x000c0] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\PlayMode\\RemediationPlayerProbeSupport.cs:98 \nUnity error during execution or cleanup: CaptureScreenshotAsTexture() failed to generate texture! Was method called before the 'end of frame' state was reached?\nUnityEngine.ScreenCapture:CaptureScreenshotAsTexture ()\nRhythmDojo.Tests.RemediationPlayerProbe/<Capture>d__57:MoveNext () (at C:/Users/song/RhythmDojo-pr-quality/Assets/Game/Tests/PlayMode/RemediationPlayerProbeSupport.cs:431)\nRhythmDojo.Tests.RemediationPlayerProbe/<RunChecked>d__38:MoveNext () (at C:/Users/song/RhythmDojo-pr-quality/Assets/Game/Tests/PlayMode/RemediationPlayerProbeSupport.cs:98)\nUnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr)\n",
+    "editor": false,
+    "success": false,
+    "assertions": 13,
+    "requestedBuffer": 0,
+    "appliedBuffer": 0,
+    "sampleRate": 0,
+    "duration": 0.4620723,
+    "clipPeak": 0.0,
+    "mixerPeak": 0.0,
+    "steps": [
+        {
+            "name": "preferences-backed-up",
+            "detail": "Known string preference keys and existence flags saved before isolation.",
+            "utc": "2026-11-02T18:37:14.4105189Z",
+            "elapsed": 0.024760599999999579
+        }
+    ],
+    "clockMeasurements": [],
+    "alignment": []
+}

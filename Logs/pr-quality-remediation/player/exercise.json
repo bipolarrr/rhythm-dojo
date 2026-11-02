@@ -1,0 +1,214 @@
+{
+    "phase": "exercise",
+    "unity": "6000.3.23f1",
+    "platform": "WindowsPlayer",
+    "startedUtc": "2026-11-02T18:46:32.8697272Z",
+    "finishedUtc": "2026-11-02T18:47:13.9845892Z",
+    "step": "finished",
+    "error": "",
+    "editor": false,
+    "success": true,
+    "assertions": 881,
+    "requestedBuffer": 256,
+    "appliedBuffer": 256,
+    "sampleRate": 48000,
+    "duration": 41.118914800000009,
+    "clipPeak": 0.149993896484375,
+    "mixerPeak": 0.047726426273584369,
+    "steps": [
+        {
+            "name": "preferences-backed-up",
+            "detail": "Known string preference keys and existence flags saved before isolation.",
+            "utc": "2026-11-02T18:46:32.8912633Z",
+            "elapsed": 0.025199500000000265
+        },
+        {
+            "name": "capture-title",
+            "detail": "Offscreen StandardRequest display camera=Main Camera; size=1280x720; visible pixels=904807",
+            "utc": "2026-11-02T18:46:33.7823420Z",
+            "elapsed": 0.9163600000000001
+        },
+        {
+            "name": "title-settings",
+            "detail": "Opened settings with queued pointer input; key persisted and Back restored title.",
+            "utc": "2026-11-02T18:46:35.8816999Z",
+            "elapsed": 3.0156604999999998
+        },
+        {
+            "name": "editor-round-trip",
+            "detail": "Real Back autosave verified; only the new probe-owned project file and empty folder removed.",
+            "utc": "2026-11-02T18:46:36.3850062Z",
+            "elapsed": 3.5198118
+        },
+        {
+            "name": "selection-ready",
+            "detail": "Title unloaded, door complete, one input system and listener.",
+            "utc": "2026-11-02T18:46:40.4400326Z",
+            "elapsed": 7.575421799999999
+        },
+        {
+            "name": "capture-mode-settings",
+            "detail": "Offscreen StandardRequest display camera=Main Camera; size=1280x720; visible pixels=918342",
+            "utc": "2026-11-02T18:46:41.4058232Z",
+            "elapsed": 8.540015499999999
+        },
+        {
+            "name": "capture-paused-audio-settings",
+            "detail": "Offscreen StandardRequest display camera=Gameplay Display Camera; size=1920x1080; visible pixels=2064747",
+            "utc": "2026-11-02T18:46:45.8234190Z",
+            "elapsed": 12.958024699999998
+        },
+        {
+            "name": "capture-recovered-gameplay",
+            "detail": "Offscreen StandardRequest display camera=Gameplay Display Camera; size=1920x1080; visible pixels=2073599",
+            "utc": "2026-11-02T18:46:50.0245608Z",
+            "elapsed": 17.158909400000004
+        },
+        {
+            "name": "loopback-ready",
+            "detail": "Recovered external 440 Hz tone plays for 20 seconds for independent OS loopback capture.",
+            "utc": "2026-11-02T18:46:50.0255651Z",
+            "elapsed": 17.159676100000003
+        },
+        {
+            "name": "pause-resume-restart-exit",
+            "detail": "Real external loader, reset/recovery, scheduled resume, restart and exit passed.",
+            "utc": "2026-11-02T18:47:10.4132517Z",
+            "elapsed": 37.54737450000001
+        },
+        {
+            "name": "capture-results",
+            "detail": "Offscreen StandardRequest display camera=Main Camera; size=1920x1080; visible pixels=2073600",
+            "utc": "2026-11-02T18:47:11.8286954Z",
+            "elapsed": 38.96273260000001
+        },
+        {
+            "name": "results-navigation",
+            "detail": "Explicit session advance used only to exercise the built Results scene and Back.",
+            "utc": "2026-11-02T18:47:11.9783923Z",
+            "elapsed": 39.11236910000001
+        },
+        {
+            "name": "exercise-complete",
+            "detail": "Mode keys remain saved for the next process; original preferences stay in backup.",
+            "utc": "2026-11-02T18:47:13.9312464Z",
+            "elapsed": 41.065186100000008
+        }
+    ],
+    "clockMeasurements": [
+        {
+            "elapsed": 1.2000035000000012,
+            "lower": 0.9911082203788018,
+            "upper": 1.0088859463048788,
+            "buffer": 256,
+            "rate": 48000,
+            "state": "Healthy"
+        },
+        {
+            "elapsed": 1.2000078999999975,
+            "lower": 0.9911045863392526,
+            "upper": 1.0088822470807637,
+            "buffer": 256,
+            "rate": 48000,
+            "state": "Healthy"
+        }
+    ],
+    "alignment": [
+        {
+            "audio": 0.7667120181405895,
+            "logicalAudio": 0.7607988310091862,
+            "error": 0.005913187131403319,
+            "uncertainty": 0.02685004240362375,
+            "block": 256,
+            "buffers": 4
+        },
+        {
+            "audio": 0.7773696145124717,
+            "logicalAudio": 0.7774452063522688,
+            "error": -0.00007559183979710671,
+            "uncertainty": 0.027337142403628155,
+            "block": 256,
+            "buffers": 4
+        },
+        {
+            "audio": 0.7987074829931973,
+            "logicalAudio": 0.7941888216407342,
+            "error": 0.004518661352463038,
+            "uncertainty": 0.027357242403628566,
+            "block": 256,
+            "buffers": 4
+        },
+        {
+            "audio": 0.8200453514739229,
+            "logicalAudio": 0.8110064191814281,
+            "error": 0.00903893229249475,
+            "uncertainty": 0.027355342403624126,
+            "block": 256,
+            "buffers": 4
+        },
+        {
+            "audio": 0.830702947845805,
+            "logicalAudio": 0.8277287684557528,
+            "error": 0.0029741793900521786,
+            "uncertainty": 0.02736184240362903,
+            "block": 256,
+            "buffers": 4
+        },
+        {
+            "audio": 0.8467120181405896,
+            "logicalAudio": 0.8444169907253141,
+            "error": 0.002295027415275541,
+            "uncertainty": 0.02733934240362544,
+            "block": 256,
+            "buffers": 4
+        },
+        {
+            "audio": 0.8573696145124716,
+            "logicalAudio": 0.8610334202880523,
+            "error": -0.0036638057755806754,
+            "uncertainty": 0.02736754240362814,
+            "block": 256,
+            "buffers": 4
+        },
+        {
+            "audio": 0.8787074829931972,
+            "logicalAudio": 0.8777247140825644,
+            "error": 0.0009827689106328697,
+            "uncertainty": 0.02736434240362627,
+            "block": 256,
+            "buffers": 4
+        },
+        {
+            "audio": 0.900045351473923,
+            "logicalAudio": 0.8944753642301464,
+            "error": 0.005569987243776553,
+            "uncertainty": 0.027346742403626654,
+            "block": 256,
+            "buffers": 4
+        },
+        {
+            "audio": 0.910702947845805,
+            "logicalAudio": 0.9111432078222883,
+            "error": -0.00044025997648333703,
+            "uncertainty": 0.027364742403627394,
+            "block": 256,
+            "buffers": 4
+        },
+        {
+            "audio": 0.9267120181405896,
+            "logicalAudio": 0.9277834032351677,
+            "error": -0.001071385094578159,
+            "uncertainty": 0.027347942403626467,
+            "block": 256,
+            "buffers": 4
+        },
+        {
+            "audio": 0.9480498866213152,
+            "logicalAudio": 0.9444954071453822,
+            "error": 0.0035544794759330147,
+            "uncertainty": 0.027341942403627405,
+            "block": 256,
+            "buffers": 4
+        }
+    ]
+}

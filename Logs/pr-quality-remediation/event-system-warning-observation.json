@@ -1,0 +1,5 @@
+{
+  "firstPlayerWarningCount": 3,
+  "baselineWarningCount": 23,
+  "note": "Transient additive-load warning also exists in baseline. Final scene assertions require exactly one active EventSystem and AudioListener after transition; no residual duplicate was observed."
+}

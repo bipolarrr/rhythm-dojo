@@ -161,3 +161,22 @@ Edit Mode에서 **Game Tools > Preview > Results**를 누르면 샘플 결과가
 ### 외부 WAV 회귀 fixture
 
 `PupaResultsFlowTests`의 기존 이름과 `LocalAudio` 분류는 호출 경로 호환을 위해 유지한다. 외부 음원을 사용하는 세 테스트는 이제 개인 `LocalAudio/PUPA.wav` 대신 임시 44.1kHz mono PCM WAV를 생성하고 실제 외부 음원 로더로 읽는다. 파일 길이는 131.54초, 첫 신호는 채보와 독립적으로 지정한 0.5033333333333334초다. 번들된 929노트 채보에 대해 첫 공격음·입력 시각, 전체 재생 완료, 긴 음원 꼬리 이전 결과 전환을 검사한다. 이것은 실제 PUPA 음원에 대한 검증이 아니다. 테스트가 끝나거나 실패하면 lease와 임시 파일을 해제한다.
+
+### Windows remediation diagnostic
+
+`RhythmDojo.EditorTools.RemediationPlayerVerification.BuildPlayer()` builds the separate development player at `Builds/RemediationProbe/RemediationProbe.exe`. After compilation, run `unity command run_script --file Logs/pr-quality-remediation/RemediationBuildDispatch.cs --entry RemediationBuildDispatch.Main --json` in the project root. This dispatches the build on the next Editor update so the CLI request finishes before the build; a synchronous eval can time out and inject an error into a strict build. The builder writes `Logs/pr-quality-remediation/player-probe-build.json` and restores the prior scene setup. It includes all product scenes and test assemblies only in this diagnostic build; Foundation still builds the ordinary player separately.
+
+Run the phases sequentially, waiting for each process to exit. Use the same absolute evidence directory for both launches:
+
+```powershell
+$probe = 'C:/Users/song/RhythmDojo-pr-quality/Builds/RemediationProbe/RemediationProbe.exe'
+$evidence = 'C:/Users/song/RhythmDojo-pr-quality/Logs/pr-quality-remediation/player'
+Start-Process -FilePath $probe -WindowStyle Hidden -Wait -ArgumentList @('-remediationPhase', 'exercise', '-remediationOutput', $evidence, '-logFile', "$evidence/exercise-player.log")
+Start-Process -FilePath $probe -WindowStyle Hidden -Wait -ArgumentList @('-remediationPhase', 'persistence', '-remediationOutput', $evidence, '-logFile', "$evidence/persistence-player.log")
+```
+
+Check each process exit code and the corresponding JSON `success`; a completed process alone does not imply success. The first phase backs up the six known string preference keys, including their existence flags, before isolating them. Successful exercise leaves the two mode key overrides for the next process. Persistence verifies those overrides and their settings UI, then restores the exact original values. Failure also attempts restoration independently of other cleanup. If a process is killed, run the same command with `-remediationPhase restore`; do not remove `preferences-backup.json` before restoration. Backup writes replace the prior file atomically.
+
+The probe uses queued keyboard/mouse input and verifies pointer raycasts before clicking buttons. Buffer selection uses the Dropdown's normal value-change route, followed by an actual Apply click in the graphics tab. It covers title/settings/editor/selection navigation, actual editor Back autosave of a newly generated GUID project, mode isolation and HUD/Results labels, external WAV loading, pause/buffer validation/recovery/resume/restart/exit, and the built Results scene. It removes only the probe's new editor JSON file and empty GUID directory, after checking containment, absence before creation, and lack of links or unexpected contents; it never removes existing projects. The owned GUID is saved in the backup for crash cleanup.
+
+`exercise.json` records requested/applied buffers, DSP rate intervals, decoded and mixer sample peaks, and audio/song alignment with DSP block plus observed-frame uncertainty. A `loopback-ready` step holds the recovered external 440 Hz tone for 20 seconds so a separate OS loopback recorder can verify output beyond Unity's mixer. PNGs are offscreen renders using the active pipeline StandardRequest, preserving original display-camera world visibility and the existing gameplay texture. They are not framebuffer captures. Blank frames fail the diagnostic and saved images still require visual review. The Results navigation check explicitly advances the session; it does not substitute for the full real-time external WAV test. Synthetic input, screenshots, and mixer sampling do not by themselves establish physical audio latency or subjective output quality.

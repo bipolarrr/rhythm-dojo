@@ -1,0 +1,52 @@
+{
+    "phase": "persistence",
+    "unity": "6000.3.23f1",
+    "platform": "WindowsPlayer",
+    "startedUtc": "2026-11-02T18:47:27.3945665Z",
+    "finishedUtc": "2026-11-02T18:47:34.0980907Z",
+    "step": "finished",
+    "error": "",
+    "editor": false,
+    "success": true,
+    "assertions": 257,
+    "requestedBuffer": 0,
+    "appliedBuffer": 0,
+    "sampleRate": 0,
+    "duration": 6.7083777,
+    "clipPeak": 0.0,
+    "mixerPeak": 0.0,
+    "steps": [
+        {
+            "name": "persisted-keys",
+            "detail": "Default=A; second four-lane mode=Q, before clearing any preferences.",
+            "utc": "2026-11-02T18:47:27.4373142Z",
+            "elapsed": 0.047508600000000459
+        },
+        {
+            "name": "capture-title",
+            "detail": "Offscreen StandardRequest display camera=Main Camera; size=1920x1080; visible pixels=2036272",
+            "utc": "2026-11-02T18:47:28.3905841Z",
+            "elapsed": 1.0006588
+        },
+        {
+            "name": "title-settings",
+            "detail": "Opened settings with queued pointer input; key persisted and Back restored title.",
+            "utc": "2026-11-02T18:47:30.2981277Z",
+            "elapsed": 2.9086737000000006
+        },
+        {
+            "name": "selection-ready",
+            "detail": "Title unloaded, door complete, one input system and listener.",
+            "utc": "2026-11-02T18:47:33.2340992Z",
+            "elapsed": 5.8441312
+        },
+        {
+            "name": "persistence-ui",
+            "detail": "Both mode settings survived a separate process launch.",
+            "utc": "2026-11-02T18:47:34.0361651Z",
+            "elapsed": 6.6462751
+        }
+    ],
+    "clockMeasurements": [],
+    "alignment": []
+}

@@ -108,7 +108,7 @@
 
 - 최종 결과: ScenePreparationFlow 9/9, ProjectLibraryFlow 3/3, MainMenuFlow 19/19, Smoke 4/4 통과. 처음 타이틀 테스트의 미초기화 화면 복원 예외 2건과 독립 검토의 null 포커스 복원 지적을 수정하고 회귀를 추가했다. 초기 실패 증거를 유지하며 로그를 무시하지 않았다. 독립 재검토 수정 요구 없음. 매 실행 후 PlayMode 종료·Editor ready 확인. 씬 에셋 변경 없음. 증거: Logs/pr-quality-remediation/task7*. 커밋: `d675507`. 다음 행동: 기준 실패/외부 WAV fixture와 Windows 검증 도구를 정비한 뒤 최종 Foundation.
 
-### 최종 통합 검증: 준비 중
+### 최종 통합 검증: 기준 정비 완료·Windows 진단 준비 중
 
 - 범위: 소스 refresh·컴파일 후 Verify Foundation 전체 테스트와 Windows 빌드. 실패 수정 후 재검증하며 부분 실행은 전체 통과로 표기하지 않는다.
 - 플레이어: 외부 WAV 로드/플레이/정지/버퍼 변경/재개/재시작, 모드별 키 저장, 타이틀·설정·에디터·선택 왕복, 재실행 설정 유지, 실제 출력 확인.
@@ -120,3 +120,7 @@
 
 
 - 최종 기준 정비: Results의 Esc 정지 후 실제 나가기 클릭, 개인 곡 목록과 분리한 두 곡 즐겨찾기 탐색, 임시 WAV 실제 로더 fixture로 개인 PUPA 음원 의존 제거. 기존 채보/판정/완료 시각 기대값 유지. Results 회귀 1/1, 곡 선택 회귀 1/1, PupaResultsFlow 6/6(skip 0) 통과. 독립 검토 수정 요구 없음. Foundation 명시 빌드 목록에 Results 추가. 증거: final-*-regression.json, final-pupa-generated-wave.json, final-baseline-fixes.md. 다음 행동: Windows 개발 진단 구현과 최종 Foundation.
+
+- 기준 정비 커밋: `b10a27e`. 최종 독립 검토(`d34b688..b10a27e`)에서 제품 코드·소유권·계약·테스트 기대값의 수정 요구 없음. 개발용 Windows 진단은 별도 검토 예정이며 Foundation/플레이어 실행을 아직 통과로 표시하지 않는다.
+
+- Windows 개발 진단: exercise 41.119초·persistence 6.708초 모두 exit 0. 실제 입력으로 타이틀/설정/에디터/선택 왕복, 외부 WAV 복구·재개·재시작·나가기, 두 모드 키 저장·재실행 유지, HUD/Results 표기 검사. 원래 설정 6개 복원·임시 프로젝트 잔류 0. 요청/적용 256/256, 두 진행률 구간 ±1% 내, 12관측 최대 오차9.039ms(기록된 DSP+프레임 불확실성 내). OS 루프백440Hz peak0.0477258 확인. 최종 합성 렌더 직접 검토 완료. 최초 CLI 빌드 실패 및 잘못된 캡처를 보존하고 수정했다. 일반 플레이어 Foundation 및 시작 검증은 아직 대기.

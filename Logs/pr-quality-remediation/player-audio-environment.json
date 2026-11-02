@@ -1,0 +1,19 @@
+{
+  "python": "3.14.8 (tags/v3.14.8:8e6e75d, Sep 30 2026, 18:19:33) [MSC v.1944 64 bit (AMD64)]",
+  "packages": {
+    "SoundCard": "0.4.6",
+    "numpy": "2.5.4",
+    "cffi": "2.1.1"
+  },
+  "speakers": [
+    {
+      "id": "{0.0.0.00000000}.{7a427060-f9ce-4729-a60b-ff59d19474d1}",
+      "name": "스피커(6- Fosi Audio C3)"
+    },
+    {
+      "id": "{0.0.0.00000000}.{99d735ce-8c10-4078-b76e-68ce88b6d5ba}",
+      "name": "스피커(Realtek High Definition Audio)"
+    }
+  ],
+  "default_speaker": "스피커(Realtek High Definition Audio)"
+}

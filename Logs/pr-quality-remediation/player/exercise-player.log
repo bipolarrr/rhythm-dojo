@@ -1,0 +1,143 @@
+Mono path[0] = 'C:/Users/song/RhythmDojo-pr-quality/Builds/RemediationProbe/RemediationProbe_Data/Managed'
+Mono config path = 'C:/Users/song/RhythmDojo-pr-quality/Builds/RemediationProbe/MonoBleedingEdge/etc'
+Found 2 interfaces on host : 0) 192.168.0.238 1) 100.83.57.37
+Player connection [33488]  Target information:
+
+Player connection [33488]  * "[IP] 192.168.0.238 [Port] 55000 [Flags] 2 [Guid] 2273857495 [EditorId] 4065902287 [Version] 1048832 [Id] WindowsPlayer(2,DESKTOP-8HJ31S9) [Debug] 0 [PackageName] WindowsPlayer [ProjectName] RhythmDojo" 
+
+Player connection [33488]  * "[IP] 100.83.57.37 [Port] 55000 [Flags] 2 [Guid] 2273857495 [EditorId] 4065902287 [Version] 1048832 [Id] WindowsPlayer(2,DESKTOP-8HJ31S9) [Debug] 0 [PackageName] WindowsPlayer [ProjectName] RhythmDojo" 
+
+Player connection [33488] Started UDP target info broadcast (1) on [225.0.0.222:54997].
+
+Input System module state changed to: Initialized.
+[Physics::Module] Initialized fallback backend.
+[Physics::Module] Id: 0xdecafbad
+Initialize engine version: 6000.3.23f1 (09d2ecc7fb28)
+[Subsystems] Discovering subsystems at path C:/Users/song/RhythmDojo-pr-quality/Builds/RemediationProbe/RemediationProbe_Data/UnitySubsystems
+[D3D12 Device Filter] Vendor Name: NVIDIA
+[D3D12 Device Filter] Device Name: NVIDIA GeForce RTX 4060
+[D3D12 Device Filter] Driver Version: 32.0.16.1664
+[D3D12 Device Filter] Feature Level: 12.2
+[D3D12 Device Filter] Graphics Memory: 7957 MB
+[D3D12 Device Filter] Processor Count: 16
+[D3D12 Device Filter] Device Type: Discrete
+GfxDevice: creating device client; kGfxThreadingModeSplitJobs
+d3d12: failed to query info queue interface (0x80004002).
+Direct3D:
+    Version:         Direct3D 12 [level 12.2]
+    Renderer:        NVIDIA GeForce RTX 4060 (ID=0x2882)
+    Vendor:          NVIDIA
+    VRAM:            7957 MB
+    App VRAM Budget: 7189 MB
+    Driver:          32.0.16.1664
+Begin MonoManager ReloadAssembly
+- Loaded All Assemblies, in  0.303 seconds
+- Finished resetting the current domain, in  0.003 seconds
+[Physics::Module] Selected backend.
+[Physics::Module] Name: PhysX
+[Physics::Module] Id: 0xf2b8ea05
+[Physics::Module] SDK Version: 4.1.2
+[Physics::Module] Integration Version: 1.0.0
+[Physics::Module] Threading Mode: Multi-Threaded
+<RI> Initializing input.
+Using Windows.Gaming.Input
+UnloadTime: 0.744500 ms
+Unloading 6 Unused Serialized files (Serialized files now loaded: 0)
+UnloadTime: 0.621000 ms
+Unloading 5 unused Assets / (Unknown). Loaded Objects now: 2981.
+Memory consumption went from 135.9 MB to 135.9 MB.
+Total: 1.190900 ms (FindLiveObjects: 0.142300 ms CreateObjectMapping: 0.098600 ms MarkObjects: 0.924000 ms  DeleteObjects: 0.022300 ms)
+
+There can be only one active Event System.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at C:/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:35)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[]) (at C:/build/output/unity/unity/Runtime/Export/Logging/DebugLogHandler.cs:9)
+UnityEngine.Logger:Log (UnityEngine.LogType,object) (at C:/build/output/unity/unity/Runtime/Export/Logging/Logger.cs:60)
+UnityEngine.Debug:LogWarning (object) (at C:/build/output/unity/unity/Runtime/Export/Debug/Debug.bindings.cs:213)
+UnityEngine.UIElements.UIElementsRuntimeUtility:RegisterEventSystem (UnityEngine.Object) (at C:/build/output/unity/unity/Modules/UIElements/Core/UIElementsRuntimeUtility.cs:229)
+UnityEngine.UIElements.UIToolkitInteroperabilityBridge:OnEnable () (at ./Library/PackageCache/com.unity.ugui@27635d171b1a/Runtime/UGUI/EventSystem/UIElements/UIToolkitInteroperabilityBridge.cs:216)
+UnityEngine.EventSystems.EventSystem:OnEnable () (at ./Library/PackageCache/com.unity.ugui@27635d171b1a/Runtime/UGUI/EventSystem/EventSystem.cs:425)
+
+(Filename: C:/build/output/unity/unity/Runtime/Export/Debug/Debug.bindings.cs Line: 213)
+
+Unloading 6 Unused Serialized files (Serialized files now loaded: 0)
+UnloadTime: 0.816900 ms
+Unloading 1420 unused Assets / (18.8 MB). Loaded Objects now: 5605.
+Memory consumption went from 145.3 MB to 126.5 MB.
+Total: 2.712500 ms (FindLiveObjects: 0.240500 ms CreateObjectMapping: 0.117900 ms MarkObjects: 1.442800 ms  DeleteObjects: 0.911000 ms)
+
+Unloading 4 Unused Serialized files (Serialized files now loaded: 0)
+UnloadTime: 2.307900 ms
+Unloading 11 unused Assets / (0 B). Loaded Objects now: 4584.
+Memory consumption went from 144.3 MB to 144.3 MB.
+Total: 1.900500 ms (FindLiveObjects: 0.181200 ms CreateObjectMapping: 0.078300 ms MarkObjects: 1.616500 ms  DeleteObjects: 0.024000 ms)
+
+There can be only one active Event System.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at C:/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:35)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[]) (at C:/build/output/unity/unity/Runtime/Export/Logging/DebugLogHandler.cs:9)
+UnityEngine.Logger:Log (UnityEngine.LogType,object) (at C:/build/output/unity/unity/Runtime/Export/Logging/Logger.cs:60)
+UnityEngine.Debug:LogWarning (object) (at C:/build/output/unity/unity/Runtime/Export/Debug/Debug.bindings.cs:213)
+UnityEngine.UIElements.UIElementsRuntimeUtility:RegisterEventSystem (UnityEngine.Object) (at C:/build/output/unity/unity/Modules/UIElements/Core/UIElementsRuntimeUtility.cs:229)
+UnityEngine.UIElements.UIToolkitInteroperabilityBridge:OnEnable () (at ./Library/PackageCache/com.unity.ugui@27635d171b1a/Runtime/UGUI/EventSystem/UIElements/UIToolkitInteroperabilityBridge.cs:216)
+UnityEngine.EventSystems.EventSystem:OnEnable () (at ./Library/PackageCache/com.unity.ugui@27635d171b1a/Runtime/UGUI/EventSystem/EventSystem.cs:425)
+
+(Filename: C:/build/output/unity/unity/Runtime/Export/Debug/Debug.bindings.cs Line: 213)
+
+Unloading 5 Unused Serialized files (Serialized files now loaded: 0)
+UnloadTime: 1.519000 ms
+Unloading 55 unused Assets / (204.3 KB). Loaded Objects now: 4994.
+Memory consumption went from 153.7 MB to 153.5 MB.
+Total: 1.966200 ms (FindLiveObjects: 0.192200 ms CreateObjectMapping: 0.093000 ms MarkObjects: 1.579000 ms  DeleteObjects: 0.101300 ms)
+
+Unloading 6 Unused Serialized files (Serialized files now loaded: 0)
+UnloadTime: 2.029000 ms
+Unloading 27 unused Assets / (Unknown). Loaded Objects now: 5669.
+Memory consumption went from 123.2 MB to 123.2 MB.
+Total: 2.147500 ms (FindLiveObjects: 0.207500 ms CreateObjectMapping: 0.079600 ms MarkObjects: 1.831200 ms  DeleteObjects: 0.028800 ms)
+
+Unloading 5 Unused Serialized files (Serialized files now loaded: 0)
+UnloadTime: 1.587200 ms
+Unloading 16 unused Assets / (27.8 KB). Loaded Objects now: 5006.
+Memory consumption went from 130.5 MB to 130.4 MB.
+Total: 2.022300 ms (FindLiveObjects: 0.190100 ms CreateObjectMapping: 0.080700 ms MarkObjects: 1.726300 ms  DeleteObjects: 0.024800 ms)
+
+Unloading 4 Unused Serialized files (Serialized files now loaded: 0)
+UnloadTime: 0.739400 ms
+Unloading 19 unused Assets / (4.2 KB). Loaded Objects now: 4804.
+Memory consumption went from 122.4 MB to 122.4 MB.
+Total: 2.031400 ms (FindLiveObjects: 0.186200 ms CreateObjectMapping: 0.079200 ms MarkObjects: 1.735800 ms  DeleteObjects: 0.029800 ms)
+
+Unloading 5 Unused Serialized files (Serialized files now loaded: 0)
+UnloadTime: 0.526100 ms
+Unloading 38 unused Assets / (0.6 MB). Loaded Objects now: 5642.
+Memory consumption went from 119.2 MB to 118.6 MB.
+Total: 2.298800 ms (FindLiveObjects: 0.201100 ms CreateObjectMapping: 0.106700 ms MarkObjects: 1.824800 ms  DeleteObjects: 0.165700 ms)
+
+Unloading 4 Unused Serialized files (Serialized files now loaded: 0)
+UnloadTime: 1.601800 ms
+Unloading 11 unused Assets / (0.5 KB). Loaded Objects now: 4588.
+Memory consumption went from 147.9 MB to 147.9 MB.
+Total: 2.038100 ms (FindLiveObjects: 0.171600 ms CreateObjectMapping: 0.108000 ms MarkObjects: 1.744200 ms  DeleteObjects: 0.013900 ms)
+
+There can be only one active Event System.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at C:/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:35)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[]) (at C:/build/output/unity/unity/Runtime/Export/Logging/DebugLogHandler.cs:9)
+UnityEngine.Logger:Log (UnityEngine.LogType,object) (at C:/build/output/unity/unity/Runtime/Export/Logging/Logger.cs:60)
+UnityEngine.Debug:LogWarning (object) (at C:/build/output/unity/unity/Runtime/Export/Debug/Debug.bindings.cs:213)
+UnityEngine.UIElements.UIElementsRuntimeUtility:RegisterEventSystem (UnityEngine.Object) (at C:/build/output/unity/unity/Modules/UIElements/Core/UIElementsRuntimeUtility.cs:229)
+UnityEngine.UIElements.UIToolkitInteroperabilityBridge:OnEnable () (at ./Library/PackageCache/com.unity.ugui@27635d171b1a/Runtime/UGUI/EventSystem/UIElements/UIToolkitInteroperabilityBridge.cs:216)
+UnityEngine.EventSystems.EventSystem:OnEnable () (at ./Library/PackageCache/com.unity.ugui@27635d171b1a/Runtime/UGUI/EventSystem/EventSystem.cs:425)
+
+(Filename: C:/build/output/unity/unity/Runtime/Export/Debug/Debug.bindings.cs Line: 213)
+
+[Physics::Module] Cleanup current backend.
+[Physics::Module] Id: 0xf2b8ea05
+Input System module state changed to: ShutdownInProgress.
+Input System polling thread exited.
+Input System module state changed to: Shutdown.
+PlayerConnection::Cleanup##utp:{"type":"MemoryLeaks","version":2,"phase":"Immediate","time":1793645234225,"processId":32736,"allocatedMemory":596222,"memoryLabels":[{"Default":136},{"NewDelete":776},{"Thread":8384},{"Manager":539958},{"GfxDevice":2128},{"GfxThread":2304},{"Audio":784},{"Serialization":520},{"JobScheduler":32768},{"String":412},{"HashMap":5120},{"PoolAlloc":288},{"CloudService":144},{"VR":1872},{"Video":144},{"NativeArray":372},{"Subsystems":96},{"CoreBusinessMetrics":120}]}
