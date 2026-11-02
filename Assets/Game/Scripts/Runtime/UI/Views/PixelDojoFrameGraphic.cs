@@ -3,6 +3,7 @@ using UnityEngine.UI;
 
 namespace RhythmDojo.UI
 {
+    [ExecuteAlways]
     [RequireComponent(typeof(CanvasRenderer))]
     public sealed class PixelDojoFrameGraphic : MaskableGraphic
     {
@@ -10,6 +11,130 @@ namespace RhythmDojo.UI
         public Color trimColor = new Color(.72f, .46f, .24f);
         public float borderWidth = 10;
         public Sprite artwork;
+
+        [SerializeField]
+        private Image artworkBorder;
+        private Sprite previousArtwork;
+        private float previousBorderWidth;
+        private Vector2 previousSize;
+        private float previousReferencePixelsPerUnit;
+
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+            RefreshArtwork();
+        }
+
+        public void RefreshArtwork()
+        {
+            previousArtwork = artwork;
+            previousBorderWidth = borderWidth;
+            previousSize = rectTransform.rect.size;
+            previousReferencePixelsPerUnit = ReferencePixelsPerUnit();
+            if (!artwork)
+            {
+                if (artworkBorder)
+                {
+                    artworkBorder.enabled = false;
+                }
+                base.SetVerticesDirty();
+                return;
+            }
+
+            if (!artworkBorder)
+            {
+                var item = new GameObject("Artwork Border", typeof(RectTransform), typeof(Image));
+                item.transform.SetParent(transform, false);
+                item.transform.SetAsFirstSibling();
+                artworkBorder = item.GetComponent<Image>();
+                var rect = artworkBorder.rectTransform;
+                rect.anchorMin = Vector2.zero;
+                rect.anchorMax = Vector2.one;
+                rect.offsetMin = Vector2.zero;
+                rect.offsetMax = Vector2.zero;
+            }
+
+            artworkBorder.gameObject.layer = gameObject.layer;
+            var border = artwork.border;
+            float largest = Mathf.Max(border.x, border.y, border.z, border.w);
+            artworkBorder.enabled = isActiveAndEnabled && largest > 0;
+            artworkBorder.sprite = artwork;
+            artworkBorder.type = Image.Type.Sliced;
+            artworkBorder.fillCenter = false;
+            artworkBorder.color = Color.white;
+            artworkBorder.raycastTarget = false;
+            artworkBorder.maskable = maskable;
+            artworkBorder.material = material;
+            float edge = ArtworkEdge();
+            float pixelsPerUnit = artwork.pixelsPerUnit / previousReferencePixelsPerUnit;
+            if (largest > 0)
+            {
+                artworkBorder.pixelsPerUnitMultiplier = largest / (Mathf.Max(.001f, edge) * pixelsPerUnit);
+            }
+            artworkBorder.canvasRenderer.SetColor(canvasRenderer.GetColor());
+            base.SetVerticesDirty();
+        }
+
+        private void LateUpdate()
+        {
+            bool changed = previousArtwork != artwork || previousBorderWidth != borderWidth;
+            changed |= previousSize != rectTransform.rect.size;
+            changed |= previousReferencePixelsPerUnit != ReferencePixelsPerUnit();
+            if (artwork && !artworkBorder)
+            {
+                changed = true;
+            }
+            if (artworkBorder)
+            {
+                changed |= artworkBorder.gameObject.layer != gameObject.layer;
+                changed |= artworkBorder.maskable != maskable || artworkBorder.material != material;
+                artworkBorder.canvasRenderer.SetColor(canvasRenderer.GetColor());
+            }
+            if (changed)
+            {
+                RefreshArtwork();
+            }
+        }
+
+        protected override void OnDisable()
+        {
+            if (artworkBorder)
+            {
+                artworkBorder.enabled = false;
+            }
+            base.OnDisable();
+        }
+
+        protected override void OnDestroy()
+        {
+            if (artworkBorder)
+            {
+                if (UnityEngine.Application.isPlaying)
+                {
+                    Destroy(artworkBorder.gameObject);
+                }
+                else
+                {
+                    DestroyImmediate(artworkBorder.gameObject);
+                }
+            }
+            base.OnDestroy();
+        }
+
+        private float ReferencePixelsPerUnit()
+        {
+            if (canvas)
+            {
+                return canvas.referencePixelsPerUnit;
+            }
+            return 100;
+        }
+
+        private float ArtworkEdge()
+        {
+            var rect = GetPixelAdjustedRect();
+            return Mathf.Max(0, Mathf.Min(borderWidth, Mathf.Min(rect.width, rect.height) * .5f));
+        }
 
         public override Texture mainTexture
         {
@@ -52,35 +177,24 @@ namespace RhythmDojo.UI
 
         private void BuildArtwork(VertexHelper helper)
         {
+            // The native sliced Image draws only the border. This quad occupies only the center,
+            // so translucent artwork is sampled once and the center tint cannot affect the border.
             var rect = GetPixelAdjustedRect();
-            float edge = Mathf.Min(borderWidth, Mathf.Min(rect.width, rect.height) * .5f);
-            var uv = UnityEngine.Sprites.DataUtility.GetOuterUV(artwork);
             var border = artwork.border;
-            var x = new[] { rect.xMin, rect.xMin + edge, rect.xMax - edge, rect.xMax };
-            var y = new[] { rect.yMin, rect.yMin + edge, rect.yMax - edge, rect.yMax };
-            var u = new[] { uv.x, uv.x + border.x / artwork.texture.width,
-                uv.z - border.z / artwork.texture.width, uv.z };
-            var v = new[] { uv.y, uv.y + border.y / artwork.texture.height,
-                uv.w - border.w / artwork.texture.height, uv.w };
-            for (int row = 0; row < 3; row++)
+            float largest = Mathf.Max(border.x, border.y, border.z, border.w);
+            if (largest > 0)
             {
-                for (int column = 0; column < 3; column++)
-                {
-                    var tint = Color.white;
-                    if (row == 1 && column == 1)
-                    {
-                        tint = color;
-                    }
-
-                    int index = helper.currentVertCount;
-                    helper.AddVert(new Vector2(x[column], y[row]), tint, new Vector2(u[column], v[row]));
-                    helper.AddVert(new Vector2(x[column], y[row + 1]), tint, new Vector2(u[column], v[row + 1]));
-                    helper.AddVert(new Vector2(x[column + 1], y[row + 1]), tint, new Vector2(u[column + 1], v[row + 1]));
-                    helper.AddVert(new Vector2(x[column + 1], y[row]), tint, new Vector2(u[column + 1], v[row]));
-                    helper.AddTriangle(index, index + 1, index + 2);
-                    helper.AddTriangle(index, index + 2, index + 3);
-                }
+                border *= ArtworkEdge() / largest;
+                rect = Rect.MinMaxRect(rect.xMin + border.x, rect.yMin + border.y,
+                    rect.xMax - border.z, rect.yMax - border.w);
             }
+            var uv = UnityEngine.Sprites.DataUtility.GetInnerUV(artwork);
+            helper.AddVert(new Vector2(rect.xMin, rect.yMin), color, new Vector2(uv.x, uv.y));
+            helper.AddVert(new Vector2(rect.xMin, rect.yMax), color, new Vector2(uv.x, uv.w));
+            helper.AddVert(new Vector2(rect.xMax, rect.yMax), color, new Vector2(uv.z, uv.w));
+            helper.AddVert(new Vector2(rect.xMax, rect.yMin), color, new Vector2(uv.z, uv.y));
+            helper.AddTriangle(0, 1, 2);
+            helper.AddTriangle(0, 2, 3);
         }
 
         private static Rect Inset(Rect rect, float amount)

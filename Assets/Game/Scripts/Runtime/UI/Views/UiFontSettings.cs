@@ -12,13 +12,7 @@ namespace RhythmDojo.UI
 
         public static void Apply(Text text)
         {
-            text.font = Current;
-            var scope = text.GetComponentInParent<UiFontScope>(true);
-            if (scope && scope.font)
-            {
-                text.font = scope.font;
-            }
-            text.fontStyle = Style;
+            Apply(text, Current);
         }
 
         public static void ApplyTo(Transform root)
@@ -26,14 +20,22 @@ namespace RhythmDojo.UI
             var currentFont = Current;
             foreach (var text in root.GetComponentsInChildren<Text>(true))
             {
-                text.font = currentFont;
-                var scope = text.GetComponentInParent<UiFontScope>(true);
-                if (scope && scope.font)
-                {
-                    text.font = scope.font;
-                }
-                text.fontStyle = Style;
+                Apply(text, currentFont);
             }
+        }
+
+        private static void Apply(Text text, Font currentFont)
+        {
+            var scope = text.GetComponentInParent<UiFontScope>(true);
+            if (scope && scope.font)
+            {
+                text.font = scope.font;
+            }
+            else
+            {
+                text.font = currentFont;
+            }
+            text.fontStyle = Style;
         }
 
         public static Font Current

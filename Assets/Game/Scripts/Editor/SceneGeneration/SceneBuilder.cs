@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using RhythmDojo.UI;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -150,8 +151,22 @@ namespace RhythmDojo.EditorTools
             }
         }
 
+        internal static void PrepareArtwork(Scene scene)
+        {
+            Canvas.ForceUpdateCanvases();
+            foreach (var root in scene.GetRootGameObjects())
+            {
+                foreach (var frame in root.GetComponentsInChildren<PixelDojoFrameGraphic>(true))
+                {
+                    frame.RefreshArtwork();
+                }
+            }
+            Canvas.ForceUpdateCanvases();
+        }
+
         private static void Save(Scene scene, string path)
         {
+            PrepareArtwork(scene);
             GameSceneValidator.Validate(scene);
 
             if (!EditorSceneManager.SaveScene(scene, path))

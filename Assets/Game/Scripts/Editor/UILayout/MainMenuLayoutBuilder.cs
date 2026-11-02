@@ -46,7 +46,7 @@ namespace RhythmDojo.EditorTools
             Stretch((RectTransform)interior.transform);
             var interiorArt = interior.AddComponent<DojoTrainingGraphic>();
             interiorArt.interior = true;
-            interiorArt.artwork = DojoEntranceAssets.Load("TrainingInterior");
+            interiorArt.artwork = DojoEntranceAssets.Load("TrainingInterior", UiArtworkCrop.Full);
             interiorArt.raycastTarget = false;
             view.trainingInterior = (RectTransform)interior.transform;
             view.entranceTrigger = Button("Door Interaction", entrance.transform, Color.clear);
@@ -69,7 +69,7 @@ namespace RhythmDojo.EditorTools
             var logoObject = new GameObject("Logo", typeof(RectTransform), typeof(DojoSlidingImage));
             logoObject.transform.SetParent(logoClip.transform, false);
             var logoImage = logoObject.GetComponent<Image>();
-            logoImage.sprite = DojoEntranceAssets.Load("RoundPlaque");
+            logoImage.sprite = DojoEntranceAssets.Load("RoundPlaque", UiArtworkCrop.Alpha);
             logoImage.preserveAspect = true;
             logoImage.raycastTarget = true;
             logoObject.AddComponent<DojoPlaqueHitArea>();
@@ -229,7 +229,7 @@ namespace RhythmDojo.EditorTools
         private static void BuildEntrance(DojoEntranceView entrance)
         {
             var left = Panel("Left Door", entrance.transform, Color.white);
-            left.sprite = DojoEntranceAssets.Load("DoorPanel");
+            left.sprite = DojoEntranceAssets.Load("DoorPanel", UiArtworkCrop.Full);
             left.raycastTarget = false;
             left.rectTransform.anchorMin = Vector2.zero;
             left.rectTransform.anchorMax = new Vector2(.5f, 1f);
@@ -246,7 +246,7 @@ namespace RhythmDojo.EditorTools
             entrance.rightDoor = right.rectTransform;
 
             var frame = Panel("Entrance Frame", entrance.transform, Color.white);
-            frame.sprite = DojoEntranceAssets.Load("EntranceFrame");
+            frame.sprite = DojoEntranceAssets.Load("EntranceFrame", UiArtworkCrop.Full);
             frame.raycastTarget = false;
             Stretch(frame.rectTransform);
             entrance.frame = frame.gameObject.AddComponent<CanvasGroup>();
@@ -257,7 +257,7 @@ namespace RhythmDojo.EditorTools
         {
             var button = Button(name, parent, Color.white);
             var image = button.GetComponent<Image>();
-            image.sprite = DojoEntranceAssets.Load(spriteName);
+            image.sprite = DojoEntranceAssets.Load(spriteName, UiArtworkCrop.Alpha);
             image.preserveAspect = false;
             Anchor((RectTransform)button.transform, new Vector2(.5f, .5f), new Vector2(0, y), new Vector2(320, 78));
             button.gameObject.AddComponent<DojoBoardBreak>();
@@ -371,7 +371,7 @@ namespace RhythmDojo.EditorTools
             );
 
             var graphic = button.GetComponent<Image>();
-            graphic.sprite = DojoEntranceAssets.Load("VerticalMenuBoard");
+            graphic.sprite = DojoEntranceAssets.Load("VerticalMenuBoard", UiArtworkCrop.Alpha);
             graphic.preserveAspect = true;
             button.targetGraphic = graphic;
             var colors = button.colors;

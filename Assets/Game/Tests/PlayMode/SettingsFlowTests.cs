@@ -109,8 +109,12 @@ namespace RhythmDojo.Tests
             var popupFrame = view.transform.Find("Settings Popup").GetComponentInChildren<PixelDojoFrameGraphic>();
             Assert.That(popupFrame.artwork.name, Is.EqualTo("SettingsPanel"));
             Canvas.ForceUpdateCanvases();
-            var panelMesh = popupFrame.canvasRenderer.GetMesh();
-            Assert.That(panelMesh.vertexCount, Is.EqualTo(36));
+            var border = popupFrame.GetComponentInChildren<Image>();
+            Assert.That(border.type, Is.EqualTo(Image.Type.Sliced));
+            Assert.That(border.fillCenter, Is.False);
+            Assert.That(border.raycastTarget, Is.False);
+            var panelMesh = border.canvasRenderer.GetMesh();
+            Assert.That(panelMesh.vertexCount, Is.EqualTo(32));
             Assert.That(panelMesh.vertices[2].x - panelMesh.vertices[0].x, Is.EqualTo(24f).Within(.01f),
                 "The textured frame corners must retain their size instead of stretching with the panel.");
             Assert.That(view.backdrop.GetComponent<Image>().sprite.name, Is.EqualTo("TrainingInterior"));

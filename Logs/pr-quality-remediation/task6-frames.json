@@ -1,0 +1,57 @@
+{
+  "success": true,
+  "command": "command test_status",
+  "data": {
+    "command": "test_status",
+    "parameters": {},
+    "result": {
+      "status": "completed",
+      "duration": 0.47,
+      "summary": {
+        "total": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0,
+        "inconclusive": 0
+      },
+      "results": [
+        {
+          "FullName": "RhythmDojo.Tests.PixelDojoFrameTests.ArtworkAtNormalAndSmallSizesPreservesTintMaskAndClickTargets",
+          "Status": "Passed",
+          "Duration": 0.1425485,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PixelDojoFrameTests.ArtworkLayersFollowDisableReenableClearAndDestroy",
+          "Status": "Passed",
+          "Duration": 0.0064695,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PixelDojoFrameTests.NativeBorderPolicySupportsZeroAndAsymmetricSourceBorders(0,0,0,0)",
+          "Status": "Passed",
+          "Duration": 0.0041583,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PixelDojoFrameTests.NativeBorderPolicySupportsZeroAndAsymmetricSourceBorders(2,4,8,6)",
+          "Status": "Passed",
+          "Duration": 0.0006496,
+          "Message": null,
+          "StackTrace": null
+        }
+      ]
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "C:\\Users\\song\\RhythmDojo-pr-quality"
+    },
+    "success": true
+  },
+  "errors": [],
+  "warnings": []
+}

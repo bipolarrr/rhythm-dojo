@@ -21,7 +21,7 @@ namespace RhythmDojo.EditorTools
             backdrop.transform.SetAsFirstSibling();
             Stretch((RectTransform)backdrop.transform);
             var image = backdrop.GetComponent<Image>();
-            image.sprite = DojoEntranceAssets.Load("TrainingInterior");
+            image.sprite = DojoEntranceAssets.Load("TrainingInterior", UiArtworkCrop.Full);
             image.raycastTarget = false;
             var fit = backdrop.GetComponent<AspectRatioFitter>();
             fit.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
@@ -29,7 +29,9 @@ namespace RhythmDojo.EditorTools
             view.transform.Find("Modal Shade").GetComponent<Image>().color = new Color(.075f, .035f, .02f, .62f);
             var popup = view.transform.Find("Settings Popup");
             var popupFrame = PixelSongSelectionStyle.Frame((RectTransform)popup, Color.white, 24);
-            popupFrame.artwork = SettingsArtAssets.Load("SettingsPanel");
+            popupFrame.artwork = SettingsArtAssets.Load("SettingsPanel", UiArtworkCrop.Full,
+                new Vector4(128, 128, 128, 128));
+            popupFrame.RefreshArtwork();
             foreach (var text in view.GetComponentsInChildren<Text>(true))
             {
                 text.font = AssetDatabase.LoadAssetAtPath<Font>(MainMenuLayoutBuilder.FontPath);
@@ -91,13 +93,16 @@ namespace RhythmDojo.EditorTools
         private static void StyleSettingsButton(Button button)
         {
             var frame = button.GetComponentInChildren<PixelDojoFrameGraphic>();
-            frame.artwork = SettingsArtAssets.Load("SettingsControl");
+            frame.artwork = SettingsArtAssets.Load("SettingsControl", UiArtworkCrop.Full,
+                new Vector4(128, 128, 128, 128));
             frame.borderWidth = 8;
+            frame.RefreshArtwork();
         }
 
         private static void SetSettingsSurface(Image image)
         {
-            image.sprite = SettingsArtAssets.Load("SettingsControl");
+            image.sprite = SettingsArtAssets.Load("SettingsControl", UiArtworkCrop.Full,
+                new Vector4(128, 128, 128, 128));
             image.type = Image.Type.Sliced;
             image.pixelsPerUnitMultiplier = 16;
             image.color = Color.white;

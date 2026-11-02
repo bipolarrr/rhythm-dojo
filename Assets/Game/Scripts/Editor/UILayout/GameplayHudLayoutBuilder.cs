@@ -255,7 +255,9 @@ namespace RhythmDojo.EditorTools
             menu.panel = shade.gameObject;
             var dialog = Panel("Pause Dialog", shade, Color.white, .32f, .20f, .68f, .80f);
             var frame = PixelSongSelectionStyle.Frame(dialog, Color.white, 20);
-            frame.artwork = SettingsArtAssets.Load("SettingsPanel");
+            frame.artwork = SettingsArtAssets.Load("SettingsPanel", UiArtworkCrop.Full,
+                new Vector4(128, 128, 128, 128));
+            frame.RefreshArtwork();
             menu.resumeButton = PauseButton("Resume Play", dialog, "←", .04f, .81f, .20f, .95f);
             var title = Label("Pause Heading", dialog, "수련 일시정지", .23f, .80f, .95f, .95f, 30);
             title.color = new Color(.24f, .12f, .085f);
@@ -274,7 +276,7 @@ namespace RhythmDojo.EditorTools
             countdown.GetComponent<Image>().raycastTarget = true;
             menu.countdown = countdown.gameObject;
             var plaque = Panel("Countdown Wooden Seal", countdown, Color.white, .412f, .348f, .588f, .652f);
-            plaque.GetComponent<Image>().sprite = DojoEntranceAssets.Load("RoundPlaque");
+            plaque.GetComponent<Image>().sprite = DojoEntranceAssets.Load("RoundPlaque", UiArtworkCrop.Alpha);
             plaque.GetComponent<Image>().preserveAspect = true;
             menu.countdownText = Label("Countdown Number", plaque, "3", .08f, .03f, .92f, .97f, 102);
             menu.countdownText.color = new Color(1, .91f, .72f);
@@ -292,7 +294,9 @@ namespace RhythmDojo.EditorTools
             var button = UiElements.Button(name, parent, text, Vector2.zero, Vector2.zero);
             Bounds((RectTransform)button.transform, x0, y0, x1, y1);
             var frame = PixelSongSelectionStyle.Frame((RectTransform)button.transform, Color.white, 10);
-            frame.artwork = SettingsArtAssets.Load("SettingsControl");
+            frame.artwork = SettingsArtAssets.Load("SettingsControl", UiArtworkCrop.Full,
+                new Vector4(128, 128, 128, 128));
+            frame.RefreshArtwork();
             var label = button.GetComponentInChildren<Text>();
             label.fontSize = 32;
             label.color = new Color(.24f, .12f, .085f);

@@ -82,19 +82,21 @@
 - 재현: 서로 다른 4레인 모드 격리와 6레인 설정 화면.
 - 결정/범위: GameModeDefinition에서 기본 바인딩/표시명/레인 수를 읽고 원래 ModeId별 변경분을 저장한다. 타이틀 기본 모드/선택 곡 모드/플레이 요청 모드를 설정 대상으로 고정한다. 기존 View 필드를 유지하며 행 템플릿·스크롤 컨테이너를 추가한다. 중복·시작/복귀 바인딩 충돌을 검사하고 Esc 취소를 유지한다. v1은 기존 기본 4레인에 한 번만 이전하며 새 저장소 우선, 원본 보존, 초기화는 해당 모드만 적용한다. 비키보드 기본값은 보존하고 편집을 비활성화한다.
 - 검증: 기본값/초기화/v1 이전/손상 데이터/예약 키/플레이 중 변경/HUD·결과 일치; 빌더에 PC PlayerPrefs를 굽지 않는다.
-- 커밋: 본 작업 커밋; 증거: Logs/pr-quality-remediation/task5*.
+- 커밋: `790e294`; 증거: Logs/pr-quality-remediation/task5*.
 - 재현 결과: 기존 API를 사용하는 독립 4레인 키보드/게임패드 모드 2건 모두 기본 바인딩이 <Keyboard>/d로 덮어써져 실패. 기존 7건 통과. 증거: Logs/pr-quality-remediation/task5-red.json. 다음 행동: 명시 ModeId 전달, 모드별 저장소, 동적 행 및 회귀 테스트 구현.
 
 - 결과: EditMode PlayKeyBindings 23/23, KeySettingsFlow 5/5, GameplayFlow 3/3, SettingsPopup 재검증 2/2, Smoke 4/4 통과. Settings 씬/팝업만 재생성, 기존 GUID 유지. 6레인 상단/하단 캡처에서 마스크·표시·비키보드 비활성 확인. 독립 검토의 빈 v2 키 존재 여부 복원 지적 수정 후 재검토 통과. 각 실행 후 PlayMode 종료·Editor ready 확인.
 - 남은 관찰: SettingsPopup 첫 실행에서 graphics 탭 클릭이 전달되지 않은 1건은 제품 변경 없이 단독 및 같은 순서 재실행에서 통과했다. 최초 실패를 보존하고 최종 전체 실행에서 다시 확인한다. 기대값을 완화하거나 클릭을 직접 호출하도록 바꾸지 않았다. 다음 행동: 작업 6 UI 중복 구현.
 
-### 작업 6 — UI 중복 구현: 대기
+### 작업 6 — UI 중복 구현: 완료
 
 - 재현: 기존 크기와 작은 크기의 artwork 프레임을 비교한다.
 - 결정/범위: 두 로더를 유지하며 importer·sprite 생성·저장을 Editor 공통 헬퍼로 이동한다. 호출자가 crop/border를 명시하고 GUID/meta를 보존한다. PixelDojoFrameGraphic artwork는 Image.Type.Sliced와 중앙/테두리 tint 레이어를 사용하며 절차적 경로를 유지한다. UiFontSettings.Apply/ApplyTo의 글꼴 결정을 공유한다. 빌더 수정 후 영향받는 씬/프리팹만 재생성한다.
 - 검증: 테두리/중앙 tint/마스크/클릭 영역 시각 비교, 타이포그래피·레이아웃·씬 재생성 및 GUID 유지.
-- 커밋/증거: 없음 / 미실행.
-- 미해결/다음 행동: 작업 5 완료 후 시각 기준 확보.
+- 커밋: 본 작업 커밋; 증거: Logs/pr-quality-remediation/task6*.
+- 중간 결과: 기존 렌더링 기준 1/1 통과. 첫 구현 Frame 4/4, 에셋 3/3, Typography 9/9 통과. 실제 SettingsPanel/Control의 1200×700 RGB 비교에서 변경 픽셀 0. 독립 검토가 Graphic.OnValidate → SetAllDirty → 자식 생성 경고를 재현하여 수명 수정 중이다. 로그를 무시하지 않고 Inspector 검증 경로 회귀를 추가한다. 증거: Logs/pr-quality-remediation/task6*.
+
+- 최종 결과: Frame 5/5(Inspector 회귀 포함), 에셋 3/3, Typography 9/9, SceneRegeneration 2/2, Settings 동작 1/1, PauseFlow 2/2 통과. 수정 후 RGB 변경 픽셀 0, 재컴파일·씬 복원·재생성에서 기존 검증 경고 0건. Settings/Gameplay/공용 팝업만 저장 변경으로 포함하고 기존 meta/GUID 유지. 독립 재검토 수정 요구 없음. PlayMode 종료·Editor ready 확인. 다음 행동: 작업 7 씬 준비 수명과 입력 차단.
 
 ### 작업 7 — 씬 준비 수명·입력 차단: 대기
 

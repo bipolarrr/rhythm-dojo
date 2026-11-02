@@ -74,6 +74,36 @@ namespace RhythmDojo.Tests
             }
         }
 
+        [Test]
+        public void IndividualAndTreeFontApplicationUseTheSameInactiveScope()
+        {
+            var root = new GameObject("Font resolver", typeof(UiFontScope));
+            var font = AssetDatabase.LoadAssetAtPath<Font>(SongSelectionLayoutBuilder.BrushFontPath);
+            root.GetComponent<UiFontScope>().font = font;
+            try
+            {
+                var text = UiElements.Label("Hidden label", root.transform, "Test", Vector2.zero,
+                    new Vector2(200, 40));
+                text.gameObject.SetActive(false);
+                UiFontSettings.Apply(text);
+                Assert.That(text.font, Is.SameAs(font));
+                text.font = null;
+                UiFontSettings.ApplyTo(root.transform);
+                Assert.That(text.font, Is.SameAs(font));
+                Assert.That(text.fontStyle, Is.EqualTo(UiFontSettings.Style));
+                root.GetComponent<UiFontScope>().font = null;
+                UiFontSettings.Apply(text);
+                Assert.That(text.font, Is.SameAs(UiFontSettings.Current));
+                text.font = null;
+                UiFontSettings.ApplyTo(root.transform);
+                Assert.That(text.font, Is.SameAs(UiFontSettings.Current));
+            }
+            finally
+            {
+                Object.DestroyImmediate(root);
+            }
+        }
+
         [TestCase("Title")]
         [TestCase("SongSelection")]
         [TestCase("Settings")]

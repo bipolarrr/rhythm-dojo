@@ -162,6 +162,7 @@ namespace RhythmDojo.EditorTools
             popupInput.AddComponent<UnityEngine.InputSystem.UI.InputSystemUIInputModule>()
                 .AssignDefaultActions();
 
+            SceneBuilder.PrepareArtwork(scene);
             view.backdrop.SetActive(false);
             view.gameObject.SetActive(false);
             System.IO.Directory.CreateDirectory("Assets/Game/Resources/UI");
