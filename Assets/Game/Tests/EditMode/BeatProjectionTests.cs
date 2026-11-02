@@ -7,6 +7,57 @@ namespace RhythmDojo.Tests
     public sealed class BeatProjectionTests
     {
         [Test]
+        public void TimeProjectionKeepsScrollSpeedAndChangesSpacingAt256And64Bpm()
+        {
+            var timing = new BeatGridTiming(new[]
+            {
+                new TempoPoint(0, 128),
+                new TempoPoint(7.5, 256),
+                new TempoPoint(15, 64)
+            }, new BeatGridSettings());
+
+            foreach (double time in new[] { -1.0, 0, 7.4, 7.5, 14.9, 15, 20 })
+            {
+                var projection = new BeatProjection(timing.BeatAtTime(time), -320, 20, timing);
+                double distance = projection.Project(timing.BeatAtTime(time + 0.25))
+                    - projection.Project(timing.BeatAtTime(time));
+                Assert.That(distance, Is.EqualTo(0.25 * 128 / 60 * 20).Within(1e-9));
+                Assert.That(projection.Project(timing.BeatAtTime(time)), Is.EqualTo(-320).Within(1e-9));
+            }
+
+            var grid = new BeatProjection(0, 0, 20, timing);
+            Assert.That(grid.Project(2) - grid.Project(1), Is.EqualTo(20).Within(1e-9));
+            double fast = timing.BeatAtTime(8);
+            double slow = timing.BeatAtTime(16);
+            Assert.That(grid.Project(fast + 1) - grid.Project(fast), Is.EqualTo(10).Within(1e-9));
+            Assert.That(grid.Project(slow + 1) - grid.Project(slow), Is.EqualTo(40).Within(1e-9));
+        }
+
+        [Test]
+        public void TimeProjectionRoundTripsWithGridOriginAndFractionalTempoBoundaries()
+        {
+            var timing = new BeatGridTiming(new[]
+            {
+                new TempoPoint(0, 128),
+                new TempoPoint(7.51, 256),
+                new TempoPoint(15.13, 64)
+            }, new BeatGridSettings { OriginSeconds = 2.08193 });
+
+            foreach (double bottomTime in new[] { -20.0, 0, 7.5, 15, 100 })
+            {
+                foreach (double scale in new[] { 0.1, 20, 100 })
+                {
+                    var projection = new BeatProjection(timing.BeatAtTime(bottomTime), -320, scale, timing);
+                    foreach (double time in new[] { -10.0, 0, 7.51 - 1e-9, 7.51, 7.51 + 1e-9, 15.13, 200 })
+                    {
+                        double beat = timing.BeatAtTime(time);
+                        Assert.That(projection.Unproject(projection.Project(beat)), Is.EqualTo(beat).Within(1e-9));
+                    }
+                }
+            }
+        }
+
+        [Test]
         public void TempoRoundTripsAcrossFractionalBoundariesWithoutQuantizing()
         {
             var tempo = new TempoMap(

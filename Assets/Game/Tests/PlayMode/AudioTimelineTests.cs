@@ -24,6 +24,73 @@ namespace RhythmDojo.Tests
     public sealed class AudioTimelineTests
     {
         [UnityTest]
+        public IEnumerator GridScrollsAndPansToNegativeTenMeasureWithMeterAndOriginChanges()
+        {
+            yield return SceneManager.LoadSceneAsync(ChartEditorMenu.ScenePath);
+            yield return null;
+            var screen = Object.FindFirstObjectByType<ChartEditorScreen>();
+            var timeline = screen.GetComponent<ChartAudioTimeline>();
+            var detail = screen.GetComponentInParent<Canvas>()
+                .GetComponentsInChildren<AudioTimelineGraphic>(true).Single(graphic => !graphic.Overview);
+
+            foreach (var meter in new[] { new MeterPoint(0, 4, 4), new MeterPoint(0, 3, 8) })
+            {
+                screen.Session.Edit(edit =>
+                {
+                    edit.SetTiming(0.25, new TempoPoint(0, 120));
+                    edit.SetGrid(new BeatGridSettings
+                    {
+                        OriginSeconds = 2,
+                        Meters = new[] { meter }
+                    });
+                });
+                screen.ResetView();
+                double expectedBeat = -11 * meter.Numerator * 4.0 / meter.Denominator;
+                screen.Scroll(-1000);
+                yield return null;
+
+                Assert.That(screen.ScrollBeatOffset, Is.EqualTo(expectedBeat).Within(1e-8));
+                Assert.That(timeline.WindowStart,
+                    Is.EqualTo(timeline.Timing.TimeAtBeat(expectedBeat) - timeline.AudioOffset).Within(1e-8));
+                timeline.Timing.GetMusicalPosition(screen.ScrollBeatOffset, out int measure, out double position);
+                Assert.That(measure, Is.EqualTo(-10));
+                Assert.That(position, Is.Zero.Within(1e-8));
+                Canvas.ForceUpdateCanvases();
+                detail.RefreshLabels();
+                Assert.That(detail.GetComponentsInChildren<Text>()
+                    .Any(label => label.text == "-10.1"), Is.True);
+
+                var grid = screen.GetComponent<RectTransform>();
+                var pointer = new PointerEventData(EventSystem.current)
+                {
+                    position = RectTransformUtility.WorldToScreenPoint(null,
+                        grid.TransformPoint(grid.rect.center)),
+                    button = PointerEventData.InputButton.Left
+                };
+                screen.OnPointerDown(pointer);
+                screen.OnPointerUp(pointer);
+                Assert.That(screen.Session.GetNotes(screen.ChartId), Is.Empty,
+                    "The pre-song grid must not create notes at negative chart times.");
+                Capture(screen, "Logs/grid-negative-ten-" + meter.Denominator + ".png");
+
+                double minimum = timeline.WindowStart;
+                timeline.Pan(0);
+                timeline.Pan(-1000);
+                Assert.That(timeline.WindowStart, Is.EqualTo(minimum).Within(1e-8));
+                Assert.That(screen.ScrollBeatOffset, Is.EqualTo(expectedBeat).Within(1e-8));
+                timeline.Zoom(1, minimum);
+                Assert.That(timeline.WindowStart, Is.EqualTo(minimum).Within(1e-8));
+                screen.Scroll(0.5);
+                yield return null;
+                Assert.That(screen.ScrollBeatOffset, Is.EqualTo(expectedBeat + 0.5).Within(1e-8));
+
+                screen.ResetView();
+                Assert.That(screen.ScrollBeatOffset,
+                    Is.EqualTo(timeline.Timing.BeatAtTime(0)).Within(1e-8));
+            }
+        }
+
+        [UnityTest]
         public IEnumerator GridCorrectionAppliesEnteredBpmAndPlaytestKeepsTheSameTiming()
         {
             yield return SceneManager.LoadSceneAsync(ChartEditorMenu.ScenePath);
@@ -211,11 +278,14 @@ namespace RhythmDojo.Tests
                 var advancedPanel = canvas.GetComponentsInChildren<RectTransform>(true)
                     .Single(rect => rect.name == "Advanced Grid Panel");
                 Assert.That(advancedPanel.gameObject.activeSelf, Is.False);
-                var advancedButton = buttons.Single(b => b.name == "Advanced Grid");
+                var advancedButton = buttons.Single(b => b.name == "Grid Settings");
+                var workspace = Object.FindFirstObjectByType<WorkspaceEditor>();
+                workspace.view.OpenMenu(workspace.view.menus[1]);
                 Click(advancedButton);
                 Assert.That(advancedPanel.gameObject.activeInHierarchy, Is.True);
                 menu.ToggleFile();
                 Assert.That(advancedPanel.gameObject.activeSelf, Is.False);
+                workspace.view.OpenMenu(workspace.view.menus[1]);
                 Click(advancedButton);
                 Assert.That(canvas.GetComponentsInChildren<RectTransform>(true)
                     .Single(rect => rect.name == "File Panel").gameObject.activeSelf, Is.False);
@@ -250,6 +320,7 @@ namespace RhythmDojo.Tests
                 Click(buttons.Single(b => b.name == "Undo"));
                 Assert.That(screen.Session.Snapshot.Grid.Meters.Length, Is.EqualTo(1));
                 Click(buttons.Single(b => b.name == "Redo"));
+                workspace.view.OpenMenu(workspace.view.menus[1]);
                 Click(advancedButton);
                 Assert.That(ProjectValidation.ContentEquals(edited, screen.Session.Snapshot), Is.True);
                 Capture(screen, "Logs/grid-timeline-small.png", 960, 540);

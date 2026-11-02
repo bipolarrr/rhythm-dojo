@@ -146,6 +146,10 @@ namespace RhythmDojo.EditorTools
             Action(settings, "BPM 자동 측정", WorkspaceAction.EstimateBpm, bindings);
             view.offset = Field(settings, "악곡 시작 타이밍 (ms)", "0");
             Action(settings, "설정 적용", WorkspaceAction.ApplySettings, bindings);
+            var gridSettings = workspace.timeline.GetComponent<ChartAudioTimelineView>().gridSettingsControl;
+            gridSettings.transform.SetParent(settings, false);
+            UiElements.Position(gridSettings.GetComponent<RectTransform>(), new Vector2(4, Next(settings, 24)), new Vector2(478, 24));
+            StyleMenuButton(gridSettings, TextAnchor.MiddleLeft, 14);
 
             var edit = Menu(canvas.transform, view, "편집", 2, menus);
             Action(edit, "실행 취소", WorkspaceAction.Undo, bindings);

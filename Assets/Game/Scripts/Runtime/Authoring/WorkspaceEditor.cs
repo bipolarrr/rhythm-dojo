@@ -275,6 +275,12 @@ namespace RhythmDojo.Authoring
 
         private void HandleEscape()
         {
+            if (timeline.IsTempoChangeOpen)
+            {
+                timeline.CloseTempoChange();
+                return;
+            }
+
             if (movingNote)
             {
                 CancelGrab();
@@ -328,6 +334,22 @@ namespace RhythmDojo.Authoring
 
         private bool HandlePopupKeyboard(Keyboard keyboard)
         {
+            if (timeline.IsTempoChangeOpen)
+            {
+                if (keyboard.enterKey.wasPressedThisFrame || keyboard.numpadEnterKey.wasPressedThisFrame)
+                {
+                    var selected = EventSystem.current?.currentSelectedGameObject;
+                    if (selected && selected.GetComponent<Button>())
+                    {
+                        return true;
+                    }
+
+                    timeline.ApplyTempoChange();
+                }
+
+                return true;
+            }
+
             WorkspaceAction action;
             if (view.saveAsPopup.activeSelf)
             {
@@ -1311,7 +1333,10 @@ namespace RhythmDojo.Authoring
                 -grabbedNotes.Min(note => note.Data.Lane),
                 chart.LaneCount - 1 - grabbedNotes.Max(note => note.Data.Lane));
             grabLane = grabbedNote.Data.Lane + laneShift;
-            double beat = grid.Projection.Unproject(point.y) - grabBeatOffset;
+            double pointerTime = timeline.Timing.TimeAtBeat(grid.Projection.Unproject(point.y));
+            double grabbedBeat = timeline.Timing.BeatAtTime(grabbedNote.Data.StartTime);
+            double pointerOffset = timeline.Timing.TimeAtBeat(grabbedBeat + grabBeatOffset) - grabbedNote.Data.StartTime;
+            double beat = timeline.Timing.BeatAtTime(pointerTime - pointerOffset);
             if (screen.SnapEnabled)
             {
                 beat = Math.Round(beat / screen.SnapBeats) * screen.SnapBeats;

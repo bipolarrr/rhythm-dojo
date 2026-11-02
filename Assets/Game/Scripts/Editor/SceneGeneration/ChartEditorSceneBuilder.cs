@@ -294,7 +294,7 @@ namespace RhythmDojo.EditorTools
             );
 
             var file = MenuPanel("File Panel", canvas.transform, 490);
-            var settings = MenuPanel("Settings Panel", canvas.transform, 470);
+            var settings = MenuPanel("Settings Panel", canvas.transform, 520);
             var tools = MenuPanel("Tools Panel", canvas.transform, 210);
             SceneBuilder.Wire(menu, "filePanel", file.gameObject);
             SceneBuilder.Wire(menu, "settingsPanel", settings.gameObject);
@@ -342,6 +342,7 @@ namespace RhythmDojo.EditorTools
                 Field(settings, "Duration", "채보 종료 시간 (초)", 316)
             );
             ActionButton(settings, "Apply Settings", "설정 적용", 408, menu.ApplySettings);
+            view.gridSettingsControl = AudioTimelineUi.Button(settings, "Grid Settings", "그리드 세부 설정", 16, 458, 488, null);
             SceneBuilder.Wire(
                 menu,
                 "undo",

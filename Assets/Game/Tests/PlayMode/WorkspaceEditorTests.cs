@@ -123,6 +123,342 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        public IEnumerator SaikiAt128BpmCanDragAndWheelBeforeFirstMeasure()
+        {
+            string path = Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath,
+                "..", "LocalAudio", "Saiki.wav"));
+            if (!File.Exists(path))
+            {
+                Assert.Ignore("Place the local Saiki verification song at LocalAudio/Saiki.wav.");
+            }
+
+            workspace.view.audioPath.text = path;
+            workspace.Run(WorkspaceAction.ImportAudio);
+            yield return Idle();
+            double deadline = Time.realtimeSinceStartupAsDouble + 60;
+            while (workspace.timeline.Peaks == null || !workspace.timeline.Peaks.Ready)
+            {
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                yield return null;
+            }
+
+            workspace.view.bpm.text = "128";
+            workspace.Run(WorkspaceAction.ApplySettings);
+            yield return Idle();
+            Assert.That(workspace.screen.Session.Snapshot.TempoPoints[0].Bpm, Is.EqualTo(128));
+            var detail = workspace.timeline.GetComponent<ChartAudioTimelineView>().detail;
+            Vector2 point = Center(detail.rectTransform);
+            yield return MoveTo(point);
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = point, buttons = 1 });
+            yield return null;
+            Vector2 destination = point + new Vector2(detail.rectTransform.rect.width * 0.25f, 0);
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = destination, buttons = 1 });
+            yield return null;
+            yield return null;
+            yield return MoveTo(destination);
+            Assert.That(workspace.timeline.WindowStart, Is.LessThan(0),
+                "Dragging the imported waveform right must reveal the pre-song grid.");
+
+            for (int i = 0; i < 40; i++)
+            {
+                InputSystem.QueueStateEvent(mouse, new MouseState
+                {
+                    position = point,
+                    scroll = new Vector2(0, 120)
+                });
+                yield return null;
+                yield return null;
+            }
+
+            double expected = -44 * 60.0 / 128;
+            Assert.That(workspace.timeline.WindowStart, Is.EqualTo(expected).Within(1e-8));
+            Assert.That(workspace.screen.ScrollBeatOffset, Is.EqualTo(-44).Within(1e-8));
+            detail.RefreshLabels();
+            Assert.That(detail.GetComponentsInChildren<Text>()
+                .Any(label => label.text == "-10.1"), Is.True);
+            Assert.That(workspace.timeline.MusicTime, Is.Zero);
+
+            yield return ClickAt(point);
+            Assert.That(workspace.timeline.WindowStart, Is.EqualTo(expected).Within(1e-8),
+                "Clicking before the audio begins must not reset the viewport to measure 1.");
+            Assert.That(workspace.timeline.MusicTime,
+                Is.EqualTo(expected + workspace.timeline.WindowDuration * 0.5).Within(0.05),
+                "The playhead must move to the clicked negative time.");
+            yield return null;
+            Assert.That(workspace.grid.PlayheadTime,
+                Is.EqualTo(workspace.timeline.MusicTime + workspace.timeline.AudioOffset).Within(1e-8));
+
+            workspace.timeline.Seek(expected - 10);
+            Assert.That(workspace.timeline.MusicTime, Is.EqualTo(expected).Within(1e-8));
+            workspace.timeline.Seek(-0.5);
+            Assert.That(workspace.timeline.MusicTime, Is.EqualTo(-0.5).Within(1e-8));
+            workspace.timeline.PlayPreview();
+            yield return new WaitForSecondsRealtime(0.15f);
+            Assert.That(workspace.timeline.MusicTime, Is.InRange(-0.5, -0.1));
+            Assert.That(workspace.timeline.GetComponent<AudioSource>().timeSamples, Is.Zero);
+            workspace.timeline.PausePreview();
+            double paused = workspace.timeline.MusicTime;
+            yield return new WaitForSecondsRealtime(0.1f);
+            Assert.That(workspace.timeline.MusicTime, Is.EqualTo(paused).Within(1e-8));
+
+            workspace.timeline.SetPreviewSpeed(0.5f);
+            workspace.timeline.PlayPreview();
+            yield return new WaitForSecondsRealtime(1.2f);
+            Assert.That(workspace.timeline.MusicTime, Is.GreaterThan(0));
+            Assert.That(workspace.timeline.GetComponent<AudioSource>().timeSamples, Is.GreaterThan(0));
+            workspace.timeline.StopPreview();
+            workspace.timeline.SetPreviewSpeed(1);
+            Assert.That(workspace.timeline.MusicTime, Is.Zero);
+
+            workspace.timeline.Seek(0.75);
+            Assert.That(workspace.timeline.MusicTime, Is.EqualTo(0.75).Within(1e-8));
+            Assert.That(workspace.screen.ScrollBeatOffset,
+                Is.EqualTo(workspace.timeline.Timing.BeatAtTime(0.75)).Within(1e-8));
+        }
+
+        [UnityTest]
+        public IEnumerator Saiki128To256To64KeepsScrollSpeedAndPlacesNotesOnResizedBeatSpacing()
+        {
+            string path = Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath,
+                "..", "LocalAudio", "Saiki.wav"));
+            if (!File.Exists(path))
+            {
+                Assert.Ignore("Place the local Saiki verification song at LocalAudio/Saiki.wav.");
+            }
+
+            workspace.view.audioPath.text = path;
+            workspace.Run(WorkspaceAction.ImportAudio);
+            yield return Idle();
+            double deadline = Time.realtimeSinceStartupAsDouble + 60;
+            while (workspace.timeline.Peaks == null || !workspace.timeline.Peaks.Ready)
+            {
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                yield return null;
+            }
+
+            workspace.screen.Session.Edit(edit => edit.SetTiming(0,
+                new TempoPoint(0, 128), new TempoPoint(7.5, 256), new TempoPoint(15, 64)));
+            workspace.screen.ResetView();
+            var timing = workspace.timeline.Timing;
+            var grid = workspace.grid;
+            var area = grid.rectTransform.rect;
+            double unitsPerSecond = area.height / workspace.screen.VisibleBeats * 128 / 60;
+            foreach (double boundary in new[] { 7.5, 15.0 })
+            {
+                workspace.timeline.Seek(boundary - 0.25);
+                workspace.timeline.GetComponent<ChartAudioTimelineView>().followAudioControl.onClick.Invoke();
+                yield return null;
+                double startTime = timing.TimeAtBeat(workspace.screen.ScrollBeatOffset);
+                double startY = grid.Projection.Project(timing.BeatAtTime(20));
+                workspace.timeline.PlayPreview();
+                yield return new WaitForSecondsRealtime(0.6f);
+                workspace.timeline.PausePreview();
+                yield return null;
+                double endTime = timing.TimeAtBeat(workspace.screen.ScrollBeatOffset);
+                double endY = grid.Projection.Project(timing.BeatAtTime(20));
+                Assert.That(workspace.timeline.MusicTime, Is.GreaterThan(boundary));
+                Assert.That(endTime, Is.GreaterThan(boundary));
+                Assert.That(startY - endY, Is.EqualTo((endTime - startTime) * unitsPerSecond).Within(0.001),
+                    "Playback follow must keep the same pixel speed through both BPM transitions.");
+            }
+
+            double previousY = 0;
+            foreach (double time in new[] { 7.3, 7.4, 7.5, 7.6, 14.8, 14.9, 15.0, 15.1 })
+            {
+                workspace.screen.Scroll(timing.BeatAtTime(time) - workspace.screen.ScrollBeatOffset);
+                yield return null;
+                var projection = grid.Projection;
+                double y = projection.Project(timing.BeatAtTime(20));
+                if (time != 7.3 && time != 14.8)
+                {
+                    Assert.That(previousY - y, Is.EqualTo(unitsPerSecond * 0.1).Within(0.001),
+                        "An equal elapsed time must move the grid by equal pixels across BPM changes.");
+                }
+
+                Assert.That(timing.TimeAtBeat(projection.Unproject(area.yMax)) - time,
+                    Is.EqualTo(workspace.screen.VisibleBeats * 60.0 / 128).Within(1e-8));
+                previousY = y;
+            }
+
+            foreach (double start in new[] { 0.0, 7.5, 15 })
+            {
+                workspace.timeline.Pan(start);
+                yield return null;
+                var projection = grid.Projection;
+                double beat = timing.BeatAtTime(start + 0.5);
+                double spacing = projection.Project(beat + 1) - projection.Project(beat);
+                Assert.That(spacing, Is.EqualTo(projection.UnitsPerBeat * 128 / timing.BpmAt(start + 0.5)).Within(0.001));
+                Vector2 local = new Vector2(area.xMin + area.width * 0.125f, area.yMin + area.height * 0.8f);
+                double expectedBeat = timing.SnapBeat(projection.Unproject(local.y), workspace.screen.SnapBeats,
+                    workspace.screen.ScrollBeatOffset, projection.Unproject(area.yMax));
+                double expectedTime = timing.TimeAtBeat(expectedBeat);
+                Vector2 point = RectTransformUtility.WorldToScreenPoint(null, grid.rectTransform.TransformPoint(local));
+                yield return ClickAt(point);
+                Assert.That(workspace.screen.Session.GetNotes(workspace.screen.ChartId)
+                    .Any(note => Math.Abs(note.Data.StartTime - expectedTime) < 1e-8), Is.True,
+                    "A click must use the tempo-dependent grid spacing, including beyond the old visible-beat limit.");
+                Assert.That(grid.HitTest(new Vector2(local.x, (float)projection.Project(expectedBeat))), Is.Not.Zero);
+            }
+
+            workspace.timeline.Pan(5);
+            yield return null;
+            CaptureTempoPreview("tempo-spacing-128-256.png");
+            workspace.timeline.Pan(12);
+            yield return null;
+            CaptureTempoPreview("tempo-spacing-256-64.png");
+        }
+
+        [UnityTest]
+        public IEnumerator TempoButtonEditsCursorBpmAndSettingsKeepsDetailedGridControls()
+        {
+            string path = Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath,
+                "..", "LocalAudio", "Saiki.wav"));
+            if (!File.Exists(path))
+            {
+                Assert.Ignore("Place the local Saiki verification song at LocalAudio/Saiki.wav.");
+            }
+
+            workspace.view.audioPath.text = path;
+            workspace.Run(WorkspaceAction.ImportAudio);
+            yield return Idle();
+            double deadline = Time.realtimeSinceStartupAsDouble + 60;
+            while (workspace.timeline.Peaks == null || !workspace.timeline.Peaks.Ready)
+            {
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                yield return null;
+            }
+
+            workspace.view.bpm.text = "128";
+            workspace.Run(WorkspaceAction.ApplySettings);
+            yield return Idle();
+            var timelineView = workspace.timeline.GetComponent<ChartAudioTimelineView>();
+            Assert.That(timelineView.advancedGridControl.GetComponentInChildren<Text>().text, Is.EqualTo("변속"));
+            yield return ClickAt(Center(workspace.view.menus[1].trigger.GetComponent<RectTransform>()));
+            workspace.view.menus[1].panel.GetComponent<ScrollRect>().verticalNormalizedPosition = 0;
+            yield return null;
+            yield return ClickAt(Center(timelineView.gridSettingsControl.GetComponent<RectTransform>()));
+            Assert.That(timelineView.advanced.activeSelf, Is.True);
+            Assert.That(workspace.view.HasOpenMenu, Is.False);
+            Assert.That(timelineView.numerator.gameObject.activeInHierarchy, Is.True);
+            yield return ClickAt(Center(timelineView.closeAdvancedControl.GetComponent<RectTransform>()));
+
+            workspace.screen.Session.Edit(edit =>
+            {
+                edit.AddNote(workspace.screen.ChartId, NoteData.Tap(0, 1));
+                edit.AddNote(workspace.screen.ChartId, NoteData.Hold(1, 8, 10));
+            });
+            var original = workspace.screen.Session.GetNotes(workspace.screen.ChartId);
+            var grid = workspace.screen.Session.Snapshot.Grid;
+            timelineView.existingNotePolicyControl.value = 1;
+            workspace.timeline.Seek(7.51);
+            yield return ClickAt(Center(timelineView.advancedGridControl.GetComponent<RectTransform>()));
+            Assert.That(timelineView.tempoChangePopup.activeSelf, Is.True);
+            Assert.That(workspace.screen.IsBusy, Is.True);
+            StringAssert.Contains("5.1", timelineView.tempoChangePosition.text);
+            Assert.That(timelineView.tempoChangeBpm.text, Is.EqualTo("128"));
+            timelineView.tempoChangeBpm.text = "160";
+            CaptureTempoPreview("tempo-change-dialog.png");
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.Enter));
+            yield return null;
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+            yield return null;
+            Assert.That(timelineView.tempoChangePopup.activeSelf, Is.False);
+            Assert.That(workspace.screen.IsBusy, Is.False);
+            var points = workspace.screen.Session.Snapshot.TempoPoints;
+            Assert.That(points.Length, Is.EqualTo(2));
+            Assert.That(points[1].StartTimeSeconds, Is.EqualTo(7.5).Within(1e-8));
+            Assert.That(points[1].Bpm, Is.EqualTo(160));
+            Assert.That(workspace.screen.Session.GetNotes(workspace.screen.ChartId), Is.EqualTo(original));
+            Assert.That(workspace.screen.Session.Snapshot.Grid.Meters, Is.EqualTo(grid.Meters));
+            workspace.timeline.Pan(7);
+            yield return null;
+            Assert.That(timelineView.detail.GetComponentsInChildren<Text>()
+                .Any(label => label.text == "BPM 128 → 160"), Is.True);
+            CaptureTempoPreview("tempo-change-marker.png");
+
+            workspace.screen.Session.Undo();
+            Assert.That(workspace.screen.Session.Snapshot.TempoPoints.Length, Is.EqualTo(1));
+            workspace.screen.Session.Redo();
+            workspace.timeline.Seek(7.5);
+            yield return ClickAt(Center(timelineView.advancedGridControl.GetComponent<RectTransform>()));
+            Assert.That(timelineView.tempoChangeBpm.text, Is.EqualTo("160"));
+            Assert.That(timelineView.deleteTempoChangeControl.interactable, Is.True);
+            timelineView.tempoChangeBpm.text = "192";
+            yield return ClickAt(Center(timelineView.applyTempoChangeControl.GetComponent<RectTransform>()));
+            Assert.That(workspace.screen.Session.Snapshot.TempoPoints.Length, Is.EqualTo(2));
+            Assert.That(workspace.screen.Session.Snapshot.TempoPoints[1].Bpm, Is.EqualTo(192));
+
+            workspace.Run(WorkspaceAction.Save);
+            yield return Idle();
+            var saved = workspace.menu.Store.Read(workspace.screen.Session.Snapshot.Id);
+            Assert.That(saved.TempoPoints[1].Bpm, Is.EqualTo(192));
+            workspace.timeline.Seek(7.5);
+            yield return ClickAt(Center(timelineView.advancedGridControl.GetComponent<RectTransform>()));
+            yield return ClickAt(Center(timelineView.deleteTempoChangeControl.GetComponent<RectTransform>()));
+            Assert.That(workspace.screen.Session.Snapshot.TempoPoints.Length, Is.EqualTo(1));
+            Assert.That(workspace.screen.Session.GetNotes(workspace.screen.ChartId), Is.EqualTo(original));
+        }
+
+        [UnityTest]
+        public IEnumerator TempoDialogRejectsInvalidBpmAndCancelsWithoutChangingTiming()
+        {
+            var timelineView = workspace.timeline.GetComponent<ChartAudioTimelineView>();
+            var original = workspace.screen.Session.Snapshot.TempoPoints;
+            yield return ClickAt(Center(timelineView.advancedGridControl.GetComponent<RectTransform>()));
+            Assert.That(timelineView.deleteTempoChangeControl.interactable, Is.False);
+            foreach (string value in new[] { "0", "-5", "NaN", "abc" })
+            {
+                timelineView.tempoChangeBpm.text = value;
+                yield return ClickAt(Center(timelineView.applyTempoChangeControl.GetComponent<RectTransform>()));
+                Assert.That(timelineView.tempoChangePopup.activeSelf, Is.True);
+                Assert.That(timelineView.tempoChangeError.text, Is.Not.Empty);
+                Assert.That(workspace.screen.Session.Snapshot.TempoPoints, Is.EqualTo(original));
+            }
+
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.Escape));
+            yield return null;
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+            yield return null;
+            Assert.That(timelineView.tempoChangePopup.activeSelf, Is.False);
+            Assert.That(workspace.screen.IsBusy, Is.False);
+            Assert.That(workspace.view.exitPopup.activeSelf, Is.False);
+            Assert.That(workspace.screen.Session.Snapshot.TempoPoints, Is.EqualTo(original));
+        }
+
+        private void CaptureTempoPreview(string name)
+        {
+            var canvas = workspace.screen.GetComponentInParent<Canvas>();
+            var camera = Camera.main;
+            var target = new RenderTexture(1280, 720, 24);
+            var texture = new Texture2D(1280, 720, TextureFormat.RGB24, false);
+            var previous = RenderTexture.active;
+            var previousTarget = camera.targetTexture;
+            var previousMode = canvas.renderMode;
+            try
+            {
+                canvas.renderMode = RenderMode.ScreenSpaceCamera;
+                canvas.worldCamera = camera;
+                canvas.planeDistance = 1;
+                camera.targetTexture = target;
+                Canvas.ForceUpdateCanvases();
+                camera.Render();
+                RenderTexture.active = target;
+                texture.ReadPixels(new Rect(0, 0, 1280, 720), 0, 0);
+                texture.Apply();
+                Directory.CreateDirectory("Logs");
+                File.WriteAllBytes(Path.Combine("Logs", name), texture.EncodeToPNG());
+            }
+            finally
+            {
+                canvas.renderMode = previousMode;
+                camera.targetTexture = previousTarget;
+                RenderTexture.active = previous;
+                UnityEngine.Object.Destroy(target);
+                UnityEngine.Object.Destroy(texture);
+            }
+        }
+
+        [UnityTest]
         public IEnumerator QuantizationButtonStartsAtQuarterCyclesAndSynchronizesAllControls()
         {
             var view = workspace.view;

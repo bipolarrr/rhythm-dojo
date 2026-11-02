@@ -12,6 +12,8 @@ using UnityEngine.UI;
 
 namespace RhythmDojo.Tests
 {
+    [PrebuildSetup(typeof(TestRunStartup))]
+    [PostBuildCleanup(typeof(TestRunStartup))]
     public sealed class ChartEditorScreenTests
     {
         [UnityTest]
@@ -90,6 +92,10 @@ namespace RhythmDojo.Tests
                 float originalY = notes.Bounds(0).center.y;
                 yield return Scroll(mouse, point, 120);
                 Assert.That(editor.VisibleBeats, Is.EqualTo(16), "Wheel alone must not zoom.");
+                Assert.That(editor.ScrollBeatOffset, Is.EqualTo(-0.5));
+                Assert.That(notes.Bounds(0).center.y, Is.GreaterThan(originalY));
+                originalY = notes.Bounds(0).center.y;
+
                 InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.LeftCtrl));
                 yield return null;
                 yield return Scroll(mouse, point, 120);

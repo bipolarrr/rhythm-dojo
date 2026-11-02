@@ -50,6 +50,14 @@ namespace RhythmDojo.Authoring
         public Dropdown existingNotePolicyControl;
         public Dropdown displayDensityControl;
         public Button advancedGridControl;
+        public Button gridSettingsControl;
+        public GameObject tempoChangePopup;
+        public Text tempoChangePosition;
+        public Text tempoChangeError;
+        public InputField tempoChangeBpm;
+        public Button applyTempoChangeControl;
+        public Button deleteTempoChangeControl;
+        public Button cancelTempoChangeControl;
         public RectTransform canvas;
         public Text lockLabel;
         public Selectable[] editControls;
@@ -68,7 +76,9 @@ namespace RhythmDojo.Authoring
                 halfBPMControl, gridLockControl, noteSnapControl, closeAdvancedControl, tempoSegmentsControl,
                 addTempoSegmentControl, applyTempoSegmentControl, deleteTempoSegmentControl, alignTempoSegmentControl, captureFirstBeatControl,
                 captureSecondBeatControl, calculateBPMControl, existingNotePolicyControl, displayDensityControl, advancedGridControl,
-                canvas, lockLabel,
+                canvas, lockLabel, gridSettingsControl, tempoChangePopup, tempoChangePosition,
+                tempoChangeError, tempoChangeBpm, applyTempoChangeControl, deleteTempoChangeControl,
+                cancelTempoChangeControl,
             };
             foreach (var reference in references)
             {

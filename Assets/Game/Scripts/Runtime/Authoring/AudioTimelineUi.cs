@@ -144,6 +144,20 @@ namespace RhythmDojo.Authoring
             }
 
             graphic.ConfigureLabels(labels);
+            if (!overview)
+            {
+                var tempoLabels = new Text[24];
+                for (int i = 0; i < tempoLabels.Length; i++)
+                {
+                    tempoLabels[i] = Label(go.transform, "Tempo Label " + i, "", 0, 26, 175, 22);
+                    tempoLabels[i].fontSize = 12;
+                    tempoLabels[i].color = new Color(0.35f, 0.8f, 1);
+                    tempoLabels[i].gameObject.SetActive(false);
+                }
+
+                graphic.ConfigureTempoLabels(tempoLabels);
+            }
+
             return graphic;
         }
     }
