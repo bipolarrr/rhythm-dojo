@@ -26,12 +26,16 @@ namespace RhythmDojo.Tests
             public void Release(int lane, double time) => Released?.Invoke(lane, time);
         }
 
-        private sealed class FakeClock : ISongClock, IInputTimingClock
+        private sealed class FakeClock : ISongClock, IInputTimingClock, IResumableSongClock
         {
             public double SongTime { get; set; }
             public bool Running { get; private set; }
 
             public int Schedules;
+
+            public void Pause() => Running = false;
+
+            public void Resume() => Running = true;
 
             public double InputTimingOffsetSeconds { get; set; }
 
@@ -185,6 +189,40 @@ namespace RhythmDojo.Tests
                 null,
                 rules
             );
+        }
+
+        [Test]
+        public void PausePreservesProgressAndHeldNotesWhileBlockingJudgmentsAndRestartInput()
+        {
+            var input = new FakeInput();
+            var clock = new FakeClock();
+            using var c = Coordinator(input, clock, new FakePresenter());
+            c.Start();
+            input.Press(0, 1);
+            clock.SongTime = 5.2;
+            input.Press(1, 5.2);
+            c.Tick();
+            c.Pause();
+            int resolved = c.Session.Resolved;
+            input.Release(1, 6);
+            input.Press(1, 6.1);
+            input.Start();
+            c.LoseFocus();
+            c.Tick();
+            Assert.That(c.IsPaused, Is.True);
+            Assert.That(c.Session.IsHeld(1), Is.True);
+            Assert.That(c.Session.Resolved, Is.EqualTo(resolved));
+            Assert.That(c.Snapshot.SongTime, Is.EqualTo(5.2));
+            Assert.That(clock.Schedules, Is.EqualTo(1));
+            c.Resume();
+            input.Release(1, 6.8);
+            Assert.That(c.Session.Perfect, Is.EqualTo(2));
+            Assert.That(clock.Running, Is.True);
+            c.Pause();
+            c.Restart();
+            Assert.That(c.IsPaused, Is.False);
+            Assert.That(c.Session.Resolved, Is.Zero);
+            Assert.That(clock.Schedules, Is.EqualTo(2));
         }
 
         [TestCase(ScrollMode.Constant, .5)]

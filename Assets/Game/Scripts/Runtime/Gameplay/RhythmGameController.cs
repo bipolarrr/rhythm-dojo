@@ -87,6 +87,14 @@ namespace RhythmDojo.Gameplay
 
         public void StartSession() => coordinator?.Start();
 
+        public bool IsPaused => coordinator?.IsPaused ?? false;
+
+        public void PauseSession() => coordinator?.Pause();
+
+        public void ResumeSession() => coordinator?.Resume();
+
+        public void RestartSession() => coordinator?.Restart();
+
         private void Update() => coordinator?.Tick();
 
         private void OnApplicationFocus(bool focused)

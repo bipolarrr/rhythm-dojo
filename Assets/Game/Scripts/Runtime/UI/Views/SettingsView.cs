@@ -16,6 +16,11 @@ namespace RhythmDojo.UI
         public Button soundTab,
             graphicsTab;
         public Button gameplayTab;
+        public Button keySettingsTab;
+        public GameObject keySettingsPanel;
+        public Button[] keyBindingButtons;
+        public Button resetKeys;
+        public Text keyBindingStatus;
         public GameObject gameplayPanel;
         public Slider speedSlider,
             timingOffset;
@@ -42,6 +47,18 @@ namespace RhythmDojo.UI
 
         public void Validate()
         {
+            if (!keySettingsTab || !keySettingsPanel || !resetKeys)
+            {
+                throw new InvalidOperationException("Key settings view references missing.");
+            }
+            if (!keyBindingStatus || keyBindingButtons == null)
+            {
+                throw new InvalidOperationException("Key settings controls missing.");
+            }
+            if (keyBindingButtons.Length != 4 || Array.Exists(keyBindingButtons, value => !value))
+            {
+                throw new InvalidOperationException("Four key binding buttons required.");
+            }
             if ((!bufferList || !actualState) || !status)
             {
                 throw new InvalidOperationException("Settings view references missing.");

@@ -229,6 +229,10 @@ namespace RhythmDojo.Tests
             Assert.That(game.Session.Health, Is.EqualTo(100));
             Assert.That(game.Session.State, Is.EqualTo(SessionState.Playing));
             yield return Press(Key.Escape);
+            var pauseMenu = Object.FindFirstObjectByType<GameplayPauseMenu>();
+            Assert.That(pauseMenu.panel.activeSelf, Is.True);
+            Assert.That(game.IsPaused, Is.True);
+            yield return Click(pauseMenu.exitButton);
             yield return Await(() => Object.FindFirstObjectByType<SongSelectionScreen>());
             Assert.That(
                 Object.FindFirstObjectByType<SongSelectionScreen>().HardModeSelected,

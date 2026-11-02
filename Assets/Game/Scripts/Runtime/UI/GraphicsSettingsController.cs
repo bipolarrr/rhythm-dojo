@@ -166,7 +166,18 @@ namespace RhythmDojo.UI
             view.actualState.text =
                 $"현재 DSP: {actual.BufferSize} samples × {actual.BufferCount} · {actual.SampleRate} Hz\n요청 버퍼: {audio.RequestedBufferSize} samples";
             view.status.text = audio.BufferStatus;
-            view.apply.interactable = view.back.interactable = !navigation.Transitioning;
+            bool validating = false;
+            if (audio is IAudioBufferValidation validation)
+            {
+                validating = validation.IsBufferValidationPending;
+                view.status.gameObject.SetActive(validating || validation.HasBufferValidationResult);
+            }
+            view.bufferList.SetValueWithoutNotify(audio.SelectedBufferOption);
+            view.bufferList.interactable = !validating && !navigation.Transitioning;
+            view.apply.interactable = view.back.interactable = !navigation.Transitioning && !validating;
+            view.soundTab.interactable = !validating;
+            view.gameplayTab.interactable = !validating;
+            view.keySettingsTab.interactable = !validating;
         }
 
         public void Dispose()

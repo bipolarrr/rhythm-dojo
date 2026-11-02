@@ -32,8 +32,8 @@ namespace RhythmDojo.EditorTools
             var popup = Panel(
                 "Settings Popup",
                 canvas.transform,
-                new Vector2(130, -65),
-                new Vector2(1020, 590),
+                new Vector2(130, -35),
+                new Vector2(1020, 650),
                 new Color(.015f, .02f, .025f, .88f)
             );
             UiElements.Label(
@@ -68,7 +68,7 @@ namespace RhythmDojo.EditorTools
                 "Tab Divider",
                 popup.transform,
                 new Vector2(202, -104),
-                new Vector2(2, 380),
+                new Vector2(2, 440),
                 new Color(1, 1, 1, .14f)
             );
             view.soundPanel = Panel(
@@ -232,7 +232,7 @@ namespace RhythmDojo.EditorTools
             UiElements.Label(
                 "Hold End Help", view.gameplayPanel.transform,
                 "Automatic: 재입력 허용 · 끝에서 누르고 있으면 자동 판정\nRelease: 조기 해제·시작 Miss 후 복구 불가 · 남은 유지 판정 Miss",
-                new Vector2(0, -365), new Vector2(700, 64), 17);
+                new Vector2(0, -398), new Vector2(700, 54), 17);
 
             view.masterLabel = UiElements.Label(
                 "Master Volume Label",
@@ -267,31 +267,31 @@ namespace RhythmDojo.EditorTools
             view.aspectList = UiElements.Dropdown(
                 "Aspect Ratio",
                 parent,
-                new Vector2(230, 0),
-                new Vector2(470, 40)
+                new Vector2(180, 0),
+                new Vector2(520, 64)
             );
-            Caption(parent, "해상도", -54);
+            Caption(parent, "해상도", -94);
             view.resolutionList = UiElements.Dropdown(
                 "Resolution",
                 parent,
-                new Vector2(230, -54),
-                new Vector2(470, 40)
+                new Vector2(180, -94),
+                new Vector2(520, 64)
             );
-            Caption(parent, "FPS", -108);
+            Caption(parent, "FPS", -188);
             view.fpsList = UiElements.Dropdown(
                 "Frame Rate",
                 parent,
-                new Vector2(230, -108),
-                new Vector2(470, 40)
+                new Vector2(180, -188),
+                new Vector2(520, 64)
             );
             view.qualityButtons = System.Array.Empty<Button>();
             view.qualityLabels = System.Array.Empty<Text>();
-            Caption(parent, "DSP 버퍼", -162);
+            Caption(parent, "DSP 버퍼", -282);
             view.bufferList = UiElements.Dropdown(
                 "DSP Buffer",
                 parent,
-                new Vector2(230, -162),
-                new Vector2(470, 40)
+                new Vector2(180, -282),
+                new Vector2(520, 64)
             );
             view.displayState = UiElements.Label(
                 "Display State",
@@ -313,12 +313,27 @@ namespace RhythmDojo.EditorTools
                 "Audio Status",
                 parent,
                 "",
-                new Vector2(0, -326),
+                new Vector2(0, -350),
                 new Vector2(700, 40),
-                14
+                16
             );
-            view.apply = Tab("Apply", popup.transform, "적용", new Vector2(640, -514));
-            view.back = Tab("Back", popup.transform, "닫기", new Vector2(816, -514));
+            // Buffer validation reveals its status only while checking or after an application.
+            view.displayState.gameObject.SetActive(false);
+            view.actualState.gameObject.SetActive(false);
+            view.status.gameObject.SetActive(false);
+            foreach (var dropdown in new[] { view.aspectList, view.resolutionList, view.fpsList, view.bufferList })
+            {
+                dropdown.captionText.fontSize = 24;
+                dropdown.itemText.fontSize = 24;
+                dropdown.template.sizeDelta = new Vector2(dropdown.template.sizeDelta.x, 240);
+                var item = (RectTransform)dropdown.itemText.transform.parent;
+                item.sizeDelta = new Vector2(item.sizeDelta.x, 48);
+                var content = (RectTransform)item.parent;
+                content.sizeDelta = new Vector2(content.sizeDelta.x, 48);
+            }
+
+            view.apply = Tab("Apply", popup.transform, "적용", new Vector2(640, -574));
+            view.back = Tab("Back", popup.transform, "닫기", new Vector2(816, -574));
 
             var nav = view.bufferList.navigation;
             nav.mode = Navigation.Mode.Explicit;
@@ -348,10 +363,128 @@ namespace RhythmDojo.EditorTools
             view.soundPanel.SetActive(true);
             view.graphicsPanel.SetActive(false);
             view.gameplayPanel.SetActive(false);
+            BuildKeySettings(view);
 
             PixelOptionsStyle.Apply(view);
+            PixelOptionsStyle.StyleKeySettings(view);
+            ApplyFont(view);
+            ApplyCaptionSizes(view);
+            ApplyPlayRuleSizes(view);
 
             return view;
+        }
+
+        public static void BuildKeySettings(SettingsView view)
+        {
+            if (view.keySettingsTab)
+            {
+                return;
+            }
+            var popup = view.transform.Find("Settings Popup");
+            view.keySettingsTab = Tab("Key Settings Tab", popup, "키 셋팅", new Vector2(28, -309));
+            view.keySettingsPanel = Panel("Key Settings Panel", popup, new Vector2(238, -110),
+                new Vector2(740, 380), Color.clear);
+            var parent = view.keySettingsPanel.transform;
+            UiElements.Label("Key Settings Heading", parent, "플레이 키 설정", Vector2.zero,
+                new Vector2(700, 44), 34);
+            view.keyBindingButtons = new Button[4];
+            for (int i = 0; i < view.keyBindingButtons.Length; i++)
+            {
+                float x = i * 178;
+                var label = UiElements.Label("Lane Caption " + i, parent, (i + 1) + "번 레인",
+                    new Vector2(x, -64), new Vector2(154, 36), 26);
+                label.alignment = TextAnchor.MiddleCenter;
+                view.keyBindingButtons[i] = UiElements.Button("Lane Key " + i, parent,
+                    RhythmDojo.Services.PlayKeyBindings.GetLabel(i), new Vector2(x, -110), new Vector2(154, 82));
+                var text = view.keyBindingButtons[i].GetComponentInChildren<Text>();
+                SetCaptionSize(text, 42, 18);
+            }
+            UiElements.Label("Key Settings Help", parent,
+                "바꿀 키를 누른 뒤 원하는 키보드 키를 입력하세요.\nEsc: 변경 취소 · Space: 재시작 전용 · 중복 키 사용 불가",
+                new Vector2(0, -216), new Vector2(700, 72), 25);
+            view.keyBindingStatus = UiElements.Label("Key Binding Status", parent,
+                "기본 D F J K · 변경한 키는 자동 저장됩니다.",
+                new Vector2(0, -292), new Vector2(700, 54), 24);
+            view.resetKeys = UiElements.Button("Reset Play Keys", parent, "기본값으로 복원",
+                new Vector2(0, -350), new Vector2(250, 44));
+            view.resetKeys.GetComponentInChildren<Text>().fontSize = 26;
+            view.keySettingsPanel.SetActive(false);
+        }
+
+        public static void ApplyFont(SettingsView view)
+        {
+            var font = AssetDatabase.LoadAssetAtPath<Font>(SongSelectionLayoutBuilder.BrushFontPath);
+            if (!font)
+            {
+                throw new InvalidOperationException("Settings brush font missing.");
+            }
+            var scope = view.GetComponent<UiFontScope>();
+            if (!scope)
+            {
+                scope = view.gameObject.AddComponent<UiFontScope>();
+            }
+            scope.font = font;
+            UiFontSettings.ApplyTo(view.transform);
+        }
+
+        public static void ApplyCaptionSizes(SettingsView view)
+        {
+            foreach (var text in new[] { view.masterLabel, view.backgroundLabel, view.gameplayLabel })
+            {
+                SetCaptionSize(text, 32, 28);
+            }
+            SetCaptionSize(view.speedLabel, 30, 26);
+            SetCaptionSize(view.timingLabel, 30, 26);
+            foreach (Transform child in view.graphicsPanel.transform)
+            {
+                var text = child.GetComponent<Text>();
+                if (text && child.name.EndsWith(" Label", StringComparison.Ordinal))
+                {
+                    SetCaptionSize(text, 30, 26);
+                }
+            }
+            foreach (Transform child in view.gameplayPanel.transform)
+            {
+                var text = child.GetComponent<Text>();
+                if (text && child.name.StartsWith("Play Rule ", StringComparison.Ordinal))
+                {
+                    SetCaptionSize(text, 26, 23);
+                }
+            }
+        }
+
+        public static void ApplyPlayRuleSizes(SettingsView view)
+        {
+            for (int i = 0; i < view.playRuleLists.Length; i++)
+            {
+                float y = -156 - i * 48;
+                var text = view.gameplayPanel.transform.Find("Play Rule " + i).GetComponent<Text>();
+                UiElements.Position(text.rectTransform, new Vector2(0, y), new Vector2(200, 44));
+                SetCaptionSize(text, 30, 28);
+                text.alignment = TextAnchor.MiddleLeft;
+
+                var dropdown = view.playRuleLists[i];
+                UiElements.Position((RectTransform)dropdown.transform, new Vector2(210, y), new Vector2(490, 44));
+                SetCaptionSize(dropdown.captionText, 30, 28);
+                dropdown.captionText.alignment = TextAnchor.MiddleLeft;
+                dropdown.captionText.rectTransform.offsetMin = new Vector2(16, 2);
+                dropdown.captionText.rectTransform.offsetMax = new Vector2(-44, -2);
+                SetCaptionSize(dropdown.itemText, 30, 28);
+                dropdown.itemText.alignment = TextAnchor.MiddleLeft;
+                dropdown.template.sizeDelta = new Vector2(dropdown.template.sizeDelta.x, 208);
+                var item = (RectTransform)dropdown.itemText.transform.parent;
+                item.sizeDelta = new Vector2(item.sizeDelta.x, 52);
+                var content = (RectTransform)item.parent;
+                content.sizeDelta = new Vector2(content.sizeDelta.x, 52);
+            }
+        }
+
+        private static void SetCaptionSize(Text text, int size, int minimumSize)
+        {
+            text.fontSize = size;
+            text.resizeTextForBestFit = true;
+            text.resizeTextMinSize = minimumSize;
+            text.resizeTextMaxSize = size;
         }
 
         private static void StyleHardRuleDropdown(Dropdown dropdown)
@@ -424,8 +557,8 @@ namespace RhythmDojo.EditorTools
                 caption + " Label",
                 parent,
                 caption,
-                new Vector2(0, y - 4),
-                new Vector2(215, 36),
+                new Vector2(0, y - 12),
+                new Vector2(170, 40),
                 23
             );
 

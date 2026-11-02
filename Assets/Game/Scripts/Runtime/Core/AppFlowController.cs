@@ -37,7 +37,6 @@ namespace RhythmDojo.Core
         private ModalInputScope settingsInputScope;
         private SettingsScreen settingsPopup;
         private Action<string> returned;
-
         public GameSettings Settings => settings;
 
         public SongLibrary Library { get; private set; }
@@ -166,6 +165,8 @@ namespace RhythmDojo.Core
             return SceneManager.GetSceneByPath(SettingsPath).isLoaded;
         }
 
+        private void Update() => Audio?.Tick();
+
         private void OnEnable() => SceneManager.sceneLoaded += SceneLoaded;
 
         private void OnDisable() => SceneManager.sceneLoaded -= SceneLoaded;
@@ -254,6 +255,7 @@ namespace RhythmDojo.Core
             }
 
             var rules = Rules.Snapshot;
+            Audio.CancelBufferValidation();
             Transitioning = true;
 
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(
@@ -357,6 +359,7 @@ namespace RhythmDojo.Core
             }
 
             var rules = Rules.Snapshot;
+            Audio.CancelBufferValidation();
             Transitioning = true;
 
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(
@@ -458,6 +461,23 @@ namespace RhythmDojo.Core
             OpenSettingsPopup();
         }
 
+        public void ShowGameplaySettings()
+        {
+            if (Transitioning || !SceneManager.GetSceneByPath(GameplayPath).isLoaded)
+            {
+                return;
+            }
+
+            var game = FindFirstObjectByType<RhythmGameController>();
+            if (!game || !game.IsPaused)
+            {
+                return;
+            }
+
+            settingsReturnPath = GameplayPath;
+            OpenSettingsPopup();
+        }
+
         public void ShowTitleSettings()
         {
             if (
@@ -479,7 +499,11 @@ namespace RhythmDojo.Core
                 return;
             }
 
-            ClearEditorReturn();
+            Audio.CancelBufferValidation();
+            if (settingsReturnPath != GameplayPath)
+            {
+                ClearEditorReturn();
+            }
 
             if (settingsInputScope == null)
             {
@@ -542,6 +566,7 @@ namespace RhythmDojo.Core
 
         private void Load(string path)
         {
+            Audio?.CancelBufferValidation();
             if (settingsInputScope != null)
             {
                 settingsPopup.gameObject.SetActive(false);

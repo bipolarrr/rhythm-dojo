@@ -1,6 +1,7 @@
 using System;
 using RhythmDojo.Application;
 using RhythmDojo.Gameplay;
+using RhythmDojo.Services;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,6 +15,7 @@ namespace RhythmDojo.UI
         private GameplayPresentationSettings settings;
         private Image[] indicators;
         private Text[] keyLabels;
+        private GameModeDefinition bindingMode;
         private double[] flashUntil;
         private Color[] flashColor;
         private double nextTextRefresh;
@@ -55,6 +57,7 @@ namespace RhythmDojo.UI
             }
 
             settings = presentation;
+            bindingMode = mode;
             model = readModel;
             indicators = view.lanes.Build(mode, presentation);
             keyLabels = new Text[indicators.Length];
@@ -65,11 +68,20 @@ namespace RhythmDojo.UI
             }
 
             flashUntil = new double[indicators.Length];
+            PlayKeyBindings.Changed += RefreshKeyLabels;
             flashColor = new Color[indicators.Length];
             model.Judged += Judged;
             model.HoldStarted += HoldStarted;
             model.ResetOccurred += ResetDisplay;
             ResetDisplay();
+        }
+
+        private void RefreshKeyLabels()
+        {
+            for (int i = 0; i < keyLabels.Length; i++)
+            {
+                keyLabels[i].text = PlayKeyBindings.GetLabel(bindingMode, i);
+            }
         }
 
         private void Judged(JudgmentEvent result)
@@ -439,6 +451,7 @@ namespace RhythmDojo.UI
 
         public void Unbind()
         {
+            PlayKeyBindings.Changed -= RefreshKeyLabels;
             if (model == null)
             {
                 return;

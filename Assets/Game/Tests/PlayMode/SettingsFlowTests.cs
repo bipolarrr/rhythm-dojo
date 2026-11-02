@@ -106,6 +106,20 @@ namespace RhythmDojo.Tests
             Assert.That(UnityEngine.Application.targetFrameRate, Is.EqualTo(beforeFrameRate));
             yield return Click(view.soundTab);
             Assert.That(view.gameplayPanel.activeSelf, Is.False);
+            var popupFrame = view.transform.Find("Settings Popup").GetComponentInChildren<PixelDojoFrameGraphic>();
+            Assert.That(popupFrame.artwork.name, Is.EqualTo("SettingsPanel"));
+            Canvas.ForceUpdateCanvases();
+            var panelMesh = popupFrame.canvasRenderer.GetMesh();
+            Assert.That(panelMesh.vertexCount, Is.EqualTo(36));
+            Assert.That(panelMesh.vertices[2].x - panelMesh.vertices[0].x, Is.EqualTo(24f).Within(.01f),
+                "The textured frame corners must retain their size instead of stretching with the panel.");
+            Assert.That(view.backdrop.GetComponent<Image>().sprite.name, Is.EqualTo("TrainingInterior"));
+            foreach (var button in new[] { view.soundTab, view.graphicsTab, view.gameplayTab, view.apply, view.back })
+            {
+                var frame = button.GetComponentInChildren<PixelDojoFrameGraphic>();
+                Assert.That(frame.artwork.name, Is.EqualTo("SettingsControl"));
+                Assert.That(frame.mainTexture, Is.SameAs(frame.artwork.texture));
+            }
             Assert.That(view.soundPanel.activeSelf, Is.True);
             yield return Click(view.graphicsTab);
             Assert.That(view.gameplayPanel.activeSelf, Is.False);
@@ -255,6 +269,8 @@ namespace RhythmDojo.Tests
 
                         var before = new Vector2Int(Screen.width, Screen.height);
                         view.apply.onClick.Invoke();
+                        yield return Await(() => !UnityEngine.Object.FindFirstObjectByType<AppFlowController>()
+                            .Audio.IsBufferValidationPending, "Audio verification did not finish after display apply.");
                         yield return Await(
                             () =>
                                 new Vector2Int(Screen.width, Screen.height)
@@ -362,6 +378,23 @@ namespace RhythmDojo.Tests
             Assert.That(view.soundPanel.activeSelf, Is.False);
             Assert.That(view.graphicsPanel.activeSelf, Is.True);
             Assert.That(view.bufferList.gameObject.activeInHierarchy, Is.True);
+            Assert.That(view.displayState.gameObject.activeSelf, Is.False);
+            Assert.That(view.actualState.gameObject.activeSelf, Is.False);
+            Assert.That(view.status.gameObject.activeSelf, Is.False);
+            foreach (var dropdown in new[] { view.aspectList, view.resolutionList, view.fpsList, view.bufferList })
+            {
+                Assert.That(((RectTransform)dropdown.transform).sizeDelta, Is.EqualTo(new Vector2(520, 64)));
+                Assert.That(dropdown.captionText.fontSize, Is.EqualTo(24));
+                Assert.That(dropdown.image.sprite.name, Is.EqualTo("SettingsControl"));
+                Assert.That(dropdown.image.type, Is.EqualTo(Image.Type.Sliced));
+                Assert.That(dropdown.transform.Find("Settings Expand Indicator"), Is.Not.Null);
+                foreach (var toggle in dropdown.template.GetComponentsInChildren<Toggle>(true))
+                {
+                    Assert.That(toggle.graphic.gameObject.activeSelf, Is.False,
+                        "Settings dropdowns must not show a square beside the selected option.");
+                }
+            }
+
             Assert.That(view.aspectList.options.Count, Is.EqualTo(2));
             Assert.That(view.resolutionList.options.Count, Is.EqualTo(2));
             view.aspectList.value = 1;
@@ -386,6 +419,8 @@ namespace RhythmDojo.Tests
             Assert.That(QualitySettings.shadowDistance, Is.EqualTo(beforeShadowDistance));
             Assert.That(QualitySettings.lodBias, Is.EqualTo(beforeLodBias));
             Assert.That(QualitySettings.anisotropicFiltering, Is.EqualTo(beforeFiltering));
+            yield return Await(() => !UnityEngine.Object.FindFirstObjectByType<AppFlowController>()
+                .Audio.IsBufferValidationPending, "Audio verification did not finish before closing settings.");
             yield return Click(view.back);
             yield return Await(() => !UnityEngine.Object.FindFirstObjectByType<SettingsScreen>());
             Assert.That(selection.enabled, Is.True);
@@ -454,6 +489,30 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        public IEnumerator BufferValidationBlocksEarlyCloseAndShowsTheAppliedConfiguration()
+        {
+            var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
+            flow.ShowSettings();
+            var view = UnityEngine.Object.FindFirstObjectByType<SettingsView>();
+            yield return Click(view.graphicsTab);
+            view.bufferList.value = 1;
+            view.apply.onClick.Invoke();
+            Assert.That(flow.Audio.IsBufferValidationPending, Is.True);
+            Assert.That(view.back.interactable, Is.False);
+            Assert.That(view.bufferList.interactable, Is.False);
+            yield return Press(Key.Escape);
+            Assert.That(view.gameObject.activeInHierarchy, Is.True, "Escape must not resume a song before validation ends.");
+            yield return Await(() => !flow.Audio.IsBufferValidationPending, "Audio buffer validation did not finish.");
+            Assert.That(flow.Audio.LastDspRealtimeRatio, Is.InRange(.85, 1.15));
+            Assert.That(view.back.interactable, Is.True);
+            Assert.That(view.bufferList.value, Is.EqualTo(flow.SelectedBufferOption));
+            Assert.That(view.status.gameObject.activeInHierarchy, Is.True);
+            Assert.That(view.status.text, Does.Contain($"{AudioSettings.GetConfiguration().dspBufferSize} samples"));
+            yield return Click(view.back);
+            Assert.That(view.gameObject.activeSelf, Is.False);
+        }
+
+        [UnityTest]
         public IEnumerator SettingsMouseAndKeyboardApplyActualBufferAndKeepSelection()
         {
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
@@ -498,12 +557,14 @@ namespace RhythmDojo.Tests
             yield return Press(Key.Enter);
             Assert.That(
                 UnityEngine
-                    .Object.FindObjectsByType<Text>(FindObjectsSortMode.None)
-                    .Single(t => t.name == "Actual Audio State")
+                    .Object.FindFirstObjectByType<SettingsView>()
+                    .actualState
                     .text,
                 Does.Contain($"{AudioSettings.GetConfiguration().dspBufferSize} samples")
             );
             Assert.That(flow.BufferStatus, Does.Contain("Actual:"));
+            yield return Await(() => !flow.Audio.IsBufferValidationPending, "Audio verification did not finish.");
+            int appliedOption = flow.SelectedBufferOption;
             yield return Press(Key.RightArrow);
             yield return Press(Key.Enter);
             yield return Await(() =>
@@ -518,9 +579,10 @@ namespace RhythmDojo.Tests
             yield return Click(
                 UnityEngine.Object.FindFirstObjectByType<SettingsView>().graphicsTab
             );
-            Assert.That(dropdown.value, Is.EqualTo(1));
+            Assert.That(dropdown.value, Is.EqualTo(appliedOption));
             dropdown.value = 0;
             yield return Click(UnityEngine.Object.FindFirstObjectByType<SettingsView>().apply);
+            yield return Await(() => !flow.Audio.IsBufferValidationPending);
             Assert.That(
                 AudioSettings.GetConfiguration().dspBufferSize,
                 Is.EqualTo(flow.DefaultBufferSize)

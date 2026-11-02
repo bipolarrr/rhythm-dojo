@@ -34,6 +34,7 @@ namespace RhythmDojo.Tests
         private string previousPresentation;
         private string previousHardMode;
         private string previousRules;
+        private string previousPlayKeys;
         private float previousMasterVolume,
             previousLodBias,
             previousShadowDistance;
@@ -46,6 +47,8 @@ namespace RhythmDojo.Tests
         public IEnumerator SetUp()
         {
             System.IO.Directory.CreateDirectory("Logs");
+            previousPlayKeys = PlayerPrefs.GetString(RhythmDojo.Services.PlayKeyBindings.StorageKey, "");
+            PlayerPrefs.DeleteKey(RhythmDojo.Services.PlayKeyBindings.StorageKey);
             previousRules = PlayerPrefs.GetString(
                 RhythmDojo.Services.PlayRulesService.StorageKey,
                 ""
@@ -103,6 +106,14 @@ namespace RhythmDojo.Tests
         [UnityTearDown]
         public IEnumerator TearDown()
         {
+            if (string.IsNullOrEmpty(previousPlayKeys))
+            {
+                PlayerPrefs.DeleteKey(RhythmDojo.Services.PlayKeyBindings.StorageKey);
+            }
+            else
+            {
+                PlayerPrefs.SetString(RhythmDojo.Services.PlayKeyBindings.StorageKey, previousPlayKeys);
+            }
             if (string.IsNullOrEmpty(previousRules))
             {
                 PlayerPrefs.DeleteKey(RhythmDojo.Services.PlayRulesService.StorageKey);
@@ -235,7 +246,9 @@ namespace RhythmDojo.Tests
             Assert.That(
                 hits[0].gameObject.GetComponentInParent<Button>(),
                 Is.EqualTo(button),
-                "Button is obscured."
+                "Button is obscured by " + hits[0].gameObject.name
+                    + " in " + hits[0].gameObject.scene.path
+                    + "; EventSystem: " + system.gameObject.scene.path
             );
             InputSystem.QueueStateEvent(mouse, new MouseState { position = point + Vector2.one });
             yield return null;

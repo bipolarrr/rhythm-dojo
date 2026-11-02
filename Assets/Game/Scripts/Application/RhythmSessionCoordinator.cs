@@ -19,6 +19,9 @@ namespace RhythmDojo.Application
         private double songTime;
         private ReadyReason reason;
         private bool disposed;
+        public bool IsPaused { get; private set; }
+        private readonly System.Collections.Generic.HashSet<int> pausedReleases =
+            new System.Collections.Generic.HashSet<int>();
 
         public RhythmSession Session { get; }
 
@@ -163,7 +166,13 @@ namespace RhythmDojo.Application
 
         private void Press(int lane, double timestamp)
         {
-            if (!disposed && clock.Running)
+            if (IsPaused)
+            {
+                pausedReleases.Remove(lane);
+                return;
+            }
+
+            if (!disposed && !IsPaused && clock.Running)
             {
                 Session.PressLane(lane, clock.InputTimeToSongTime(timestamp));
             }
@@ -171,7 +180,13 @@ namespace RhythmDojo.Application
 
         private void Release(int lane, double timestamp)
         {
-            if (!disposed && clock.Running)
+            if (IsPaused)
+            {
+                pausedReleases.Add(lane);
+                return;
+            }
+
+            if (!disposed && !IsPaused && clock.Running)
             {
                 Session.ReleaseLane(lane, clock.InputTimeToSongTime(timestamp));
             }
@@ -179,7 +194,7 @@ namespace RhythmDojo.Application
 
         public void Start()
         {
-            if (disposed)
+            if (disposed || IsPaused)
             {
                 return;
             }
@@ -199,7 +214,7 @@ namespace RhythmDojo.Application
 
         public void Tick()
         {
-            if (disposed)
+            if (disposed || IsPaused)
             {
                 return;
             }
@@ -233,7 +248,7 @@ namespace RhythmDojo.Application
 
         public void LoseFocus()
         {
-            if (disposed || Session.State != SessionState.Playing)
+            if (disposed || IsPaused || Session.State != SessionState.Playing)
             {
                 return;
             }
@@ -246,6 +261,47 @@ namespace RhythmDojo.Application
             reason = ReadyReason.FocusLost;
             ResetOccurred?.Invoke();
             presenter.Render(Session, songTime);
+        }
+
+        public void Pause()
+        {
+            if (disposed || IsPaused || Session.State != SessionState.Playing)
+            {
+                return;
+            }
+
+            if (clock is IResumableSongClock pausable)
+            {
+                songTime = clock.SongTime;
+                pausable.Pause();
+                IsPaused = true;
+            }
+        }
+
+        public void Resume()
+        {
+            if (disposed || !IsPaused)
+            {
+                return;
+            }
+
+            ((IResumableSongClock)clock).Resume();
+            IsPaused = false;
+            foreach (int lane in pausedReleases)
+            {
+                if (Session.IsHeld(lane))
+                {
+                    Session.ReleaseLane(lane, songTime);
+                }
+            }
+            pausedReleases.Clear();
+        }
+
+        public void Restart()
+        {
+            IsPaused = false;
+            pausedReleases.Clear();
+            Start();
         }
 
         public void Dispose()

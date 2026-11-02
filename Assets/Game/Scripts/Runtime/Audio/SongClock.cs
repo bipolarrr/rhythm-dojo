@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace RhythmDojo.Audio
 {
-    public sealed class SongClock : MonoBehaviour, ISongClock, IInputTimingClock, IPausableSongClock
+    public sealed class SongClock : MonoBehaviour, ISongClock, IInputTimingClock, IPausableSongClock, IResumableSongClock
     {
         [SerializeField]
         private AudioSource source;
@@ -18,6 +18,8 @@ namespace RhythmDojo.Audio
         private double dspRealtimeOffset;
         private double clockSampleRealtime;
         private int clockSampleFrame = -1;
+        private bool pausedAudioReset;
+        private int pausedSamplePosition;
 
         public double ScheduledStartDspTime { get; private set; }
         public bool Running { get; private set; }
@@ -129,13 +131,48 @@ namespace RhythmDojo.Audio
 
             pausedSongTime = SongTime;
             paused = true;
+            pausedAudioReset = false;
 
             if (source)
             {
+                pausedSamplePosition = source.timeSamples;
                 source.Pause();
             }
 
             Running = false;
+        }
+
+        public void Resume()
+        {
+            if (!paused || !initialized)
+            {
+                return;
+            }
+
+            double dsp = AudioSettings.dspTime;
+            clockSampleRealtime = Time.realtimeSinceStartupAsDouble;
+            clockSampleFrame = Time.frameCount;
+            dspRealtimeOffset = dsp - clockSampleRealtime;
+            ScheduledStartDspTime = dsp + offset - pausedSongTime;
+            RefreshVolume();
+            if (pausedSongTime < offset)
+            {
+                source.Stop();
+                source.PlayScheduled(ScheduledStartDspTime);
+            }
+            else if (pausedAudioReset)
+            {
+                source.Stop();
+                source.timeSamples = Mathf.Clamp(pausedSamplePosition, 0, source.clip.samples - 1);
+                source.Play();
+            }
+            else
+            {
+                source.UnPause();
+            }
+
+            paused = false;
+            Running = true;
         }
 
         public void Stop()
@@ -165,6 +202,7 @@ namespace RhythmDojo.Audio
 
         private void OnEnable()
         {
+            AudioSettings.OnAudioConfigurationChanged += AudioConfigurationChanged;
             RhythmDojo.Services.PresentationPreferences.Changed += RefreshVolume;
 
             if (initialized)
@@ -175,8 +213,17 @@ namespace RhythmDojo.Audio
 
         private void OnDisable()
         {
+            AudioSettings.OnAudioConfigurationChanged -= AudioConfigurationChanged;
             RhythmDojo.Services.PresentationPreferences.Changed -= RefreshVolume;
             Stop();
+        }
+
+        private void AudioConfigurationChanged(bool deviceWasChanged)
+        {
+            if (paused)
+            {
+                pausedAudioReset = true;
+            }
         }
     }
 }

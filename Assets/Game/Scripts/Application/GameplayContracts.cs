@@ -38,6 +38,11 @@ namespace RhythmDojo.Application
         void Pause();
     }
 
+    public interface IResumableSongClock : IPausableSongClock
+    {
+        void Resume();
+    }
+
     public interface IInputTimingClock
     {
         double InputTimingOffsetSeconds { get; }

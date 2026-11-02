@@ -5,6 +5,7 @@ using RhythmDojo.Content;
 using RhythmDojo.Gameplay;
 using RhythmDojo.Input;
 using RhythmDojo.Presentation;
+using RhythmDojo.Services;
 using RhythmDojo.UI;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -52,6 +53,7 @@ namespace RhythmDojo.Core
         private PlayableSong ownedSong;
         private GameModeDefinition runtimeMode;
         private GameplayPresentationSettings runtimePresentation;
+        private GameplayPauseMenu pauseMenu;
 
         public void Validate(bool validateGeneratedViews = false)
         {
@@ -229,7 +231,12 @@ namespace RhythmDojo.Core
             );
             controller.ReadModel.Judged += TrackCombo;
             controller.ReadModel.ResetOccurred += ResetRecord;
-            input.ReturnRequested += ReturnToSelection;
+            pauseMenu = hud.GetComponent<GameplayPauseMenu>();
+            if (pauseMenu)
+            {
+                pauseMenu.Initialize(controller, flow, this);
+            }
+            input.ReturnRequested += HandleGameplayEscape;
             ui.Initialize(controller.ReadModel, ReturnToSelection);
             initialized = true;
             input.Activate();
@@ -271,7 +278,7 @@ namespace RhythmDojo.Core
                 return;
             }
 
-            if (playRequest == null)
+            if (playRequest == null || controller.IsPaused)
             {
                 return;
             }
@@ -301,7 +308,7 @@ namespace RhythmDojo.Core
 
             for (int i = 0; i < laneLabels.Length; i++)
             {
-                laneLabels[i] = runtimeMode.GetLane(i).displayName;
+                laneLabels[i] = PlayKeyBindings.GetLabel(runtimeMode, i);
             }
 
             var result = new PlayResult(
@@ -378,6 +385,17 @@ namespace RhythmDojo.Core
             }
         }
 
+        private void HandleGameplayEscape()
+        {
+            if (pauseMenu && controller.Session.State == SessionState.Playing)
+            {
+                pauseMenu.Open();
+                return;
+            }
+
+            ReturnToSelection();
+        }
+
         public void ReturnToSelection()
         {
             if (!initialized || flow && flow.Transitioning)
@@ -406,7 +424,7 @@ namespace RhythmDojo.Core
             input.Shutdown();
             hud.Unbind();
             initialized = false;
-            input.ReturnRequested -= ReturnToSelection;
+            input.ReturnRequested -= HandleGameplayEscape;
             ui.Unbind();
         }
 
@@ -414,7 +432,7 @@ namespace RhythmDojo.Core
         {
             if (input)
             {
-                input.ReturnRequested -= ReturnToSelection;
+                input.ReturnRequested -= HandleGameplayEscape;
             }
 
             if (ui)

@@ -264,13 +264,15 @@ namespace RhythmDojo.Tests
         {
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
             flow.ShowSettings();
+            Assert.That(flow.Transitioning, Is.False, "Settings opens as a modal without changing scenes.");
             Assert.That(
                 flow.ApplyBufferSize(),
-                Is.False,
-                "Apply during transition must be rejected."
+                Is.True,
+                "The active settings modal must accept audio configuration changes."
             );
             yield return Await(() => UnityEngine.Object.FindFirstObjectByType<SettingsScreen>());
             yield return null;
+            yield return Await(() => !flow.Audio.IsBufferValidationPending, "Initial audio validation did not finish.");
             System.IO.File.WriteAllText(
                 "Logs/audio-buffers.txt",
                 $"Startup: {originalAudio.dspBufferSize} samples / {originalAudio.sampleRate} Hz\n"
@@ -279,8 +281,9 @@ namespace RhythmDojo.Tests
             for (int option = 1; option < AppFlowController.BufferOptionCount; option++)
             {
                 flow.SelectBufferOption(option);
-
+                int requestedSize = flow.RequestedBufferSize;
                 bool accepted = flow.ApplyBufferSize();
+                yield return Await(() => !flow.Audio.IsBufferValidationPending, "DSP buffer validation did not finish.");
                 var actual = AudioSettings.GetConfiguration();
                 AudioSettings.GetDSPBufferSize(out int size, out int count);
                 yield return new WaitForSecondsRealtime(.3f);
@@ -293,16 +296,20 @@ namespace RhythmDojo.Tests
                 double dspElapsed = AudioSettings.dspTime - start;
                 System.IO.File.AppendAllText(
                     "Logs/audio-buffers.txt",
-                    $"Requested {flow.RequestedBufferSize}: accepted={accepted}, actual={size} x {count}, rate={actual.sampleRate}, real={elapsed:F4}s, DSP={dspElapsed:F4}s, ratio={dspElapsed / elapsed:F3}\n"
+                    $"Requested {requestedSize}: accepted={accepted}, actual={size} x {count}, rate={actual.sampleRate}, real={elapsed:F4}s, DSP={dspElapsed:F4}s, ratio={dspElapsed / elapsed:F3}, rejectedRatio={flow.Audio.LastRejectedDspRealtimeRatio:F3}\n"
                 );
                 Assert.That(size, Is.EqualTo(actual.dspBufferSize));
                 Assert.That(size, Is.GreaterThan(0));
                 Assert.That(AudioSettings.dspTime, Is.GreaterThan(start));
+                Assert.That(dspElapsed / elapsed, Is.InRange(.85, 1.15),
+                    "An accepted configuration must advance the real DSP clock at normal speed.");
             }
 
             flow.SelectBufferOption(4);
             Assert.That(flow.ApplyBufferSize(), Is.True);
+            yield return Await(() => !flow.Audio.IsBufferValidationPending);
             flow.ShowSelection();
+            Assert.That(flow.ApplyBufferSize(), Is.False, "Apply during transition must be rejected.");
             yield return Await(() =>
                 UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>()
             );
@@ -320,9 +327,15 @@ namespace RhythmDojo.Tests
                 AudioSettings.GetConfiguration().dspBufferSize,
                 Is.EqualTo(playingConfiguration.dspBufferSize)
             );
+            double realStarted = Time.realtimeSinceStartupAsDouble;
             game.StartSession();
             yield return new WaitForSecondsRealtime(2);
             Assert.That(game.Clock.SongTime, Is.GreaterThan(1));
+            double actualPlayback = UnityEngine.Object.FindFirstObjectByType<SongClock>()
+                .GetComponent<AudioSource>().time;
+            Assert.That(actualPlayback, Is.EqualTo(Time.realtimeSinceStartupAsDouble - realStarted
+                - flow.Settings.audio.ScheduleLeadTime).Within(.25),
+                "Actual audio samples must advance with real time, not just the displayed song clock.");
             Assert.That(
                 UnityEngine
                     .Object.FindFirstObjectByType<SongClock>()
@@ -345,6 +358,48 @@ namespace RhythmDojo.Tests
                 "Logs/audio-buffers.txt",
                 "PASS: requested 256 samples; scheduled playback and restart advance song time and report AudioSource playing. Audible dropouts were not measured.\n"
             );
+        }
+
+        [UnityTest]
+        public IEnumerator TitleMusicReloadsMissingPreferencesAndRestartsAfterAudioReset()
+        {
+            var preferences = RhythmDojo.Services.PresentationPreferences.Current;
+            var property = typeof(RhythmDojo.Services.PresentationPreferences).GetProperty("Current");
+            var settings = ScriptableObject.CreateInstance<TitleMusicSettings>();
+            // Use an imported clip: device resets discard procedural AudioClip data.
+            var clip = Resources.Load<AudioClip>("UI/DojoHitPerfect");
+            Assert.That(clip, Is.Not.Null);
+            typeof(TitleMusicSettings).GetField("musicClip", System.Reflection.BindingFlags.Instance
+                | System.Reflection.BindingFlags.NonPublic).SetValue(settings, clip);
+            var root = new GameObject("Title audio reload regression");
+            try
+            {
+                preferences.backgroundVolume = .35f;
+                preferences.SaveAudio();
+                var player = root.AddComponent<TitleMusicPlayer>();
+                player.Initialize(settings);
+                root.SetActive(false);
+                property.SetValue(null, null);
+                root.SetActive(true);
+                Assert.That(RhythmDojo.Services.PresentationPreferences.Current, Is.Not.Null);
+                var source = root.GetComponent<AudioSource>();
+                Assert.That(source.volume, Is.EqualTo(settings.Volume * .35f).Within(.001f));
+                yield return new WaitForSecondsRealtime(.25f);
+                Assert.That(source.isPlaying, Is.True);
+                Assert.That(AudioSettings.Reset(AudioSettings.GetConfiguration()), Is.True);
+                yield return new WaitForSecondsRealtime(.3f);
+                Assert.That(source.isPlaying, Is.True, "DSP reconfiguration must not leave title music stopped.");
+                double rms = 0;
+                yield return MeasureOutputRms(value => rms = value);
+                Assert.That(rms, Is.GreaterThan(.001), "Title audio must reach the actual output after reset.");
+            }
+            finally
+            {
+                root.SetActive(false);
+                UnityEngine.Object.Destroy(root);
+                UnityEngine.Object.Destroy(settings);
+                property.SetValue(null, preferences);
+            }
         }
     }
 }

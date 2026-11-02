@@ -12,6 +12,37 @@ namespace RhythmDojo.Tests
     public sealed class UiTypographyTests
     {
         [Test]
+        public void SharedPopupAndRuntimeControlsMatchStartButtonTypography()
+        {
+            var popup = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Game/Resources/UI/SettingsPopup.prefab");
+            var font = AssetDatabase.LoadAssetAtPath<Font>(SongSelectionLayoutBuilder.BrushFontPath);
+            Assert.That(popup.GetComponent<UiFontScope>().font, Is.SameAs(font));
+            foreach (var text in popup.GetComponentsInChildren<Text>(true))
+            {
+                Assert.That(text.font, Is.SameAs(font), text.name);
+                Assert.That(text.fontStyle, Is.EqualTo(FontStyle.Bold), text.name);
+            }
+
+            var root = new GameObject("Runtime typography test");
+            try
+            {
+                UiElements.Label("Label", root.transform, "글씨 123", Vector2.zero, new Vector2(200, 40));
+                UiElements.Button("Button", root.transform, "시작", Vector2.zero, new Vector2(200, 40));
+                UiElements.Dropdown("Dropdown", root.transform, Vector2.zero, new Vector2(200, 40));
+                RhythmDojo.Authoring.AudioTimelineUi.Field(root.transform, "Input", "입력", 0, 0, 200, "123");
+                foreach (var text in root.GetComponentsInChildren<Text>(true))
+                {
+                    Assert.That(text.font, Is.SameAs(UiFontSettings.Current), text.name);
+                    Assert.That(text.fontStyle, Is.EqualTo(FontStyle.Bold), text.name);
+                }
+            }
+            finally
+            {
+                Object.DestroyImmediate(root);
+            }
+        }
+
+        [Test]
         public void ScopedControlsKeepBrushFontWhenCreatedAtRuntime()
         {
             var root = new GameObject("Scoped typography test", typeof(UiFontScope));

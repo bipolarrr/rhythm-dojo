@@ -1,5 +1,6 @@
 using System;
 using RhythmDojo.Gameplay;
+using RhythmDojo.Services;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -72,12 +73,15 @@ namespace RhythmDojo.UI
                 var key = UiElements.Label(
                     "Key",
                     go.transform,
-                    mode.GetLane(i).displayName,
+                    PlayKeyBindings.GetLabel(mode, i),
                     Vector2.zero,
                     rect.sizeDelta,
                     26
                 );
                 key.alignment = TextAnchor.MiddleCenter;
+                key.resizeTextForBestFit = true;
+                key.resizeTextMinSize = 12;
+                key.resizeTextMaxSize = 26;
                 if (font)
                 {
                     key.font = font;
