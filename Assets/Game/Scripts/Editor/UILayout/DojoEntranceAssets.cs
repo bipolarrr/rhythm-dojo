@@ -28,6 +28,7 @@ namespace RhythmDojo.EditorTools
             importer.isReadable = true;
             importer.alphaIsTransparency = true;
             importer.mipmapEnabled = false;
+            importer.npotScale = TextureImporterNPOTScale.None;
             importer.filterMode = FilterMode.Point;
             importer.wrapMode = TextureWrapMode.Clamp;
             importer.textureCompression = TextureImporterCompression.Uncompressed;
@@ -35,7 +36,9 @@ namespace RhythmDojo.EditorTools
             importer.SaveAndReimport();
             var texture = AssetDatabase.LoadAssetAtPath<Texture2D>(texturePath);
             var bounds = new Rect(0f, 0f, texture.width, texture.height);
-            if (name != "EntranceFrame" && name != "DoorPanel")
+            bool architecture = name == "EntranceFrame" || name == "DoorPanel";
+            bool trainingArt = name == "TrainingInterior" || name == "TrainingDummy";
+            if (!architecture && !trainingArt)
             {
                 bounds = OpaqueBounds(texture);
             }

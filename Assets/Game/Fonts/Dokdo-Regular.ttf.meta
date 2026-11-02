@@ -1,0 +1,23 @@
+fileFormatVersion: 2
+guid: 39bcbf68896a6bf43b8a98c73e10f749
+TrueTypeFontImporter:
+  externalObjects: {}
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontNames:
+  - Dokdo
+  - Mona12 Text KR
+  fallbackFontReferences:
+  - {fileID: 12800000, guid: 657698f3fff2c4b4cb9a297aad88bd3b, type: 3}
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  useLegacyBoundsCalculation: 0
+  shouldRoundAdvanceValue: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -8,7 +8,7 @@ namespace RhythmDojo.EditorTools
 {
     public static class MainMenuLayoutBuilder
     {
-        public const string FontPath = "Assets/Game/Fonts/Mona12TextKR.ttf";
+        public const string FontPath = "Assets/Game/Fonts/Dokdo-Regular.ttf";
 
         public static MainMenuView Build()
         {

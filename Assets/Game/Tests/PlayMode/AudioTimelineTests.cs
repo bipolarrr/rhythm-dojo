@@ -377,6 +377,11 @@ namespace RhythmDojo.Tests
 
         private static void Capture(ChartEditorScreen screen, string path, int width = 1280, int height = 720)
         {
+            if (System.Environment.GetEnvironmentVariable("RHYTHM_DOJO_SKIP_CAPTURE") == "1")
+            {
+                return;
+            }
+
             var canvas = screen.GetComponentInParent<Canvas>();
             var camera = Camera.main;
             var target = new RenderTexture(width, height, 24);

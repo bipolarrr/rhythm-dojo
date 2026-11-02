@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec77adb86ab590446accb282ac717191, type: 3}
   m_Name: UiFontSettings
   m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.UiFontSettings
-  font: {fileID: 12800000, guid: 657698f3fff2c4b4cb9a297aad88bd3b, type: 3}
+  font: {fileID: 12800000, guid: 39bcbf68896a6bf43b8a98c73e10f749, type: 3}
