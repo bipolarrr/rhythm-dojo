@@ -1,0 +1,98 @@
+[
+  {
+    "path": "C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Scenes\\Title.unity",
+    "before": "F131E544DE83B6A137B0F259DECF06ED0012CCD3594304920808A46C9193FACF",
+    "after": "F131E544DE83B6A137B0F259DECF06ED0012CCD3594304920808A46C9193FACF",
+    "identical": true
+  },
+  {
+    "path": "C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Scenes\\Title.unity.meta",
+    "before": "A973539A6576194D71975FF74894F410CC1A3117EF08C3D0409E5D394562400E",
+    "after": "A973539A6576194D71975FF74894F410CC1A3117EF08C3D0409E5D394562400E",
+    "identical": true
+  },
+  {
+    "path": "C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Scenes\\Bootstrap.unity",
+    "before": "E3A49065A28A36CD65CC952AC202A5009040CA50D7EFC90964BCD89B3B40A482",
+    "after": "E3A49065A28A36CD65CC952AC202A5009040CA50D7EFC90964BCD89B3B40A482",
+    "identical": true
+  },
+  {
+    "path": "C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Scenes\\Bootstrap.unity.meta",
+    "before": "5848E437E4C6D9ABE8240C1E214861A373FC37EE9E9FD14892F8DBDAC03CDF89",
+    "after": "5848E437E4C6D9ABE8240C1E214861A373FC37EE9E9FD14892F8DBDAC03CDF89",
+    "identical": true
+  },
+  {
+    "path": "C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Scenes\\SongSelection.unity",
+    "before": "28BBBE3E22667E335ABC8806F8E93899FF02ADF4F8E636CD5A542B9B9135DADF",
+    "after": "28BBBE3E22667E335ABC8806F8E93899FF02ADF4F8E636CD5A542B9B9135DADF",
+    "identical": true
+  },
+  {
+    "path": "C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Scenes\\SongSelection.unity.meta",
+    "before": "591C784265E9D649BBC28517B2BA722739CFFE6CD5773CA021A592B5CFD9C647",
+    "after": "591C784265E9D649BBC28517B2BA722739CFFE6CD5773CA021A592B5CFD9C647",
+    "identical": true
+  },
+  {
+    "path": "C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Scenes\\Gameplay.unity",
+    "before": "5B770FD7318175355BC1DFD9146152BC30181E8D9685867B227A5FDFA8EA6A0D",
+    "after": "5B770FD7318175355BC1DFD9146152BC30181E8D9685867B227A5FDFA8EA6A0D",
+    "identical": true
+  },
+  {
+    "path": "C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Scenes\\Gameplay.unity.meta",
+    "before": "C22032685B362EC6764507CA285A1523D19CCA9E0C5900213BF63F5E419F9134",
+    "after": "C22032685B362EC6764507CA285A1523D19CCA9E0C5900213BF63F5E419F9134",
+    "identical": true
+  },
+  {
+    "path": "C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Scenes\\Results.unity",
+    "before": "A3B231CFFE06DC3C21799457E46FE0DF1077CA813E51F4FAAED0B40B60390130",
+    "after": "A3B231CFFE06DC3C21799457E46FE0DF1077CA813E51F4FAAED0B40B60390130",
+    "identical": true
+  },
+  {
+    "path": "C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Scenes\\Results.unity.meta",
+    "before": "836BD0E5B01598D04FD6AF7E91F65EBB5E4FA8A9E594704D142664BCADA54F67",
+    "after": "836BD0E5B01598D04FD6AF7E91F65EBB5E4FA8A9E594704D142664BCADA54F67",
+    "identical": true
+  },
+  {
+    "path": "C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Scenes\\Settings.unity",
+    "before": "C39F09C89EF35D1D48B376AAFD1C544EFA2384AE538D339E563E4E6D034147DE",
+    "after": "C39F09C89EF35D1D48B376AAFD1C544EFA2384AE538D339E563E4E6D034147DE",
+    "identical": true
+  },
+  {
+    "path": "C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Scenes\\Settings.unity.meta",
+    "before": "3AA7483EEA61D43820458ADFB64DB1AB1CB57339A258BD0BE2C9A4F055798049",
+    "after": "3AA7483EEA61D43820458ADFB64DB1AB1CB57339A258BD0BE2C9A4F055798049",
+    "identical": true
+  },
+  {
+    "path": "C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Scenes\\ChartEditor.unity",
+    "before": "E91E6A868BFCB01DF9679ABED29979F880080F4A42D3E9E6958A0622AE628299",
+    "after": "E91E6A868BFCB01DF9679ABED29979F880080F4A42D3E9E6958A0622AE628299",
+    "identical": true
+  },
+  {
+    "path": "C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Scenes\\ChartEditor.unity.meta",
+    "before": "8DBC77FA9FC76C546993C4320D5A88493B289EF2FA84244C2E2A048C4D3FC12C",
+    "after": "8DBC77FA9FC76C546993C4320D5A88493B289EF2FA84244C2E2A048C4D3FC12C",
+    "identical": true
+  },
+  {
+    "path": "C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Resources\\UI\\SettingsPopup.prefab",
+    "before": "C3D999C7DB14F8313810C12FE8BE2C89885611030506E05680C07C74D2FA1B29",
+    "after": "C3D999C7DB14F8313810C12FE8BE2C89885611030506E05680C07C74D2FA1B29",
+    "identical": true
+  },
+  {
+    "path": "C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Resources\\UI\\SettingsPopup.prefab.meta",
+    "before": "45EC3BA86F3624443FCD481FE3B4771D12E5A47BF92A7A4C5DF692B2A1C5C494",
+    "after": "45EC3BA86F3624443FCD481FE3B4771D12E5A47BF92A7A4C5DF692B2A1C5C494",
+    "identical": true
+  }
+]
