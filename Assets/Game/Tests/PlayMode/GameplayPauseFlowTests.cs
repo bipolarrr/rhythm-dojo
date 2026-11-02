@@ -65,6 +65,11 @@ namespace RhythmDojo.Tests
             Assert.That(menu.countdownText.text, Is.EqualTo("1"));
             Assert.That(game.Session.Resolved, Is.EqualTo(resolved));
             yield return new WaitForSecondsRealtime(1.05f);
+            if (game.IsPaused)
+            {
+                Assert.That(game.Session.Resolved, Is.EqualTo(resolved));
+            }
+            yield return Await(() => !game.IsPaused && !menu.countdown.activeSelf);
             Assert.That(menu.countdown.activeSelf, Is.False);
             Assert.That(game.IsPaused, Is.False);
             Assert.That(game.Clock.Running, Is.True);

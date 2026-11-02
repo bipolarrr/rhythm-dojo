@@ -6,7 +6,7 @@ using UnityEngine;
 namespace RhythmDojo.Audio
 {
     public sealed class SongClock : MonoBehaviour, ISongClock, IInputTimingClock, IPausableSongClock,
-        IResumableSongClock, IPlaybackReadinessClock
+        IResumableSongClock, IPlaybackReadinessClock, IScheduledResumeClock
     {
         [SerializeField]
         private AudioSource source;
@@ -22,6 +22,11 @@ namespace RhythmDojo.Audio
         private bool pausedAudioReset;
         private int pausedSamplePosition;
         private Func<bool> playbackReady;
+        private double resumeDspTime;
+        private double resumeRealtime;
+
+        public bool ResumePending { get; private set; }
+        public double ResumeDspTime => resumeDspTime;
 
         public bool PlaybackReady => playbackReady?.Invoke() ?? true;
 
@@ -42,6 +47,7 @@ namespace RhythmDojo.Audio
                 throw new ArgumentNullException(nameof(clip));
             }
 
+            CancelResume();
             source.clip = clip;
             pausedAudioReset = true;
         }
@@ -120,6 +126,7 @@ namespace RhythmDojo.Audio
             }
 
             RefreshVolume();
+            ResumePending = false;
             paused = false;
             source.Stop();
             double dsp = AudioSettings.dspTime;
@@ -157,6 +164,12 @@ namespace RhythmDojo.Audio
 
         public void Pause()
         {
+            if (ResumePending)
+            {
+                CancelResume();
+                return;
+            }
+
             if (!Running)
             {
                 return;
@@ -187,30 +200,89 @@ namespace RhythmDojo.Audio
                 return;
             }
 
+            if (ResumePending)
+            {
+                return;
+            }
+
             double dsp = AudioSettings.dspTime;
             clockSampleRealtime = Time.realtimeSinceStartupAsDouble;
             clockSampleFrame = Time.frameCount;
             dspRealtimeOffset = dsp - clockSampleRealtime;
-            ScheduledStartDspTime = dsp + offset - pausedSongTime;
+            resumeDspTime = dsp + lead;
+            resumeRealtime = clockSampleRealtime + lead;
+            ScheduledStartDspTime = resumeDspTime + offset - pausedSongTime;
             RefreshVolume();
+            source.Stop();
+            pausedSamplePosition = AudioResumeTiming.SamplePosition(
+                pausedSongTime, offset, source.clip.frequency, source.clip.samples);
             if (pausedSongTime < offset)
             {
-                source.Stop();
+                source.timeSamples = 0;
                 source.PlayScheduled(ScheduledStartDspTime);
             }
-            else if (pausedAudioReset)
+            else if (pausedSamplePosition < source.clip.samples)
             {
-                source.Stop();
-                source.timeSamples = Mathf.Clamp(pausedSamplePosition, 0, source.clip.samples - 1);
-                source.Play();
-            }
-            else
-            {
-                source.UnPause();
+                source.timeSamples = pausedSamplePosition;
+                source.PlayScheduled(resumeDspTime);
             }
 
+            ResumePending = true;
+        }
+
+        public bool IsInputAfterResume(double timestamp)
+        {
+            return timestamp >= resumeRealtime;
+        }
+
+        public bool TryCompleteResume()
+        {
+            if (!ResumePending)
+            {
+                return Running;
+            }
+
+            if (!PlaybackReady)
+            {
+                CancelResume();
+                return false;
+            }
+
+            double dsp = AudioSettings.dspTime;
+            if (dsp < resumeDspTime)
+            {
+                return false;
+            }
+
+            // A block update can cross the anchor before the old interpolation does.
+            // Re-anchor here so the first resumed logical time never moves backwards.
+            clockSampleRealtime = Time.realtimeSinceStartupAsDouble;
+            clockSampleFrame = Time.frameCount;
+            dspRealtimeOffset = dsp - clockSampleRealtime;
+            ResumePending = false;
+            pausedAudioReset = false;
             paused = false;
             Running = true;
+            return true;
+        }
+
+        public void CancelResume()
+        {
+            if (!ResumePending)
+            {
+                return;
+            }
+
+            source.Stop();
+            ResumePending = false;
+        }
+
+        private void Update()
+        {
+            if (ResumePending)
+            {
+                TryCompleteResume();
+            }
         }
 
         public void Stop()
@@ -221,6 +293,7 @@ namespace RhythmDojo.Audio
             }
 
             Running = false;
+            ResumePending = false;
             paused = false;
             pausedSongTime = 0;
         }
@@ -258,8 +331,14 @@ namespace RhythmDojo.Audio
 
         private void AudioConfigurationChanged(bool deviceWasChanged)
         {
+            if (Running && !PlaybackReady)
+            {
+                Pause();
+            }
+
             if (paused)
             {
+                CancelResume();
                 pausedAudioReset = true;
             }
         }

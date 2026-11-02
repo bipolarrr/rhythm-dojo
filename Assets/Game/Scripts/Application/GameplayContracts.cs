@@ -43,6 +43,14 @@ namespace RhythmDojo.Application
         void Resume();
     }
 
+    public interface IScheduledResumeClock
+    {
+        bool ResumePending { get; }
+        bool IsInputAfterResume(double timestamp);
+        bool TryCompleteResume();
+        void CancelResume();
+    }
+
     public interface IInputTimingClock
     {
         double InputTimingOffsetSeconds { get; }

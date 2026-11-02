@@ -1,0 +1,288 @@
+{
+  "success": true,
+  "command": "command test_status",
+  "data": {
+    "command": "test_status",
+    "parameters": {},
+    "result": {
+      "status": "completed",
+      "duration": 0.35,
+      "summary": {
+        "total": 37,
+        "passed": 37,
+        "failed": 0,
+        "skipped": 0,
+        "inconclusive": 0
+      },
+      "results": [
+        {
+          "FullName": "RhythmDojo.Tests.AudioResumeTimingTests.BeforeAudioClampsToZeroAndEndUsesEndSentinel",
+          "Status": "Passed",
+          "Duration": 0.0187985,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(44100,-0.25d,0)",
+          "Status": "Passed",
+          "Duration": 0.0046807,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(44100,-0.25d,1E-05.0d)",
+          "Status": "Passed",
+          "Duration": 0.0001024,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(44100,-0.25d,0.123456789d)",
+          "Status": "Passed",
+          "Duration": 0.0000699,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(44100,-0.25d,12.3456789d)",
+          "Status": "Passed",
+          "Duration": 0.0000643,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(44100,0,0)",
+          "Status": "Passed",
+          "Duration": 0.0001077,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(44100,0,1E-05.0d)",
+          "Status": "Passed",
+          "Duration": 0.0000886,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(44100,0,0.123456789d)",
+          "Status": "Passed",
+          "Duration": 0.0000758,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(44100,0,12.3456789d)",
+          "Status": "Passed",
+          "Duration": 0.0000793,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(44100,0.25d,0)",
+          "Status": "Passed",
+          "Duration": 0.0000825,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(44100,0.25d,1E-05.0d)",
+          "Status": "Passed",
+          "Duration": 0.0001135,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(44100,0.25d,0.123456789d)",
+          "Status": "Passed",
+          "Duration": 0.0000874,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(44100,0.25d,12.3456789d)",
+          "Status": "Passed",
+          "Duration": 0.0000754,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(48000,-0.25d,0)",
+          "Status": "Passed",
+          "Duration": 0.0000631,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(48000,-0.25d,1E-05.0d)",
+          "Status": "Passed",
+          "Duration": 0.0000599,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(48000,-0.25d,0.123456789d)",
+          "Status": "Passed",
+          "Duration": 0.0001131,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(48000,-0.25d,12.3456789d)",
+          "Status": "Passed",
+          "Duration": 0.0001015,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(48000,0,0)",
+          "Status": "Passed",
+          "Duration": 0.0000776,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(48000,0,1E-05.0d)",
+          "Status": "Passed",
+          "Duration": 0.0000792,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(48000,0,0.123456789d)",
+          "Status": "Passed",
+          "Duration": 0.000097,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(48000,0,12.3456789d)",
+          "Status": "Passed",
+          "Duration": 0.000104,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(48000,0.25d,0)",
+          "Status": "Passed",
+          "Duration": 0.0000741,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(48000,0.25d,1E-05.0d)",
+          "Status": "Passed",
+          "Duration": 0.0000772,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(48000,0.25d,0.123456789d)",
+          "Status": "Passed",
+          "Duration": 0.0000651,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(48000,0.25d,12.3456789d)",
+          "Status": "Passed",
+          "Duration": 0.0000884,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(96000,-0.25d,0)",
+          "Status": "Passed",
+          "Duration": 0.0000905,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(96000,-0.25d,1E-05.0d)",
+          "Status": "Passed",
+          "Duration": 0.0000786,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(96000,-0.25d,0.123456789d)",
+          "Status": "Passed",
+          "Duration": 0.0000663,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(96000,-0.25d,12.3456789d)",
+          "Status": "Passed",
+          "Duration": 0.0000629,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(96000,0,0)",
+          "Status": "Passed",
+          "Duration": 0.0000595,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(96000,0,1E-05.0d)",
+          "Status": "Passed",
+          "Duration": 0.0000599,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(96000,0,0.123456789d)",
+          "Status": "Passed",
+          "Duration": 0.0000661,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(96000,0,12.3456789d)",
+          "Status": "Passed",
+          "Duration": 0.0000612,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(96000,0.25d,0)",
+          "Status": "Passed",
+          "Duration": 0.0000789,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(96000,0.25d,1E-05.0d)",
+          "Status": "Passed",
+          "Duration": 0.0000822,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(96000,0.25d,0.123456789d)",
+          "Status": "Passed",
+          "Duration": 0.0001043,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(96000,0.25d,12.3456789d)",
+          "Status": "Passed",
+          "Duration": 0.0001438,
+          "Message": null,
+          "StackTrace": null
+        }
+      ]
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "C:\\Users\\song\\RhythmDojo-pr-quality"
+    },
+    "success": true
+  },
+  "errors": [],
+  "warnings": []
+}

@@ -1,0 +1,36 @@
+{
+  "success": true,
+  "command": "command test_status",
+  "data": {
+    "command": "test_status",
+    "parameters": {},
+    "result": {
+      "status": "completed",
+      "duration": 51.74,
+      "summary": {
+        "total": 1,
+        "passed": 0,
+        "failed": 1,
+        "skipped": 0,
+        "inconclusive": 0
+      },
+      "results": [
+        {
+          "FullName": "RhythmDojo.Tests.SongClockResumeTests.TwentyResumesKeepSourceSamplesAlignedAcrossBuffersAndOffsets",
+          "Status": "Failed",
+          "Duration": 51.6823907,
+          "Message": "  Expected: null\r\n  But was:  \"Requested 128, applied 128, offset -0.25, cycle 0, frame 1: error -0.023188344352650991, uncertainty 0.020663609069982009, raw DSP error -2.2863024686292643E-05.\"\r\n",
+          "StackTrace": "at RhythmDojo.Tests.SongClockResumeTests+<TwentyResumesKeepSourceSamplesAlignedAcrossBuffersAndOffsets>d__3.MoveNext () [0x00827] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\PlayMode\\SongClockResumeTests.cs:154\r\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@bd7f943e9647\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\r\n"
+        }
+      ]
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "C:\\Users\\song\\RhythmDojo-pr-quality"
+    },
+    "success": true
+  },
+  "errors": [],
+  "warnings": []
+}

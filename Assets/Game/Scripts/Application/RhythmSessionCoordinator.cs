@@ -18,6 +18,8 @@ namespace RhythmDojo.Application
         private readonly double multiplier;
         private double songTime;
         private double pausedInputTime;
+        private bool resumeRequested;
+        private bool resumeInputCutoff;
         private ReadyReason reason;
         private bool disposed;
         public bool IsPaused { get; private set; }
@@ -172,6 +174,12 @@ namespace RhythmDojo.Application
                 return;
             }
 
+            CompleteResumeForInput(timestamp);
+            if (disposed)
+            {
+                return;
+            }
+
             if (IsPaused)
             {
                 pausedReleases.Remove(lane);
@@ -180,12 +188,22 @@ namespace RhythmDojo.Application
 
             if (clock.Running)
             {
+                if (resumeInputCutoff && !((IScheduledResumeClock)clock).IsInputAfterResume(timestamp))
+                {
+                    return;
+                }
                 Session.PressLane(lane, clock.InputTimeToSongTime(timestamp));
             }
         }
 
         private void Release(int lane, double timestamp)
         {
+            if (disposed)
+            {
+                return;
+            }
+
+            CompleteResumeForInput(timestamp);
             if (disposed)
             {
                 return;
@@ -199,6 +217,11 @@ namespace RhythmDojo.Application
 
             if (clock.Running)
             {
+                if (resumeInputCutoff && !((IScheduledResumeClock)clock).IsInputAfterResume(timestamp))
+                {
+                    Session.ReleaseLane(lane, pausedInputTime);
+                    return;
+                }
                 Session.ReleaseLane(lane, clock.InputTimeToSongTime(timestamp));
             }
         }
@@ -217,6 +240,8 @@ namespace RhythmDojo.Application
 
             clock.Stop();
             pausedReleases.Clear();
+            resumeRequested = false;
+            resumeInputCutoff = false;
             Session.Reset();
             input.ResetHeld();
             presenter.Reset();
@@ -231,9 +256,17 @@ namespace RhythmDojo.Application
 
         public void Tick()
         {
-            if (disposed || IsPaused)
+            if (disposed)
             {
                 return;
+            }
+
+            if (IsPaused)
+            {
+                if (!TryCompleteScheduledResume())
+                {
+                    return;
+                }
             }
 
             // Input System Dynamic dispatch precedes the Unity controller's timeout sweep.
@@ -282,13 +315,34 @@ namespace RhythmDojo.Application
 
         public void Pause()
         {
-            if (disposed || IsPaused || Session.State != SessionState.Playing)
+            if (disposed || Session.State != SessionState.Playing)
             {
+                return;
+            }
+
+            if (IsPaused)
+            {
+                TryCompleteScheduledResume();
+            }
+
+            if (disposed)
+            {
+                return;
+            }
+
+            if (IsPaused)
+            {
+                resumeRequested = false;
+                if (clock is IScheduledResumeClock scheduled)
+                {
+                    scheduled.CancelResume();
+                }
                 return;
             }
 
             if (clock is IResumableSongClock pausable)
             {
+                resumeInputCutoff = false;
                 songTime = clock.SongTime;
                 double timingOffsetSeconds = 0;
 
@@ -315,7 +369,30 @@ namespace RhythmDojo.Application
                 return;
             }
 
+            if (resumeRequested)
+            {
+                return;
+            }
+
             ((IResumableSongClock)clock).Resume();
+            if (clock is IScheduledResumeClock scheduled && scheduled.ResumePending)
+            {
+                resumeRequested = true;
+                return;
+            }
+
+            if (!clock.Running)
+            {
+                return;
+            }
+
+            CompleteResume();
+        }
+
+        private void CompleteResume()
+        {
+            resumeInputCutoff = resumeRequested;
+            resumeRequested = false;
             IsPaused = false;
             while (pausedReleases.Count > 0)
             {
@@ -342,6 +419,51 @@ namespace RhythmDojo.Application
             }
         }
 
+        private void CompleteResumeForInput(double timestamp)
+        {
+            if (!IsPaused || !resumeRequested)
+            {
+                return;
+            }
+
+            if (((IScheduledResumeClock)clock).IsInputAfterResume(timestamp))
+            {
+                TryCompleteScheduledResume();
+            }
+        }
+
+        private bool TryCompleteScheduledResume()
+        {
+            if (!resumeRequested)
+            {
+                return false;
+            }
+
+            var scheduled = (IScheduledResumeClock)clock;
+            if (clock is IPlaybackReadinessClock readiness && !readiness.PlaybackReady)
+            {
+                if (clock.Running)
+                {
+                    ((IResumableSongClock)clock).Pause();
+                }
+                scheduled.CancelResume();
+                resumeRequested = false;
+                return false;
+            }
+
+            if (!scheduled.TryCompleteResume())
+            {
+                if (!scheduled.ResumePending)
+                {
+                    resumeRequested = false;
+                }
+                return false;
+            }
+
+            CompleteResume();
+            return !disposed && !IsPaused;
+        }
+
         public void Restart()
         {
             if (disposed)
@@ -355,6 +477,7 @@ namespace RhythmDojo.Application
             }
 
             IsPaused = false;
+            resumeRequested = false;
             pausedReleases.Clear();
             Start();
         }
@@ -368,6 +491,7 @@ namespace RhythmDojo.Application
 
             disposed = true;
             IsPaused = false;
+            resumeRequested = false;
             pausedReleases.Clear();
             input.Pressed -= Press;
             input.Released -= Release;

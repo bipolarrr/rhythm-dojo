@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using RhythmDojo.Application;
 using RhythmDojo.Core;
 using RhythmDojo.Gameplay;
 using UnityEngine;
@@ -23,10 +24,11 @@ namespace RhythmDojo.UI
         private AppFlowController flow;
         private GameplayCompositionRoot root;
         private double resumeAt = -1;
+        private bool waitingForResume;
         private CancellationTokenSource recoveryCancellation;
         private int recoveryGeneration;
 
-        public bool CountingDown => resumeAt >= 0;
+        public bool CountingDown => resumeAt >= 0 || waitingForResume;
         public bool RecoveringAudio => recoveryCancellation != null;
         public string RecoveryError { get; private set; }
 
@@ -153,6 +155,23 @@ namespace RhythmDojo.UI
 
         private void Update()
         {
+            if (waitingForResume)
+            {
+                if (!controller.IsPaused)
+                {
+                    waitingForResume = false;
+                    countdown.SetActive(false);
+                }
+                else if (controller.Clock is IScheduledResumeClock scheduled && !scheduled.ResumePending)
+                {
+                    if (!controller.Clock.Running)
+                    {
+                        Open();
+                    }
+                }
+                return;
+            }
+
             if (!CountingDown)
             {
                 return;
@@ -185,8 +204,10 @@ namespace RhythmDojo.UI
             }
 
             panel.SetActive(false);
-            countdown.SetActive(false);
             controller.ResumeSession();
+            waitingForResume = controller.IsPaused;
+            countdown.SetActive(waitingForResume);
+            countdownText.text = "1";
         }
 
         private async Task<bool> PreparePlayback()
@@ -236,6 +257,7 @@ namespace RhythmDojo.UI
 
         private void CancelRecovery()
         {
+            waitingForResume = false;
             recoveryGeneration++;
             recoveryCancellation?.Cancel();
             recoveryCancellation = null;

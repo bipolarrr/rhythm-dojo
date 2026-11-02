@@ -27,17 +27,50 @@ namespace RhythmDojo.Tests
         }
 
         private sealed class FakeClock : ISongClock, IInputTimingClock, IResumableSongClock,
-            IPlaybackReadinessClock
+            IPlaybackReadinessClock, IScheduledResumeClock
         {
+            public bool ScheduleResume;
+            public bool ResumeReady;
+            public double ResumeTimestamp = 100;
+            public bool ResumePending { get; private set; }
             public bool PlaybackReady { get; set; } = true;
             public double SongTime { get; set; }
             public bool Running { get; private set; }
 
             public int Schedules;
 
-            public void Pause() => Running = false;
+            public void Pause()
+            {
+                Running = false;
+                ResumePending = false;
+            }
 
-            public void Resume() => Running = true;
+            public void Resume()
+            {
+                if (ScheduleResume)
+                {
+                    ResumePending = true;
+                    return;
+                }
+                Running = true;
+            }
+
+            public bool IsInputAfterResume(double timestamp) => timestamp >= ResumeTimestamp;
+
+            public bool TryCompleteResume()
+            {
+                if (ResumePending && ResumeReady)
+                {
+                    ResumePending = false;
+                    Running = true;
+                }
+                return Running;
+            }
+
+            public void CancelResume()
+            {
+                ResumePending = false;
+            }
 
             public double InputTimingOffsetSeconds { get; set; }
 
@@ -51,6 +84,7 @@ namespace RhythmDojo.Tests
             public void Stop()
             {
                 Running = false;
+                ResumePending = false;
                 SongTime = 0;
             }
 
@@ -142,6 +176,134 @@ namespace RhythmDojo.Tests
             c.Resume();
             Assert.That(c.IsPaused, Is.False);
             Assert.That(clock.Running, Is.True);
+        }
+
+        [Test]
+        public void ScheduledResumeDefersReleaseAndSweepUntilAnchor()
+        {
+            var input = new FakeInput();
+            var clock = new FakeClock { ScheduleResume = true };
+            using var c = Coordinator(input, clock, new FakePresenter());
+            c.Start();
+            input.Press(1, 5.2);
+            clock.SongTime = 6.8;
+            c.Pause();
+            input.Release(1, 50);
+            c.Resume();
+            clock.SongTime = 100;
+            c.Tick();
+            Assert.That(c.IsPaused, Is.True);
+            Assert.That(c.Session.GetNoteJudgments(1).End.HasValue, Is.False);
+            Assert.That(c.Snapshot.SongTime, Is.EqualTo(6.8));
+            clock.SongTime = 6.8;
+            clock.ResumeReady = true;
+            c.Tick();
+            Assert.That(c.IsPaused, Is.False);
+            Assert.That(c.Session.GetNoteJudgments(1).End.Value.ErrorSeconds, Is.Zero.Within(1e-9));
+        }
+
+        [Test]
+        public void FirstPostAnchorInputCompletesResumeBeforeTheFrameTick()
+        {
+            var input = new FakeInput();
+            var clock = new FakeClock { ScheduleResume = true, ResumeTimestamp = 1 };
+            using var c = Coordinator(input, clock, new FakePresenter());
+            c.Start();
+            clock.SongTime = .9;
+            c.Pause();
+            c.Resume();
+            clock.ResumeReady = true;
+            input.Press(0, .99);
+            Assert.That(c.IsPaused, Is.True, "A delayed pre-anchor input remains paused input.");
+            Assert.That(c.Session.Resolved, Is.Zero);
+            input.Press(0, 1);
+            Assert.That(c.IsPaused, Is.False);
+            Assert.That(c.Session.Perfect, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void PauseCancelsPendingResumeAndCanPauseAClockThatCompletedBeforeCoordinator()
+        {
+            var input = new FakeInput();
+            var clock = new FakeClock { ScheduleResume = true };
+            using var c = Coordinator(input, clock, new FakePresenter());
+            c.Start();
+            clock.SongTime = .9;
+            c.Pause();
+            c.Resume();
+            c.Pause();
+            Assert.That(clock.ResumePending, Is.False);
+            clock.ResumeReady = true;
+            c.Tick();
+            Assert.That(c.IsPaused, Is.True);
+            Assert.That(clock.Running, Is.False);
+            c.Resume();
+            clock.TryCompleteResume();
+            Assert.That(clock.Running, Is.True);
+            c.Pause();
+            Assert.That(c.IsPaused, Is.True);
+            Assert.That(clock.Running, Is.False);
+        }
+
+        [Test]
+        public void AudioInvalidationAfterClockAnchorKeepsCoordinatorAndClockPaused()
+        {
+            var input = new FakeInput();
+            var clock = new FakeClock { ScheduleResume = true };
+            using var c = Coordinator(input, clock, new FakePresenter());
+            c.Start();
+            clock.SongTime = .9;
+            c.Pause();
+            c.Resume();
+            clock.ResumeReady = true;
+            clock.TryCompleteResume();
+            clock.PlaybackReady = false;
+            c.Tick();
+            Assert.That(c.IsPaused, Is.True);
+            Assert.That(clock.Running, Is.False);
+            Assert.That(c.Session.Resolved, Is.Zero);
+        }
+
+        [Test]
+        public void LatePreAnchorReleaseAfterFrameTickUsesFrozenPauseTime()
+        {
+            var input = new FakeInput();
+            var clock = new FakeClock { ScheduleResume = true, ResumeTimestamp = 6.8 };
+            using var c = Coordinator(input, clock, new FakePresenter());
+            c.Start();
+            input.Press(1, 5.2);
+            clock.SongTime = 6.8;
+            c.Pause();
+            c.Resume();
+            clock.ResumeReady = true;
+            c.Tick();
+            input.Release(1, 6.7);
+            Assert.That(c.Session.GetNoteJudgments(1).End.Value.ErrorSeconds, Is.Zero.Within(1e-9));
+        }
+
+        [Test]
+        public void TwentyScheduledPausesPreserveTheSameHoldJudgment()
+        {
+            var input = new FakeInput();
+            var clock = new FakeClock { ScheduleResume = true, InputTimingOffsetSeconds = .2, ResumeTimestamp = 5.7 };
+            using var c = Coordinator(input, clock, new FakePresenter());
+            c.Start();
+            input.Press(0, 1.2);
+            input.Press(1, 5.4);
+            clock.SongTime = 5.7;
+            for (int i = 0; i < 20; i++)
+            {
+                c.Pause();
+                clock.ResumeReady = false;
+                c.Resume();
+                c.Tick();
+                Assert.That(c.IsPaused, Is.True);
+                clock.ResumeReady = true;
+                c.Tick();
+                Assert.That(c.IsPaused, Is.False);
+            }
+            input.Release(1, 7);
+            Assert.That(c.Session.Perfect, Is.EqualTo(2));
         }
 
         [TestCase(.2, 1.2, JudgmentProfile.Warmup)]

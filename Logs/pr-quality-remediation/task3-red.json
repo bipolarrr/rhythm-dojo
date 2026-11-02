@@ -1,0 +1,43 @@
+{
+  "success": true,
+  "command": "command test_status",
+  "data": {
+    "command": "test_status",
+    "parameters": {},
+    "result": {
+      "status": "completed",
+      "duration": 3.67,
+      "summary": {
+        "total": 2,
+        "passed": 0,
+        "failed": 2,
+        "skipped": 0,
+        "inconclusive": 0
+      },
+      "results": [
+        {
+          "FullName": "RhythmDojo.Tests.SongClockResumeTests.ResumeSeeksFromFrozenLogicalTimeInsteadOfPausedSourceCursor",
+          "Status": "Failed",
+          "Duration": 2.041903,
+          "Message": "  User calibration and a stale source cursor must not change the resume sample.\r\n  Expected: less than or equal to 1\r\n  But was:  72693\r\n",
+          "StackTrace": "at RhythmDojo.Tests.SongClockResumeTests+<ResumeSeeksFromFrozenLogicalTimeInsteadOfPausedSourceCursor>d__2.MoveNext () [0x000d5] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\PlayMode\\SongClockResumeTests.cs:66\r\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@bd7f943e9647\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\r\n"
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SongClockResumeTests.ResumeWaitsForScheduledAnchorWithoutAdvancingLogicalTime",
+          "Status": "Failed",
+          "Duration": 1.5883561,
+          "Message": "  Resume must reserve a shared future DSP anchor.\r\n  Expected: False\r\n  But was:  True\r\n",
+          "StackTrace": "at RhythmDojo.Tests.SongClockResumeTests+<ResumeWaitsForScheduledAnchorWithoutAdvancingLogicalTime>d__1.MoveNext () [0x000d0] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\PlayMode\\SongClockResumeTests.cs:39\r\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@bd7f943e9647\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\r\n"
+        }
+      ]
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7801,
+      "projectPath": "C:\\Users\\song\\RhythmDojo-pr-quality"
+    },
+    "success": true
+  },
+  "errors": [],
+  "warnings": []
+}
