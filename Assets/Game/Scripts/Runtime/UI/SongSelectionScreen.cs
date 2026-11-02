@@ -402,6 +402,11 @@ namespace RhythmDojo.UI
                 view.artistBpm.text = "";
                 view.album.sprite = view.fallbackCover;
                 view.record.text = "기록 없음";
+                if (view.comboRecord)
+                {
+                    view.record.text = "스코어  —\n랭크  —\n레이트  —";
+                    view.comboRecord.text = "최대 콤보  —\n<size=30>기록</size>\n<size=28>기록 없음</size>";
+                }
                 view.details.text = "전체 탭에서 곡을 선택하세요.";
                 view.play.interactable = false;
 
@@ -524,7 +529,7 @@ namespace RhythmDojo.UI
                     duration = chart.Duration.Value;
                 }
                 var time = TimeSpan.FromSeconds(Math.Max(0, duration));
-                view.artistBpm.text = $"아티스트  {song.Artist}\n\nBPM  {bpm}\nPLAY TIME  {(int)time.TotalMinutes}:{time.Seconds:00}";
+                view.artistBpm.text = $"아티스트  {song.Artist}\nBPM  {bpm}\nPLAY TIME  {(int)time.TotalMinutes}:{time.Seconds:00}";
             }
 
             if (song.Cover && song.Cover != view.legacyFallbackCover)
@@ -558,12 +563,28 @@ namespace RhythmDojo.UI
             if (best == null)
             {
                 view.record.text =
-                    "스코어     —             랭크  —\n레이트     —\n최대 콤보  —\n기록 없음";
+                    "스코어  —\n랭크  —\n레이트  —\n최대 콤보  —\n기록 없음";
             }
             else
             {
                 view.record.text =
-                    $"스코어     {best.score:N0}       랭크  {best.Rank}\n레이트     {best.rate:0.00}%\n최대 콤보  {best.maxCombo}";
+                    $"스코어  {best.score:N0}\n랭크  {best.Rank}\n레이트  {best.rate:0.00}%\n최대 콤보  {best.maxCombo}";
+            }
+
+            var recordDetails = view.record;
+            if (view.comboRecord)
+            {
+                recordDetails = view.comboRecord;
+                if (best == null)
+                {
+                    view.record.text = "스코어  —\n랭크  —\n레이트  —";
+                    recordDetails.text = "최대 콤보  —\n<size=30>기록</size>\n<size=28>기록 없음</size>";
+                }
+                else
+                {
+                    view.record.text = $"스코어  {best.score:N0}\n랭크  {best.Rank}\n레이트  {best.rate:0.00}%";
+                    recordDetails.text = $"최대 콤보  {best.maxCombo:N0}\n<size=30>기록</size>";
+                }
             }
 
             if (preferences is SelectionPreferences records)
@@ -572,8 +593,8 @@ namespace RhythmDojo.UI
                 {
                     if (best.gaugeClear)
                     {
-                        view.record.text +=
-                            $"\n<size=14>Gauge CLEAR · Challenge "
+                        recordDetails.text +=
+                            $"\n<size=26>Gauge CLEAR\nChallenge "
                             + string.Join(
                                 " / ",
                                 Enumerable
@@ -594,8 +615,8 @@ namespace RhythmDojo.UI
                     }
                     else
                     {
-                        view.record.text +=
-                            $"\n<size=14>Gauge — · Challenge "
+                        recordDetails.text +=
+                            $"\n<size=26>Gauge —\nChallenge "
                             + string.Join(
                                 " / ",
                                 Enumerable
@@ -620,8 +641,8 @@ namespace RhythmDojo.UI
 
                 if (failed != null)
                 {
-                    view.record.text +=
-                        $"\n<size=14><color=#888888>실패 완주 {failed.score:N0} · {failed.rate:0.00}%</color></size>";
+                    recordDetails.text +=
+                        $"\n<size=26><color=#D6A873>실패 완주\n{failed.score:N0} · {failed.rate:0.00}%</color></size>";
                 }
             }
 

@@ -18,6 +18,7 @@ namespace RhythmDojo.UI
             timingLabel,
             emptyMessage;
         public bool pixelTheme;
+        public Text comboRecord;
         public RectTransform[] entrancePanels;
         public Image album;
         public Sprite fallbackCover;
@@ -66,6 +67,11 @@ namespace RhythmDojo.UI
             if ((!artistBpm || !record) || !timingOffset)
             {
                 throw new InvalidOperationException("Song selection view references missing.");
+            }
+
+            if (pixelTheme && !comboRecord)
+            {
+                throw new InvalidOperationException("Song selection combo record reference missing.");
             }
 
             if ((!timingLabel || !speedSlider) || !speedLabel)
@@ -176,13 +182,13 @@ namespace RhythmDojo.UI
                     {
                         frame.color = new Color(.60f, .20f, .13f);
                         frame.borderColor = new Color(.88f, .37f, .15f);
-                        button.GetComponentInChildren<Text>().color = new Color(1, .92f, .74f);
+                        button.GetComponentInChildren<Text>().color = new Color(.96f, .79f, .56f);
                     }
                     else
                     {
                         frame.color = new Color(.84f, .69f, .47f);
                         frame.borderColor = new Color(.29f, .13f, .09f);
-                        button.GetComponentInChildren<Text>().color = new Color(.25f, .13f, .09f);
+                        button.GetComponentInChildren<Text>().color = new Color(.84f, .66f, .45f);
                     }
                     var caption = button.GetComponentInChildren<Text>();
                     switch (caption.text)

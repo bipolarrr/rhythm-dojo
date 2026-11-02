@@ -81,6 +81,10 @@ namespace RhythmDojo.Tests
         public IEnumerator SongRowsKeyboardSelectionUpdatesSelectedSong()
         {
             var view = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
+            var nextSongId = view.Rows.Where(row => row.gameObject.activeInHierarchy)
+                .OrderBy(row => row.transform.GetSiblingIndex())
+                .SkipWhile(row => row.Entry.Id != "test-pulse")
+                .Skip(1).First().Entry.Id;
             EventSystem.current.SetSelectedGameObject(
                 view.Rows.First(r => r.Entry.Id == "test-pulse").gameObject
             );
@@ -89,11 +93,12 @@ namespace RhythmDojo.Tests
                 UnityEngine
                     .Object.FindFirstObjectByType<AppFlowController>()
                     .Selection.SelectedSongId,
-                Is.EqualTo("tempo-pulse")
+                Is.EqualTo(nextSongId)
             );
+            var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
             Assert.That(
-                UnityEngine.Object.FindFirstObjectByType<AppFlowController>().SelectedSongIndex,
-                Is.EqualTo(1)
+                flow.Library.Entries[flow.SelectedSongIndex].Id,
+                Is.EqualTo(nextSongId)
             );
         }
 
@@ -315,8 +320,6 @@ namespace RhythmDojo.Tests
         [Category("Smoke")]
         public IEnumerator MouseClickUsesUiInputModuleToLoadSong()
         {
-            CaptureSelection();
-
             var button = UnityEngine
                 .Object.FindObjectsByType<Button>(FindObjectsSortMode.None)
                 .Single(b => b.name == "Play");

@@ -1,0 +1,13 @@
+# Song selection dojo artwork and typography
+
+PixelSongSelectionStyle remains the authoritative styling pass after SongSelectionLayoutBuilder builds the existing controls. The browser occupies the left 42.5% of the screen and the information panel the right 46.5%, with proportional anchors and the existing 1920 × 1080 CanvasScaler. The larger panels use the available screen area while preserving room for the heading, tabs and footer.
+
+The backdrop uses SelectionBackground.png, an enhanced version of the original open pavilion overlooking blue mountains, retaining its original composition, banners, lanterns, railing and training mat. The title's enclosed TrainingInterior is only a rendering-quality reference, not the setting. The original TitleBackground.png remains unchanged. The heading, rows, controls and dialogs reuse SettingsControl and SettingsPanel sprites with sliced woodgrain, bronze fittings and paper textures.
+
+All Song Selection text, including dropdown templates, modal dialogs and cloned song rows, uses Dokdo-Regular.ttf in bold to echo the title logo's brush lettering. SongSelectionLayoutBuilder.BrushFontPath is the font asset reference, and the canvas UiFontScope keeps dynamically created UI on that font. UiFontSettings retains Mona as the shared default for other screens. The Dokdo importer embeds its font data and references Mona as a fallback for missing symbols. The unmodified Google Fonts asset is licensed under SIL OFL 1.1; the license is present next to the font and in Resources/UI/Dokdo-OFL.txt for inclusion with the player.
+
+The right panel places the album at upper left and the selected title and artist/BPM/play time at upper right. Metadata is 34–42 reference pixels with explicit line breaks and 1.45 line spacing; it is vertically centered in the area below the title, filling the height alongside the album rather than gathering at the top in small type. Difficulty captions are 26 and buttons 30.
+
+Below difficulty, score/rank/rate form the left column, while maximum combo and completion history form the right column. A thin warm-brown divider separates the groups. Score text uses 34–40 reference pixels; combo uses 32–36, with 26-pixel gauge/challenge and failed-run details. The history column has slightly more width to accommodate longer records. Both groups use proportional anchors, preserve record identities/data, and reset when the song list is empty. Existing `record` remains the score label; `comboRecord` is the new explicit reference for combo/history.
+
+Current verification checks text-generation bounds at 16:9, 16:10 and 4:3, plus actual saved-record and empty-list flows, without captures or a player build. Regenerate only Song Selection with SceneBuilder.BuildSelection.
