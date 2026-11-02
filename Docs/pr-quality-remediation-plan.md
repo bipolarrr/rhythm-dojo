@@ -103,20 +103,20 @@
 - 재현: 느린 준비 중 에디터 이동, 모달과 준비 완료 중첩, 중복 Play, 실패 후 재시도.
 - 결정/범위: ModalInputScope의 상태 보존/복원을 추출하여 중첩 소유자의 마지막 해제 때 복원한다. 준비 객체가 로드 작업/씬/차단/Canvas 순서/세대를 소유한다. 사전 준비와 클릭 로딩은 같은 활성화 경로를 사용한다. AppFlow는 이동을 조율한다. 취소 불가 로드는 무효화하고 늦은 씬은 서비스 연결/활성화 없이 언로드한다. 실패/시간 초과/이탈/재진입 상태·포커스를 복원한다. 문 연출은 초기화와 이전 씬 정리 완료 신호를 받는다.
 - 검증: 타이틀 재진입, 준비 없는 진입, 직접 씬 실행 포함; 관련 화면 테스트+Smoke, 잔류 씬/EventSystem/AudioListener/차단 상태 없음.
-- 커밋/증거: 없음 / 미실행.
+- 커밋/증거: `d675507` / `Logs/pr-quality-remediation/task7*`.
 - 재현 결과: 기존 ModalInputScope 두 개 중 첫 소유자만 Dispose해도 SongSelectionScreen.enabled가 true로 복원돼 실패. task7-red.json에 보존. 다음 행동: 공유 상태 수명과 준비 씬 소유 객체 구현, 늦은 초기화 차단 및 회귀 테스트.
 
 - 최종 결과: ScenePreparationFlow 9/9, ProjectLibraryFlow 3/3, MainMenuFlow 19/19, Smoke 4/4 통과. 처음 타이틀 테스트의 미초기화 화면 복원 예외 2건과 독립 검토의 null 포커스 복원 지적을 수정하고 회귀를 추가했다. 초기 실패 증거를 유지하며 로그를 무시하지 않았다. 독립 재검토 수정 요구 없음. 매 실행 후 PlayMode 종료·Editor ready 확인. 씬 에셋 변경 없음. 증거: Logs/pr-quality-remediation/task7*. 커밋: `d675507`. 다음 행동: 기준 실패/외부 WAV fixture와 Windows 검증 도구를 정비한 뒤 최종 Foundation.
 
-### 최종 통합 검증: 기준 정비 완료·Windows 진단 준비 중
+### 최종 통합 검증: Windows 진단 완료·Foundation 재실행 준비
 
 - 범위: 소스 refresh·컴파일 후 Verify Foundation 전체 테스트와 Windows 빌드. 실패 수정 후 재검증하며 부분 실행은 전체 통과로 표기하지 않는다.
 - 플레이어: 외부 WAV 로드/플레이/정지/버퍼 변경/재개/재시작, 모드별 키 저장, 타이틀·설정·에디터·선택 왕복, 재실행 설정 유지, 실제 출력 확인.
 - 진단: 수치 측정은 Editor API에 의존하지 않는 개발 빌드 진단으로 두고 제품 화면에 노출하지 않는다.
 - 검토: 별도 최종 에이전트가 전체 diff의 하드코딩, 계약 중복, 소유권 누락, Editor 의존성, 잘못된 테스트 통과 조건을 확인한다.
-- 커밋/증거: 없음 / 미실행.
-- 미해결: 기준 BuildPlayer의 명시 scenes 목록에 Results가 누락돼 있다. EditorBuildSettings와 불일치하며 실제 플레이어 검증 전에 확인한다.
-- 다음 행동: 작업 7까지 완료 후 전체 검증·최종 검토·장부 마감.
+- 커밋/증거: 기준 정비 `b10a27e`, Windows 진단 `677e842`, 씬 테스트 정리 `76b6477`; 상세 결과는 아래와 `Logs/pr-quality-remediation/`.
+- 해결: Foundation의 명시 scenes 목록에 Results를 추가하여 등록된 7개 씬과 일치시켰다.
+- 남은 실행: 시간 측정·테스트 격리 수정 검증, Foundation 재실행, 일반 Windows 플레이어 시작 확인, 장부 마감.
 
 
 - 최종 기준 정비: Results의 Esc 정지 후 실제 나가기 클릭, 개인 곡 목록과 분리한 두 곡 즐겨찾기 탐색, 임시 WAV 실제 로더 fixture로 개인 PUPA 음원 의존 제거. 기존 채보/판정/완료 시각 기대값 유지. Results 회귀 1/1, 곡 선택 회귀 1/1, PupaResultsFlow 6/6(skip 0) 통과. 독립 검토 수정 요구 없음. Foundation 명시 빌드 목록에 Results 추가. 증거: final-*-regression.json, final-pupa-generated-wave.json, final-baseline-fixes.md. 다음 행동: Windows 개발 진단 구현과 최종 Foundation.
@@ -125,3 +125,6 @@
 
 - Windows 개발 진단: exercise 41.119초·persistence 6.708초 모두 exit 0. 실제 입력으로 타이틀/설정/에디터/선택 왕복, 외부 WAV 복구·재개·재시작·나가기, 두 모드 키 저장·재실행 유지, HUD/Results 표기 검사. 원래 설정 6개 복원·임시 프로젝트 잔류 0. 요청/적용 256/256, 두 진행률 구간 ±1% 내, 12관측 최대 오차9.039ms(기록된 DSP+프레임 불확실성 내). OS 루프백440Hz peak0.0477258 확인. 최종 합성 렌더 직접 검토 완료. 최초 CLI 빌드 실패 및 잘못된 캡처를 보존하고 수정했다. 일반 플레이어 Foundation 및 시작 검증은 아직 대기.
 - 최종 테스트 정리: SceneRegenerationTests가 생성하는 7개 씬과 SettingsPopup/meta를 모두 원복하도록 확장. 2/2 통과, 전후16개 파일 SHA256 동일, 생성 에셋 변경 잔류 없음. 독립 검토 수정 요구 없음. Windows 진단 커밋 `677e842`; 다음 행동: 최종 Foundation 전체 테스트·일반 Windows 빌드.
+- 첫 최종 Foundation(`76b6477`): EditMode373/373, PlayMode155통과·1실패·skip0. RealPupaAudioFinishesAndAutomaticallyLoadsResults 벽시계125.5693146초가 기존 음원길이-6 상한125.539993초를29ms 초과. 실제 음원 시작 DSP 기준과 벽시계 비교 단위를 분리해 측정하며 6초 꼬리 조건은 유지한다. 다른 모든 테스트 통과; 빌드는 실패 후 실행하지 않음. 또한 ContentTests/TeamBoundaryTests 두 BuildAll 테스트의 씬/팝업 원복 누락을 발견, 전체 테스트가 최종 에셋을 바꾸지 않도록 보완 중. 실패XML/로그와 생성diff통계 보존. 다음 행동: 관련 테스트·해시 검증 후 Foundation 재실행.
+
+- 최종 검증 보완: Content/TeamBoundary 생성 테스트 각각1/1, PupaResultsFlow6/6(skip0), 생성 씬·팝업·meta16개 SHA256 동일. 예약 오디오 DSP 기준125.332667초에 Results 표시(음원131.54초, 기존6초 꼬리 조건 유지), 벽시계125.463869초·완료 후 표시1.365–1.382초 관측. 테스트 격리·시간 단위 수정 독립 검토 지적 없음. 제품 코드 변경 없음. 증거: final-verification-isolation.md, final-*-restoration.json, final-all-builder-hash-comparison.json, final-pupa-audio-anchor-tests.json, final-pupa-targeted-timing.json. 다음 행동: 이 수정 커밋에서 Foundation 재실행.

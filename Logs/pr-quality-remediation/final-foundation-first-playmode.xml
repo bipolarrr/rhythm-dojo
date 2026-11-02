@@ -1,0 +1,1329 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="156" result="Failed(Child)" total="156" passed="155" failed="1" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-11-02 18:54:09Z" end-time="2026-11-02 19:07:52Z" duration="822.9638795">
+  <test-suite type="TestSuite" id="1190" name="RhythmDojo" fullname="RhythmDojo" runstate="Runnable" testcasecount="156" result="Failed" site="Child" start-time="2026-11-02 18:54:09Z" end-time="2026-11-02 19:07:52Z" duration="822.963880" total="156" passed="155" failed="1" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="PlayMode" />
+    </properties>
+    <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+    </failure>
+    <test-suite type="Assembly" id="1184" name="Game.PlayMode.Tests.dll" fullname="C:/Users/song/RhythmDojo-pr-quality/Library/ScriptAssemblies/Game.PlayMode.Tests.dll" runstate="Runnable" testcasecount="156" result="Failed" site="Child" start-time="2026-11-02 18:54:09Z" end-time="2026-11-02 19:07:52Z" duration="822.932866" total="156" passed="155" failed="1" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="1424" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <test-suite type="TestSuite" id="1185" name="RhythmDojo" fullname="RhythmDojo" runstate="Runnable" testcasecount="156" result="Failed" site="Child" start-time="2026-11-02 18:54:09Z" end-time="2026-11-02 19:07:52Z" duration="822.929020" total="156" passed="155" failed="1" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-suite type="TestSuite" id="1186" name="Tests" fullname="RhythmDojo.Tests" runstate="Runnable" testcasecount="156" result="Failed" site="Child" start-time="2026-11-02 18:54:09Z" end-time="2026-11-02 19:07:52Z" duration="822.924945" total="156" passed="155" failed="1" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <failure>
+            <message><![CDATA[One or more child tests had errors]]></message>
+          </failure>
+          <test-suite type="TestFixture" id="1001" name="AudioFlowTests" fullname="RhythmDojo.Tests.AudioFlowTests" classname="RhythmDojo.Tests.AudioFlowTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-11-02 18:54:09Z" end-time="2026-11-02 18:55:33Z" duration="83.784121" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties>
+              <property name="Category" value="Gameplay" />
+            </properties>
+            <test-case id="1005" name="AllBufferRequestsReportActualConfigurationAndChangedAudioPlaysAndRestarts" fullname="RhythmDojo.Tests.AudioFlowTests.AllBufferRequestsReportActualConfigurationAndChangedAudioPlaysAndRestarts" methodname="AllBufferRequestsReportActualConfigurationAndChangedAudioPlaysAndRestarts" classname="RhythmDojo.Tests.AudioFlowTests" runstate="Runnable" seed="1580407965" result="Passed" start-time="2026-11-02 18:54:09Z" end-time="2026-11-02 18:55:22Z" duration="72.840526" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1004" name="GameplayMusicUsesSelectedVolumeAndRespondsToLiveChanges" fullname="RhythmDojo.Tests.AudioFlowTests.GameplayMusicUsesSelectedVolumeAndRespondsToLiveChanges" methodname="GameplayMusicUsesSelectedVolumeAndRespondsToLiveChanges" classname="RhythmDojo.Tests.AudioFlowTests" runstate="Runnable" seed="560166987" result="Passed" start-time="2026-11-02 18:55:22Z" end-time="2026-11-02 18:55:24Z" duration="2.458173" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1003" name="SoundSlidersChangeMixedOutputMuteAndRestoreSavedValues" fullname="RhythmDojo.Tests.AudioFlowTests.SoundSlidersChangeMixedOutputMuteAndRestoreSavedValues" methodname="SoundSlidersChangeMixedOutputMuteAndRestoreSavedValues" classname="RhythmDojo.Tests.AudioFlowTests" runstate="Runnable" seed="1210994343" result="Passed" start-time="2026-11-02 18:55:24Z" end-time="2026-11-02 18:55:29Z" duration="4.833176" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[There can be only one active Event System.
+]]></output>
+            </test-case>
+            <test-case id="1006" name="TitleMusicReloadsMissingPreferencesAndRestartsAfterAudioReset" fullname="RhythmDojo.Tests.AudioFlowTests.TitleMusicReloadsMissingPreferencesAndRestartsAfterAudioReset" methodname="TitleMusicReloadsMissingPreferencesAndRestartsAfterAudioReset" classname="RhythmDojo.Tests.AudioFlowTests" runstate="Runnable" seed="1510399579" result="Passed" start-time="2026-11-02 18:55:29Z" end-time="2026-11-02 18:55:31Z" duration="2.218307" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1002" name="TitleStartupRestoresSavedMasterAndBackgroundVolume" fullname="RhythmDojo.Tests.AudioFlowTests.TitleStartupRestoresSavedMasterAndBackgroundVolume" methodname="TitleStartupRestoresSavedMasterAndBackgroundVolume" classname="RhythmDojo.Tests.AudioFlowTests" runstate="Runnable" seed="1665982670" result="Passed" start-time="2026-11-02 18:55:31Z" end-time="2026-11-02 18:55:33Z" duration="1.406737" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[There can be only one active Event System.
+]]></output>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1007" name="AudioLeaseRecoveryTests" fullname="RhythmDojo.Tests.AudioLeaseRecoveryTests" classname="RhythmDojo.Tests.AudioLeaseRecoveryTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-11-02 18:55:33Z" end-time="2026-11-02 18:55:37Z" duration="4.855317" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1011" name="BorrowedAudioNeedsNoReloadAndIsNotDestroyed" fullname="RhythmDojo.Tests.AudioLeaseRecoveryTests.BorrowedAudioNeedsNoReloadAndIsNotDestroyed" methodname="BorrowedAudioNeedsNoReloadAndIsNotDestroyed" classname="RhythmDojo.Tests.AudioLeaseRecoveryTests" runstate="Runnable" seed="1963656037" result="Passed" start-time="2026-11-02 18:55:33Z" end-time="2026-11-02 18:55:34Z" duration="0.979373" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1009" name="CancelledRecoveryDisposesLateResultAndCanRetry" fullname="RhythmDojo.Tests.AudioLeaseRecoveryTests.CancelledRecoveryDisposesLateResultAndCanRetry" methodname="CancelledRecoveryDisposesLateResultAndCanRetry" classname="RhythmDojo.Tests.AudioLeaseRecoveryTests" runstate="Runnable" seed="51457973" result="Passed" start-time="2026-11-02 18:55:34Z" end-time="2026-11-02 18:55:35Z" duration="0.971666" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1010" name="DisposalDuringRecoveryRejectsAndReleasesLateAudio" fullname="RhythmDojo.Tests.AudioLeaseRecoveryTests.DisposalDuringRecoveryRejectsAndReleasesLateAudio" methodname="DisposalDuringRecoveryRejectsAndReleasesLateAudio" classname="RhythmDojo.Tests.AudioLeaseRecoveryTests" runstate="Runnable" seed="1349198287" result="Passed" start-time="2026-11-02 18:55:35Z" end-time="2026-11-02 18:55:35Z" duration="0.952981" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1012" name="LoaderCancellationWithoutNewResetDoesNotRetryForever" fullname="RhythmDojo.Tests.AudioLeaseRecoveryTests.LoaderCancellationWithoutNewResetDoesNotRetryForever" methodname="LoaderCancellationWithoutNewResetDoesNotRetryForever" classname="RhythmDojo.Tests.AudioLeaseRecoveryTests" runstate="Runnable" seed="2054318794" result="Passed" start-time="2026-11-02 18:55:35Z" end-time="2026-11-02 18:55:36Z" duration="0.973576" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1008" name="OnlyLatestResetPublishesAndEveryLeaseReleasesOnce" fullname="RhythmDojo.Tests.AudioLeaseRecoveryTests.OnlyLatestResetPublishesAndEveryLeaseReleasesOnce" methodname="OnlyLatestResetPublishesAndEveryLeaseReleasesOnce" classname="RhythmDojo.Tests.AudioLeaseRecoveryTests" runstate="Runnable" seed="1690811997" result="Passed" start-time="2026-11-02 18:55:36Z" end-time="2026-11-02 18:55:37Z" duration="0.970656" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1013" name="AudioRecoveryFlowTests" fullname="RhythmDojo.Tests.AudioRecoveryFlowTests" classname="RhythmDojo.Tests.AudioRecoveryFlowTests" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-11-02 18:55:37Z" end-time="2026-11-02 18:56:04Z" duration="26.505186" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1017" name="BuiltInAudioSurvivesResetWithoutReplacingBorrowedClip" fullname="RhythmDojo.Tests.AudioRecoveryFlowTests.BuiltInAudioSurvivesResetWithoutReplacingBorrowedClip" methodname="BuiltInAudioSurvivesResetWithoutReplacingBorrowedClip" classname="RhythmDojo.Tests.AudioRecoveryFlowTests" runstate="Runnable" seed="1744817626" result="Passed" start-time="2026-11-02 18:55:37Z" end-time="2026-11-02 18:55:46Z" duration="8.505647" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1016" name="ExitRemainsClickableDuringRecoveryAndLateClipIsReleased" fullname="RhythmDojo.Tests.AudioRecoveryFlowTests.ExitRemainsClickableDuringRecoveryAndLateClipIsReleased" methodname="ExitRemainsClickableDuringRecoveryAndLateClipIsReleased" classname="RhythmDojo.Tests.AudioRecoveryFlowTests" runstate="Runnable" seed="49458586" result="Passed" start-time="2026-11-02 18:55:46Z" end-time="2026-11-02 18:55:49Z" duration="2.683611" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1014" name="ExternalWaveReloadsAfterResetAndReturnsEditorSession" fullname="RhythmDojo.Tests.AudioRecoveryFlowTests.ExternalWaveReloadsAfterResetAndReturnsEditorSession" methodname="ExternalWaveReloadsAfterResetAndReturnsEditorSession" classname="RhythmDojo.Tests.AudioRecoveryFlowTests" runstate="Runnable" seed="1690954036" result="Passed" start-time="2026-11-02 18:55:49Z" end-time="2026-11-02 18:55:55Z" duration="6.163672" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[AudioClip.GetData failed; AudioClip  contains no data
+]]></output>
+            </test-case>
+            <test-case id="1019" name="InvalidatedBeforeGameplayInitializationExposesRecoveryWithoutAnotherReset" fullname="RhythmDojo.Tests.AudioRecoveryFlowTests.InvalidatedBeforeGameplayInitializationExposesRecoveryWithoutAnotherReset" methodname="InvalidatedBeforeGameplayInitializationExposesRecoveryWithoutAnotherReset" classname="RhythmDojo.Tests.AudioRecoveryFlowTests" runstate="Runnable" seed="1587022827" result="Passed" start-time="2026-11-02 18:55:55Z" end-time="2026-11-02 18:55:56Z" duration="1.660084" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1015" name="MissingExternalWaveKeepsPauseAndRetryRestoresPlayback" fullname="RhythmDojo.Tests.AudioRecoveryFlowTests.MissingExternalWaveKeepsPauseAndRetryRestoresPlayback" methodname="MissingExternalWaveKeepsPauseAndRetryRestoresPlayback" classname="RhythmDojo.Tests.AudioRecoveryFlowTests" runstate="Runnable" seed="790982532" result="Passed" start-time="2026-11-02 18:55:56Z" end-time="2026-11-02 18:56:02Z" duration="5.758568" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1018" name="ResetBeforeStartBlocksQueuedSpaceUntilAudioIsRecovered" fullname="RhythmDojo.Tests.AudioRecoveryFlowTests.ResetBeforeStartBlocksQueuedSpaceUntilAudioIsRecovered" methodname="ResetBeforeStartBlocksQueuedSpaceUntilAudioIsRecovered" classname="RhythmDojo.Tests.AudioRecoveryFlowTests" runstate="Runnable" seed="1022186015" result="Passed" start-time="2026-11-02 18:56:02Z" end-time="2026-11-02 18:56:04Z" duration="1.723728" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1020" name="AudioTimelineTests" fullname="RhythmDojo.Tests.AudioTimelineTests" classname="RhythmDojo.Tests.AudioTimelineTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-11-02 18:56:04Z" end-time="2026-11-02 18:56:06Z" duration="2.338717" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1021" name="ImportedWaveformSeekingZoomPlaybackAndGridEditsShareMusicTime" fullname="RhythmDojo.Tests.AudioTimelineTests.ImportedWaveformSeekingZoomPlaybackAndGridEditsShareMusicTime" methodname="ImportedWaveformSeekingZoomPlaybackAndGridEditsShareMusicTime" classname="RhythmDojo.Tests.AudioTimelineTests" runstate="Runnable" seed="1467038276" result="Passed" start-time="2026-11-02 18:56:04Z" end-time="2026-11-02 18:56:06Z" duration="2.334472" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1022" name="AuthoringFlowTests" fullname="RhythmDojo.Tests.AuthoringFlowTests" classname="RhythmDojo.Tests.AuthoringFlowTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-11-02 18:56:06Z" end-time="2026-11-02 18:56:12Z" duration="6.223889" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties>
+              <property name="Category" value="Authoring" />
+            </properties>
+            <test-case id="1024" name="CanceledEditorLoadStaysOnScreenAndAllowsRetry" fullname="RhythmDojo.Tests.AuthoringFlowTests.CanceledEditorLoadStaysOnScreenAndAllowsRetry" methodname="CanceledEditorLoadStaysOnScreenAndAllowsRetry" classname="RhythmDojo.Tests.AuthoringFlowTests" runstate="Runnable" seed="1844590984" result="Passed" start-time="2026-11-02 18:56:06Z" end-time="2026-11-02 18:56:08Z" duration="1.378584" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1025" name="DelayedPlaytestKeepsOptionsCapturedAtRequest" fullname="RhythmDojo.Tests.AuthoringFlowTests.DelayedPlaytestKeepsOptionsCapturedAtRequest" methodname="DelayedPlaytestKeepsOptionsCapturedAtRequest" classname="RhythmDojo.Tests.AuthoringFlowTests" runstate="Runnable" seed="1835013652" result="Passed" start-time="2026-11-02 18:56:08Z" end-time="2026-11-02 18:56:09Z" duration="1.423742" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1023" name="UnsavedDocumentPlaytestReturnsSessionAndReleasesAudio" fullname="RhythmDojo.Tests.AuthoringFlowTests.UnsavedDocumentPlaytestReturnsSessionAndReleasesAudio" methodname="UnsavedDocumentPlaytestReturnsSessionAndReleasesAudio" classname="RhythmDojo.Tests.AuthoringFlowTests" runstate="Runnable" seed="1338201280" result="Passed" start-time="2026-11-02 18:56:09Z" end-time="2026-11-02 18:56:12Z" duration="3.409805" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="Category" value="Results" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1026" name="ChartEditorMenuTests" fullname="RhythmDojo.Tests.ChartEditorMenuTests" classname="RhythmDojo.Tests.ChartEditorMenuTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-11-02 18:56:12Z" end-time="2026-11-02 18:56:18Z" duration="5.929305" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1029" name="FileActionsSaveLoadAndPreserveCurrentDraftOnFailure" fullname="RhythmDojo.Tests.ChartEditorMenuTests.FileActionsSaveLoadAndPreserveCurrentDraftOnFailure" methodname="FileActionsSaveLoadAndPreserveCurrentDraftOnFailure" classname="RhythmDojo.Tests.ChartEditorMenuTests" runstate="Runnable" seed="1578090272" result="Passed" start-time="2026-11-02 18:56:12Z" end-time="2026-11-02 18:56:14Z" duration="1.028637" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1030" name="FileMenuImportsShowcaseGridAndSavesVersionThree" fullname="RhythmDojo.Tests.ChartEditorMenuTests.FileMenuImportsShowcaseGridAndSavesVersionThree" methodname="FileMenuImportsShowcaseGridAndSavesVersionThree" classname="RhythmDojo.Tests.ChartEditorMenuTests" runstate="Runnable" seed="157378033" result="Passed" start-time="2026-11-02 18:56:14Z" end-time="2026-11-02 18:56:15Z" duration="0.995824" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1028" name="GeneratedMenuAppliesTimingAndUndoRedoRestoresNotes" fullname="RhythmDojo.Tests.ChartEditorMenuTests.GeneratedMenuAppliesTimingAndUndoRedoRestoresNotes" methodname="GeneratedMenuAppliesTimingAndUndoRedoRestoresNotes" classname="RhythmDojo.Tests.ChartEditorMenuTests" runstate="Runnable" seed="1026784926" result="Passed" start-time="2026-11-02 18:56:15Z" end-time="2026-11-02 18:56:15Z" duration="0.922351" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1031" name="ImportedAudioPlaysAndReturnsWithUnsavedSessionAndUndoHistory" fullname="RhythmDojo.Tests.ChartEditorMenuTests.ImportedAudioPlaysAndReturnsWithUnsavedSessionAndUndoHistory" methodname="ImportedAudioPlaysAndReturnsWithUnsavedSessionAndUndoHistory" classname="RhythmDojo.Tests.ChartEditorMenuTests" runstate="Runnable" seed="2038219748" result="Passed" start-time="2026-11-02 18:56:15Z" end-time="2026-11-02 18:56:17Z" duration="1.888132" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1027" name="PupaButtonPreservesDraftAndImportsBundledChartWithLocalAudio" fullname="RhythmDojo.Tests.ChartEditorMenuTests.PupaButtonPreservesDraftAndImportsBundledChartWithLocalAudio" methodname="PupaButtonPreservesDraftAndImportsBundledChartWithLocalAudio" classname="RhythmDojo.Tests.ChartEditorMenuTests" runstate="Runnable" seed="525152893" result="Passed" start-time="2026-11-02 18:56:17Z" end-time="2026-11-02 18:56:18Z" duration="1.075843" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1032" name="ChartEditorScreenTests" fullname="RhythmDojo.Tests.ChartEditorScreenTests" classname="RhythmDojo.Tests.ChartEditorScreenTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-11-02 18:56:18Z" end-time="2026-11-02 18:56:24Z" duration="5.369417" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1035" name="DraggingUpCreatesHoldAndRightClickOnItsBodyRemovesIt" fullname="RhythmDojo.Tests.ChartEditorScreenTests.DraggingUpCreatesHoldAndRightClickOnItsBodyRemovesIt" methodname="DraggingUpCreatesHoldAndRightClickOnItsBodyRemovesIt" classname="RhythmDojo.Tests.ChartEditorScreenTests" runstate="Runnable" seed="1099782341" result="Passed" start-time="2026-11-02 18:56:18Z" end-time="2026-11-02 18:56:20Z" duration="1.292442" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1036" name="LayoutFillsSixteenNineAndSixteenTen" fullname="RhythmDojo.Tests.ChartEditorScreenTests.LayoutFillsSixteenNineAndSixteenTen" methodname="LayoutFillsSixteenNineAndSixteenTen" classname="RhythmDojo.Tests.ChartEditorScreenTests" runstate="Runnable" seed="1644614808" result="Passed" start-time="2026-11-02 18:56:20Z" end-time="2026-11-02 18:56:20Z" duration="0.475127" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1033" name="MouseClicksAddUniqueBeatNotesAndRightClickRemovesThem" fullname="RhythmDojo.Tests.ChartEditorScreenTests.MouseClicksAddUniqueBeatNotesAndRightClickRemovesThem" methodname="MouseClicksAddUniqueBeatNotesAndRightClickRemovesThem" classname="RhythmDojo.Tests.ChartEditorScreenTests" runstate="Runnable" seed="1178398957" result="Passed" start-time="2026-11-02 18:56:20Z" end-time="2026-11-02 18:56:22Z" duration="1.670804" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1034" name="PlainWheelScrollsTimelineWithoutChangingZoomAndCanPlaceLaterNotes" fullname="RhythmDojo.Tests.ChartEditorScreenTests.PlainWheelScrollsTimelineWithoutChangingZoomAndCanPlaceLaterNotes" methodname="PlainWheelScrollsTimelineWithoutChangingZoomAndCanPlaceLaterNotes" classname="RhythmDojo.Tests.ChartEditorScreenTests" runstate="Runnable" seed="602362731" result="Passed" start-time="2026-11-02 18:56:22Z" end-time="2026-11-02 18:56:24Z" duration="1.857228" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1037" name="ChartProjectionRenderingTests" fullname="RhythmDojo.Tests.ChartProjectionRenderingTests" classname="RhythmDojo.Tests.ChartProjectionRenderingTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-11-02 18:56:24Z" end-time="2026-11-02 18:56:26Z" duration="2.525681" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1039" name="DeletionUsesClippedVisibleBoundsWithoutBeatSnappingAndPreviewSurvivesZoom" fullname="RhythmDojo.Tests.ChartProjectionRenderingTests.DeletionUsesClippedVisibleBoundsWithoutBeatSnappingAndPreviewSurvivesZoom" methodname="DeletionUsesClippedVisibleBoundsWithoutBeatSnappingAndPreviewSurvivesZoom" classname="RhythmDojo.Tests.ChartProjectionRenderingTests" runstate="Runnable" seed="912107891" result="Passed" start-time="2026-11-02 18:56:24Z" end-time="2026-11-02 18:56:24Z" duration="0.470896" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1040" name="MaximumOverviewIncludesEveryBeatAndManyNotesWithoutExceedingMeshCapacity" fullname="RhythmDojo.Tests.ChartProjectionRenderingTests.MaximumOverviewIncludesEveryBeatAndManyNotesWithoutExceedingMeshCapacity" methodname="MaximumOverviewIncludesEveryBeatAndManyNotesWithoutExceedingMeshCapacity" classname="RhythmDojo.Tests.ChartProjectionRenderingTests" runstate="Runnable" seed="62529169" result="Passed" start-time="2026-11-02 18:56:24Z" end-time="2026-11-02 18:56:25Z" duration="0.470154" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1038" name="RenderAtSmallAndLargeResolutionsAcrossZoomScrollAndTempoBoundary" fullname="RhythmDojo.Tests.ChartProjectionRenderingTests.RenderAtSmallAndLargeResolutionsAcrossZoomScrollAndTempoBoundary" methodname="RenderAtSmallAndLargeResolutionsAcrossZoomScrollAndTempoBoundary" classname="RhythmDojo.Tests.ChartProjectionRenderingTests" runstate="Runnable" seed="1106270640" result="Passed" start-time="2026-11-02 18:56:25Z" end-time="2026-11-02 18:56:26Z" duration="1.580072" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1041" name="DojoClickFeedbackTests" fullname="RhythmDojo.Tests.DojoClickFeedbackTests" classname="RhythmDojo.Tests.DojoClickFeedbackTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-11-02 18:56:26Z" end-time="2026-11-02 18:56:36Z" duration="9.651137" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties>
+              <property name="Category" value="UI" />
+            </properties>
+            <test-case id="1044" name="BurstUsesBoundedObjectsAndRipplesExpireWhilePaused" fullname="RhythmDojo.Tests.DojoClickFeedbackTests.BurstUsesBoundedObjectsAndRipplesExpireWhilePaused" methodname="BurstUsesBoundedObjectsAndRipplesExpireWhilePaused" classname="RhythmDojo.Tests.DojoClickFeedbackTests" runstate="Runnable" seed="2080039540" result="Passed" start-time="2026-11-02 18:56:26Z" end-time="2026-11-02 18:56:28Z" duration="1.463798" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1042" name="ClickEffectDoesNotBlockSettingsAndSurvivesSceneTransition" fullname="RhythmDojo.Tests.DojoClickFeedbackTests.ClickEffectDoesNotBlockSettingsAndSurvivesSceneTransition" methodname="ClickEffectDoesNotBlockSettingsAndSurvivesSceneTransition" classname="RhythmDojo.Tests.DojoClickFeedbackTests" runstate="Runnable" seed="1008342630" result="Passed" start-time="2026-11-02 18:56:28Z" end-time="2026-11-02 18:56:29Z" duration="1.309501" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1043" name="ClickSoundReachesOutputAfterTitlePlaySettingsAndGameplayTransitions" fullname="RhythmDojo.Tests.DojoClickFeedbackTests.ClickSoundReachesOutputAfterTitlePlaySettingsAndGameplayTransitions" methodname="ClickSoundReachesOutputAfterTitlePlaySettingsAndGameplayTransitions" classname="RhythmDojo.Tests.DojoClickFeedbackTests" runstate="Runnable" seed="1497903792" result="Passed" start-time="2026-11-02 18:56:29Z" end-time="2026-11-02 18:56:36Z" duration="6.871969" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[There can be only one active Event System.
+]]></output>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1045" name="GameplayFlowTests" fullname="RhythmDojo.Tests.GameplayFlowTests" classname="RhythmDojo.Tests.GameplayFlowTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-11-02 18:56:36Z" end-time="2026-11-02 18:56:41Z" duration="4.891748" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties>
+              <property name="Category" value="Gameplay" />
+            </properties>
+            <test-case id="1046" name="DirectGameplaySceneUsesCopiedPlayRules" fullname="RhythmDojo.Tests.GameplayFlowTests.DirectGameplaySceneUsesCopiedPlayRules" methodname="DirectGameplaySceneUsesCopiedPlayRules" classname="RhythmDojo.Tests.GameplayFlowTests" runstate="Runnable" seed="1290351428" result="Passed" start-time="2026-11-02 18:56:36Z" end-time="2026-11-02 18:56:37Z" duration="1.413956" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1048" name="KeyboardNavigationAndStartRestartFocusLossUseActualActions" fullname="RhythmDojo.Tests.GameplayFlowTests.KeyboardNavigationAndStartRestartFocusLossUseActualActions" methodname="KeyboardNavigationAndStartRestartFocusLossUseActualActions" classname="RhythmDojo.Tests.GameplayFlowTests" runstate="Runnable" seed="1235222917" result="Passed" start-time="2026-11-02 18:56:37Z" end-time="2026-11-02 18:56:39Z" duration="1.970719" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="Category" value="Smoke" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1047" name="SixLaneDefinitionDrivesAllUnityAdapters" fullname="RhythmDojo.Tests.GameplayFlowTests.SixLaneDefinitionDrivesAllUnityAdapters" methodname="SixLaneDefinitionDrivesAllUnityAdapters" classname="RhythmDojo.Tests.GameplayFlowTests" runstate="Runnable" seed="1976376120" result="Passed" start-time="2026-11-02 18:56:39Z" end-time="2026-11-02 18:56:41Z" duration="1.490883" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1049" name="GameplayHealthPlaytestTests" fullname="RhythmDojo.Tests.GameplayHealthPlaytestTests" classname="RhythmDojo.Tests.GameplayHealthPlaytestTests" runstate="Runnable" testcasecount="7" result="Passed" start-time="2026-11-02 18:56:41Z" end-time="2026-11-02 18:57:53Z" duration="71.702954" total="7" passed="7" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties>
+              <property name="Category" value="Gameplay" />
+              <property name="Category" value="HealthPlaytest" />
+              <property name="Category" value="Results" />
+            </properties>
+            <test-case id="1055" name="GaugeFailureContinuesAndLatchesOnceUntilRestart" fullname="RhythmDojo.Tests.GameplayHealthPlaytestTests.GaugeFailureContinuesAndLatchesOnceUntilRestart" methodname="GaugeFailureContinuesAndLatchesOnceUntilRestart" classname="RhythmDojo.Tests.GameplayHealthPlaytestTests" runstate="Runnable" seed="1232020997" result="Passed" start-time="2026-11-02 18:56:41Z" end-time="2026-11-02 18:56:57Z" duration="16.267584" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1054" name="HardConfiguredThreeMissesDrainFractionalHealthThenGameOver" fullname="RhythmDojo.Tests.GameplayHealthPlaytestTests.HardConfiguredThreeMissesDrainFractionalHealthThenGameOver" methodname="HardConfiguredThreeMissesDrainFractionalHealthThenGameOver" classname="RhythmDojo.Tests.GameplayHealthPlaytestTests" runstate="Runnable" seed="545283674" result="Passed" start-time="2026-11-02 18:56:57Z" end-time="2026-11-02 18:57:03Z" duration="5.809253" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1052" name="HardDefaultMissImmediatelyShowsGameOver" fullname="RhythmDojo.Tests.GameplayHealthPlaytestTests.HardDefaultMissImmediatelyShowsGameOver" methodname="HardDefaultMissImmediatelyShowsGameOver" classname="RhythmDojo.Tests.GameplayHealthPlaytestTests" runstate="Runnable" seed="690438303" result="Passed" start-time="2026-11-02 18:57:03Z" end-time="2026-11-02 18:57:08Z" duration="4.833268" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1053" name="HardPerfectPreservesHealthAndGoodImmediatelyShowsGameOver" fullname="RhythmDojo.Tests.GameplayHealthPlaytestTests.HardPerfectPreservesHealthAndGoodImmediatelyShowsGameOver" methodname="HardPerfectPreservesHealthAndGoodImmediatelyShowsGameOver" classname="RhythmDojo.Tests.GameplayHealthPlaytestTests" runstate="Runnable" seed="715771176" result="Passed" start-time="2026-11-02 18:57:08Z" end-time="2026-11-02 18:57:13Z" duration="5.278031" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1056" name="HoldReleaseAndRegrabUsesOnlyMissedChecksAsPenalties" fullname="RhythmDojo.Tests.GameplayHealthPlaytestTests.HoldReleaseAndRegrabUsesOnlyMissedChecksAsPenalties" methodname="HoldReleaseAndRegrabUsesOnlyMissedChecksAsPenalties" classname="RhythmDojo.Tests.GameplayHealthPlaytestTests" runstate="Runnable" seed="144490106" result="Passed" start-time="2026-11-02 18:57:13Z" end-time="2026-11-02 18:57:28Z" duration="15.210782" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1050" name="NormalMissesDamagePerfectAndGoodRecoverThenClear" fullname="RhythmDojo.Tests.GameplayHealthPlaytestTests.NormalMissesDamagePerfectAndGoodRecoverThenClear" methodname="NormalMissesDamagePerfectAndGoodRecoverThenClear" classname="RhythmDojo.Tests.GameplayHealthPlaytestTests" runstate="Runnable" seed="1929234988" result="Passed" start-time="2026-11-02 18:57:28Z" end-time="2026-11-02 18:57:44Z" duration="15.648119" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1051" name="NormalTenMissesGameOverThenSpaceRestoresHealth" fullname="RhythmDojo.Tests.GameplayHealthPlaytestTests.NormalTenMissesGameOverThenSpaceRestoresHealth" methodname="NormalTenMissesGameOverThenSpaceRestoresHealth" classname="RhythmDojo.Tests.GameplayHealthPlaytestTests" runstate="Runnable" seed="1231325687" result="Passed" start-time="2026-11-02 18:57:44Z" end-time="2026-11-02 18:57:53Z" duration="8.634688" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1057" name="GameplayHitFeedbackTests" fullname="RhythmDojo.Tests.GameplayHitFeedbackTests" classname="RhythmDojo.Tests.GameplayHitFeedbackTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-11-02 18:57:53Z" end-time="2026-11-02 18:57:58Z" duration="5.827006" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties>
+              <property name="Category" value="Gameplay" />
+            </properties>
+            <test-case id="1058" name="HitsReachAudioOutputWhileMissesStayQuietAndPoolsRemainBounded" fullname="RhythmDojo.Tests.GameplayHitFeedbackTests.HitsReachAudioOutputWhileMissesStayQuietAndPoolsRemainBounded" methodname="HitsReachAudioOutputWhileMissesStayQuietAndPoolsRemainBounded" classname="RhythmDojo.Tests.GameplayHitFeedbackTests" runstate="Runnable" seed="835840938" result="Passed" start-time="2026-11-02 18:57:53Z" end-time="2026-11-02 18:57:54Z" duration="1.704343" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1059" name="HoldGlowSurvivesBurstFadeAndResetRestoresCameraEvenWhenPaused" fullname="RhythmDojo.Tests.GameplayHitFeedbackTests.HoldGlowSurvivesBurstFadeAndResetRestoresCameraEvenWhenPaused" methodname="HoldGlowSurvivesBurstFadeAndResetRestoresCameraEvenWhenPaused" classname="RhythmDojo.Tests.GameplayHitFeedbackTests" runstate="Runnable" seed="897283684" result="Passed" start-time="2026-11-02 18:57:54Z" end-time="2026-11-02 18:57:56Z" duration="1.990222" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1060" name="RebindingDetachesOldEventsAndReturningToSelectionRemovesEffects" fullname="RhythmDojo.Tests.GameplayHitFeedbackTests.RebindingDetachesOldEventsAndReturningToSelectionRemovesEffects" methodname="RebindingDetachesOldEventsAndReturningToSelectionRemovesEffects" classname="RhythmDojo.Tests.GameplayHitFeedbackTests" runstate="Runnable" seed="991115186" result="Passed" start-time="2026-11-02 18:57:56Z" end-time="2026-11-02 18:57:58Z" duration="2.114022" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1061" name="GameplayHudFlowTests" fullname="RhythmDojo.Tests.GameplayHudFlowTests" classname="RhythmDojo.Tests.GameplayHudFlowTests" runstate="Runnable" testcasecount="8" result="Passed" start-time="2026-11-02 18:57:58Z" end-time="2026-11-02 18:58:19Z" duration="20.612278" total="8" passed="8" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties>
+              <property name="Category" value="UI" />
+            </properties>
+            <test-case id="1062" name="GameplayKeepsDisplayCameraWhileWorldRendersIntoWindow" fullname="RhythmDojo.Tests.GameplayHudFlowTests.GameplayKeepsDisplayCameraWhileWorldRendersIntoWindow" methodname="GameplayKeepsDisplayCameraWhileWorldRendersIntoWindow" classname="RhythmDojo.Tests.GameplayHudFlowTests" runstate="Runnable" seed="1427605704" result="Passed" start-time="2026-11-02 18:57:58Z" end-time="2026-11-02 18:58:00Z" duration="1.521768" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1064" name="GameplayWindowPreservesProjectionAndReleasesCameraOnDisable" fullname="RhythmDojo.Tests.GameplayHudFlowTests.GameplayWindowPreservesProjectionAndReleasesCameraOnDisable" methodname="GameplayWindowPreservesProjectionAndReleasesCameraOnDisable" classname="RhythmDojo.Tests.GameplayHudFlowTests" runstate="Runnable" seed="1662546155" result="Passed" start-time="2026-11-02 18:58:00Z" end-time="2026-11-02 18:58:02Z" duration="1.583792" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1063" name="GameplayWindowRendersJudgmentLineBelowCenter" fullname="RhythmDojo.Tests.GameplayHudFlowTests.GameplayWindowRendersJudgmentLineBelowCenter" methodname="GameplayWindowRendersJudgmentLineBelowCenter" classname="RhythmDojo.Tests.GameplayHudFlowTests" runstate="Runnable" seed="2062734269" result="Passed" start-time="2026-11-02 18:58:02Z" end-time="2026-11-02 18:58:03Z" duration="1.748835" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1065" name="HealthDepletionShowsGameOverFreezesNotesAndSpaceRestarts" fullname="RhythmDojo.Tests.GameplayHudFlowTests.HealthDepletionShowsGameOverFreezesNotesAndSpaceRestarts" methodname="HealthDepletionShowsGameOverFreezesNotesAndSpaceRestarts" classname="RhythmDojo.Tests.GameplayHudFlowTests" runstate="Runnable" seed="744112138" result="Passed" start-time="2026-11-02 18:58:03Z" end-time="2026-11-02 18:58:08Z" duration="4.927720" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="Category" value="Results" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1067" name="ReturnButtonInReadyStateLoadsSongSelectionAndReleasesSong" fullname="RhythmDojo.Tests.GameplayHudFlowTests.ReturnButtonInReadyStateLoadsSongSelectionAndReleasesSong" methodname="ReturnButtonInReadyStateLoadsSongSelectionAndReleasesSong" classname="RhythmDojo.Tests.GameplayHudFlowTests" runstate="Runnable" seed="434094583" result="Passed" start-time="2026-11-02 18:58:08Z" end-time="2026-11-02 18:58:10Z" duration="2.076089" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="Category" value="Smoke" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1068" name="ReturnButtonIsHiddenWhilePlayingAndEscapeReturnsToSelection" fullname="RhythmDojo.Tests.GameplayHudFlowTests.ReturnButtonIsHiddenWhilePlayingAndEscapeReturnsToSelection" methodname="ReturnButtonIsHiddenWhilePlayingAndEscapeReturnsToSelection" classname="RhythmDojo.Tests.GameplayHudFlowTests" runstate="Runnable" seed="2057186324" result="Passed" start-time="2026-11-02 18:58:10Z" end-time="2026-11-02 18:58:12Z" duration="2.190171" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1069" name="ReturnButtonReappearsAfterCompletionAndLoadsSongSelection" fullname="RhythmDojo.Tests.GameplayHudFlowTests.ReturnButtonReappearsAfterCompletionAndLoadsSongSelection" methodname="ReturnButtonReappearsAfterCompletionAndLoadsSongSelection" classname="RhythmDojo.Tests.GameplayHudFlowTests" runstate="Runnable" seed="1913642570" result="Passed" start-time="2026-11-02 18:58:12Z" end-time="2026-11-02 18:58:16Z" duration="3.564764" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="Category" value="Results" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1066" name="TrainingFeedbackTracksHoldMissPeakComboAndFocusReset" fullname="RhythmDojo.Tests.GameplayHudFlowTests.TrainingFeedbackTracksHoldMissPeakComboAndFocusReset" methodname="TrainingFeedbackTracksHoldMissPeakComboAndFocusReset" classname="RhythmDojo.Tests.GameplayHudFlowTests" runstate="Runnable" seed="812559505" result="Passed" start-time="2026-11-02 18:58:16Z" end-time="2026-11-02 18:58:19Z" duration="2.978545" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1070" name="GameplayJudgmentTests" fullname="RhythmDojo.Tests.GameplayJudgmentTests" classname="RhythmDojo.Tests.GameplayJudgmentTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-11-02 18:58:19Z" end-time="2026-11-02 18:59:25Z" duration="65.992525" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties>
+              <property name="Category" value="Gameplay" />
+              <property name="Category" value="Results" />
+            </properties>
+            <test-case id="1072" name="SpaceRestartClearsHeldLaneAndScoresThenAllowsPerfectRun" fullname="RhythmDojo.Tests.GameplayJudgmentTests.SpaceRestartClearsHeldLaneAndScoresThenAllowsPerfectRun" methodname="SpaceRestartClearsHeldLaneAndScoresThenAllowsPerfectRun" classname="RhythmDojo.Tests.GameplayJudgmentTests" runstate="Runnable" seed="506063930" result="Passed" start-time="2026-11-02 18:58:19Z" end-time="2026-11-02 18:58:34Z" duration="15.402995" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1075" name="TempoBoundaryHoldIsPerfectWithBpmScroll" fullname="RhythmDojo.Tests.GameplayJudgmentTests.TempoBoundaryHoldIsPerfectWithBpmScroll" methodname="TempoBoundaryHoldIsPerfectWithBpmScroll" classname="RhythmDojo.Tests.GameplayJudgmentTests" runstate="Runnable" seed="971022037" result="Passed" start-time="2026-11-02 18:58:34Z" end-time="2026-11-02 18:58:46Z" duration="11.709668" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1074" name="TempoBoundaryHoldIsPerfectWithConstantScroll" fullname="RhythmDojo.Tests.GameplayJudgmentTests.TempoBoundaryHoldIsPerfectWithConstantScroll" methodname="TempoBoundaryHoldIsPerfectWithConstantScroll" classname="RhythmDojo.Tests.GameplayJudgmentTests" runstate="Runnable" seed="283831101" result="Passed" start-time="2026-11-02 18:58:46Z" end-time="2026-11-02 18:58:58Z" duration="11.695847" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1071" name="TimestampedLaneActionsJudgeMixedRunDespiteFrameHitch" fullname="RhythmDojo.Tests.GameplayJudgmentTests.TimestampedLaneActionsJudgeMixedRunDespiteFrameHitch" methodname="TimestampedLaneActionsJudgeMixedRunDespiteFrameHitch" classname="RhythmDojo.Tests.GameplayJudgmentTests" runstate="Runnable" seed="1369739277" result="Passed" start-time="2026-11-02 18:58:58Z" end-time="2026-11-02 18:59:11Z" duration="13.561082" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1073" name="UnplayedTapsAndHoldStartsAllBecomeMisses" fullname="RhythmDojo.Tests.GameplayJudgmentTests.UnplayedTapsAndHoldStartsAllBecomeMisses" methodname="UnplayedTapsAndHoldStartsAllBecomeMisses" classname="RhythmDojo.Tests.GameplayJudgmentTests" runstate="Runnable" seed="183327183" result="Passed" start-time="2026-11-02 18:59:11Z" end-time="2026-11-02 18:59:25Z" duration="13.603470" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1076" name="GameplayPauseFlowTests" fullname="RhythmDojo.Tests.GameplayPauseFlowTests" classname="RhythmDojo.Tests.GameplayPauseFlowTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-11-02 18:59:25Z" end-time="2026-11-02 18:59:39Z" duration="13.590146" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1078" name="EscapeDuringCountdownReopensPauseWithoutResumingTheClock" fullname="RhythmDojo.Tests.GameplayPauseFlowTests.EscapeDuringCountdownReopensPauseWithoutResumingTheClock" methodname="EscapeDuringCountdownReopensPauseWithoutResumingTheClock" classname="RhythmDojo.Tests.GameplayPauseFlowTests" runstate="Runnable" seed="533008985" result="Passed" start-time="2026-11-02 18:59:25Z" end-time="2026-11-02 18:59:28Z" duration="2.904030" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1077" name="PauseSettingsCountdownRestartAndExitPreserveTheSongUntilRequested" fullname="RhythmDojo.Tests.GameplayPauseFlowTests.PauseSettingsCountdownRestartAndExitPreserveTheSongUntilRequested" methodname="PauseSettingsCountdownRestartAndExitPreserveTheSongUntilRequested" classname="RhythmDojo.Tests.GameplayPauseFlowTests" runstate="Runnable" seed="1796460043" result="Passed" start-time="2026-11-02 18:59:28Z" end-time="2026-11-02 18:59:39Z" duration="10.668948" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1079" name="HardModeFlowTests" fullname="RhythmDojo.Tests.HardModeFlowTests" classname="RhythmDojo.Tests.HardModeFlowTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-11-02 18:59:39Z" end-time="2026-11-02 18:59:53Z" duration="14.915239" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties>
+              <property name="Category" value="UI" />
+            </properties>
+            <test-case id="1082" name="ConfiguredHardModeDoesNotRecoverAndPausesExactlyAtTheDamageLimit" fullname="RhythmDojo.Tests.HardModeFlowTests.ConfiguredHardModeDoesNotRecoverAndPausesExactlyAtTheDamageLimit" methodname="ConfiguredHardModeDoesNotRecoverAndPausesExactlyAtTheDamageLimit" classname="RhythmDojo.Tests.HardModeFlowTests" runstate="Runnable" seed="911814545" result="Passed" start-time="2026-11-02 18:59:39Z" end-time="2026-11-02 18:59:44Z" duration="5.495253" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="Category" value="Results" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1080" name="ExpandedRuleDropdownsRenderAllKoreanLabelsAndAllowSelection" fullname="RhythmDojo.Tests.HardModeFlowTests.ExpandedRuleDropdownsRenderAllKoreanLabelsAndAllowSelection" methodname="ExpandedRuleDropdownsRenderAllKoreanLabelsAndAllowSelection" classname="RhythmDojo.Tests.HardModeFlowTests" runstate="Runnable" seed="982580212" result="Passed" start-time="2026-11-02 18:59:44Z" end-time="2026-11-02 18:59:48Z" duration="3.607335" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1081" name="HardRuleRowsSaveValidateCountsAndNormalModeIgnoresThem" fullname="RhythmDojo.Tests.HardModeFlowTests.HardRuleRowsSaveValidateCountsAndNormalModeIgnoresThem" methodname="HardRuleRowsSaveValidateCountsAndNormalModeIgnoresThem" classname="RhythmDojo.Tests.HardModeFlowTests" runstate="Runnable" seed="879774141" result="Passed" start-time="2026-11-02 18:59:48Z" end-time="2026-11-02 18:59:50Z" duration="2.540262" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1083" name="StrictHardDefaultsFailOnTheFirstGoodJudgment" fullname="RhythmDojo.Tests.HardModeFlowTests.StrictHardDefaultsFailOnTheFirstGoodJudgment" methodname="StrictHardDefaultsFailOnTheFirstGoodJudgment" classname="RhythmDojo.Tests.HardModeFlowTests" runstate="Runnable" seed="1675978036" result="Passed" start-time="2026-11-02 18:59:50Z" end-time="2026-11-02 18:59:53Z" duration="3.254047" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="Category" value="Results" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1084" name="KeySettingsFlowTests" fullname="RhythmDojo.Tests.KeySettingsFlowTests" classname="RhythmDojo.Tests.KeySettingsFlowTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-11-02 18:59:53Z" end-time="2026-11-02 19:00:15Z" duration="21.211038" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1089" name="ChangingAnotherModeDoesNotReleaseCurrentHeldInput" fullname="RhythmDojo.Tests.KeySettingsFlowTests.ChangingAnotherModeDoesNotReleaseCurrentHeldInput" methodname="ChangingAnotherModeDoesNotReleaseCurrentHeldInput" classname="RhythmDojo.Tests.KeySettingsFlowTests" runstate="Runnable" seed="949866754" result="Passed" start-time="2026-11-02 18:59:54Z" end-time="2026-11-02 18:59:55Z" duration="1.589279" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1086" name="CustomKeysDriveGameplayAndPausedChangesRefreshHudImmediately" fullname="RhythmDojo.Tests.KeySettingsFlowTests.CustomKeysDriveGameplayAndPausedChangesRefreshHudImmediately" methodname="CustomKeysDriveGameplayAndPausedChangesRefreshHudImmediately" classname="RhythmDojo.Tests.KeySettingsFlowTests" runstate="Runnable" seed="1583403674" result="Passed" start-time="2026-11-02 18:59:55Z" end-time="2026-11-02 19:00:02Z" duration="7.241552" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1085" name="KeyTabCapturesPersistsCancelsRejectsDuplicatesAndResets" fullname="RhythmDojo.Tests.KeySettingsFlowTests.KeyTabCapturesPersistsCancelsRejectsDuplicatesAndResets" methodname="KeyTabCapturesPersistsCancelsRejectsDuplicatesAndResets" classname="RhythmDojo.Tests.KeySettingsFlowTests" runstate="Runnable" seed="1486892450" result="Passed" start-time="2026-11-02 19:00:02Z" end-time="2026-11-02 19:00:05Z" duration="2.821016" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1088" name="PausedSettingsUseOriginalPlayModeWhenSelectionChangesAndResultsKeepLabels" fullname="RhythmDojo.Tests.KeySettingsFlowTests.PausedSettingsUseOriginalPlayModeWhenSelectionChangesAndResultsKeepLabels" methodname="PausedSettingsUseOriginalPlayModeWhenSelectionChangesAndResultsKeepLabels" classname="RhythmDojo.Tests.KeySettingsFlowTests" runstate="Runnable" seed="804153671" result="Passed" start-time="2026-11-02 19:00:05Z" end-time="2026-11-02 19:00:12Z" duration="6.962065" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1087" name="SelectedSixLaneModeBuildsScrollableRowsAndTitleKeepsCatalogDefault" fullname="RhythmDojo.Tests.KeySettingsFlowTests.SelectedSixLaneModeBuildsScrollableRowsAndTitleKeepsCatalogDefault" methodname="SelectedSixLaneModeBuildsScrollableRowsAndTitleKeepsCatalogDefault" classname="RhythmDojo.Tests.KeySettingsFlowTests" runstate="Runnable" seed="750490764" result="Passed" start-time="2026-11-02 19:00:12Z" end-time="2026-11-02 19:00:15Z" duration="2.578250" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[There can be only one active Event System.
+]]></output>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1090" name="MainMenuFlowTests" fullname="RhythmDojo.Tests.MainMenuFlowTests" classname="RhythmDojo.Tests.MainMenuFlowTests" runstate="Runnable" testcasecount="19" result="Passed" start-time="2026-11-02 19:00:15Z" end-time="2026-11-02 19:01:12Z" duration="56.964156" total="19" passed="19" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties>
+              <property name="Category" value="UI" />
+            </properties>
+            <test-case id="1101" name="BootstrapFallbackStillStartsWithoutATitleView" fullname="RhythmDojo.Tests.MainMenuFlowTests.BootstrapFallbackStillStartsWithoutATitleView" methodname="BootstrapFallbackStillStartsWithoutATitleView" classname="RhythmDojo.Tests.MainMenuFlowTests" runstate="Runnable" seed="690497469" result="Passed" start-time="2026-11-02 19:00:15Z" end-time="2026-11-02 19:00:16Z" duration="1.375585" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[There can be only one active Event System.
+]]></output>
+            </test-case>
+            <test-case id="1106" name="BreakingBoardDefersActionAndBlocksOtherButtons" fullname="RhythmDojo.Tests.MainMenuFlowTests.BreakingBoardDefersActionAndBlocksOtherButtons" methodname="BreakingBoardDefersActionAndBlocksOtherButtons" classname="RhythmDojo.Tests.MainMenuFlowTests" runstate="Runnable" seed="1383050853" result="Passed" start-time="2026-11-02 19:00:16Z" end-time="2026-11-02 19:00:18Z" duration="2.033281" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[There can be only one active Event System.
+]]></output>
+            </test-case>
+            <test-case id="1103" name="CaptureMenuAndKoreanQuitPopup" fullname="RhythmDojo.Tests.MainMenuFlowTests.CaptureMenuAndKoreanQuitPopup" methodname="CaptureMenuAndKoreanQuitPopup" classname="RhythmDojo.Tests.MainMenuFlowTests" runstate="Runnable" seed="1780589533" result="Passed" start-time="2026-11-02 19:00:18Z" end-time="2026-11-02 19:00:22Z" duration="3.917009" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[There can be only one active Event System.
+]]></output>
+            </test-case>
+            <test-case id="1093" name="EditorStaysBehindDoorsAndOpensFromInsideTheDojo" fullname="RhythmDojo.Tests.MainMenuFlowTests.EditorStaysBehindDoorsAndOpensFromInsideTheDojo" methodname="EditorStaysBehindDoorsAndOpensFromInsideTheDojo" classname="RhythmDojo.Tests.MainMenuFlowTests" runstate="Runnable" seed="306443383" result="Passed" start-time="2026-11-02 19:00:22Z" end-time="2026-11-02 19:00:26Z" duration="4.189393" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[There can be only one active Event System.
+]]></output>
+            </test-case>
+            <test-case id="1109" name="EntranceTimeoutOffersRecoveryAndCleansUp" fullname="RhythmDojo.Tests.MainMenuFlowTests.EntranceTimeoutOffersRecoveryAndCleansUp" methodname="EntranceTimeoutOffersRecoveryAndCleansUp" classname="RhythmDojo.Tests.MainMenuFlowTests" runstate="Runnable" seed="855515601" result="Passed" start-time="2026-11-02 19:00:26Z" end-time="2026-11-02 19:00:28Z" duration="2.143758" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[There can be only one active Event System.
+]]></output>
+            </test-case>
+            <test-case id="1107" name="EntranceWaitsForReadyAndRestoresSelectionInput" fullname="RhythmDojo.Tests.MainMenuFlowTests.EntranceWaitsForReadyAndRestoresSelectionInput" methodname="EntranceWaitsForReadyAndRestoresSelectionInput" classname="RhythmDojo.Tests.MainMenuFlowTests" runstate="Runnable" seed="170510509" result="Passed" start-time="2026-11-02 19:00:28Z" end-time="2026-11-02 19:00:33Z" duration="4.957160" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[There can be only one active Event System.
+]]></output>
+            </test-case>
+            <test-case id="1104" name="LogoCanCollapseMenuAndHiddenButtonsCannotStart" fullname="RhythmDojo.Tests.MainMenuFlowTests.LogoCanCollapseMenuAndHiddenButtonsCannotStart" methodname="LogoCanCollapseMenuAndHiddenButtonsCannotStart" classname="RhythmDojo.Tests.MainMenuFlowTests" runstate="Runnable" seed="1938013716" result="Passed" start-time="2026-11-02 19:00:33Z" end-time="2026-11-02 19:00:36Z" duration="2.987331" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[There can be only one active Event System.
+]]></output>
+            </test-case>
+            <test-case id="1097" name="LogoExpandsMenuAndPlayStartsOnceWithoutDuplicateListeners" fullname="RhythmDojo.Tests.MainMenuFlowTests.LogoExpandsMenuAndPlayStartsOnceWithoutDuplicateListeners" methodname="LogoExpandsMenuAndPlayStartsOnceWithoutDuplicateListeners" classname="RhythmDojo.Tests.MainMenuFlowTests" runstate="Runnable" seed="72302925" result="Passed" start-time="2026-11-02 19:00:36Z" end-time="2026-11-02 19:00:38Z" duration="2.138739" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[There can be only one active Event System.
+]]></output>
+            </test-case>
+            <test-case id="1108" name="PlaqueRejectsCornersAndKeyboardCanExpandAndStart" fullname="RhythmDojo.Tests.MainMenuFlowTests.PlaqueRejectsCornersAndKeyboardCanExpandAndStart" methodname="PlaqueRejectsCornersAndKeyboardCanExpandAndStart" classname="RhythmDojo.Tests.MainMenuFlowTests" runstate="Runnable" seed="1441521057" result="Passed" start-time="2026-11-02 19:00:38Z" end-time="2026-11-02 19:00:43Z" duration="4.119796" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[There can be only one active Event System.
+]]></output>
+            </test-case>
+            <test-case id="1098" name="PlayDismissesMenuImmediatelyWithoutWaitingForBoardDelay" fullname="RhythmDojo.Tests.MainMenuFlowTests.PlayDismissesMenuImmediatelyWithoutWaitingForBoardDelay" methodname="PlayDismissesMenuImmediatelyWithoutWaitingForBoardDelay" classname="RhythmDojo.Tests.MainMenuFlowTests" runstate="Runnable" seed="1180721484" result="Passed" start-time="2026-11-02 19:00:43Z" end-time="2026-11-02 19:00:44Z" duration="1.844008" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[There can be only one active Event System.
+]]></output>
+            </test-case>
+            <test-case id="1092" name="PlayOpensDoorsWithLogoHalvesAttachedUntilFullyOutsideTheDoorway" fullname="RhythmDojo.Tests.MainMenuFlowTests.PlayOpensDoorsWithLogoHalvesAttachedUntilFullyOutsideTheDoorway" methodname="PlayOpensDoorsWithLogoHalvesAttachedUntilFullyOutsideTheDoorway" classname="RhythmDojo.Tests.MainMenuFlowTests" runstate="Runnable" seed="2043611772" result="Passed" start-time="2026-11-02 19:00:44Z" end-time="2026-11-02 19:00:47Z" duration="3.032764" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[There can be only one active Event System.
+]]></output>
+            </test-case>
+            <test-case id="1095" name="QuitPopupBlocksBackgroundAndNoRestoresMenu" fullname="RhythmDojo.Tests.MainMenuFlowTests.QuitPopupBlocksBackgroundAndNoRestoresMenu" methodname="QuitPopupBlocksBackgroundAndNoRestoresMenu" classname="RhythmDojo.Tests.MainMenuFlowTests" runstate="Runnable" seed="1910392924" result="Passed" start-time="2026-11-02 19:00:47Z" end-time="2026-11-02 19:00:51Z" duration="3.125681" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[There can be only one active Event System.
+]]></output>
+            </test-case>
+            <test-case id="1102" name="SceneLoadingCompletesBeforeDoorAnimationStarts" fullname="RhythmDojo.Tests.MainMenuFlowTests.SceneLoadingCompletesBeforeDoorAnimationStarts" methodname="SceneLoadingCompletesBeforeDoorAnimationStarts" classname="RhythmDojo.Tests.MainMenuFlowTests" runstate="Runnable" seed="1549270247" result="Passed" start-time="2026-11-02 19:00:51Z" end-time="2026-11-02 19:00:55Z" duration="4.501899" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[There can be only one active Event System.
+]]></output>
+            </test-case>
+            <test-case id="1094" name="SettingsRequestsSettingsWithoutStartingTheGame" fullname="RhythmDojo.Tests.MainMenuFlowTests.SettingsRequestsSettingsWithoutStartingTheGame" methodname="SettingsRequestsSettingsWithoutStartingTheGame" classname="RhythmDojo.Tests.MainMenuFlowTests" runstate="Runnable" seed="757320541" result="Passed" start-time="2026-11-02 19:00:55Z" end-time="2026-11-02 19:00:57Z" duration="2.125448" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[There can be only one active Event System.
+]]></output>
+            </test-case>
+            <test-case id="1091" name="SlidingDoorsRevealDummiesAndReverseWithoutStartingEarly" fullname="RhythmDojo.Tests.MainMenuFlowTests.SlidingDoorsRevealDummiesAndReverseWithoutStartingEarly" methodname="SlidingDoorsRevealDummiesAndReverseWithoutStartingEarly" classname="RhythmDojo.Tests.MainMenuFlowTests" runstate="Runnable" seed="1731994747" result="Passed" start-time="2026-11-02 19:00:57Z" end-time="2026-11-02 19:01:01Z" duration="3.884280" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[There can be only one active Event System.
+]]></output>
+            </test-case>
+            <test-case id="1100" name="StartLoadsBootstrapThenExistingSongSelection" fullname="RhythmDojo.Tests.MainMenuFlowTests.StartLoadsBootstrapThenExistingSongSelection" methodname="StartLoadsBootstrapThenExistingSongSelection" classname="RhythmDojo.Tests.MainMenuFlowTests" runstate="Runnable" seed="1231003969" result="Passed" start-time="2026-11-02 19:01:01Z" end-time="2026-11-02 19:01:06Z" duration="4.519886" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="Category" value="Smoke" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[There can be only one active Event System.
+]]></output>
+            </test-case>
+            <test-case id="1099" name="TitlePreparesSelectionWithoutShowingItOrStealingInput" fullname="RhythmDojo.Tests.MainMenuFlowTests.TitlePreparesSelectionWithoutShowingItOrStealingInput" methodname="TitlePreparesSelectionWithoutShowingItOrStealingInput" classname="RhythmDojo.Tests.MainMenuFlowTests" runstate="Runnable" seed="1605903725" result="Passed" start-time="2026-11-02 19:01:06Z" end-time="2026-11-02 19:01:07Z" duration="1.608495" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[There can be only one active Event System.
+]]></output>
+            </test-case>
+            <test-case id="1105" name="TitleSettingsBackReturnsToTitle" fullname="RhythmDojo.Tests.MainMenuFlowTests.TitleSettingsBackReturnsToTitle" methodname="TitleSettingsBackReturnsToTitle" classname="RhythmDojo.Tests.MainMenuFlowTests" runstate="Runnable" seed="2141866931" result="Passed" start-time="2026-11-02 19:01:07Z" end-time="2026-11-02 19:01:09Z" duration="2.195673" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[There can be only one active Event System.
+]]></output>
+            </test-case>
+            <test-case id="1096" name="YesRequestsQuitExactlyOnceWithoutStarting" fullname="RhythmDojo.Tests.MainMenuFlowTests.YesRequestsQuitExactlyOnceWithoutStarting" methodname="YesRequestsQuitExactlyOnceWithoutStarting" classname="RhythmDojo.Tests.MainMenuFlowTests" runstate="Runnable" seed="1257733368" result="Passed" start-time="2026-11-02 19:01:09Z" end-time="2026-11-02 19:01:12Z" duration="2.235951" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[There can be only one active Event System.
+]]></output>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1110" name="PixelDojoCursorTests" fullname="RhythmDojo.Tests.PixelDojoCursorTests" classname="RhythmDojo.Tests.PixelDojoCursorTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-11-02 19:01:12Z" end-time="2026-11-02 19:01:18Z" duration="6.462745" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties>
+              <property name="Category" value="UI" />
+            </properties>
+            <test-case id="1115" name="FistMarkWaitsForContactStaysAtTheExtendedPoseAndFadesWhilePaused" fullname="RhythmDojo.Tests.PixelDojoCursorTests.FistMarkWaitsForContactStaysAtTheExtendedPoseAndFadesWhilePaused" methodname="FistMarkWaitsForContactStaysAtTheExtendedPoseAndFadesWhilePaused" classname="RhythmDojo.Tests.PixelDojoCursorTests" runstate="Runnable" seed="584294577" result="Passed" start-time="2026-11-02 19:01:12Z" end-time="2026-11-02 19:01:13Z" duration="1.783479" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1113" name="FistReachesForwardAndReturnsWithNoRandomImpactLayer" fullname="RhythmDojo.Tests.PixelDojoCursorTests.FistReachesForwardAndReturnsWithNoRandomImpactLayer" methodname="FistReachesForwardAndReturnsWithNoRandomImpactLayer" classname="RhythmDojo.Tests.PixelDojoCursorTests" runstate="Runnable" seed="1765065820" result="Passed" start-time="2026-11-02 19:01:13Z" end-time="2026-11-02 19:01:15Z" duration="1.031019" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1111" name="NativeCursorUsesPressedArtworkOnlyWhileLeftButtonIsHeld" fullname="RhythmDojo.Tests.PixelDojoCursorTests.NativeCursorUsesPressedArtworkOnlyWhileLeftButtonIsHeld" methodname="NativeCursorUsesPressedArtworkOnlyWhileLeftButtonIsHeld" classname="RhythmDojo.Tests.PixelDojoCursorTests" runstate="Runnable" seed="364210407" result="Passed" start-time="2026-11-02 19:01:15Z" end-time="2026-11-02 19:01:16Z" duration="1.327534" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1112" name="PunchFinishesAfterQuickReleaseWhilePaused" fullname="RhythmDojo.Tests.PixelDojoCursorTests.PunchFinishesAfterQuickReleaseWhilePaused" methodname="PunchFinishesAfterQuickReleaseWhilePaused" classname="RhythmDojo.Tests.PixelDojoCursorTests" runstate="Runnable" seed="263850260" result="Passed" start-time="2026-11-02 19:01:16Z" end-time="2026-11-02 19:01:17Z" duration="1.290331" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1114" name="RepeatedClicksReuseFramesAndFocusLossRestoresTheNativePointer" fullname="RhythmDojo.Tests.PixelDojoCursorTests.RepeatedClicksReuseFramesAndFocusLossRestoresTheNativePointer" methodname="RepeatedClicksReuseFramesAndFocusLossRestoresTheNativePointer" classname="RhythmDojo.Tests.PixelDojoCursorTests" runstate="Runnable" seed="1508811615" result="Passed" start-time="2026-11-02 19:01:17Z" end-time="2026-11-02 19:01:18Z" duration="1.010450" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1116" name="ProjectLibraryFlowTests" fullname="RhythmDojo.Tests.ProjectLibraryFlowTests" classname="RhythmDojo.Tests.ProjectLibraryFlowTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-11-02 19:01:18Z" end-time="2026-11-02 19:01:25Z" duration="7.132567" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1119" name="ModalScopeRestoresInputAndFocusAfterOpeningFailureAndDispose" fullname="RhythmDojo.Tests.ProjectLibraryFlowTests.ModalScopeRestoresInputAndFocusAfterOpeningFailureAndDispose" methodname="ModalScopeRestoresInputAndFocusAfterOpeningFailureAndDispose" classname="RhythmDojo.Tests.ProjectLibraryFlowTests" runstate="Runnable" seed="639486044" result="Passed" start-time="2026-11-02 19:01:18Z" end-time="2026-11-02 19:01:19Z" duration="0.995985" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1118" name="NestedModalScopesKeepInputBlockedUntilTheLastOwnerCloses" fullname="RhythmDojo.Tests.ProjectLibraryFlowTests.NestedModalScopesKeepInputBlockedUntilTheLastOwnerCloses" methodname="NestedModalScopesKeepInputBlockedUntilTheLastOwnerCloses" classname="RhythmDojo.Tests.ProjectLibraryFlowTests" runstate="Runnable" seed="1026291798" result="Passed" start-time="2026-11-02 19:01:19Z" end-time="2026-11-02 19:01:20Z" duration="0.994274" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1117" name="SavedThreeChartProjectSelectsLoadsAndRefreshesEachSlot" fullname="RhythmDojo.Tests.ProjectLibraryFlowTests.SavedThreeChartProjectSelectsLoadsAndRefreshesEachSlot" methodname="SavedThreeChartProjectSelectsLoadsAndRefreshesEachSlot" classname="RhythmDojo.Tests.ProjectLibraryFlowTests" runstate="Runnable" seed="871047537" result="Passed" start-time="2026-11-02 19:01:20Z" end-time="2026-11-02 19:01:25Z" duration="5.124648" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1120" name="PupaResultsFlowTests" fullname="RhythmDojo.Tests.PupaResultsFlowTests" classname="RhythmDojo.Tests.PupaResultsFlowTests" runstate="Runnable" testcasecount="6" result="Failed" site="Child" start-time="2026-11-02 19:01:25Z" end-time="2026-11-02 19:03:52Z" duration="146.676606" total="6" passed="5" failed="1" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <failure>
+              <message><![CDATA[One or more child tests had errors]]></message>
+            </failure>
+            <test-case id="1124" name="CorrectedPupaClockKeepsAudioNotesAndTimestampedInputTogether" fullname="RhythmDojo.Tests.PupaResultsFlowTests.CorrectedPupaClockKeepsAudioNotesAndTimestampedInputTogether" methodname="CorrectedPupaClockKeepsAudioNotesAndTimestampedInputTogether" classname="RhythmDojo.Tests.PupaResultsFlowTests" runstate="Runnable" seed="1288710037" result="Passed" start-time="2026-11-02 19:01:25Z" end-time="2026-11-02 19:01:28Z" duration="2.727813" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="Category" value="LocalAudio" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1122" name="EditorPupaShowsResultsBeforeReturningTheUnsavedSession" fullname="RhythmDojo.Tests.PupaResultsFlowTests.EditorPupaShowsResultsBeforeReturningTheUnsavedSession" methodname="EditorPupaShowsResultsBeforeReturningTheUnsavedSession" classname="RhythmDojo.Tests.PupaResultsFlowTests" runstate="Runnable" seed="1664344511" result="Passed" start-time="2026-11-02 19:01:28Z" end-time="2026-11-02 19:01:32Z" duration="3.751088" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1126" name="PupaAudioTailTransitionsPromptlyWithEveryJudgmentPreserved" fullname="RhythmDojo.Tests.PupaResultsFlowTests.PupaAudioTailTransitionsPromptlyWithEveryJudgmentPreserved" methodname="PupaAudioTailTransitionsPromptlyWithEveryJudgmentPreserved" classname="RhythmDojo.Tests.PupaResultsFlowTests" runstate="Runnable" seed="1846572751" result="Passed" start-time="2026-11-02 19:01:32Z" end-time="2026-11-02 19:01:38Z" duration="6.715296" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="Category" value="LocalAudio" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1123" name="RealPupaAudioFinishesAndAutomaticallyLoadsResults" fullname="RhythmDojo.Tests.PupaResultsFlowTests.RealPupaAudioFinishesAndAutomaticallyLoadsResults" methodname="RealPupaAudioFinishesAndAutomaticallyLoadsResults" classname="RhythmDojo.Tests.PupaResultsFlowTests" runstate="Runnable" seed="1894438297" result="Failed" start-time="2026-11-02 19:01:38Z" end-time="2026-11-02 19:03:46Z" duration="127.585280" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="Category" value="LocalAudio" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <failure>
+                <message><![CDATA[  Trailing audio must not delay Results.
+  Expected: less than 125.539993f
+  But was:  125.56931459999942d
+]]></message>
+                <stack-trace><![CDATA[at RhythmDojo.Tests.PupaResultsFlowTests+<RealPupaAudioFinishesAndAutomaticallyLoadsResults>d__4.MoveNext () [0x00475] in C:\Users\song\RhythmDojo-pr-quality\Assets\Game\Tests\PlayMode\PupaResultsFlowTests.cs:192
+at UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\Library\PackageCache\com.unity.test-framework@bd7f943e9647\UnityEngine.TestRunner\NUnitExtensions\Attributes\TestEnumerator.cs:44
+]]></stack-trace>
+              </failure>
+            </test-case>
+            <test-case id="1125" name="ShortenedOutroStillPreservesTheFinalHoldReleaseWindow" fullname="RhythmDojo.Tests.PupaResultsFlowTests.ShortenedOutroStillPreservesTheFinalHoldReleaseWindow" methodname="ShortenedOutroStillPreservesTheFinalHoldReleaseWindow" classname="RhythmDojo.Tests.PupaResultsFlowTests" runstate="Runnable" seed="1055880024" result="Passed" start-time="2026-11-02 19:03:46Z" end-time="2026-11-02 19:03:49Z" duration="2.929054" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1121" name="SongSelectionPupaCompletesAndKeepsTheWholeChart" fullname="RhythmDojo.Tests.PupaResultsFlowTests.SongSelectionPupaCompletesAndKeepsTheWholeChart" methodname="SongSelectionPupaCompletesAndKeepsTheWholeChart" classname="RhythmDojo.Tests.PupaResultsFlowTests" runstate="Runnable" seed="1160660935" result="Passed" start-time="2026-11-02 19:03:49Z" end-time="2026-11-02 19:03:52Z" duration="2.948262" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1127" name="ResultsFlowTests" fullname="RhythmDojo.Tests.ResultsFlowTests" classname="RhythmDojo.Tests.ResultsFlowTests" runstate="Runnable" testcasecount="8" result="Passed" start-time="2026-11-02 19:03:52Z" end-time="2026-11-02 19:04:34Z" duration="42.263707" total="8" passed="8" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties>
+              <property name="Category" value="Results" />
+            </properties>
+            <test-case id="1128" name="CompletionDisplaysThisPlayAndNextPlayReplacesIt" fullname="RhythmDojo.Tests.ResultsFlowTests.CompletionDisplaysThisPlayAndNextPlayReplacesIt" methodname="CompletionDisplaysThisPlayAndNextPlayReplacesIt" classname="RhythmDojo.Tests.ResultsFlowTests" runstate="Runnable" seed="1626869272" result="Passed" start-time="2026-11-02 19:03:52Z" end-time="2026-11-02 19:03:58Z" duration="5.815138" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1131" name="DirectResultsSceneHasEmptyStateAndBackWorks" fullname="RhythmDojo.Tests.ResultsFlowTests.DirectResultsSceneHasEmptyStateAndBackWorks" methodname="DirectResultsSceneHasEmptyStateAndBackWorks" classname="RhythmDojo.Tests.ResultsFlowTests" runstate="Runnable" seed="1135679455" result="Passed" start-time="2026-11-02 19:03:58Z" end-time="2026-11-02 19:04:00Z" duration="1.930760" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1135" name="EarlyFailureKeepsFutureNotesUnjudgedInWholeChartReview" fullname="RhythmDojo.Tests.ResultsFlowTests.EarlyFailureKeepsFutureNotesUnjudgedInWholeChartReview" methodname="EarlyFailureKeepsFutureNotesUnjudgedInWholeChartReview" classname="RhythmDojo.Tests.ResultsFlowTests" runstate="Runnable" seed="801838596" result="Passed" start-time="2026-11-02 19:04:00Z" end-time="2026-11-02 19:04:03Z" duration="3.268594" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1129" name="GameOverDisplaysFailureAndEscapeDuringPlaySkipsResults" fullname="RhythmDojo.Tests.ResultsFlowTests.GameOverDisplaysFailureAndEscapeDuringPlaySkipsResults" methodname="GameOverDisplaysFailureAndEscapeDuringPlaySkipsResults" classname="RhythmDojo.Tests.ResultsFlowTests" runstate="Runnable" seed="1769056974" result="Passed" start-time="2026-11-02 19:04:03Z" end-time="2026-11-02 19:04:08Z" duration="4.725821" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1134" name="MoreShowsPlayedChartAndPerNoteJudgmentsThenReturnsToSameResult" fullname="RhythmDojo.Tests.ResultsFlowTests.MoreShowsPlayedChartAndPerNoteJudgmentsThenReturnsToSameResult" methodname="MoreShowsPlayedChartAndPerNoteJudgmentsThenReturnsToSameResult" classname="RhythmDojo.Tests.ResultsFlowTests" runstate="Runnable" seed="304741496" result="Passed" start-time="2026-11-02 19:04:08Z" end-time="2026-11-02 19:04:12Z" duration="4.237994" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1132" name="RealClockCompletionTransitionsWithoutUserInput" fullname="RhythmDojo.Tests.ResultsFlowTests.RealClockCompletionTransitionsWithoutUserInput" methodname="RealClockCompletionTransitionsWithoutUserInput" classname="RhythmDojo.Tests.ResultsFlowTests" runstate="Runnable" seed="1163172579" result="Passed" start-time="2026-11-02 19:04:12Z" end-time="2026-11-02 19:04:27Z" duration="15.174265" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1130" name="RestartDuringOutcomeDelayCancelsPendingResults" fullname="RhythmDojo.Tests.ResultsFlowTests.RestartDuringOutcomeDelayCancelsPendingResults" methodname="RestartDuringOutcomeDelayCancelsPendingResults" classname="RhythmDojo.Tests.ResultsFlowTests" runstate="Runnable" seed="1507563903" result="Passed" start-time="2026-11-02 19:04:27Z" end-time="2026-11-02 19:04:31Z" duration="4.118595" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1133" name="RestartResetsStatisticsAndGoodJudgmentsReachResults" fullname="RhythmDojo.Tests.ResultsFlowTests.RestartResetsStatisticsAndGoodJudgmentsReachResults" methodname="RestartResetsStatisticsAndGoodJudgmentsReachResults" classname="RhythmDojo.Tests.ResultsFlowTests" runstate="Runnable" seed="1583519319" result="Passed" start-time="2026-11-02 19:04:31Z" end-time="2026-11-02 19:04:34Z" duration="2.971838" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1136" name="ScenePreparationFlowTests" fullname="RhythmDojo.Tests.ScenePreparationFlowTests" classname="RhythmDojo.Tests.ScenePreparationFlowTests" runstate="Runnable" testcasecount="9" result="Passed" start-time="2026-11-02 19:04:34Z" end-time="2026-11-02 19:04:53Z" duration="18.881613" total="9" passed="9" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1140" name="ClosingModalRestoresAnEmptyFocusAfterSelectionResume" fullname="RhythmDojo.Tests.ScenePreparationFlowTests.ClosingModalRestoresAnEmptyFocusAfterSelectionResume" methodname="ClosingModalRestoresAnEmptyFocusAfterSelectionResume" classname="RhythmDojo.Tests.ScenePreparationFlowTests" runstate="Runnable" seed="450403007" result="Passed" start-time="2026-11-02 19:04:34Z" end-time="2026-11-02 19:04:35Z" duration="0.958438" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1139" name="DelayedPreparationPreservesAnEmptyTitleFocus" fullname="RhythmDojo.Tests.ScenePreparationFlowTests.DelayedPreparationPreservesAnEmptyTitleFocus" methodname="DelayedPreparationPreservesAnEmptyTitleFocus" classname="RhythmDojo.Tests.ScenePreparationFlowTests" runstate="Runnable" seed="1459396965" result="Passed" start-time="2026-11-02 19:04:35Z" end-time="2026-11-02 19:04:37Z" duration="1.563196" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[There can be only one active Event System.
+]]></output>
+            </test-case>
+            <test-case id="1141" name="DisposingOwnerDrainsOutstandingLoadWithoutInitializingIt" fullname="RhythmDojo.Tests.ScenePreparationFlowTests.DisposingOwnerDrainsOutstandingLoadWithoutInitializingIt" methodname="DisposingOwnerDrainsOutstandingLoadWithoutInitializingIt" classname="RhythmDojo.Tests.ScenePreparationFlowTests" runstate="Runnable" seed="223607648" result="Passed" start-time="2026-11-02 19:04:37Z" end-time="2026-11-02 19:04:38Z" duration="1.537587" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[There can be only one active Event System.
+]]></output>
+            </test-case>
+            <test-case id="1145" name="FinalOwnerRestoresOriginalStatesAndNotifiesOnceEvenAfterAnotherParticipantThrows" fullname="RhythmDojo.Tests.ScenePreparationFlowTests.FinalOwnerRestoresOriginalStatesAndNotifiesOnceEvenAfterAnotherParticipantThrows" methodname="FinalOwnerRestoresOriginalStatesAndNotifiesOnceEvenAfterAnotherParticipantThrows" classname="RhythmDojo.Tests.ScenePreparationFlowTests" runstate="Runnable" seed="2058042111" result="Passed" start-time="2026-11-02 19:04:38Z" end-time="2026-11-02 19:04:39Z" duration="0.972091" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1137" name="InvalidatedLoadNeverInitializesAfterEditorExit" fullname="RhythmDojo.Tests.ScenePreparationFlowTests.InvalidatedLoadNeverInitializesAfterEditorExit" methodname="InvalidatedLoadNeverInitializesAfterEditorExit" classname="RhythmDojo.Tests.ScenePreparationFlowTests" runstate="Runnable" seed="1033363613" result="Passed" start-time="2026-11-02 19:04:39Z" end-time="2026-11-02 19:04:41Z" duration="1.967234" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[There can be only one active Event System.
+]]></output>
+            </test-case>
+            <test-case id="1144" name="LoadFailureAllowsColdEntranceRetry" fullname="RhythmDojo.Tests.ScenePreparationFlowTests.LoadFailureAllowsColdEntranceRetry" methodname="LoadFailureAllowsColdEntranceRetry" classname="RhythmDojo.Tests.ScenePreparationFlowTests" runstate="Runnable" seed="530682776" result="Passed" start-time="2026-11-02 19:04:41Z" end-time="2026-11-02 19:04:45Z" duration="4.269701" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[There can be only one active Event System.
+]]></output>
+            </test-case>
+            <test-case id="1138" name="PopupKeepsFocusWhilePreparationFinishesThenEntranceRestoresSelectionFocus" fullname="RhythmDojo.Tests.ScenePreparationFlowTests.PopupKeepsFocusWhilePreparationFinishesThenEntranceRestoresSelectionFocus" methodname="PopupKeepsFocusWhilePreparationFinishesThenEntranceRestoresSelectionFocus" classname="RhythmDojo.Tests.ScenePreparationFlowTests" runstate="Runnable" seed="1935483329" result="Passed" start-time="2026-11-02 19:04:45Z" end-time="2026-11-02 19:04:50Z" duration="4.235527" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[There can be only one active Event System.
+There can be only one active Event System.
+]]></output>
+            </test-case>
+            <test-case id="1142" name="ReentryQueuesNewGenerationUntilInvalidatedLoadIsDrained" fullname="RhythmDojo.Tests.ScenePreparationFlowTests.ReentryQueuesNewGenerationUntilInvalidatedLoadIsDrained" methodname="ReentryQueuesNewGenerationUntilInvalidatedLoadIsDrained" classname="RhythmDojo.Tests.ScenePreparationFlowTests" runstate="Runnable" seed="376079074" result="Passed" start-time="2026-11-02 19:04:50Z" end-time="2026-11-02 19:04:51Z" duration="1.555999" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[There can be only one active Event System.
+]]></output>
+            </test-case>
+            <test-case id="1143" name="TimeoutDiscardsUninitializedSceneAndAllowsRetry" fullname="RhythmDojo.Tests.ScenePreparationFlowTests.TimeoutDiscardsUninitializedSceneAndAllowsRetry" methodname="TimeoutDiscardsUninitializedSceneAndAllowsRetry" classname="RhythmDojo.Tests.ScenePreparationFlowTests" runstate="Runnable" seed="776697028" result="Passed" start-time="2026-11-02 19:04:51Z" end-time="2026-11-02 19:04:53Z" duration="1.799522" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[There can be only one active Event System.
+]]></output>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1146" name="SelectionBrowserTests" fullname="RhythmDojo.Tests.SelectionBrowserTests" classname="RhythmDojo.Tests.SelectionBrowserTests" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-11-02 19:04:53Z" end-time="2026-11-02 19:05:07Z" duration="13.723124" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties>
+              <property name="Category" value="UI" />
+            </properties>
+            <test-case id="1151" name="CompletedRunSavesBestAndAbortedRunDoesNotCreateRecord" fullname="RhythmDojo.Tests.SelectionBrowserTests.CompletedRunSavesBestAndAbortedRunDoesNotCreateRecord" methodname="CompletedRunSavesBestAndAbortedRunDoesNotCreateRecord" classname="RhythmDojo.Tests.SelectionBrowserTests" runstate="Runnable" seed="27558612" result="Passed" start-time="2026-11-02 19:04:53Z" end-time="2026-11-02 19:04:56Z" duration="3.033941" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1148" name="DemoCoverAndRowsRenderAtBothResolutions" fullname="RhythmDojo.Tests.SelectionBrowserTests.DemoCoverAndRowsRenderAtBothResolutions" methodname="DemoCoverAndRowsRenderAtBothResolutions" classname="RhythmDojo.Tests.SelectionBrowserTests" runstate="Runnable" seed="1582259164" result="Passed" start-time="2026-11-02 19:04:56Z" end-time="2026-11-02 19:04:58Z" duration="1.795375" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1152" name="EscapePopupBlocksPlaybackAndReturnsToTitle" fullname="RhythmDojo.Tests.SelectionBrowserTests.EscapePopupBlocksPlaybackAndReturnsToTitle" methodname="EscapePopupBlocksPlaybackAndReturnsToTitle" classname="RhythmDojo.Tests.SelectionBrowserTests" runstate="Runnable" seed="1381298816" result="Passed" start-time="2026-11-02 19:04:58Z" end-time="2026-11-02 19:05:00Z" duration="1.761889" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[There can be only one active Event System.
+]]></output>
+            </test-case>
+            <test-case id="1149" name="FavoritesEmptyStateAndSortingUseSongIds" fullname="RhythmDojo.Tests.SelectionBrowserTests.FavoritesEmptyStateAndSortingUseSongIds" methodname="FavoritesEmptyStateAndSortingUseSongIds" classname="RhythmDojo.Tests.SelectionBrowserTests" runstate="Runnable" seed="1928525941" result="Passed" start-time="2026-11-02 19:05:00Z" end-time="2026-11-02 19:05:02Z" duration="1.906149" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1147" name="KeyboardSelectionKeepsRowsVisibleWithDifferentHeightsAndSpacing" fullname="RhythmDojo.Tests.SelectionBrowserTests.KeyboardSelectionKeepsRowsVisibleWithDifferentHeightsAndSpacing" methodname="KeyboardSelectionKeepsRowsVisibleWithDifferentHeightsAndSpacing" classname="RhythmDojo.Tests.SelectionBrowserTests" runstate="Runnable" seed="1551979489" result="Passed" start-time="2026-11-02 19:05:02Z" end-time="2026-11-02 19:05:05Z" duration="3.115125" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1150" name="TimingAndOptionsSurviveSettingsAndSceneReturn" fullname="RhythmDojo.Tests.SelectionBrowserTests.TimingAndOptionsSurviveSettingsAndSceneReturn" methodname="TimingAndOptionsSurviveSettingsAndSceneReturn" classname="RhythmDojo.Tests.SelectionBrowserTests" runstate="Runnable" seed="108563179" result="Passed" start-time="2026-11-02 19:05:05Z" end-time="2026-11-02 19:05:07Z" duration="2.091792" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1153" name="SettingsFlowTests" fullname="RhythmDojo.Tests.SettingsFlowTests" classname="RhythmDojo.Tests.SettingsFlowTests" runstate="Runnable" testcasecount="9" result="Passed" start-time="2026-11-02 19:05:07Z" end-time="2026-11-02 19:06:40Z" duration="92.882357" total="9" passed="9" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties>
+              <property name="Category" value="UI" />
+            </properties>
+            <test-case id="1160" name="BufferSelectionWithoutApplyLeavesActualAudioUnchanged" fullname="RhythmDojo.Tests.SettingsFlowTests.BufferSelectionWithoutApplyLeavesActualAudioUnchanged" methodname="BufferSelectionWithoutApplyLeavesActualAudioUnchanged" classname="RhythmDojo.Tests.SettingsFlowTests" runstate="Runnable" seed="157616496" result="Passed" start-time="2026-11-02 19:05:07Z" end-time="2026-11-02 19:05:08Z" duration="1.190837" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1161" name="BufferValidationBlocksEarlyCloseAndShowsTheAppliedConfiguration" fullname="RhythmDojo.Tests.SettingsFlowTests.BufferValidationBlocksEarlyCloseAndShowsTheAppliedConfiguration" methodname="BufferValidationBlocksEarlyCloseAndShowsTheAppliedConfiguration" classname="RhythmDojo.Tests.SettingsFlowTests" runstate="Runnable" seed="441148934" result="Passed" start-time="2026-11-02 19:05:08Z" end-time="2026-11-02 19:05:13Z" duration="5.041125" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1157" name="DisplayOptionsReportActualScreenSizeForAllCombinations" fullname="RhythmDojo.Tests.SettingsFlowTests.DisplayOptionsReportActualScreenSizeForAllCombinations" methodname="DisplayOptionsReportActualScreenSizeForAllCombinations" classname="RhythmDojo.Tests.SettingsFlowTests" runstate="Runnable" seed="1982373326" result="Passed" start-time="2026-11-02 19:05:13Z" end-time="2026-11-02 19:05:52Z" duration="38.618915" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1156" name="FrameRateOptionsApplySavedLimitsAndMeasureActualFrames" fullname="RhythmDojo.Tests.SettingsFlowTests.FrameRateOptionsApplySavedLimitsAndMeasureActualFrames" methodname="FrameRateOptionsApplySavedLimitsAndMeasureActualFrames" classname="RhythmDojo.Tests.SettingsFlowTests" runstate="Runnable" seed="1303240071" result="Passed" start-time="2026-11-02 19:05:52Z" end-time="2026-11-02 19:06:08Z" duration="16.245787" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1155" name="GameplayTabPreservesAudioAndGraphicsAndSavesTimingLimits" fullname="RhythmDojo.Tests.SettingsFlowTests.GameplayTabPreservesAudioAndGraphicsAndSavesTimingLimits" methodname="GameplayTabPreservesAudioAndGraphicsAndSavesTimingLimits" classname="RhythmDojo.Tests.SettingsFlowTests" runstate="Runnable" seed="413576777" result="Passed" start-time="2026-11-02 19:06:08Z" end-time="2026-11-02 19:06:10Z" duration="2.509365" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1159" name="SettingsButtonOpensSettingsAndBackPreservesSongOptions" fullname="RhythmDojo.Tests.SettingsFlowTests.SettingsButtonOpensSettingsAndBackPreservesSongOptions" methodname="SettingsButtonOpensSettingsAndBackPreservesSongOptions" classname="RhythmDojo.Tests.SettingsFlowTests" runstate="Runnable" seed="761931301" result="Passed" start-time="2026-11-02 19:06:10Z" end-time="2026-11-02 19:06:12Z" duration="1.360678" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1162" name="SettingsMouseAndKeyboardApplyActualBufferAndKeepSelection" fullname="RhythmDojo.Tests.SettingsFlowTests.SettingsMouseAndKeyboardApplyActualBufferAndKeepSelection" methodname="SettingsMouseAndKeyboardApplyActualBufferAndKeepSelection" classname="RhythmDojo.Tests.SettingsFlowTests" runstate="Runnable" seed="1818297605" result="Passed" start-time="2026-11-02 19:06:12Z" end-time="2026-11-02 19:06:28Z" duration="15.716662" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1154" name="SettingsPopupOpensImmediatelyAndReusesInstanceWithoutLoadingScene" fullname="RhythmDojo.Tests.SettingsFlowTests.SettingsPopupOpensImmediatelyAndReusesInstanceWithoutLoadingScene" methodname="SettingsPopupOpensImmediatelyAndReusesInstanceWithoutLoadingScene" classname="RhythmDojo.Tests.SettingsFlowTests" runstate="Runnable" seed="1539052300" result="Passed" start-time="2026-11-02 19:06:28Z" end-time="2026-11-02 19:06:29Z" duration="1.345647" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1158" name="SettingsPopupTabsSaveAudioAndApplySeparateGraphicsControls" fullname="RhythmDojo.Tests.SettingsFlowTests.SettingsPopupTabsSaveAudioAndApplySeparateGraphicsControls" methodname="SettingsPopupTabsSaveAudioAndApplySeparateGraphicsControls" classname="RhythmDojo.Tests.SettingsFlowTests" runstate="Runnable" seed="995003285" result="Passed" start-time="2026-11-02 19:06:29Z" end-time="2026-11-02 19:06:40Z" duration="10.827363" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1163" name="SongClockResumeTests" fullname="RhythmDojo.Tests.SongClockResumeTests" classname="RhythmDojo.Tests.SongClockResumeTests" runstate="Runnable" testcasecount="8" result="Passed" start-time="2026-11-02 19:06:40Z" end-time="2026-11-02 19:07:34Z" duration="54.459371" total="8" passed="8" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1167" name="BeforeAudioResumeWaitsForItsRemainingLeadAndPendingPauseCancels" fullname="RhythmDojo.Tests.SongClockResumeTests.BeforeAudioResumeWaitsForItsRemainingLeadAndPendingPauseCancels" methodname="BeforeAudioResumeWaitsForItsRemainingLeadAndPendingPauseCancels" classname="RhythmDojo.Tests.SongClockResumeTests" runstate="Runnable" seed="1273372829" result="Passed" start-time="2026-11-02 19:06:40Z" end-time="2026-11-02 19:06:41Z" duration="1.595789" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1170" name="EscapeDuringResumeLeadKeepsSessionAndSourcePaused" fullname="RhythmDojo.Tests.SongClockResumeTests.EscapeDuringResumeLeadKeepsSessionAndSourcePaused" methodname="EscapeDuringResumeLeadKeepsSessionAndSourcePaused" classname="RhythmDojo.Tests.SongClockResumeTests" runstate="Runnable" seed="1811417079" result="Passed" start-time="2026-11-02 19:06:41Z" end-time="2026-11-02 19:06:44Z" duration="2.265730" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1171" name="ResetDuringMenuResumeLeadReopensPauseWithoutAdvancingSession" fullname="RhythmDojo.Tests.SongClockResumeTests.ResetDuringMenuResumeLeadReopensPauseWithoutAdvancingSession" methodname="ResetDuringMenuResumeLeadReopensPauseWithoutAdvancingSession" classname="RhythmDojo.Tests.SongClockResumeTests" runstate="Runnable" seed="1449958403" result="Passed" start-time="2026-11-02 19:06:44Z" end-time="2026-11-02 19:06:49Z" duration="5.040697" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1169" name="ResetDuringScheduledResumeKeepsTimeFrozenUntilNewResume" fullname="RhythmDojo.Tests.SongClockResumeTests.ResetDuringScheduledResumeKeepsTimeFrozenUntilNewResume" methodname="ResetDuringScheduledResumeKeepsTimeFrozenUntilNewResume" classname="RhythmDojo.Tests.SongClockResumeTests" runstate="Runnable" seed="299865485" result="Passed" start-time="2026-11-02 19:06:49Z" end-time="2026-11-02 19:06:50Z" duration="1.624477" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1168" name="ResumeAfterAudioEndDoesNotReplayTheFinalSample" fullname="RhythmDojo.Tests.SongClockResumeTests.ResumeAfterAudioEndDoesNotReplayTheFinalSample" methodname="ResumeAfterAudioEndDoesNotReplayTheFinalSample" classname="RhythmDojo.Tests.SongClockResumeTests" runstate="Runnable" seed="450671513" result="Passed" start-time="2026-11-02 19:06:50Z" end-time="2026-11-02 19:06:52Z" duration="1.482366" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1165" name="ResumeSeeksFromFrozenLogicalTimeInsteadOfPausedSourceCursor" fullname="RhythmDojo.Tests.SongClockResumeTests.ResumeSeeksFromFrozenLogicalTimeInsteadOfPausedSourceCursor" methodname="ResumeSeeksFromFrozenLogicalTimeInsteadOfPausedSourceCursor" classname="RhythmDojo.Tests.SongClockResumeTests" runstate="Runnable" seed="866507847" result="Passed" start-time="2026-11-02 19:06:52Z" end-time="2026-11-02 19:06:53Z" duration="1.499995" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1164" name="ResumeWaitsForScheduledAnchorWithoutAdvancingLogicalTime" fullname="RhythmDojo.Tests.SongClockResumeTests.ResumeWaitsForScheduledAnchorWithoutAdvancingLogicalTime" methodname="ResumeWaitsForScheduledAnchorWithoutAdvancingLogicalTime" classname="RhythmDojo.Tests.SongClockResumeTests" runstate="Runnable" seed="1698644677" result="Passed" start-time="2026-11-02 19:06:53Z" end-time="2026-11-02 19:06:55Z" duration="1.584587" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1166" name="TwentyResumesKeepSourceSamplesAlignedAcrossBuffersAndOffsets" fullname="RhythmDojo.Tests.SongClockResumeTests.TwentyResumesKeepSourceSamplesAlignedAcrossBuffersAndOffsets" methodname="TwentyResumesKeepSourceSamplesAlignedAcrossBuffersAndOffsets" classname="RhythmDojo.Tests.SongClockResumeTests" runstate="Runnable" seed="837700533" result="Passed" start-time="2026-11-02 19:06:55Z" end-time="2026-11-02 19:07:34Z" duration="39.336479" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1172" name="SongSelectionFlowTests" fullname="RhythmDojo.Tests.SongSelectionFlowTests" classname="RhythmDojo.Tests.SongSelectionFlowTests" runstate="Runnable" testcasecount="11" result="Passed" start-time="2026-11-02 19:07:34Z" end-time="2026-11-02 19:07:52Z" duration="17.543597" total="11" passed="11" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties>
+              <property name="Category" value="UI" />
+            </properties>
+            <test-case id="1175" name="DifficultyDropdownChangesJudgmentWithoutChangingScroll" fullname="RhythmDojo.Tests.SongSelectionFlowTests.DifficultyDropdownChangesJudgmentWithoutChangingScroll" methodname="DifficultyDropdownChangesJudgmentWithoutChangingScroll" classname="RhythmDojo.Tests.SongSelectionFlowTests" runstate="Runnable" seed="201800860" result="Passed" start-time="2026-11-02 19:07:34Z" end-time="2026-11-02 19:07:35Z" duration="1.014245" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1176" name="HorizontalDifficultyButtonsKeepSelectionJudgmentAndOptionsInSync" fullname="RhythmDojo.Tests.SongSelectionFlowTests.HorizontalDifficultyButtonsKeepSelectionJudgmentAndOptionsInSync" methodname="HorizontalDifficultyButtonsKeepSelectionJudgmentAndOptionsInSync" classname="RhythmDojo.Tests.SongSelectionFlowTests" runstate="Runnable" seed="1184465636" result="Passed" start-time="2026-11-02 19:07:35Z" end-time="2026-11-02 19:07:37Z" duration="1.441082" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1177" name="LeftAndRightChangeDifficultyAndRespectPopupAndSliderFocus" fullname="RhythmDojo.Tests.SongSelectionFlowTests.LeftAndRightChangeDifficultyAndRespectPopupAndSliderFocus" methodname="LeftAndRightChangeDifficultyAndRespectPopupAndSliderFocus" classname="RhythmDojo.Tests.SongSelectionFlowTests" runstate="Runnable" seed="1590775551" result="Passed" start-time="2026-11-02 19:07:37Z" end-time="2026-11-02 19:07:38Z" duration="1.838900" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1173" name="ModePopupSelectsNormalAndHardWithoutChangingGameplayOptions" fullname="RhythmDojo.Tests.SongSelectionFlowTests.ModePopupSelectsNormalAndHardWithoutChangingGameplayOptions" methodname="ModePopupSelectsNormalAndHardWithoutChangingGameplayOptions" classname="RhythmDojo.Tests.SongSelectionFlowTests" runstate="Runnable" seed="323843225" result="Passed" start-time="2026-11-02 19:07:38Z" end-time="2026-11-02 19:07:40Z" duration="1.970180" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1182" name="MouseClickUsesUiInputModuleToLoadSong" fullname="RhythmDojo.Tests.SongSelectionFlowTests.MouseClickUsesUiInputModuleToLoadSong" methodname="MouseClickUsesUiInputModuleToLoadSong" classname="RhythmDojo.Tests.SongSelectionFlowTests" runstate="Runnable" seed="968127251" result="Passed" start-time="2026-11-02 19:07:40Z" end-time="2026-11-02 19:07:42Z" duration="1.579671" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="Category" value="Smoke" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1180" name="MultiplierDropdownChangesSpeedWithoutChangingSong" fullname="RhythmDojo.Tests.SongSelectionFlowTests.MultiplierDropdownChangesSpeedWithoutChangingSong" methodname="MultiplierDropdownChangesSpeedWithoutChangingSong" classname="RhythmDojo.Tests.SongSelectionFlowTests" runstate="Runnable" seed="1440120487" result="Passed" start-time="2026-11-02 19:07:42Z" end-time="2026-11-02 19:07:43Z" duration="1.006575" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1181" name="RenamedLayoutStillLoadsSongThroughExplicitViewReferences" fullname="RhythmDojo.Tests.SongSelectionFlowTests.RenamedLayoutStillLoadsSongThroughExplicitViewReferences" methodname="RenamedLayoutStillLoadsSongThroughExplicitViewReferences" classname="RhythmDojo.Tests.SongSelectionFlowTests" runstate="Runnable" seed="1135281523" result="Passed" start-time="2026-11-02 19:07:43Z" end-time="2026-11-02 19:07:45Z" duration="1.606683" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1179" name="ScrollModeDropdownChangesModeWithoutChangingDifficulty" fullname="RhythmDojo.Tests.SongSelectionFlowTests.ScrollModeDropdownChangesModeWithoutChangingDifficulty" methodname="ScrollModeDropdownChangesModeWithoutChangingDifficulty" classname="RhythmDojo.Tests.SongSelectionFlowTests" runstate="Runnable" seed="1448000088" result="Passed" start-time="2026-11-02 19:07:45Z" end-time="2026-11-02 19:07:46Z" duration="0.986474" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1183" name="SelectionKeepsSpeedIndependentAndBothSongsLoad" fullname="RhythmDojo.Tests.SongSelectionFlowTests.SelectionKeepsSpeedIndependentAndBothSongsLoad" methodname="SelectionKeepsSpeedIndependentAndBothSongsLoad" classname="RhythmDojo.Tests.SongSelectionFlowTests" runstate="Runnable" seed="1673116409" result="Passed" start-time="2026-11-02 19:07:46Z" end-time="2026-11-02 19:07:48Z" duration="2.443037" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1174" name="SongRowsKeyboardSelectionUpdatesSelectedSong" fullname="RhythmDojo.Tests.SongSelectionFlowTests.SongRowsKeyboardSelectionUpdatesSelectedSong" methodname="SongRowsKeyboardSelectionUpdatesSelectedSong" classname="RhythmDojo.Tests.SongSelectionFlowTests" runstate="Runnable" seed="253396207" result="Passed" start-time="2026-11-02 19:07:48Z" end-time="2026-11-02 19:07:49Z" duration="1.188959" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1178" name="SpeedSliderSupportsTenthsAndSavedSpeedIsAppliedToGameplay" fullname="RhythmDojo.Tests.SongSelectionFlowTests.SpeedSliderSupportsTenthsAndSavedSpeedIsAppliedToGameplay" methodname="SpeedSliderSupportsTenthsAndSavedSpeedIsAppliedToGameplay" classname="RhythmDojo.Tests.SongSelectionFlowTests" runstate="Runnable" seed="1395649785" result="Passed" start-time="2026-11-02 19:07:49Z" end-time="2026-11-02 19:07:52Z" duration="2.444517" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[Saving results to: Logs/verification-playmode.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

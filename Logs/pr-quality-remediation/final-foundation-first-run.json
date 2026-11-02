@@ -1,0 +1,18 @@
+{
+  "head": "76b64772c7f551247e2d28b70288a8c2acf08fd2",
+  "state": "failed",
+  "startedUtc": "2026-11-02T18:53:18.385223Z",
+  "unity": "6000.3.23f1",
+  "command": "RhythmDojo.EditorTools.FoundationVerification.RunAll()",
+  "editMode": {
+    "skipped": 0,
+    "failed": 0,
+    "passed": 373
+  },
+  "playMode": {
+    "skipped": 0,
+    "failed": 1,
+    "passed": 155
+  },
+  "build": "not run after test failure"
+}
