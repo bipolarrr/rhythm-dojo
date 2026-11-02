@@ -1,0 +1,449 @@
+{
+  "success": true,
+  "command": "command test_status",
+  "data": {
+    "command": "test_status",
+    "parameters": {},
+    "result": {
+      "status": "completed",
+      "duration": 0.43,
+      "summary": {
+        "total": 60,
+        "passed": 36,
+        "failed": 24,
+        "skipped": 0,
+        "inconclusive": 0
+      },
+      "results": [
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.CalibrationCorrectsInputAndDefersMissSweep(0.2d,1.2d,Warmup)",
+          "Status": "Passed",
+          "Duration": 0.0254511,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.CalibrationCorrectsInputAndDefersMissSweep(-0.2d,0.8d,Warmup)",
+          "Status": "Passed",
+          "Duration": 0.0001224,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.CalibrationCorrectsInputAndDefersMissSweep(0.2d,1.2d,Sparring)",
+          "Status": "Passed",
+          "Duration": 0.0001042,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.CalibrationCorrectsInputAndDefersMissSweep(-0.2d,0.8d,Sparring)",
+          "Status": "Passed",
+          "Duration": 0.0000969,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.DifficultyChangesJudgmentButKeepsScrollDistance",
+          "Status": "Passed",
+          "Duration": 0.0022883,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.DisposalDiscardsPendingReleaseAndCannotResumeOrRestart",
+          "Status": "Passed",
+          "Duration": 0.0015385,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.DisposalUnsubscribesAndStopsDependencies",
+          "Status": "Passed",
+          "Duration": 0.0003192,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.GameOverStopsClockAndKeepsPresentationTimeUntilRestart",
+          "Status": "Passed",
+          "Duration": 0.0025089,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0,Release,-0.100001d)",
+          "Status": "Passed",
+          "Duration": 0.0028264,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0,Release,-0.1d)",
+          "Status": "Passed",
+          "Duration": 0.0001314,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0,Release,-0.05d)",
+          "Status": "Passed",
+          "Duration": 0.0001215,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0,Release,0)",
+          "Status": "Passed",
+          "Duration": 0.0001159,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0,Release,0.05d)",
+          "Status": "Passed",
+          "Duration": 0.0001149,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0,Release,0.1d)",
+          "Status": "Passed",
+          "Duration": 0.0001189,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0,Release,0.100001d)",
+          "Status": "Passed",
+          "Duration": 0.0001192,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0,Automatic,-0.100001d)",
+          "Status": "Passed",
+          "Duration": 0.0001268,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0,Automatic,-0.1d)",
+          "Status": "Passed",
+          "Duration": 0.0001143,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0,Automatic,-0.05d)",
+          "Status": "Passed",
+          "Duration": 0.0001421,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0,Automatic,0)",
+          "Status": "Passed",
+          "Duration": 0.0001118,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0,Automatic,0.05d)",
+          "Status": "Passed",
+          "Duration": 0.0001165,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0,Automatic,0.1d)",
+          "Status": "Passed",
+          "Duration": 0.0001089,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0,Automatic,0.100001d)",
+          "Status": "Passed",
+          "Duration": 0.0001118,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0.2d,Release,-0.100001d)",
+          "Status": "Failed",
+          "Duration": 0.0062639,
+          "Message": "  Expected: 16\r\n  But was:  17\r\n",
+          "StackTrace": "at RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime (System.Double offset, RhythmDojo.Gameplay.HoldEndMode holdEnd, System.Double error) [0x00230] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\Domain\\CoordinatorTests.cs:275\r\n"
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0.2d,Release,-0.1d)",
+          "Status": "Failed",
+          "Duration": 0.0002554,
+          "Message": "  Expected: 16\r\n  But was:  17\r\n",
+          "StackTrace": "at RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime (System.Double offset, RhythmDojo.Gameplay.HoldEndMode holdEnd, System.Double error) [0x00230] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\Domain\\CoordinatorTests.cs:275\r\n"
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0.2d,Release,-0.05d)",
+          "Status": "Failed",
+          "Duration": 0.0002156,
+          "Message": "  Expected: 18\r\n  But was:  17\r\n",
+          "StackTrace": "at RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime (System.Double offset, RhythmDojo.Gameplay.HoldEndMode holdEnd, System.Double error) [0x00230] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\Domain\\CoordinatorTests.cs:275\r\n"
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0.2d,Release,0)",
+          "Status": "Failed",
+          "Duration": 0.0002096,
+          "Message": "  Expected: 18\r\n  But was:  17\r\n",
+          "StackTrace": "at RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime (System.Double offset, RhythmDojo.Gameplay.HoldEndMode holdEnd, System.Double error) [0x00230] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\Domain\\CoordinatorTests.cs:275\r\n"
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0.2d,Release,0.05d)",
+          "Status": "Failed",
+          "Duration": 0.0002326,
+          "Message": "  Expected: 18\r\n  But was:  17\r\n",
+          "StackTrace": "at RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime (System.Double offset, RhythmDojo.Gameplay.HoldEndMode holdEnd, System.Double error) [0x00230] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\Domain\\CoordinatorTests.cs:275\r\n"
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0.2d,Release,0.1d)",
+          "Status": "Failed",
+          "Duration": 0.0002086,
+          "Message": "  Expected: 1\r\n  But was:  0\r\n",
+          "StackTrace": "at RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime (System.Double offset, RhythmDojo.Gameplay.HoldEndMode holdEnd, System.Double error) [0x00256] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\Domain\\CoordinatorTests.cs:276\r\n"
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0.2d,Release,0.100001d)",
+          "Status": "Passed",
+          "Duration": 0.0001206,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0.2d,Automatic,-0.100001d)",
+          "Status": "Failed",
+          "Duration": 0.0002055,
+          "Message": "  Expected: 16\r\n  But was:  18\r\n",
+          "StackTrace": "at RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime (System.Double offset, RhythmDojo.Gameplay.HoldEndMode holdEnd, System.Double error) [0x00230] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\Domain\\CoordinatorTests.cs:275\r\n"
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0.2d,Automatic,-0.1d)",
+          "Status": "Failed",
+          "Duration": 0.0002094,
+          "Message": "  Expected: 16\r\n  But was:  18\r\n",
+          "StackTrace": "at RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime (System.Double offset, RhythmDojo.Gameplay.HoldEndMode holdEnd, System.Double error) [0x00230] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\Domain\\CoordinatorTests.cs:275\r\n"
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0.2d,Automatic,-0.05d)",
+          "Status": "Failed",
+          "Duration": 0.0003255,
+          "Message": "  Expected: 17\r\n  But was:  18\r\n",
+          "StackTrace": "at RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime (System.Double offset, RhythmDojo.Gameplay.HoldEndMode holdEnd, System.Double error) [0x00230] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\Domain\\CoordinatorTests.cs:275\r\n"
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0.2d,Automatic,0)",
+          "Status": "Passed",
+          "Duration": 0.0001986,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0.2d,Automatic,0.05d)",
+          "Status": "Passed",
+          "Duration": 0.0001904,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0.2d,Automatic,0.1d)",
+          "Status": "Passed",
+          "Duration": 0.0001352,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0.2d,Automatic,0.100001d)",
+          "Status": "Passed",
+          "Duration": 0.0001738,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(-0.2d,Release,-0.100001d)",
+          "Status": "Failed",
+          "Duration": 0.0002539,
+          "Message": "  Expected: 16\r\n  But was:  14\r\n",
+          "StackTrace": "at RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime (System.Double offset, RhythmDojo.Gameplay.HoldEndMode holdEnd, System.Double error) [0x00230] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\Domain\\CoordinatorTests.cs:275\r\n"
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(-0.2d,Release,-0.1d)",
+          "Status": "Failed",
+          "Duration": 0.0002193,
+          "Message": "  Expected: 16\r\n  But was:  14\r\n",
+          "StackTrace": "at RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime (System.Double offset, RhythmDojo.Gameplay.HoldEndMode holdEnd, System.Double error) [0x00230] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\Domain\\CoordinatorTests.cs:275\r\n"
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(-0.2d,Release,-0.05d)",
+          "Status": "Failed",
+          "Duration": 0.0002139,
+          "Message": "  Expected: 18\r\n  But was:  15\r\n",
+          "StackTrace": "at RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime (System.Double offset, RhythmDojo.Gameplay.HoldEndMode holdEnd, System.Double error) [0x00230] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\Domain\\CoordinatorTests.cs:275\r\n"
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(-0.2d,Release,0)",
+          "Status": "Failed",
+          "Duration": 0.0002111,
+          "Message": "  Expected: 18\r\n  But was:  15\r\n",
+          "StackTrace": "at RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime (System.Double offset, RhythmDojo.Gameplay.HoldEndMode holdEnd, System.Double error) [0x00230] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\Domain\\CoordinatorTests.cs:275\r\n"
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(-0.2d,Release,0.05d)",
+          "Status": "Failed",
+          "Duration": 0.0002139,
+          "Message": "  Expected: 18\r\n  But was:  16\r\n",
+          "StackTrace": "at RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime (System.Double offset, RhythmDojo.Gameplay.HoldEndMode holdEnd, System.Double error) [0x00230] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\Domain\\CoordinatorTests.cs:275\r\n"
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(-0.2d,Release,0.1d)",
+          "Status": "Failed",
+          "Duration": 0.0002082,
+          "Message": "  Expected: 17\r\n  But was:  16\r\n",
+          "StackTrace": "at RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime (System.Double offset, RhythmDojo.Gameplay.HoldEndMode holdEnd, System.Double error) [0x00230] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\Domain\\CoordinatorTests.cs:275\r\n"
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(-0.2d,Release,0.100001d)",
+          "Status": "Failed",
+          "Duration": 0.0002145,
+          "Message": "  Expected: 17\r\n  But was:  16\r\n",
+          "StackTrace": "at RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime (System.Double offset, RhythmDojo.Gameplay.HoldEndMode holdEnd, System.Double error) [0x00230] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\Domain\\CoordinatorTests.cs:275\r\n"
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(-0.2d,Automatic,-0.100001d)",
+          "Status": "Failed",
+          "Duration": 0.0002406,
+          "Message": "  Expected: 16\r\n  But was:  14\r\n",
+          "StackTrace": "at RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime (System.Double offset, RhythmDojo.Gameplay.HoldEndMode holdEnd, System.Double error) [0x00230] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\Domain\\CoordinatorTests.cs:275\r\n"
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(-0.2d,Automatic,-0.1d)",
+          "Status": "Failed",
+          "Duration": 0.0002078,
+          "Message": "  Expected: 16\r\n  But was:  14\r\n",
+          "StackTrace": "at RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime (System.Double offset, RhythmDojo.Gameplay.HoldEndMode holdEnd, System.Double error) [0x00230] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\Domain\\CoordinatorTests.cs:275\r\n"
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(-0.2d,Automatic,-0.05d)",
+          "Status": "Failed",
+          "Duration": 0.0002073,
+          "Message": "  Expected: 17\r\n  But was:  15\r\n",
+          "StackTrace": "at RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime (System.Double offset, RhythmDojo.Gameplay.HoldEndMode holdEnd, System.Double error) [0x00230] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\Domain\\CoordinatorTests.cs:275\r\n"
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(-0.2d,Automatic,0)",
+          "Status": "Failed",
+          "Duration": 0.0002148,
+          "Message": "  Expected: 18\r\n  But was:  15\r\n",
+          "StackTrace": "at RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime (System.Double offset, RhythmDojo.Gameplay.HoldEndMode holdEnd, System.Double error) [0x00230] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\Domain\\CoordinatorTests.cs:275\r\n"
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(-0.2d,Automatic,0.05d)",
+          "Status": "Failed",
+          "Duration": 0.0002084,
+          "Message": "  Expected: 18\r\n  But was:  16\r\n",
+          "StackTrace": "at RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime (System.Double offset, RhythmDojo.Gameplay.HoldEndMode holdEnd, System.Double error) [0x00230] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\Domain\\CoordinatorTests.cs:275\r\n"
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(-0.2d,Automatic,0.1d)",
+          "Status": "Failed",
+          "Duration": 0.0002156,
+          "Message": "  Expected: 18\r\n  But was:  16\r\n",
+          "StackTrace": "at RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime (System.Double offset, RhythmDojo.Gameplay.HoldEndMode holdEnd, System.Double error) [0x00230] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\Domain\\CoordinatorTests.cs:275\r\n"
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(-0.2d,Automatic,0.100001d)",
+          "Status": "Failed",
+          "Duration": 0.0002049,
+          "Message": "  Expected: 18\r\n  But was:  16\r\n",
+          "StackTrace": "at RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime (System.Double offset, RhythmDojo.Gameplay.HoldEndMode holdEnd, System.Double error) [0x00230] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\Domain\\CoordinatorTests.cs:275\r\n"
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PausePreservesProgressAndHeldNotesWhileBlockingJudgmentsAndRestartInput",
+          "Status": "Passed",
+          "Duration": 0.0007563,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PressDuringPauseCancelsPendingReleaseAndNextPauseUsesNewTime(0)",
+          "Status": "Passed",
+          "Duration": 0.0005922,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PressDuringPauseCancelsPendingReleaseAndNextPauseUsesNewTime(0.2d)",
+          "Status": "Passed",
+          "Duration": 0.0000806,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.PressDuringPauseCancelsPendingReleaseAndNextPauseUsesNewTime(-0.2d)",
+          "Status": "Failed",
+          "Duration": 0.0002626,
+          "Message": "  Expected: 2\r\n  But was:  1\r\n",
+          "StackTrace": "at RhythmDojo.Tests.CoordinatorTests.PressDuringPauseCancelsPendingReleaseAndNextPauseUsesNewTime (System.Double offset) [0x00105] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\Domain\\CoordinatorTests.cs:310\r\n"
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.RestartAndFocusLossClearDisplayAndLogicalState",
+          "Status": "Passed",
+          "Duration": 0.0008833,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.RestartDiscardsPendingReleaseBeforeAnotherHoldAndPause",
+          "Status": "Passed",
+          "Duration": 0.000368,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.VisualPolicyNeverChangesJudgments(Constant,0.5d)",
+          "Status": "Passed",
+          "Duration": 0.0006067,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.VisualPolicyNeverChangesJudgments(Constant,2)",
+          "Status": "Passed",
+          "Duration": 0.0001068,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.VisualPolicyNeverChangesJudgments(Bpm,0.5d)",
+          "Status": "Passed",
+          "Duration": 0.0000998,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.CoordinatorTests.VisualPolicyNeverChangesJudgments(Bpm,2)",
+          "Status": "Passed",
+          "Duration": 0.0000974,
+          "Message": null,
+          "StackTrace": null
+        }
+      ]
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7801,
+      "projectPath": "C:\\Users\\song\\RhythmDojo-pr-quality"
+    },
+    "success": true
+  },
+  "errors": [],
+  "warnings": []
+}

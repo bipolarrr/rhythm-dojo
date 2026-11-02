@@ -225,6 +225,135 @@ namespace RhythmDojo.Tests
             Assert.That(clock.Schedules, Is.EqualTo(2));
         }
 
+        [Test]
+        public void PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(
+            [Values(0, .2, -.2)] double offset,
+            [Values(HoldEndMode.Release, HoldEndMode.Automatic)] HoldEndMode holdEnd,
+            [Values(-.100001, -.1, -.05, 0, .05, .1, .100001)] double error
+        )
+        {
+            var input = new FakeInput();
+            var clock = new FakeClock { InputTimingOffsetSeconds = offset };
+            using var c = Coordinator(input, clock, new FakePresenter(),
+                rules: new PlayRules { HoldEnd = holdEnd });
+            var ordinaryInput = new FakeInput();
+            var ordinaryClock = new FakeClock { InputTimingOffsetSeconds = offset };
+            using var ordinary = Coordinator(ordinaryInput, ordinaryClock, new FakePresenter(),
+                rules: new PlayRules { HoldEnd = holdEnd });
+            c.Start();
+            ordinary.Start();
+            input.Press(0, 1 + offset);
+            ordinaryInput.Press(0, 1 + offset);
+            input.Press(1, 5.2 + offset);
+            ordinaryInput.Press(1, 5.2 + offset);
+            clock.SongTime = 6.8 + error + offset;
+            ordinaryInput.Release(1, clock.SongTime);
+
+            c.Pause();
+            int resolved = c.Session.Resolved;
+            double frozen = c.Snapshot.SongTime;
+            clock.InputTimingOffsetSeconds = .07 - offset;
+            clock.SongTime = 900;
+            input.Release(1, 300);
+            input.Release(1, 600);
+            c.Tick();
+            Assert.That(c.Session.Resolved, Is.EqualTo(resolved));
+            Assert.That(c.Session.IsHeld(1), Is.True);
+            Assert.That(c.Snapshot.SongTime, Is.EqualTo(frozen));
+
+            c.Resume();
+            int resumedResolved = c.Session.Resolved;
+            c.Resume();
+            Assert.That(c.Session.Resolved, Is.EqualTo(resumedResolved));
+            Assert.That(c.Session.IsHeld(1), Is.False);
+            clock.InputTimingOffsetSeconds = offset;
+            clock.SongTime = 9;
+            ordinaryClock.SongTime = 9;
+            c.Tick();
+            ordinary.Tick();
+
+            Assert.That(c.Session.Perfect, Is.EqualTo(ordinary.Session.Perfect));
+            Assert.That(c.Session.Good, Is.EqualTo(ordinary.Session.Good));
+            Assert.That(c.Session.Miss, Is.EqualTo(ordinary.Session.Miss));
+            Assert.That(c.Session.GetState(1), Is.EqualTo(ordinary.Session.GetState(1)));
+            var expected = ordinary.Session.GetNoteJudgments(1).End;
+            var actual = c.Session.GetNoteJudgments(1).End;
+            Assert.That(expected.HasValue, Is.True);
+            Assert.That(actual.HasValue, Is.True);
+            Assert.That(actual.Value.Grade, Is.EqualTo(expected.Value.Grade));
+            Assert.That(actual.Value.ErrorSeconds, Is.EqualTo(expected.Value.ErrorSeconds).Within(1e-9));
+        }
+
+        [TestCase(0)]
+        [TestCase(.2)]
+        [TestCase(-.2)]
+        public void PressDuringPauseCancelsPendingReleaseAndNextPauseUsesNewTime(double offset)
+        {
+            var input = new FakeInput();
+            var clock = new FakeClock { InputTimingOffsetSeconds = offset };
+            using var c = Coordinator(input, clock, new FakePresenter());
+            c.Start();
+            input.Press(0, 1 + offset);
+            input.Press(1, 5.2 + offset);
+            clock.SongTime = 5.5 + offset;
+            c.Pause();
+            input.Release(1, 100);
+            input.Press(1, 200);
+            c.Resume();
+            Assert.That(c.Session.IsHeld(1), Is.True);
+            Assert.That(c.Session.GetNoteJudgments(1).End.HasValue, Is.False);
+
+            clock.SongTime = 6.8 + offset;
+            c.Pause();
+            input.Release(1, 300);
+            c.Resume();
+            Assert.That(c.Session.Perfect, Is.EqualTo(2));
+            Assert.That(c.Session.IsHeld(1), Is.False);
+        }
+
+        [Test]
+        public void RestartDiscardsPendingReleaseBeforeAnotherHoldAndPause()
+        {
+            var input = new FakeInput();
+            var clock = new FakeClock();
+            using var c = Coordinator(input, clock, new FakePresenter());
+            c.Start();
+            input.Press(1, 5.2);
+            clock.SongTime = 5.5;
+            c.Pause();
+            input.Release(1, 100);
+            c.Restart();
+            input.Press(1, 5.2);
+            clock.SongTime = 5.5;
+            c.Pause();
+            c.Resume();
+            Assert.That(c.Session.IsHeld(1), Is.True);
+            Assert.That(c.Session.GetNoteJudgments(1).End.HasValue, Is.False);
+        }
+
+        [Test]
+        public void DisposalDiscardsPendingReleaseAndCannotResumeOrRestart()
+        {
+            var input = new FakeInput();
+            var clock = new FakeClock();
+            var c = Coordinator(input, clock, new FakePresenter());
+            c.Start();
+            input.Press(1, 5.2);
+            clock.SongTime = 6.8;
+            c.Pause();
+            input.Release(1, 100);
+            c.Dispose();
+            int resolved = c.Session.Resolved;
+            input.Release(1, 200);
+            c.Resume();
+            c.Restart();
+            c.Tick();
+            Assert.That(c.Session.Resolved, Is.EqualTo(resolved));
+            Assert.That(c.Session.GetNoteJudgments(1).End.HasValue, Is.False);
+            Assert.That(clock.Running, Is.False);
+            Assert.That(clock.Schedules, Is.EqualTo(1));
+        }
+
         [TestCase(ScrollMode.Constant, .5)]
         [TestCase(ScrollMode.Constant, 2)]
         [TestCase(ScrollMode.Bpm, .5)]

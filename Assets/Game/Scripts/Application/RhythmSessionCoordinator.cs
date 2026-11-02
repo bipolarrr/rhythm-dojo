@@ -17,6 +17,7 @@ namespace RhythmDojo.Application
         private readonly ScrollMode scrollMode;
         private readonly double multiplier;
         private double songTime;
+        private double pausedInputTime;
         private ReadyReason reason;
         private bool disposed;
         public bool IsPaused { get; private set; }
@@ -166,13 +167,18 @@ namespace RhythmDojo.Application
 
         private void Press(int lane, double timestamp)
         {
+            if (disposed)
+            {
+                return;
+            }
+
             if (IsPaused)
             {
                 pausedReleases.Remove(lane);
                 return;
             }
 
-            if (!disposed && !IsPaused && clock.Running)
+            if (clock.Running)
             {
                 Session.PressLane(lane, clock.InputTimeToSongTime(timestamp));
             }
@@ -180,13 +186,18 @@ namespace RhythmDojo.Application
 
         private void Release(int lane, double timestamp)
         {
+            if (disposed)
+            {
+                return;
+            }
+
             if (IsPaused)
             {
                 pausedReleases.Add(lane);
                 return;
             }
 
-            if (!disposed && !IsPaused && clock.Running)
+            if (clock.Running)
             {
                 Session.ReleaseLane(lane, clock.InputTimeToSongTime(timestamp));
             }
@@ -200,6 +211,7 @@ namespace RhythmDojo.Application
             }
 
             clock.Stop();
+            pausedReleases.Clear();
             Session.Reset();
             input.ResetHeld();
             presenter.Reset();
@@ -273,6 +285,14 @@ namespace RhythmDojo.Application
             if (clock is IResumableSongClock pausable)
             {
                 songTime = clock.SongTime;
+                double timingOffsetSeconds = 0;
+
+                if (clock is IInputTimingClock calibrated)
+                {
+                    timingOffsetSeconds = calibrated.InputTimingOffsetSeconds;
+                }
+
+                pausedInputTime = InputTiming.Calibrate(songTime, timingOffsetSeconds);
                 pausable.Pause();
                 IsPaused = true;
             }
@@ -287,18 +307,38 @@ namespace RhythmDojo.Application
 
             ((IResumableSongClock)clock).Resume();
             IsPaused = false;
-            foreach (int lane in pausedReleases)
+            while (pausedReleases.Count > 0)
             {
+                int lane;
+
+                using (var pending = pausedReleases.GetEnumerator())
+                {
+                    pending.MoveNext();
+                    lane = pending.Current;
+                }
+
+                // Remove before notifying judgment subscribers, which may restart or dispose us.
+                pausedReleases.Remove(lane);
+
                 if (Session.IsHeld(lane))
                 {
-                    Session.ReleaseLane(lane, songTime);
+                    Session.ReleaseLane(lane, pausedInputTime);
+                }
+
+                if (disposed || IsPaused)
+                {
+                    return;
                 }
             }
-            pausedReleases.Clear();
         }
 
         public void Restart()
         {
+            if (disposed)
+            {
+                return;
+            }
+
             IsPaused = false;
             pausedReleases.Clear();
             Start();
@@ -312,6 +352,8 @@ namespace RhythmDojo.Application
             }
 
             disposed = true;
+            IsPaused = false;
+            pausedReleases.Clear();
             input.Pressed -= Press;
             input.Released -= Release;
             input.StartRequested -= Start;

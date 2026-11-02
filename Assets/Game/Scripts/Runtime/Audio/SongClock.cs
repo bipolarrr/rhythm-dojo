@@ -101,8 +101,11 @@ namespace RhythmDojo.Audio
             Running = true;
         }
 
-        public double InputTimeToSongTime(double eventTime) =>
-            SongTime - (Time.realtimeSinceStartupAsDouble - eventTime) - InputTimingOffsetSeconds;
+        public double InputTimeToSongTime(double eventTime)
+        {
+            double songTime = SongTime - (Time.realtimeSinceStartupAsDouble - eventTime);
+            return InputTiming.Calibrate(songTime, InputTimingOffsetSeconds);
+        }
 
         private double InterpolatedDspTime()
         {

@@ -37,17 +37,18 @@
 - 결정: 메인 에이전트가 아래 명령으로 baseline batch process 13084를 시작했다. batch 실행은 종료했다. EditMode 241 통과; PlayMode 114 통과, 7 실패, 3 skip. 일반 Editor에서 커서 5/5 및 렌더링 1/1 통과, Results 전환 시간 초과와 곡 선택 불일치 각각 1건은 재현됐다. 전체 통과가 아니다.
 - 실행 명령: `& 'C:/Program Files/Unity/Hub/Editor/6000.3.23f1/Editor/Unity.exe' -batchmode -projectPath 'C:/Users/song/RhythmDojo-pr-quality' -executeMethod RhythmDojo.EditorTools.FoundationVerification.RunTestsOnly -logFile 'C:/Users/song/RhythmDojo-pr-quality/Logs/pr-quality-remediation/baseline-editor.log'`
 - 증거: `Logs/pr-quality-remediation/baseline-editor.log`; runner 출력은 `Logs/verification-editmode.xml`, `Logs/verification-playmode.xml`, `Logs/verification.txt`이며 완료 후 baseline 이름으로 보존한다. 정적 환경 증거는 `Logs/pr-quality-remediation/baseline-environment.md`.
-- 커밋: 미커밋. 기준 `d34b688`.
+- 커밋: `c569072` (기준 기록 및 증거). 테스트 소스 기준 `d34b688`.
 - 미해결: runner는 EditMode 실패/skip/inconclusive 시 PlayMode를 실행하지 않는다. 그 경우 PlayMode를 별도 실행해 미실행 범위를 채운다. PUPA 전용 3개 테스트는 `LocalAudio/PUPA.wav` 부재 시 Ignore하며 파일은 현재 없다. 이를 통과로 표시하지 않는다.
 - 다음 행동: 원본 XML과 baseline-generated.patch를 보존하고 생성 변경을 복원했다. 독립 검토의 씬 재생성 조건/WAV 집계 지적을 수정했다. CLI 일반 Editor PID1424 ready 및 PlayMode 종료 확인. 작업 1로 진행하며 기존 Results/선택 실패는 최종 검증 전에 해결한다.
 
-### 작업 1 — 정지 입력 판정 시각: 대기
+### 작업 1 — 정지 입력 판정 시각: 완료
 
 - 재현: 일시정지 중 해제와 재입력, 보정값 0/양수/음수에서 정지 전후 동일 논리 입력 비교.
 - 결정/범위: 정지 순간 논리 곡 시각과 보정값을 고정한다. 정지 중 판정하지 않고 재개 시 대기 입력을 한 번 반영한다. 다시 누른 레인은 해제를 취소한다. 일반/합성 보정 계산은 Application 공통 경로로 모은다.
 - 검증: CoordinatorTests; Release/Automatic 홀드, 판정창 경계, 해제 후 재입력, 재시작/폐기 시 대기 입력 제거.
 - 커밋/증거: 없음 / 미실행.
-- 미해결/다음 행동: 작업 0 완료 후 기존 경로를 추적하고 재현 테스트부터 작성한다.
+- 결과: 수정 전 CoordinatorTests 60개 중 24 실패; 수정 후 60/60 통과. GameplayPauseFlowTests 2/2 통과. 각 실행 후 PlayMode 종료와 Editor ready 확인. 독립 검토에서 수정 요구 없음. 증거: task1.md, task1-red.json, task1-green.json, task1-pause-flow.json (Logs/pr-quality-remediation).
+- 커밋: 이 장부와 함께 생성하는 작업 1 커밋. 미해결 없음. 다음 행동: 작업 2 외부 음원 복구.
 
 ### 작업 2 — 외부 음원 복구: 대기
 
