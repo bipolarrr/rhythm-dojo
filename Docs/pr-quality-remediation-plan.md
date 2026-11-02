@@ -48,15 +48,16 @@
 - 검증: CoordinatorTests; Release/Automatic 홀드, 판정창 경계, 해제 후 재입력, 재시작/폐기 시 대기 입력 제거.
 - 커밋/증거: 없음 / 미실행.
 - 결과: 수정 전 CoordinatorTests 60개 중 24 실패; 수정 후 60/60 통과. GameplayPauseFlowTests 2/2 통과. 각 실행 후 PlayMode 종료와 Editor ready 확인. 독립 검토에서 수정 요구 없음. 증거: task1.md, task1-red.json, task1-green.json, task1-pause-flow.json (Logs/pr-quality-remediation).
-- 커밋: 이 장부와 함께 생성하는 작업 1 커밋. 미해결 없음. 다음 행동: 작업 2 외부 음원 복구.
+- 커밋: `82e5575`. 미해결 없음. 다음 행동: 작업 2 외부 음원 복구.
 
-### 작업 2 — 외부 음원 복구: 대기
+### 작업 2 — 외부 음원 복구: 완료
 
 - 재현: 실제 임시 WAV 로더로 로딩한 클립에서 오디오 설정 재설정.
 - 결정/범위: SongAudioLease에 재로딩 공급 경로를 추가하고 DocumentSongLoader → PlayableSong에 수명을 전달한다. 기존 생성자와 내장 대여를 유지한다. PlayableSong이 현재 lease/복구를 소유하고 SongClock에 외부 경로를 넣지 않는다. 마지막 설정 세대만 채택하며 이전/취소 결과는 정확히 한 번 해제한다. 복구 중 나가기는 허용하고 재개는 차단한다. 실패 시 정지·오류를 유지하며 재시도한다.
 - 검증: 외부 WAV/내장 클립, 연속 재설정, 파일 삭제, 복구 중 나가기, 중복 해제, 에디터 테스트 플레이 복귀; 참조/isPlaying 외 샘플과 실제 출력 확인.
 - 커밋/증거: 없음 / 미실행.
-- 미해결/다음 행동: 작업 1 완료 후 소유권 추적과 재현.
+- 결과: 실제 WAV reset 후 GetData=false/peak=0 재현. 복구 후 외부/내장 mixer peak 0.11653/0.06048. Coordinator 61/61, AudioLeaseRecovery 5/5, AudioRecoveryFlow 6/6, GameplayPauseFlow 2/2, Smoke 4/4 통과. 각 실행 후 PlayMode 종료·Editor ready 확인. Gameplay만 재생성. 초기화 전 무효화 검토 지적을 수정하고 재검토 통과.
+- 증거: Logs/pr-quality-remediation/task2*. 미해결 없음. 다음 행동: 작업 3 공통 DSP 재개 기준점.
 
 ### 작업 3 — 재개 DSP 기준점: 대기
 

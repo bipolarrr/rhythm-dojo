@@ -26,8 +26,10 @@ namespace RhythmDojo.Tests
             public void Release(int lane, double time) => Released?.Invoke(lane, time);
         }
 
-        private sealed class FakeClock : ISongClock, IInputTimingClock, IResumableSongClock
+        private sealed class FakeClock : ISongClock, IInputTimingClock, IResumableSongClock,
+            IPlaybackReadinessClock
         {
+            public bool PlaybackReady { get; set; } = true;
             public double SongTime { get; set; }
             public bool Running { get; private set; }
 
@@ -113,6 +115,32 @@ namespace RhythmDojo.Tests
             Assert.That(c.Session.Miss, Is.EqualTo(10));
             input.Start();
             Assert.That(c.Session.Health, Is.EqualTo(100));
+            Assert.That(clock.Running, Is.True);
+        }
+
+        [Test]
+        public void UnavailableAudioBlocksInputStartResumeAndRestartUntilRecovered()
+        {
+            var input = new FakeInput();
+            var clock = new FakeClock { PlaybackReady = false };
+            using var c = Coordinator(input, clock, new FakePresenter());
+            input.Start();
+            Assert.That(clock.Schedules, Is.Zero);
+            Assert.That(c.Session.State, Is.EqualTo(SessionState.Ready));
+            clock.PlaybackReady = true;
+            input.Start();
+            clock.SongTime = 2;
+            c.Pause();
+            clock.PlaybackReady = false;
+            c.Resume();
+            c.Restart();
+            input.Start();
+            Assert.That(c.IsPaused, Is.True);
+            Assert.That(clock.Running, Is.False);
+            Assert.That(clock.Schedules, Is.EqualTo(1));
+            clock.PlaybackReady = true;
+            c.Resume();
+            Assert.That(c.IsPaused, Is.False);
             Assert.That(clock.Running, Is.True);
         }
 

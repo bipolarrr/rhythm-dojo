@@ -1,0 +1,71 @@
+{
+  "success": true,
+  "command": "command test_status",
+  "data": {
+    "command": "test_status",
+    "parameters": {},
+    "result": {
+      "status": "completed",
+      "duration": 26.61,
+      "summary": {
+        "total": 6,
+        "passed": 6,
+        "failed": 0,
+        "skipped": 0,
+        "inconclusive": 0
+      },
+      "results": [
+        {
+          "FullName": "RhythmDojo.Tests.AudioRecoveryFlowTests.BuiltInAudioSurvivesResetWithoutReplacingBorrowedClip",
+          "Status": "Passed",
+          "Duration": 9.3211283,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioRecoveryFlowTests.ExitRemainsClickableDuringRecoveryAndLateClipIsReleased",
+          "Status": "Passed",
+          "Duration": 2.6462644,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioRecoveryFlowTests.ExternalWaveReloadsAfterResetAndReturnsEditorSession",
+          "Status": "Passed",
+          "Duration": 5.849048,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioRecoveryFlowTests.InvalidatedBeforeGameplayInitializationExposesRecoveryWithoutAnotherReset",
+          "Status": "Passed",
+          "Duration": 1.629279,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioRecoveryFlowTests.MissingExternalWaveKeepsPauseAndRetryRestoresPlayback",
+          "Status": "Passed",
+          "Duration": 5.4763157,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioRecoveryFlowTests.ResetBeforeStartBlocksQueuedSpaceUntilAudioIsRecovered",
+          "Status": "Passed",
+          "Duration": 1.6400926,
+          "Message": null,
+          "StackTrace": null
+        }
+      ]
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7801,
+      "projectPath": "C:\\Users\\song\\RhythmDojo-pr-quality"
+    },
+    "success": true
+  },
+  "errors": [],
+  "warnings": []
+}

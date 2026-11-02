@@ -263,6 +263,11 @@ namespace RhythmDojo.EditorTools
             menu.settingsButton = PauseButton("Pause Settings", dialog, "설정", .14f, .58f, .86f, .74f);
             menu.restartButton = PauseButton("Restart Play", dialog, "재시작", .14f, .35f, .86f, .51f);
             menu.exitButton = PauseButton("Exit Play", dialog, "나가기", .14f, .12f, .86f, .28f);
+            menu.recoveryStatus = Label("Audio Recovery Status", dialog, "", .04f, .005f, .96f, .115f, 14);
+            menu.recoveryStatus.color = new Color(.24f, .12f, .085f);
+            menu.recoveryStatus.alignment = TextAnchor.MiddleCenter;
+            menu.recoveryStatus.raycastTarget = false;
+            menu.recoveryStatus.gameObject.SetActive(false);
             shade.gameObject.SetActive(false);
 
             var countdown = Panel("Resume Countdown", parent, new Color(.08f, .035f, .015f, .55f), 0, 0, 1, 1);

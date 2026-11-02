@@ -1,4 +1,6 @@
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using RhythmDojo.Application;
 using RhythmDojo.Gameplay;
 using UnityEngine;
@@ -10,6 +12,15 @@ namespace RhythmDojo.Content
     {
         private Action release;
         private bool disposed;
+        private SongAudioLease audioLease;
+        private readonly Func<CancellationToken, Task<SongAudioLease>> reload;
+        private CancellationTokenSource recoveryCancellation;
+        private int audioGeneration;
+        private int loadedGeneration;
+        private int recoveryRequest;
+
+        public bool NeedsAudioRecovery => !disposed && reload != null && loadedGeneration != audioGeneration;
+        public event Action<AudioClip> AudioChanged;
 
         public string SongId { get; }
         public string ChartId { get; }
@@ -19,7 +30,7 @@ namespace RhythmDojo.Content
         public ChartData Chart { get; }
         public TempoMap Tempo { get; }
         public double AudioOffset { get; }
-        public AudioClip AudioClip { get; }
+        public AudioClip AudioClip { get; private set; }
         public GameModeDefinition Mode { get; }
 
         public PlayableSong(
@@ -28,13 +39,23 @@ namespace RhythmDojo.Content
             GameModeDefinition mode,
             Action releaseAudio = null
         )
+            : this(document, mode, new SongAudioLease(audio, releaseAudio))
+        {
+        }
+
+        public PlayableSong(SongDocument document, GameModeDefinition mode, SongAudioLease lease)
         {
             if (document == null)
             {
                 throw new ArgumentNullException(nameof(document));
             }
 
-            if (!audio || audio.length <= 0)
+            if (lease == null || !lease.Clip)
+            {
+                throw new InvalidOperationException("AudioId: audio missing or empty.");
+            }
+
+            if (lease.Clip.length <= 0)
             {
                 throw new InvalidOperationException("AudioId: audio missing or empty.");
             }
@@ -54,9 +75,120 @@ namespace RhythmDojo.Content
             Chart = new ChartData(snapshot.Notes, snapshot.CompletionTime);
             Tempo = new TempoMap(snapshot.TempoPoints);
             AudioOffset = snapshot.AudioOffset;
-            AudioClip = audio;
+            AudioClip = lease.Clip;
             Mode = UnityEngine.Object.Instantiate(mode);
-            release = releaseAudio;
+            audioLease = lease;
+            release = lease.Dispose;
+            reload = lease.Reload;
+            AudioSettings.OnAudioConfigurationChanged += AudioConfigurationChanged;
+        }
+
+        private void AudioConfigurationChanged(bool deviceWasChanged)
+        {
+            InvalidateAudio();
+        }
+
+        public void InvalidateAudio()
+        {
+            if (disposed || reload == null)
+            {
+                return;
+            }
+
+            audioGeneration++;
+            recoveryCancellation?.Cancel();
+        }
+
+        public async Task<bool> RecoverAudioAsync(CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (disposed)
+            {
+                throw new ObjectDisposedException(nameof(PlayableSong));
+            }
+
+            if (!NeedsAudioRecovery)
+            {
+                return true;
+            }
+
+            recoveryCancellation?.Cancel();
+            var cancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            recoveryCancellation = cancellation;
+            int generation = audioGeneration;
+            int request = ++recoveryRequest;
+            SongAudioLease replacement = null;
+            try
+            {
+                replacement = await reload(cancellation.Token);
+                cancellationToken.ThrowIfCancellationRequested();
+                if (disposed)
+                {
+                    throw new OperationCanceledException(cancellation.Token);
+                }
+
+                if (generation != audioGeneration || request != recoveryRequest)
+                {
+                    return false;
+                }
+
+                cancellation.Token.ThrowIfCancellationRequested();
+                if (replacement == null || !replacement.Clip)
+                {
+                    throw new InvalidOperationException("복구한 음원 데이터가 비어 있습니다.");
+                }
+
+                if (replacement.Clip.length <= 0)
+                {
+                    throw new InvalidOperationException("복구한 음원 데이터가 비어 있습니다.");
+                }
+
+                var previous = audioLease;
+                audioLease = replacement;
+                replacement = null;
+                AudioClip = audioLease.Clip;
+                release = audioLease.Dispose;
+                loadedGeneration = generation;
+                try
+                {
+                    // Consumers replace their source before the previous clip is released.
+                    AudioChanged?.Invoke(AudioClip);
+                }
+                catch
+                {
+                    InvalidateAudio();
+                    throw;
+                }
+                finally
+                {
+                    previous.Dispose();
+                }
+
+                return !NeedsAudioRecovery;
+            }
+            catch (OperationCanceledException)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                if (disposed)
+                {
+                    throw;
+                }
+                if (generation == audioGeneration && request == recoveryRequest)
+                {
+                    throw;
+                }
+
+                return false;
+            }
+            finally
+            {
+                replacement?.Dispose();
+                if (ReferenceEquals(recoveryCancellation, cancellation))
+                {
+                    recoveryCancellation = null;
+                }
+                cancellation.Dispose();
+            }
         }
 
         public void Validate()
@@ -82,6 +214,9 @@ namespace RhythmDojo.Content
             }
 
             disposed = true;
+            AudioSettings.OnAudioConfigurationChanged -= AudioConfigurationChanged;
+            recoveryCancellation?.Cancel();
+            AudioChanged = null;
 
             if (Mode)
             {

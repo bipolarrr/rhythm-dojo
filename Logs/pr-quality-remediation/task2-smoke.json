@@ -1,0 +1,57 @@
+{
+  "success": true,
+  "command": "command test_status",
+  "data": {
+    "command": "test_status",
+    "parameters": {},
+    "result": {
+      "status": "completed",
+      "duration": 11.28,
+      "summary": {
+        "total": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0,
+        "inconclusive": 0
+      },
+      "results": [
+        {
+          "FullName": "RhythmDojo.Tests.GameplayFlowTests.KeyboardNavigationAndStartRestartFocusLossUseActualActions",
+          "Status": "Passed",
+          "Duration": 3.2205141,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.GameplayHudFlowTests.ReturnButtonInReadyStateLoadsSongSelectionAndReleasesSong",
+          "Status": "Passed",
+          "Duration": 1.9810996,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.StartLoadsBootstrapThenExistingSongSelection",
+          "Status": "Passed",
+          "Duration": 4.501846,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SongSelectionFlowTests.MouseClickUsesUiInputModuleToLoadSong",
+          "Status": "Passed",
+          "Duration": 1.4997418,
+          "Message": null,
+          "StackTrace": null
+        }
+      ]
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7801,
+      "projectPath": "C:\\Users\\song\\RhythmDojo-pr-quality"
+    },
+    "success": true
+  },
+  "errors": [],
+  "warnings": []
+}

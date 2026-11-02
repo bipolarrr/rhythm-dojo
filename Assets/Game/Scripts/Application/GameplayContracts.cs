@@ -48,6 +48,11 @@ namespace RhythmDojo.Application
         double InputTimingOffsetSeconds { get; }
     }
 
+    public interface IPlaybackReadinessClock
+    {
+        bool PlaybackReady { get; }
+    }
+
     public enum ReadyReason
     {
         Initial,

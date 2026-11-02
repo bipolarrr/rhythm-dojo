@@ -210,6 +210,11 @@ namespace RhythmDojo.Application
                 return;
             }
 
+            if (clock is IPlaybackReadinessClock readiness && !readiness.PlaybackReady)
+            {
+                return;
+            }
+
             clock.Stop();
             pausedReleases.Clear();
             Session.Reset();
@@ -305,6 +310,11 @@ namespace RhythmDojo.Application
                 return;
             }
 
+            if (clock is IPlaybackReadinessClock readiness && !readiness.PlaybackReady)
+            {
+                return;
+            }
+
             ((IResumableSongClock)clock).Resume();
             IsPaused = false;
             while (pausedReleases.Count > 0)
@@ -335,6 +345,11 @@ namespace RhythmDojo.Application
         public void Restart()
         {
             if (disposed)
+            {
+                return;
+            }
+
+            if (clock is IPlaybackReadinessClock readiness && !readiness.PlaybackReady)
             {
                 return;
             }

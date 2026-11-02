@@ -5,7 +5,8 @@ using UnityEngine;
 
 namespace RhythmDojo.Audio
 {
-    public sealed class SongClock : MonoBehaviour, ISongClock, IInputTimingClock, IPausableSongClock, IResumableSongClock
+    public sealed class SongClock : MonoBehaviour, ISongClock, IInputTimingClock, IPausableSongClock,
+        IResumableSongClock, IPlaybackReadinessClock
     {
         [SerializeField]
         private AudioSource source;
@@ -20,6 +21,30 @@ namespace RhythmDojo.Audio
         private int clockSampleFrame = -1;
         private bool pausedAudioReset;
         private int pausedSamplePosition;
+        private Func<bool> playbackReady;
+
+        public bool PlaybackReady => playbackReady?.Invoke() ?? true;
+
+        public void SetPlaybackReadiness(Func<bool> playbackReady)
+        {
+            this.playbackReady = playbackReady;
+        }
+
+        public void ReplaceAudioClip(AudioClip clip)
+        {
+            if (Running)
+            {
+                throw new InvalidOperationException("Pause playback before replacing its audio.");
+            }
+
+            if (!clip)
+            {
+                throw new ArgumentNullException(nameof(clip));
+            }
+
+            source.clip = clip;
+            pausedAudioReset = true;
+        }
 
         public double ScheduledStartDspTime { get; private set; }
         public bool Running { get; private set; }
@@ -84,6 +109,11 @@ namespace RhythmDojo.Audio
 
         public void Schedule()
         {
+            if (!PlaybackReady)
+            {
+                throw new InvalidOperationException("Recover playback audio before starting.");
+            }
+
             if (!initialized)
             {
                 throw new InvalidOperationException("SongClock is not initialized.");
@@ -147,6 +177,11 @@ namespace RhythmDojo.Audio
 
         public void Resume()
         {
+            if (!PlaybackReady)
+            {
+                return;
+            }
+
             if (!paused || !initialized)
             {
                 return;
