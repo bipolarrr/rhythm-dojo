@@ -41,7 +41,9 @@ namespace RhythmDojo.UI
             ISelectionPreferences savedPreferences,
             HardModePreferences hardMode = null,
             IPlayRulesService rules = null,
-            PresentationPreferences presentation = null
+            PresentationPreferences presentation = null,
+            GameModeDefinition keyMode = null,
+            string modeId = null
         )
         {
             Unbind();
@@ -64,7 +66,12 @@ namespace RhythmDojo.UI
                 rules
             );
             view.back.onClick.AddListener(Back);
-            keys = new KeySettingsController(view);
+            if (!keyMode && modeId == null && gameSettings)
+            {
+                keyMode = gameSettings.catalog[0].Mode;
+                modeId = keyMode.name;
+            }
+            keys = new KeySettingsController(view, keyMode, modeId);
             view.keySettingsTab.onClick.AddListener(ShowKeys);
             view.soundTab.onClick.AddListener(ShowSound);
             view.graphicsTab.onClick.AddListener(ShowGraphics);

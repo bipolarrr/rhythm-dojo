@@ -1,4 +1,5 @@
 using System;
+using RhythmDojo.Gameplay;
 using RhythmDojo.UI;
 using UnityEditor;
 using UnityEngine;
@@ -387,26 +388,60 @@ namespace RhythmDojo.EditorTools
             var parent = view.keySettingsPanel.transform;
             UiElements.Label("Key Settings Heading", parent, "플레이 키 설정", Vector2.zero,
                 new Vector2(700, 44), 34);
-            view.keyBindingButtons = new Button[4];
+            var mode = SceneResources.Require<GameSettings>(TestContentBuilder.SettingsPath).catalog[0].Mode;
+            var viewport = Panel("Key Rows Viewport", parent, new Vector2(0, -58),
+                new Vector2(700, 208), Color.clear);
+            viewport.GetComponent<Image>().raycastTarget = true;
+            viewport.AddComponent<RectMask2D>();
+            view.keyRowsScroll = viewport.AddComponent<ScrollRect>();
+            view.keyRowsScroll.horizontal = false;
+            view.keyRowsScroll.vertical = true;
+            view.keyRowsScroll.scrollSensitivity = 28;
+            view.keyRowsScroll.movementType = ScrollRect.MovementType.Clamped;
+            view.keyRowsScroll.viewport = (RectTransform)viewport.transform;
+            var content = new GameObject("Key Rows", typeof(RectTransform));
+            content.transform.SetParent(viewport.transform, false);
+            view.keyRowsContainer = (RectTransform)content.transform;
+            view.keyRowsContainer.anchorMin = new Vector2(0, 1);
+            view.keyRowsContainer.anchorMax = new Vector2(1, 1);
+            view.keyRowsContainer.pivot = new Vector2(0, 1);
+            view.keyRowsContainer.anchoredPosition = Vector2.zero;
+            view.keyRowsContainer.sizeDelta = new Vector2(0, mode.LaneCount * 52);
+            view.keyRowsScroll.content = view.keyRowsContainer;
+
+            var template = new GameObject("Key Row Template", typeof(RectTransform), typeof(KeyBindingRowView));
+            template.transform.SetParent(parent, false);
+            var templateRect = (RectTransform)template.transform;
+            templateRect.anchorMin = new Vector2(0, 1);
+            templateRect.anchorMax = new Vector2(1, 1);
+            templateRect.pivot = new Vector2(0, 1);
+            templateRect.sizeDelta = new Vector2(0, 52);
+            view.keyRowTemplate = template.GetComponent<KeyBindingRowView>();
+            view.keyRowTemplate.caption = UiElements.Label("Lane Caption", template.transform,
+                "", Vector2.zero, new Vector2(410, 48), 26);
+            view.keyRowTemplate.button = UiElements.Button("Lane Key", template.transform,
+                "", new Vector2(430, 0), new Vector2(250, 46));
+            SetCaptionSize(view.keyRowTemplate.button.GetComponentInChildren<Text>(), 30, 18);
+            template.SetActive(false);
+            view.keyBindingButtons = new Button[mode.LaneCount];
             for (int i = 0; i < view.keyBindingButtons.Length; i++)
             {
-                float x = i * 178;
-                var label = UiElements.Label("Lane Caption " + i, parent, (i + 1) + "번 레인",
-                    new Vector2(x, -64), new Vector2(154, 36), 26);
-                label.alignment = TextAnchor.MiddleCenter;
-                view.keyBindingButtons[i] = UiElements.Button("Lane Key " + i, parent,
-                    RhythmDojo.Services.PlayKeyBindings.GetLabel(i), new Vector2(x, -110), new Vector2(154, 82));
-                var text = view.keyBindingButtons[i].GetComponentInChildren<Text>();
-                SetCaptionSize(text, 42, 18);
+                var row = UnityEngine.Object.Instantiate(view.keyRowTemplate, view.keyRowsContainer);
+                row.name = "Lane Row " + i;
+                row.gameObject.SetActive(true);
+                ((RectTransform)row.transform).anchoredPosition = new Vector2(0, -i * 52);
+                row.caption.text = (i + 1) + " · " + mode.GetLane(i).displayName;
+                row.button.GetComponentInChildren<Text>().text = mode.GetLane(i).displayName;
+                view.keyBindingButtons[i] = row.button;
             }
             UiElements.Label("Key Settings Help", parent,
-                "바꿀 키를 누른 뒤 원하는 키보드 키를 입력하세요.\nEsc: 변경 취소 · Space: 재시작 전용 · 중복 키 사용 불가",
-                new Vector2(0, -216), new Vector2(700, 72), 25);
+                "바꿀 키를 누른 뒤 원하는 키보드 키를 입력하세요.\nEsc: 변경 취소 · 시작·복귀 키 및 중복 키 사용 불가",
+                new Vector2(0, -274), new Vector2(700, 52), 23);
             view.keyBindingStatus = UiElements.Label("Key Binding Status", parent,
-                "기본 D F J K · 변경한 키는 자동 저장됩니다.",
-                new Vector2(0, -292), new Vector2(700, 54), 24);
+                "변경한 키는 이 모드에 자동 저장됩니다.",
+                new Vector2(0, -328), new Vector2(700, 34), 22);
             view.resetKeys = UiElements.Button("Reset Play Keys", parent, "기본값으로 복원",
-                new Vector2(0, -350), new Vector2(250, 44));
+                new Vector2(0, -366), new Vector2(250, 40));
             view.resetKeys.GetComponentInChildren<Text>().fontSize = 26;
             view.keySettingsPanel.SetActive(false);
         }

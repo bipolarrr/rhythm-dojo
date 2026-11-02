@@ -19,6 +19,9 @@ namespace RhythmDojo.UI
         public Button keySettingsTab;
         public GameObject keySettingsPanel;
         public Button[] keyBindingButtons;
+        public RectTransform keyRowsContainer;
+        public KeyBindingRowView keyRowTemplate;
+        public ScrollRect keyRowsScroll;
         public Button resetKeys;
         public Text keyBindingStatus;
         public GameObject gameplayPanel;
@@ -55,9 +58,13 @@ namespace RhythmDojo.UI
             {
                 throw new InvalidOperationException("Key settings controls missing.");
             }
-            if (keyBindingButtons.Length != 4 || Array.Exists(keyBindingButtons, value => !value))
+            if (Array.Exists(keyBindingButtons, value => !value))
             {
-                throw new InvalidOperationException("Four key binding buttons required.");
+                throw new InvalidOperationException("Key binding buttons missing.");
+            }
+            if (keyRowTemplate && (!keyRowsContainer || !keyRowsScroll))
+            {
+                throw new InvalidOperationException("Key binding row container missing.");
             }
             if ((!bufferList || !actualState) || !status)
             {

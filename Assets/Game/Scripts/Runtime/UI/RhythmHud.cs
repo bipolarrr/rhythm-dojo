@@ -16,6 +16,7 @@ namespace RhythmDojo.UI
         private Image[] indicators;
         private Text[] keyLabels;
         private GameModeDefinition bindingMode;
+        private string bindingModeId;
         private double[] flashUntil;
         private Color[] flashColor;
         private double nextTextRefresh;
@@ -43,7 +44,8 @@ namespace RhythmDojo.UI
         public void Initialize(
             IGameplayReadModel readModel,
             GameModeDefinition mode,
-            GameplayPresentationSettings presentation
+            GameplayPresentationSettings presentation,
+            string modeId = null
         )
         {
             Unbind();
@@ -58,8 +60,9 @@ namespace RhythmDojo.UI
 
             settings = presentation;
             bindingMode = mode;
+            bindingModeId = modeId ?? mode.name;
             model = readModel;
-            indicators = view.lanes.Build(mode, presentation);
+            indicators = view.lanes.Build(mode, presentation, bindingModeId);
             keyLabels = new Text[indicators.Length];
 
             for (int i = 0; i < indicators.Length; i++)
@@ -80,7 +83,7 @@ namespace RhythmDojo.UI
         {
             for (int i = 0; i < keyLabels.Length; i++)
             {
-                keyLabels[i].text = PlayKeyBindings.GetLabel(bindingMode, i);
+                keyLabels[i].text = PlayKeyBindings.GetLabel(bindingMode, bindingModeId, i);
             }
         }
 

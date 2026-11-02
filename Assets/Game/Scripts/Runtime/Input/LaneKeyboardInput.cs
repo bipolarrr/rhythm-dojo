@@ -11,6 +11,7 @@ namespace RhythmDojo.Input
     {
         private InputAction[] lanes;
         private GameModeDefinition bindingMode;
+        private string bindingModeId;
         private InputAction restart,
             back;
         private bool[] held,
@@ -27,9 +28,15 @@ namespace RhythmDojo.Input
 
         public void Initialize(GameModeDefinition mode)
         {
+            Initialize(mode, mode.name);
+        }
+
+        public void Initialize(GameModeDefinition mode, string modeId)
+        {
             Shutdown();
             mode.Validate();
             bindingMode = mode;
+            bindingModeId = modeId;
             lanes = new InputAction[mode.LaneCount];
             held = new bool[mode.LaneCount];
             blockedUntilRelease = new bool[mode.LaneCount];
@@ -40,7 +47,7 @@ namespace RhythmDojo.Input
                 lanes[i] = new InputAction(
                     mode.GetLane(i).displayName,
                     InputActionType.Button,
-                    PlayKeyBindings.GetBinding(mode, i)
+                    PlayKeyBindings.GetBinding(mode, modeId, i)
                 );
                 lanes[i].performed += c =>
                 {
@@ -67,11 +74,21 @@ namespace RhythmDojo.Input
 
         private void RefreshBindings()
         {
+            bool changed = false;
             for (int i = 0; i < lanes.Length; i++)
             {
-                lanes[i].ApplyBindingOverride(PlayKeyBindings.GetBinding(bindingMode, i));
+                string binding = PlayKeyBindings.GetBinding(bindingMode, bindingModeId, i);
+                if (string.Equals(lanes[i].bindings[0].effectivePath, binding, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+                lanes[i].ApplyBindingOverride(binding);
+                changed = true;
             }
-            ResetHeld();
+            if (changed)
+            {
+                ResetHeld();
+            }
         }
 
         private void OnStart(InputAction.CallbackContext context) => StartRequested?.Invoke();

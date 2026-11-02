@@ -35,6 +35,9 @@ namespace RhythmDojo.Tests
         private string previousHardMode;
         private string previousRules;
         private string previousPlayKeys;
+        private string previousModePlayKeys;
+        private bool hadPreviousModePlayKeys;
+        private GameModeDefinition previousKeyMode;
         private float previousMasterVolume,
             previousLodBias,
             previousShadowDistance;
@@ -48,7 +51,12 @@ namespace RhythmDojo.Tests
         {
             System.IO.Directory.CreateDirectory("Logs");
             previousPlayKeys = PlayerPrefs.GetString(RhythmDojo.Services.PlayKeyBindings.StorageKey, "");
+            previousModePlayKeys = PlayerPrefs.GetString(RhythmDojo.Services.PlayKeyBindings.ModeStorageKey, "");
+            hadPreviousModePlayKeys = PlayerPrefs.HasKey(RhythmDojo.Services.PlayKeyBindings.ModeStorageKey);
+            previousKeyMode = RhythmDojo.Services.PlayKeyBindings.ConfiguredDefaultMode;
+            RhythmDojo.Services.PlayKeyBindings.ConfigureDefaultMode(null);
             PlayerPrefs.DeleteKey(RhythmDojo.Services.PlayKeyBindings.StorageKey);
+            PlayerPrefs.DeleteKey(RhythmDojo.Services.PlayKeyBindings.ModeStorageKey);
             previousRules = PlayerPrefs.GetString(
                 RhythmDojo.Services.PlayRulesService.StorageKey,
                 ""
@@ -106,6 +114,15 @@ namespace RhythmDojo.Tests
         [UnityTearDown]
         public IEnumerator TearDown()
         {
+            RhythmDojo.Services.PlayKeyBindings.ConfigureDefaultMode(previousKeyMode);
+            if (!hadPreviousModePlayKeys)
+            {
+                PlayerPrefs.DeleteKey(RhythmDojo.Services.PlayKeyBindings.ModeStorageKey);
+            }
+            else
+            {
+                PlayerPrefs.SetString(RhythmDojo.Services.PlayKeyBindings.ModeStorageKey, previousModePlayKeys);
+            }
             if (string.IsNullOrEmpty(previousPlayKeys))
             {
                 PlayerPrefs.DeleteKey(RhythmDojo.Services.PlayKeyBindings.StorageKey);

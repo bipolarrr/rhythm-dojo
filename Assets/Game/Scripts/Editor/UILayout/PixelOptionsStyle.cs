@@ -67,6 +67,11 @@ namespace RhythmDojo.EditorTools
 
         public static void StyleKeySettings(SettingsView view)
         {
+            if (view.keyRowTemplate)
+            {
+                Button(view.keyRowTemplate.button, Color.white, Ink);
+                StyleSettingsButton(view.keyRowTemplate.button);
+            }
             foreach (var button in view.keyBindingButtons)
             {
                 Button(button, Color.white, Ink);

@@ -37,6 +37,8 @@ namespace RhythmDojo.Core
         private GameObject settingsPreviousFocus;
         private ModalInputScope settingsInputScope;
         private SettingsScreen settingsPopup;
+        private GameModeDefinition settingsKeyMode;
+        private string settingsKeyModeId;
         private Action<string> returned;
         private bool preparingSelection;
         private bool selectionPreparationReady;
@@ -131,6 +133,7 @@ namespace RhythmDojo.Core
 
             var flow = new GameObject("App Flow").AddComponent<AppFlowController>();
             flow.settings = settings;
+            PlayKeyBindings.ConfigureDefaultMode(settings.catalog[0].Mode);
             flow.Library = new SongLibrary();
             flow.Library.Register(new BuiltInSongProvider(settings.catalog));
             flow.Library.Register(
@@ -650,6 +653,7 @@ namespace RhythmDojo.Core
             }
 
             settingsReturnPath = SelectionPath;
+            SelectSettingsKeyMode();
             OpenSettingsPopup();
         }
 
@@ -667,6 +671,8 @@ namespace RhythmDojo.Core
             }
 
             settingsReturnPath = GameplayPath;
+            settingsKeyMode = CurrentRequest?.Song.Mode;
+            settingsKeyModeId = CurrentRequest?.Song.ModeId ?? "";
             OpenSettingsPopup();
         }
 
@@ -681,7 +687,39 @@ namespace RhythmDojo.Core
             }
 
             settingsReturnPath = "Assets/Game/Scenes/Title.unity";
+            settingsKeyMode = settings.catalog[0].Mode;
+            settingsKeyModeId = settingsKeyMode.name;
             OpenSettingsPopup();
+        }
+
+        private void SelectSettingsKeyMode()
+        {
+            settingsKeyMode = null;
+            settingsKeyModeId = "";
+            var entry = Library.Find(Selection.SelectedSongId);
+            if (entry == null)
+            {
+                return;
+            }
+            settingsKeyMode = entry.Mode;
+            settingsKeyModeId = entry.ModeId ?? "";
+            foreach (var chart in entry.Charts)
+            {
+                if (chart.Slot != Selection.SelectedSlot)
+                {
+                    continue;
+                }
+                if (chart.Mode && !string.IsNullOrWhiteSpace(chart.ModeId))
+                {
+                    settingsKeyMode = chart.Mode;
+                    settingsKeyModeId = chart.ModeId;
+                }
+                break;
+            }
+            if (string.IsNullOrWhiteSpace(settingsKeyModeId))
+            {
+                settingsKeyMode = null;
+            }
         }
 
         public void ReturnFromSettings()
@@ -741,7 +779,7 @@ namespace RhythmDojo.Core
                 settingsPopup.gameObject.SetActive(true);
                 settingsPopup.Initialize(
                     Audio, this, settings, Selection, Preferences, HardMode, Rules,
-                    PresentationPreferences.Current);
+                    PresentationPreferences.Current, settingsKeyMode, settingsKeyModeId);
             }
             catch
             {

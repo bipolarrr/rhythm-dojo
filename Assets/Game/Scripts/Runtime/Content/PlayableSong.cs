@@ -32,6 +32,7 @@ namespace RhythmDojo.Content
         public double AudioOffset { get; }
         public AudioClip AudioClip { get; private set; }
         public GameModeDefinition Mode { get; }
+        public string ModeId { get; }
 
         public PlayableSong(
             SongDocument document,
@@ -76,6 +77,7 @@ namespace RhythmDojo.Content
             Tempo = new TempoMap(snapshot.TempoPoints);
             AudioOffset = snapshot.AudioOffset;
             AudioClip = lease.Clip;
+            ModeId = snapshot.ModeId;
             Mode = UnityEngine.Object.Instantiate(mode);
             audioLease = lease;
             release = lease.Dispose;

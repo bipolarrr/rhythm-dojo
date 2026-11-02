@@ -52,7 +52,9 @@ namespace RhythmDojo.Content
                                 error,
                                 revision,
                                 chart.Notes.Length,
-                                chart.CompletionTimeSeconds
+                                chart.CompletionTimeSeconds,
+                                mode,
+                                mode.name
                             )
                         );
                     }
@@ -102,7 +104,9 @@ namespace RhythmDojo.Content
                                     _ => null,
                                 }
                             ),
-                            charts: charts
+                            charts: charts,
+                            mode: mode,
+                            modeId: mode.name
                         )
                     );
                 }

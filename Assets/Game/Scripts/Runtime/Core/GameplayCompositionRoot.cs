@@ -175,7 +175,7 @@ namespace RhythmDojo.Core
             clock.SetPlaybackReadiness(() => !song.NeedsAudioRecovery);
             song.AudioChanged += ReplaceAudio;
             AudioSettings.OnAudioConfigurationChanged += AudioConfigurationChanged;
-            input.Initialize(runtimeMode);
+            input.Initialize(runtimeMode, song.ModeId);
             notes.Configure(runtimeMode, runtimePresentation);
             playfield.Build(runtimeMode, runtimePresentation);
 
@@ -231,7 +231,7 @@ namespace RhythmDojo.Core
                 request.HardModeRules,
                 request.Rules
             );
-            hud.Initialize(controller.ReadModel, runtimeMode, runtimePresentation);
+            hud.Initialize(controller.ReadModel, runtimeMode, runtimePresentation, song.ModeId);
             hits.Initialize(
                 controller.ReadModel,
                 runtimeMode,
@@ -377,7 +377,7 @@ namespace RhythmDojo.Core
 
             for (int i = 0; i < laneLabels.Length; i++)
             {
-                laneLabels[i] = PlayKeyBindings.GetLabel(runtimeMode, i);
+                laneLabels[i] = PlayKeyBindings.GetLabel(runtimeMode, playRequest.Song.ModeId, i);
             }
 
             var result = new PlayResult(
