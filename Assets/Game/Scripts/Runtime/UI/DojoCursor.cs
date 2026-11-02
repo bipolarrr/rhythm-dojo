@@ -3,17 +3,22 @@ using UnityEngine.InputSystem;
 
 namespace RhythmDojo.UI
 {
-    // Native pointer animation, with non-interactive feedback on a separate canvas.
+    // Native fist frames keep the input hotspot fixed while the artwork punches forward and back.
     public sealed class DojoCursor : MonoBehaviour
     {
         private static DojoCursor instance;
         private Texture2D normalTexture,
             hoverTexture;
         private Texture2D currentTexture;
-        private static readonly Vector2 Hotspot = new Vector2(16, 16);
+        private static readonly Vector2 Hotspot = new Vector2(48, 48);
         private Texture2D[] punchFrames;
         private float punchElapsed = PunchDuration;
         private const float PunchDuration = .18f;
+        private Color32[] cursorPixels;
+        private RectInt cursorBounds;
+        private int cursorSourceWidth;
+        private DojoPunchImpact impact;
+        private bool impactPending;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetStatics()
@@ -36,30 +41,45 @@ namespace RhythmDojo.UI
 
         private void Awake()
         {
-            normalTexture = CreateCursor(16);
-            hoverTexture = CreateCursor(12);
+            var texture = Resources.Load<Texture2D>("UI/DojoFistCursor");
+            if (!texture)
+            {
+                throw new System.InvalidOperationException("Hand-wrap cursor artwork missing.");
+            }
+
+            cursorPixels = texture.GetPixels32();
+            cursorSourceWidth = texture.width;
+            cursorBounds = GetVisibleBounds(cursorPixels, texture.width, texture.height);
+            normalTexture = CreateCursor(72);
+            hoverTexture = CreateCursor(72);
             punchFrames = new[]
             {
-                CreateCursor(18),
-                CreateCursor(16),
-                CreateCursor(14),
-                CreateCursor(12),
-                CreateCursor(14)
+                CreateCursor(69, new Vector2Int(6, -6)),
+                CreateCursor(72),
+                CreateCursor(78, new Vector2Int(-9, 9)),
+                CreateCursor(81, new Vector2Int(-12, 12)),
+                CreateCursor(78, new Vector2Int(-9, 9)),
+                CreateCursor(75, new Vector2Int(-3, 3)),
+                CreateCursor(72)
             };
-            var canvasObject = new GameObject("Punch Impact", typeof(RectTransform), typeof(Canvas));
+            cursorPixels = null;
+            var canvasObject = new GameObject("Fist Imprints", typeof(RectTransform), typeof(Canvas));
             canvasObject.transform.SetParent(transform, false);
             var canvas = canvasObject.GetComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             canvas.sortingOrder = 32001;
-
-            // No GraphicRaycaster: effects never participate in UI input.
-            var impactObject = new GameObject("Impact Sparks", typeof(RectTransform), typeof(DojoPunchImpact));
+            canvas.pixelPerfect = true;
+            // No GraphicRaycaster: a mark can never consume a menu click.
+            var impactObject = new GameObject("Fist Marks", typeof(RectTransform), typeof(DojoPunchImpact));
             impactObject.transform.SetParent(canvasObject.transform, false);
             var rect = (RectTransform)impactObject.transform;
             rect.anchorMin = Vector2.zero;
             rect.anchorMax = Vector2.one;
             rect.offsetMin = rect.offsetMax = Vector2.zero;
-            gameObject.AddComponent<DojoClickFeedback>().Initialize(impactObject.GetComponent<DojoPunchImpact>());
+            impact = impactObject.GetComponent<DojoPunchImpact>();
+            impact.Initialize(punchFrames[3], Hotspot);
+            gameObject.AddComponent<DojoClickFeedback>().Initialize(impact);
+            Apply(normalTexture);
         }
 
         private void Update()
@@ -78,7 +98,15 @@ namespace RhythmDojo.UI
 
             if (Mouse.current.leftButton.wasPressedThisFrame)
             {
-                punchElapsed = 0;
+                var position = Mouse.current.position.ReadValue();
+                if (position.x >= 0 && position.x < Screen.width)
+                {
+                    if (position.y >= 0 && position.y < Screen.height)
+                    {
+                        punchElapsed = 0;
+                        impactPending = true;
+                    }
+                }
             }
 
             RefreshTexture();
@@ -89,6 +117,16 @@ namespace RhythmDojo.UI
             if (Mouse.current == null)
             {
                 return;
+            }
+
+            // Stamp the exact extended frame once, when the fist reaches contact.
+            if (impactPending && punchElapsed >= PunchDuration * 3f / punchFrames.Length)
+            {
+                impactPending = false;
+                if (impact)
+                {
+                    impact.PlayAt(Mouse.current.position.ReadValue());
+                }
             }
 
             if (punchElapsed < PunchDuration)
@@ -107,38 +145,72 @@ namespace RhythmDojo.UI
             }
         }
 
-        private static Texture2D CreateCursor(int size)
+        private Texture2D CreateCursor(int size)
         {
-            // Two-pixel cells give the monochrome ring a deliberately stepped edge.
-            var output = new Color32[32 * 32];
-            var tint = new Color32(255, 241, 213, 255);
-            float outer = size * .5f;
-            float inner = outer - 2.5f;
+            return CreateCursor(size, Vector2Int.zero);
+        }
 
-            for (int y = 0; y < 32; y++)
+        private Texture2D CreateCursor(int size, Vector2Int offset)
+        {
+            // Fit the complete v5 silhouette, including its loose tail, without filtering the pixels.
+            // Extra transparent padding fits the longer punch; the matching hotspot shift
+            // preserves the resting artwork's screen position and its visible size.
+            const int canvasSize = 128;
+            var output = new Color32[canvasSize * canvasSize];
+            float scale = (float)size / Mathf.Max(cursorBounds.width, cursorBounds.height);
+            int width = Mathf.Max(1, Mathf.RoundToInt(cursorBounds.width * scale));
+            int height = Mathf.Max(1, Mathf.RoundToInt(cursorBounds.height * scale));
+            int left = (canvasSize - width) / 2 + offset.x;
+            int bottom = (canvasSize - height) / 2 + offset.y;
+            for (int y = 0; y < height; y++)
             {
-                for (int x = 0; x < 32; x++)
+                for (int x = 0; x < width; x++)
                 {
-                    float sourceX = x / 2 * 2 + 1 - 16;
-                    float sourceY = y / 2 * 2 + 1 - 16;
-                    float distance = sourceX * sourceX + sourceY * sourceY;
-
-                    if (distance > outer * outer || distance < inner * inner)
-                    {
-                        continue;
-                    }
-
-                    output[y * 32 + x] = tint;
+                    int sourceX = cursorBounds.x + Mathf.Min(cursorBounds.width - 1,
+                        Mathf.FloorToInt((x + .5f) * cursorBounds.width / width));
+                    int sourceY = cursorBounds.y + Mathf.Min(cursorBounds.height - 1,
+                        Mathf.FloorToInt((y + .5f) * cursorBounds.height / height));
+                    output[(bottom + y) * canvasSize + left + x] = cursorPixels[sourceY * cursorSourceWidth + sourceX];
                 }
             }
 
-            var texture = new Texture2D(32, 32, TextureFormat.RGBA32, false);
-            texture.name = "DojoDotCursor";
+            var texture = new Texture2D(canvasSize, canvasSize, TextureFormat.RGBA32, false);
+            texture.name = "DojoHandrapV5Cursor";
             texture.filterMode = FilterMode.Point;
             texture.wrapMode = TextureWrapMode.Clamp;
             texture.SetPixels32(output);
             texture.Apply();
             return texture;
+        }
+
+        private static RectInt GetVisibleBounds(Color32[] pixels, int width, int height)
+        {
+            int left = width;
+            int bottom = height;
+            int right = -1;
+            int top = -1;
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    if (pixels[y * width + x].a < 128)
+                    {
+                        continue;
+                    }
+
+                    left = Mathf.Min(left, x);
+                    bottom = Mathf.Min(bottom, y);
+                    right = Mathf.Max(right, x);
+                    top = Mathf.Max(top, y);
+                }
+            }
+
+            if (right < left || top < bottom)
+            {
+                throw new System.InvalidOperationException("Hand-wrap cursor artwork is empty.");
+            }
+
+            return new RectInt(left, bottom, right - left + 1, top - bottom + 1);
         }
 
         private void Apply(Texture2D texture)
@@ -150,7 +222,9 @@ namespace RhythmDojo.UI
 
             if (texture)
             {
-                Cursor.SetCursor(texture, Hotspot, CursorMode.Auto);
+                // Hardware cursors can shrink the padded animation texture to the platform size.
+                // Render it at its pixel size so the fist stays full-sized with the longer reach.
+                Cursor.SetCursor(texture, Hotspot, CursorMode.ForceSoftware);
             }
             else
             {
@@ -164,6 +238,11 @@ namespace RhythmDojo.UI
         {
             currentTexture = null;
             punchElapsed = PunchDuration;
+            impactPending = false;
+            if (impact)
+            {
+                impact.Clear();
+            }
 
             if (focused)
             {
@@ -209,6 +288,11 @@ namespace RhythmDojo.UI
             Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
             currentTexture = null;
             punchElapsed = PunchDuration;
+            impactPending = false;
+            if (impact)
+            {
+                impact.Clear();
+            }
         }
     }
 }
