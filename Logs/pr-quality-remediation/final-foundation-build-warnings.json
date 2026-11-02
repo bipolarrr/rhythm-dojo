@@ -1,0 +1,37 @@
+{
+  "success": true,
+  "command": "command eval",
+  "data": {
+    "command": "eval",
+    "parameters": {
+      "code": "var r = UnityEditor.Build.Reporting.BuildReport.GetLatestReport(); return r.steps.SelectMany(s => s.messages).Where(m => m.type == UnityEngine.LogType.Warning || m.type == UnityEngine.LogType.Error).Select(m => new { type = m.type.ToString(), message = m.content }).ToArray();"
+    },
+    "result": {
+      "output": null,
+      "diagnostics": [],
+      "success": true,
+      "result": [
+        {
+          "type": "Warning",
+          "message": "Pipeline: No RuntimePipelineConfig asset found (Project Settings > Pipeline > Runtime). Pipeline will be disabled in Player builds."
+        },
+        {
+          "type": "Warning",
+          "message": "Assets\\Game\\Scripts\\Runtime\\Services\\PlayKeyBindings.cs(259,48): warning CS0618: 'Key.IMESelected' is obsolete: 'IMESelected is a dummy key and will be removed in the future. Please use ButtonControl imeSelected'"
+        },
+        {
+          "type": "Warning",
+          "message": "Assets\\Game\\Scripts\\Runtime\\Audio\\SongClock.cs(22,22): warning CS0414: The field 'SongClock.pausedAudioReset' is assigned but its value is never used"
+        }
+      ]
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "C:\\Users\\song\\RhythmDojo-pr-quality"
+    },
+    "success": true
+  },
+  "errors": [],
+  "warnings": []
+}

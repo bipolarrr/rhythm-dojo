@@ -1,0 +1,50 @@
+Mono path[0] = 'C:/Users/song/RhythmDojo-pr-quality/Builds/RemediationProbe/RemediationProbe_Data/Managed'
+Mono config path = 'C:/Users/song/RhythmDojo-pr-quality/Builds/RemediationProbe/MonoBleedingEdge/etc'
+Found 2 interfaces on host : 0) 192.168.0.238 1) 100.83.57.37
+Player connection [19236]  Target information:
+
+Player connection [19236]  * "[IP] 192.168.0.238 [Port] 55000 [Flags] 2 [Guid] 341849321 [EditorId] 4065902287 [Version] 1048832 [Id] WindowsPlayer(2,DESKTOP-8HJ31S9) [Debug] 0 [PackageName] WindowsPlayer [ProjectName] RhythmDojo" 
+
+Player connection [19236]  * "[IP] 100.83.57.37 [Port] 55000 [Flags] 2 [Guid] 341849321 [EditorId] 4065902287 [Version] 1048832 [Id] WindowsPlayer(2,DESKTOP-8HJ31S9) [Debug] 0 [PackageName] WindowsPlayer [ProjectName] RhythmDojo" 
+
+Player connection [19236] Started UDP target info broadcast (1) on [225.0.0.222:54997].
+
+Input System module state changed to: Initialized.
+[Physics::Module] Initialized fallback backend.
+[Physics::Module] Id: 0xdecafbad
+Initialize engine version: 6000.3.23f1 (09d2ecc7fb28)
+[Subsystems] Discovering subsystems at path C:/Users/song/RhythmDojo-pr-quality/Builds/RemediationProbe/RemediationProbe_Data/UnitySubsystems
+[D3D12 Device Filter] Vendor Name: NVIDIA
+[D3D12 Device Filter] Device Name: NVIDIA GeForce RTX 4060
+[D3D12 Device Filter] Driver Version: 32.0.16.1664
+[D3D12 Device Filter] Feature Level: 12.2
+[D3D12 Device Filter] Graphics Memory: 7957 MB
+[D3D12 Device Filter] Processor Count: 16
+[D3D12 Device Filter] Device Type: Discrete
+GfxDevice: creating device client; kGfxThreadingModeSplitJobs
+d3d12: failed to query info queue interface (0x80004002).
+Direct3D:
+    Version:         Direct3D 12 [level 12.2]
+    Renderer:        NVIDIA GeForce RTX 4060 (ID=0x2882)
+    Vendor:          NVIDIA
+    VRAM:            7957 MB
+    App VRAM Budget: 7189 MB
+    Driver:          32.0.16.1664
+Begin MonoManager ReloadAssembly
+- Loaded All Assemblies, in  0.179 seconds
+- Finished resetting the current domain, in  0.003 seconds
+[Physics::Module] Selected backend.
+[Physics::Module] Name: PhysX
+[Physics::Module] Id: 0xf2b8ea05
+[Physics::Module] SDK Version: 4.1.2
+[Physics::Module] Integration Version: 1.0.0
+[Physics::Module] Threading Mode: Multi-Threaded
+<RI> Initializing input.
+Using Windows.Gaming.Input
+UnloadTime: 0.745100 ms
+[Physics::Module] Cleanup current backend.
+[Physics::Module] Id: 0xf2b8ea05
+Input System module state changed to: ShutdownInProgress.
+Input System polling thread exited.
+Input System module state changed to: Shutdown.
+PlayerConnection::Cleanup##utp:{"type":"MemoryLeaks","version":2,"phase":"Immediate","time":1793648596532,"processId":33572,"allocatedMemory":68478,"memoryLabels":[{"Default":136},{"NewDelete":776},{"Thread":7616},{"Manager":15414},{"GfxDevice":2128},{"Audio":752},{"Serialization":520},{"JobScheduler":32768},{"String":412},{"HashMap":5120},{"PoolAlloc":192},{"CloudService":144},{"VR":1872},{"Video":144},{"NativeArray":372},{"Subsystems":96},{"CoreBusinessMetrics":120}]}

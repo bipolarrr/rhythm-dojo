@@ -1,0 +1,19 @@
+{
+    "status": "succeeded",
+    "error": "",
+    "output": "Builds/RemediationProbe/RemediationProbe.exe",
+    "unity": "6000.3.23f1",
+    "startedUtc": "2026-11-02T19:39:34.7226580Z",
+    "finishedUtc": "2026-11-02T19:40:11.7869533Z",
+    "scenes": [
+        "Assets/Game/Scenes/RemediationPlayerProbe.unity",
+        "Assets/Game/Scenes/Title.unity",
+        "Assets/Game/Scenes/Bootstrap.unity",
+        "Assets/Game/Scenes/SongSelection.unity",
+        "Assets/Game/Scenes/Gameplay.unity",
+        "Assets/Game/Scenes/Results.unity",
+        "Assets/Game/Scenes/Settings.unity",
+        "Assets/Game/Scenes/ChartEditor.unity"
+    ],
+    "bytes": 297466062
+}

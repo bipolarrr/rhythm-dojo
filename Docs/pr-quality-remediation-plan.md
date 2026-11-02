@@ -1,5 +1,28 @@
 # PR #5·#6·#7 품질 개선 작업 장부
 
+## 최종 상태 — 완료
+
+검증 소스 커밋은 `cad59e6`이며 이후 커밋은 이 장부와 실행 증거만 추가한다. 작업 0–7 구현·작업별 검증·독립 검토가 완료됐다. 기존 PR/main은 수정하거나 게시하지 않았고 원래 worktree의 Results 및 임시 씬은 보존했다.
+
+| 최종 검증 | 결과 | 증거 (`Logs/pr-quality-remediation/` 기준) |
+| --- | --- | --- |
+| Foundation EditMode | 373 통과, 실패/skip/inconclusive 0 | `final-foundation-editmode.xml` |
+| Foundation PlayMode | 156 통과, 실패/skip/inconclusive 0 | `final-foundation-playmode.xml` |
+| 일반 Windows 빌드 | 성공, 오류 0·경고 3 | `final-foundation-build.json`, `final-foundation-build-warnings.json` |
+| 최종 개발 플레이어 | exercise 40.990초, persistence 6.755초, exit 0 | `player-final/exercise.json`, `player-final/persistence.json`, 각 exit JSON |
+| 출력 오디오 | OS 스피커 루프백 440Hz, peak 0.0477273 | `player-final/os-loopback.json`, `.wav` |
+| 일반 플레이어 시작·종료 | RhythmDojo 창/응답 확인, WM_CLOSE 후 종료·입력 정리 확인 | `player-final/shipping-startup.json`, `shipping-windows.json`, `shipping-close.json`, `.log` |
+| 생성 에셋 보존 | 씬·팝업·meta 16개 SHA256 동일 | `final-foundation-scene-hashes.json` |
+| 설정/임시 데이터 정리 | 원래 6개 설정 복원, 진단 소유 프로젝트 0 | `player-final/preference-restoration.json` |
+
+실행 요약과 소스 커밋·바이너리 해시는 `final-summary.json`에 있다. 게임 어셈블리·데이터를 포함한 전체 빌드 파일 해시는 `final-shipping-build-manifest.json`과 `final-diagnostic-build-manifest.json`에 정렬해 기록했다. 배포 실행 파일은 `Builds/Windows/RhythmDojo.exe`, 별도 개발 진단은 `Builds/RemediationProbe/RemediationProbe.exe`다. 일반 빌드에 테스트 어셈블리는 포함되지 않는다. 빌드 바이너리와 개인 설정 백업은 Git에 넣지 않는다.
+
+남은 제한: 이 장치의 원시128 버퍼는 이전 측정에서 느린 DSP 진행이 관측됐으며 서비스의256 복구 경로를 검증했다. 루프백은 OS 출력 확인이며 스피커의 음향·체감 지연·음질 보증이 아니다. 화면 PNG는 개발 진단의 offscreen StandardRequest 합성 렌더이며 실제 창 framebuffer 캡처가 아니다. 일반 플레이어는 시작·정상 종료를, 기능 경로는 같은 소스 커밋의 개발 플레이어에서 검증했다. 숨김 실행의 MainWindowHandle=0으로 첫 종료 요청은 실패했으나 프로세스 소유 창을 열거해 WM_CLOSE로 종료했다. 이 두 단계의 증거를 모두 보존했으며 일반 플레이어 exit code는 수집하지 못했다.
+
+빌드 경고 3개(Pipeline 런타임 설정 미사용, Key.IMESelected 폐기 예정 API, SongClock.pausedAudioReset 미사용 필드)와 기준에서도 관측된 전환 중 EventSystem 경고는 원문 보존했다. 최종 개발 진단은 전환 완료 후 EventSystem/AudioListener 각각1개 및 차단 해제를 검사했다. 새 기능 회귀나 미실행 필수 범위는 남아 있지 않다.
+
+이하 작업별 “다음 행동”, 중간 실패와 대기 표시는 당시 실행 이력이다. 현재 상태는 위 최종 결과와 마지막 마감 기록을 따른다.
+
 ## 실행 계약
 
 기능과 시각적 결과를 유지하며 아래 작업을 순서대로 완료한다. 각 작업은 전담 구현 에이전트의 재현·수정·회귀 테스트, 메인 에이전트의 계약 검토·Unity 실행, 별도 읽기 전용 검토 에이전트의 검토, 지적 해결, 작업별 커밋 순서로 진행한다. 구현은 한 번에 하나만 진행한다. Unity 실행과 공통 계약, 장부, 커밋은 메인 에이전트가 소유한다.
@@ -108,7 +131,7 @@
 
 - 최종 결과: ScenePreparationFlow 9/9, ProjectLibraryFlow 3/3, MainMenuFlow 19/19, Smoke 4/4 통과. 처음 타이틀 테스트의 미초기화 화면 복원 예외 2건과 독립 검토의 null 포커스 복원 지적을 수정하고 회귀를 추가했다. 초기 실패 증거를 유지하며 로그를 무시하지 않았다. 독립 재검토 수정 요구 없음. 매 실행 후 PlayMode 종료·Editor ready 확인. 씬 에셋 변경 없음. 증거: Logs/pr-quality-remediation/task7*. 커밋: `d675507`. 다음 행동: 기준 실패/외부 WAV fixture와 Windows 검증 도구를 정비한 뒤 최종 Foundation.
 
-### 최종 통합 검증: Windows 진단 완료·Foundation 재실행 준비
+### 최종 통합 검증: 완료 (아래 중간 실행 이력 포함)
 
 - 범위: 소스 refresh·컴파일 후 Verify Foundation 전체 테스트와 Windows 빌드. 실패 수정 후 재검증하며 부분 실행은 전체 통과로 표기하지 않는다.
 - 플레이어: 외부 WAV 로드/플레이/정지/버퍼 변경/재개/재시작, 모드별 키 저장, 타이틀·설정·에디터·선택 왕복, 재실행 설정 유지, 실제 출력 확인.
@@ -116,7 +139,7 @@
 - 검토: 별도 최종 에이전트가 전체 diff의 하드코딩, 계약 중복, 소유권 누락, Editor 의존성, 잘못된 테스트 통과 조건을 확인한다.
 - 커밋/증거: 기준 정비 `b10a27e`, Windows 진단 `677e842`, 씬 테스트 정리 `76b6477`; 상세 결과는 아래와 `Logs/pr-quality-remediation/`.
 - 해결: Foundation의 명시 scenes 목록에 Results를 추가하여 등록된 7개 씬과 일치시켰다.
-- 남은 실행: 시간 측정·테스트 격리 수정 검증, Foundation 재실행, 일반 Windows 플레이어 시작 확인, 장부 마감.
+- 완료 범위: 시간 측정·테스트 격리 수정, Foundation 재실행, 최종 Windows 진단 및 일반 플레이어 시작·종료 확인.
 
 
 - 최종 기준 정비: Results의 Esc 정지 후 실제 나가기 클릭, 개인 곡 목록과 분리한 두 곡 즐겨찾기 탐색, 임시 WAV 실제 로더 fixture로 개인 PUPA 음원 의존 제거. 기존 채보/판정/완료 시각 기대값 유지. Results 회귀 1/1, 곡 선택 회귀 1/1, PupaResultsFlow 6/6(skip 0) 통과. 독립 검토 수정 요구 없음. Foundation 명시 빌드 목록에 Results 추가. 증거: final-*-regression.json, final-pupa-generated-wave.json, final-baseline-fixes.md. 다음 행동: Windows 개발 진단 구현과 최종 Foundation.
@@ -128,3 +151,7 @@
 - 첫 최종 Foundation(`76b6477`): EditMode373/373, PlayMode155통과·1실패·skip0. RealPupaAudioFinishesAndAutomaticallyLoadsResults 벽시계125.5693146초가 기존 음원길이-6 상한125.539993초를29ms 초과. 실제 음원 시작 DSP 기준과 벽시계 비교 단위를 분리해 측정하며 6초 꼬리 조건은 유지한다. 다른 모든 테스트 통과; 빌드는 실패 후 실행하지 않음. 또한 ContentTests/TeamBoundaryTests 두 BuildAll 테스트의 씬/팝업 원복 누락을 발견, 전체 테스트가 최종 에셋을 바꾸지 않도록 보완 중. 실패XML/로그와 생성diff통계 보존. 다음 행동: 관련 테스트·해시 검증 후 Foundation 재실행.
 
 - 최종 검증 보완: Content/TeamBoundary 생성 테스트 각각1/1, PupaResultsFlow6/6(skip0), 생성 씬·팝업·meta16개 SHA256 동일. 예약 오디오 DSP 기준125.332667초에 Results 표시(음원131.54초, 기존6초 꼬리 조건 유지), 벽시계125.463869초·완료 후 표시1.365–1.382초 관측. 테스트 격리·시간 단위 수정 독립 검토 지적 없음. 제품 코드 변경 없음. 증거: final-verification-isolation.md, final-*-restoration.json, final-all-builder-hash-comparison.json, final-pupa-audio-anchor-tests.json, final-pupa-targeted-timing.json. 다음 행동: 이 수정 커밋에서 Foundation 재실행.
+
+- 최종 마감 (`cad59e6` 소스): Foundation EditMode373/373·PlayMode156/156, 실패/skip/inconclusive0. Windows 빌드 성공(211,439,954bytes,37.788초,오류0·경고3). PlayMode 종료·Editor ready 확인. 최종 장시간 음원 결과125.311333 DSP초,6초 꼬리 조건 유지. 생성16파일 해시 동일; 재생성 테스트의 최종 에셋 변경 없음. 테스트가 다시 쓴 기존 증거는 `final-suite-output/`에 보존하고 과거 작업 증거를 복원했다.
+- 동일 커밋 개발 진단 재빌드·실행: exercise40.990초/persistence6.755초 모두exit0. 요청/적용256/256, 두 진행률 구간 모두±1% 내; 12개 재개 관측 최대7.994ms로 각 DSP블록+프레임 불확실성 내. 실제 WAV 샘플/mixer와 OS루프백440Hz 확인. 최종 HUD Q/F/J/K·정지 설정256 화면 직접 검토. 타이틀/설정/에디터/선택 왕복, 외부 WAV 복구/재개/재시작/나가기, 모드별 키 저장·재실행 유지 검증. Results 이동은 개발 진단에서 명시적으로 세션을 진행시켰고 실제 긴 곡 완료는 Foundation이 별도로 검증했다.
+- 일반 배포 플레이어는 hidden 실행으로 창 핸들을 별도 열거하여 응답/제목 확인 후 WM_CLOSE로 종료했다. 테스트 어셈블리 없음. 정상 종료 후 진단 restore phase exit0, 원래6개 설정 및 존재 여부 복원·진단 소유 프로젝트0. 원본 worktree 상태 보존 확인. 최종 독립 검토(`d34b688..cad59e6`)에 미해결 소스 지적 없음. 최종 증거·장부만 커밋하고 종료하며 GitHub 게시/main 병합은 수행하지 않았다.

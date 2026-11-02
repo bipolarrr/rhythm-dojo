@@ -1,0 +1,18 @@
+{
+  "scope": "Foundation: all EditMode, all PlayMode, ordinary Windows build",
+  "startedUtc": "2026-11-02T19:23:29.7642064Z",
+  "head": "cad59e6e96929b77761d4fd3771ff864918f4243",
+  "state": "passed",
+  "finishedUtc": "2026-11-02T19:39:25.2700588Z",
+  "editMode": {
+    "passed": 373,
+    "skipped": 0,
+    "failed": 0
+  },
+  "playMode": {
+    "passed": 156,
+    "skipped": 0,
+    "failed": 0
+  },
+  "windowsBuild": "succeeded"
+}
