@@ -272,7 +272,7 @@ namespace RhythmDojo.Tests
             );
             yield return Await(() => UnityEngine.Object.FindFirstObjectByType<SettingsScreen>());
             yield return null;
-            yield return Await(() => !flow.Audio.IsBufferValidationPending, "Initial audio validation did not finish.");
+            yield return Await(() => !flow.Audio.IsBufferValidationPending, "Initial audio validation did not finish.", timeoutSeconds: RhythmDojo.Services.AudioSettingsService.ClockValidationTimeoutSeconds + 2);
             System.IO.File.WriteAllText(
                 "Logs/audio-buffers.txt",
                 $"Startup: {originalAudio.dspBufferSize} samples / {originalAudio.sampleRate} Hz\n"
@@ -283,7 +283,7 @@ namespace RhythmDojo.Tests
                 flow.SelectBufferOption(option);
                 int requestedSize = flow.RequestedBufferSize;
                 bool accepted = flow.ApplyBufferSize();
-                yield return Await(() => !flow.Audio.IsBufferValidationPending, "DSP buffer validation did not finish.");
+                yield return Await(() => !flow.Audio.IsBufferValidationPending, "DSP buffer validation did not finish.", timeoutSeconds: RhythmDojo.Services.AudioSettingsService.ClockValidationTimeoutSeconds + 2);
                 var actual = AudioSettings.GetConfiguration();
                 AudioSettings.GetDSPBufferSize(out int size, out int count);
                 yield return new WaitForSecondsRealtime(.3f);
@@ -301,13 +301,28 @@ namespace RhythmDojo.Tests
                 Assert.That(size, Is.EqualTo(actual.dspBufferSize));
                 Assert.That(size, Is.GreaterThan(0));
                 Assert.That(AudioSettings.dspTime, Is.GreaterThan(start));
-                Assert.That(dspElapsed / elapsed, Is.InRange(.85, 1.15),
-                    "An accepted configuration must advance the real DSP clock at normal speed.");
+                foreach (var measurement in flow.Audio.ClockRateMeasurements)
+                {
+                    System.IO.File.AppendAllText("Logs/audio-buffers.txt", System.FormattableString.Invariant(
+                        $"  buffer={measurement.BufferSize}, sampleRate={measurement.SampleRate}, duration={measurement.ElapsedSeconds:R}, dsp={measurement.DspElapsedSeconds:R}, interval=[{measurement.LowerBound:R},{measurement.UpperBound:R}], state={measurement.State}\n"));
+                }
+                System.IO.File.AppendAllText("Logs/audio-buffers.txt",
+                    $"  verified={flow.Audio.ClockRateVerified}, consecutive={flow.Audio.ConsecutiveClockRateMeasurements}, total={flow.Audio.ValidationElapsedSeconds:R}, status={flow.Audio.BufferStatus}\n");
+                if (flow.Audio.ClockRateVerified)
+                {
+                    AssertClockRateVerified(flow.Audio);
+                }
+                else
+                {
+                    Assert.That(flow.Audio.HasBufferValidationResult, Is.True);
+                    Assert.That(flow.Audio.BufferStatus, Does.Contain("못했습니다").Or.Contain("failed"));
+                }
             }
 
             flow.SelectBufferOption(4);
             Assert.That(flow.ApplyBufferSize(), Is.True);
-            yield return Await(() => !flow.Audio.IsBufferValidationPending);
+            yield return Await(() => !flow.Audio.IsBufferValidationPending, timeoutSeconds: RhythmDojo.Services.AudioSettingsService.ClockValidationTimeoutSeconds + 2);
+            AssertClockRateVerified(flow.Audio);
             flow.ShowSelection();
             Assert.That(flow.ApplyBufferSize(), Is.False, "Apply during transition must be rejected.");
             yield return Await(() =>

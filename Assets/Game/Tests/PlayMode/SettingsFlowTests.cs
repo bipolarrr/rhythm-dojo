@@ -270,7 +270,7 @@ namespace RhythmDojo.Tests
                         var before = new Vector2Int(Screen.width, Screen.height);
                         view.apply.onClick.Invoke();
                         yield return Await(() => !UnityEngine.Object.FindFirstObjectByType<AppFlowController>()
-                            .Audio.IsBufferValidationPending, "Audio verification did not finish after display apply.");
+                            .Audio.IsBufferValidationPending, "Audio verification did not finish after display apply.", timeoutSeconds: RhythmDojo.Services.AudioSettingsService.ClockValidationTimeoutSeconds + 2);
                         yield return Await(
                             () =>
                                 new Vector2Int(Screen.width, Screen.height)
@@ -420,7 +420,7 @@ namespace RhythmDojo.Tests
             Assert.That(QualitySettings.lodBias, Is.EqualTo(beforeLodBias));
             Assert.That(QualitySettings.anisotropicFiltering, Is.EqualTo(beforeFiltering));
             yield return Await(() => !UnityEngine.Object.FindFirstObjectByType<AppFlowController>()
-                .Audio.IsBufferValidationPending, "Audio verification did not finish before closing settings.");
+                .Audio.IsBufferValidationPending, "Audio verification did not finish before closing settings.", timeoutSeconds: RhythmDojo.Services.AudioSettingsService.ClockValidationTimeoutSeconds + 2);
             yield return Click(view.back);
             yield return Await(() => !UnityEngine.Object.FindFirstObjectByType<SettingsScreen>());
             Assert.That(selection.enabled, Is.True);
@@ -502,8 +502,8 @@ namespace RhythmDojo.Tests
             Assert.That(view.bufferList.interactable, Is.False);
             yield return Press(Key.Escape);
             Assert.That(view.gameObject.activeInHierarchy, Is.True, "Escape must not resume a song before validation ends.");
-            yield return Await(() => !flow.Audio.IsBufferValidationPending, "Audio buffer validation did not finish.");
-            Assert.That(flow.Audio.LastDspRealtimeRatio, Is.InRange(.85, 1.15));
+            yield return Await(() => !flow.Audio.IsBufferValidationPending, "Audio buffer validation did not finish.", timeoutSeconds: RhythmDojo.Services.AudioSettingsService.ClockValidationTimeoutSeconds + 2);
+            AssertClockRateVerified(flow.Audio);
             Assert.That(view.back.interactable, Is.True);
             Assert.That(view.bufferList.value, Is.EqualTo(flow.SelectedBufferOption));
             Assert.That(view.status.gameObject.activeInHierarchy, Is.True);
@@ -563,7 +563,7 @@ namespace RhythmDojo.Tests
                 Does.Contain($"{AudioSettings.GetConfiguration().dspBufferSize} samples")
             );
             Assert.That(flow.BufferStatus, Does.Contain("Actual:"));
-            yield return Await(() => !flow.Audio.IsBufferValidationPending, "Audio verification did not finish.");
+            yield return Await(() => !flow.Audio.IsBufferValidationPending, "Audio verification did not finish.", timeoutSeconds: RhythmDojo.Services.AudioSettingsService.ClockValidationTimeoutSeconds + 2);
             int appliedOption = flow.SelectedBufferOption;
             yield return Press(Key.RightArrow);
             yield return Press(Key.Enter);
@@ -582,7 +582,7 @@ namespace RhythmDojo.Tests
             Assert.That(dropdown.value, Is.EqualTo(appliedOption));
             dropdown.value = 0;
             yield return Click(UnityEngine.Object.FindFirstObjectByType<SettingsView>().apply);
-            yield return Await(() => !flow.Audio.IsBufferValidationPending);
+            yield return Await(() => !flow.Audio.IsBufferValidationPending, timeoutSeconds: RhythmDojo.Services.AudioSettingsService.ClockValidationTimeoutSeconds + 2);
             Assert.That(
                 AudioSettings.GetConfiguration().dspBufferSize,
                 Is.EqualTo(flow.DefaultBufferSize)

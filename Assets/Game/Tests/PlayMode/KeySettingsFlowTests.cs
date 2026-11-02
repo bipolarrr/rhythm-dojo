@@ -92,8 +92,11 @@ namespace RhythmDojo.Tests
             Assert.That(hud.lanes.laneRoot.GetChild(0).GetComponentInChildren<Text>().text, Is.EqualTo("Q"));
             yield return Click(view.back);
             yield return Click(pause.resumeButton);
-            yield return new WaitForSecondsRealtime(3.1f);
+            yield return Await(
+                () => !game.IsPaused && !pause.countdown.activeSelf,
+                "Gameplay did not finish scheduled resume.");
             Assert.That(game.IsPaused, Is.False);
+            Assert.That(game.Clock.Running, Is.True);
             pressed = -1;
             yield return Press(Key.A);
             Assert.That(pressed, Is.EqualTo(-1));

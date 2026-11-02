@@ -1,0 +1,37 @@
+Startup: 1024 samples / 48000 Hz
+Requested 32: accepted=True, actual=256 x 4, rate=48000, real=1.0042s, DSP=1.0133s, ratio=1.009, rejectedRatio=0.000
+  buffer=32, sampleRate=48000, duration=0.015695999999479682, dsp=0.0019999999999527063, interval=[0.042473666325272226,0.21236833163841351], state=Unhealthy
+  buffer=64, sampleRate=48000, duration=0.0160688999994818, dsp=0.0039999999999054126, interval=[0.082976017853228543,0.41488008928968811], state=Unhealthy
+  buffer=128, sampleRate=48000, duration=0.017412600000170642, dsp=0, interval=[0,0.30629161258405219], state=Unhealthy
+  buffer=256, sampleRate=48000, duration=1.167003499999737, dsp=1.1679999999998927, interval=[0.99171367809392763,1.0099941145564901], state=Healthy
+  buffer=256, sampleRate=48000, duration=1.199939699999959, dsp=1.2000000000000455, interval=[0.9911609169472595,1.0089395881032635], state=Healthy
+  verified=True, consecutive=2, total=3.8059918999997535, status=요청 32 진행률 이상 → Actual: 256 samples로 복구 · DSP 시계 ±1% 확인
+Requested 64: accepted=True, actual=256 x 4, rate=48000, real=1.0135s, DSP=1.0187s, ratio=1.005, rejectedRatio=0.000
+  buffer=64, sampleRate=48000, duration=0.016317099999469065, dsp=0.0039999999999054126, interval=[0.08171386663574598,0.40856933320191718], state=Unhealthy
+  buffer=128, sampleRate=48000, duration=0.015783599999849685, dsp=0, interval=[0,0.337903477874764], state=Unhealthy
+  buffer=256, sampleRate=48000, duration=1.2001325000001088, dsp=1.2000000000000455, interval=[0.99100168800800825,1.0087775030395412], state=Healthy
+  buffer=256, sampleRate=48000, duration=1.1999524000002566, dsp=1.1999999999998181, interval=[0.99115042674434184,1.0089289097352743], state=Healthy
+  verified=True, consecutive=2, total=3.4665349999995669, status=요청 64 진행률 이상 → Actual: 256 samples로 복구 · DSP 시계 ±1% 확인
+Requested 128: accepted=True, actual=256 x 4, rate=48000, real=1.0164s, DSP=1.0133s, ratio=0.997, rejectedRatio=0.000
+  buffer=128, sampleRate=48000, duration=0.01660859999992681, dsp=0, interval=[0,0.32111877782334669], state=Unhealthy
+  buffer=256, sampleRate=48000, duration=1.1988283000000592, dsp=1.1999999999998181, interval=[0.99207979435678384,1.0098749476187916], state=Healthy
+  buffer=256, sampleRate=48000, duration=1.1673152000003029, dsp=1.16800000000012, interval=[0.99144886773782537,1.0097244229034976], state=Healthy
+  verified=True, consecutive=2, total=3.0688704000003781, status=요청 128 진행률 이상 → Actual: 256 samples로 복구 · DSP 시계 ±1% 확인
+Requested 256: accepted=True, actual=512 x 4, rate=48000, real=1.0005s, DSP=0.9920s, ratio=0.992, rejectedRatio=0.958
+  buffer=256, sampleRate=48000, duration=0.35069960000055289, dsp=0.33600000000001273, interval=[0.92766953065482016,0.98850031955021578], state=Unhealthy
+  buffer=512, sampleRate=48000, duration=2.250158000000738, dsp=2.2506666666665751, interval=[0.990745242481866,1.0097068739169264], state=Healthy
+  buffer=512, sampleRate=48000, duration=2.2495973999994021, dsp=2.2506666666665751, interval=[0.99099213634130023,1.0099584930176895], state=Healthy
+  verified=True, consecutive=2, total=5.5443051000002015, status=요청 256 진행률 이상 → Actual: 512 samples로 복구 · DSP 시계 ±1% 확인
+Requested 512: accepted=True, actual=512 x 4, rate=48000, real=1.0102s, DSP=1.0133s, ratio=1.003, rejectedRatio=NaN
+  buffer=512, sampleRate=48000, duration=2.4335240999998859, dsp=2.4320000000000164, interval=[0.99060727061087916,1.0081401426570893], state=Healthy
+  buffer=512, sampleRate=48000, duration=2.2500088000006144, dsp=2.2506666666665751, interval=[0.99081093964282851,1.0097738284398212], state=Healthy
+  verified=True, consecutive=2, total=5.0341854000007515, status=DSP 시계 진행률 ±1% 확인 완료 · Actual: 512 samples
+Requested 1024: accepted=True, actual=1024 x 4, rate=48000, real=1.0172s, DSP=1.0240s, ratio=1.007, rejectedRatio=NaN
+  buffer=1024, sampleRate=48000, duration=4.4170672000000195, dsp=4.41599999999994, interval=[0.99009889035268794,1.0094178930912772], state=Healthy
+  buffer=1024, sampleRate=48000, duration=4.4172192000005452, dsp=4.41599999999994, interval=[0.99006482026808484,1.0093831582245354], state=Healthy
+  verified=True, consecutive=2, total=9.179022199999963, status=DSP 시계 진행률 ±1% 확인 완료 · Actual: 1024 samples
+Requested 2048: accepted=True, actual=2048 x 4, rate=48000, real=1.0167s, DSP=1.0240s, ratio=1.007, rejectedRatio=NaN
+  buffer=2048, sampleRate=48000, duration=8.95920550000028, dsp=8.959999999999809, interval=[0.99056402564559975,1.0096133338310924], state=Healthy
+  buffer=2048, sampleRate=48000, duration=9.0491082999997161, dsp=9.045333333333474, interval=[0.99015280875801015,1.0090128622581622], state=Healthy
+  verified=True, consecutive=2, total=18.364532699999472, status=DSP 시계 진행률 ±1% 확인 완료 · Actual: 2048 samples
+PASS: requested 256 samples; scheduled playback and restart advance song time and report AudioSource playing. Audible dropouts were not measured.

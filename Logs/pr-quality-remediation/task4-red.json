@@ -1,0 +1,106 @@
+{
+  "success": true,
+  "command": "command test_status",
+  "data": {
+    "command": "test_status",
+    "parameters": {},
+    "result": {
+      "status": "completed",
+      "duration": 0.36,
+      "summary": {
+        "total": 11,
+        "passed": 9,
+        "failed": 2,
+        "skipped": 0,
+        "inconclusive": 0
+      },
+      "results": [
+        {
+          "FullName": "RhythmDojo.Tests.AudioSettingsServiceTests.DriverClampingIsReflectedInTheSelectedAndActualBuffer",
+          "Status": "Passed",
+          "Duration": 0.0216722,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioSettingsServiceTests.FailedRecoveryStopsRetryingAndReportsFailureInsteadOfSuccess",
+          "Status": "Passed",
+          "Duration": 0.0044199,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioSettingsServiceTests.ForcedNavigationCanCancelValidationAndRestoreBeforeGameplay",
+          "Status": "Passed",
+          "Duration": 0.0004836,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioSettingsServiceTests.HealthyLowBufferRemainsAvailableWithoutForcedMinimum",
+          "Status": "Passed",
+          "Duration": 0.0034018,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioSettingsServiceTests.PausedAudioDoesNotGetMisdiagnosedAsSlowHardware",
+          "Status": "Passed",
+          "Duration": 0.0007709,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioSettingsServiceTests.RejectedResetRestoresPreviousConfigurationAndPublishesResult",
+          "Status": "Passed",
+          "Duration": 0.0006437,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioSettingsServiceTests.SlowAcceptedConfigurationRecoversBeforeReportingSuccess(1,32)",
+          "Status": "Passed",
+          "Duration": 0.0017499,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioSettingsServiceTests.SlowAcceptedConfigurationRecoversBeforeReportingSuccess(2,64)",
+          "Status": "Passed",
+          "Duration": 0.0001291,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioSettingsServiceTests.SlowAcceptedConfigurationRecoversBeforeReportingSuccess(3,128)",
+          "Status": "Passed",
+          "Duration": 0.0000965,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioSettingsServiceTests.TwoPercentClockErrorCannotPassAsHealthy(0.98d)",
+          "Status": "Failed",
+          "Duration": 0.0082246,
+          "Message": "  One short observation must not accept a persistent two-percent clock error.\r\n  Expected: True\r\n  But was:  False\r\n",
+          "StackTrace": "at RhythmDojo.Tests.AudioSettingsServiceTests.TwoPercentClockErrorCannotPassAsHealthy (System.Double rate) [0x0004a] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\EditMode\\AudioSettingsServiceTests.cs:76\r\n"
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioSettingsServiceTests.TwoPercentClockErrorCannotPassAsHealthy(1.02d)",
+          "Status": "Failed",
+          "Duration": 0.0002135,
+          "Message": "  One short observation must not accept a persistent two-percent clock error.\r\n  Expected: True\r\n  But was:  False\r\n",
+          "StackTrace": "at RhythmDojo.Tests.AudioSettingsServiceTests.TwoPercentClockErrorCannotPassAsHealthy (System.Double rate) [0x0004a] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\EditMode\\AudioSettingsServiceTests.cs:76\r\n"
+        }
+      ]
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "C:\\Users\\song\\RhythmDojo-pr-quality"
+    },
+    "success": true
+  },
+  "errors": [],
+  "warnings": []
+}

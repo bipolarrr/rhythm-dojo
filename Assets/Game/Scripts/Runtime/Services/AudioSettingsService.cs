@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using RhythmDojo.Application;
 using UnityEngine;
 
 namespace RhythmDojo.Services
@@ -43,6 +46,19 @@ namespace RhythmDojo.Services
         private int validationRequestedBuffer;
         private bool recoveryOccurred;
         private bool disposed;
+        private double validationStartedRealtime;
+        private double lastProbeDsp;
+        private bool resettingConfiguration;
+        private readonly List<DspClockRateMeasurement> clockRateMeasurements =
+            new List<DspClockRateMeasurement>();
+        private readonly ReadOnlyCollection<DspClockRateMeasurement> clockRateMeasurementView;
+
+        public const double ClockValidationTimeoutSeconds = 20;
+        public bool ClockRateVerified { get; private set; }
+        public int ConsecutiveClockRateMeasurements { get; private set; }
+        public DspClockRateMeasurement? LastClockRateMeasurement { get; private set; }
+        public IReadOnlyList<DspClockRateMeasurement> ClockRateMeasurements => clockRateMeasurementView;
+        public double ValidationElapsedSeconds { get; private set; }
 
         public bool IsBufferValidationPending { get; private set; }
         public bool HasBufferValidationResult { get; private set; }
@@ -61,6 +77,7 @@ namespace RhythmDojo.Services
         {
             this.canApply = canApply ?? throw new ArgumentNullException(nameof(canApply));
             this.backend = backend ?? throw new ArgumentNullException(nameof(backend));
+            clockRateMeasurementView = clockRateMeasurements.AsReadOnly();
             DefaultBufferSize = backend.Configuration.dspBufferSize;
             backend.Changed += ConfigurationChanged;
         }
@@ -73,12 +90,27 @@ namespace RhythmDojo.Services
             }
         }
 
-        private void ConfigurationChanged(bool changed) => Changed?.Invoke();
+        private void ConfigurationChanged(bool changed)
+        {
+            ClockRateVerified = false;
+            if (IsBufferValidationPending && !resettingConfiguration)
+            {
+                BeginValidation();
+            }
+            else if (!resettingConfiguration)
+            {
+                ConsecutiveClockRateMeasurements = 0;
+                HasBufferValidationResult = false;
+                BufferStatus = "오디오 설정 변경으로 DSP 시계 진행률 확인이 무효화되었습니다. 다시 적용해 주세요.";
+            }
+            Changed?.Invoke();
+        }
 
         public void Dispose()
         {
             disposed = true;
             IsBufferValidationPending = false;
+            ClockRateVerified = false;
             backend.Changed -= ConfigurationChanged;
             if (ownsBackend && backend is IDisposable disposable)
             {
@@ -126,12 +158,16 @@ namespace RhythmDojo.Services
             validationRequestedBuffer = RequestedBufferSize;
             recoveryOccurred = false;
             LastRejectedDspRealtimeRatio = double.NaN;
+            ClockRateVerified = false;
+            validationStartedRealtime = backend.Realtime;
+            ValidationElapsedSeconds = 0;
+            clockRateMeasurements.Clear();
 
             string error;
 
             try
             {
-                if (backend.Reset(requested))
+                if (ResetConfiguration(requested))
                 {
                     BeginValidation();
                     return true;
@@ -148,7 +184,7 @@ namespace RhythmDojo.Services
 
             try
             {
-                restored = backend.Reset(previous);
+                restored = ResetConfiguration(previous);
             }
             catch (Exception e)
             {
@@ -181,10 +217,12 @@ namespace RhythmDojo.Services
             checkedConfiguration = backend.Configuration;
             warmupEnds = backend.Realtime + .3;
             probeStartRealtime = -1;
+            ConsecutiveClockRateMeasurements = 0;
+            LastClockRateMeasurement = null;
             IsBufferValidationPending = true;
             HasBufferValidationResult = false;
             LastDspRealtimeRatio = double.NaN;
-            BufferStatus = $"오디오 안정성 확인 중… Actual: {Actual.BufferSize} samples";
+            BufferStatus = $"DSP 시계 진행률 확인 중 (±1%, 최대 20초)… Actual: {Actual.BufferSize} samples";
             Changed?.Invoke();
         }
 
@@ -194,95 +232,198 @@ namespace RhythmDojo.Services
             {
                 return;
             }
+
+            double realtime = backend.Realtime;
+            ValidationElapsedSeconds = realtime - validationStartedRealtime;
+            if (ValidationElapsedSeconds >= ClockValidationTimeoutSeconds)
+            {
+                if (LastClockRateMeasurement.HasValue)
+                {
+                    clockRateMeasurements.Add(LastClockRateMeasurement.Value);
+                }
+                RestoreConfiguration("DSP 시계 진행률 확인 시간 초과 (20초). 정상 여부를 확인하지 못했습니다.");
+                return;
+            }
+            if (ValidationElapsedSeconds < 0 || !double.IsFinite(realtime))
+            {
+                RestoreConfiguration("DSP 시계 진행률 확인 실패: 기준 시각이 변경되었습니다.");
+                return;
+            }
             if (!canApply())
             {
                 IsBufferValidationPending = false;
                 HasBufferValidationResult = true;
-                BufferStatus = "오디오 확인이 중단되었습니다. 설정에서 다시 적용해 주세요.";
+                BufferStatus = "DSP 시계 진행률 확인이 중단되었습니다. 설정에서 다시 적용해 주세요.";
                 Changed?.Invoke();
                 return;
             }
 
-            double realtime = backend.Realtime;
             if (backend.Paused)
             {
-                warmupEnds = realtime + .3;
-                probeStartRealtime = -1;
+                BeginValidation();
+                return;
+            }
+            if (!SameConfiguration(backend.Configuration, checkedConfiguration))
+            {
+                BeginValidation();
                 return;
             }
             if (realtime < warmupEnds)
             {
                 return;
             }
+
+            double dsp = backend.DspTime;
+            if (!double.IsFinite(dsp))
+            {
+                RestoreConfiguration("DSP 시계 진행률 확인 실패: 장치 시각을 읽을 수 없습니다.");
+                return;
+            }
             if (probeStartRealtime < 0)
             {
                 probeStartRealtime = realtime;
-                probeStartDsp = backend.DspTime;
+                probeStartDsp = dsp;
+                lastProbeDsp = dsp;
                 return;
             }
-
-            double elapsed = realtime - probeStartRealtime;
-            double dspElapsed = backend.DspTime - probeStartDsp;
-            if (dspElapsed < 0 || backend.Configuration.dspBufferSize != checkedConfiguration.dspBufferSize)
+            if (dsp < lastProbeDsp)
             {
                 BeginValidation();
                 return;
             }
-            if (elapsed < 1)
+            lastProbeDsp = dsp;
+
+            double elapsed = realtime - probeStartRealtime;
+            double dspElapsed = dsp - probeStartDsp;
+            if (elapsed <= 0)
+            {
+                return;
+            }
+            if (checkedConfiguration.dspBufferSize <= 0 || checkedConfiguration.sampleRate <= 0)
+            {
+                RestoreConfiguration("DSP 시계 진행률 확인 실패: 장치 설정이 유효하지 않습니다.");
+                return;
+            }
+
+            var measurement = new DspClockRateMeasurement(elapsed, dspElapsed,
+                checkedConfiguration.dspBufferSize, checkedConfiguration.sampleRate);
+            LastClockRateMeasurement = measurement;
+            LastDspRealtimeRatio = measurement.Ratio;
+            if (measurement.State == DspClockRateState.Undetermined)
             {
                 return;
             }
 
-            LastDspRealtimeRatio = dspElapsed / elapsed;
-            if (LastDspRealtimeRatio >= .85 && LastDspRealtimeRatio <= 1.15)
+            clockRateMeasurements.Add(measurement);
+            if (measurement.State == DspClockRateState.Healthy)
             {
-                lastHealthyConfiguration = backend.Configuration;
-                IsBufferValidationPending = false;
-                HasBufferValidationResult = true;
-                if (recoveryOccurred || Actual.BufferSize != validationRequestedBuffer)
+                ConsecutiveClockRateMeasurements++;
+                if (ConsecutiveClockRateMeasurements < DspClockRateMeasurement.RequiredConsecutiveMeasurements)
                 {
-                    SyncAppliedOption();
+                    // The next observation starts here; it does not reuse the previous interval.
+                    probeStartRealtime = realtime;
+                    probeStartDsp = dsp;
+                    return;
                 }
-                if (recoveryOccurred)
-                {
-                    BufferStatus = $"요청 {validationRequestedBuffer} 불안정 → Actual: {Actual.BufferSize} samples로 복구";
-                }
-                else
-                {
-                    BufferStatus = $"오디오 적용 완료 · Actual: {Actual.BufferSize} samples";
-                }
-                Changed?.Invoke();
+                CompleteValidation();
                 return;
             }
 
+            ConsecutiveClockRateMeasurements = 0;
             LastRejectedDspRealtimeRatio = LastDspRealtimeRatio;
-            int next = Math.Max(256, checkedConfiguration.dspBufferSize * 2);
-            if (next <= 2048)
+            RecoverLargerBuffer();
+        }
+
+        private void CompleteValidation()
+        {
+            lastHealthyConfiguration = backend.Configuration;
+            IsBufferValidationPending = false;
+            HasBufferValidationResult = true;
+            ClockRateVerified = true;
+            if (recoveryOccurred || Actual.BufferSize != validationRequestedBuffer)
+            {
+                SyncAppliedOption();
+            }
+            if (recoveryOccurred)
+            {
+                BufferStatus = $"요청 {validationRequestedBuffer} 진행률 이상 → Actual: {Actual.BufferSize} samples로 복구 · DSP 시계 ±1% 확인";
+            }
+            else
+            {
+                BufferStatus = $"DSP 시계 진행률 ±1% 확인 완료 · Actual: {Actual.BufferSize} samples";
+            }
+            Changed?.Invoke();
+        }
+
+        private void RecoverLargerBuffer()
+        {
+            int next = NextLargerBuffer(checkedConfiguration.dspBufferSize);
+            if (next > 0)
             {
                 var requested = backend.Configuration;
                 requested.dspBufferSize = next;
+                int previousBuffer = checkedConfiguration.dspBufferSize;
                 try
                 {
-                    if (backend.Reset(requested) && backend.Configuration.dspBufferSize > checkedConfiguration.dspBufferSize)
+                    if (ResetConfiguration(requested))
                     {
-                        recoveryOccurred = true;
-                        BeginValidation();
-                        return;
+                        if (backend.Configuration.dspBufferSize > previousBuffer)
+                        {
+                            recoveryOccurred = true;
+                            BeginValidation();
+                            return;
+                        }
                     }
                 }
                 catch (Exception)
                 {
-                    // Restore below; a failed recovery must never be reported as successful.
+                    // Restore below; an accepted reset is not a verified clock rate.
                 }
             }
-            RestoreConfiguration("안정적인 오디오 설정을 확인하지 못했습니다.");
+            RestoreConfiguration("정상 DSP 시계 진행률을 확인하지 못했습니다.");
+        }
+
+        private static int NextLargerBuffer(int current)
+        {
+            foreach (int size in bufferSizes)
+            {
+                if (size > current)
+                {
+                    return size;
+                }
+            }
+            return 0;
+        }
+
+        private bool ResetConfiguration(AudioConfiguration configuration)
+        {
+            resettingConfiguration = true;
+            try
+            {
+                return backend.Reset(configuration);
+            }
+            finally
+            {
+                resettingConfiguration = false;
+            }
+        }
+
+        private static bool SameConfiguration(AudioConfiguration first, AudioConfiguration second)
+        {
+            if (first.dspBufferSize != second.dspBufferSize || first.sampleRate != second.sampleRate)
+            {
+                return false;
+            }
+            return first.speakerMode == second.speakerMode
+                && first.numRealVoices == second.numRealVoices
+                && first.numVirtualVoices == second.numVirtualVoices;
         }
 
         public void CancelBufferValidation()
         {
             if (IsBufferValidationPending)
             {
-                RestoreConfiguration("오디오 확인을 취소했습니다.");
+                RestoreConfiguration("DSP 시계 진행률 확인을 취소했습니다.");
             }
         }
 
@@ -290,6 +431,7 @@ namespace RhythmDojo.Services
         {
             IsBufferValidationPending = false;
             HasBufferValidationResult = true;
+            ClockRateVerified = false;
             var previous = previousConfiguration;
             if (lastHealthyConfiguration.HasValue)
             {
@@ -302,7 +444,7 @@ namespace RhythmDojo.Services
             bool restored = false;
             try
             {
-                restored = backend.Reset(previous);
+                restored = ResetConfiguration(previous);
             }
             catch (Exception)
             {

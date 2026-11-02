@@ -83,7 +83,7 @@ namespace RhythmDojo.Tests
             var report = new StringBuilder("requested,actual,buffers,rate,clipRate,offset,cycle,frame,dsp,realtime,anchor,frozen,seekSample,sourceSample,logical,audio,error,uncertainty,drift,dspElapsed,realtimeElapsed,dspRatio,rawDspAudioError\n");
             string failure = null;
             Directory.CreateDirectory("Logs/pr-quality-remediation");
-            var validationReport = new StringBuilder("requested,applied,validationRatio,rejectedRatio,status\n");
+            var validationReport = new StringBuilder("requested,applied,validationRatio,rejectedRatio,verified,count,totalSeconds,lower,upper,status\n");
             var appliedSizes = new System.Collections.Generic.HashSet<int>();
             using var validation = new AudioSettingsService(() => true);
             try
@@ -99,17 +99,18 @@ namespace RhythmDojo.Tests
                         }
                     }
                     Assert.That(validation.ApplyBufferSize(), Is.True);
-                    double validationDeadline = Time.realtimeSinceStartupAsDouble + 30;
+                    double validationDeadline = Time.realtimeSinceStartupAsDouble + AudioSettingsService.ClockValidationTimeoutSeconds + 2;
                     while (validation.IsBufferValidationPending)
                     {
                         Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(validationDeadline));
                         validation.Tick();
                         yield return null;
                     }
+                    AssertClockRateVerified(validation);
                     AudioSettings.GetDSPBufferSize(out int actual, out int count);
                     appliedSizes.Add(actual);
                     validationReport.AppendLine(FormattableString.Invariant(
-                        $"{size},{actual},{validation.LastDspRealtimeRatio:R},{validation.LastRejectedDspRealtimeRatio:R},{validation.BufferStatus}"));
+                        $"{size},{actual},{validation.LastDspRealtimeRatio:R},{validation.LastRejectedDspRealtimeRatio:R},{validation.ClockRateVerified},{validation.ConsecutiveClockRateMeasurements},{validation.ValidationElapsedSeconds:R},{validation.LastClockRateMeasurement.Value.LowerBound:R},{validation.LastClockRateMeasurement.Value.UpperBound:R},{validation.BufferStatus}"));
                     foreach (double offset in new[] { -.25, .25 })
                     {
                         var clock = CreateClock(offset, 200);

@@ -1,0 +1,43 @@
+{
+  "success": true,
+  "command": "command test_status",
+  "data": {
+    "command": "test_status",
+    "parameters": {},
+    "result": {
+      "status": "completed",
+      "duration": 9.89,
+      "summary": {
+        "total": 2,
+        "passed": 2,
+        "failed": 0,
+        "skipped": 0,
+        "inconclusive": 0
+      },
+      "results": [
+        {
+          "FullName": "RhythmDojo.Tests.KeySettingsFlowTests.CustomKeysDriveGameplayAndPausedChangesRefreshHudImmediately",
+          "Status": "Passed",
+          "Duration": 6.9121363,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.KeySettingsFlowTests.KeyTabCapturesPersistsCancelsRejectsDuplicatesAndResets",
+          "Status": "Passed",
+          "Duration": 2.9260229,
+          "Message": null,
+          "StackTrace": null
+        }
+      ]
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "C:\\Users\\song\\RhythmDojo-pr-quality"
+    },
+    "success": true
+  },
+  "errors": [],
+  "warnings": []
+}

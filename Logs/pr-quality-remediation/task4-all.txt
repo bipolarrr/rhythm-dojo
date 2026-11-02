@@ -1,0 +1,995 @@
+Verification started: 2026-11-02T16:33:37.6909577Z
+Passed: RhythmDojo.Tests.AudioResumeTimingTests.BeforeAudioClampsToZeroAndEndUsesEndSentinel
+
+Passed: RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(44100,-0.25d,0)
+
+Passed: RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(44100,-0.25d,1E-05.0d)
+
+Passed: RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(44100,-0.25d,0.123456789d)
+
+Passed: RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(44100,-0.25d,12.3456789d)
+
+Passed: RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(44100,0,0)
+
+Passed: RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(44100,0,1E-05.0d)
+
+Passed: RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(44100,0,0.123456789d)
+
+Passed: RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(44100,0,12.3456789d)
+
+Passed: RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(44100,0.25d,0)
+
+Passed: RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(44100,0.25d,1E-05.0d)
+
+Passed: RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(44100,0.25d,0.123456789d)
+
+Passed: RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(44100,0.25d,12.3456789d)
+
+Passed: RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(48000,-0.25d,0)
+
+Passed: RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(48000,-0.25d,1E-05.0d)
+
+Passed: RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(48000,-0.25d,0.123456789d)
+
+Passed: RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(48000,-0.25d,12.3456789d)
+
+Passed: RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(48000,0,0)
+
+Passed: RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(48000,0,1E-05.0d)
+
+Passed: RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(48000,0,0.123456789d)
+
+Passed: RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(48000,0,12.3456789d)
+
+Passed: RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(48000,0.25d,0)
+
+Passed: RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(48000,0.25d,1E-05.0d)
+
+Passed: RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(48000,0.25d,0.123456789d)
+
+Passed: RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(48000,0.25d,12.3456789d)
+
+Passed: RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(96000,-0.25d,0)
+
+Passed: RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(96000,-0.25d,1E-05.0d)
+
+Passed: RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(96000,-0.25d,0.123456789d)
+
+Passed: RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(96000,-0.25d,12.3456789d)
+
+Passed: RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(96000,0,0)
+
+Passed: RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(96000,0,1E-05.0d)
+
+Passed: RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(96000,0,0.123456789d)
+
+Passed: RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(96000,0,12.3456789d)
+
+Passed: RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(96000,0.25d,0)
+
+Passed: RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(96000,0.25d,1E-05.0d)
+
+Passed: RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(96000,0.25d,0.123456789d)
+
+Passed: RhythmDojo.Tests.AudioResumeTimingTests.ConversionRoundsToWithinOneSample(96000,0.25d,12.3456789d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.AudioInvalidationAfterClockAnchorKeepsCoordinatorAndClockPaused
+
+Passed: RhythmDojo.Tests.CoordinatorTests.CalibrationCorrectsInputAndDefersMissSweep(0.2d,1.2d,Warmup)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.CalibrationCorrectsInputAndDefersMissSweep(-0.2d,0.8d,Warmup)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.CalibrationCorrectsInputAndDefersMissSweep(0.2d,1.2d,Sparring)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.CalibrationCorrectsInputAndDefersMissSweep(-0.2d,0.8d,Sparring)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.DifficultyChangesJudgmentButKeepsScrollDistance
+
+Passed: RhythmDojo.Tests.CoordinatorTests.DisposalDiscardsPendingReleaseAndCannotResumeOrRestart
+
+Passed: RhythmDojo.Tests.CoordinatorTests.DisposalUnsubscribesAndStopsDependencies
+
+Passed: RhythmDojo.Tests.CoordinatorTests.FirstPostAnchorInputCompletesResumeBeforeTheFrameTick
+
+Passed: RhythmDojo.Tests.CoordinatorTests.GameOverStopsClockAndKeepsPresentationTimeUntilRestart
+
+Passed: RhythmDojo.Tests.CoordinatorTests.LatePreAnchorReleaseAfterFrameTickUsesFrozenPauseTime
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PauseCancelsPendingResumeAndCanPauseAClockThatCompletedBeforeCoordinator
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0,Release,-0.100001d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0,Release,-0.1d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0,Release,-0.05d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0,Release,0)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0,Release,0.05d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0,Release,0.1d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0,Release,0.100001d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0,Automatic,-0.100001d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0,Automatic,-0.1d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0,Automatic,-0.05d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0,Automatic,0)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0,Automatic,0.05d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0,Automatic,0.1d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0,Automatic,0.100001d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0.2d,Release,-0.100001d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0.2d,Release,-0.1d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0.2d,Release,-0.05d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0.2d,Release,0)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0.2d,Release,0.05d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0.2d,Release,0.1d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0.2d,Release,0.100001d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0.2d,Automatic,-0.100001d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0.2d,Automatic,-0.1d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0.2d,Automatic,-0.05d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0.2d,Automatic,0)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0.2d,Automatic,0.05d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0.2d,Automatic,0.1d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(0.2d,Automatic,0.100001d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(-0.2d,Release,-0.100001d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(-0.2d,Release,-0.1d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(-0.2d,Release,-0.05d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(-0.2d,Release,0)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(-0.2d,Release,0.05d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(-0.2d,Release,0.1d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(-0.2d,Release,0.100001d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(-0.2d,Automatic,-0.100001d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(-0.2d,Automatic,-0.1d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(-0.2d,Automatic,-0.05d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(-0.2d,Automatic,0)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(-0.2d,Automatic,0.05d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(-0.2d,Automatic,0.1d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(-0.2d,Automatic,0.100001d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PausePreservesProgressAndHeldNotesWhileBlockingJudgmentsAndRestartInput
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PressDuringPauseCancelsPendingReleaseAndNextPauseUsesNewTime(0)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PressDuringPauseCancelsPendingReleaseAndNextPauseUsesNewTime(0.2d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.PressDuringPauseCancelsPendingReleaseAndNextPauseUsesNewTime(-0.2d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.RestartAndFocusLossClearDisplayAndLogicalState
+
+Passed: RhythmDojo.Tests.CoordinatorTests.RestartDiscardsPendingReleaseBeforeAnotherHoldAndPause
+
+Passed: RhythmDojo.Tests.CoordinatorTests.ScheduledResumeDefersReleaseAndSweepUntilAnchor
+
+Passed: RhythmDojo.Tests.CoordinatorTests.TwentyScheduledPausesPreserveTheSameHoldJudgment
+
+Passed: RhythmDojo.Tests.CoordinatorTests.UnavailableAudioBlocksInputStartResumeAndRestartUntilRecovered
+
+Passed: RhythmDojo.Tests.CoordinatorTests.VisualPolicyNeverChangesJudgments(Constant,0.5d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.VisualPolicyNeverChangesJudgments(Constant,2)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.VisualPolicyNeverChangesJudgments(Bpm,0.5d)
+
+Passed: RhythmDojo.Tests.CoordinatorTests.VisualPolicyNeverChangesJudgments(Bpm,2)
+
+Passed: RhythmDojo.Tests.HardModeHealthTests.EveryGradeCanPreserveDamageOrFail(Perfect,Preserve)
+
+Passed: RhythmDojo.Tests.HardModeHealthTests.EveryGradeCanPreserveDamageOrFail(Good,Preserve)
+
+Passed: RhythmDojo.Tests.HardModeHealthTests.EveryGradeCanPreserveDamageOrFail(Miss,Preserve)
+
+Passed: RhythmDojo.Tests.HardModeHealthTests.EveryGradeCanPreserveDamageOrFail(Perfect,Damage)
+
+Passed: RhythmDojo.Tests.HardModeHealthTests.EveryGradeCanPreserveDamageOrFail(Good,Damage)
+
+Passed: RhythmDojo.Tests.HardModeHealthTests.EveryGradeCanPreserveDamageOrFail(Miss,Damage)
+
+Passed: RhythmDojo.Tests.HardModeHealthTests.EveryGradeCanPreserveDamageOrFail(Perfect,GameOver)
+
+Passed: RhythmDojo.Tests.HardModeHealthTests.EveryGradeCanPreserveDamageOrFail(Good,GameOver)
+
+Passed: RhythmDojo.Tests.HardModeHealthTests.EveryGradeCanPreserveDamageOrFail(Miss,GameOver)
+
+Passed: RhythmDojo.Tests.HardModeHealthTests.FractionalDamageFailsExactlyAtConfiguredCount(1)
+
+Passed: RhythmDojo.Tests.HardModeHealthTests.FractionalDamageFailsExactlyAtConfiguredCount(2)
+
+Passed: RhythmDojo.Tests.HardModeHealthTests.FractionalDamageFailsExactlyAtConfiguredCount(3)
+
+Passed: RhythmDojo.Tests.HardModeHealthTests.FractionalDamageFailsExactlyAtConfiguredCount(7)
+
+Passed: RhythmDojo.Tests.HardModeHealthTests.FractionalDamageFailsExactlyAtConfiguredCount(10)
+
+Passed: RhythmDojo.Tests.HardModeHealthTests.FractionalDamageFailsExactlyAtConfiguredCount(100)
+
+Passed: RhythmDojo.Tests.HardModeHealthTests.FractionalDamageFailsExactlyAtConfiguredCount(1000)
+
+Passed: RhythmDojo.Tests.HardModeHealthTests.HoldsApplyTheWorseGradeOnlyOnceAtResolution
+
+Passed: RhythmDojo.Tests.HardModeHealthTests.InvalidActionsAndGradesAreRejected
+
+Passed: RhythmDojo.Tests.HardModeHealthTests.InvalidCountsAreRejectedAtTheDomainBoundary(0)
+
+Passed: RhythmDojo.Tests.HardModeHealthTests.InvalidCountsAreRejectedAtTheDomainBoundary(-1)
+
+Passed: RhythmDojo.Tests.HardModeHealthTests.InvalidCountsAreRejectedAtTheDomainBoundary(1001)
+
+Passed: RhythmDojo.Tests.HardModeHealthTests.MixedGradesAddTheirIndividualDamageFractions
+
+Passed: RhythmDojo.Tests.HardModeHealthTests.PreservedGradesNeverRecoverHealthAndResetRestoresTheBudget
+
+Passed: RhythmDojo.Tests.PlayRulesTests.ChallengeAllowsLimitThenStops(1,1)
+
+Passed: RhythmDojo.Tests.PlayRulesTests.ChallengeAllowsLimitThenStops(2,0)
+
+Passed: RhythmDojo.Tests.PlayRulesTests.ChallengeAllowsLimitThenStops(3,0)
+
+Passed: RhythmDojo.Tests.PlayRulesTests.EarlyReleaseFailureStopsBeforeFutureRecordsAndTicks
+
+Passed: RhythmDojo.Tests.PlayRulesTests.EndIsCountedOnce(Automatic,0)
+
+Passed: RhythmDojo.Tests.PlayRulesTests.EndIsCountedOnce(Release,1)
+
+Passed: RhythmDojo.Tests.PlayRulesTests.FailureIsLatchedOnceAndRestartClearsIt(Continue)
+
+Passed: RhythmDojo.Tests.PlayRulesTests.FailureIsLatchedOnceAndRestartClearsIt(Stop)
+
+Passed: RhythmDojo.Tests.PlayRulesTests.FixedRecordSlotUpdatesAllocateNoManagedMemory
+
+Passed: RhythmDojo.Tests.PlayRulesTests.HoldScheduleCrossesTempoChangeAndHasFixedDenominator
+
+Passed: RhythmDojo.Tests.PlayRulesTests.MissedHeadRecoveryDependsOnEndMode(Automatic)
+
+Passed: RhythmDojo.Tests.PlayRulesTests.MissedHeadRecoveryDependsOnEndMode(Release)
+
+Passed: RhythmDojo.Tests.PlayRulesTests.RecoveryStartsAtTenGoodKeepsComboWithoutRecoveryAndMissResets
+
+Passed: RhythmDojo.Tests.PlayRulesTests.RegrabPreservesEndpointsAndMatchesFrameSweeps(Automatic)
+
+Passed: RhythmDojo.Tests.PlayRulesTests.RegrabPreservesEndpointsAndMatchesFrameSweeps(Release)
+
+Passed: RhythmDojo.Tests.PlayRulesTests.ReleaseAndRegrabResultsDoNotDependOnFrameSweeps
+
+Passed: RhythmDojo.Tests.PlayRulesTests.ReleaseWindowKeepsInclusiveBoundariesAndDoesNotOverwrite(-0.1d,Good)
+
+Passed: RhythmDojo.Tests.PlayRulesTests.ReleaseWindowKeepsInclusiveBoundariesAndDoesNotOverwrite(0,Perfect)
+
+Passed: RhythmDojo.Tests.PlayRulesTests.ReleaseWindowKeepsInclusiveBoundariesAndDoesNotOverwrite(0.1d,Good)
+
+Passed: RhythmDojo.Tests.PlayRulesTests.ReleaseWindowKeepsInclusiveBoundariesAndDoesNotOverwrite(0.101d,Miss)
+
+Passed: RhythmDojo.Tests.PlayRulesTests.ShortAutomaticTailAtHeadDeadlineResolvesBeforeRelease
+
+Passed: RhythmDojo.Tests.PlayRulesTests.TimingBoundariesAreInclusive(Warmup,0.05d,0.1d)
+
+Passed: RhythmDojo.Tests.PlayRulesTests.TimingBoundariesAreInclusive(Sparring,0.016d,0.05d)
+
+Passed: RhythmDojo.Tests.RhythmSessionTests.AutomaticHoldCompletionKeepsHeadGradeAndIgnoresLateRelease
+
+Passed: RhythmDojo.Tests.RhythmSessionTests.ChordsAndOtherLaneDuringHoldWorkAndEmptyPressDoesNotResetCombo
+
+Passed: RhythmDojo.Tests.RhythmSessionTests.GradesInclusiveBoundaries(-0.05d,Perfect)
+
+Passed: RhythmDojo.Tests.RhythmSessionTests.GradesInclusiveBoundaries(0.05d,Perfect)
+
+Passed: RhythmDojo.Tests.RhythmSessionTests.GradesInclusiveBoundaries(-0.05001d,Good)
+
+Passed: RhythmDojo.Tests.RhythmSessionTests.GradesInclusiveBoundaries(0.05001d,Good)
+
+Passed: RhythmDojo.Tests.RhythmSessionTests.GradesInclusiveBoundaries(-0.11d,Good)
+
+Passed: RhythmDojo.Tests.RhythmSessionTests.GradesInclusiveBoundaries(0.11d,Good)
+
+Passed: RhythmDojo.Tests.RhythmSessionTests.GradesInclusiveBoundaries(-0.11001d,Miss)
+
+Passed: RhythmDojo.Tests.RhythmSessionTests.GradesInclusiveBoundaries(0.11001d,Miss)
+
+Passed: RhythmDojo.Tests.RhythmSessionTests.HealthRecoversOnJudgmentsAndHoldIsCountedOnlyOnce
+
+Passed: RhythmDojo.Tests.RhythmSessionTests.HoldUsesWorseHeadAndTail(0,0.08d,Good)
+
+Passed: RhythmDojo.Tests.RhythmSessionTests.HoldUsesWorseHeadAndTail(0.08d,0,Good)
+
+Passed: RhythmDojo.Tests.RhythmSessionTests.HoldUsesWorseHeadAndTail(0,0,Perfect)
+
+Passed: RhythmDojo.Tests.RhythmSessionTests.HoldUsesWorseHeadAndTail(0,-1,Miss)
+
+Passed: RhythmDojo.Tests.RhythmSessionTests.LegacyHoldRecordsStartAndFinalWithoutChangingScoreCount
+
+Passed: RhythmDojo.Tests.RhythmSessionTests.MalformedChartAndSettingsFailBeforePlay
+
+Passed: RhythmDojo.Tests.RhythmSessionTests.NearestCandidateAndStableTieOrder
+
+Passed: RhythmDojo.Tests.RhythmSessionTests.SignedErrorAndDuplicatePrevention(-0.08d)
+
+Passed: RhythmDojo.Tests.RhythmSessionTests.SignedErrorAndDuplicatePrevention(0.08d)
+
+Passed: RhythmDojo.Tests.RhythmSessionTests.SixLanesAndDefensiveCopy
+
+Passed: RhythmDojo.Tests.RhythmSessionTests.TimeoutBoundaryAndResetClearAllState
+
+Passed: RhythmDojo.Tests.RhythmSessionTests.ZeroHealthFreezesRemainingNotesAndRestartRestoresFullHealth
+
+Passed: RhythmDojo.Tests.ScrollTimelineTests.BoundaryIsContinuousAndVelocityChanges
+
+Passed: RhythmDojo.Tests.ScrollTimelineTests.CountdownAndLastSegmentExtendAndInputsAreCopied
+
+Passed: RhythmDojo.Tests.ScrollTimelineTests.HoldAcrossBoundaryHasConsistentLength
+
+Passed: RhythmDojo.Tests.ScrollTimelineTests.IntegratesEverySegmentAndAppliesIndependentMultiplier(0.5d)
+
+Passed: RhythmDojo.Tests.ScrollTimelineTests.IntegratesEverySegmentAndAppliesIndependentMultiplier(1)
+
+Passed: RhythmDojo.Tests.ScrollTimelineTests.IntegratesEverySegmentAndAppliesIndependentMultiplier(2)
+
+Passed: RhythmDojo.Tests.ScrollTimelineTests.MalformedTempoAndSpeedAreRejected
+
+Passed: RhythmDojo.Tests.AudioSettingsServiceTests.ClockResetDiscardsPriorSuccessfulObservation
+
+Passed: RhythmDojo.Tests.AudioSettingsServiceTests.DeviceRefusingLargerAppliedBufferCannotReportRecovery
+
+Passed: RhythmDojo.Tests.AudioSettingsServiceTests.DriverClampingIsReflectedInTheSelectedAndActualBuffer
+
+Passed: RhythmDojo.Tests.AudioSettingsServiceTests.ExternalResetInvalidatesVerifiedStatus
+
+Passed: RhythmDojo.Tests.AudioSettingsServiceTests.FailedRecoveryStopsRetryingAndReportsFailureInsteadOfSuccess
+
+Passed: RhythmDojo.Tests.AudioSettingsServiceTests.ForcedNavigationCanCancelValidationAndRestoreBeforeGameplay
+
+Passed: RhythmDojo.Tests.AudioSettingsServiceTests.HealthyLowBufferRemainsAvailableWithoutForcedMinimum
+
+Passed: RhythmDojo.Tests.AudioSettingsServiceTests.MeasurementIncludesBothEndpointBlockUncertainty(1,1,Undetermined)
+
+Passed: RhythmDojo.Tests.AudioSettingsServiceTests.MeasurementIncludesBothEndpointBlockUncertainty(5,5,Healthy)
+
+Passed: RhythmDojo.Tests.AudioSettingsServiceTests.MeasurementIncludesBothEndpointBlockUncertainty(5,4.9d,Unhealthy)
+
+Passed: RhythmDojo.Tests.AudioSettingsServiceTests.MeasurementIncludesBothEndpointBlockUncertainty(5,5.1d,Unhealthy)
+
+Passed: RhythmDojo.Tests.AudioSettingsServiceTests.PausedAudioDoesNotGetMisdiagnosedAsSlowHardware
+
+Passed: RhythmDojo.Tests.AudioSettingsServiceTests.PauseInvalidatesCompletedFirstInterval
+
+Passed: RhythmDojo.Tests.AudioSettingsServiceTests.PauseOrRepeatedConfigurationChangesCannotRestartOverallDeadline(True)
+
+Passed: RhythmDojo.Tests.AudioSettingsServiceTests.PauseOrRepeatedConfigurationChangesCannotRestartOverallDeadline(False)
+
+Passed: RhythmDojo.Tests.AudioSettingsServiceTests.QuantizedClockAndDelayedFramesStillRequireContainedIntervals
+
+Passed: RhythmDojo.Tests.AudioSettingsServiceTests.RejectedLargerBufferReportsFailureAndRestoresPreviousConfiguration
+
+Passed: RhythmDojo.Tests.AudioSettingsServiceTests.RejectedResetRestoresPreviousConfigurationAndPublishesResult
+
+Passed: RhythmDojo.Tests.AudioSettingsServiceTests.SlowAcceptedConfigurationRecoversBeforeReportingSuccess(1,32)
+
+Passed: RhythmDojo.Tests.AudioSettingsServiceTests.SlowAcceptedConfigurationRecoversBeforeReportingSuccess(2,64)
+
+Passed: RhythmDojo.Tests.AudioSettingsServiceTests.SlowAcceptedConfigurationRecoversBeforeReportingSuccess(3,128)
+
+Passed: RhythmDojo.Tests.AudioSettingsServiceTests.TwoIndependentIntervalsMustContainTheEntireUncertaintyRange
+
+Passed: RhythmDojo.Tests.AudioSettingsServiceTests.TwoPercentClockErrorCannotPassAsHealthy(0.98d)
+
+Passed: RhythmDojo.Tests.AudioSettingsServiceTests.TwoPercentClockErrorCannotPassAsHealthy(1.02d)
+
+Passed: RhythmDojo.Tests.AudioSettingsServiceTests.UnresolvedUncertaintyTimesOutWithoutClaimingHealthy
+
+Passed: RhythmDojo.Tests.BeatGridEditingTests.CompoundMeterAndMidBeatMeterChangesEmitSharedMeasureLines
+
+Passed: RhythmDojo.Tests.BeatGridEditingTests.FineMeterDoesNotRemoveTripletSubdivisionLines
+
+Passed: RhythmDojo.Tests.BeatGridEditingTests.GridEditProtectsNotesAndUndoRestoresAllChartsAndHoldEndpoints(False)
+
+Passed: RhythmDojo.Tests.BeatGridEditingTests.GridEditProtectsNotesAndUndoRestoresAllChartsAndHoldEndpoints(True)
+
+Passed: RhythmDojo.Tests.BeatGridEditingTests.GridOriginAndTempoChangesRoundTripWithoutAccumulatedDrift
+
+Passed: RhythmDojo.Tests.BeatGridEditingTests.InvalidGridEditLeavesDocumentAndHistoryUntouched
+
+Passed: RhythmDojo.Tests.BeatGridEditingTests.JsonRestoresGridAndLoadsOldV2WithDefaultGrid
+
+Passed: RhythmDojo.Tests.BeatGridEditingTests.LargeCompoundMeterOverviewKeepsGridLinesAtFarEnd
+
+Passed: RhythmDojo.Tests.BeatGridEditingTests.MalformedTimingStillReportsOriginalValidationFieldPath
+
+Passed: RhythmDojo.Tests.BeatGridEditingTests.MovingWholeGridShiftsEveryTempoAndMeterBySameMusicTime
+
+Passed: RhythmDojo.Tests.BeatProjectionTests.ProjectionRoundTripsAndZoomKeepsBottomFixedAtEverySizeAndScroll
+
+Passed: RhythmDojo.Tests.BeatProjectionTests.TempoRoundTripsAcrossFractionalBoundariesWithoutQuantizing
+
+Passed: RhythmDojo.Tests.ContentTests.CompletedMigrationPreservesEasyAndAudioWhenLegacyIsInvalidOrAbsent(False)
+
+Passed: RhythmDojo.Tests.ContentTests.CompletedMigrationPreservesEasyAndAudioWhenLegacyIsInvalidOrAbsent(True)
+
+Passed: RhythmDojo.Tests.ContentTests.DomainAndApplicationNeverReferenceUnityAssemblies
+
+Passed: RhythmDojo.Tests.ContentTests.DuplicateSongIdDisablesCatalogEntry
+
+Passed: RhythmDojo.Tests.ContentTests.FirstCreationMigratesLegacyValuesAndOffset
+
+Passed: RhythmDojo.Tests.ContentTests.FreshCreationWithoutLegacyUsesNewDefaults
+
+Passed: RhythmDojo.Tests.ContentTests.GeneratedScenesRemainStableAndSettingsAreNotOverwritten
+
+Passed: RhythmDojo.Tests.ContentTests.GeneratedViewValidationUsesChartKindsAndRuntimeCanRebuildViews
+
+Passed: RhythmDojo.Tests.ContentTests.HoldViewUsesIntegratedDistanceAndPinsHoldingHead
+
+Passed: RhythmDojo.Tests.ContentTests.InvalidLegacyFailsOnlyWhenMigrationIsNeeded
+
+Passed: RhythmDojo.Tests.ContentTests.MissingRequiredScreenReferencesFail("Bootstrap","settings")
+
+Passed: RhythmDojo.Tests.ContentTests.MissingRequiredScreenReferencesFail("SongSelection","settingsButton")
+
+Passed: RhythmDojo.Tests.ContentTests.MissingRequiredScreenReferencesFail("Settings","bufferList")
+
+Passed: RhythmDojo.Tests.ContentTests.MissingRequiredScreenReferencesFail("Settings","actualState")
+
+Passed: RhythmDojo.Tests.ContentTests.MissingRequiredScreenReferencesFail("Settings","status")
+
+Passed: RhythmDojo.Tests.ContentTests.MissingRequiredScreenReferencesFail("Settings","apply")
+
+Passed: RhythmDojo.Tests.ContentTests.MissingRequiredScreenReferencesFail("Settings","back")
+
+Passed: RhythmDojo.Tests.ContentTests.MissingRequiredScreenReferencesFail("Settings","settings")
+
+Passed: RhythmDojo.Tests.ContentTests.MissingTapHeadAndGeneratedViewReferencesFail
+
+Passed: RhythmDojo.Tests.ContentTests.ModeCountAndCenteredLayoutHaveSingleSource(4)
+
+Passed: RhythmDojo.Tests.ContentTests.ModeCountAndCenteredLayoutHaveSingleSource(5)
+
+Passed: RhythmDojo.Tests.ContentTests.ModeCountAndCenteredLayoutHaveSingleSource(6)
+
+Passed: RhythmDojo.Tests.ContentTests.SettingsAndTwoSongsAreValid
+
+Passed: RhythmDojo.Tests.HardModePreferencesTests.InvalidStoredValuesAreClampedAndUnknownActionsUseSafeDefaults
+
+Passed: RhythmDojo.Tests.HardModePreferencesTests.ModeAndRulesSurviveReloadAndSnapshotsDoNotChange
+
+Passed: RhythmDojo.Tests.HardModePreferencesTests.NewPlayersStartInNormalModeWithStrictHardDefaults
+
+Passed: RhythmDojo.Tests.MainMenuTests.EmptyMusicUsesConfiguredBpmWithoutAnIntroDelay
+
+Passed: RhythmDojo.Tests.MainMenuTests.FirstBeatOutsideMusicIsRejected
+
+Passed: RhythmDojo.Tests.MainMenuTests.GeneratedMenuHasRequiredReferencesAnchorsAndKoreanGlyphs
+
+Passed: RhythmDojo.Tests.MainMenuTests.MusicBeatRestartsAtTheClipLoopAndWaitsForTheFirstBeat
+
+Passed: RhythmDojo.Tests.MainMenuTests.TitleIsFirstEnabledBuildSceneAndBootstrapRemainsRegistered
+
+Passed: RhythmDojo.Tests.PlayKeyBindingsTests.InvalidReservedAndDuplicateKeysLeaveSavedBindingsUnchanged(None)
+
+Passed: RhythmDojo.Tests.PlayKeyBindingsTests.InvalidReservedAndDuplicateKeysLeaveSavedBindingsUnchanged(Escape)
+
+Passed: RhythmDojo.Tests.PlayKeyBindingsTests.InvalidReservedAndDuplicateKeysLeaveSavedBindingsUnchanged(Space)
+
+Passed: RhythmDojo.Tests.PlayKeyBindingsTests.InvalidReservedAndDuplicateKeysLeaveSavedBindingsUnchanged(F)
+
+Passed: RhythmDojo.Tests.PlayKeyBindingsTests.InvalidSavedKeysFallBackToDefaults("invalid json")
+
+Passed: RhythmDojo.Tests.PlayKeyBindingsTests.InvalidSavedKeysFallBackToDefaults("{\"keys\":[0,0,0,0]}")
+
+Passed: RhythmDojo.Tests.PlayKeyBindingsTests.InvalidSavedKeysFallBackToDefaults("{\"keys\":[15]}")
+
+Passed: RhythmDojo.Tests.PlayRecordsAndChartsTests.ComparisonSharesModesAndSeparatesTimingTailAndContent
+
+Passed: RhythmDojo.Tests.PlayRecordsAndChartsTests.LegacyImportIsExplicitAndKeepsIdsAndNotes
+
+Passed: RhythmDojo.Tests.PlayRecordsAndChartsTests.RecordMigrationOnlyRemovesOldScores
+
+Passed: RhythmDojo.Tests.PlayRecordsAndChartsTests.ThreeChartsPreserveSelectionEditsAndUndoAcrossSaveAndLoad
+
+Passed: RhythmDojo.Tests.PlayResultReviewTests.FixedSnapshotSurvivesResetAndKeepsAggregateMaintenanceMisses
+
+Passed: RhythmDojo.Tests.PlayResultReviewTests.ReinitializeBindsOnceAndDisplayControlsTheReview
+
+Passed: RhythmDojo.Tests.PlayResultReviewTests.ReviewCanInspectEveryLongNoteJudgmentAndNavigateWholeChart
+
+Passed: RhythmDojo.Tests.PlayResultReviewTests.SnapshotKeepsEveryNoteAndEveryHoldJudgmentWithoutBorrowingLists
+
+Passed: RhythmDojo.Tests.ResultsLayoutTests.SavedResultsSceneHasSketchLayoutAndEmptyFeedback
+
+Passed: RhythmDojo.Tests.ResultsPreviewTests.ClearPreviewHasMixedJudgmentsAndMaintenanceMisses
+
+Passed: RhythmDojo.Tests.ResultsPreviewTests.GameOverPreviewHasEarlyReleaseMissAndUnreachedNotes
+
+Passed: RhythmDojo.Tests.SceneRegenerationTests.AllFiveScenesCanBeRegeneratedWithoutReplacingTheirGuids
+
+Passed: RhythmDojo.Tests.SceneRegenerationTests.TitleStartupDoesNotOverrideActiveFoundationVerification
+
+Passed: RhythmDojo.Tests.SelectionPreferencesTests.CorruptPreferencesFallBackAndOffsetsAreClamped
+
+Passed: RhythmDojo.Tests.SelectionPreferencesTests.DemoPreparationIsIdempotentAndPreservesExistingCharts
+
+Passed: RhythmDojo.Tests.SelectionPreferencesTests.IncompleteAndWorseRunsDoNotReplaceBest
+
+Passed: RhythmDojo.Tests.SelectionPreferencesTests.InformationPanelReservesHeaderAndFooterAndAlbumFillsFrame
+
+Passed: RhythmDojo.Tests.SelectionPreferencesTests.OptionsFavoritesAndRecordsSurviveReload
+
+Passed: RhythmDojo.Tests.SelectionPreferencesTests.RankBoundaries(95,"S")
+
+Passed: RhythmDojo.Tests.SelectionPreferencesTests.RankBoundaries(90,"A")
+
+Passed: RhythmDojo.Tests.SelectionPreferencesTests.RankBoundaries(80,"B")
+
+Passed: RhythmDojo.Tests.SelectionPreferencesTests.RankBoundaries(70,"C")
+
+Passed: RhythmDojo.Tests.SelectionPreferencesTests.RankBoundaries(69,"D")
+
+Passed: RhythmDojo.Tests.SongProjectTests.AssetCopyIsIndependentAndUsesNewUuids
+
+Passed: RhythmDojo.Tests.SongProjectTests.CancellationFailureAndConcurrentStoresPreserveCommittedFiles
+
+Passed: RhythmDojo.Tests.SongProjectTests.ChartLifecycleAndEqualTimeOrder
+
+Passed: RhythmDojo.Tests.SongProjectTests.DraftLayoutsAndTempoEditsPreserveSeconds
+
+Passed: RhythmDojo.Tests.SongProjectTests.EditorIdsSnapshotsBatchesAndHistory
+
+Passed: RhythmDojo.Tests.SongProjectTests.EmptyDraftSavesButCannotPlay
+
+Passed: RhythmDojo.Tests.SongProjectTests.GridErrorsReportExactPaths("missing","timing.grid")
+
+Passed: RhythmDojo.Tests.SongProjectTests.GridErrorsReportExactPaths("null","timing.grid")
+
+Passed: RhythmDojo.Tests.SongProjectTests.GridErrorsReportExactPaths("origin","timing.grid.originSeconds")
+
+Passed: RhythmDojo.Tests.SongProjectTests.GridErrorsReportExactPaths("unknown","timing.grid.extra")
+
+Passed: RhythmDojo.Tests.SongProjectTests.GridErrorsReportExactPaths("empty","timing.grid.meters")
+
+Passed: RhythmDojo.Tests.SongProjectTests.GridErrorsReportExactPaths("first","timing.grid.meters[0].timeSeconds")
+
+Passed: RhythmDojo.Tests.SongProjectTests.GridErrorsReportExactPaths("numerator","timing.grid.meters[0].numerator")
+
+Passed: RhythmDojo.Tests.SongProjectTests.GridErrorsReportExactPaths("denominator","timing.grid.meters[0].denominator")
+
+Passed: RhythmDojo.Tests.SongProjectTests.GridErrorsReportExactPaths("order","timing.grid.meters[1].timeSeconds")
+
+Passed: RhythmDojo.Tests.SongProjectTests.GridErrorsReportExactPaths("meterUnknown","timing.grid.meters[0].extra")
+
+Passed: RhythmDojo.Tests.SongProjectTests.ImportedAudioIsPortableAndOldAudioSurvives
+
+Passed: RhythmDojo.Tests.SongProjectTests.InvalidAudioPathsFail("../outside.ogg")
+
+Passed: RhythmDojo.Tests.SongProjectTests.InvalidAudioPathsFail("/absolute.ogg")
+
+Passed: RhythmDojo.Tests.SongProjectTests.InvalidAudioPathsFail("C:/outside.ogg")
+
+Passed: RhythmDojo.Tests.SongProjectTests.InvalidAudioPathsFail("audio\\file.ogg")
+
+Passed: RhythmDojo.Tests.SongProjectTests.InvalidAudioPathsFail("audio//file.ogg")
+
+Passed: RhythmDojo.Tests.SongProjectTests.InvalidAudioPathsFail("audio/../file.ogg")
+
+Passed: RhythmDojo.Tests.SongProjectTests.InvalidAudioPathsFail("audio/CON.ogg")
+
+Passed: RhythmDojo.Tests.SongProjectTests.InvalidAudioPathsFail("audio/")
+
+Passed: RhythmDojo.Tests.SongProjectTests.LegacyReadsPreserveFileBytesAndDefaultGridUntilExplicitSave
+
+Passed: RhythmDojo.Tests.SongProjectTests.MalformedFilesFail("version")
+
+Passed: RhythmDojo.Tests.SongProjectTests.MalformedFilesFail("field")
+
+Passed: RhythmDojo.Tests.SongProjectTests.MalformedFilesFail("duplicateKey")
+
+Passed: RhythmDojo.Tests.SongProjectTests.MalformedFilesFail("kind")
+
+Passed: RhythmDojo.Tests.SongProjectTests.MalformedFilesFail("duplicateId")
+
+Passed: RhythmDojo.Tests.SongProjectTests.MalformedFilesFail("id")
+
+Passed: RhythmDojo.Tests.SongProjectTests.MalformedFilesFail("nan")
+
+Passed: RhythmDojo.Tests.SongProjectTests.MalformedFilesFail("type")
+
+Passed: RhythmDojo.Tests.SongProjectTests.MalformedFilesFail("tapEnd")
+
+Passed: RhythmDojo.Tests.SongProjectTests.NewSavesAlwaysIncludeV3GridAndImportsKeepGrid
+
+Passed: RhythmDojo.Tests.SongProjectTests.PlaybackErrorsMapToEditorIdsAndModesMustMatch
+
+Passed: RhythmDojo.Tests.SongProjectTests.PublishedExamplesLoad
+
+Passed: RhythmDojo.Tests.SongProjectTests.RoundTripPreservesDoublesOrderAndMultipleCharts
+
+Passed: RhythmDojo.Tests.SongProjectTests.SaveTracksCapturedContentAndFailurePreservesSession
+
+Passed: RhythmDojo.Tests.TeamBoundaryTests.AssetAndDocumentPlaybackHaveEquivalentImmutableData
+
+Passed: RhythmDojo.Tests.TeamBoundaryTests.CancellationAfterAudioLoadReleasesExactlyOnce
+
+Passed: RhythmDojo.Tests.TeamBoundaryTests.DraftStoreCopiesAndAllowsIncompleteDocuments
+
+Passed: RhythmDojo.Tests.TeamBoundaryTests.HudLayoutSupportsLaneCountsWithoutController(4)
+
+Passed: RhythmDojo.Tests.TeamBoundaryTests.HudLayoutSupportsLaneCountsWithoutController(5)
+
+Passed: RhythmDojo.Tests.TeamBoundaryTests.HudLayoutSupportsLaneCountsWithoutController(6)
+
+Passed: RhythmDojo.Tests.TeamBoundaryTests.InvalidDocumentsReportFieldOrNote("title")
+
+Passed: RhythmDojo.Tests.TeamBoundaryTests.InvalidDocumentsReportFieldOrNote("tempo")
+
+Passed: RhythmDojo.Tests.TeamBoundaryTests.InvalidDocumentsReportFieldOrNote("overlap")
+
+Passed: RhythmDojo.Tests.TeamBoundaryTests.InvalidDocumentsReportFieldOrNote("lane")
+
+Passed: RhythmDojo.Tests.TeamBoundaryTests.LoaderSnapshotsBeforeAwaitAndReleasesOnDispose
+
+Passed: RhythmDojo.Tests.TeamBoundaryTests.MissingAudioAndUnknownModeFailWithoutLeaking
+
+Passed: RhythmDojo.Tests.TeamBoundaryTests.SceneGenerationDoesNotWriteContentAssets
+
+Passed: RhythmDojo.Tests.TeamBoundaryTests.SelectionSurvivesReorderAndDuplicateIdsCannotLoad
+
+Passed: RhythmDojo.Tests.UiTypographyTests.SavedSceneUsesMonaForAllTextIncludingHiddenControls("Title")
+
+Passed: RhythmDojo.Tests.UiTypographyTests.SavedSceneUsesMonaForAllTextIncludingHiddenControls("SongSelection")
+
+Passed: RhythmDojo.Tests.UiTypographyTests.SavedSceneUsesMonaForAllTextIncludingHiddenControls("Settings")
+
+Passed: RhythmDojo.Tests.UiTypographyTests.SavedSceneUsesMonaForAllTextIncludingHiddenControls("Gameplay")
+
+Passed: RhythmDojo.Tests.UiTypographyTests.SavedSceneUsesMonaForAllTextIncludingHiddenControls("ChartEditor")
+
+Passed: RhythmDojo.Tests.UiTypographyTests.SavedSceneUsesMonaForAllTextIncludingHiddenControls("Results")
+
+Passed: RhythmDojo.Tests.UiTypographyTests.ScopedControlsKeepBrushFontWhenCreatedAtRuntime
+
+Passed: RhythmDojo.Tests.UiTypographyTests.SharedPopupAndRuntimeControlsMatchStartButtonTypography
+
+Passed: RhythmDojo.Tests.WaveformPeaksTests.ColorCacheFollowsLocalFrequencyChangesAndHandlesSilence
+
+Passed: RhythmDojo.Tests.WaveformPeaksTests.EveryZoomRangeMatchesPcmSamplesOnTheSameHalfOpenTimeAxis(44100)
+
+Passed: RhythmDojo.Tests.WaveformPeaksTests.EveryZoomRangeMatchesPcmSamplesOnTheSameHalfOpenTimeAxis(48000)
+
+Passed: RhythmDojo.Tests.WaveformPeaksTests.FrequencyBandsUseRedGreenAndBlueWithoutCancellingStereo(100,0)
+
+Passed: RhythmDojo.Tests.WaveformPeaksTests.FrequencyBandsUseRedGreenAndBlueWithoutCancellingStereo(1000,1)
+
+Passed: RhythmDojo.Tests.WaveformPeaksTests.FrequencyBandsUseRedGreenAndBlueWithoutCancellingStereo(10000,2)
+
+Passed: RhythmDojo.Tests.WaveformPeaksTests.PeakPyramidPreservesStereoTransientsAndPartialFinalBlock
+
+Passed: RhythmDojo.Tests.WaveformPeaksTests.RangeExcludesAdjacentTransientsAtCoarseAndSampleResolution
+
+editmode: 348 passed, 0 failed, 0 skipped, 0 inconclusive.
+Passed: RhythmDojo.Tests.AudioFlowTests.AllBufferRequestsReportActualConfigurationAndChangedAudioPlaysAndRestarts
+
+Passed: RhythmDojo.Tests.AudioFlowTests.GameplayMusicUsesSelectedVolumeAndRespondsToLiveChanges
+
+Passed: RhythmDojo.Tests.AudioFlowTests.SoundSlidersChangeMixedOutputMuteAndRestoreSavedValues
+
+Passed: RhythmDojo.Tests.AudioFlowTests.TitleMusicReloadsMissingPreferencesAndRestartsAfterAudioReset
+
+Passed: RhythmDojo.Tests.AudioFlowTests.TitleStartupRestoresSavedMasterAndBackgroundVolume
+
+Passed: RhythmDojo.Tests.AudioLeaseRecoveryTests.BorrowedAudioNeedsNoReloadAndIsNotDestroyed
+
+Passed: RhythmDojo.Tests.AudioLeaseRecoveryTests.CancelledRecoveryDisposesLateResultAndCanRetry
+
+Passed: RhythmDojo.Tests.AudioLeaseRecoveryTests.DisposalDuringRecoveryRejectsAndReleasesLateAudio
+
+Passed: RhythmDojo.Tests.AudioLeaseRecoveryTests.LoaderCancellationWithoutNewResetDoesNotRetryForever
+
+Passed: RhythmDojo.Tests.AudioLeaseRecoveryTests.OnlyLatestResetPublishesAndEveryLeaseReleasesOnce
+
+Passed: RhythmDojo.Tests.AudioRecoveryFlowTests.BuiltInAudioSurvivesResetWithoutReplacingBorrowedClip
+
+Passed: RhythmDojo.Tests.AudioRecoveryFlowTests.ExitRemainsClickableDuringRecoveryAndLateClipIsReleased
+
+Passed: RhythmDojo.Tests.AudioRecoveryFlowTests.ExternalWaveReloadsAfterResetAndReturnsEditorSession
+
+Passed: RhythmDojo.Tests.AudioRecoveryFlowTests.InvalidatedBeforeGameplayInitializationExposesRecoveryWithoutAnotherReset
+
+Passed: RhythmDojo.Tests.AudioRecoveryFlowTests.MissingExternalWaveKeepsPauseAndRetryRestoresPlayback
+
+Passed: RhythmDojo.Tests.AudioRecoveryFlowTests.ResetBeforeStartBlocksQueuedSpaceUntilAudioIsRecovered
+
+Passed: RhythmDojo.Tests.AudioTimelineTests.ImportedWaveformSeekingZoomPlaybackAndGridEditsShareMusicTime
+
+Passed: RhythmDojo.Tests.AuthoringFlowTests.CanceledEditorLoadStaysOnScreenAndAllowsRetry
+
+Passed: RhythmDojo.Tests.AuthoringFlowTests.DelayedPlaytestKeepsOptionsCapturedAtRequest
+
+Passed: RhythmDojo.Tests.AuthoringFlowTests.UnsavedDocumentPlaytestReturnsSessionAndReleasesAudio
+
+Passed: RhythmDojo.Tests.ChartEditorMenuTests.FileActionsSaveLoadAndPreserveCurrentDraftOnFailure
+
+Passed: RhythmDojo.Tests.ChartEditorMenuTests.FileMenuImportsShowcaseGridAndSavesVersionThree
+
+Passed: RhythmDojo.Tests.ChartEditorMenuTests.GeneratedMenuAppliesTimingAndUndoRedoRestoresNotes
+
+Passed: RhythmDojo.Tests.ChartEditorMenuTests.ImportedAudioPlaysAndReturnsWithUnsavedSessionAndUndoHistory
+
+Passed: RhythmDojo.Tests.ChartEditorMenuTests.PupaButtonPreservesDraftAndImportsBundledChartWithLocalAudio
+
+Passed: RhythmDojo.Tests.ChartEditorScreenTests.DraggingUpCreatesHoldAndRightClickOnItsBodyRemovesIt
+
+Passed: RhythmDojo.Tests.ChartEditorScreenTests.LayoutFillsSixteenNineAndSixteenTen
+
+Passed: RhythmDojo.Tests.ChartEditorScreenTests.MouseClicksAddUniqueBeatNotesAndRightClickRemovesThem
+
+Passed: RhythmDojo.Tests.ChartEditorScreenTests.PlainWheelScrollsTimelineWithoutChangingZoomAndCanPlaceLaterNotes
+
+Passed: RhythmDojo.Tests.ChartProjectionRenderingTests.DeletionUsesClippedVisibleBoundsWithoutBeatSnappingAndPreviewSurvivesZoom
+
+Passed: RhythmDojo.Tests.ChartProjectionRenderingTests.MaximumOverviewIncludesEveryBeatAndManyNotesWithoutExceedingMeshCapacity
+
+Passed: RhythmDojo.Tests.ChartProjectionRenderingTests.RenderAtSmallAndLargeResolutionsAcrossZoomScrollAndTempoBoundary
+
+Passed: RhythmDojo.Tests.DojoClickFeedbackTests.BurstUsesBoundedObjectsAndRipplesExpireWhilePaused
+
+Passed: RhythmDojo.Tests.DojoClickFeedbackTests.ClickEffectDoesNotBlockSettingsAndSurvivesSceneTransition
+
+Passed: RhythmDojo.Tests.DojoClickFeedbackTests.ClickSoundReachesOutputAfterTitlePlaySettingsAndGameplayTransitions
+
+Passed: RhythmDojo.Tests.GameplayFlowTests.DirectGameplaySceneUsesCopiedPlayRules
+
+Passed: RhythmDojo.Tests.GameplayFlowTests.KeyboardNavigationAndStartRestartFocusLossUseActualActions
+
+Passed: RhythmDojo.Tests.GameplayFlowTests.SixLaneDefinitionDrivesAllUnityAdapters
+
+Passed: RhythmDojo.Tests.GameplayHealthPlaytestTests.GaugeFailureContinuesAndLatchesOnceUntilRestart
+
+Passed: RhythmDojo.Tests.GameplayHealthPlaytestTests.HardConfiguredThreeMissesDrainFractionalHealthThenGameOver
+
+Passed: RhythmDojo.Tests.GameplayHealthPlaytestTests.HardDefaultMissImmediatelyShowsGameOver
+
+Passed: RhythmDojo.Tests.GameplayHealthPlaytestTests.HardPerfectPreservesHealthAndGoodImmediatelyShowsGameOver
+
+Passed: RhythmDojo.Tests.GameplayHealthPlaytestTests.HoldReleaseAndRegrabUsesOnlyMissedChecksAsPenalties
+
+Passed: RhythmDojo.Tests.GameplayHealthPlaytestTests.NormalMissesDamagePerfectAndGoodRecoverThenClear
+
+Passed: RhythmDojo.Tests.GameplayHealthPlaytestTests.NormalTenMissesGameOverThenSpaceRestoresHealth
+
+Passed: RhythmDojo.Tests.GameplayHitFeedbackTests.HitsReachAudioOutputWhileMissesStayQuietAndPoolsRemainBounded
+
+Passed: RhythmDojo.Tests.GameplayHitFeedbackTests.HoldGlowSurvivesBurstFadeAndResetRestoresCameraEvenWhenPaused
+
+Passed: RhythmDojo.Tests.GameplayHitFeedbackTests.RebindingDetachesOldEventsAndReturningToSelectionRemovesEffects
+
+Passed: RhythmDojo.Tests.GameplayHudFlowTests.GameplayKeepsDisplayCameraWhileWorldRendersIntoWindow
+
+Passed: RhythmDojo.Tests.GameplayHudFlowTests.GameplayWindowPreservesProjectionAndReleasesCameraOnDisable
+
+Passed: RhythmDojo.Tests.GameplayHudFlowTests.GameplayWindowRendersJudgmentLineBelowCenter
+
+Passed: RhythmDojo.Tests.GameplayHudFlowTests.HealthDepletionShowsGameOverFreezesNotesAndSpaceRestarts
+
+Passed: RhythmDojo.Tests.GameplayHudFlowTests.ReturnButtonInReadyStateLoadsSongSelectionAndReleasesSong
+
+Passed: RhythmDojo.Tests.GameplayHudFlowTests.ReturnButtonIsHiddenWhilePlayingAndEscapeReturnsToSelection
+
+Passed: RhythmDojo.Tests.GameplayHudFlowTests.ReturnButtonReappearsAfterCompletionAndLoadsSongSelection
+
+Passed: RhythmDojo.Tests.GameplayHudFlowTests.TrainingFeedbackTracksHoldMissPeakComboAndFocusReset
+
+Passed: RhythmDojo.Tests.GameplayJudgmentTests.SpaceRestartClearsHeldLaneAndScoresThenAllowsPerfectRun
+
+Passed: RhythmDojo.Tests.GameplayJudgmentTests.TempoBoundaryHoldIsPerfectWithBpmScroll
+
+Passed: RhythmDojo.Tests.GameplayJudgmentTests.TempoBoundaryHoldIsPerfectWithConstantScroll
+
+Passed: RhythmDojo.Tests.GameplayJudgmentTests.TimestampedLaneActionsJudgeMixedRunDespiteFrameHitch
+
+Passed: RhythmDojo.Tests.GameplayJudgmentTests.UnplayedTapsAndHoldStartsAllBecomeMisses
+
+Passed: RhythmDojo.Tests.GameplayPauseFlowTests.EscapeDuringCountdownReopensPauseWithoutResumingTheClock
+
+Passed: RhythmDojo.Tests.GameplayPauseFlowTests.PauseSettingsCountdownRestartAndExitPreserveTheSongUntilRequested
+
+Passed: RhythmDojo.Tests.HardModeFlowTests.ConfiguredHardModeDoesNotRecoverAndPausesExactlyAtTheDamageLimit
+
+Passed: RhythmDojo.Tests.HardModeFlowTests.ExpandedRuleDropdownsRenderAllKoreanLabelsAndAllowSelection
+
+Passed: RhythmDojo.Tests.HardModeFlowTests.HardRuleRowsSaveValidateCountsAndNormalModeIgnoresThem
+
+Passed: RhythmDojo.Tests.HardModeFlowTests.StrictHardDefaultsFailOnTheFirstGoodJudgment
+
+Failed: RhythmDojo.Tests.KeySettingsFlowTests.CustomKeysDriveGameplayAndPausedChangesRefreshHudImmediately
+  Expected: False
+  But was:  True
+
+Passed: RhythmDojo.Tests.KeySettingsFlowTests.KeyTabCapturesPersistsCancelsRejectsDuplicatesAndResets
+
+Passed: RhythmDojo.Tests.MainMenuFlowTests.BootstrapFallbackStillStartsWithoutATitleView
+
+Passed: RhythmDojo.Tests.MainMenuFlowTests.BreakingBoardDefersActionAndBlocksOtherButtons
+
+Passed: RhythmDojo.Tests.MainMenuFlowTests.CaptureMenuAndKoreanQuitPopup
+
+Passed: RhythmDojo.Tests.MainMenuFlowTests.EditorStaysBehindDoorsAndOpensFromInsideTheDojo
+
+Passed: RhythmDojo.Tests.MainMenuFlowTests.EntranceTimeoutOffersRecoveryAndCleansUp
+
+Passed: RhythmDojo.Tests.MainMenuFlowTests.EntranceWaitsForReadyAndRestoresSelectionInput
+
+Passed: RhythmDojo.Tests.MainMenuFlowTests.LogoCanCollapseMenuAndHiddenButtonsCannotStart
+
+Passed: RhythmDojo.Tests.MainMenuFlowTests.LogoExpandsMenuAndPlayStartsOnceWithoutDuplicateListeners
+
+Passed: RhythmDojo.Tests.MainMenuFlowTests.PlaqueRejectsCornersAndKeyboardCanExpandAndStart
+
+Passed: RhythmDojo.Tests.MainMenuFlowTests.PlayDismissesMenuImmediatelyWithoutWaitingForBoardDelay
+
+Passed: RhythmDojo.Tests.MainMenuFlowTests.PlayOpensDoorsWithLogoHalvesAttachedUntilFullyOutsideTheDoorway
+
+Passed: RhythmDojo.Tests.MainMenuFlowTests.QuitPopupBlocksBackgroundAndNoRestoresMenu
+
+Passed: RhythmDojo.Tests.MainMenuFlowTests.SceneLoadingCompletesBeforeDoorAnimationStarts
+
+Passed: RhythmDojo.Tests.MainMenuFlowTests.SettingsRequestsSettingsWithoutStartingTheGame
+
+Passed: RhythmDojo.Tests.MainMenuFlowTests.SlidingDoorsRevealDummiesAndReverseWithoutStartingEarly
+
+Passed: RhythmDojo.Tests.MainMenuFlowTests.StartLoadsBootstrapThenExistingSongSelection
+
+Passed: RhythmDojo.Tests.MainMenuFlowTests.TitlePreparesSelectionWithoutShowingItOrStealingInput
+
+Passed: RhythmDojo.Tests.MainMenuFlowTests.TitleSettingsBackReturnsToTitle
+
+Passed: RhythmDojo.Tests.MainMenuFlowTests.YesRequestsQuitExactlyOnceWithoutStarting
+
+Passed: RhythmDojo.Tests.PixelDojoCursorTests.FistMarkWaitsForContactStaysAtTheExtendedPoseAndFadesWhilePaused
+
+Passed: RhythmDojo.Tests.PixelDojoCursorTests.FistReachesForwardAndReturnsWithNoRandomImpactLayer
+
+Passed: RhythmDojo.Tests.PixelDojoCursorTests.NativeCursorUsesPressedArtworkOnlyWhileLeftButtonIsHeld
+
+Passed: RhythmDojo.Tests.PixelDojoCursorTests.PunchFinishesAfterQuickReleaseWhilePaused
+
+Passed: RhythmDojo.Tests.PixelDojoCursorTests.RepeatedClicksReuseFramesAndFocusLossRestoresTheNativePointer
+
+Passed: RhythmDojo.Tests.ProjectLibraryFlowTests.ModalScopeRestoresInputAndFocusAfterOpeningFailureAndDispose
+
+Passed: RhythmDojo.Tests.ProjectLibraryFlowTests.SavedThreeChartProjectSelectsLoadsAndRefreshesEachSlot
+
+Skipped:Ignored: RhythmDojo.Tests.PupaResultsFlowTests.CorrectedPupaClockKeepsAudioNotesAndTimestampedInputTogether
+Requires the separately supplied LocalAudio/PUPA.wav.
+Passed: RhythmDojo.Tests.PupaResultsFlowTests.EditorPupaShowsResultsBeforeReturningTheUnsavedSession
+
+Skipped:Ignored: RhythmDojo.Tests.PupaResultsFlowTests.PupaAudioTailTransitionsPromptlyWithEveryJudgmentPreserved
+Requires the separately supplied LocalAudio/PUPA.wav.
+Skipped:Ignored: RhythmDojo.Tests.PupaResultsFlowTests.RealPupaAudioFinishesAndAutomaticallyLoadsResults
+Requires the separately supplied LocalAudio/PUPA.wav.
+Passed: RhythmDojo.Tests.PupaResultsFlowTests.ShortenedOutroStillPreservesTheFinalHoldReleaseWindow
+
+Passed: RhythmDojo.Tests.PupaResultsFlowTests.SongSelectionPupaCompletesAndKeepsTheWholeChart
+
+Passed: RhythmDojo.Tests.ResultsFlowTests.CompletionDisplaysThisPlayAndNextPlayReplacesIt
+
+Passed: RhythmDojo.Tests.ResultsFlowTests.DirectResultsSceneHasEmptyStateAndBackWorks
+
+Passed: RhythmDojo.Tests.ResultsFlowTests.EarlyFailureKeepsFutureNotesUnjudgedInWholeChartReview
+
+Failed: RhythmDojo.Tests.ResultsFlowTests.GameOverDisplaysFailureAndEscapeDuringPlaySkipsResults
+  Scene transition timed out.
+  Expected: less than 497.29456470000059d
+  But was:  497.29556420000063d
+
+Passed: RhythmDojo.Tests.ResultsFlowTests.MoreShowsPlayedChartAndPerNoteJudgmentsThenReturnsToSameResult
+
+Passed: RhythmDojo.Tests.ResultsFlowTests.RealClockCompletionTransitionsWithoutUserInput
+
+Passed: RhythmDojo.Tests.ResultsFlowTests.RestartDuringOutcomeDelayCancelsPendingResults
+
+Passed: RhythmDojo.Tests.ResultsFlowTests.RestartResetsStatisticsAndGoodJudgmentsReachResults
+
+Passed: RhythmDojo.Tests.SelectionBrowserTests.CompletedRunSavesBestAndAbortedRunDoesNotCreateRecord
+
+Passed: RhythmDojo.Tests.SelectionBrowserTests.DemoCoverAndRowsRenderAtBothResolutions
+
+Passed: RhythmDojo.Tests.SelectionBrowserTests.EscapePopupBlocksPlaybackAndReturnsToTitle
+
+Passed: RhythmDojo.Tests.SelectionBrowserTests.FavoritesEmptyStateAndSortingUseSongIds
+
+Passed: RhythmDojo.Tests.SelectionBrowserTests.KeyboardSelectionKeepsRowsVisibleWithDifferentHeightsAndSpacing
+
+Passed: RhythmDojo.Tests.SelectionBrowserTests.TimingAndOptionsSurviveSettingsAndSceneReturn
+
+Passed: RhythmDojo.Tests.SettingsFlowTests.BufferSelectionWithoutApplyLeavesActualAudioUnchanged
+
+Passed: RhythmDojo.Tests.SettingsFlowTests.BufferValidationBlocksEarlyCloseAndShowsTheAppliedConfiguration
+
+Passed: RhythmDojo.Tests.SettingsFlowTests.DisplayOptionsReportActualScreenSizeForAllCombinations
+
+Passed: RhythmDojo.Tests.SettingsFlowTests.FrameRateOptionsApplySavedLimitsAndMeasureActualFrames
+
+Passed: RhythmDojo.Tests.SettingsFlowTests.GameplayTabPreservesAudioAndGraphicsAndSavesTimingLimits
+
+Passed: RhythmDojo.Tests.SettingsFlowTests.SettingsButtonOpensSettingsAndBackPreservesSongOptions
+
+Passed: RhythmDojo.Tests.SettingsFlowTests.SettingsMouseAndKeyboardApplyActualBufferAndKeepSelection
+
+Passed: RhythmDojo.Tests.SettingsFlowTests.SettingsPopupOpensImmediatelyAndReusesInstanceWithoutLoadingScene
+
+Passed: RhythmDojo.Tests.SettingsFlowTests.SettingsPopupTabsSaveAudioAndApplySeparateGraphicsControls
+
+Passed: RhythmDojo.Tests.SongClockResumeTests.BeforeAudioResumeWaitsForItsRemainingLeadAndPendingPauseCancels
+
+Passed: RhythmDojo.Tests.SongClockResumeTests.EscapeDuringResumeLeadKeepsSessionAndSourcePaused
+
+Passed: RhythmDojo.Tests.SongClockResumeTests.ResetDuringMenuResumeLeadReopensPauseWithoutAdvancingSession
+
+Passed: RhythmDojo.Tests.SongClockResumeTests.ResetDuringScheduledResumeKeepsTimeFrozenUntilNewResume
+
+Passed: RhythmDojo.Tests.SongClockResumeTests.ResumeAfterAudioEndDoesNotReplayTheFinalSample
+
+Passed: RhythmDojo.Tests.SongClockResumeTests.ResumeSeeksFromFrozenLogicalTimeInsteadOfPausedSourceCursor
+
+Passed: RhythmDojo.Tests.SongClockResumeTests.ResumeWaitsForScheduledAnchorWithoutAdvancingLogicalTime
+
+Passed: RhythmDojo.Tests.SongClockResumeTests.TwentyResumesKeepSourceSamplesAlignedAcrossBuffersAndOffsets
+
+Passed: RhythmDojo.Tests.SongSelectionFlowTests.DifficultyDropdownChangesJudgmentWithoutChangingScroll
+
+Passed: RhythmDojo.Tests.SongSelectionFlowTests.HorizontalDifficultyButtonsKeepSelectionJudgmentAndOptionsInSync
+
+Passed: RhythmDojo.Tests.SongSelectionFlowTests.LeftAndRightChangeDifficultyAndRespectPopupAndSliderFocus
+
+Passed: RhythmDojo.Tests.SongSelectionFlowTests.ModePopupSelectsNormalAndHardWithoutChangingGameplayOptions
+
+Passed: RhythmDojo.Tests.SongSelectionFlowTests.MouseClickUsesUiInputModuleToLoadSong
+
+Passed: RhythmDojo.Tests.SongSelectionFlowTests.MultiplierDropdownChangesSpeedWithoutChangingSong
+
+Passed: RhythmDojo.Tests.SongSelectionFlowTests.RenamedLayoutStillLoadsSongThroughExplicitViewReferences
+
+Passed: RhythmDojo.Tests.SongSelectionFlowTests.ScrollModeDropdownChangesModeWithoutChangingDifficulty
+
+Passed: RhythmDojo.Tests.SongSelectionFlowTests.SelectionKeepsSpeedIndependentAndBothSongsLoad
+
+Failed: RhythmDojo.Tests.SongSelectionFlowTests.SongRowsKeyboardSelectionUpdatesSelectedSong
+  Expected string length 11 but was 36. Strings differ at index 0.
+  Expected: "tempo-pulse"
+  But was:  "0349e961-3846-4eb0-bf80-63209e44e6e4"
+  -----------^
+
+Passed: RhythmDojo.Tests.SongSelectionFlowTests.SpeedSliderSupportsTenthsAndSavedSpeedIsAppliedToGameplay
+
+playmode: 137 passed, 3 failed, 3 skipped, 0 inconclusive.
+FAIL: verification stopped; see XML results.

@@ -44,8 +44,8 @@ namespace RhythmDojo.Tests
             settings.bufferList.value = 1;
             yield return Click(settings.apply);
             var flow = Object.FindFirstObjectByType<AppFlowController>();
-            yield return Await(() => !flow.Audio.IsBufferValidationPending);
-            Assert.That(flow.Audio.LastDspRealtimeRatio, Is.InRange(.85, 1.15));
+            yield return Await(() => !flow.Audio.IsBufferValidationPending, timeoutSeconds: RhythmDojo.Services.AudioSettingsService.ClockValidationTimeoutSeconds + 2);
+            AssertClockRateVerified(flow.Audio);
             Assert.That(game.IsPaused, Is.True);
             Assert.That(game.Clock.SongTime, Is.EqualTo(time));
             Assert.That(AudioSettings.Reset(AudioSettings.GetConfiguration()), Is.True);

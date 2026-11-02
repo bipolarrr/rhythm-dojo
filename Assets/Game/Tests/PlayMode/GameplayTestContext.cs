@@ -200,10 +200,11 @@ namespace RhythmDojo.Tests
 
         protected static IEnumerator Await(
             System.Func<bool> condition,
-            string message = "Scene transition timed out."
+            string message = "Scene transition timed out.",
+            double timeoutSeconds = 15
         )
         {
-            double deadline = Time.realtimeSinceStartupAsDouble + 15;
+            double deadline = Time.realtimeSinceStartupAsDouble + timeoutSeconds;
 
             while (
                 !condition()
@@ -214,6 +215,19 @@ namespace RhythmDojo.Tests
             {
                 Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline), message);
                 yield return null;
+            }
+        }
+
+        protected static void AssertClockRateVerified(RhythmDojo.Services.AudioSettingsService service)
+        {
+            Assert.That(service.ClockRateVerified, Is.True, service.BufferStatus);
+            Assert.That(service.ConsecutiveClockRateMeasurements, Is.EqualTo(2));
+            Assert.That(service.ClockRateMeasurements.Count, Is.GreaterThanOrEqualTo(2));
+            for (int i = service.ClockRateMeasurements.Count - 2; i < service.ClockRateMeasurements.Count; i++)
+            {
+                var measurement = service.ClockRateMeasurements[i];
+                Assert.That(measurement.LowerBound, Is.GreaterThanOrEqualTo(.99));
+                Assert.That(measurement.UpperBound, Is.LessThanOrEqualTo(1.01));
             }
         }
 
