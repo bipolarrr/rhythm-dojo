@@ -112,6 +112,8 @@ namespace RhythmDojo.Tests
                 var review = view.review.GetComponent<ResultsChartReview>();
                 review.Show(result);
                 Assert.That(view.review.lanes.text, Does.Contain("K"));
+                Assert.That(view.review.eventPosition.gameObject.activeSelf, Is.False);
+                Assert.That(view.review.eventPositionLabel.gameObject.activeSelf, Is.False);
                 Assert.That(view.review.events.text, Does.Contain("끝: Perfect"));
                 Assert.That(view.review.events.text, Does.Contain("시작: Perfect"));
                 review.SelectNote(1);

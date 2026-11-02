@@ -12,7 +12,9 @@ namespace RhythmDojo.UI
         public Text range;
         public Text selected;
         public Text events;
+        public Text eventPositionLabel;
         public Slider position;
+        public Slider eventPosition;
         public Dropdown zoom;
         public Button closeButton;
         public Button previousButton;
