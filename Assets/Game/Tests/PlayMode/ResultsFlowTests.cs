@@ -136,6 +136,12 @@ namespace RhythmDojo.Tests
             yield return LoadGameplay();
             yield return Press(Key.Space);
             yield return Press(Key.Escape);
+            game = Object.FindFirstObjectByType<RhythmGameController>();
+            var pause = Object.FindFirstObjectByType<GameplayPauseMenu>();
+            Assert.That(game.IsPaused, Is.True);
+            Assert.That(pause.panel.activeSelf, Is.True);
+            Assert.That(Object.FindFirstObjectByType<ResultsScreen>(), Is.Null);
+            yield return Click(pause.exitButton);
             yield return Await(() => Object.FindFirstObjectByType<SongSelectionScreen>());
             Assert.That(flow.LastResult, Is.Null);
         }

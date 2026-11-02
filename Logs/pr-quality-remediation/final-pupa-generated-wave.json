@@ -1,0 +1,71 @@
+{
+  "success": true,
+  "command": "command test_status",
+  "data": {
+    "command": "test_status",
+    "parameters": {},
+    "result": {
+      "status": "completed",
+      "duration": 148.45,
+      "summary": {
+        "total": 6,
+        "passed": 6,
+        "failed": 0,
+        "skipped": 0,
+        "inconclusive": 0
+      },
+      "results": [
+        {
+          "FullName": "RhythmDojo.Tests.PupaResultsFlowTests.CorrectedPupaClockKeepsAudioNotesAndTimestampedInputTogether",
+          "Status": "Passed",
+          "Duration": 3.3694199,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PupaResultsFlowTests.EditorPupaShowsResultsBeforeReturningTheUnsavedSession",
+          "Status": "Passed",
+          "Duration": 3.55527,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PupaResultsFlowTests.PupaAudioTailTransitionsPromptlyWithEveryJudgmentPreserved",
+          "Status": "Passed",
+          "Duration": 6.5346276,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PupaResultsFlowTests.RealPupaAudioFinishesAndAutomaticallyLoadsResults",
+          "Status": "Passed",
+          "Duration": 127.3515495,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PupaResultsFlowTests.ShortenedOutroStillPreservesTheFinalHoldReleaseWindow",
+          "Status": "Passed",
+          "Duration": 2.7645407,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PupaResultsFlowTests.SongSelectionPupaCompletesAndKeepsTheWholeChart",
+          "Status": "Passed",
+          "Duration": 4.8123027,
+          "Message": null,
+          "StackTrace": null
+        }
+      ]
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "C:\\Users\\song\\RhythmDojo-pr-quality"
+    },
+    "success": true
+  },
+  "errors": [],
+  "warnings": []
+}

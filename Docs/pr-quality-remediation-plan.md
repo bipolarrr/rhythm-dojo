@@ -106,9 +106,9 @@
 - 커밋/증거: 없음 / 미실행.
 - 재현 결과: 기존 ModalInputScope 두 개 중 첫 소유자만 Dispose해도 SongSelectionScreen.enabled가 true로 복원돼 실패. task7-red.json에 보존. 다음 행동: 공유 상태 수명과 준비 씬 소유 객체 구현, 늦은 초기화 차단 및 회귀 테스트.
 
-- 최종 결과: ScenePreparationFlow 9/9, ProjectLibraryFlow 3/3, MainMenuFlow 19/19, Smoke 4/4 통과. 처음 타이틀 테스트의 미초기화 화면 복원 예외 2건과 독립 검토의 null 포커스 복원 지적을 수정하고 회귀를 추가했다. 초기 실패 증거를 유지하며 로그를 무시하지 않았다. 독립 재검토 수정 요구 없음. 매 실행 후 PlayMode 종료·Editor ready 확인. 씬 에셋 변경 없음. 증거: Logs/pr-quality-remediation/task7*. 커밋: 본 작업 커밋. 다음 행동: 기준 실패/외부 WAV fixture와 Windows 검증 도구를 정비한 뒤 최종 Foundation.
+- 최종 결과: ScenePreparationFlow 9/9, ProjectLibraryFlow 3/3, MainMenuFlow 19/19, Smoke 4/4 통과. 처음 타이틀 테스트의 미초기화 화면 복원 예외 2건과 독립 검토의 null 포커스 복원 지적을 수정하고 회귀를 추가했다. 초기 실패 증거를 유지하며 로그를 무시하지 않았다. 독립 재검토 수정 요구 없음. 매 실행 후 PlayMode 종료·Editor ready 확인. 씬 에셋 변경 없음. 증거: Logs/pr-quality-remediation/task7*. 커밋: `d675507`. 다음 행동: 기준 실패/외부 WAV fixture와 Windows 검증 도구를 정비한 뒤 최종 Foundation.
 
-### 최종 통합 검증: 대기
+### 최종 통합 검증: 준비 중
 
 - 범위: 소스 refresh·컴파일 후 Verify Foundation 전체 테스트와 Windows 빌드. 실패 수정 후 재검증하며 부분 실행은 전체 통과로 표기하지 않는다.
 - 플레이어: 외부 WAV 로드/플레이/정지/버퍼 변경/재개/재시작, 모드별 키 저장, 타이틀·설정·에디터·선택 왕복, 재실행 설정 유지, 실제 출력 확인.
@@ -118,3 +118,5 @@
 - 미해결: 기준 BuildPlayer의 명시 scenes 목록에 Results가 누락돼 있다. EditorBuildSettings와 불일치하며 실제 플레이어 검증 전에 확인한다.
 - 다음 행동: 작업 7까지 완료 후 전체 검증·최종 검토·장부 마감.
 
+
+- 최종 기준 정비: Results의 Esc 정지 후 실제 나가기 클릭, 개인 곡 목록과 분리한 두 곡 즐겨찾기 탐색, 임시 WAV 실제 로더 fixture로 개인 PUPA 음원 의존 제거. 기존 채보/판정/완료 시각 기대값 유지. Results 회귀 1/1, 곡 선택 회귀 1/1, PupaResultsFlow 6/6(skip 0) 통과. 독립 검토 수정 요구 없음. Foundation 명시 빌드 목록에 Results 추가. 증거: final-*-regression.json, final-pupa-generated-wave.json, final-baseline-fixes.md. 다음 행동: Windows 개발 진단 구현과 최종 Foundation.

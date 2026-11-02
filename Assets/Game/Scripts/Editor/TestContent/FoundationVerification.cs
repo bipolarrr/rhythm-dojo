@@ -333,6 +333,7 @@ namespace RhythmDojo.EditorTools
                         SceneBuilder.BootstrapPath,
                         SceneBuilder.SelectionPath,
                         SceneBuilder.GameplayPath,
+                        SceneBuilder.ResultsPath,
                         SceneBuilder.SettingsPath,
                         ChartEditorSceneBuilder.ScenePath,
                     },

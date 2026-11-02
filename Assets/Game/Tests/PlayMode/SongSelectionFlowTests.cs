@@ -81,6 +81,13 @@ namespace RhythmDojo.Tests
         public IEnumerator SongRowsKeyboardSelectionUpdatesSelectedSong()
         {
             var view = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
+            var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
+            flow.Preferences.ToggleFavorite("test-pulse");
+            flow.Preferences.ToggleFavorite("tempo-pulse");
+            yield return Click(view.favoritesTab);
+            Assert.That(view.Rows.Select(row => row.Entry.Id),
+                Is.EquivalentTo(new[] { "test-pulse", "tempo-pulse" }));
+
             EventSystem.current.SetSelectedGameObject(
                 view.Rows.First(r => r.Entry.Id == "test-pulse").gameObject
             );

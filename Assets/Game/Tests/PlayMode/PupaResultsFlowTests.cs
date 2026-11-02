@@ -136,13 +136,9 @@ namespace RhythmDojo.Tests
         [Category("LocalAudio")]
         public IEnumerator RealPupaAudioFinishesAndAutomaticallyLoadsResults()
         {
-            string path = System.IO.Path.GetFullPath("LocalAudio/PUPA.wav");
-
-            if (!System.IO.File.Exists(path))
-            {
-                Assert.Ignore("Requires the separately supplied LocalAudio/PUPA.wav.");
-            }
-
+            // Legacy test names retain the bundled chart; audio is an independent external fixture.
+            using var wave = new TemporaryWaveFile(131.54, .5033333333333334);
+            string path = wave.Path;
             var load = ChartEditorCompositionRoot.LoadAudio(path, CancellationToken.None);
             yield return Await(() => load.IsCompleted);
             Assert.That(load.IsFaulted, Is.False, load.Exception?.ToString());
@@ -206,13 +202,9 @@ namespace RhythmDojo.Tests
         [Category("LocalAudio")]
         public IEnumerator CorrectedPupaClockKeepsAudioNotesAndTimestampedInputTogether()
         {
-            string path = System.IO.Path.GetFullPath("LocalAudio/PUPA.wav");
-
-            if (!System.IO.File.Exists(path))
-            {
-                Assert.Ignore("Requires the separately supplied LocalAudio/PUPA.wav.");
-            }
-
+            // Legacy test names retain the bundled chart; audio is an independent external fixture.
+            using var wave = new TemporaryWaveFile(131.54, .5033333333333334);
+            string path = wave.Path;
             var load = ChartEditorCompositionRoot.LoadAudio(path, CancellationToken.None);
             yield return Await(() => load.IsCompleted);
             Assert.That(load.IsFaulted, Is.False, load.Exception?.ToString());
@@ -303,13 +295,9 @@ namespace RhythmDojo.Tests
         [Category("LocalAudio")]
         public IEnumerator PupaAudioTailTransitionsPromptlyWithEveryJudgmentPreserved()
         {
-            string path = System.IO.Path.GetFullPath("LocalAudio/PUPA.wav");
-
-            if (!System.IO.File.Exists(path))
-            {
-                Assert.Ignore("Requires the separately supplied LocalAudio/PUPA.wav.");
-            }
-
+            // Legacy test names retain the bundled chart; audio is an independent external fixture.
+            using var wave = new TemporaryWaveFile(131.54, .5033333333333334);
+            string path = wave.Path;
             var load = ChartEditorCompositionRoot.LoadAudio(path, CancellationToken.None);
             yield return Await(() => load.IsCompleted);
             Assert.That(load.IsFaulted, Is.False, load.Exception?.ToString());
