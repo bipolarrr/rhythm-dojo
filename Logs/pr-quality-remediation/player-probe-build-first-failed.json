@@ -1,0 +1,19 @@
+{
+    "status": "failed",
+    "error": "System.InvalidOperationException: Diagnostic player build failed: Failed\r\n  at RhythmDojo.EditorTools.RemediationPlayerVerification.BuildPlayer () [0x0019a] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Scripts\\Editor\\TestContent\\RemediationPlayerVerification.cs:77 ",
+    "output": "Builds/RemediationProbe/RemediationProbe.exe",
+    "unity": "6000.3.23f1",
+    "startedUtc": "2026-11-02T18:28:20.2070972Z",
+    "finishedUtc": "2026-11-02T18:28:45.9702755Z",
+    "scenes": [
+        "Assets/Game/Scenes/RemediationPlayerProbe.unity",
+        "Assets/Game/Scenes/Title.unity",
+        "Assets/Game/Scenes/Bootstrap.unity",
+        "Assets/Game/Scenes/SongSelection.unity",
+        "Assets/Game/Scenes/Gameplay.unity",
+        "Assets/Game/Scenes/Results.unity",
+        "Assets/Game/Scenes/Settings.unity",
+        "Assets/Game/Scenes/ChartEditor.unity"
+    ],
+    "bytes": 4934
+}

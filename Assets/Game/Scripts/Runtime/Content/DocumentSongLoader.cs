@@ -12,11 +12,19 @@ namespace RhythmDojo.Content
         private Action release;
 
         public AudioClip Clip { get; }
+        public Func<CancellationToken, Task<SongAudioLease>> Reload { get; }
 
         public SongAudioLease(AudioClip clip, Action release = null)
+            : this(clip, release, null)
+        {
+        }
+
+        public SongAudioLease(AudioClip clip, Action release,
+            Func<CancellationToken, Task<SongAudioLease>> reload)
         {
             Clip = clip;
             this.release = release;
+            Reload = reload;
         }
 
         public void Dispose()
@@ -71,7 +79,7 @@ namespace RhythmDojo.Content
                     throw new InvalidOperationException("AudioId: loader returned no audio.");
                 }
 
-                return new PlayableSong(snapshot, lease.Clip, mode, lease.Dispose);
+                return new PlayableSong(snapshot, mode, lease);
             }
             catch
             {

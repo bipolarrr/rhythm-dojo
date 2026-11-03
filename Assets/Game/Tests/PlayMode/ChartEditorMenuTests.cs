@@ -52,7 +52,8 @@ namespace RhythmDojo.Tests
 
         private T Control<T>(string name)
             where T : Component =>
-            menu.GetComponentsInChildren<T>(true).Single(c => c.name == name);
+            menu.GetComponentsInChildren<T>(true).Single(c => c.name == name
+                && !c.GetComponentInParent<WorkspaceMenuPopup>(true));
 
         private void Click(string name) => Control<Button>(name).onClick.Invoke();
 
@@ -113,7 +114,7 @@ namespace RhythmDojo.Tests
             Assert.That(imported.Id, Is.Not.EqualTo(original.Snapshot.Id));
             Assert.That(imported.Title, Is.EqualTo("PUPA"));
             Assert.That(imported.TempoPoints[0].Bpm, Is.EqualTo(202));
-            Assert.That(imported.AudioOffsetSeconds, Is.EqualTo(0));
+            Assert.That(imported.AudioOffsetSeconds, Is.EqualTo(-.02));
             Assert.That(imported.Grid.OriginSeconds, Is.EqualTo(0.4833333333333334));
             Assert.That(imported.Charts.Single().Notes.Length, Is.EqualTo(929));
             Assert.That(imported.Charts.Single().Notes.Count(n => n.Kind == NoteKind.Hold), Is.EqualTo(29));
@@ -362,7 +363,9 @@ namespace RhythmDojo.Tests
             screen = Object.FindFirstObjectByType<ChartEditorScreen>();
             Assert.That(screen.Session, Is.SameAs(session));
             Assert.That(screen.ChartId, Is.EqualTo(activeChartId));
-            Assert.That(session.Snapshot.Charts.Length, Is.EqualTo(3));
+            Assert.That(session.Snapshot.Charts.Length, Is.EqualTo(2));
+            Assert.That(session.Snapshot.Charts.Select(chart => chart.Slot),
+                Is.EquivalentTo(new[] { ChartSlot.Easy, ChartSlot.Hard }));
             Assert.That(session.IsDirty, Is.True);
             session.Undo();
             Assert.That(session.GetNotes(screen.ChartId), Is.Empty);

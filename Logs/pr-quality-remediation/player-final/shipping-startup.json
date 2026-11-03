@@ -1,0 +1,12 @@
+{
+  "observedUtc": "2026-11-02T19:42:04.3019981Z",
+  "scope": "Ordinary non-development Windows player startup and orderly close; functional paths covered by final development probe",
+  "pid": 14452,
+  "responding": true,
+  "exited": false,
+  "testAssemblies": [],
+  "running": true,
+  "windowHandle": 0,
+  "windowTitle": "",
+  "closeRequested": false
+}

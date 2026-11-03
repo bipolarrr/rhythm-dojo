@@ -1,0 +1,3 @@
+requested,applied,validationRatio,rejectedRatio,verified,count,totalSeconds,lower,upper,status
+128,256,1.000601880734415,0,True,2,3.0557595999998739,0.9912504612882983,1.0099533001805316,요청 128 진행률 이상 → Actual: 256 samples로 복구 · DSP 시계 ±1% 확인
+1024,1024,0.99990053072847052,NaN,True,2,9.200073699999848,0.99023965603544217,1.0095614054214987,DSP 시계 진행률 ±1% 확인 완료 · Actual: 1024 samples

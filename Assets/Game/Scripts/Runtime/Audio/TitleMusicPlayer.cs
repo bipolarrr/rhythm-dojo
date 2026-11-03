@@ -10,6 +10,7 @@ namespace RhythmDojo.Audio
         private AudioSource source;
         private double startDspTime;
         private bool initialized;
+        private bool restartRequested;
 
         public double BeatPosition => settings.BeatPositionAt(AudioSettings.dspTime - startDspTime);
 
@@ -69,13 +70,15 @@ namespace RhythmDojo.Audio
         {
             if (source && settings)
             {
-                source.volume = settings.Volume * PresentationPreferences.Current.backgroundVolume;
+                source.volume = settings.Volume
+                    * (PresentationPreferences.Current ?? PresentationPreferences.Load()).backgroundVolume;
             }
         }
 
         private void OnEnable()
         {
             PresentationPreferences.Changed += RefreshVolume;
+            AudioSettings.OnAudioConfigurationChanged += AudioConfigurationChanged;
 
             if (initialized)
             {
@@ -86,12 +89,39 @@ namespace RhythmDojo.Audio
 
         private void OnDisable()
         {
+            restartRequested = false;
             PresentationPreferences.Changed -= RefreshVolume;
+            AudioSettings.OnAudioConfigurationChanged -= AudioConfigurationChanged;
 
             if (source)
             {
                 source.Stop();
             }
+        }
+
+        private void AudioConfigurationChanged(bool deviceWasChanged)
+        {
+            if (!isActiveAndEnabled || !initialized)
+            {
+                return;
+            }
+            if (source && settings)
+            {
+                // Reset may still be stopping sources while this event is raised.
+                restartRequested = true;
+            }
+        }
+
+        private void LateUpdate()
+        {
+            if (!restartRequested)
+            {
+                return;
+            }
+
+            restartRequested = false;
+            RefreshVolume();
+            Restart();
         }
     }
 }

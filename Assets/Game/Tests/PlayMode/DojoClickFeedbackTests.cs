@@ -47,9 +47,10 @@ namespace RhythmDojo.Tests
             var menu = Object.FindFirstObjectByType<MainMenuView>();
             Assert.That(menu.menuPanel.gameObject.activeSelf, Is.False);
             yield return Click(menu.logo);
-            yield return new WaitForSecondsRealtime(.3f);
+            yield return new WaitForSecondsRealtime(MainMenuScreen.MenuExpansionSeconds + .1f);
             yield return Click(menu.start);
-            yield return Await(() => Object.FindFirstObjectByType<SongSelectionScreen>());
+            yield return Await(() => UnityEngine.SceneManagement.SceneManager.GetActiveScene().path
+                == RhythmDojo.Core.AppFlowController.SelectionPath);
             yield return Await(() => !DojoEntranceTransition.Active);
             yield return CheckClickOutput();
             yield return Click(Object.FindFirstObjectByType<SongSelectionView>().settingsButton);
@@ -133,12 +134,12 @@ namespace RhythmDojo.Tests
                 var all = feedback.GetComponentsInChildren<UnityEngine.UI.RawImage>(true);
                 Assert.That(
                     all.Length,
-                    Is.InRange(1, 8),
-                    "Burst effects have a fixed allocation budget."
+                    Is.Zero,
+                    "Clicking must not allocate random fist sprites."
                 );
                 Assert.That(
                     feedback.GetComponentsInChildren<UnityEngine.UI.RawImage>().Length,
-                    Is.GreaterThan(0)
+                    Is.Zero
                 );
                 Time.timeScale = 0;
                 yield return new WaitForSecondsRealtime(.5f);

@@ -36,6 +36,7 @@ namespace RhythmDojo.UI
         private float expansion;
         private AudioSource effects;
         private float knockTime;
+        public const float MenuExpansionSeconds = .85f;
 
         public void Validate()
         {
@@ -75,8 +76,17 @@ namespace RhythmDojo.UI
             view.quitPopup.SetActive(false);
             view.SetMenuInteractable(true);
             view.confirmQuit.interactable = view.cancelQuit.interactable = true;
+            if (view.editor)
+            {
+                view.editor.onClick.AddListener(OpenEditor);
+            }
+
             view.start.onClick.AddListener(StartGame);
             view.logo.onClick.AddListener(ToggleMenu);
+            if (view.entranceTrigger)
+            {
+                view.entranceTrigger.onClick.AddListener(ToggleMenu);
+            }
             view.settings.onClick.AddListener(OpenSettings);
             view.quit.onClick.AddListener(ShowQuit);
             view.confirmQuit.onClick.AddListener(ConfirmQuit);
@@ -110,11 +120,11 @@ namespace RhythmDojo.UI
 
             if (menuExpanded)
             {
-                expansion = Mathf.MoveTowards(expansion, 1f, Time.unscaledDeltaTime / .25f);
+                expansion = Mathf.MoveTowards(expansion, 1f, Time.unscaledDeltaTime / MenuExpansionSeconds);
             }
             else
             {
-                expansion = Mathf.MoveTowards(expansion, 0f, Time.unscaledDeltaTime / .25f);
+                expansion = Mathf.MoveTowards(expansion, 0f, Time.unscaledDeltaTime / MenuExpansionSeconds);
             }
 
             view.SetExpansion(expansion);
@@ -162,6 +172,7 @@ namespace RhythmDojo.UI
                 titleScale * (1f + bounce * Mathf.Clamp(titleBounceAmount, 0f, .3f));
             view.startPrompt.rectTransform.localScale =
                 promptScale * (1f + bounce * Mathf.Clamp(promptBounceAmount, 0f, .3f));
+            view.entrance.SetLogoSeparation(view.entrance.MenuLogoSeparation);
         }
 
         private void RestoreScale()
@@ -179,6 +190,11 @@ namespace RhythmDojo.UI
             if (view.startPrompt)
             {
                 view.startPrompt.rectTransform.localScale = promptScale;
+            }
+
+            if (view.entrance)
+            {
+                view.entrance.SetLogoSeparation(view.entrance.MenuLogoSeparation);
             }
         }
 
@@ -216,7 +232,7 @@ namespace RhythmDojo.UI
 
                 yield return board.Play();
             }
-            else
+            else if (!leaving)
             {
                 yield return new WaitForSecondsRealtime(.25f);
             }
@@ -228,7 +244,6 @@ namespace RhythmDojo.UI
                 {
                     elapsed += Time.unscaledDeltaTime;
                     float alpha = 1f - Mathf.Clamp01(elapsed / .15f);
-                    view.logoGroup.alpha = alpha;
                     view.menuPanel.alpha = alpha;
                     yield return null;
                 }
@@ -242,6 +257,38 @@ namespace RhythmDojo.UI
             {
                 starting = false;
                 view.RestoreBoards();
+                view.SetMenuInteractable(true);
+                Debug.LogException(error, this);
+            }
+        }
+
+        private void OpenEditor()
+        {
+            if (Busy || !menuExpanded || view.quitPopup.activeSelf)
+            {
+                return;
+            }
+
+            if (expansion < .99f)
+            {
+                return;
+            }
+
+            if (!(actions is RhythmDojo.Core.MainMenuActions mainMenuActions))
+            {
+                return;
+            }
+
+            starting = true;
+            view.SetMenuInteractable(false);
+
+            try
+            {
+                mainMenuActions.ShowEditor();
+            }
+            catch (Exception error)
+            {
+                starting = false;
                 view.SetMenuInteractable(true);
                 Debug.LogException(error, this);
             }
@@ -271,7 +318,11 @@ namespace RhythmDojo.UI
 
         private IEnumerator FocusMenuAfterExpansion()
         {
-            yield return new WaitForSecondsRealtime(.26f);
+            // Reversing the doors must also cancel the previous focus destination.
+            while ((menuExpanded && expansion < 1f) || (!menuExpanded && expansion > 0f))
+            {
+                yield return null;
+            }
             if (Busy || view.quitPopup.activeSelf || !EventSystem.current)
             {
                 yield break;
@@ -384,8 +435,17 @@ namespace RhythmDojo.UI
                 return;
             }
 
+            if (view.editor)
+            {
+                view.editor.onClick.RemoveListener(OpenEditor);
+            }
+
             view.start.onClick.RemoveListener(StartGame);
             view.logo.onClick.RemoveListener(ToggleMenu);
+            if (view.entranceTrigger)
+            {
+                view.entranceTrigger.onClick.RemoveListener(ToggleMenu);
+            }
             view.settings.onClick.RemoveListener(OpenSettings);
             view.quit.onClick.RemoveListener(ShowQuit);
             view.confirmQuit.onClick.RemoveListener(ConfirmQuit);

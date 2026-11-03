@@ -1,0 +1,92 @@
+{
+  "success": true,
+  "command": "command test_status",
+  "data": {
+    "command": "test_status",
+    "parameters": {},
+    "result": {
+      "status": "completed",
+      "duration": 0.63,
+      "summary": {
+        "total": 9,
+        "passed": 9,
+        "failed": 0,
+        "skipped": 0,
+        "inconclusive": 0
+      },
+      "results": [
+        {
+          "FullName": "RhythmDojo.Tests.UiTypographyTests.IndividualAndTreeFontApplicationUseTheSameInactiveScope",
+          "Status": "Passed",
+          "Duration": 0.0150069,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.UiTypographyTests.SavedSceneUsesMonaForAllTextIncludingHiddenControls(\"Title\")",
+          "Status": "Passed",
+          "Duration": 0.0390557,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.UiTypographyTests.SavedSceneUsesMonaForAllTextIncludingHiddenControls(\"SongSelection\")",
+          "Status": "Passed",
+          "Duration": 0.0323346,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.UiTypographyTests.SavedSceneUsesMonaForAllTextIncludingHiddenControls(\"Settings\")",
+          "Status": "Passed",
+          "Duration": 0.041138,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.UiTypographyTests.SavedSceneUsesMonaForAllTextIncludingHiddenControls(\"Gameplay\")",
+          "Status": "Passed",
+          "Duration": 0.0306478,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.UiTypographyTests.SavedSceneUsesMonaForAllTextIncludingHiddenControls(\"ChartEditor\")",
+          "Status": "Passed",
+          "Duration": 0.0703119,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.UiTypographyTests.SavedSceneUsesMonaForAllTextIncludingHiddenControls(\"Results\")",
+          "Status": "Passed",
+          "Duration": 0.0222126,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.UiTypographyTests.ScopedControlsKeepBrushFontWhenCreatedAtRuntime",
+          "Status": "Passed",
+          "Duration": 0.024452,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.UiTypographyTests.SharedPopupAndRuntimeControlsMatchStartButtonTypography",
+          "Status": "Passed",
+          "Duration": 0.0426976,
+          "Message": null,
+          "StackTrace": null
+        }
+      ]
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "C:\\Users\\song\\RhythmDojo-pr-quality"
+    },
+    "success": true
+  },
+  "errors": [],
+  "warnings": []
+}

@@ -38,9 +38,27 @@ namespace RhythmDojo.Application
         void Pause();
     }
 
+    public interface IResumableSongClock : IPausableSongClock
+    {
+        void Resume();
+    }
+
+    public interface IScheduledResumeClock
+    {
+        bool ResumePending { get; }
+        bool IsInputAfterResume(double timestamp);
+        bool TryCompleteResume();
+        void CancelResume();
+    }
+
     public interface IInputTimingClock
     {
         double InputTimingOffsetSeconds { get; }
+    }
+
+    public interface IPlaybackReadinessClock
+    {
+        bool PlaybackReady { get; }
     }
 
     public enum ReadyReason

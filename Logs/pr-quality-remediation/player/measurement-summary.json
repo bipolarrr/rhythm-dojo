@@ -1,0 +1,24 @@
+{
+  "requestedBuffer": 256,
+  "maxAbsoluteAlignmentErrorSeconds": 0.00903893229249475,
+  "samples": 12,
+  "measurements": [
+    {
+      "elapsed": 1.200003500000001,
+      "lower": 0.9911082203788018,
+      "upper": 1.0088859463048787,
+      "buffer": 256,
+      "rate": 48000,
+      "state": "Healthy"
+    },
+    {
+      "elapsed": 1.2000078999999975,
+      "lower": 0.9911045863392526,
+      "upper": 1.0088822470807637,
+      "buffer": 256,
+      "rate": 48000,
+      "state": "Healthy"
+    }
+  ],
+  "appliedBuffer": 256
+}

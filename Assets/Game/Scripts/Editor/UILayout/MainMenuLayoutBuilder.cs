@@ -8,7 +8,7 @@ namespace RhythmDojo.EditorTools
 {
     public static class MainMenuLayoutBuilder
     {
-        public const string FontPath = "Assets/Game/Fonts/Mona12TextKR.ttf";
+        public const string FontPath = "Assets/Game/Fonts/Dokdo-Regular.ttf";
 
         public static MainMenuView Build()
         {
@@ -24,8 +24,8 @@ namespace RhythmDojo.EditorTools
 
             var view = canvas.gameObject.AddComponent<MainMenuView>();
             view.alwaysVisibleMenu = false;
-            view.logoOpenPosition = new Vector2(-250f, 0f);
-            view.menuOpenPosition = new Vector2(230f, 0f);
+            view.logoOpenPosition = Vector2.zero;
+            view.menuOpenPosition = Vector2.zero;
             var entrance = new GameObject("Dojo Entrance", typeof(RectTransform));
             entrance.transform.SetParent(canvas.transform, false);
             Stretch((RectTransform)entrance.transform);
@@ -34,25 +34,47 @@ namespace RhythmDojo.EditorTools
             view.entrance = entrance.AddComponent<DojoEntranceView>();
             var wall = Panel("Dojo Wall", entrance.transform, Color.white);
             Stretch(wall.rectTransform);
-            wall.sprite = LoadSprite("TitleBackground");
+            wall.sprite = DojoEntranceAssets.Load("SelectionBackground");
             entranceFit.aspectRatio = wall.sprite.rect.width / wall.sprite.rect.height;
             wall.raycastTarget = false;
             // Crop to fill ultrawide/portrait windows without stretching the artwork.
             var fit = wall.gameObject.AddComponent<AspectRatioFitter>();
             fit.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
             fit.aspectRatio = wall.sprite.rect.width / wall.sprite.rect.height;
+            var interior = new GameObject("Training Dojo Interior", typeof(RectTransform));
+            interior.transform.SetParent(entrance.transform, false);
+            Stretch((RectTransform)interior.transform);
+            var interiorArt = interior.AddComponent<DojoTrainingGraphic>();
+            interiorArt.interior = true;
+            interiorArt.artwork = DojoEntranceAssets.Load("TrainingInterior", UiArtworkCrop.Full);
+            interiorArt.raycastTarget = false;
+            view.trainingInterior = (RectTransform)interior.transform;
+            view.entranceTrigger = Button("Door Interaction", entrance.transform, Color.clear);
+            Stretch((RectTransform)view.entranceTrigger.transform);
+            view.entranceTrigger.transition = Selectable.Transition.None;
             BuildEntrance(view.entrance);
             view.knock = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Game/Audio/DojoKnock.wav");
             view.boardCrack = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Game/Audio/DojoBoardCrack.wav");
             view.doorSlide = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Game/Audio/DojoDoorSlide.wav");
 
-            var logoObject = new GameObject("Logo", typeof(RectTransform), typeof(Image));
-            logoObject.transform.SetParent(canvas.transform, false);
+            var logoClip = new GameObject("Doorway Logo Clip", typeof(RectTransform), typeof(RectMask2D));
+            logoClip.transform.SetParent(entrance.transform, false);
+            var logoClipRect = (RectTransform)logoClip.transform;
+            // Match the transparent opening of EntranceFrame; the columns occlude the sliding logo.
+            logoClipRect.anchorMin = new Vector2(.165f, .08f);
+            logoClipRect.anchorMax = new Vector2(.835f, .84f);
+            logoClipRect.offsetMin = logoClipRect.offsetMax = Vector2.zero;
+            logoClip.transform.SetSiblingIndex(view.entrance.frame.transform.GetSiblingIndex());
+            view.entrance.logoClip = logoClipRect;
+            var logoObject = new GameObject("Logo", typeof(RectTransform), typeof(DojoSlidingImage));
+            logoObject.transform.SetParent(logoClip.transform, false);
             var logoImage = logoObject.GetComponent<Image>();
-            logoImage.sprite = DojoEntranceAssets.Load("RoundPlaque");
+            logoImage.sprite = DojoEntranceAssets.Load("RoundPlaque", UiArtworkCrop.Alpha);
             logoImage.preserveAspect = true;
             logoImage.raycastTarget = true;
             logoObject.AddComponent<DojoPlaqueHitArea>();
+            view.slidingPlaque = logoObject.GetComponent<DojoSlidingImage>();
+            view.slidingPlaque.splitDepth = 12f;
             view.logoGroup = logoObject.AddComponent<CanvasGroup>();
             view.logo = logoObject.AddComponent<Button>();
             view.logo.targetGraphic = logoImage;
@@ -60,8 +82,13 @@ namespace RhythmDojo.EditorTools
             var logoNavigation = view.logo.navigation;
             logoNavigation.mode = Navigation.Mode.Explicit;
             view.logo.navigation = logoNavigation;
-            Anchor((RectTransform)view.logo.transform, new Vector2(.5f, .5f), Vector2.zero, new Vector2(360, 360));
-            var logoArt = Panel("Game Logo", logoObject.transform, Color.white);
+            Anchor((RectTransform)view.logo.transform, new Vector2(.5f, .42f / .76f), Vector2.zero, new Vector2(360, 360));
+            var logoArtObject = new GameObject("Game Logo", typeof(RectTransform), typeof(DojoSlidingImage));
+            logoArtObject.transform.SetParent(logoObject.transform, false);
+            var logoArt = logoArtObject.GetComponent<DojoSlidingImage>();
+            view.slidingLogo = logoArt;
+            view.entrance.slidingPlaque = view.slidingPlaque;
+            view.entrance.slidingLogo = view.slidingLogo;
             logoArt.sprite = LoadSprite("TitleLogo");
             logoArt.preserveAspect = true;
             logoArt.raycastTarget = false;
@@ -77,22 +104,29 @@ namespace RhythmDojo.EditorTools
 
             var menu = new GameObject("Menu Buttons", typeof(RectTransform), typeof(CanvasGroup));
             menu.transform.SetParent(canvas.transform, false);
-            view.menuPanel = menu.GetComponent<CanvasGroup>();
-            Anchor((RectTransform)menu.transform, new Vector2(.5f, .5f), Vector2.zero, new Vector2(464, 144));
-            view.start = MenuButton("Play", menu.transform, "플레이", font, -160);
-            view.settings = MenuButton("Settings", menu.transform, "설정", font, 0);
-            view.quit = MenuButton("Quit", menu.transform, "종료", font, 160);
-            SetNavigation(view.start, view.quit, view.settings);
-            SetNavigation(view.settings, view.start, view.quit);
-            SetNavigation(view.quit, view.settings, view.start);
-            logoNavigation.selectOnRight = view.start;
-            view.logo.navigation = logoNavigation;
-            foreach (var button in new[] { view.start, view.settings, view.quit })
+            var menuFont = AssetDatabase.LoadAssetAtPath<Font>(SongSelectionLayoutBuilder.BrushFontPath);
+            if (!menuFont)
             {
-                var navigation = button.navigation;
-                navigation.selectOnUp = view.logo;
-                button.navigation = navigation;
+                throw new InvalidOperationException("Main menu brush font missing.");
             }
+            menu.AddComponent<UiFontScope>().font = menuFont;
+            view.menuPanel = menu.GetComponent<CanvasGroup>();
+            view.entrance.trainingMenu = view.menuPanel;
+            Anchor((RectTransform)menu.transform, new Vector2(.5f, .5f), Vector2.zero, new Vector2(350, 290));
+            view.start = MenuButton("Play", menu.transform, "플레이", font, -135);
+            view.settings = MenuButton("Settings", menu.transform, "설정", font, -45);
+            view.editor = MenuButton("Showcase Editor", menu.transform, "에디터", font, 45);
+            view.quit = MenuButton("Quit", menu.transform, "종료", font, 135);
+            // Keep plaques above the doors but behind both logo halves throughout reveal and reversal.
+            menu.transform.SetParent(entrance.transform, false);
+            menu.transform.SetSiblingIndex(view.entrance.logoClip.GetSiblingIndex());
+            SetNavigation(view.start, view.quit, view.settings);
+            SetNavigation(view.settings, view.start, view.editor);
+            SetNavigation(view.editor, view.settings, view.quit);
+            SetNavigation(view.quit, view.editor, view.start);
+            logoNavigation.selectOnRight = view.start;
+            logoNavigation.selectOnDown = view.start;
+            view.logo.navigation = logoNavigation;
 
             view.SetExpansion(0f);
             view.menuPanel.gameObject.SetActive(false);
@@ -141,9 +175,44 @@ namespace RhythmDojo.EditorTools
             );
             overlay.gameObject.SetActive(false);
             PixelOptionsStyle.ApplyQuit(view);
+            UiFontSettings.ApplyTo(view.transform);
+            ApplyMenuTextStyle(view);
             view.Validate();
 
             return view;
+        }
+
+        public static void ApplyMenuTextStyle(MainMenuView view)
+        {
+            var font = AssetDatabase.LoadAssetAtPath<Font>(SongSelectionLayoutBuilder.BrushFontPath);
+            var material = AssetDatabase.LoadAssetAtPath<Material>("Assets/Game/Resources/UI/SelectionWoodText.mat");
+            if (!font || !material)
+            {
+                throw new InvalidOperationException("Selection brush font or wood text material missing.");
+            }
+
+            foreach (var button in new[] { view.start, view.settings, view.editor, view.quit })
+            {
+                var text = button.GetComponentInChildren<Text>(true);
+                text.font = font;
+                text.fontStyle = FontStyle.Bold;
+                text.color = new Color(.84f, .66f, .45f);
+                text.material = material;
+                var shadow = text.GetComponent<Shadow>();
+                if (!shadow)
+                {
+                    shadow = text.gameObject.AddComponent<Shadow>();
+                }
+                shadow.effectColor = new Color(.20f, .09f, .035f, .85f);
+                shadow.effectDistance = new Vector2(1, -2);
+                var outline = text.GetComponent<Outline>();
+                if (!outline)
+                {
+                    outline = text.gameObject.AddComponent<Outline>();
+                }
+                outline.effectColor = new Color(.34f, .17f, .075f);
+                outline.effectDistance = new Vector2(1, -1);
+            }
         }
 
         private static Sprite LoadSprite(string name)
@@ -160,7 +229,7 @@ namespace RhythmDojo.EditorTools
         private static void BuildEntrance(DojoEntranceView entrance)
         {
             var left = Panel("Left Door", entrance.transform, Color.white);
-            left.sprite = DojoEntranceAssets.Load("DoorPanel");
+            left.sprite = DojoEntranceAssets.Load("DoorPanel", UiArtworkCrop.Full);
             left.raycastTarget = false;
             left.rectTransform.anchorMin = Vector2.zero;
             left.rectTransform.anchorMax = new Vector2(.5f, 1f);
@@ -177,7 +246,7 @@ namespace RhythmDojo.EditorTools
             entrance.rightDoor = right.rectTransform;
 
             var frame = Panel("Entrance Frame", entrance.transform, Color.white);
-            frame.sprite = DojoEntranceAssets.Load("EntranceFrame");
+            frame.sprite = DojoEntranceAssets.Load("EntranceFrame", UiArtworkCrop.Full);
             frame.raycastTarget = false;
             Stretch(frame.rectTransform);
             entrance.frame = frame.gameObject.AddComponent<CanvasGroup>();
@@ -188,7 +257,7 @@ namespace RhythmDojo.EditorTools
         {
             var button = Button(name, parent, Color.white);
             var image = button.GetComponent<Image>();
-            image.sprite = DojoEntranceAssets.Load(spriteName);
+            image.sprite = DojoEntranceAssets.Load(spriteName, UiArtworkCrop.Alpha);
             image.preserveAspect = false;
             Anchor((RectTransform)button.transform, new Vector2(.5f, .5f), new Vector2(0, y), new Vector2(320, 78));
             button.gameObject.AddComponent<DojoBoardBreak>();
@@ -209,6 +278,8 @@ namespace RhythmDojo.EditorTools
             navigation.mode = Navigation.Mode.Explicit;
             navigation.selectOnLeft = up;
             navigation.selectOnRight = down;
+            navigation.selectOnUp = up;
+            navigation.selectOnDown = down;
             button.navigation = navigation;
         }
 
@@ -296,13 +367,28 @@ namespace RhythmDojo.EditorTools
                 (RectTransform)button.transform,
                 new Vector2(.5f, .5f),
                 new Vector2(x, 0),
-                new Vector2(144, 144)
+                new Vector2(80, 290)
             );
 
-            var captionText = Label("Caption", button.transform, caption, font, 28);
-            captionText.color = new Color(.12f, .12f, .12f);
+            var graphic = button.GetComponent<Image>();
+            graphic.sprite = DojoEntranceAssets.Load("VerticalMenuBoard", UiArtworkCrop.Alpha);
+            graphic.preserveAspect = true;
+            button.targetGraphic = graphic;
+            var colors = button.colors;
+            colors.highlightedColor = new Color(1f, .88f, .63f);
+            colors.selectedColor = colors.highlightedColor;
+            colors.pressedColor = new Color(.72f, .56f, .38f);
+            colors.disabledColor = new Color(.65f, .60f, .53f);
+            colors.fadeDuration = .12f;
+            button.colors = colors;
+            var captionText = Label("Caption", button.transform, string.Join("\n", caption.ToCharArray()), font, 30);
+            captionText.color = new Color(1f, .95f, .84f);
+            captionText.fontStyle = FontStyle.Bold;
+            var captionHighlight = captionText.gameObject.AddComponent<Shadow>();
+            captionHighlight.effectColor = new Color(.12f, .055f, .025f, .85f);
+            captionHighlight.effectDistance = new Vector2(0, -1);
             captionText.raycastTarget = false;
-            Stretch(captionText.rectTransform);
+            Anchor(captionText.rectTransform, new Vector2(.5f, .5f), new Vector2(0, -8), new Vector2(54, 180));
 
             return button;
         }

@@ -9,6 +9,7 @@ namespace RhythmDojo.UI
     // Owns only presentation. Scene loading and recovery are supplied by Core.
     public sealed class DojoEntranceTransition : MonoBehaviour
     {
+        public const float DoorOpeningSeconds = 1.4f;
         public static DojoEntranceTransition Active { get; private set; }
         public bool Failed { get; private set; }
 
@@ -20,9 +21,7 @@ namespace RhythmDojo.UI
         private Font font;
         private AudioSource audioSource;
         private AudioClip slide;
-        private bool selectionWasEnabled;
-        private bool priorInteractable;
-        private bool priorRaycasts;
+        private InputStateScope selectionInputScope;
         private RectTransform[] selectionPanels;
         private CanvasGroup[] panelGroups;
         private float[] priorAlphas;
@@ -30,6 +29,7 @@ namespace RhythmDojo.UI
         private Vector3[] priorScales;
         private GameObject recoveryInput;
         private Button recoveryButton;
+        private AsyncOperation sceneCleanup;
         [SerializeField]
         private float readyTimeout = 20f;
 
@@ -60,7 +60,24 @@ namespace RhythmDojo.UI
             var transition = go.AddComponent<DojoEntranceTransition>();
             transition.overlay = go.AddComponent<CanvasGroup>();
             transition.entrance = Instantiate(source, go.transform, false);
-            transition.entrance.SetOpening(0f);
+            transition.entrance.SetLogoSeparation(source.MenuLogoSeparation);
+            transition.entrance.SetOpening(source.Opening);
+
+            if (transition.entrance.trainingMenu)
+            {
+                transition.entrance.trainingMenu.gameObject.SetActive(false);
+                Destroy(transition.entrance.trainingMenu.gameObject);
+            }
+
+            foreach (var button in transition.entrance.GetComponentsInChildren<Button>(true))
+            {
+                button.interactable = false;
+                Destroy(button);
+            }
+            foreach (var graphic in transition.entrance.GetComponentsInChildren<Graphic>(true))
+            {
+                graphic.raycastTarget = false;
+            }
             transition.entrance.SetApproach(0f);
             transition.font = font;
             transition.slide = slide;
@@ -80,8 +97,12 @@ namespace RhythmDojo.UI
             }
 
             Active.selection = screen;
-            Active.selectionWasEnabled = screen.enabled;
-            screen.enabled = false;
+            if (Active.selectionInputScope != null)
+            {
+                return;
+            }
+            Active.selectionInputScope = new InputStateScope();
+            Active.selectionInputScope.Suspend(screen);
             var group = screen.GetComponent<CanvasGroup>();
             if (!group)
             {
@@ -89,10 +110,7 @@ namespace RhythmDojo.UI
             }
 
             Active.selectionGroup = group;
-            Active.priorInteractable = group.interactable;
-            Active.priorRaycasts = group.blocksRaycasts;
-            group.interactable = false;
-            group.blocksRaycasts = false;
+            Active.selectionInputScope.Block(group);
             Active.PrepareSelectionPanels();
             if (Active.recoveryInput)
             {
@@ -110,23 +128,20 @@ namespace RhythmDojo.UI
             }
         }
 
+        public void WaitForSceneCleanup(AsyncOperation operation)
+        {
+            sceneCleanup = operation;
+        }
+
         private IEnumerator Reveal()
         {
-            if (slide)
-            {
-                audioSource.PlayOneShot(slide, .65f);
-            }
+            // Let deferred destruction of the copied menu and input components finish first.
+            yield return null;
 
-            float elapsed = 0f;
-            while (elapsed < .55f)
-            {
-                elapsed += Time.unscaledDeltaTime;
-                entrance.SetOpening(Mathf.Clamp01(elapsed / .55f));
-                yield return null;
-            }
-
+            // Scene activation, song discovery and UI construction can block the main thread.
+            // Keep the cloned doorway still until that work has completed behind it.
             float deadline = Time.realtimeSinceStartup + readyTimeout;
-            while (!selection)
+            while (!selection || (sceneCleanup != null && !sceneCleanup.isDone))
             {
                 if (Time.realtimeSinceStartup >= deadline)
                 {
@@ -134,6 +149,26 @@ namespace RhythmDojo.UI
                     yield break;
                 }
 
+                yield return null;
+            }
+
+            // Settle layout/font rebuilds and scene cleanup before starting the motion clock.
+            Canvas.ForceUpdateCanvases();
+            yield return null;
+            Canvas.ForceUpdateCanvases();
+            yield return null;
+
+            float opening = entrance.Opening;
+            if (slide && opening < 1f)
+            {
+                audioSource.PlayOneShot(slide, .65f);
+            }
+
+            float elapsed = 0f;
+            while (elapsed < DoorOpeningSeconds)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                entrance.SetOpening(Mathf.Lerp(opening, 1f, Mathf.Clamp01(elapsed / DoorOpeningSeconds)));
                 yield return null;
             }
 
@@ -212,6 +247,16 @@ namespace RhythmDojo.UI
             }
         }
 
+        public void Fail()
+        {
+            if (Failed)
+            {
+                return;
+            }
+            StopAllCoroutines();
+            ShowFailure();
+        }
+
         private void ShowFailure()
         {
             Failed = true;
@@ -237,6 +282,7 @@ namespace RhythmDojo.UI
             label.transform.SetParent(go.transform, false);
             var text = label.GetComponent<Text>();
             text.font = font;
+            text.fontStyle = UiFontSettings.Style;
             text.text = "곡 선택 화면을 열지 못했습니다.\n클릭하여 타이틀로 돌아가기";
             text.fontSize = 25;
             text.alignment = TextAnchor.MiddleCenter;
@@ -266,17 +312,18 @@ namespace RhythmDojo.UI
 
         private void ReleaseSelection()
         {
+            if (overlay)
+            {
+                overlay.blocksRaycasts = false;
+            }
+            var raycaster = GetComponent<GraphicRaycaster>();
+            if (raycaster)
+            {
+                raycaster.enabled = false;
+            }
             SetSelectionReveal(1f);
-            if (selectionGroup)
-            {
-                selectionGroup.interactable = priorInteractable;
-                selectionGroup.blocksRaycasts = priorRaycasts;
-            }
-
-            if (selection)
-            {
-                selection.enabled = selectionWasEnabled;
-            }
+            selectionInputScope?.Dispose();
+            selectionInputScope = null;
         }
 
         private void OnDestroy()

@@ -30,7 +30,13 @@ namespace RhythmDojo.Tests
                 Assert.That(view.moreButton.onClick.GetPersistentEventCount(), Is.Zero);
                 Assert.That(view.cover.rectTransform.anchorMax.x, Is.LessThanOrEqualTo(1));
                 Assert.That(view.feedback.anchorMax.y, Is.LessThan(.435f));
-                Assert.That(view.outcome.rectTransform.anchorMin.x, Is.GreaterThan(.725f));
+                Assert.That(((RectTransform)view.outcome.transform.parent).anchorMin.x, Is.GreaterThan(.69f));
+                Assert.That(view.feedback.GetComponentInChildren<PixelDojoFrameGraphic>().artwork.name,
+                    Is.EqualTo("SettingsPanel"));
+                Assert.That(view.moreButton.GetComponentInChildren<PixelDojoFrameGraphic>().artwork.name,
+                    Is.EqualTo("SettingsControl"));
+                Assert.That(view.outcome.transform.parent.Find("Wooden Result Seal").GetComponent<Image>().sprite.name,
+                    Is.EqualTo("RoundPlaque"));
                 Assert.That(view.GetComponent<CanvasScaler>().referenceResolution, Is.EqualTo(new Vector2(1920, 1080)));
                 Assert.That(view.GetComponent<CanvasScaler>().uiScaleMode, Is.EqualTo(CanvasScaler.ScaleMode.ScaleWithScreenSize));
                 Assert.That(scene.GetRootGameObjects().SelectMany(root => root.GetComponentsInChildren<Transform>())

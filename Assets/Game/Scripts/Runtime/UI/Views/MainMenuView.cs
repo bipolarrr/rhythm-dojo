@@ -15,6 +15,8 @@ namespace RhythmDojo.UI
             quit,
             confirmQuit,
             cancelQuit;
+        public Button editor;
+        public Button entranceTrigger;
         public bool alwaysVisibleMenu;
         public CanvasGroup menuPanel;
         public Vector2 logoOpenPosition = new Vector2(-330, 0);
@@ -23,6 +25,9 @@ namespace RhythmDojo.UI
         public DojoEntranceView entrance;
         public CanvasGroup logoGroup;
         public RectTransform logoArtwork;
+        public RectTransform trainingInterior;
+        public DojoSlidingImage slidingPlaque;
+        public DojoSlidingImage slidingLogo;
         public AudioClip knock,
             boardCrack,
             doorSlide;
@@ -75,11 +80,21 @@ namespace RhythmDojo.UI
 
         public void SetMenuInteractable(bool value)
         {
+            if (entranceTrigger)
+            {
+                entranceTrigger.interactable = value;
+            }
+
             logo.interactable =
                 start.interactable =
                 settings.interactable =
                 quit.interactable =
                     value;
+
+            if (editor)
+            {
+                editor.interactable = value;
+            }
         }
 
         public void SetExpansion(float amount)
@@ -93,15 +108,24 @@ namespace RhythmDojo.UI
                 return;
             }
 
+            amount = Mathf.Clamp01(amount);
             float eased = Mathf.SmoothStep(0f, 1f, amount);
-            ((RectTransform)logo.transform).anchoredPosition = Vector2.Lerp(
-                Vector2.zero,
-                logoOpenPosition,
-                eased
-            );
+            entrance.SetOpening(0f);
+            logo.targetGraphic.raycastTarget = amount < .01f;
+            ((RectTransform)logo.transform).anchoredPosition = Vector2.zero;
+            float separation = Mathf.Min(220f, ((RectTransform)entrance.transform).rect.width * .18f) * eased;
+            entrance.SetLogoSeparation(separation);
+
+            float reveal = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(.12f, 1f, amount));
             ((RectTransform)menuPanel.transform).anchoredPosition =
-                menuOpenPosition + new Vector2(30f * (1f - eased), 0);
-            menuPanel.alpha = eased;
+                menuOpenPosition + Vector2.up * (36f * (1f - reveal));
+            menuPanel.transform.localScale = Vector3.one * Mathf.Lerp(.72f, 1f, reveal);
+            menuPanel.alpha = reveal;
+            if (trainingInterior)
+            {
+                trainingInterior.localScale = Vector3.one * Mathf.Lerp(.96f, 1f, eased);
+            }
+
             menuPanel.interactable = menuPanel.blocksRaycasts = amount >= .99f;
             startPrompt.gameObject.SetActive(amount < .01f);
         }

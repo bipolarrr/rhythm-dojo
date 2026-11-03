@@ -55,6 +55,13 @@ namespace RhythmDojo.Authoring
 
         public static async Task<SongAudioLease> LoadAudio(string path, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
+            if (!File.Exists(path))
+            {
+                throw new FileNotFoundException("음원 파일을 찾을 수 없습니다.", path);
+            }
+
             var extension = Path.GetExtension(path).ToLowerInvariant();
             AudioType type;
 
@@ -97,7 +104,8 @@ namespace RhythmDojo.Authoring
                 throw new IOException("음원 데이터가 비어 있습니다.");
             }
 
-            return new SongAudioLease(clip, () => UnityEngine.Object.Destroy(clip));
+            return new SongAudioLease(clip, () => UnityEngine.Object.Destroy(clip),
+                cancellation => LoadAudio(path, cancellation));
         }
     }
 }

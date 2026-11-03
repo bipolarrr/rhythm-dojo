@@ -16,6 +16,7 @@ namespace RhythmDojo.Authoring
         private double dragStart;
         private bool dragged;
         [SerializeField] private Text[] labels;
+        [SerializeField] private Text[] tempoLabels;
         private double[] labelBeats;
         private float lastWidth;
         private RhythmDojo.Gameplay.BeatGridTiming labelTiming;
@@ -33,6 +34,11 @@ namespace RhythmDojo.Authoring
         {
             this.labels = labels;
             InitializeLabels();
+        }
+
+        public void ConfigureTempoLabels(Text[] source)
+        {
+            tempoLabels = source;
         }
 
         public void InitializeLabels()
@@ -127,6 +133,44 @@ namespace RhythmDojo.Authoring
             for (int i = count; i < labels.Length; i++)
             {
                 labels[i].gameObject.SetActive(false);
+            }
+
+            RefreshTempoLabels();
+        }
+
+        private void RefreshTempoLabels()
+        {
+            if (tempoLabels == null)
+            {
+                return;
+            }
+
+            int count = 0;
+            for (int i = 1; i < Owner.TempoPoints.Count; i++)
+            {
+                double time = Owner.TempoPoints[i].StartTimeSeconds - Owner.AudioOffset;
+                if (time < StartTime || time > StartTime + Duration)
+                {
+                    continue;
+                }
+
+                if (count == tempoLabels.Length)
+                {
+                    break;
+                }
+
+                var label = tempoLabels[count];
+                label.gameObject.SetActive(true);
+                label.rectTransform.anchoredPosition = new Vector2(
+                    (float)((time - StartTime) / Duration * rectTransform.rect.width) + 3, -26);
+                label.text = "BPM " + Owner.TempoPoints[i - 1].Bpm.ToString("0.##")
+                    + " → " + Owner.TempoPoints[i].Bpm.ToString("0.##");
+                count++;
+            }
+
+            for (int i = count; i < tempoLabels.Length; i++)
+            {
+                tempoLabels[i].gameObject.SetActive(false);
             }
         }
 
@@ -255,6 +299,18 @@ namespace RhythmDojo.Authoring
 
                     float x = X(time, area, start, duration);
                     AddRect(vertices, new Rect(x - thickness * 0.5f, area.yMin, thickness, area.height), tint);
+                }
+
+                for (int i = 1; i < Owner.TempoPoints.Count; i++)
+                {
+                    double time = Owner.TempoPoints[i].StartTimeSeconds - Owner.AudioOffset;
+                    if (time < start || time > start + duration)
+                    {
+                        continue;
+                    }
+
+                    float x = X(time, area, start, duration);
+                    AddRect(vertices, new Rect(x - 1, area.yMin, 2, area.height), new Color(0.35f, 0.8f, 1));
                 }
             }
 

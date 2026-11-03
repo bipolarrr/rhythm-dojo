@@ -34,6 +34,10 @@ namespace RhythmDojo.Tests
         private string previousPresentation;
         private string previousHardMode;
         private string previousRules;
+        private string previousPlayKeys;
+        private string previousModePlayKeys;
+        private bool hadPreviousModePlayKeys;
+        private GameModeDefinition previousKeyMode;
         private float previousMasterVolume,
             previousLodBias,
             previousShadowDistance;
@@ -46,6 +50,13 @@ namespace RhythmDojo.Tests
         public IEnumerator SetUp()
         {
             System.IO.Directory.CreateDirectory("Logs");
+            previousPlayKeys = PlayerPrefs.GetString(RhythmDojo.Services.PlayKeyBindings.StorageKey, "");
+            previousModePlayKeys = PlayerPrefs.GetString(RhythmDojo.Services.PlayKeyBindings.ModeStorageKey, "");
+            hadPreviousModePlayKeys = PlayerPrefs.HasKey(RhythmDojo.Services.PlayKeyBindings.ModeStorageKey);
+            previousKeyMode = RhythmDojo.Services.PlayKeyBindings.ConfiguredDefaultMode;
+            RhythmDojo.Services.PlayKeyBindings.ConfigureDefaultMode(null);
+            PlayerPrefs.DeleteKey(RhythmDojo.Services.PlayKeyBindings.StorageKey);
+            PlayerPrefs.DeleteKey(RhythmDojo.Services.PlayKeyBindings.ModeStorageKey);
             previousRules = PlayerPrefs.GetString(
                 RhythmDojo.Services.PlayRulesService.StorageKey,
                 ""
@@ -103,6 +114,23 @@ namespace RhythmDojo.Tests
         [UnityTearDown]
         public IEnumerator TearDown()
         {
+            RhythmDojo.Services.PlayKeyBindings.ConfigureDefaultMode(previousKeyMode);
+            if (!hadPreviousModePlayKeys)
+            {
+                PlayerPrefs.DeleteKey(RhythmDojo.Services.PlayKeyBindings.ModeStorageKey);
+            }
+            else
+            {
+                PlayerPrefs.SetString(RhythmDojo.Services.PlayKeyBindings.ModeStorageKey, previousModePlayKeys);
+            }
+            if (string.IsNullOrEmpty(previousPlayKeys))
+            {
+                PlayerPrefs.DeleteKey(RhythmDojo.Services.PlayKeyBindings.StorageKey);
+            }
+            else
+            {
+                PlayerPrefs.SetString(RhythmDojo.Services.PlayKeyBindings.StorageKey, previousPlayKeys);
+            }
             if (string.IsNullOrEmpty(previousRules))
             {
                 PlayerPrefs.DeleteKey(RhythmDojo.Services.PlayRulesService.StorageKey);
@@ -189,10 +217,11 @@ namespace RhythmDojo.Tests
 
         protected static IEnumerator Await(
             System.Func<bool> condition,
-            string message = "Scene transition timed out."
+            string message = "Scene transition timed out.",
+            double timeoutSeconds = 15
         )
         {
-            double deadline = Time.realtimeSinceStartupAsDouble + 15;
+            double deadline = Time.realtimeSinceStartupAsDouble + timeoutSeconds;
 
             while (
                 !condition()
@@ -203,6 +232,19 @@ namespace RhythmDojo.Tests
             {
                 Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline), message);
                 yield return null;
+            }
+        }
+
+        protected static void AssertClockRateVerified(RhythmDojo.Services.AudioSettingsService service)
+        {
+            Assert.That(service.ClockRateVerified, Is.True, service.BufferStatus);
+            Assert.That(service.ConsecutiveClockRateMeasurements, Is.EqualTo(2));
+            Assert.That(service.ClockRateMeasurements.Count, Is.GreaterThanOrEqualTo(2));
+            for (int i = service.ClockRateMeasurements.Count - 2; i < service.ClockRateMeasurements.Count; i++)
+            {
+                var measurement = service.ClockRateMeasurements[i];
+                Assert.That(measurement.LowerBound, Is.GreaterThanOrEqualTo(.99));
+                Assert.That(measurement.UpperBound, Is.LessThanOrEqualTo(1.01));
             }
         }
 
@@ -235,7 +277,9 @@ namespace RhythmDojo.Tests
             Assert.That(
                 hits[0].gameObject.GetComponentInParent<Button>(),
                 Is.EqualTo(button),
-                "Button is obscured."
+                "Button is obscured by " + hits[0].gameObject.name
+                    + " in " + hits[0].gameObject.scene.path
+                    + "; EventSystem: " + system.gameObject.scene.path
             );
             InputSystem.QueueStateEvent(mouse, new MouseState { position = point + Vector2.one });
             yield return null;

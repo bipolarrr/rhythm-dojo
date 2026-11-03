@@ -75,8 +75,20 @@ namespace RhythmDojo.UI
             view.accuracy.text = "정확도  " + result.Session.AccuracyRate.ToString("F2", CultureInfo.InvariantCulture) + "%";
             view.maxCombo.text = "최대 콤보  " + result.MaxCombo.ToString(CultureInfo.InvariantCulture);
             view.cover.sprite = result.Cover;
-            view.cover.enabled = result.Cover;
-            view.coverPlaceholder.gameObject.SetActive(!result.Cover);
+            if (!result.Cover || result.Cover == view.legacyFallbackCover)
+            {
+                view.cover.sprite = view.fallbackCover;
+            }
+            view.cover.enabled = view.cover.sprite;
+            view.coverPlaceholder.gameObject.SetActive(!view.cover.sprite);
+            if (view.cover.sprite)
+            {
+                var fit = view.cover.GetComponent<UnityEngine.UI.AspectRatioFitter>();
+                if (fit)
+                {
+                    fit.aspectRatio = view.cover.sprite.rect.width / view.cover.sprite.rect.height;
+                }
+            }
         }
 
         private void Back()

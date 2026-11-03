@@ -1,0 +1,1408 @@
+{
+  "success": true,
+  "command": "command test_status",
+  "data": {
+    "command": "test_status",
+    "parameters": {},
+    "result": {
+      "status": "completed",
+      "duration": 929.69,
+      "summary": {
+        "total": 197,
+        "passed": 192,
+        "failed": 2,
+        "skipped": 3,
+        "inconclusive": 0
+      },
+      "results": [
+        {
+          "FullName": "RhythmDojo.Tests.AudioFlowTests.AllBufferRequestsReportActualConfigurationAndChangedAudioPlaysAndRestarts",
+          "Status": "Passed",
+          "Duration": 75.8251922,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioFlowTests.GameplayMusicUsesSelectedVolumeAndRespondsToLiveChanges",
+          "Status": "Passed",
+          "Duration": 3.1129266,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioFlowTests.SoundSlidersChangeMixedOutputMuteAndRestoreSavedValues",
+          "Status": "Passed",
+          "Duration": 5.430626,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioFlowTests.TitleMusicReloadsMissingPreferencesAndRestartsAfterAudioReset",
+          "Status": "Passed",
+          "Duration": 2.5798724,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioFlowTests.TitleStartupRestoresSavedMasterAndBackgroundVolume",
+          "Status": "Passed",
+          "Duration": 2.009361,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioLeaseRecoveryTests.BorrowedAudioNeedsNoReloadAndIsNotDestroyed",
+          "Status": "Passed",
+          "Duration": 1.2993059,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioLeaseRecoveryTests.CancelledRecoveryDisposesLateResultAndCanRetry",
+          "Status": "Passed",
+          "Duration": 1.3238022,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioLeaseRecoveryTests.DisposalDuringRecoveryRejectsAndReleasesLateAudio",
+          "Status": "Passed",
+          "Duration": 1.2625367,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioLeaseRecoveryTests.LoaderCancellationWithoutNewResetDoesNotRetryForever",
+          "Status": "Passed",
+          "Duration": 1.3046261,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioLeaseRecoveryTests.OnlyLatestResetPublishesAndEveryLeaseReleasesOnce",
+          "Status": "Passed",
+          "Duration": 1.277577,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioRecoveryFlowTests.BuiltInAudioSurvivesResetWithoutReplacingBorrowedClip",
+          "Status": "Passed",
+          "Duration": 8.9443375,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioRecoveryFlowTests.ExitRemainsClickableDuringRecoveryAndLateClipIsReleased",
+          "Status": "Passed",
+          "Duration": 3.4047397,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioRecoveryFlowTests.ExternalWaveReloadsAfterResetAndReturnsEditorSession",
+          "Status": "Passed",
+          "Duration": 6.8547606,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioRecoveryFlowTests.InvalidatedBeforeGameplayInitializationExposesRecoveryWithoutAnotherReset",
+          "Status": "Passed",
+          "Duration": 2.246764,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioRecoveryFlowTests.MissingExternalWaveKeepsPauseAndRetryRestoresPlayback",
+          "Status": "Passed",
+          "Duration": 6.3388889,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioRecoveryFlowTests.ResetBeforeStartBlocksQueuedSpaceUntilAudioIsRecovered",
+          "Status": "Passed",
+          "Duration": 2.5879279,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioTimelineTests.GridCorrectionAppliesEnteredBpmAndPlaytestKeepsTheSameTiming",
+          "Status": "Passed",
+          "Duration": 1.1132243,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioTimelineTests.GridScrollsAndPansToNegativeTenMeasureWithMeterAndOriginChanges",
+          "Status": "Passed",
+          "Duration": 0.9865194,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioTimelineTests.ImportedWaveformSeekingZoomPlaybackAndGridEditsShareMusicTime",
+          "Status": "Failed",
+          "Duration": 2.3054037,
+          "Message": "  Expected: True\r\n  But was:  False\r\n",
+          "StackTrace": "at RhythmDojo.Tests.AudioTimelineTests.Click (UnityEngine.UI.Button button) [0x00000] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\PlayMode\\AudioTimelineTests.cs:470\r\nat RhythmDojo.Tests.AudioTimelineTests+<ImportedWaveformSeekingZoomPlaybackAndGridEditsShareMusicTime>d__2.MoveNext () [0x01360] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\PlayMode\\AudioTimelineTests.cs:319\r\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@bd7f943e9647\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\r\n"
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AuthoringFlowTests.CanceledEditorLoadStaysOnScreenAndAllowsRetry",
+          "Status": "Passed",
+          "Duration": 2.369605,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AuthoringFlowTests.DelayedPlaytestKeepsOptionsCapturedAtRequest",
+          "Status": "Passed",
+          "Duration": 2.1396087,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AuthoringFlowTests.UnsavedDocumentPlaytestReturnsSessionAndReleasesAudio",
+          "Status": "Passed",
+          "Duration": 4.5438435,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ChartEditorMenuTests.FileActionsSaveLoadAndPreserveCurrentDraftOnFailure",
+          "Status": "Passed",
+          "Duration": 1.5526187,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ChartEditorMenuTests.FileMenuImportsShowcaseGridAndSavesVersionThree",
+          "Status": "Passed",
+          "Duration": 1.5945698,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ChartEditorMenuTests.GeneratedMenuAppliesTimingAndUndoRedoRestoresNotes",
+          "Status": "Passed",
+          "Duration": 1.5006989,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ChartEditorMenuTests.ImportedAudioPlaysAndReturnsWithUnsavedSessionAndUndoHistory",
+          "Status": "Passed",
+          "Duration": 2.7044834,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ChartEditorMenuTests.PupaButtonPreservesDraftAndImportsBundledChartWithLocalAudio",
+          "Status": "Passed",
+          "Duration": 1.5596164,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ChartEditorScreenTests.DraggingUpCreatesHoldAndRightClickOnItsBodyRemovesIt",
+          "Status": "Passed",
+          "Duration": 1.5831333,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ChartEditorScreenTests.LayoutFillsSixteenNineAndSixteenTen",
+          "Status": "Passed",
+          "Duration": 0.7408278,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ChartEditorScreenTests.MouseClicksAddUniqueBeatNotesAndRightClickRemovesThem",
+          "Status": "Passed",
+          "Duration": 1.9144866,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ChartEditorScreenTests.PlainWheelScrollsTimelineWithoutChangingZoomAndCanPlaceLaterNotes",
+          "Status": "Passed",
+          "Duration": 2.1150848,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ChartProjectionRenderingTests.DeletionUsesClippedVisibleBoundsWithoutBeatSnappingAndPreviewSurvivesZoom",
+          "Status": "Passed",
+          "Duration": 0.7712252,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ChartProjectionRenderingTests.MaximumOverviewIncludesEveryBeatAndManyNotesWithoutExceedingMeshCapacity",
+          "Status": "Passed",
+          "Duration": 0.800728,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ChartProjectionRenderingTests.RenderAtSmallAndLargeResolutionsAcrossZoomScrollAndTempoBoundary",
+          "Status": "Passed",
+          "Duration": 2.1286199,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.DojoClickFeedbackTests.BurstUsesBoundedObjectsAndRipplesExpireWhilePaused",
+          "Status": "Passed",
+          "Duration": 2.0173502,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.DojoClickFeedbackTests.ClickEffectDoesNotBlockSettingsAndSurvivesSceneTransition",
+          "Status": "Passed",
+          "Duration": 1.8409598,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.DojoClickFeedbackTests.ClickSoundReachesOutputAfterTitlePlaySettingsAndGameplayTransitions",
+          "Status": "Passed",
+          "Duration": 7.9571502,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.GameplayFlowTests.DirectGameplaySceneUsesCopiedPlayRules",
+          "Status": "Passed",
+          "Duration": 2.054925,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.GameplayFlowTests.KeyboardNavigationAndStartRestartFocusLossUseActualActions",
+          "Status": "Passed",
+          "Duration": 2.815548,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.GameplayFlowTests.SixLaneDefinitionDrivesAllUnityAdapters",
+          "Status": "Passed",
+          "Duration": 2.2641827,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.GameplayHealthPlaytestTests.GaugeFailureContinuesAndLatchesOnceUntilRestart",
+          "Status": "Passed",
+          "Duration": 17.6596177,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.GameplayHealthPlaytestTests.HardConfiguredThreeMissesDrainFractionalHealthThenGameOver",
+          "Status": "Passed",
+          "Duration": 6.6461273,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.GameplayHealthPlaytestTests.HardDefaultMissImmediatelyShowsGameOver",
+          "Status": "Passed",
+          "Duration": 5.7291133,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.GameplayHealthPlaytestTests.HardPerfectPreservesHealthAndGoodImmediatelyShowsGameOver",
+          "Status": "Passed",
+          "Duration": 6.1706889,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.GameplayHealthPlaytestTests.HoldReleaseAndRegrabUsesOnlyMissedChecksAsPenalties",
+          "Status": "Passed",
+          "Duration": 16.2248532,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.GameplayHealthPlaytestTests.NormalMissesDamagePerfectAndGoodRecoverThenClear",
+          "Status": "Passed",
+          "Duration": 16.9443432,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.GameplayHealthPlaytestTests.NormalTenMissesGameOverThenSpaceRestoresHealth",
+          "Status": "Passed",
+          "Duration": 9.6373097,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.GameplayHitFeedbackTests.HitsReachAudioOutputWhileMissesStayQuietAndPoolsRemainBounded",
+          "Status": "Passed",
+          "Duration": 2.1963548,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.GameplayHitFeedbackTests.HoldGlowSurvivesBurstFadeAndResetRestoresCameraEvenWhenPaused",
+          "Status": "Passed",
+          "Duration": 2.4233176,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.GameplayHitFeedbackTests.RebindingDetachesOldEventsAndReturningToSelectionRemovesEffects",
+          "Status": "Passed",
+          "Duration": 2.6807511,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.GameplayHudFlowTests.GameplayKeepsDisplayCameraWhileWorldRendersIntoWindow",
+          "Status": "Passed",
+          "Duration": 1.9583098,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.GameplayHudFlowTests.GameplayWindowPreservesProjectionAndReleasesCameraOnDisable",
+          "Status": "Passed",
+          "Duration": 2.1128781,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.GameplayHudFlowTests.GameplayWindowRendersJudgmentLineBelowCenter",
+          "Status": "Passed",
+          "Duration": 2.3923673,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.GameplayHudFlowTests.HealthDepletionShowsGameOverFreezesNotesAndSpaceRestarts",
+          "Status": "Passed",
+          "Duration": 6.4106451,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.GameplayHudFlowTests.ReturnButtonInReadyStateLoadsSongSelectionAndReleasesSong",
+          "Status": "Passed",
+          "Duration": 2.770603,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.GameplayHudFlowTests.ReturnButtonIsHiddenWhilePlayingAndEscapeReturnsToSelection",
+          "Status": "Passed",
+          "Duration": 3.0540841,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.GameplayHudFlowTests.ReturnButtonReappearsAfterCompletionAndLoadsSongSelection",
+          "Status": "Passed",
+          "Duration": 4.2888732,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.GameplayHudFlowTests.TrainingFeedbackTracksHoldMissPeakComboAndFocusReset",
+          "Status": "Passed",
+          "Duration": 3.5180587,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.GameplayJudgmentTests.SpaceRestartClearsHeldLaneAndScoresThenAllowsPerfectRun",
+          "Status": "Passed",
+          "Duration": 15.9222923,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.GameplayJudgmentTests.TempoBoundaryHoldIsPerfectWithBpmScroll",
+          "Status": "Passed",
+          "Duration": 12.7160388,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.GameplayJudgmentTests.TempoBoundaryHoldIsPerfectWithConstantScroll",
+          "Status": "Passed",
+          "Duration": 12.3580443,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.GameplayJudgmentTests.TimestampedLaneActionsJudgeMixedRunDespiteFrameHitch",
+          "Status": "Passed",
+          "Duration": 14.1340873,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.GameplayJudgmentTests.UnplayedTapsAndHoldStartsAllBecomeMisses",
+          "Status": "Passed",
+          "Duration": 14.1004489,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.GameplayPauseFlowTests.EscapeDuringCountdownReopensPauseWithoutResumingTheClock",
+          "Status": "Passed",
+          "Duration": 3.735196,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.GameplayPauseFlowTests.PauseSettingsCountdownRestartAndExitPreserveTheSongUntilRequested",
+          "Status": "Passed",
+          "Duration": 14.6516922,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.HardModeFlowTests.ConfiguredHardModeDoesNotRecoverAndPausesExactlyAtTheDamageLimit",
+          "Status": "Passed",
+          "Duration": 8.1948727,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.HardModeFlowTests.ExpandedRuleDropdownsRenderAllKoreanLabelsAndAllowSelection",
+          "Status": "Passed",
+          "Duration": 4.6434211,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.HardModeFlowTests.HardRuleRowsSaveValidateCountsAndNormalModeIgnoresThem",
+          "Status": "Passed",
+          "Duration": 3.8916337,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.HardModeFlowTests.StrictHardDefaultsFailOnTheFirstGoodJudgment",
+          "Status": "Passed",
+          "Duration": 4.5400034,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.KeySettingsFlowTests.ChangingAnotherModeDoesNotReleaseCurrentHeldInput",
+          "Status": "Passed",
+          "Duration": 2.7317803,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.KeySettingsFlowTests.CustomKeysDriveGameplayAndPausedChangesRefreshHudImmediately",
+          "Status": "Passed",
+          "Duration": 12.6688193,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.KeySettingsFlowTests.KeyTabCapturesPersistsCancelsRejectsDuplicatesAndResets",
+          "Status": "Passed",
+          "Duration": 3.4542744,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.KeySettingsFlowTests.PausedSettingsUseOriginalPlayModeWhenSelectionChangesAndResultsKeepLabels",
+          "Status": "Passed",
+          "Duration": 8.1876819,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.KeySettingsFlowTests.SelectedSixLaneModeBuildsScrollableRowsAndTitleKeepsCatalogDefault",
+          "Status": "Passed",
+          "Duration": 3.7783,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.BootstrapFallbackStillStartsWithoutATitleView",
+          "Status": "Passed",
+          "Duration": 2.3503869,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.BreakingBoardDefersActionAndBlocksOtherButtons",
+          "Status": "Passed",
+          "Duration": 2.4603211,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.CaptureMenuAndKoreanQuitPopup",
+          "Status": "Passed",
+          "Duration": 4.8762388,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.EditorStaysBehindDoorsAndOpensFromInsideTheDojo",
+          "Status": "Passed",
+          "Duration": 4.9874233,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.EntranceTimeoutOffersRecoveryAndCleansUp",
+          "Status": "Passed",
+          "Duration": 2.6396565,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.EntranceWaitsForReadyAndRestoresSelectionInput",
+          "Status": "Passed",
+          "Duration": 5.5078557,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.LogoCanCollapseMenuAndHiddenButtonsCannotStart",
+          "Status": "Passed",
+          "Duration": 3.3353392,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.LogoExpandsMenuAndPlayStartsOnceWithoutDuplicateListeners",
+          "Status": "Passed",
+          "Duration": 2.5079472,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.PlaqueRejectsCornersAndKeyboardCanExpandAndStart",
+          "Status": "Passed",
+          "Duration": 4.4350308,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.PlayDismissesMenuImmediatelyWithoutWaitingForBoardDelay",
+          "Status": "Passed",
+          "Duration": 2.1818755,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.PlayOpensDoorsWithLogoHalvesAttachedUntilFullyOutsideTheDoorway",
+          "Status": "Passed",
+          "Duration": 3.3718147,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.QuitPopupBlocksBackgroundAndNoRestoresMenu",
+          "Status": "Passed",
+          "Duration": 3.4194744,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.SceneLoadingCompletesBeforeDoorAnimationStarts",
+          "Status": "Passed",
+          "Duration": 4.966178,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.SettingsRequestsSettingsWithoutStartingTheGame",
+          "Status": "Passed",
+          "Duration": 2.7133082,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.SlidingDoorsRevealDummiesAndReverseWithoutStartingEarly",
+          "Status": "Passed",
+          "Duration": 4.4388035,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.StartLoadsBootstrapThenExistingSongSelection",
+          "Status": "Passed",
+          "Duration": 4.8968087,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.TitlePreparesSelectionWithoutShowingItOrStealingInput",
+          "Status": "Passed",
+          "Duration": 2.1579398,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.TitleSettingsBackReturnsToTitle",
+          "Status": "Passed",
+          "Duration": 2.6004123,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.YesRequestsQuitExactlyOnceWithoutStarting",
+          "Status": "Passed",
+          "Duration": 2.7204057,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PixelDojoCursorTests.FistMarkWaitsForContactStaysAtTheExtendedPoseAndFadesWhilePaused",
+          "Status": "Passed",
+          "Duration": 2.9589073,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PixelDojoCursorTests.FistReachesForwardAndReturnsWithNoRandomImpactLayer",
+          "Status": "Passed",
+          "Duration": 1.8061736,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PixelDojoCursorTests.NativeCursorUsesPressedArtworkOnlyWhileLeftButtonIsHeld",
+          "Status": "Passed",
+          "Duration": 1.9447698,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PixelDojoCursorTests.PunchFinishesAfterQuickReleaseWhilePaused",
+          "Status": "Passed",
+          "Duration": 1.8821957,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PixelDojoCursorTests.RepeatedClicksReuseFramesAndFocusLossRestoresTheNativePointer",
+          "Status": "Passed",
+          "Duration": 1.7923356,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ProjectLibraryFlowTests.ModalScopeRestoresInputAndFocusAfterOpeningFailureAndDispose",
+          "Status": "Passed",
+          "Duration": 1.6610214,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ProjectLibraryFlowTests.NestedModalScopesKeepInputBlockedUntilTheLastOwnerCloses",
+          "Status": "Passed",
+          "Duration": 1.5845284,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ProjectLibraryFlowTests.SavedThreeChartProjectSelectsLoadsAndRefreshesEachSlot",
+          "Status": "Passed",
+          "Duration": 8.0498786,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PupaResultsFlowTests.CorrectedPupaClockKeepsAudioNotesAndTimestampedInputTogether",
+          "Status": "Passed",
+          "Duration": 3.8390993,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PupaResultsFlowTests.EditorPupaShowsResultsBeforeReturningTheUnsavedSession",
+          "Status": "Passed",
+          "Duration": 5.2411862,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PupaResultsFlowTests.PupaAudioTailTransitionsPromptlyWithEveryJudgmentPreserved",
+          "Status": "Passed",
+          "Duration": 8.0863242,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PupaResultsFlowTests.RealPupaAudioFinishesAndAutomaticallyLoadsResults",
+          "Status": "Failed",
+          "Duration": 5.3592647,
+          "Message": "PUPA playback was reset before completion: FocusLost",
+          "StackTrace": "at RhythmDojo.Tests.PupaResultsFlowTests+<RealPupaAudioFinishesAndAutomaticallyLoadsResults>d__5.MoveNext () [0x004c3] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\PlayMode\\PupaResultsFlowTests.cs:234\r\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@bd7f943e9647\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\r\n"
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PupaResultsFlowTests.ShortenedOutroStillPreservesTheFinalHoldReleaseWindow",
+          "Status": "Passed",
+          "Duration": 4.0556169,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PupaResultsFlowTests.SongSelectionPupaCompletesAndKeepsTheWholeChart",
+          "Status": "Passed",
+          "Duration": 4.63031,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ResultsFlowTests.CompletionDisplaysThisPlayAndNextPlayReplacesIt",
+          "Status": "Passed",
+          "Duration": 7.6400561,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ResultsFlowTests.DirectResultsSceneHasEmptyStateAndBackWorks",
+          "Status": "Passed",
+          "Duration": 3.116995,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ResultsFlowTests.EarlyFailureKeepsFutureNotesUnjudgedInWholeChartReview",
+          "Status": "Passed",
+          "Duration": 4.3059384,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ResultsFlowTests.GameOverDisplaysFailureAndEscapeDuringPlaySkipsResults",
+          "Status": "Passed",
+          "Duration": 7.1458058,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ResultsFlowTests.MoreShowsPlayedChartAndPerNoteJudgmentsThenReturnsToSameResult",
+          "Status": "Passed",
+          "Duration": 6.0017166,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ResultsFlowTests.RealClockCompletionTransitionsWithoutUserInput",
+          "Status": "Passed",
+          "Duration": 16.6558732,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ResultsFlowTests.RestartDuringOutcomeDelayCancelsPendingResults",
+          "Status": "Passed",
+          "Duration": 5.271839,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ResultsFlowTests.RestartResetsStatisticsAndGoodJudgmentsReachResults",
+          "Status": "Passed",
+          "Duration": 4.4347665,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ScenePreparationFlowTests.ClosingModalRestoresAnEmptyFocusAfterSelectionResume",
+          "Status": "Passed",
+          "Duration": 1.6949953,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ScenePreparationFlowTests.DelayedPreparationPreservesAnEmptyTitleFocus",
+          "Status": "Passed",
+          "Duration": 2.5138561,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ScenePreparationFlowTests.DisposingOwnerDrainsOutstandingLoadWithoutInitializingIt",
+          "Status": "Passed",
+          "Duration": 2.5353124,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ScenePreparationFlowTests.FinalOwnerRestoresOriginalStatesAndNotifiesOnceEvenAfterAnotherParticipantThrows",
+          "Status": "Passed",
+          "Duration": 1.6676329,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ScenePreparationFlowTests.InvalidatedLoadNeverInitializesAfterEditorExit",
+          "Status": "Passed",
+          "Duration": 3.2549931,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ScenePreparationFlowTests.LoadFailureAllowsColdEntranceRetry",
+          "Status": "Passed",
+          "Duration": 5.1595429,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ScenePreparationFlowTests.PopupKeepsFocusWhilePreparationFinishesThenEntranceRestoresSelectionFocus",
+          "Status": "Passed",
+          "Duration": 5.5694307,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ScenePreparationFlowTests.ReentryQueuesNewGenerationUntilInvalidatedLoadIsDrained",
+          "Status": "Passed",
+          "Duration": 2.9842817,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ScenePreparationFlowTests.TimeoutDiscardsUninitializedSceneAndAllowsRetry",
+          "Status": "Passed",
+          "Duration": 2.8223442,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SelectionBrowserTests.CompletedRunSavesBestAndAbortedRunDoesNotCreateRecord",
+          "Status": "Passed",
+          "Duration": 5.3654598,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SelectionBrowserTests.DemoCoverAndRowsRenderAtBothResolutions",
+          "Status": "Passed",
+          "Duration": 3.6073261,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SelectionBrowserTests.EscapePopupBlocksPlaybackAndReturnsToTitle",
+          "Status": "Passed",
+          "Duration": 2.773767,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SelectionBrowserTests.FavoritesEmptyStateAndSortingUseSongIds",
+          "Status": "Passed",
+          "Duration": 2.6466665,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SelectionBrowserTests.KeyboardSelectionKeepsRowsVisibleWithDifferentHeightsAndSpacing",
+          "Status": "Passed",
+          "Duration": 3.9339855,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SelectionBrowserTests.TimingAndOptionsSurviveSettingsAndSceneReturn",
+          "Status": "Passed",
+          "Duration": 3.08152,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SettingsFlowTests.BufferSelectionWithoutApplyLeavesActualAudioUnchanged",
+          "Status": "Passed",
+          "Duration": 1.8259813,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SettingsFlowTests.BufferValidationBlocksEarlyCloseAndShowsTheAppliedConfiguration",
+          "Status": "Passed",
+          "Duration": 8.5047516,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SettingsFlowTests.DisplayOptionsReportActualScreenSizeForAllCombinations",
+          "Status": "Passed",
+          "Duration": 39.2115047,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SettingsFlowTests.FrameRateOptionsApplySavedLimitsAndMeasureActualFrames",
+          "Status": "Passed",
+          "Duration": 16.8858035,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SettingsFlowTests.GameplayTabPreservesAudioAndGraphicsAndSavesTimingLimits",
+          "Status": "Passed",
+          "Duration": 3.9095637,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SettingsFlowTests.SettingsButtonOpensSettingsAndBackPreservesSongOptions",
+          "Status": "Passed",
+          "Duration": 2.0401063,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SettingsFlowTests.SettingsMouseAndKeyboardApplyActualBufferAndKeepSelection",
+          "Status": "Passed",
+          "Duration": 20.0538247,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SettingsFlowTests.SettingsPopupOpensImmediatelyAndReusesInstanceWithoutLoadingScene",
+          "Status": "Passed",
+          "Duration": 2.1006339,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SettingsFlowTests.SettingsPopupTabsSaveAudioAndApplySeparateGraphicsControls",
+          "Status": "Passed",
+          "Duration": 11.56084,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SongClockResumeTests.BeforeAudioResumeWaitsForItsRemainingLeadAndPendingPauseCancels",
+          "Status": "Passed",
+          "Duration": 2.2768856,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SongClockResumeTests.EditorStartPositionKeepsAudioAnchorAndDoesNotReplayPastEnd",
+          "Status": "Passed",
+          "Duration": 2.0626734,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SongClockResumeTests.EscapeDuringResumeLeadKeepsSessionAndSourcePaused",
+          "Status": "Passed",
+          "Duration": 3.2271689,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SongClockResumeTests.ResetDuringMenuResumeLeadReopensPauseWithoutAdvancingSession",
+          "Status": "Passed",
+          "Duration": 5.9422131,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SongClockResumeTests.ResetDuringScheduledResumeKeepsTimeFrozenUntilNewResume",
+          "Status": "Passed",
+          "Duration": 2.261466,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SongClockResumeTests.ResumeAfterAudioEndDoesNotReplayTheFinalSample",
+          "Status": "Passed",
+          "Duration": 2.288671,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SongClockResumeTests.ResumeSeeksFromFrozenLogicalTimeInsteadOfPausedSourceCursor",
+          "Status": "Passed",
+          "Duration": 2.2778061,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SongClockResumeTests.ResumeWaitsForScheduledAnchorWithoutAdvancingLogicalTime",
+          "Status": "Passed",
+          "Duration": 2.3991473,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SongClockResumeTests.TwentyResumesKeepSourceSamplesAlignedAcrossBuffersAndOffsets",
+          "Status": "Passed",
+          "Duration": 39.9506583,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SongSelectionFlowTests.DifficultyDropdownChangesJudgmentWithoutChangingScroll",
+          "Status": "Passed",
+          "Duration": 1.7767568,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SongSelectionFlowTests.HorizontalDifficultyButtonsKeepSelectionJudgmentAndOptionsInSync",
+          "Status": "Passed",
+          "Duration": 2.2233112,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SongSelectionFlowTests.LeftAndRightChangeDifficultyAndRespectPopupAndSliderFocus",
+          "Status": "Passed",
+          "Duration": 2.6168048,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SongSelectionFlowTests.ModePopupSelectsNormalAndHardWithoutChangingGameplayOptions",
+          "Status": "Passed",
+          "Duration": 2.7020653,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SongSelectionFlowTests.MouseClickUsesUiInputModuleToLoadSong",
+          "Status": "Passed",
+          "Duration": 2.5212659,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SongSelectionFlowTests.MultiplierDropdownChangesSpeedWithoutChangingSong",
+          "Status": "Passed",
+          "Duration": 1.7410427,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SongSelectionFlowTests.RenamedLayoutStillLoadsSongThroughExplicitViewReferences",
+          "Status": "Passed",
+          "Duration": 2.6537401,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SongSelectionFlowTests.ScrollModeDropdownChangesModeWithoutChangingDifficulty",
+          "Status": "Passed",
+          "Duration": 1.6842869,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SongSelectionFlowTests.SelectionKeepsSpeedIndependentAndBothSongsLoad",
+          "Status": "Passed",
+          "Duration": 4.1370936,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SongSelectionFlowTests.SongRowsKeyboardSelectionUpdatesSelectedSong",
+          "Status": "Passed",
+          "Duration": 2.0355554,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SongSelectionFlowTests.SpeedSliderSupportsTenthsAndSavedSpeedIsAppliedToGameplay",
+          "Status": "Passed",
+          "Duration": 3.5420922,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.BpmFieldsSynchronizeAndCommitBothWays",
+          "Status": "Passed",
+          "Duration": 2.2010117,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.ControlEnterAppliesSettingsWithoutSubmittingSelectedToolButton",
+          "Status": "Passed",
+          "Duration": 1.7635445,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.CurrentPositionAutoTestUsesTemporaryNotesAndReturnsToExtendedEditor",
+          "Status": "Passed",
+          "Duration": 6.0417334,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.DifficultyButtonsLiveInSettingsAndSelectAllSlots",
+          "Status": "Passed",
+          "Duration": 2.0964201,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.EraserButtonDeletesSelectionAndUndoRestoresWholeGroup",
+          "Status": "Passed",
+          "Duration": 2.1171171,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.EraserMenuAndClickDeleteSelectedGroup",
+          "Status": "Passed",
+          "Duration": 1.8840435,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.EscapeReturnsToTitleWhenSavedAndNoMenuIsOpen",
+          "Status": "Passed",
+          "Duration": 2.6542316,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.FileShortcutsAndEscapeRespectMenusDialogsAndTyping",
+          "Status": "Passed",
+          "Duration": 2.6304391,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.GrabCancelsOutsideGridAndDoesNotDrawOnEmptySpace",
+          "Status": "Passed",
+          "Duration": 1.8341467,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.GrabMovesTapAndHoldWithPointerDragAndUndo",
+          "Status": "Passed",
+          "Duration": 1.9210006,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.GrabSelectedNoteMovesWholeSelectionAndLeavesOthersAlone",
+          "Status": "Passed",
+          "Duration": 2.235873,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.GrabSelectionClampsAsAGroupAtFirstLaneAndTimeZero",
+          "Status": "Passed",
+          "Duration": 1.7223438,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.JacketAndVolumeSurviveSavingAndReloadingWithoutOptionalSound",
+          "Status": "Passed",
+          "Duration": 1.7463563,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.KindSelectionMirrorAndQuantizationUseTheExistingSession",
+          "Status": "Passed",
+          "Duration": 1.6105083,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.LeftToolIconsSelectDrawEraseAndGrabWithVisibleSelection",
+          "Status": "Passed",
+          "Duration": 2.7928307,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.MenusOpenOnClickSwitchOnHoverAndCloseAfterAnAction",
+          "Status": "Passed",
+          "Duration": 2.3569195,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.MenusPreviewOnHoverPinOnClickAndExitCanBeCancelled",
+          "Status": "Passed",
+          "Duration": 1.6336812,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.NewAfterSavingDoesNotAskUntilResourcesChange",
+          "Status": "Passed",
+          "Duration": 1.6838553,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.NewFilesStartWithEasySelected",
+          "Status": "Passed",
+          "Duration": 1.5144637,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.NewSaveFailureKeepsCurrentWorkAndAllowsNo",
+          "Status": "Passed",
+          "Duration": 1.5424874,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.NewWithUnsavedChangesWaitsForNoAndDoesNotSave",
+          "Status": "Passed",
+          "Duration": 1.5063508,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.NewWithYesSavesCurrentNotesAndResourcesBeforeReplacing",
+          "Status": "Passed",
+          "Duration": 1.512372,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.OriginalEditorKeepsItsStandardDefault",
+          "Status": "Passed",
+          "Duration": 2.3347563,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.OutsideClickAndEscapeDismissMenusWithoutEditingTheChart",
+          "Status": "Passed",
+          "Duration": 1.9005976,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.QuantizationButtonStartsAtQuarterCyclesAndSynchronizesAllControls",
+          "Status": "Passed",
+          "Duration": 2.5366121,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.Saiki128To256To64KeepsScrollSpeedAndPlacesNotesOnResizedBeatSpacing",
+          "Status": "Skipped",
+          "Duration": 1.4707812,
+          "Message": "Place the local Saiki verification song at LocalAudio/Saiki.wav.",
+          "StackTrace": "at RhythmDojo.Tests.WorkspaceEditorTests+<Saiki128To256To64KeepsScrollSpeedAndPlacesNotesOnResizedBeatSpacing>d__15.MoveNext () [0x00070] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\PlayMode\\WorkspaceEditorTests.cs:226\r\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@bd7f943e9647\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\r\n"
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.SaikiAt128BpmCanDragAndWheelBeforeFirstMeasure",
+          "Status": "Skipped",
+          "Duration": 1.6268858,
+          "Message": "Place the local Saiki verification song at LocalAudio/Saiki.wav.",
+          "StackTrace": "at RhythmDojo.Tests.WorkspaceEditorTests+<SaikiAt128BpmCanDragAndWheelBeforeFirstMeasure>d__14.MoveNext () [0x00084] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\PlayMode\\WorkspaceEditorTests.cs:132\r\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@bd7f943e9647\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\r\n"
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.SaveAsCreatesIndependentSongAndKeepsOriginal",
+          "Status": "Passed",
+          "Duration": 1.924086,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.SaveAsFailureKeepsCurrentSessionAndNameForRetry",
+          "Status": "Passed",
+          "Duration": 1.6438143,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.SaveAsRequiresANameAndCancelKeepsCurrentWork",
+          "Status": "Passed",
+          "Duration": 1.6734734,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.SettingsPathsImportOnEndEditAndKeepSettingsOpen",
+          "Status": "Passed",
+          "Duration": 2.0774957,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.SettingsTitleAndArtistCommitWhenFocusMoves",
+          "Status": "Passed",
+          "Duration": 1.9354737,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.ShortcutKeyEventsResolveEveryCommandWithExactModifiers",
+          "Status": "Passed",
+          "Duration": 2.6947747,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.ShortcutLabelsAndToolDifficultyEditingCommandsStayInSync",
+          "Status": "Passed",
+          "Duration": 2.8131984,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.SpaceTogglesPlaybackButNotWhileTypingOrConfirming",
+          "Status": "Passed",
+          "Duration": 2.2469345,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.TempoButtonEditsCursorBpmAndSettingsKeepsDetailedGridControls",
+          "Status": "Skipped",
+          "Duration": 1.567051,
+          "Message": "Place the local Saiki verification song at LocalAudio/Saiki.wav.",
+          "StackTrace": "at RhythmDojo.Tests.WorkspaceEditorTests+<TempoButtonEditsCursorBpmAndSettingsKeepsDetailedGridControls>d__16.MoveNext () [0x00088] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\PlayMode\\WorkspaceEditorTests.cs:318\r\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@bd7f943e9647\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\r\n"
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.TempoDialogRejectsInvalidBpmAndCancelsWithoutChangingTiming",
+          "Status": "Passed",
+          "Duration": 2.1283191,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.VolumeDragUpdatesPercentFillAndSavedValue",
+          "Status": "Passed",
+          "Duration": 1.7703095,
+          "Message": null,
+          "StackTrace": null
+        }
+      ]
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "C:\\Users\\song\\RhythmDojo-pr-quality"
+    },
+    "success": true
+  },
+  "errors": [],
+  "warnings": []
+}

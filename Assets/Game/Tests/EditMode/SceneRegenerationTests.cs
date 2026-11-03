@@ -20,8 +20,12 @@ namespace RhythmDojo.Tests
                 SceneBuilder.SelectionPath,
                 SceneBuilder.GameplayPath,
                 SceneBuilder.SettingsPath,
+                SceneBuilder.ResultsPath,
+                ChartEditorSceneBuilder.ScenePath,
             };
+            // Settings generation also rewrites the shared popup used by title and pause.
             var originals = paths
+                .Concat(new[] { "Assets/Game/Resources/UI/SettingsPopup.prefab" })
                 .SelectMany(path => new[] { path, path + ".meta" })
                 .ToDictionary(path => path, File.ReadAllBytes);
             var guids = paths.ToDictionary(path => path, AssetDatabase.AssetPathToGUID);

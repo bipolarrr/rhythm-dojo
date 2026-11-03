@@ -18,6 +18,33 @@ namespace RhythmDojo.Tests
 {
     public sealed class PupaResultsFlowTests : GameplayTestContext
     {
+        [System.Serializable]
+        private sealed class PlaybackTimingMeasurement
+        {
+            public double startedRealtime;
+            public double startedDsp;
+            public double scheduledStartDsp;
+            public double chartCompletionTime;
+            public double chartOffset;
+            public double clipDurationSeconds;
+            public int sampleCount;
+            public int frequency;
+            public int dspBufferLength;
+            public int dspBufferCount;
+            public int outputSampleRate;
+            public double lastPlayingRealtime;
+            public double completedRealtime = -1;
+            public double completedDsp = -1;
+            public double resultsRealtime = -1;
+            public double resultsDsp = -1;
+            public double maximumFrameGapSeconds;
+            public double wallElapsedSeconds;
+            public double audioElapsedSeconds;
+            public double outcomeDelayLowerSeconds;
+            public double outcomeDelayUpperSeconds;
+            public bool clockStoppedAtCompletion;
+        }
+
         private static SongDocument PupaDocument(SongDefinition source)
         {
             var project = new SongProjectJson().Deserialize(Resources.Load<TextAsset>("Authoring/Pupa").text);
@@ -136,13 +163,9 @@ namespace RhythmDojo.Tests
         [Category("LocalAudio")]
         public IEnumerator RealPupaAudioFinishesAndAutomaticallyLoadsResults()
         {
-            string path = System.IO.Path.GetFullPath("LocalAudio/PUPA.wav");
-
-            if (!System.IO.File.Exists(path))
-            {
-                Assert.Ignore("Requires the separately supplied LocalAudio/PUPA.wav.");
-            }
-
+            // Legacy test names retain the bundled chart; audio is an independent external fixture.
+            using var wave = new TemporaryWaveFile(131.54, .5033333333333334);
+            string path = wave.Path;
             var load = ChartEditorCompositionRoot.LoadAudio(path, CancellationToken.None);
             yield return Await(() => load.IsCompleted);
             Assert.That(load.IsFaulted, Is.False, load.Exception?.ToString());
@@ -174,27 +197,86 @@ namespace RhythmDojo.Tests
 
             yield return null;
 #endif
+            var clock = Object.FindFirstObjectByType<SongClock>();
+            AudioSettings.GetDSPBufferSize(out int bufferLength, out int bufferCount);
             double started = Time.realtimeSinceStartupAsDouble;
             double deadline = started + game.Chart.CompletionTime + 15;
-            game.StartSession();
-
-            while (!Object.FindFirstObjectByType<ResultsScreen>())
+            var measurement = new PlaybackTimingMeasurement
             {
-                if (game && game.Session != null && game.Session.State == SessionState.Ready)
+                startedRealtime = started,
+                startedDsp = AudioSettings.dspTime,
+                chartCompletionTime = game.Chart.CompletionTime,
+                chartOffset = document.AudioOffset,
+                clipDurationSeconds = (double)lease.Clip.samples / lease.Clip.frequency,
+                sampleCount = lease.Clip.samples,
+                frequency = lease.Clip.frequency,
+                dspBufferLength = bufferLength,
+                dspBufferCount = bufferCount,
+                outputSampleRate = AudioSettings.outputSampleRate,
+                lastPlayingRealtime = started,
+            };
+            double previousFrame = started;
+            game.StartSession();
+            measurement.scheduledStartDsp = clock.ScheduledStartDspTime;
+
+            try
+            {
+                while (!Object.FindFirstObjectByType<ResultsScreen>())
                 {
-                    Assert.Fail("PUPA playback was reset before completion: " + game.ReadModel.Snapshot.ReadyReason);
+                    double observedRealtime = Time.realtimeSinceStartupAsDouble;
+                    measurement.maximumFrameGapSeconds = System.Math.Max(
+                        measurement.maximumFrameGapSeconds, observedRealtime - previousFrame);
+                    previousFrame = observedRealtime;
+                    if (game && game.Session != null)
+                    {
+                        if (game.Session.State == SessionState.Ready)
+                        {
+                            Assert.Fail("PUPA playback was reset before completion: " + game.ReadModel.Snapshot.ReadyReason);
+                        }
+                        if (game.Session.State == SessionState.Playing)
+                        {
+                            measurement.lastPlayingRealtime = observedRealtime;
+                        }
+                        else if (game.Session.State == SessionState.Completed && measurement.completedRealtime < 0)
+                        {
+                            measurement.completedRealtime = observedRealtime;
+                            measurement.completedDsp = AudioSettings.dspTime;
+                            measurement.clockStoppedAtCompletion = !clock.Running;
+                        }
+                    }
+
+                    Assert.That(observedRealtime, Is.LessThan(deadline),
+                        "PUPA audio ended without automatic result transition.");
+                    yield return null;
                 }
 
-                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline),
-                    "PUPA audio ended without automatic result transition.");
-                yield return null;
+                measurement.resultsRealtime = Time.realtimeSinceStartupAsDouble;
+                measurement.resultsDsp = AudioSettings.dspTime;
+                measurement.maximumFrameGapSeconds = System.Math.Max(
+                    measurement.maximumFrameGapSeconds, measurement.resultsRealtime - previousFrame);
+                measurement.wallElapsedSeconds = measurement.resultsRealtime - started;
+                measurement.audioElapsedSeconds = measurement.resultsDsp - measurement.scheduledStartDsp;
+                measurement.outcomeDelayLowerSeconds = measurement.resultsRealtime - measurement.completedRealtime;
+                measurement.outcomeDelayUpperSeconds = measurement.resultsRealtime - measurement.lastPlayingRealtime;
+            }
+            finally
+            {
+                System.IO.Directory.CreateDirectory("Logs/pr-quality-remediation");
+                System.IO.File.WriteAllText("Logs/pr-quality-remediation/final-pupa-timing.json",
+                    JsonUtility.ToJson(measurement, true));
             }
 
+            Assert.That(measurement.completedRealtime, Is.GreaterThanOrEqualTo(started));
+            Assert.That(measurement.clockStoppedAtCompletion, Is.True);
+            Assert.That(measurement.audioElapsedSeconds,
+                Is.GreaterThan(document.Notes.Max(note => note.EndTime) - document.AudioOffset));
+            Assert.That(measurement.audioElapsedSeconds,
+                Is.LessThan(measurement.clipDurationSeconds - 6),
+                "Trailing audio must not delay Results, measured from the scheduled audio DSP anchor.");
+            // Completion lies between the last Playing and first Completed observations.
+            // The interval must be consistent with the one-second outcome display contract.
+            Assert.That(measurement.outcomeDelayUpperSeconds, Is.GreaterThanOrEqualTo(1));
             yield return null;
-            Assert.That(Time.realtimeSinceStartupAsDouble - started,
-                Is.GreaterThan(document.Notes.Max(note => note.EndTime)));
-            Assert.That(Time.realtimeSinceStartupAsDouble - started,
-                Is.LessThan(lease.Clip.length - 6), "Trailing audio must not delay Results.");
             Assert.That(flow.LastResult.Title, Is.EqualTo("PUPA"));
             Assert.That(flow.LastResult.Session.State, Is.EqualTo(SessionState.Completed));
             Assert.That(flow.LastResult.Session.Resolved, Is.EqualTo(flow.LastResult.Session.TotalNotes));
@@ -206,13 +288,9 @@ namespace RhythmDojo.Tests
         [Category("LocalAudio")]
         public IEnumerator CorrectedPupaClockKeepsAudioNotesAndTimestampedInputTogether()
         {
-            string path = System.IO.Path.GetFullPath("LocalAudio/PUPA.wav");
-
-            if (!System.IO.File.Exists(path))
-            {
-                Assert.Ignore("Requires the separately supplied LocalAudio/PUPA.wav.");
-            }
-
+            // Legacy test names retain the bundled chart; audio is an independent external fixture.
+            using var wave = new TemporaryWaveFile(131.54, .5033333333333334);
+            string path = wave.Path;
             var load = ChartEditorCompositionRoot.LoadAudio(path, CancellationToken.None);
             yield return Await(() => load.IsCompleted);
             Assert.That(load.IsFaulted, Is.False, load.Exception?.ToString());
@@ -303,13 +381,9 @@ namespace RhythmDojo.Tests
         [Category("LocalAudio")]
         public IEnumerator PupaAudioTailTransitionsPromptlyWithEveryJudgmentPreserved()
         {
-            string path = System.IO.Path.GetFullPath("LocalAudio/PUPA.wav");
-
-            if (!System.IO.File.Exists(path))
-            {
-                Assert.Ignore("Requires the separately supplied LocalAudio/PUPA.wav.");
-            }
-
+            // Legacy test names retain the bundled chart; audio is an independent external fixture.
+            using var wave = new TemporaryWaveFile(131.54, .5033333333333334);
+            string path = wave.Path;
             var load = ChartEditorCompositionRoot.LoadAudio(path, CancellationToken.None);
             yield return Await(() => load.IsCompleted);
             Assert.That(load.IsFaulted, Is.False, load.Exception?.ToString());

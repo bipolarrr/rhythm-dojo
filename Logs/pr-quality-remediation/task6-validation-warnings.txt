@@ -1,0 +1,75 @@
+UnityEngine.UI.MaskableGraphic:OnValidate () (at ./Library/PackageCache/com.unity.ugui@27635d171b1a/Runtime/UGUI/UI/Core/MaskableGraphic.cs:199)
+UnityEditor.TestTools.TestRunner.TestRun.Tasks.Scene.RestoreSceneSetupTask/<Execute>d__3:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@bd7f943e9647/UnityEditor.TestRunner/TestRun/Tasks/Scene/RestoreSceneSetupTask.cs:23)
+UnityEditor.TestTools.TestRunner.TestRun.TestJobRunner:ExecuteStep () (at ./Library/PackageCache/com.unity.test-framework@bd7f943e9647/UnityEditor.TestRunner/TestRun/TestJobRunner.cs:173)
+UnityEditor.TestTools.TestRunner.TestRun.TestJobRunner:ExecuteCallback () (at ./Library/PackageCache/com.unity.test-framework@bd7f943e9647/UnityEditor.TestRunner/TestRun/TestJobRunner.cs:108)
+UnityEditor.EditorApplication:Internal_CallUpdateFunctions ()
+
+[./Library/PackageCache/com.unity.test-framework@bd7f943e9647/UnityEditor.TestRunner/TestRun/Tasks/Scene/RestoreSceneSetupTask.cs line 23]
+
+SendMessage cannot be called during Awake, CheckConsistency, or OnValidate (Artwork Border: OnRectTransformDimensionsChange)
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.RectTransform:set_anchorMin (UnityEngine.Vector2)
+RhythmDojo.UI.PixelDojoFrameGraphic:RefreshArtwork () (at Assets/Game/Scripts/Runtime/UI/Views/PixelDojoFrameGraphic.cs:51)
+RhythmDojo.UI.PixelDojoFrameGraphic:SetAllDirty () (at Assets/Game/Scripts/Runtime/UI/Views/PixelDojoFrameGraphic.cs:24)
+UnityEngine.UI.Graphic:OnValidate () (at ./Library/PackageCache/com.unity.ugui@27635d171b1a/Runtime/UGUI/UI/Core/Graphic.cs:951)
+UnityEngine.UI.MaskableGraphic:OnValidate () (at ./Library/PackageCache/com.unity.ugui@27635d171b1a/Runtime/UGUI/UI/Core/MaskableGraphic.cs:199)
+UnityEditor.TestTools.TestRunner.TestRun.Tasks.Scene.RestoreSceneSetupTask/<Execute>d__3:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@bd7f943e9647/UnityEditor.TestRunner/TestRun/Tasks/Scene/RestoreSceneSetupTask.cs:23)
+UnityEditor.TestTools.TestRunner.TestRun.TestJobRunner:ExecuteStep () (at ./Library/PackageCache/com.unity.test-framework@bd7f943e9647/UnityEditor.TestRunner/TestRun/TestJobRunner.cs:173)
+UnityEditor.TestTools.TestRunner.TestRun.TestJobRunner:ExecuteCallback () (at ./Library/PackageCache/com.unity.test-framework@bd7f943e9647/UnityEditor.TestRunner/TestRun/TestJobRunner.cs:108)
+UnityEditor.EditorApplication:Internal_CallUpdateFunctions ()
+
+[./Library/PackageCache/com.unity.test-framework@bd7f943e9647/UnityEditor.TestRunner/TestRun/Tasks/Scene/RestoreSceneSetupTask.cs line 23]
+
+SendMessage cannot be called during Awake, CheckConsistency, or OnValidate (Artwork Border: OnRectTransformDimensionsChange)
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.RectTransform:set_anchorMax (UnityEngine.Vector2)
+RhythmDojo.UI.PixelDojoFrameGraphic:RefreshArtwork () (at Assets/Game/Scripts/Runtime/UI/Views/PixelDojoFrameGraphic.cs:52)
+RhythmDojo.UI.PixelDojoFrameGraphic:SetAllDirty () (at Assets/Game/Scripts/Runtime/UI/Views/PixelDojoFrameGraphic.cs:24)
+UnityEngine.UI.Graphic:OnValidate () (at ./Library/PackageCache/com.unity.ugui@27635d171b1a/Runtime/UGUI/UI/Core/Graphic.cs:951)
+UnityEngine.UI.MaskableGraphic:OnValidate () (at ./Library/PackageCache/com.unity.ugui@27635d171b1a/Runtime/UGUI/UI/Core/MaskableGraphic.cs:199)
+UnityEditor.TestTools.TestRunner.TestRun.Tasks.Scene.RestoreSceneSetupTask/<Execute>d__3:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@bd7f943e9647/UnityEditor.TestRunner/TestRun/Tasks/Scene/RestoreSceneSetupTask.cs:23)
+UnityEditor.TestTools.TestRunner.TestRun.TestJobRunner:ExecuteStep () (at ./Library/PackageCache/com.unity.test-framework@bd7f943e9647/UnityEditor.TestRunner/TestRun/TestJobRunner.cs:173)
+UnityEditor.TestTools.TestRunner.TestRun.TestJobRunner:ExecuteCallback () (at ./Library/PackageCache/com.unity.test-framework@bd7f943e9647/UnityEditor.TestRunner/TestRun/TestJobRunner.cs:108)
+UnityEditor.EditorApplication:Internal_CallUpdateFunctions ()
+
+[./Library/PackageCache/com.unity.test-framework@bd7f943e9647/UnityEditor.TestRunner/TestRun/Tasks/Scene/RestoreSceneSetupTask.cs line 23]
+
+SendMessage cannot be called during Awake, CheckConsistency, or OnValidate (Artwork Border: OnRectTransformDimensionsChange)
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.RectTransform:set_sizeDelta (UnityEngine.Vector2)
+UnityEngine.RectTransform:set_offsetMin (UnityEngine.Vector2)
+RhythmDojo.UI.PixelDojoFrameGraphic:RefreshArtwork () (at Assets/Game/Scripts/Runtime/UI/Views/PixelDojoFrameGraphic.cs:53)
+RhythmDojo.UI.PixelDojoFrameGraphic:SetAllDirty () (at Assets/Game/Scripts/Runtime/UI/Views/PixelDojoFrameGraphic.cs:24)
+UnityEngine.UI.Graphic:OnValidate () (at ./Library/PackageCache/com.unity.ugui@27635d171b1a/Runtime/UGUI/UI/Core/Graphic.cs:951)
+UnityEngine.UI.MaskableGraphic:OnValidate () (at ./Library/PackageCache/com.unity.ugui@27635d171b1a/Runtime/UGUI/UI/Core/MaskableGraphic.cs:199)
+UnityEditor.TestTools.TestRunner.TestRun.Tasks.Scene.RestoreSceneSetupTask/<Execute>d__3:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@bd7f943e9647/UnityEditor.TestRunner/TestRun/Tasks/Scene/RestoreSceneSetupTask.cs:23)
+UnityEditor.TestTools.TestRunner.TestRun.TestJobRunner:ExecuteStep () (at ./Library/PackageCache/com.unity.test-framework@bd7f943e9647/UnityEditor.TestRunner/TestRun/TestJobRunner.cs:173)
+UnityEditor.TestTools.TestRunner.TestRun.TestJobRunner:ExecuteCallback () (at ./Library/PackageCache/com.unity.test-framework@bd7f943e9647/UnityEditor.TestRunner/TestRun/TestJobRunner.cs:108)
+UnityEditor.EditorApplication:Internal_CallUpdateFunctions ()
+
+[./Library/PackageCache/com.unity.test-framework@bd7f943e9647/UnityEditor.TestRunner/TestRun/Tasks/Scene/RestoreSceneSetupTask.cs line 23]
+
+SendMessage cannot be called during Awake, CheckConsistency, or OnValidate (Artwork Border: OnRectTransformDimensionsChange)
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.RectTransform:set_sizeDelta (UnityEngine.Vector2)
+UnityEngine.RectTransform:set_offsetMax (UnityEngine.Vector2)
+RhythmDojo.UI.PixelDojoFrameGraphic:RefreshArtwork () (at Assets/Game/Scripts/Runtime/UI/Views/PixelDojoFrameGraphic.cs:54)
+RhythmDojo.UI.PixelDojoFrameGraphic:SetAllDirty () (at Assets/Game/Scripts/Runtime/UI/Views/PixelDojoFrameGraphic.cs:24)
+UnityEngine.UI.Graphic:OnValidate () (at ./Library/PackageCache/com.unity.ugui@27635d171b1a/Runtime/UGUI/UI/Core/Graphic.cs:951)
+UnityEngine.UI.MaskableGraphic:OnValidate () (at ./Library/PackageCache/com.unity.ugui@27635d171b1a/Runtime/UGUI/UI/Core/MaskableGraphic.cs:199)
+UnityEditor.TestTools.TestRunner.TestRun.Tasks.Scene.RestoreSceneSetupTask/<Execute>d__3:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@bd7f943e9647/UnityEditor.TestRunner/TestRun/Tasks/Scene/RestoreSceneSetupTask.cs:23)
+UnityEditor.TestTools.TestRunner.TestRun.TestJobRunner:ExecuteStep () (at ./Library/PackageCache/com.unity.test-framework@bd7f943e9647/UnityEditor.TestRunner/TestRun/TestJobRunner.cs:173)
+UnityEditor.TestTools.TestRunner.TestRun.TestJobRunner:ExecuteCallback () (at ./Library/PackageCache/com.unity.test-framework@bd7f943e9647/UnityEditor.TestRunner/TestRun/TestJobRunner.cs:108)
+UnityEditor.EditorApplication:Internal_CallUpdateFunctions ()
+
+[./Library/PackageCache/com.unity.test-framework@bd7f943e9647/UnityEditor.TestRunner/TestRun/Tasks/Scene/RestoreSceneSetupTask.cs line 23]
+
+Loaded scene 'Assets/Game/Scenes/Settings.unity'
+	Deserialize:            36.944 ms
+	Integration:            391.046 ms
+	Integration of assets:  0.925 ms
+	Thread Wait Time:       0.130 ms

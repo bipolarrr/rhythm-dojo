@@ -52,6 +52,12 @@ namespace RhythmDojo.Tests
                 Assert.That(view.menuPanel.blocksRaycasts, Is.False);
                 Assert.That(view.entrance.leftDoor, Is.Not.Null);
                 Assert.That(view.entrance.rightDoor, Is.Not.Null);
+                Assert.That(view.entrance.logoClip.GetComponent<UnityEngine.UI.RectMask2D>(), Is.Not.Null);
+                Assert.That(view.logo.transform.parent, Is.SameAs(view.entrance.logoClip));
+                Assert.That(view.entrance.logoClip.GetSiblingIndex(),
+                    Is.LessThan(view.entrance.frame.transform.GetSiblingIndex()));
+                Assert.That(view.entrance.logoClip.anchorMin.x, Is.GreaterThan(0f));
+                Assert.That(view.entrance.logoClip.anchorMax.x, Is.LessThan(1f));
                 Assert.That(view.knock, Is.Not.Null);
                 Assert.That(view.boardCrack, Is.Not.Null);
                 Assert.That(view.doorSlide, Is.Not.Null);
@@ -94,18 +100,45 @@ namespace RhythmDojo.Tests
                     settingsRect.anchoredPosition.y,
                     Is.EqualTo(quitRect.anchoredPosition.y)
                 );
-                foreach (var button in new[] { view.start, view.settings, view.quit })
+                var editorRect = (RectTransform)view.editor.transform;
+                Assert.That(editorRect.parent, Is.EqualTo(playRect.parent));
+                Assert.That(editorRect.anchoredPosition.x, Is.GreaterThan(settingsRect.anchoredPosition.x));
+                Assert.That(editorRect.anchoredPosition.x, Is.LessThan(quitRect.anchoredPosition.x));
+                Assert.That(editorRect.anchoredPosition.y, Is.EqualTo(playRect.anchoredPosition.y));
+                foreach (var button in new[] { view.start, view.settings, view.editor, view.quit })
                 {
-                    Assert.That(button.GetComponent<UnityEngine.UI.Image>().sprite, Is.Null);
-                    Assert.That(button.GetComponent<UnityEngine.UI.Image>().color, Is.EqualTo(Color.white));
+                    Assert.That(((RectTransform)button.transform).sizeDelta, Is.EqualTo(new Vector2(80, 290)));
+                    Assert.That(button.GetComponent<UnityEngine.UI.Image>().sprite.name, Is.EqualTo("VerticalMenuBoard"));
                     Assert.That(button.GetComponentInChildren<UnityEngine.UI.Text>().font,
-                        Is.SameAs(UiFontSettings.Current));
+                        Is.SameAs(AssetDatabase.LoadAssetAtPath<Font>(SongSelectionLayoutBuilder.BrushFontPath)));
                     Assert.That(button.GetComponent<DojoBoardBreak>(), Is.Null);
+                    var graphic = button.GetComponent<UnityEngine.UI.Image>();
+                    Assert.That(graphic, Is.Not.Null);
+                    Assert.That(graphic.preserveAspect, Is.True);
+                    Assert.That(graphic.sprite.texture.filterMode, Is.EqualTo(FilterMode.Point));
+                    Assert.That(button.GetComponentInChildren<DojoTrainingGraphic>(), Is.Null);
                 }
 
+                var interiorArt = view.trainingInterior.GetComponent<DojoTrainingGraphic>();
+                Assert.That(interiorArt.artwork.name, Is.EqualTo("TrainingInterior"));
+                Assert.That(interiorArt.mainTexture, Is.SameAs(interiorArt.artwork.texture));
+                Assert.That(interiorArt.artwork.texture.width, Is.EqualTo(1672));
+                Assert.That(interiorArt.artwork.texture.height, Is.EqualTo(941));
+
                 Assert.That(view.start.navigation.selectOnRight, Is.SameAs(view.settings));
-                Assert.That(view.settings.navigation.selectOnRight, Is.SameAs(view.quit));
-                Assert.That(view.quit.navigation.selectOnLeft, Is.SameAs(view.settings));
+                Assert.That(view.settings.navigation.selectOnRight, Is.SameAs(view.editor));
+                Assert.That(view.editor.navigation.selectOnLeft, Is.SameAs(view.settings));
+                Assert.That(view.editor.navigation.selectOnRight, Is.SameAs(view.quit));
+                Assert.That(view.quit.navigation.selectOnLeft, Is.SameAs(view.editor));
+                var trainingHallPlaque = view.trainingInterior.Find("Training Hall Plaque");
+                Assert.That(trainingHallPlaque, Is.Null);
+                Assert.That(view.start.navigation.selectOnDown, Is.SameAs(view.settings));
+                Assert.That(view.editor.navigation.selectOnUp, Is.SameAs(view.settings));
+                Assert.That(view.menuPanel.transform.GetSiblingIndex(),
+                    Is.GreaterThan(view.entrance.rightDoor.GetSiblingIndex()));
+                Assert.That(view.menuPanel.transform.GetSiblingIndex(),
+                    Is.LessThan(view.entrance.logoClip.GetSiblingIndex()),
+                    "Wooden menu plaques must render behind the logo during opening and closing.");
                 Assert.That(
                     scene
                         .GetRootGameObjects()

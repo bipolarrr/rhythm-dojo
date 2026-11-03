@@ -1,0 +1,184 @@
+{
+    "phase": "exercise",
+    "unity": "6000.3.23f1",
+    "platform": "WindowsPlayer",
+    "startedUtc": "2026-11-02T18:32:53.7921867Z",
+    "finishedUtc": "2026-11-02T18:33:35.6267907Z",
+    "step": "finished",
+    "error": "",
+    "editor": false,
+    "success": true,
+    "assertions": 855,
+    "requestedBuffer": 256,
+    "appliedBuffer": 256,
+    "sampleRate": 48000,
+    "duration": 41.839749700000009,
+    "clipPeak": 0.149993896484375,
+    "mixerPeak": 0.04772714897990227,
+    "steps": [
+        {
+            "name": "preferences-backed-up",
+            "detail": "Known string preference keys and existence flags saved before isolation.",
+            "utc": "2026-11-02T18:32:53.8078325Z",
+            "elapsed": 0.02197469999999946
+        },
+        {
+            "name": "title-settings",
+            "detail": "Opened settings with queued pointer input; key persisted and Back restored title.",
+            "utc": "2026-11-02T18:32:57.7809556Z",
+            "elapsed": 3.994225199999999
+        },
+        {
+            "name": "editor-round-trip",
+            "detail": "Real Back autosave verified; only the new probe-owned project file and empty folder removed.",
+            "utc": "2026-11-02T18:32:58.4328569Z",
+            "elapsed": 4.646390199999999
+        },
+        {
+            "name": "selection-ready",
+            "detail": "Title unloaded, door complete, one input system and listener.",
+            "utc": "2026-11-02T18:33:02.4717271Z",
+            "elapsed": 8.685272099999999
+        },
+        {
+            "name": "loopback-ready",
+            "detail": "Recovered external 440 Hz tone plays for 20 seconds for independent OS loopback capture.",
+            "utc": "2026-11-02T18:33:11.7123512Z",
+            "elapsed": 17.925634000000004
+        },
+        {
+            "name": "pause-resume-restart-exit",
+            "detail": "Real external loader, reset/recovery, scheduled resume, restart and exit passed.",
+            "utc": "2026-11-02T18:33:32.0966338Z",
+            "elapsed": 38.310041500000007
+        },
+        {
+            "name": "results-navigation",
+            "detail": "Explicit session advance used only to exercise the built Results scene and Back.",
+            "utc": "2026-11-02T18:33:33.6149047Z",
+            "elapsed": 39.82827170000001
+        },
+        {
+            "name": "exercise-complete",
+            "detail": "Mode keys remain saved for the next process; original preferences stay in backup.",
+            "utc": "2026-11-02T18:33:35.5684515Z",
+            "elapsed": 41.781713800000009
+        }
+    ],
+    "clockMeasurements": [
+        {
+            "elapsed": 1.163293300000003,
+            "lower": 0.9902919581845756,
+            "upper": 1.0086306981509566,
+            "buffer": 256,
+            "rate": 48000,
+            "state": "Healthy"
+        },
+        {
+            "elapsed": 1.2000131000000014,
+            "lower": 0.9911002915995928,
+            "upper": 1.008877875305415,
+            "buffer": 256,
+            "rate": 48000,
+            "state": "Healthy"
+        }
+    ],
+    "alignment": [
+        {
+            "audio": 0.7647845804988662,
+            "logicalAudio": 0.7623769035034691,
+            "error": 0.0024076769953971235,
+            "uncertainty": 0.026851642403624685,
+            "block": 256,
+            "buffers": 4
+        },
+        {
+            "audio": 0.7807709750566894,
+            "logicalAudio": 0.7790543838141559,
+            "error": 0.0017165912425334274,
+            "uncertainty": 0.027337542403632829,
+            "block": 256,
+            "buffers": 4
+        },
+        {
+            "audio": 0.7914512471655328,
+            "logicalAudio": 0.7956620868901965,
+            "error": -0.004210839724663629,
+            "uncertainty": 0.027367542403621035,
+            "block": 256,
+            "buffers": 4
+        },
+        {
+            "audio": 0.8127664399092971,
+            "logicalAudio": 0.8123382100831265,
+            "error": 0.0004282298261706341,
+            "uncertainty": 0.02735764240363324,
+            "block": 256,
+            "buffers": 4
+        },
+        {
+            "audio": 0.8341043083900227,
+            "logicalAudio": 0.8290888475229536,
+            "error": 0.005015460867069055,
+            "uncertainty": 0.02735514240362534,
+            "block": 256,
+            "buffers": 4
+        },
+        {
+            "audio": 0.8447845804988662,
+            "logicalAudio": 0.8457408947849956,
+            "error": -0.0009563142861294116,
+            "uncertainty": 0.027357142403627398,
+            "block": 256,
+            "buffers": 4
+        },
+        {
+            "audio": 0.8607709750566893,
+            "logicalAudio": 0.8623781346276154,
+            "error": -0.0016071595709260534,
+            "uncertainty": 0.027353142403623286,
+            "block": 256,
+            "buffers": 4
+        },
+        {
+            "audio": 0.8821088435374149,
+            "logicalAudio": 0.8790844978990933,
+            "error": 0.003024345638321657,
+            "uncertainty": 0.02734434240362703,
+            "block": 256,
+            "buffers": 4
+        },
+        {
+            "audio": 0.892766439909297,
+            "logicalAudio": 0.8957171878617842,
+            "error": -0.002950747952487176,
+            "uncertainty": 0.02737104240362641,
+            "block": 256,
+            "buffers": 4
+        },
+        {
+            "audio": 0.9141043083900227,
+            "logicalAudio": 0.9124133567177744,
+            "error": 0.0016909516722483087,
+            "uncertainty": 0.02735654240362749,
+            "block": 256,
+            "buffers": 4
+        },
+        {
+            "audio": 0.9247845804988663,
+            "logicalAudio": 0.9290082008261393,
+            "error": -0.004223620327273081,
+            "uncertainty": 0.02735484240362894,
+            "block": 256,
+            "buffers": 4
+        },
+        {
+            "audio": 0.9407709750566894,
+            "logicalAudio": 0.9455927196832192,
+            "error": -0.004821744626529845,
+            "uncertainty": 0.027354342403623098,
+            "block": 256,
+            "buffers": 4
+        }
+    ]
+}

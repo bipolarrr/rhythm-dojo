@@ -1,0 +1,183 @@
+{
+  "success": true,
+  "command": "command test_status",
+  "data": {
+    "command": "test_status",
+    "parameters": {},
+    "result": {
+      "status": "completed",
+      "duration": 0.79,
+      "summary": {
+        "total": 22,
+        "passed": 22,
+        "failed": 0,
+        "skipped": 0,
+        "inconclusive": 0
+      },
+      "results": [
+        {
+          "FullName": "RhythmDojo.Tests.PlayKeyBindingsTests.CorruptNewStorageDoesNotResurrectLegacyKeys(\"invalid json\")",
+          "Status": "Passed",
+          "Duration": 0.0346881,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PlayKeyBindingsTests.CorruptNewStorageDoesNotResurrectLegacyKeys(\"{\\\"version\\\":2,\\\"migrated\\\":true,\\\"modes\\\":[{\\\"modeId\\\":\\\"FourLaneMode\\\",\\\"overrides\\\":[{\\\"lane\\\":99,\\\"key\\\":15}]}]}\")",
+          "Status": "Passed",
+          "Duration": 0.0026219,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PlayKeyBindingsTests.EqualLaneCountsKeepOverridesAndResetIsolatedByOriginalModeId",
+          "Status": "Passed",
+          "Duration": 0.0124061,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PlayKeyBindingsTests.ExistingModeRecordWinsOverLegacyEvenBeforeMigrationMarker",
+          "Status": "Passed",
+          "Duration": 0.0025824,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PlayKeyBindingsTests.FourLaneModeKeepsItsOwnDefaultBindingAndLabel(\"<Keyboard>/a\",\"Left\")",
+          "Status": "Passed",
+          "Duration": 0.0019286,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PlayKeyBindingsTests.FourLaneModeKeepsItsOwnDefaultBindingAndLabel(\"<Gamepad>/buttonSouth\",\"Pad South\")",
+          "Status": "Passed",
+          "Duration": 0.0010057,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PlayKeyBindingsTests.InvalidReservedAndDuplicateKeysLeaveSavedBindingsUnchanged(None)",
+          "Status": "Passed",
+          "Duration": 0.0054697,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PlayKeyBindingsTests.InvalidReservedAndDuplicateKeysLeaveSavedBindingsUnchanged(Escape)",
+          "Status": "Passed",
+          "Duration": 0.001191,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PlayKeyBindingsTests.InvalidReservedAndDuplicateKeysLeaveSavedBindingsUnchanged(Space)",
+          "Status": "Passed",
+          "Duration": 0.0011403,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PlayKeyBindingsTests.InvalidReservedAndDuplicateKeysLeaveSavedBindingsUnchanged(F)",
+          "Status": "Passed",
+          "Duration": 0.00136,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PlayKeyBindingsTests.InvalidSavedKeysFallBackToDefaults(\"invalid json\")",
+          "Status": "Passed",
+          "Duration": 0.0017988,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PlayKeyBindingsTests.InvalidSavedKeysFallBackToDefaults(\"{\\\"keys\\\":[0,0,0,0]}\")",
+          "Status": "Passed",
+          "Duration": 0.0013776,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PlayKeyBindingsTests.InvalidSavedKeysFallBackToDefaults(\"{\\\"keys\\\":[15]}\")",
+          "Status": "Passed",
+          "Duration": 0.0013492,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PlayKeyBindingsTests.LegacyKeysMigrateOnlyToOriginalDefaultOnceAndRemainStored",
+          "Status": "Passed",
+          "Duration": 0.002674,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PlayKeyBindingsTests.ModeCommandBindingsReserveTheirPhysicalKeys(\"<Keyboard>/enter\",Enter)",
+          "Status": "Passed",
+          "Duration": 0.00416,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PlayKeyBindingsTests.ModeCommandBindingsReserveTheirPhysicalKeys(\"<Keyboard>/ctrl\",LeftCtrl)",
+          "Status": "Passed",
+          "Duration": 0.0011675,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PlayKeyBindingsTests.ModeCommandBindingsReserveTheirPhysicalKeys(\"<Keyboard>/anyKey\",Q)",
+          "Status": "Passed",
+          "Duration": 0.0011794,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PlayKeyBindingsTests.ModeCommandBindingsReserveTheirPhysicalKeys(\"<Keyboard>/{Submit}\",Enter)",
+          "Status": "Passed",
+          "Duration": 0.0011618,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PlayKeyBindingsTests.ModeCommandBindingsReserveTheirPhysicalKeys(\"<Keyboard>/leftWindows\",LeftCommand)",
+          "Status": "Passed",
+          "Duration": 0.0011289,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PlayKeyBindingsTests.SettingsBuilderUsesAssetDefaultsWithoutBakingSavedOverrides",
+          "Status": "Passed",
+          "Duration": 0.2523877,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PlayKeyBindingsTests.SixLaneOverridesUseDefinitionDefaultsAndPreserveGamepadLane",
+          "Status": "Passed",
+          "Duration": 0.0027824,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PlayKeyBindingsTests.SpaceIsAvailableWhenThisModeUsesDifferentCommands",
+          "Status": "Passed",
+          "Duration": 0.0020743,
+          "Message": null,
+          "StackTrace": null
+        }
+      ]
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "C:\\Users\\song\\RhythmDojo-pr-quality"
+    },
+    "success": true
+  },
+  "errors": [],
+  "warnings": []
+}

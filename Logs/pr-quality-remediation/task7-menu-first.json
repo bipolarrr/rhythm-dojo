@@ -1,0 +1,162 @@
+{
+  "success": true,
+  "command": "command test_status",
+  "data": {
+    "command": "test_status",
+    "parameters": {},
+    "result": {
+      "status": "completed",
+      "duration": 57.08,
+      "summary": {
+        "total": 19,
+        "passed": 17,
+        "failed": 2,
+        "skipped": 0,
+        "inconclusive": 0
+      },
+      "results": [
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.BootstrapFallbackStillStartsWithoutATitleView",
+          "Status": "Passed",
+          "Duration": 1.9630545,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.BreakingBoardDefersActionAndBlocksOtherButtons",
+          "Status": "Passed",
+          "Duration": 2.014614,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.CaptureMenuAndKoreanQuitPopup",
+          "Status": "Passed",
+          "Duration": 3.9004616,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.EditorStaysBehindDoorsAndOpensFromInsideTheDojo",
+          "Status": "Passed",
+          "Duration": 4.1371659,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.EntranceTimeoutOffersRecoveryAndCleansUp",
+          "Status": "Passed",
+          "Duration": 2.1436094,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.EntranceWaitsForReadyAndRestoresSelectionInput",
+          "Status": "Failed",
+          "Duration": 4.9398424,
+          "Message": "Unhandled log message: '[Exception] NullReferenceException: Object reference not set to an instance of an object'. Use UnityEngine.TestTools.LogAssert.Expect",
+          "StackTrace": "RhythmDojo.UI.SongSelectionScreen.RefreshMode () (at Assets/Game/Scripts/Runtime/UI/SongSelectionScreen.cs:937)\r\nRhythmDojo.UI.SongSelectionScreen.ResumeAfterModal () (at Assets/Game/Scripts/Runtime/UI/SongSelectionScreen.cs:1124)\r\nRhythmDojo.UI.InputStateScope.Dispose () (at Assets/Game/Scripts/Runtime/UI/InputStateScope.cs:150)\r\nRethrow as AggregateException: Input state was restored, but a resume notification failed. (Object reference not set to an instance of an object)\r\nRhythmDojo.UI.InputStateScope.Dispose () (at Assets/Game/Scripts/Runtime/UI/InputStateScope.cs:162)\r\nRhythmDojo.UI.DojoEntranceTransition.ReleaseSelection () (at Assets/Game/Scripts/Runtime/UI/DojoEntranceTransition.cs:325)\r\nRhythmDojo.UI.DojoEntranceTransition+<Reveal>d__30.MoveNext () (at Assets/Game/Scripts/Runtime/UI/DojoEntranceTransition.cs:187)\r\nUnityEngine.SetupCoroutine.InvokeMoveNext (System.Collections.IEnumerator enumerator, System.IntPtr returnValueAddress) (at <4188a0f79dff4b4191dbeaff03bfe462>:0)\r\n\r\n"
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.LogoCanCollapseMenuAndHiddenButtonsCannotStart",
+          "Status": "Passed",
+          "Duration": 2.953474,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.LogoExpandsMenuAndPlayStartsOnceWithoutDuplicateListeners",
+          "Status": "Passed",
+          "Duration": 2.0884874,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.PlaqueRejectsCornersAndKeyboardCanExpandAndStart",
+          "Status": "Passed",
+          "Duration": 4.1165101,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.PlayDismissesMenuImmediatelyWithoutWaitingForBoardDelay",
+          "Status": "Passed",
+          "Duration": 1.8206819,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.PlayOpensDoorsWithLogoHalvesAttachedUntilFullyOutsideTheDoorway",
+          "Status": "Failed",
+          "Duration": 2.9929438,
+          "Message": "System.AggregateException : Input state was restored, but a resume notification failed. (Object reference not set to an instance of an object)\r\n  ----> System.NullReferenceException : Object reference not set to an instance of an object",
+          "StackTrace": "  at RhythmDojo.UI.InputStateScope.Dispose () [0x001a5] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Scripts\\Runtime\\UI\\InputStateScope.cs:162 \r\n  at RhythmDojo.UI.DojoEntranceTransition.ReleaseSelection () [0x0003a] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Scripts\\Runtime\\UI\\DojoEntranceTransition.cs:325 \r\n  at RhythmDojo.UI.DojoEntranceTransition.Cancel () [0x00006] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Scripts\\Runtime\\UI\\DojoEntranceTransition.cs:309 \r\n  at RhythmDojo.Tests.MainMenuFlowTests+<PlayOpensDoorsWithLogoHalvesAttachedUntilFullyOutsideTheDoorway>d__13.MoveNext () [0x008d9] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\PlayMode\\MainMenuFlowTests.cs:298 \r\n  at UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@bd7f943e9647\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44 \r\n--NullReferenceException\r\n  at RhythmDojo.UI.SongSelectionScreen.RefreshMode () [0x0001f] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Scripts\\Runtime\\UI\\SongSelectionScreen.cs:937 \r\n  at RhythmDojo.UI.SongSelectionScreen.ResumeAfterModal () [0x00000] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Scripts\\Runtime\\UI\\SongSelectionScreen.cs:1124 \r\n  at RhythmDojo.UI.InputStateScope.Dispose () [0x0015d] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Scripts\\Runtime\\UI\\InputStateScope.cs:150 "
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.QuitPopupBlocksBackgroundAndNoRestoresMenu",
+          "Status": "Passed",
+          "Duration": 3.0606644,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.SceneLoadingCompletesBeforeDoorAnimationStarts",
+          "Status": "Passed",
+          "Duration": 4.4978769,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.SettingsRequestsSettingsWithoutStartingTheGame",
+          "Status": "Passed",
+          "Duration": 2.1061328,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.SlidingDoorsRevealDummiesAndReverseWithoutStartingEarly",
+          "Status": "Passed",
+          "Duration": 3.8288228,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.StartLoadsBootstrapThenExistingSongSelection",
+          "Status": "Passed",
+          "Duration": 4.4911415,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.TitlePreparesSelectionWithoutShowingItOrStealingInput",
+          "Status": "Passed",
+          "Duration": 1.5974951,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.TitleSettingsBackReturnsToTitle",
+          "Status": "Passed",
+          "Duration": 2.1640427,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.MainMenuFlowTests.YesRequestsQuitExactlyOnceWithoutStarting",
+          "Status": "Passed",
+          "Duration": 2.2090243,
+          "Message": null,
+          "StackTrace": null
+        }
+      ]
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "C:\\Users\\song\\RhythmDojo-pr-quality"
+    },
+    "success": true
+  },
+  "errors": [],
+  "warnings": []
+}

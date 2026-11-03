@@ -24,6 +24,124 @@ namespace RhythmDojo.Tests
     public sealed class AudioTimelineTests
     {
         [UnityTest]
+        public IEnumerator GridScrollsAndPansToNegativeTenMeasureWithMeterAndOriginChanges()
+        {
+            yield return SceneManager.LoadSceneAsync(ChartEditorMenu.ScenePath);
+            yield return null;
+            var screen = Object.FindFirstObjectByType<ChartEditorScreen>();
+            var timeline = screen.GetComponent<ChartAudioTimeline>();
+            var detail = screen.GetComponentInParent<Canvas>()
+                .GetComponentsInChildren<AudioTimelineGraphic>(true).Single(graphic => !graphic.Overview);
+
+            foreach (var meter in new[] { new MeterPoint(0, 4, 4), new MeterPoint(0, 3, 8) })
+            {
+                screen.Session.Edit(edit =>
+                {
+                    edit.SetTiming(0.25, new TempoPoint(0, 120));
+                    edit.SetGrid(new BeatGridSettings
+                    {
+                        OriginSeconds = 2,
+                        Meters = new[] { meter }
+                    });
+                });
+                screen.ResetView();
+                double expectedBeat = -11 * meter.Numerator * 4.0 / meter.Denominator;
+                screen.Scroll(-1000);
+                yield return null;
+
+                Assert.That(screen.ScrollBeatOffset, Is.EqualTo(expectedBeat).Within(1e-8));
+                Assert.That(timeline.WindowStart,
+                    Is.EqualTo(timeline.Timing.TimeAtBeat(expectedBeat) - timeline.AudioOffset).Within(1e-8));
+                timeline.Timing.GetMusicalPosition(screen.ScrollBeatOffset, out int measure, out double position);
+                Assert.That(measure, Is.EqualTo(-10));
+                Assert.That(position, Is.Zero.Within(1e-8));
+                Canvas.ForceUpdateCanvases();
+                detail.RefreshLabels();
+                Assert.That(detail.GetComponentsInChildren<Text>()
+                    .Any(label => label.text == "-10.1"), Is.True);
+
+                var grid = screen.GetComponent<RectTransform>();
+                var pointer = new PointerEventData(EventSystem.current)
+                {
+                    position = RectTransformUtility.WorldToScreenPoint(null,
+                        grid.TransformPoint(grid.rect.center)),
+                    button = PointerEventData.InputButton.Left
+                };
+                screen.OnPointerDown(pointer);
+                screen.OnPointerUp(pointer);
+                Assert.That(screen.Session.GetNotes(screen.ChartId), Is.Empty,
+                    "The pre-song grid must not create notes at negative chart times.");
+                Capture(screen, "Logs/grid-negative-ten-" + meter.Denominator + ".png");
+
+                double minimum = timeline.WindowStart;
+                timeline.Pan(0);
+                timeline.Pan(-1000);
+                Assert.That(timeline.WindowStart, Is.EqualTo(minimum).Within(1e-8));
+                Assert.That(screen.ScrollBeatOffset, Is.EqualTo(expectedBeat).Within(1e-8));
+                timeline.Zoom(1, minimum);
+                Assert.That(timeline.WindowStart, Is.EqualTo(minimum).Within(1e-8));
+                screen.Scroll(0.5);
+                yield return null;
+                Assert.That(screen.ScrollBeatOffset, Is.EqualTo(expectedBeat + 0.5).Within(1e-8));
+
+                screen.ResetView();
+                Assert.That(screen.ScrollBeatOffset,
+                    Is.EqualTo(timeline.Timing.BeatAtTime(0)).Within(1e-8));
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator GridCorrectionAppliesEnteredBpmAndPlaytestKeepsTheSameTiming()
+        {
+            yield return SceneManager.LoadSceneAsync(ChartEditorMenu.ScenePath);
+            yield return null;
+            var screen = Object.FindFirstObjectByType<ChartEditorScreen>();
+            var timeline = screen.GetComponent<ChartAudioTimeline>();
+            var canvas = screen.GetComponentInParent<Canvas>();
+            var bpm = canvas.GetComponentsInChildren<InputField>(true)
+                .Single(field => field.name == "Grid BPM");
+            var button = canvas.GetComponentsInChildren<Button>(true)
+                .Single(control => control.name == "Cursor Origin");
+            screen.Session.Edit(edit =>
+            {
+                edit.SetTiming(0.1, new TempoPoint(0, 120));
+                edit.SetChartSettings(screen.ChartId, screen.Mode.name, screen.Mode.LaneCount, 171);
+                edit.AddNote(screen.ChartId, NoteData.Tap(0, 1));
+                edit.AddNote(screen.ChartId, NoteData.Hold(1, 149, 150));
+            });
+            screen.Scroll(64);
+            yield return null;
+            var before = screen.Session.GetNotes(screen.ChartId);
+            double origin = timeline.MusicTime + timeline.AudioOffset;
+            bpm.text = "128";
+            button.onClick.Invoke();
+
+            Assert.That(screen.Session.Snapshot.TempoPoints[0].Bpm, Is.EqualTo(128),
+                "Grid correction must commit the BPM shown in its input field.");
+            Assert.That(timeline.Timing.TimeAtBeat(0), Is.EqualTo(origin).Within(1e-8));
+            Assert.That(timeline.Timing.TimeAtBeat(128) - origin, Is.EqualTo(60).Within(1e-8));
+            Assert.That(screen.Session.GetNotes(screen.ChartId), Is.EqualTo(before));
+            var snapshot = screen.Session.Snapshot;
+            snapshot.Title = "128 BPM playback verification";
+            snapshot.Audio = "verification.wav";
+            var document = ChartPlaybackAdapter.ToDocument(snapshot, screen.ChartId,
+                screen.Mode.name, screen.Mode.ToRules(), _ => true);
+            var tempo = new TempoMap(document.TempoPoints);
+            foreach (double time in new[] { 0.0, 30, 90, 150 })
+            {
+                double beat = timeline.Timing.BeatAtTime(time + document.AudioOffset);
+                Assert.That(timeline.Timing.TimeAtBeat(beat),
+                    Is.EqualTo(time + document.AudioOffset).Within(1e-8));
+                Assert.That(tempo.BpmAt(time), Is.EqualTo(128));
+            }
+
+            screen.Session.Undo();
+            Assert.That(screen.Session.Snapshot.TempoPoints[0].Bpm, Is.EqualTo(120));
+            Assert.That(screen.Session.Snapshot.Grid.OriginSeconds, Is.EqualTo(0));
+            Assert.That(screen.Session.GetNotes(screen.ChartId), Is.EqualTo(before));
+        }
+
+        [UnityTest]
         public IEnumerator ImportedWaveformSeekingZoomPlaybackAndGridEditsShareMusicTime()
         {
             yield return SceneManager.LoadSceneAsync(ChartEditorMenu.ScenePath);
@@ -160,11 +278,14 @@ namespace RhythmDojo.Tests
                 var advancedPanel = canvas.GetComponentsInChildren<RectTransform>(true)
                     .Single(rect => rect.name == "Advanced Grid Panel");
                 Assert.That(advancedPanel.gameObject.activeSelf, Is.False);
-                var advancedButton = buttons.Single(b => b.name == "Advanced Grid");
+                var advancedButton = buttons.Single(b => b.name == "Grid Settings");
+                var workspace = Object.FindFirstObjectByType<WorkspaceEditor>();
+                workspace.view.OpenMenu(workspace.view.menus[1]);
                 Click(advancedButton);
                 Assert.That(advancedPanel.gameObject.activeInHierarchy, Is.True);
                 menu.ToggleFile();
                 Assert.That(advancedPanel.gameObject.activeSelf, Is.False);
+                workspace.view.OpenMenu(workspace.view.menus[1]);
                 Click(advancedButton);
                 Assert.That(canvas.GetComponentsInChildren<RectTransform>(true)
                     .Single(rect => rect.name == "File Panel").gameObject.activeSelf, Is.False);
@@ -195,10 +316,12 @@ namespace RhythmDojo.Tests
                 yield return null;
                 Capture(screen, "Logs/grid-timeline-advanced.png");
                 var edited = screen.Session.Snapshot;
-                Click(buttons.Single(b => b.name == "도구"));
-                Click(buttons.Single(b => b.name == "Undo"));
+                workspace.view.OpenMenu(workspace.view.menus[2]);
+                Click(workspace.view.actions.Single(binding => binding.action == WorkspaceAction.Undo).button);
                 Assert.That(screen.Session.Snapshot.Grid.Meters.Length, Is.EqualTo(1));
-                Click(buttons.Single(b => b.name == "Redo"));
+                workspace.view.OpenMenu(workspace.view.menus[2]);
+                Click(workspace.view.actions.Single(binding => binding.action == WorkspaceAction.Redo).button);
+                workspace.view.OpenMenu(workspace.view.menus[1]);
                 Click(advancedButton);
                 Assert.That(ProjectValidation.ContentEquals(edited, screen.Session.Snapshot), Is.True);
                 Capture(screen, "Logs/grid-timeline-small.png", 960, 540);
@@ -239,8 +362,8 @@ namespace RhythmDojo.Tests
                 view.displayDensityControl.value = 5;
                 Assert.That(timeline.DisplayStep, Is.EqualTo(1.0 / 6));
                 view.noteSnapControl.value = 3;
-                Assert.That(screen.SnapBeats, Is.EqualTo(0.125));
-                view.noteSnapControl.value = 6;
+                Assert.That(screen.SnapBeats, Is.EqualTo(0.25));
+                view.noteSnapControl.value = view.noteSnapControl.options.FindIndex(option => option.text == "OFF");
                 Assert.That(screen.SnapEnabled, Is.False);
                 buttons.Single(b => b.name == "Close Advanced").onClick.Invoke();
                 timeline.Resize(140);
@@ -377,6 +500,11 @@ namespace RhythmDojo.Tests
 
         private static void Capture(ChartEditorScreen screen, string path, int width = 1280, int height = 720)
         {
+            if (System.Environment.GetEnvironmentVariable("RHYTHM_DOJO_SKIP_CAPTURE") == "1")
+            {
+                return;
+            }
+
             var canvas = screen.GetComponentInParent<Canvas>();
             var camera = Camera.main;
             var target = new RenderTexture(width, height, 24);

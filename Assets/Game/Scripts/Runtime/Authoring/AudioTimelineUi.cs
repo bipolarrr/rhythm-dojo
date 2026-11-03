@@ -31,7 +31,7 @@ namespace RhythmDojo.Authoring
             go.transform.SetParent(parent, false);
             Place((RectTransform)go.transform, x, y, width, height);
             var text = go.GetComponent<Text>();
-            text.font = RhythmDojo.UI.UiFontSettings.Current;
+            RhythmDojo.UI.UiFontSettings.Apply(text);
             text.fontSize = 15;
             text.color = new Color(0.84f, 0.88f, 0.93f);
             text.text = caption;
@@ -111,7 +111,7 @@ namespace RhythmDojo.Authoring
 
             foreach (var text in go.GetComponentsInChildren<Text>(true))
             {
-                text.font = RhythmDojo.UI.UiFontSettings.Current;
+                RhythmDojo.UI.UiFontSettings.Apply(text);
                 text.fontSize = 14;
                 text.color = new Color(0.9f, 0.94f, 1);
             }
@@ -144,6 +144,20 @@ namespace RhythmDojo.Authoring
             }
 
             graphic.ConfigureLabels(labels);
+            if (!overview)
+            {
+                var tempoLabels = new Text[24];
+                for (int i = 0; i < tempoLabels.Length; i++)
+                {
+                    tempoLabels[i] = Label(go.transform, "Tempo Label " + i, "", 0, 26, 175, 22);
+                    tempoLabels[i].fontSize = 12;
+                    tempoLabels[i].color = new Color(0.35f, 0.8f, 1);
+                    tempoLabels[i].gameObject.SetActive(false);
+                }
+
+                graphic.ConfigureTempoLabels(tempoLabels);
+            }
+
             return graphic;
         }
     }

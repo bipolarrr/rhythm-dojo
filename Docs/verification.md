@@ -1,5 +1,20 @@
 # 동작별 검증 가이드
 
+## 2026-11-03 PR 기능 통합 검증
+
+로컬 `12218cf`의 PR #5~#7 품질 수정을 기준으로 #8 곡 선택, #9 결과 화면, #10 에디터 기능을 `integrate/pr-features`에 선택 통합했다. 원래 `RhythmDojo` 작업 폴더의 Results 씬과 임시 씬은 보존했다. 씬은 PR 스냅샷 대신 로컬 빌더로 재생성했다.
+
+중복 타이틀 진입 코드와 사용되지 않는 판정 이력 슬라이더를 제외했다. 기존 오디오 복구·DSP 재개·키 설정·씬 수명과 v3 저장 계약을 유지했다. 에디터의 이전 형식 가져오기·종료 시간 설정·보기 초기화·스냅 OFF 접근을 복원했고, 패널 재열기·비동기 종료 처리·매 프레임 노트 복사·음수 위치 게임 테스트를 보완했다. 테스트용 개인 Saiki 음원 의존은 임시 WAV로 대체했다.
+
+- 전체 EditMode 최초 398개: 397 통과, 글꼴 1 실패. 빌더 수정 후 글꼴 9/9, 최종 씬 재생성 2/2 통과.
+- 전체 PlayMode 최초 197개: 192 통과, 2 실패, 개인 음원 부재로 3 skip. 수정 후 파형 3/3, 에디터 39/39(skip 0), 기존 메뉴 5/5 통과. 후속 스냅 OFF 변경 뒤 에디터 39개 중 38 통과·BPM 입력 포커스 1 실패였으며 해당 항목 단독 재실행은 1/1 통과했다.
+- 장시간 자동 종료 검사는 단독 재실행에서도 약 61.76초에 FocusLost로 중단됐다. 이 실패를 숨기거나 제품의 포커스 처리 규칙을 변경하지 않았다. 전체 검증 통과가 아니다.
+- 전체 실행과 후속 실행을 테스트 이름별 최신 결과로 합치면 596개 중 595 통과, 1 실패, skip 0이다. 최종 상태에서 전체를 다시 실행한 단일 실행 결과가 아니며 반복 검사를 별도 고유 테스트로 합산하지 않았다.
+- Unity 6000.3.23f1 컴파일 성공, 소스/문서 diff 공백 검사와 meta 412개 검사 통과. 각 실행은 순차 진행하고 Play Mode 종료 및 Editor ready를 확인했다. Windows 빌드는 빌드/플랫폼 변경 요청이 없어 생략했다.
+
+원본 결과와 선택 통합 내역은 `Logs/pr-features-*.json`, 현재 곡 선택·에디터·변속 화면의 Unity 렌더 캡처는 `Logs/pr-features/`에 있다. 결과 화면은 동작 테스트로 확인했으며 이번 결과 화면 캡처는 없다. 기존 품질 개선 증거를 테스트가 다시 쓴 내용은 `Logs/pr-features/retest-artifacts/`에 보관하고 이전 기록은 복원했다. 원격 push 및 기존 PR 병합/종료는 수행하지 않았다.
+
+
 테스트는 **준비 → 입력/동작 → 관찰 가능한 결과**로 작성합니다. 실패한 테스트 이름만 읽어도 어떤 약속이 깨졌는지 알 수 있어야 합니다. 하나의 긴 플레이 순서에 여러 기능의 성공 여부를 묶지 않습니다.
 
 ## 실행
@@ -106,6 +121,11 @@ $unity = 'C:/Program Files/Unity/Hub/Editor/6000.3.23f1/Editor/Unity.exe'
 
 오디오 테스트는 출력 장치에 의존합니다. 실제 DSP 설정/시간 진행을 검사하며 사람이 느끼는 입력 지연이나 잡음이 없음을 보증하지 않습니다. 스크린샷은 `Logs/`에 남는 보조 자료이고 자동 시각 비교는 아닙니다.
 
+버퍼 적용 후 검사는 DSP **시계 진행률**을 확인한다. 실시간 관측 길이 `T`, DSP 증가량 `D`, 실제 블록 크기 `B`, 샘플레이트 `F`에 대해 두 끝점의 블록 관측 오차를 합한 `E = 2B/F`를 사용한다. 진행률 구간 `[max(0, (D-E)/T), (D+E)/T]` 전체가 `[0.99, 1.01]` 안에 있는 서로 겹치지 않는 관측 두 번만 정상으로 인정한다. 구간이 경계와 겹치면 같은 관측을 연장하며, 완전히 벗어나면 기존 선택 목록의 다음 큰 버퍼를 요청하고 실제 적용값을 확인한다. 48 kHz / 1024 샘플의 정확한 1배속은 관측당 최소 약 4.27초가 필요하다. 2048은 두 관측에 약 17.07초가 필요하며 실제 양자화나 프레임 지연 때문에 완료하지 못할 수도 있다.
+
+전체 적용 검사는 준비·복구·일시정지·장치 변경을 포함해 최대 20초이다. 일시정지와 설정 변경은 관측을 폐기하되 제한 시간을 다시 시작하지 않는다. 제한 시간 만료와 복원 요청 수락은 정상 판정이 아니다. `ClockRateVerified`, `ConsecutiveClockRateMeasurements`, `ClockRateMeasurements`, `ValidationElapsedSeconds`가 판정 근거를 제공하며 `AudioFlowTests`는 실제 요청/적용 버퍼와 구간을 `Logs/audio-buffers.txt`에 기록한다. 이는 출력 품질이나 체감 지연을 보증하지 않는다.
+
+
 ## 결과 기록과 롱노트 규칙 v3
 
 `PlayRules.CurrentVersion`은 3이다. Automatic은 시작 Miss나 중간 해제 후에도 재입력할 수 있고, 끝 시각의 키 상태로 자동 끝 판정을 적용한다. Release는 조기 해제 순간 끝 Miss와 HP·콤보·실패를 한 번 적용하며 재입력으로 복구하지 않는다. 남은 유지 시각에는 키 상태와 무관하게 Miss를 적용한다. Release의 시작 Miss도 복구할 수 없다. 정상/늦은 해제는 기존 판정창과 시간 허용 오차를 사용한다.
@@ -152,3 +172,26 @@ Unity 6000.3.23f1에서 갱신·컴파일 후 순차 실행했다. 선택 검증
 Edit Mode에서 **Game Tools > Preview > Results**를 누르면 샘플 결과가 있는 Results 씬으로 바로 Play Mode를 시작한다. 실제 곡을 플레이하거나 Title 시작 옵션을 끌 필요가 없다. 더보기와 노트 선택을 그대로 사용할 수 있으며 Perfect/Good/Miss, 유지 Miss가 있는 롱노트를 포함한다. **Results (Game Over)**는 Release 조기 해제로 실패하고 이후 노트가 미판정인 예시다.
 
 미리보기는 에디터 전용 샘플을 화면에만 주입하므로 최고 기록이나 마지막 실제 플레이 결과를 저장하지 않는다. Play Mode를 종료하면 원래 작업 씬과 Play Mode 시작 씬 설정으로 돌아온다. 미리보기 메뉴는 Play Mode와 전체 검증 실행 중에는 비활성화된다.
+
+### 외부 WAV 회귀 fixture
+
+`PupaResultsFlowTests`의 기존 이름과 `LocalAudio` 분류는 호출 경로 호환을 위해 유지한다. 외부 음원을 사용하는 세 테스트는 이제 개인 `LocalAudio/PUPA.wav` 대신 임시 44.1kHz mono PCM WAV를 생성하고 실제 외부 음원 로더로 읽는다. 파일 길이는 131.54초, 첫 신호는 채보와 독립적으로 지정한 0.5033333333333334초다. 번들된 929노트 채보에 대해 첫 공격음·입력 시각, 전체 재생 완료, 긴 음원 꼬리 이전 결과 전환을 검사한다. 이것은 실제 PUPA 음원에 대한 검증이 아니다. 테스트가 끝나거나 실패하면 lease와 임시 파일을 해제한다.
+
+### Windows remediation diagnostic
+
+`RhythmDojo.EditorTools.RemediationPlayerVerification.BuildPlayer()` builds the separate development player at `Builds/RemediationProbe/RemediationProbe.exe`. After compilation, run `unity command run_script --file Logs/pr-quality-remediation/RemediationBuildDispatch.cs --entry RemediationBuildDispatch.Main --json` in the project root. This dispatches the build on the next Editor update so the CLI request finishes before the build; a synchronous eval can time out and inject an error into a strict build. The builder writes `Logs/pr-quality-remediation/player-probe-build.json` and restores the prior scene setup. It includes all product scenes and test assemblies only in this diagnostic build; Foundation still builds the ordinary player separately.
+
+Run the phases sequentially, waiting for each process to exit. Use the same absolute evidence directory for both launches:
+
+```powershell
+$probe = 'C:/Users/song/RhythmDojo-pr-quality/Builds/RemediationProbe/RemediationProbe.exe'
+$evidence = 'C:/Users/song/RhythmDojo-pr-quality/Logs/pr-quality-remediation/player'
+Start-Process -FilePath $probe -WindowStyle Hidden -Wait -ArgumentList @('-remediationPhase', 'exercise', '-remediationOutput', $evidence, '-logFile', "$evidence/exercise-player.log")
+Start-Process -FilePath $probe -WindowStyle Hidden -Wait -ArgumentList @('-remediationPhase', 'persistence', '-remediationOutput', $evidence, '-logFile', "$evidence/persistence-player.log")
+```
+
+Check each process exit code and the corresponding JSON `success`; a completed process alone does not imply success. The first phase backs up the six known string preference keys, including their existence flags, before isolating them. Successful exercise leaves the two mode key overrides for the next process. Persistence verifies those overrides and their settings UI, then restores the exact original values. Failure also attempts restoration independently of other cleanup. If a process is killed, run the same command with `-remediationPhase restore`; do not remove `preferences-backup.json` before restoration. Backup writes replace the prior file atomically.
+
+The probe uses queued keyboard/mouse input and verifies pointer raycasts before clicking buttons. Buffer selection uses the Dropdown's normal value-change route, followed by an actual Apply click in the graphics tab. It covers title/settings/editor/selection navigation, actual editor Back autosave of a newly generated GUID project, mode isolation and HUD/Results labels, external WAV loading, pause/buffer validation/recovery/resume/restart/exit, and the built Results scene. It removes only the probe's new editor JSON file and empty GUID directory, after checking containment, absence before creation, and lack of links or unexpected contents; it never removes existing projects. The owned GUID is saved in the backup for crash cleanup.
+
+`exercise.json` records requested/applied buffers, DSP rate intervals, decoded and mixer sample peaks, and audio/song alignment with DSP block plus observed-frame uncertainty. A `loopback-ready` step holds the recovered external 440 Hz tone for 20 seconds so a separate OS loopback recorder can verify output beyond Unity's mixer. PNGs are offscreen renders using the active pipeline StandardRequest, preserving original display-camera world visibility and the existing gameplay texture. They are not framebuffer captures. Blank frames fail the diagnostic and saved images still require visual review. The Results navigation check explicitly advances the session; it does not substitute for the full real-time external WAV test. Synthetic input, screenshots, and mixer sampling do not by themselves establish physical audio latency or subjective output quality.

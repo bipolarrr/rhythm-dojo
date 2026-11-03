@@ -1,0 +1,100 @@
+{
+  "baseline": "12218cf",
+  "branch": "integrate/pr-features",
+  "sources": {
+    "8": "675807718524aa2a3351c1f6abc0071d4c7210c0",
+    "9": "d489852e7b0107e686cf1685502854d9f9bddbe5",
+    "10": "64f3dab2438f23d156f980614a496cb74e81edb0"
+  },
+  "preserved": [
+    "Local PR 5-7 remediation: calibrated pause input, audio lease recovery, shared DSP resume anchor, bounded clock health checks, mode keys, artwork generation and prepared scene ownership",
+    "Original worktree Results.unity and temporary scene",
+    "v3 chart storage and endpoint-only judgment records"
+  ],
+  "adaptations": [
+    "Selected source/test diffs; generated scenes rebuilt locally instead of replacing them with PR snapshots",
+    "Reuse local title editor entry and scene lifetime; omit PR 10 duplicate title navigation",
+    "Exclude unused result event pagination controls",
+    "Keep isolated local song-browser and pause exit tests",
+    "Match title and selection background framing",
+    "Apply shared typography after workspace generation",
+    "Remove automatic deletion of legacy workspace scene",
+    "Schedule editor start position using existing audio sample conversion and preserve local clock/recovery code",
+    "Guard UI access after asynchronous editor work ends; cache note arrays on session changes",
+    "Clamp pre-song game playtest position to zero; keep negative timeline preview support",
+    "Restore access to project-ID/v1/showcase import, chart duration and view reset in workspace menus; Escape closes legacy panels first",
+    "Replace optional personal Saiki WAV tests with generated 128 BPM WAV fixtures through the real audio loader",
+    "Preserve snap OFF alongside extended quantization; make the grid settings menu consistently open the panel"
+  ],
+  "verification": {
+    "editmodeInitial": {
+      "total": 398,
+      "passed": 397,
+      "failed": 1,
+      "failure": "ChartEditor placeholder Italic instead of shared Bold"
+    },
+    "typographyAfterFix": {
+      "total": 9,
+      "passed": 9
+    },
+    "playmode": "Initial full run plus targeted reruns; one unresolved FocusLost failure, not a full pass",
+    "windowsBuild": "Not run: no build/platform change requested",
+    "workspaceAfterFix": {
+      "total": 39,
+      "passed": 39,
+      "failed": 0,
+      "skipped": 0
+    },
+    "playmodeInitial": {
+      "total": 197,
+      "passed": 192,
+      "failed": 2,
+      "skipped": 3,
+      "failures": [
+        "AudioTimelineTests used hidden legacy Tools button",
+        "PupaResultsFlowTests real-time playback reset by FocusLost"
+      ],
+      "skipReason": "Three personal Saiki WAV cases"
+    },
+    "timelineAfterFix": {
+      "total": 3,
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0
+    },
+    "latestDistinctResults": {
+      "Passed": 595,
+      "Failed": 1,
+      "Skipped": 0
+    },
+    "pupaRetry": {
+      "total": 1,
+      "passed": 0,
+      "failed": 1,
+      "durationSeconds": 61.76,
+      "reason": "FocusLost; production focus-reset behavior preserved"
+    },
+    "workspaceFinal": {
+      "total": 39,
+      "passed": 38,
+      "failed": 1,
+      "skipped": 0,
+      "followup": "BpmFieldsSynchronizeAndCommitBothWays passed 1/1 on isolated rerun"
+    },
+    "editorMenuFinal": {
+      "total": 5,
+      "passed": 5
+    },
+    "typographyFinal": {
+      "total": 9,
+      "passed": 9
+    },
+    "sceneRegenerationFinal": {
+      "total": 2,
+      "passed": 2
+    },
+    "meta": "412 staged meta files passed",
+    "visualInspection": "Reviewed current selection-1920, editor-timeline and tempo-dialog offscreen Unity render captures. Results runtime covered by tests; no new results screenshot."
+  },
+  "publication": "Local integration only; no remote PR mutation or push"
+}

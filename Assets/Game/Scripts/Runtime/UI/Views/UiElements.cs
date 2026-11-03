@@ -52,7 +52,7 @@ namespace RhythmDojo.UI
             go.transform.SetParent(parent, false);
 
             var label = go.AddComponent<Text>();
-            label.font = RhythmDojo.UI.UiFontSettings.Current;
+            RhythmDojo.UI.UiFontSettings.Apply(label);
             label.text = text;
             label.fontSize = fontSize;
             label.color = Color.white;
@@ -64,10 +64,7 @@ namespace RhythmDojo.UI
 
         private static void Font(GameObject go)
         {
-            foreach (var text in go.GetComponentsInChildren<Text>(true))
-            {
-                text.font = RhythmDojo.UI.UiFontSettings.Current;
-            }
+            RhythmDojo.UI.UiFontSettings.ApplyTo(go.transform);
         }
 
         public static Button Button(

@@ -130,8 +130,14 @@ namespace RhythmDojo.Tests
             try
             {
                 var left = (RectTransform)view.songTitle.transform.parent;
-                Assert.That(left.anchorMin, Is.EqualTo(new Vector2(.45f, .17f)));
-                Assert.That(left.anchorMax, Is.EqualTo(new Vector2(.86f, .815f)));
+                var header = (RectTransform)view.transform.Find("Background/Header");
+                var footer = (RectTransform)view.play.transform.parent;
+                Assert.That(left.anchorMin.y, Is.GreaterThan(footer.anchorMax.y),
+                    "The information panel must leave room for the footer.");
+                Assert.That(left.anchorMax.y, Is.LessThan(header.anchorMin.y),
+                    "The information panel must leave room for the heading.");
+                Assert.That(left.anchorMax.x - left.anchorMin.x, Is.GreaterThan(.4f),
+                    "The information panel must retain enough width for album and metadata.");
                 Assert.That(view.pixelTheme, Is.True);
                 var browser = (RectTransform)view.scroll.transform.parent;
                 Assert.That(browser.anchorMax.x, Is.LessThan(left.anchorMin.x), "The song list must stay left of the information panel.");

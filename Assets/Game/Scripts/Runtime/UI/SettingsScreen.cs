@@ -18,6 +18,7 @@ namespace RhythmDojo.UI
         private SoundSettingsController sound;
         private GraphicsSettingsController graphics;
         private GameplaySettingsController gameplay;
+        private KeySettingsController keys;
 
         public void Validate()
         {
@@ -40,7 +41,9 @@ namespace RhythmDojo.UI
             ISelectionPreferences savedPreferences,
             HardModePreferences hardMode = null,
             IPlayRulesService rules = null,
-            PresentationPreferences presentation = null
+            PresentationPreferences presentation = null,
+            GameModeDefinition keyMode = null,
+            string modeId = null
         )
         {
             Unbind();
@@ -63,6 +66,13 @@ namespace RhythmDojo.UI
                 rules
             );
             view.back.onClick.AddListener(Back);
+            if (!keyMode && modeId == null && gameSettings)
+            {
+                keyMode = gameSettings.catalog[0].Mode;
+                modeId = keyMode.name;
+            }
+            keys = new KeySettingsController(view, keyMode, modeId);
+            view.keySettingsTab.onClick.AddListener(ShowKeys);
             view.soundTab.onClick.AddListener(ShowSound);
             view.graphicsTab.onClick.AddListener(ShowGraphics);
             view.gameplayTab.onClick.AddListener(ShowGameplay);
@@ -80,13 +90,17 @@ namespace RhythmDojo.UI
 
         private void ShowGameplay() => SelectTab(false, true);
 
-        private void SelectTab(bool graphics, bool gameplay = false)
+        private void ShowKeys() => SelectTab(false, false, true);
+
+        private void SelectTab(bool graphics, bool gameplay = false, bool keySettings = false)
         {
-            view.soundPanel.SetActive(!graphics && !gameplay);
+            keys?.Cancel();
+            view.soundPanel.SetActive(!graphics && !gameplay && !keySettings);
             view.graphicsPanel.SetActive(graphics);
             view.gameplayPanel.SetActive(gameplay);
+            view.keySettingsPanel.SetActive(keySettings);
 
-            if (!graphics && !gameplay)
+            if (!graphics && !gameplay && !keySettings)
             {
                 view.soundTab.GetComponent<Image>().color = new Color(.15f, .46f, .5f);
             }
@@ -115,14 +129,27 @@ namespace RhythmDojo.UI
 
             if (view.pixelTheme)
             {
-                StylePixelTab(view.soundTab, !graphics && !gameplay);
+                StylePixelTab(view.soundTab, !graphics && !gameplay && !keySettings);
                 StylePixelTab(view.graphicsTab, graphics);
                 StylePixelTab(view.gameplayTab, gameplay);
+                StylePixelTab(view.keySettingsTab, keySettings);
+            }
+            else if (keySettings)
+            {
+                view.keySettingsTab.image.color = new Color(.15f, .46f, .5f);
+            }
+            else
+            {
+                view.keySettingsTab.image.color = new Color(.13f, .17f, .2f);
             }
 
             var nav = view.apply.navigation;
 
-            if (gameplay)
+            if (keySettings)
+            {
+                nav.selectOnUp = view.resetKeys;
+            }
+            else if (gameplay)
             {
                 nav.selectOnUp = this.gameplay.HardModeLastControl();
             }
@@ -151,6 +178,10 @@ namespace RhythmDojo.UI
             else
             {
                 frame.color = new Color(.79f, .63f, .42f);
+                if (frame.artwork)
+                {
+                    frame.color = Color.white;
+                }
                 label.color = new Color(.24f, .12f, .085f);
             }
         }
@@ -159,6 +190,10 @@ namespace RhythmDojo.UI
         {
             sound?.Tick();
             graphics?.Tick();
+            if (keys?.Tick() == true)
+            {
+                return;
+            }
 
             if (
                 navigation == null
@@ -179,6 +214,11 @@ namespace RhythmDojo.UI
 
         private void Back()
         {
+            if (!view.back.interactable)
+            {
+                return;
+            }
+
             if (navigation is ISettingsReturnNavigation returning)
             {
                 returning.ReturnFromSettings();
@@ -191,6 +231,8 @@ namespace RhythmDojo.UI
 
         private void Unbind()
         {
+            keys?.Dispose();
+            keys = null;
             sound?.Dispose();
             graphics?.Dispose();
             gameplay?.Dispose();
@@ -207,6 +249,7 @@ namespace RhythmDojo.UI
             view.soundTab.onClick.RemoveListener(ShowSound);
             view.graphicsTab.onClick.RemoveListener(ShowGraphics);
             view.gameplayTab.onClick.RemoveListener(ShowGameplay);
+            view.keySettingsTab.onClick.RemoveListener(ShowKeys);
         }
 
         private void OnDisable() => Unbind();

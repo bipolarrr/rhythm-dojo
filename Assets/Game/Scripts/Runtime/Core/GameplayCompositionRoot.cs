@@ -1,10 +1,13 @@
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using RhythmDojo.Application;
 using RhythmDojo.Audio;
 using RhythmDojo.Content;
 using RhythmDojo.Gameplay;
 using RhythmDojo.Input;
 using RhythmDojo.Presentation;
+using RhythmDojo.Services;
 using RhythmDojo.UI;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -52,6 +55,10 @@ namespace RhythmDojo.Core
         private PlayableSong ownedSong;
         private GameModeDefinition runtimeMode;
         private GameplayPresentationSettings runtimePresentation;
+        private GameplayPauseMenu pauseMenu;
+        private CancellationTokenSource playbackLifetime;
+
+        public bool NeedsAudioRecovery => playRequest?.Song.NeedsAudioRecovery ?? false;
 
         public void Validate(bool validateGeneratedViews = false)
         {
@@ -132,6 +139,7 @@ namespace RhythmDojo.Core
 
             var song = request.Song;
             song.Validate();
+            playbackLifetime = new CancellationTokenSource();
             runtimeMode = Instantiate(song.Mode);
             runtimePresentation = Instantiate(settings.presentation);
 
@@ -164,7 +172,10 @@ namespace RhythmDojo.Core
                 settings.audio,
                 request.TimingOffsetMs
             );
-            input.Initialize(runtimeMode);
+            clock.SetPlaybackReadiness(() => !song.NeedsAudioRecovery);
+            song.AudioChanged += ReplaceAudio;
+            AudioSettings.OnAudioConfigurationChanged += AudioConfigurationChanged;
+            input.Initialize(runtimeMode, song.ModeId);
             notes.Configure(runtimeMode, runtimePresentation);
             playfield.Build(runtimeMode, runtimePresentation);
 
@@ -220,7 +231,7 @@ namespace RhythmDojo.Core
                 request.HardModeRules,
                 request.Rules
             );
-            hud.Initialize(controller.ReadModel, runtimeMode, runtimePresentation);
+            hud.Initialize(controller.ReadModel, runtimeMode, runtimePresentation, song.ModeId);
             hits.Initialize(
                 controller.ReadModel,
                 runtimeMode,
@@ -229,7 +240,12 @@ namespace RhythmDojo.Core
             );
             controller.ReadModel.Judged += TrackCombo;
             controller.ReadModel.ResetOccurred += ResetRecord;
-            input.ReturnRequested += ReturnToSelection;
+            pauseMenu = hud.GetComponent<GameplayPauseMenu>();
+            if (pauseMenu)
+            {
+                pauseMenu.Initialize(controller, flow, this);
+            }
+            input.ReturnRequested += HandleGameplayEscape;
             ui.Initialize(controller.ReadModel, ReturnToSelection);
             initialized = true;
             input.Activate();
@@ -237,6 +253,12 @@ namespace RhythmDojo.Core
             if (EventSystem.current)
             {
                 EventSystem.current.SetSelectedGameObject(null);
+            }
+
+            // A reset can occur after loading the song but before this scene is initialized.
+            if (song.NeedsAudioRecovery)
+            {
+                AudioConfigurationChanged(false);
             }
         }
 
@@ -248,6 +270,60 @@ namespace RhythmDojo.Core
 
                 return;
             }
+        }
+
+        private void AudioConfigurationChanged(bool deviceWasChanged)
+        {
+            if (!initialized || playRequest == null)
+            {
+                return;
+            }
+
+            if (controller.IsPaused)
+            {
+                return;
+            }
+
+            if (!playRequest.Song.NeedsAudioRecovery)
+            {
+                return;
+            }
+
+            if (controller.Session.State == SessionState.Playing || controller.Session.State == SessionState.Ready)
+            {
+                controller.PauseSession();
+                if (pauseMenu)
+                {
+                    pauseMenu.Open();
+                }
+            }
+        }
+
+        private void ReplaceAudio(AudioClip clip)
+        {
+            clock.ReplaceAudioClip(clip);
+        }
+
+        public async Task PreparePlaybackAsync(CancellationToken cancellationToken)
+        {
+            if (!initialized || returnPending)
+            {
+                throw new OperationCanceledException(cancellationToken);
+            }
+
+            using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(
+                cancellationToken, playbackLifetime.Token);
+            while (playRequest.Song.NeedsAudioRecovery)
+            {
+                cancellation.Token.ThrowIfCancellationRequested();
+                await playRequest.Song.RecoverAudioAsync(cancellation.Token);
+                if (playRequest.Song.NeedsAudioRecovery)
+                {
+                    // A device may reset again while decoding. Yield so Exit can cancel retries.
+                    await Task.Yield();
+                }
+            }
+            cancellation.Token.ThrowIfCancellationRequested();
         }
 
         private void TrackCombo(JudgmentEvent result)
@@ -271,7 +347,7 @@ namespace RhythmDojo.Core
                 return;
             }
 
-            if (playRequest == null)
+            if (playRequest == null || controller.IsPaused)
             {
                 return;
             }
@@ -301,7 +377,7 @@ namespace RhythmDojo.Core
 
             for (int i = 0; i < laneLabels.Length; i++)
             {
-                laneLabels[i] = runtimeMode.GetLane(i).displayName;
+                laneLabels[i] = PlayKeyBindings.GetLabel(runtimeMode, playRequest.Song.ModeId, i);
             }
 
             var result = new PlayResult(
@@ -378,6 +454,17 @@ namespace RhythmDojo.Core
             }
         }
 
+        private void HandleGameplayEscape()
+        {
+            if (pauseMenu && controller.Session.State == SessionState.Playing)
+            {
+                pauseMenu.Open();
+                return;
+            }
+
+            ReturnToSelection();
+        }
+
         public void ReturnToSelection()
         {
             if (!initialized || flow && flow.Transitioning)
@@ -400,21 +487,23 @@ namespace RhythmDojo.Core
 
         private void ShutdownGameplay()
         {
+            ReleasePlaybackRecovery();
             UnbindRecord();
             hits.Unbind();
             controller.Shutdown();
             input.Shutdown();
             hud.Unbind();
             initialized = false;
-            input.ReturnRequested -= ReturnToSelection;
+            input.ReturnRequested -= HandleGameplayEscape;
             ui.Unbind();
         }
 
         private void OnDestroy()
         {
+            ReleasePlaybackRecovery();
             if (input)
             {
-                input.ReturnRequested -= ReturnToSelection;
+                input.ReturnRequested -= HandleGameplayEscape;
             }
 
             if (ui)
@@ -444,6 +533,22 @@ namespace RhythmDojo.Core
             if (runtimePresentation)
             {
                 Destroy(runtimePresentation);
+            }
+        }
+
+        private void ReleasePlaybackRecovery()
+        {
+            AudioSettings.OnAudioConfigurationChanged -= AudioConfigurationChanged;
+            if (playRequest != null)
+            {
+                playRequest.Song.AudioChanged -= ReplaceAudio;
+            }
+            playbackLifetime?.Cancel();
+            playbackLifetime?.Dispose();
+            playbackLifetime = null;
+            if (clock)
+            {
+                clock.SetPlaybackReadiness(null);
             }
         }
     }

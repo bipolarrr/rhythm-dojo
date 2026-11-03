@@ -241,8 +241,72 @@ namespace RhythmDojo.EditorTools
             view.gameOverPanel.SetActive(false);
 
             PixelGameplayStyle.Apply(view);
+            BuildPauseMenu(view.transform);
+            UiFontSettings.ApplyTo(view.transform);
 
             return view;
+        }
+
+        private static void BuildPauseMenu(Transform parent)
+        {
+            var menu = parent.gameObject.AddComponent<GameplayPauseMenu>();
+            var shade = Panel("Pause Overlay", parent, new Color(.08f, .035f, .015f, .78f), 0, 0, 1, 1);
+            shade.GetComponent<Image>().raycastTarget = true;
+            menu.panel = shade.gameObject;
+            var dialog = Panel("Pause Dialog", shade, Color.white, .32f, .20f, .68f, .80f);
+            var frame = PixelSongSelectionStyle.Frame(dialog, Color.white, 20);
+            frame.artwork = SettingsArtAssets.Load("SettingsPanel", UiArtworkCrop.Full,
+                new Vector4(128, 128, 128, 128));
+            frame.RefreshArtwork();
+            menu.resumeButton = PauseButton("Resume Play", dialog, "←", .04f, .81f, .20f, .95f);
+            var title = Label("Pause Heading", dialog, "수련 일시정지", .23f, .80f, .95f, .95f, 30);
+            title.color = new Color(.24f, .12f, .085f);
+            title.alignment = TextAnchor.MiddleCenter;
+            menu.settingsButton = PauseButton("Pause Settings", dialog, "설정", .14f, .58f, .86f, .74f);
+            menu.restartButton = PauseButton("Restart Play", dialog, "재시작", .14f, .35f, .86f, .51f);
+            menu.exitButton = PauseButton("Exit Play", dialog, "나가기", .14f, .12f, .86f, .28f);
+            menu.recoveryStatus = Label("Audio Recovery Status", dialog, "", .04f, .005f, .96f, .115f, 14);
+            menu.recoveryStatus.color = new Color(.24f, .12f, .085f);
+            menu.recoveryStatus.alignment = TextAnchor.MiddleCenter;
+            menu.recoveryStatus.raycastTarget = false;
+            menu.recoveryStatus.gameObject.SetActive(false);
+            shade.gameObject.SetActive(false);
+
+            var countdown = Panel("Resume Countdown", parent, new Color(.08f, .035f, .015f, .55f), 0, 0, 1, 1);
+            countdown.GetComponent<Image>().raycastTarget = true;
+            menu.countdown = countdown.gameObject;
+            var plaque = Panel("Countdown Wooden Seal", countdown, Color.white, .412f, .348f, .588f, .652f);
+            plaque.GetComponent<Image>().sprite = DojoEntranceAssets.Load("RoundPlaque", UiArtworkCrop.Alpha);
+            plaque.GetComponent<Image>().preserveAspect = true;
+            menu.countdownText = Label("Countdown Number", plaque, "3", .08f, .03f, .92f, .97f, 102);
+            menu.countdownText.color = new Color(1, .91f, .72f);
+            menu.countdownText.alignment = TextAnchor.MiddleCenter;
+            var shadow = menu.countdownText.gameObject.AddComponent<Shadow>();
+            shadow.effectColor = new Color(.20f, .07f, .025f);
+            shadow.effectDistance = new Vector2(3, -3);
+            countdown.gameObject.SetActive(false);
+            menu.Validate();
+        }
+
+        private static Button PauseButton(string name, Transform parent, string text,
+            float x0, float y0, float x1, float y1)
+        {
+            var button = UiElements.Button(name, parent, text, Vector2.zero, Vector2.zero);
+            Bounds((RectTransform)button.transform, x0, y0, x1, y1);
+            var frame = PixelSongSelectionStyle.Frame((RectTransform)button.transform, Color.white, 10);
+            frame.artwork = SettingsArtAssets.Load("SettingsControl", UiArtworkCrop.Full,
+                new Vector4(128, 128, 128, 128));
+            frame.RefreshArtwork();
+            var label = button.GetComponentInChildren<Text>();
+            label.fontSize = 32;
+            label.color = new Color(.24f, .12f, .085f);
+            var colors = button.colors;
+            colors.normalColor = Color.white;
+            colors.highlightedColor = new Color(1, .91f, .70f);
+            colors.selectedColor = colors.highlightedColor;
+            colors.pressedColor = new Color(.74f, .55f, .34f);
+            button.colors = colors;
+            return button;
         }
 
         private static RectTransform Card(

@@ -66,8 +66,13 @@ namespace RhythmDojo.Core
                 {
                     DojoEntranceTransition.Begin(
                         view.entrance, view.doorSlide, view.startPrompt.font, ReturnToTitle);
+                    // The title already has the settings needed to compose selection.
+                    // Avoid activating and unloading an intermediate Bootstrap scene.
+                    AppFlowController.Create(settings).ShowSelection();
+                    return;
                 }
 
+                AppFlowController.Create(settings).CancelSelectionPreparation();
                 if (SceneManager.LoadSceneAsync(BootstrapScenePath, LoadSceneMode.Single) == null)
                 {
                     throw new InvalidOperationException("Cannot load Bootstrap.");
@@ -85,9 +90,40 @@ namespace RhythmDojo.Core
             }
         }
 
-        private static void ReturnToTitle()
+        private void ReturnToTitle()
         {
+            AppFlowController.Create(settings).CancelSelectionPreparation();
+            Transitioning = false;
             SceneManager.LoadSceneAsync("Assets/Game/Scenes/Title.unity", LoadSceneMode.Single);
+        }
+
+        public void ShowEditor()
+        {
+            if (Transitioning)
+            {
+                return;
+            }
+
+            if (!UnityEngine.Application.CanStreamedLevelBeLoaded(RhythmDojo.UI.ChartEditorMenu.ScenePath))
+            {
+                throw new InvalidOperationException("Chart editor scene is not registered in Build Settings.");
+            }
+
+            Transitioning = true;
+
+            try
+            {
+                AppFlowController.Create(settings).CancelSelectionPreparation();
+                if (SceneManager.LoadSceneAsync(RhythmDojo.UI.ChartEditorMenu.ScenePath, LoadSceneMode.Single) == null)
+                {
+                    throw new InvalidOperationException("Cannot load ChartEditor.");
+                }
+            }
+            catch
+            {
+                Transitioning = false;
+                throw;
+            }
         }
 
         public void QuitGame()

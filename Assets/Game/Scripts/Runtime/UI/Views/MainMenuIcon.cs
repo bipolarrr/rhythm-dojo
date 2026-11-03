@@ -11,6 +11,8 @@ namespace RhythmDojo.UI
         {
             Settings,
             Power,
+            Back,
+            Play,
         }
 
         public IconKind kind;
@@ -23,7 +25,20 @@ namespace RhythmDojo.UI
             var center = rect.center;
             float radius = Mathf.Min(rect.width, rect.height) * .31f;
 
-            if (kind == IconKind.Power)
+            if (kind == IconKind.Back)
+            {
+                Line(helper, center + Vector2.right * radius, center + Vector2.left * radius, radius * .18f);
+                Line(helper, center + Vector2.left * radius, center + new Vector2(-.2f, .8f) * radius, radius * .18f);
+                Line(helper, center + Vector2.left * radius, center + new Vector2(-.2f, -.8f) * radius, radius * .18f);
+            }
+            else if (kind == IconKind.Play)
+            {
+                helper.AddVert(center + new Vector2(-.8f, -1f) * radius, color, Vector2.zero);
+                helper.AddVert(center + new Vector2(-.8f, 1f) * radius, color, Vector2.zero);
+                helper.AddVert(center + Vector2.right * radius, color, Vector2.zero);
+                helper.AddTriangle(0, 1, 2);
+            }
+            else if (kind == IconKind.Power)
             {
                 for (int i = 0; i < 48; i++)
                 {

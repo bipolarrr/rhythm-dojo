@@ -65,12 +65,13 @@ namespace RhythmDojo.EditorTools
                 rect.anchoredPosition += new Vector2(0, 280);
             }
 
-            view.advancedGridControl = AudioTimelineUi.Button(view.panel, "Advanced Grid", "고급 GRID", 974, 192, 130, null);
+            view.advancedGridControl = AudioTimelineUi.Button(view.panel, "Advanced Grid", "변속", 974, 192, 130, null);
             var advancedRect = (RectTransform)view.advancedGridControl.transform;
             advancedRect.anchorMin = Vector2.zero;
             advancedRect.anchorMax = Vector2.zero;
             advancedRect.anchoredPosition = new Vector2(974, 88);
             BuildAdvanced(view);
+            BuildTempoChange(view);
             view.panel.offsetMin = new Vector2(28, 46);
             view.panel.offsetMax = new Vector2(-28, 326);
 
@@ -81,6 +82,9 @@ namespace RhythmDojo.EditorTools
                 hint.Caption = button.GetComponentInChildren<Text>().text;
                 switch (button.name)
                 {
+                    case "Advanced Grid":
+                        hint.Caption = "선택한 파형 커서 위치부터 적용할 BPM을 설정합니다.";
+                        break;
                     case "Cursor Origin":
                         hint.Caption = "파형에서 선택한 커서 위치를 첫 마디 첫 박으로 지정합니다. 재생 중에는 버튼을 누른 순간의 재생 위치를 사용합니다.";
                         break;
@@ -121,7 +125,7 @@ namespace RhythmDojo.EditorTools
             rect.offsetMin = new Vector2(0, 6);
             rect.offsetMax = new Vector2(0, 330);
             view.advanced = rect.gameObject;
-            AudioTimelineUi.Label(rect, "Advanced Heading", "고급 GRID · 시간은 음원상의 초 · 첫 변경점은 채보 시간 0 고정", 16, 10, 1050);
+            AudioTimelineUi.Label(rect, "Advanced Heading", "그리드 세부 설정 · 박자표 / BPM 변경점 / 표시 밀도", 16, 10, 1050);
             view.closeAdvancedControl = AudioTimelineUi.Button(rect, "Close Advanced", "닫기", 1102, 10, 110, null);
             view.segments = view.tempoSegmentsControl = AudioTimelineUi.Dropdown(rect, "Tempo Segments", 16, 48, 350, new[] { "0" }, null);
             view.segmentTime = AudioTimelineUi.Field(rect, "Segment Time", "변경점 위치 s", 16, 88, 166, "0");
@@ -149,6 +153,31 @@ namespace RhythmDojo.EditorTools
                 "롱노트 양 끝과 모든 채보에 동일 적용\n자동 스냅 없음 · Undo/Redo로 복원\n오디오 오프셋은 기존 설정 메뉴에서 별도 편집",
                 730, 234, 465, 74);
             view.advanced.SetActive(false);
+        }
+
+        private static void BuildTempoChange(ChartAudioTimelineView view)
+        {
+            var overlay = AudioTimelineUi.Panel(view.canvas, "Tempo Change Popup", new Color(0, 0, 0, 0.6f));
+            overlay.anchorMin = Vector2.zero;
+            overlay.anchorMax = Vector2.one;
+            overlay.offsetMin = overlay.offsetMax = Vector2.zero;
+            view.tempoChangePopup = overlay.gameObject;
+            var dialog = AudioTimelineUi.Panel(overlay, "Tempo Change Dialog", new Color(0.09f, 0.115f, 0.155f));
+            dialog.anchorMin = dialog.anchorMax = new Vector2(0.5f, 0.5f);
+            dialog.pivot = new Vector2(0.5f, 0.5f);
+            dialog.anchoredPosition = Vector2.zero;
+            dialog.sizeDelta = new Vector2(440, 260);
+            AudioTimelineUi.Label(dialog, "Tempo Change Heading", "변속 · 선택 위치부터 BPM 적용", 20, 16, 400);
+            view.tempoChangePosition = AudioTimelineUi.Label(dialog, "Tempo Change Position", "", 20, 48, 400);
+            view.tempoChangeBpm = AudioTimelineUi.Field(dialog, "Tempo Change BPM", "BPM", 20, 88, 400, "120");
+            AudioTimelineUi.Label(dialog, "Tempo Change Note Policy", "기존 노트의 음악 시간은 유지됩니다.", 20, 145, 400, 20).fontSize = 12;
+            view.tempoChangeError = AudioTimelineUi.Label(dialog, "Tempo Change Error", "", 20, 168, 400, 36);
+            view.tempoChangeError.color = new Color(1, 0.4f, 0.35f);
+            view.tempoChangeError.fontSize = 12;
+            view.applyTempoChangeControl = AudioTimelineUi.Button(dialog, "Apply Tempo Change", "적용", 20, 218, 125, null);
+            view.deleteTempoChangeControl = AudioTimelineUi.Button(dialog, "Delete Tempo Change", "변속 삭제", 157, 218, 125, null);
+            view.cancelTempoChangeControl = AudioTimelineUi.Button(dialog, "Cancel Tempo Change", "취소", 294, 218, 125, null);
+            overlay.gameObject.SetActive(false);
         }
 
     }

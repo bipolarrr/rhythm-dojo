@@ -1,0 +1,92 @@
+{
+  "success": true,
+  "command": "command test_status",
+  "data": {
+    "command": "test_status",
+    "parameters": {},
+    "result": {
+      "status": "completed",
+      "duration": 0.42,
+      "summary": {
+        "total": 9,
+        "passed": 7,
+        "failed": 2,
+        "skipped": 0,
+        "inconclusive": 0
+      },
+      "results": [
+        {
+          "FullName": "RhythmDojo.Tests.PlayKeyBindingsTests.FourLaneModeKeepsItsOwnDefaultBindingAndLabel(\"<Keyboard>/a\",\"Left\")",
+          "Status": "Failed",
+          "Duration": 0.02879,
+          "Message": "  String lengths are both 12. Strings differ at index 11.\r\n  Expected: \"<Keyboard>/a\"\r\n  But was:  \"<Keyboard>/d\"\r\n  ----------------------^\r\n",
+          "StackTrace": "at RhythmDojo.Tests.PlayKeyBindingsTests.FourLaneModeKeepsItsOwnDefaultBindingAndLabel (System.String binding, System.String label) [0x00081] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\EditMode\\PlayKeyBindingsTests.cs:29\r\n"
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PlayKeyBindingsTests.FourLaneModeKeepsItsOwnDefaultBindingAndLabel(\"<Gamepad>/buttonSouth\",\"Pad South\")",
+          "Status": "Failed",
+          "Duration": 0.0005115,
+          "Message": "  Expected string length 21 but was 12. Strings differ at index 1.\r\n  Expected: \"<Gamepad>/buttonSouth\"\r\n  But was:  \"<Keyboard>/d\"\r\n  ------------^\r\n",
+          "StackTrace": "at RhythmDojo.Tests.PlayKeyBindingsTests.FourLaneModeKeepsItsOwnDefaultBindingAndLabel (System.String binding, System.String label) [0x00081] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\EditMode\\PlayKeyBindingsTests.cs:29\r\n"
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PlayKeyBindingsTests.InvalidReservedAndDuplicateKeysLeaveSavedBindingsUnchanged(None)",
+          "Status": "Passed",
+          "Duration": 0.0074176,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PlayKeyBindingsTests.InvalidReservedAndDuplicateKeysLeaveSavedBindingsUnchanged(Escape)",
+          "Status": "Passed",
+          "Duration": 0.0002536,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PlayKeyBindingsTests.InvalidReservedAndDuplicateKeysLeaveSavedBindingsUnchanged(Space)",
+          "Status": "Passed",
+          "Duration": 0.0002225,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PlayKeyBindingsTests.InvalidReservedAndDuplicateKeysLeaveSavedBindingsUnchanged(F)",
+          "Status": "Passed",
+          "Duration": 0.0002332,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PlayKeyBindingsTests.InvalidSavedKeysFallBackToDefaults(\"invalid json\")",
+          "Status": "Passed",
+          "Duration": 0.0007982,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PlayKeyBindingsTests.InvalidSavedKeysFallBackToDefaults(\"{\\\"keys\\\":[0,0,0,0]}\")",
+          "Status": "Passed",
+          "Duration": 0.0010906,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.PlayKeyBindingsTests.InvalidSavedKeysFallBackToDefaults(\"{\\\"keys\\\":[15]}\")",
+          "Status": "Passed",
+          "Duration": 0.0002797,
+          "Message": null,
+          "StackTrace": null
+        }
+      ]
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "C:\\Users\\song\\RhythmDojo-pr-quality"
+    },
+    "success": true
+  },
+  "errors": [],
+  "warnings": []
+}

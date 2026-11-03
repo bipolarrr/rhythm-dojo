@@ -399,6 +399,7 @@ namespace RhythmDojo.Tests
         [Test]
         public void GeneratedScenesRemainStableAndSettingsAreNotOverwritten()
         {
+            using var generated = new GeneratedSceneSnapshot();
             string before = EditorJsonUtility.ToJson(Settings.defaultDifficulty);
             string scrollBefore = EditorJsonUtility.ToJson(Settings.scroll);
             SceneBuilder.BuildAll();

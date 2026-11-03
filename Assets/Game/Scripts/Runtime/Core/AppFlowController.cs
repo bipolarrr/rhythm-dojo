@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -36,7 +37,12 @@ namespace RhythmDojo.Core
         private GameObject settingsPreviousFocus;
         private ModalInputScope settingsInputScope;
         private SettingsScreen settingsPopup;
+        private GameModeDefinition settingsKeyMode;
+        private string settingsKeyModeId;
         private Action<string> returned;
+        private PreparedSelectionScene selectionPreparation;
+
+        public bool IsSelectionPrepared => selectionPreparation != null && selectionPreparation.IsSelectionPrepared;
 
         public GameSettings Settings => settings;
 
@@ -115,6 +121,7 @@ namespace RhythmDojo.Core
 
             var flow = new GameObject("App Flow").AddComponent<AppFlowController>();
             flow.settings = settings;
+            PlayKeyBindings.ConfigureDefaultMode(settings.catalog[0].Mode);
             flow.Library = new SongLibrary();
             flow.Library.Register(new BuiltInSongProvider(settings.catalog));
             flow.Library.Register(
@@ -146,6 +153,7 @@ namespace RhythmDojo.Core
             }
 
             flow.Audio = new AudioSettingsService(flow.CanApplyAudioSettings);
+            flow.selectionPreparation = new PreparedSelectionScene(flow);
             DontDestroyOnLoad(flow.gameObject);
 
             return flow;
@@ -166,12 +174,22 @@ namespace RhythmDojo.Core
             return SceneManager.GetSceneByPath(SettingsPath).isLoaded;
         }
 
+        private void Update()
+        {
+            Audio?.Tick();
+            selectionPreparation?.Tick();
+        }
+
         private void OnEnable() => SceneManager.sceneLoaded += SceneLoaded;
 
         private void OnDisable() => SceneManager.sceneLoaded -= SceneLoaded;
 
         private void SceneLoaded(Scene scene, LoadSceneMode mode)
         {
+            if (selectionPreparation != null && selectionPreparation.HandleSceneLoaded(scene))
+            {
+                return;
+            }
             Transitioning = false;
 
             if (scene.path == GameplayPath && CurrentRequest != null)
@@ -254,6 +272,7 @@ namespace RhythmDojo.Core
             }
 
             var rules = Rules.Snapshot;
+            Audio.CancelBufferValidation();
             Transitioning = true;
 
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(
@@ -357,6 +376,7 @@ namespace RhythmDojo.Core
             }
 
             var rules = Rules.Snapshot;
+            Audio.CancelBufferValidation();
             Transitioning = true;
 
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(
@@ -436,6 +456,46 @@ namespace RhythmDojo.Core
             Load(SelectionPath);
         }
 
+        public void PrepareSelection()
+        {
+            var scene = SceneManager.GetActiveScene();
+            if (scene.path == "Assets/Game/Scenes/Title.unity")
+            {
+                selectionPreparation.PrepareSelection(scene);
+            }
+        }
+
+        public bool CanInitializeSelection(Scene scene) => selectionPreparation.CanInitialize(scene);
+
+        public void SelectionInitialized(SongSelectionScreen screen)
+        {
+            if (!selectionPreparation.SelectionInitialized(screen))
+            {
+                DojoEntranceTransition.SelectionReady(screen);
+            }
+        }
+
+        public void CancelSelectionPreparation()
+        {
+            bool activating = selectionPreparation.IsActivating;
+            selectionPreparation.Cancel();
+            if (activating)
+            {
+                Transitioning = false;
+            }
+        }
+
+        public void SelectionPreparationFailed()
+        {
+            Transitioning = false;
+            if (DojoEntranceTransition.Active)
+            {
+                DojoEntranceTransition.Active.Fail();
+            }
+        }
+
+        public void SelectionPreparationActivated() => Transitioning = false;
+
         public void ShowTitle()
         {
             if (Transitioning)
@@ -455,6 +515,26 @@ namespace RhythmDojo.Core
             }
 
             settingsReturnPath = SelectionPath;
+            SelectSettingsKeyMode();
+            OpenSettingsPopup();
+        }
+
+        public void ShowGameplaySettings()
+        {
+            if (Transitioning || !SceneManager.GetSceneByPath(GameplayPath).isLoaded)
+            {
+                return;
+            }
+
+            var game = FindFirstObjectByType<RhythmGameController>();
+            if (!game || !game.IsPaused)
+            {
+                return;
+            }
+
+            settingsReturnPath = GameplayPath;
+            settingsKeyMode = CurrentRequest?.Song.Mode;
+            settingsKeyModeId = CurrentRequest?.Song.ModeId ?? "";
             OpenSettingsPopup();
         }
 
@@ -469,7 +549,39 @@ namespace RhythmDojo.Core
             }
 
             settingsReturnPath = "Assets/Game/Scenes/Title.unity";
+            settingsKeyMode = settings.catalog[0].Mode;
+            settingsKeyModeId = settingsKeyMode.name;
             OpenSettingsPopup();
+        }
+
+        private void SelectSettingsKeyMode()
+        {
+            settingsKeyMode = null;
+            settingsKeyModeId = "";
+            var entry = Library.Find(Selection.SelectedSongId);
+            if (entry == null)
+            {
+                return;
+            }
+            settingsKeyMode = entry.Mode;
+            settingsKeyModeId = entry.ModeId ?? "";
+            foreach (var chart in entry.Charts)
+            {
+                if (chart.Slot != Selection.SelectedSlot)
+                {
+                    continue;
+                }
+                if (chart.Mode && !string.IsNullOrWhiteSpace(chart.ModeId))
+                {
+                    settingsKeyMode = chart.Mode;
+                    settingsKeyModeId = chart.ModeId;
+                }
+                break;
+            }
+            if (string.IsNullOrWhiteSpace(settingsKeyModeId))
+            {
+                settingsKeyMode = null;
+            }
         }
 
         public void ReturnFromSettings()
@@ -479,7 +591,11 @@ namespace RhythmDojo.Core
                 return;
             }
 
-            ClearEditorReturn();
+            Audio.CancelBufferValidation();
+            if (settingsReturnPath != GameplayPath)
+            {
+                ClearEditorReturn();
+            }
 
             if (settingsInputScope == null)
             {
@@ -525,7 +641,7 @@ namespace RhythmDojo.Core
                 settingsPopup.gameObject.SetActive(true);
                 settingsPopup.Initialize(
                     Audio, this, settings, Selection, Preferences, HardMode, Rules,
-                    PresentationPreferences.Current);
+                    PresentationPreferences.Current, settingsKeyMode, settingsKeyModeId);
             }
             catch
             {
@@ -542,6 +658,7 @@ namespace RhythmDojo.Core
 
         private void Load(string path)
         {
+            Audio?.CancelBufferValidation();
             if (settingsInputScope != null)
             {
                 settingsPopup.gameObject.SetActive(false);
@@ -553,6 +670,13 @@ namespace RhythmDojo.Core
 
             try
             {
+                if (path == SelectionPath && DojoEntranceTransition.Active)
+                {
+                    LoadEntranceSelection(path);
+                    return;
+                }
+                CancelSelectionPreparation();
+                Transitioning = true;
                 if (SceneManager.LoadSceneAsync(path, LoadSceneMode.Single) == null)
                 {
                     throw new InvalidOperationException("Cannot load scene: " + path);
@@ -563,6 +687,11 @@ namespace RhythmDojo.Core
                 Transitioning = false;
                 throw;
             }
+        }
+
+        private void LoadEntranceSelection(string path)
+        {
+            selectionPreparation.ActivatePreparedSelection(SceneManager.GetActiveScene());
         }
 
         private void ReleaseRequest()
@@ -580,6 +709,7 @@ namespace RhythmDojo.Core
 
         private void OnDestroy()
         {
+            selectionPreparation?.Dispose();
             settingsInputScope?.Dispose();
             lifetime.Cancel();
             lifetime.Dispose();

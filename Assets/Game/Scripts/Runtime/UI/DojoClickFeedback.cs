@@ -77,11 +77,6 @@ namespace RhythmDojo.UI
                 return;
             }
 
-            if (impact)
-            {
-                impact.PlayAt(screenPosition);
-            }
-
             if (clickSound)
             {
                 clickSource.PlayOneShot(clickSound);

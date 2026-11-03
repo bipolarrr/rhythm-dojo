@@ -1,0 +1,36 @@
+{
+  "success": true,
+  "command": "command eval",
+  "data": {
+    "command": "eval",
+    "parameters": {
+      "code": "var r = UnityEditor.Build.Reporting.BuildReport.GetLatestReport(); return new { compiling = UnityEditor.EditorApplication.isCompiling, errors = UnityEditor.EditorUtility.scriptCompilationFailed, playing = UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode, active = UnityEditor.SessionState.GetBool(\"RhythmDojo.Verification.Active\", false), failed = UnityEditor.SessionState.GetBool(\"RhythmDojo.Verification.Failed\", false), build = r.summary.result.ToString(), buildErrors = r.summary.totalErrors, buildWarnings = r.summary.totalWarnings, bytes = r.summary.totalSize, duration = r.summary.totalTime.TotalSeconds, output = r.summary.outputPath };"
+    },
+    "result": {
+      "output": null,
+      "diagnostics": [],
+      "success": true,
+      "result": {
+        "compiling": false,
+        "errors": false,
+        "playing": false,
+        "active": false,
+        "failed": false,
+        "build": "Succeeded",
+        "buildErrors": 0,
+        "buildWarnings": 3,
+        "bytes": 211439954,
+        "duration": 37.7878147,
+        "output": "C:/Users/song/RhythmDojo-pr-quality/Builds/Windows/RhythmDojo.exe"
+      }
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "C:\\Users\\song\\RhythmDojo-pr-quality"
+    },
+    "success": true
+  },
+  "errors": [],
+  "warnings": []
+}

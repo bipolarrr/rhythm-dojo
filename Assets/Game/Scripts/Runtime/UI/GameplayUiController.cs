@@ -20,6 +20,11 @@ namespace RhythmDojo.UI
             }
 
             view.Validate();
+            var pauseMenu = GetComponent<GameplayPauseMenu>();
+            if (pauseMenu)
+            {
+                pauseMenu.Validate();
+            }
         }
 
         public void Initialize(IGameplayReadModel readModel, Action onReturn)

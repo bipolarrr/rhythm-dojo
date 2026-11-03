@@ -1,0 +1,85 @@
+{
+  "success": true,
+  "command": "command test_status",
+  "data": {
+    "command": "test_status",
+    "parameters": {},
+    "result": {
+      "status": "completed",
+      "duration": 18.94,
+      "summary": {
+        "total": 8,
+        "passed": 7,
+        "failed": 1,
+        "skipped": 0,
+        "inconclusive": 0
+      },
+      "results": [
+        {
+          "FullName": "RhythmDojo.Tests.SongClockResumeTests.BeforeAudioResumeWaitsForItsRemainingLeadAndPendingPauseCancels",
+          "Status": "Passed",
+          "Duration": 2.3951281,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SongClockResumeTests.EscapeDuringResumeLeadKeepsSessionAndSourcePaused",
+          "Status": "Passed",
+          "Duration": 2.4887191,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SongClockResumeTests.ResetDuringMenuResumeLeadReopensPauseWithoutAdvancingSession",
+          "Status": "Passed",
+          "Duration": 5.1371572,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SongClockResumeTests.ResetDuringScheduledResumeKeepsTimeFrozenUntilNewResume",
+          "Status": "Passed",
+          "Duration": 1.6986764,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SongClockResumeTests.ResumeAfterAudioEndDoesNotReplayTheFinalSample",
+          "Status": "Passed",
+          "Duration": 1.4898448,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SongClockResumeTests.ResumeSeeksFromFrozenLogicalTimeInsteadOfPausedSourceCursor",
+          "Status": "Passed",
+          "Duration": 1.5129547,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SongClockResumeTests.ResumeWaitsForScheduledAnchorWithoutAdvancingLogicalTime",
+          "Status": "Passed",
+          "Duration": 1.5941521,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.SongClockResumeTests.TwentyResumesKeepSourceSamplesAlignedAcrossBuffersAndOffsets",
+          "Status": "Failed",
+          "Duration": 2.5678351,
+          "Message": "  Sample cursor and logical clock differ beyond two DSP blocks plus observed frame.\r\n  Expected: less than or equal to 0.021498009070240038d\r\n  But was:  0.03949910274531665d\r\n",
+          "StackTrace": "at RhythmDojo.Tests.SongClockResumeTests+<TwentyResumesKeepSourceSamplesAlignedAcrossBuffersAndOffsets>d__3.MoveNext () [0x0048c] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\PlayMode\\SongClockResumeTests.cs:127\r\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@bd7f943e9647\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\r\n"
+        }
+      ]
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "C:\\Users\\song\\RhythmDojo-pr-quality"
+    },
+    "success": true
+  },
+  "errors": [],
+  "warnings": []
+}

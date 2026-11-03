@@ -1,0 +1,204 @@
+{
+  "success": true,
+  "command": "command test_status",
+  "data": {
+    "command": "test_status",
+    "parameters": {},
+    "result": {
+      "status": "completed",
+      "duration": 0.48,
+      "summary": {
+        "total": 25,
+        "passed": 25,
+        "failed": 0,
+        "skipped": 0,
+        "inconclusive": 0
+      },
+      "results": [
+        {
+          "FullName": "RhythmDojo.Tests.AudioSettingsServiceTests.ClockResetDiscardsPriorSuccessfulObservation",
+          "Status": "Passed",
+          "Duration": 0.0326908,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioSettingsServiceTests.DeviceRefusingLargerAppliedBufferCannotReportRecovery",
+          "Status": "Passed",
+          "Duration": 0.0067051,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioSettingsServiceTests.DriverClampingIsReflectedInTheSelectedAndActualBuffer",
+          "Status": "Passed",
+          "Duration": 0.0004252,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioSettingsServiceTests.ExternalResetInvalidatesVerifiedStatus",
+          "Status": "Passed",
+          "Duration": 0.0005157,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioSettingsServiceTests.FailedRecoveryStopsRetryingAndReportsFailureInsteadOfSuccess",
+          "Status": "Passed",
+          "Duration": 0.0005745,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioSettingsServiceTests.ForcedNavigationCanCancelValidationAndRestoreBeforeGameplay",
+          "Status": "Passed",
+          "Duration": 0.0004874,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioSettingsServiceTests.HealthyLowBufferRemainsAvailableWithoutForcedMinimum",
+          "Status": "Passed",
+          "Duration": 0.0038448,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioSettingsServiceTests.MeasurementIncludesBothEndpointBlockUncertainty(1,1,Undetermined)",
+          "Status": "Passed",
+          "Duration": 0.0009722,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioSettingsServiceTests.MeasurementIncludesBothEndpointBlockUncertainty(5,5,Healthy)",
+          "Status": "Passed",
+          "Duration": 0.0001102,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioSettingsServiceTests.MeasurementIncludesBothEndpointBlockUncertainty(5,4.9d,Unhealthy)",
+          "Status": "Passed",
+          "Duration": 0.0000863,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioSettingsServiceTests.MeasurementIncludesBothEndpointBlockUncertainty(5,5.1d,Unhealthy)",
+          "Status": "Passed",
+          "Duration": 0.0000961,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioSettingsServiceTests.PausedAudioDoesNotGetMisdiagnosedAsSlowHardware",
+          "Status": "Passed",
+          "Duration": 0.0004498,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioSettingsServiceTests.PauseInvalidatesCompletedFirstInterval",
+          "Status": "Passed",
+          "Duration": 0.000499,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioSettingsServiceTests.PauseOrRepeatedConfigurationChangesCannotRestartOverallDeadline(True)",
+          "Status": "Passed",
+          "Duration": 0.0006121,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioSettingsServiceTests.PauseOrRepeatedConfigurationChangesCannotRestartOverallDeadline(False)",
+          "Status": "Passed",
+          "Duration": 0.000118,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioSettingsServiceTests.QuantizedClockAndDelayedFramesStillRequireContainedIntervals",
+          "Status": "Passed",
+          "Duration": 0.0004467,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioSettingsServiceTests.RejectedLargerBufferReportsFailureAndRestoresPreviousConfiguration",
+          "Status": "Passed",
+          "Duration": 0.0004841,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioSettingsServiceTests.RejectedResetRestoresPreviousConfigurationAndPublishesResult",
+          "Status": "Passed",
+          "Duration": 0.0004508,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioSettingsServiceTests.SlowAcceptedConfigurationRecoversBeforeReportingSuccess(1,32)",
+          "Status": "Passed",
+          "Duration": 0.0013161,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioSettingsServiceTests.SlowAcceptedConfigurationRecoversBeforeReportingSuccess(2,64)",
+          "Status": "Passed",
+          "Duration": 0.000211,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioSettingsServiceTests.SlowAcceptedConfigurationRecoversBeforeReportingSuccess(3,128)",
+          "Status": "Passed",
+          "Duration": 0.0001371,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioSettingsServiceTests.TwoIndependentIntervalsMustContainTheEntireUncertaintyRange",
+          "Status": "Passed",
+          "Duration": 0.0006524,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioSettingsServiceTests.TwoPercentClockErrorCannotPassAsHealthy(0.98d)",
+          "Status": "Passed",
+          "Duration": 0.0012577,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioSettingsServiceTests.TwoPercentClockErrorCannotPassAsHealthy(1.02d)",
+          "Status": "Passed",
+          "Duration": 0.0000756,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.AudioSettingsServiceTests.UnresolvedUncertaintyTimesOutWithoutClaimingHealthy",
+          "Status": "Passed",
+          "Duration": 0.0006643,
+          "Message": null,
+          "StackTrace": null
+        }
+      ]
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "C:\\Users\\song\\RhythmDojo-pr-quality"
+    },
+    "success": true
+  },
+  "errors": [],
+  "warnings": []
+}

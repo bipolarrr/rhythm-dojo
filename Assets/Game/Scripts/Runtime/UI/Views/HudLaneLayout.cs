@@ -1,5 +1,6 @@
 using System;
 using RhythmDojo.Gameplay;
+using RhythmDojo.Services;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -20,7 +21,8 @@ namespace RhythmDojo.UI
             }
         }
 
-        public Image[] Build(GameModeDefinition mode, GameplayPresentationSettings presentation)
+        public Image[] Build(GameModeDefinition mode, GameplayPresentationSettings presentation,
+            string modeId = null)
         {
             for (int i = laneRoot.childCount - 1; i >= 0; i--)
             {
@@ -69,15 +71,23 @@ namespace RhythmDojo.UI
                 );
                 rect.sizeDelta = new Vector2(mode.HudLaneSpacing * .88f, 48);
 
+                string label = mode.GetLane(i).displayName;
+                if (UnityEngine.Application.isPlaying)
+                {
+                    label = PlayKeyBindings.GetLabel(mode, modeId ?? mode.name, i);
+                }
                 var key = UiElements.Label(
                     "Key",
                     go.transform,
-                    mode.GetLane(i).displayName,
+                    label,
                     Vector2.zero,
                     rect.sizeDelta,
                     26
                 );
                 key.alignment = TextAnchor.MiddleCenter;
+                key.resizeTextForBestFit = true;
+                key.resizeTextMinSize = 12;
+                key.resizeTextMaxSize = 26;
                 if (font)
                 {
                     key.font = font;

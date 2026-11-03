@@ -16,6 +16,8 @@ namespace RhythmDojo.Content
         public string Revision { get; }
         public int? NoteCount { get; }
         public double? Duration { get; }
+        public GameModeDefinition Mode { get; }
+        public string ModeId { get; }
 
         public ChartEntry(
             string id,
@@ -23,7 +25,9 @@ namespace RhythmDojo.Content
             string error = null,
             string revision = null,
             int? notes = null,
-            double? duration = null
+            double? duration = null,
+            GameModeDefinition mode = null,
+            string modeId = null
         )
         {
             Id = id;
@@ -32,6 +36,8 @@ namespace RhythmDojo.Content
             Revision = revision;
             NoteCount = notes;
             Duration = duration;
+            Mode = mode;
+            ModeId = modeId;
         }
     }
 
@@ -57,6 +63,8 @@ namespace RhythmDojo.Content
         public string Error { get; }
         public UnityEngine.Sprite Cover { get; }
         public IReadOnlyList<ChartEntry> Charts { get; }
+        public GameModeDefinition Mode { get; }
+        public string ModeId { get; }
 
         public SongEntry(
             string id,
@@ -69,7 +77,9 @@ namespace RhythmDojo.Content
             double maxBpm,
             string error = null,
             UnityEngine.Sprite cover = null,
-            IReadOnlyList<ChartEntry> charts = null
+            IReadOnlyList<ChartEntry> charts = null,
+            GameModeDefinition mode = null,
+            string modeId = null
         )
         {
             Id = id;
@@ -82,6 +92,8 @@ namespace RhythmDojo.Content
             MaxBpm = maxBpm;
             Error = error;
             Cover = cover;
+            Mode = mode;
+            ModeId = modeId;
             Charts =
                 charts ?? new[] { new ChartEntry(id + ":standard", ChartSlot.Standard, error) };
         }
@@ -98,7 +110,9 @@ namespace RhythmDojo.Content
                 MaxBpm,
                 error,
                 Cover,
-                Charts
+                Charts,
+                Mode,
+                ModeId
             );
     }
 
@@ -323,7 +337,9 @@ namespace RhythmDojo.Content
                                 ChartSlot.Standard,
                                 revision: RecordIdentity.Chart(SongAssetAdapter.ToDocument(song))
                             ),
-                        }
+                        },
+                        mode: song.Mode,
+                        modeId: song.Mode.name
                     )
                 );
             }

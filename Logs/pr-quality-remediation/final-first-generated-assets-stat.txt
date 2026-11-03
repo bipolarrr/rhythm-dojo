@@ -1,0 +1,8 @@
+10905	10905	Assets/Game/Resources/UI/SettingsPopup.prefab
+58	58	Assets/Game/Scenes/Bootstrap.unity
+12096	12095	Assets/Game/Scenes/ChartEditor.unity
+6145	6145	Assets/Game/Scenes/Gameplay.unity
+2992	2992	Assets/Game/Scenes/Results.unity
+12562	12562	Assets/Game/Scenes/Settings.unity
+7390	7335	Assets/Game/Scenes/SongSelection.unity
+1636	1633	Assets/Game/Scenes/Title.unity

@@ -9,6 +9,7 @@ namespace RhythmDojo.EditorTools
 {
     public static class SongSelectionLayoutBuilder
     {
+        public const string BrushFontPath = "Assets/Game/Fonts/Dokdo-Regular.ttf";
         private static readonly Color Background = new Color(.025f, .035f, .045f);
         private static readonly Color PanelColor = new Color(.055f, .068f, .08f, .98f);
         private static readonly Color Line = new Color(.46f, .55f, .57f, .24f);
@@ -16,7 +17,8 @@ namespace RhythmDojo.EditorTools
 
         public static SongSelectionView Build()
         {
-            font = AssetDatabase.LoadAssetAtPath<Font>(MainMenuLayoutBuilder.FontPath);
+            ConfigureBrushFont();
+            font = AssetDatabase.LoadAssetAtPath<Font>(BrushFontPath);
 
             if (!font)
             {
@@ -24,6 +26,7 @@ namespace RhythmDojo.EditorTools
             }
 
             var canvas = UiElements.Canvas("Song Selection");
+            canvas.gameObject.AddComponent<UiFontScope>().font = font;
             var scaler = canvas.GetComponent<CanvasScaler>();
             scaler.referenceResolution = new Vector2(1920, 1080);
             scaler.matchWidthOrHeight = .5f;
@@ -460,9 +463,32 @@ namespace RhythmDojo.EditorTools
             view.cancelMode.navigation = modeNav;
             view.modePopup.SetActive(false);
             PixelSongSelectionStyle.Apply(view);
+            UiFontSettings.ApplyTo(view.transform);
             view.Validate();
 
             return view;
+        }
+
+        private static void ConfigureBrushFont()
+        {
+            var importer = AssetImporter.GetAtPath(BrushFontPath) as TrueTypeFontImporter;
+            var fallback = AssetDatabase.LoadAssetAtPath<Font>("Assets/Game/Fonts/Mona12TextKR.ttf");
+            if (!importer || !fallback)
+            {
+                throw new InvalidOperationException("Selection brush font or fallback missing.");
+            }
+
+            bool hasFallback = Array.Exists(importer.fontReferences, item => item == fallback);
+            if (importer.includeFontData && hasFallback)
+            {
+                return;
+            }
+
+            importer.includeFontData = true;
+            importer.fontNames = new[] { importer.fontTTFName, fallback.fontNames[0] };
+            importer.fontReferences = new[] { fallback };
+            EditorUtility.SetDirty(importer);
+            importer.SaveAndReimport();
         }
 
         private static RectTransform GradientPanel(

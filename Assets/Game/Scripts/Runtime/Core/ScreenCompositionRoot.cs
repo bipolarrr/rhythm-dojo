@@ -20,6 +20,8 @@ namespace RhythmDojo.Core
         [SerializeField]
         private ResultsScreen results;
 
+        private bool initialized;
+
         public void Validate()
         {
             int count = 0;
@@ -63,9 +65,21 @@ namespace RhythmDojo.Core
 
         private void Start()
         {
-            Validate();
+            Initialize(AppFlowController.Create(settings));
+        }
 
-            var flow = AppFlowController.Create(settings);
+        public void Initialize(AppFlowController flow)
+        {
+            if (initialized)
+            {
+                return;
+            }
+            if (selection && !flow.CanInitializeSelection(gameObject.scene))
+            {
+                return;
+            }
+            Validate();
+            initialized = true;
 
             if (results)
             {
@@ -82,7 +96,7 @@ namespace RhythmDojo.Core
                     flow.HardMode,
                     flow.Rules
                 );
-                DojoEntranceTransition.SelectionReady(selection);
+                flow.SelectionInitialized(selection);
             }
 
             if (audioSettings)

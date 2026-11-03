@@ -16,7 +16,7 @@ namespace RhythmDojo.EditorTools
         {
             view.pixelTheme = true;
             var headingFont = AssetDatabase.LoadAssetAtPath<Font>(
-                "Assets/Game/Fonts/Mona12TextKR.ttf"
+                MainMenuLayoutBuilder.FontPath
             );
             if (!headingFont)
             {
@@ -121,7 +121,7 @@ namespace RhythmDojo.EditorTools
             foreach (var text in view.GetComponentsInChildren<Text>(true))
             {
                 text.font = headingFont;
-                text.fontStyle = FontStyle.Normal;
+                text.fontStyle = UiFontSettings.Style;
             }
         }
 

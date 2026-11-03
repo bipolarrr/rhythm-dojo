@@ -1,6 +1,7 @@
 using System;
 using RhythmDojo.Application;
 using RhythmDojo.Gameplay;
+using RhythmDojo.Services;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -9,6 +10,8 @@ namespace RhythmDojo.Input
     public sealed class LaneKeyboardInput : MonoBehaviour, ILaneInput
     {
         private InputAction[] lanes;
+        private GameModeDefinition bindingMode;
+        private string bindingModeId;
         private InputAction restart,
             back;
         private bool[] held,
@@ -25,8 +28,15 @@ namespace RhythmDojo.Input
 
         public void Initialize(GameModeDefinition mode)
         {
+            Initialize(mode, mode.name);
+        }
+
+        public void Initialize(GameModeDefinition mode, string modeId)
+        {
             Shutdown();
             mode.Validate();
+            bindingMode = mode;
+            bindingModeId = modeId;
             lanes = new InputAction[mode.LaneCount];
             held = new bool[mode.LaneCount];
             blockedUntilRelease = new bool[mode.LaneCount];
@@ -37,7 +47,7 @@ namespace RhythmDojo.Input
                 lanes[i] = new InputAction(
                     mode.GetLane(i).displayName,
                     InputActionType.Button,
-                    mode.GetLane(i).binding
+                    PlayKeyBindings.GetBinding(mode, modeId, i)
                 );
                 lanes[i].performed += c =>
                 {
@@ -59,6 +69,26 @@ namespace RhythmDojo.Input
             back = new InputAction("Song List", InputActionType.Button, mode.ReturnBinding);
             restart.performed += OnStart;
             back.performed += OnReturn;
+            PlayKeyBindings.Changed += RefreshBindings;
+        }
+
+        private void RefreshBindings()
+        {
+            bool changed = false;
+            for (int i = 0; i < lanes.Length; i++)
+            {
+                string binding = PlayKeyBindings.GetBinding(bindingMode, bindingModeId, i);
+                if (string.Equals(lanes[i].bindings[0].effectivePath, binding, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+                lanes[i].ApplyBindingOverride(binding);
+                changed = true;
+            }
+            if (changed)
+            {
+                ResetHeld();
+            }
         }
 
         private void OnStart(InputAction.CallbackContext context) => StartRequested?.Invoke();
@@ -98,6 +128,7 @@ namespace RhythmDojo.Input
 
         public void Shutdown()
         {
+            PlayKeyBindings.Changed -= RefreshBindings;
             if (lanes == null)
             {
                 return;

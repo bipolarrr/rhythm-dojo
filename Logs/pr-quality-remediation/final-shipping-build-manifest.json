@@ -1,0 +1,981 @@
+{
+  "sourceCommit": "cad59e6e96929b77761d4fd3771ff864918f4243",
+  "root": "Builds/Windows",
+  "files": [
+    {
+      "path": "D3D12/D3D12Core.dll",
+      "bytes": 4725304,
+      "sha256": "625bd40005b1c3708695d5256ecf230d278e6b8edba5a88af70f3d91324f3052"
+    },
+    {
+      "path": "MonoBleedingEdge/EmbedRuntime/mono-2.0-bdwgc.dll",
+      "bytes": 7828912,
+      "sha256": "7ccc2fcff211b1be0f498bd537c6575e0a028bd6971cd1812d1884c9840d702d"
+    },
+    {
+      "path": "MonoBleedingEdge/EmbedRuntime/MonoPosixHelper.dll",
+      "bytes": 611240,
+      "sha256": "4d882d75accec7054b72498afd7c627efca8824453253fa67e38dceaedaba5df"
+    },
+    {
+      "path": "MonoBleedingEdge/etc/mono/2.0/Browsers/Compat.browser",
+      "bytes": 1605,
+      "sha256": "8a1082057ac5681dcd4e9c227ed7fb8eb42ac1618963b5de3b65739dd77e2741"
+    },
+    {
+      "path": "MonoBleedingEdge/etc/mono/2.0/DefaultWsdlHelpGenerator.aspx",
+      "bytes": 60575,
+      "sha256": "751861040b69ea63a3827507b7c8da9c7f549dc181c1c8af4b7ca78cc97d710a"
+    },
+    {
+      "path": "MonoBleedingEdge/etc/mono/2.0/machine.config",
+      "bytes": 29066,
+      "sha256": "e91782a27fa39fc6c1d6ee8b08529f5d35052310d0006034b878eb04b8f2af30"
+    },
+    {
+      "path": "MonoBleedingEdge/etc/mono/2.0/settings.map",
+      "bytes": 2622,
+      "sha256": "49c6160f9d54af4270a3b4e997fc4a8301f79b9e2070118fa46ddbcbbc44f9a2"
+    },
+    {
+      "path": "MonoBleedingEdge/etc/mono/2.0/web.config",
+      "bytes": 11635,
+      "sha256": "cf2b54339e069b9e42f7d6795eecbf562c50c1011f4ca8f65f578fe52d97ff92"
+    },
+    {
+      "path": "MonoBleedingEdge/etc/mono/4.0/Browsers/Compat.browser",
+      "bytes": 1605,
+      "sha256": "8a1082057ac5681dcd4e9c227ed7fb8eb42ac1618963b5de3b65739dd77e2741"
+    },
+    {
+      "path": "MonoBleedingEdge/etc/mono/4.0/DefaultWsdlHelpGenerator.aspx",
+      "bytes": 60575,
+      "sha256": "751861040b69ea63a3827507b7c8da9c7f549dc181c1c8af4b7ca78cc97d710a"
+    },
+    {
+      "path": "MonoBleedingEdge/etc/mono/4.0/machine.config",
+      "bytes": 33598,
+      "sha256": "e60aec2c5115d65b3acb3c55ea21576dbd770f579166c017125571e46ae560ed"
+    },
+    {
+      "path": "MonoBleedingEdge/etc/mono/4.0/settings.map",
+      "bytes": 2622,
+      "sha256": "ce1db1ad8a9512073164e3eccdc193f7eda036e1a9733caec4635de21b2865c8"
+    },
+    {
+      "path": "MonoBleedingEdge/etc/mono/4.0/web.config",
+      "bytes": 18802,
+      "sha256": "e38bb8cc68fe5b4edecdfd288d094b9e8ced7629039b2a347682aba0d8bd7492"
+    },
+    {
+      "path": "MonoBleedingEdge/etc/mono/4.5/Browsers/Compat.browser",
+      "bytes": 1605,
+      "sha256": "8a1082057ac5681dcd4e9c227ed7fb8eb42ac1618963b5de3b65739dd77e2741"
+    },
+    {
+      "path": "MonoBleedingEdge/etc/mono/4.5/DefaultWsdlHelpGenerator.aspx",
+      "bytes": 60575,
+      "sha256": "751861040b69ea63a3827507b7c8da9c7f549dc181c1c8af4b7ca78cc97d710a"
+    },
+    {
+      "path": "MonoBleedingEdge/etc/mono/4.5/machine.config",
+      "bytes": 34056,
+      "sha256": "ee950004b576fb28dc85f4b0435ed04bf96612de2e8b53be84d07afe85a0de6c"
+    },
+    {
+      "path": "MonoBleedingEdge/etc/mono/4.5/settings.map",
+      "bytes": 2622,
+      "sha256": "ce1db1ad8a9512073164e3eccdc193f7eda036e1a9733caec4635de21b2865c8"
+    },
+    {
+      "path": "MonoBleedingEdge/etc/mono/4.5/web.config",
+      "bytes": 18811,
+      "sha256": "c4cbddd4fd9347b58cc5a72b36dc4ba1ad2bb699e65869d05cd3fb9865f0d824"
+    },
+    {
+      "path": "MonoBleedingEdge/etc/mono/browscap.ini",
+      "bytes": 311984,
+      "sha256": "4ddd50f31fb968f30bedefc253a46dc3f2890192d05cdaa9e0a64a056eee807e"
+    },
+    {
+      "path": "MonoBleedingEdge/etc/mono/config",
+      "bytes": 3815,
+      "sha256": "5776169973a26a387b8b3e5c0f2301a7ab9a6dd7c7d3efa22a96abc47fbf8662"
+    },
+    {
+      "path": "MonoBleedingEdge/etc/mono/mconfig/config.xml",
+      "bytes": 25817,
+      "sha256": "0c56e34c69124510fa8c19e7b4c2ca6c1c4ff460ae19f798dd0ca035809e396d"
+    },
+    {
+      "path": "RhythmDojo.exe",
+      "bytes": 667136,
+      "sha256": "82efd5a8c297a5046f6bb72c240dab8972e64003851935eba0a46ad121ce0305"
+    },
+    {
+      "path": "RhythmDojo_BurstDebugInformation_DoNotShip/Data/Plugins/x86_64/lib_burst_generated.txt",
+      "bytes": 193299,
+      "sha256": "1229910c50cc640f1bd54aaa0482ff95e081fb9122b858517fc8f2cc90e89098"
+    },
+    {
+      "path": "RhythmDojo_Data/app.info",
+      "bytes": 25,
+      "sha256": "901b738f84bab2241597c6e79d17a215c71300e18188577223fc2fe2c8db4414"
+    },
+    {
+      "path": "RhythmDojo_Data/boot.config",
+      "bytes": 156,
+      "sha256": "094129daccf4669fa28474cddbbbd860d5b79791341123d19fb117231a320d9f"
+    },
+    {
+      "path": "RhythmDojo_Data/globalgamemanagers",
+      "bytes": 290180,
+      "sha256": "580f54b36cc846164e37603f7d5ec54fe43172f82dea4b91897b30a5c97978e1"
+    },
+    {
+      "path": "RhythmDojo_Data/globalgamemanagers.assets",
+      "bytes": 1017096,
+      "sha256": "e51f06db8486b3b8d4305944bb067da88a778c866d7f4d239509628cbc742bbf"
+    },
+    {
+      "path": "RhythmDojo_Data/globalgamemanagers.assets.resS",
+      "bytes": 6176992,
+      "sha256": "f122983b2e999b7f97c5b76ff4a4d07663df0407e3d921d2826aa61d3671a70a"
+    },
+    {
+      "path": "RhythmDojo_Data/level0",
+      "bytes": 23348,
+      "sha256": "19bf89081b3197af479be4daa6d19546b86ab7d36d3443fe04ea9f5a3f411d74"
+    },
+    {
+      "path": "RhythmDojo_Data/level1",
+      "bytes": 1676,
+      "sha256": "4cd90359363e43d1bf9e0760b55e2b698619f311fbac49ea3bf1b899f54e8ffb"
+    },
+    {
+      "path": "RhythmDojo_Data/level2",
+      "bytes": 98828,
+      "sha256": "8f9648e76fd866009604708a53fe7558385d9b0995512fcd39970979036c8dd9"
+    },
+    {
+      "path": "RhythmDojo_Data/level3",
+      "bytes": 75620,
+      "sha256": "e22830b8ccd6a6affba35201eeccb7c6eb9693ebf51313575efdb21e5dc77925"
+    },
+    {
+      "path": "RhythmDojo_Data/level4",
+      "bytes": 47864,
+      "sha256": "22ce6dc2876355c93efbcdeaa58dae06ceb6bb43e01695f5687841a9914ea06a"
+    },
+    {
+      "path": "RhythmDojo_Data/level5",
+      "bytes": 178200,
+      "sha256": "a99487f5d358b82e8af3bfc0a726031f5c0317cce6c8772a2f696edfee9f2130"
+    },
+    {
+      "path": "RhythmDojo_Data/level6",
+      "bytes": 164096,
+      "sha256": "460d09744f22dcdbfbf99dee3d29d9ce3f9289c20a79e6bb5493a62950c0ec7b"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/Assembly-CSharp.dll",
+      "bytes": 3584,
+      "sha256": "d63982201403963c0c4d53c45ace12deddd617db97b2b51014d24d4e4b7c1d00"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/Game.Application.dll",
+      "bytes": 38912,
+      "sha256": "2da559d8b5bb534c9bff5795a791556009bf8e84011e118324616b681bda5105"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/Game.Domain.dll",
+      "bytes": 36864,
+      "sha256": "a71f421206f5c70f87a39461f128b88c4014264a5da4cbd799c7c2a3673b9581"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/Game.Runtime.dll",
+      "bytes": 312832,
+      "sha256": "0380a151ee1866b5f666ea9c8acf64b7c1233af73ca13ccfaf38769af6a2d261"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/Mono.Security.dll",
+      "bytes": 241152,
+      "sha256": "82df31404def10ffd69c09e3a8c454e76552f3a37675d1b7b8c743cfd3d1af6f"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/mscorlib.dll",
+      "bytes": 4632064,
+      "sha256": "194417662b72e9fdc29df44aa07fb693a9cf2194d84e327231f3eeff1104ae0f"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/netstandard.dll",
+      "bytes": 90112,
+      "sha256": "6ae62e082dc494a2433984177f60ca4db5fae69b1f360a8b33754172b310b8c5"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/Newtonsoft.Json.dll",
+      "bytes": 691712,
+      "sha256": "a56146202232958f46bd6a28b5a7da166aea123ee0d646735a46e5c341dfbf1f"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/System.ComponentModel.Composition.dll",
+      "bytes": 257024,
+      "sha256": "9373a420101d4c674b9f74bce93a45c58ddb3548c130d9b65ab87235d0a4ed30"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/System.Configuration.dll",
+      "bytes": 124928,
+      "sha256": "d3acb14b8ebaf7482d2d3e26e8c04685299e2b471a513a30508bd0cab8336354"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/System.Core.dll",
+      "bytes": 1113088,
+      "sha256": "ebf140bf5f8d49ccac20c14935625b0ae0a46c30aa4f90b2808f3b9678822470"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/System.Data.DataSetExtensions.dll",
+      "bytes": 29696,
+      "sha256": "79a01061129709358567a9254684ba52ba66371e01e0354e7fa4852a9f62e59f"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/System.Data.dll",
+      "bytes": 2125312,
+      "sha256": "5d0807269bfcf112aa844951232ef105bbb642abb1e14c2e78dd70fb9245e98a"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/System.dll",
+      "bytes": 2641920,
+      "sha256": "9e8a5190797e35428b1ae9bce6d47d39a1dbc3e974f14239e44678913dc6194a"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/System.Drawing.dll",
+      "bytes": 489984,
+      "sha256": "76dca8fbe098c285b03de79369f9f2aa141dec44de99ebcc0478c7e762024204"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/System.EnterpriseServices.dll",
+      "bytes": 44544,
+      "sha256": "d8a3d6c1929ec028793ff07df92781c03ebb38c63005d4c12c35e3116d04fcaf"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/System.IO.Compression.dll",
+      "bytes": 114688,
+      "sha256": "7370dc2d3a6f02dbda1a69ca596f2ae96fc464809b3bbca6071fc1fc1edfbb2d"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/System.IO.Compression.FileSystem.dll",
+      "bytes": 18432,
+      "sha256": "40ef91246d44d6c4d8a1505e1210b0c54963a12938ba0458959bb064d62f36f4"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/System.Net.Http.dll",
+      "bytes": 122880,
+      "sha256": "c46d5b5dc68af8ce1b34e8ace4372b157e2e85ab63d6b5eea938ca71dc7fb064"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/System.Numerics.dll",
+      "bytes": 119296,
+      "sha256": "74f6771aedd33262470e8e653fc0f4e04a659bcdadbeb44b2f8826fba7053f77"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/System.Runtime.dll",
+      "bytes": 12288,
+      "sha256": "e0a7334b7ba419aaab6bd3bb6992d693e689341a9178172c9bf99c2aa6a085bd"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/System.Runtime.Serialization.dll",
+      "bytes": 934400,
+      "sha256": "2aa92fb930200ddb3c9c3ffaaff39bd6cdc6d689f19614f6c3b84a15060800f0"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/System.Security.dll",
+      "bytes": 320000,
+      "sha256": "95a29120e164e5bdb7ff5dcb2cb4641e5ea0aca7c1ad0854b0e9b2b0ff5abe2d"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/System.ServiceModel.Internals.dll",
+      "bytes": 215040,
+      "sha256": "6738a31088136d38a50354371feb83a4fd1558acca2a5f8b165c34a859e08c47"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/System.Transactions.dll",
+      "bytes": 35328,
+      "sha256": "cfac784408e3b7da6c6e94ec04c162c6d902372fab19353c02aeda3464ce185f"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/System.Xml.dll",
+      "bytes": 3160064,
+      "sha256": "f90799a0c38f3d45e390f9768ab467bf681a052e1b807f4c59fabef5f7edaffa"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/System.Xml.Linq.dll",
+      "bytes": 136704,
+      "sha256": "ed219710472b837fddf45cc73c912e04b4d6b8ca833ea074ec1f73bc00157b05"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/Unity.AI.Navigation.dll",
+      "bytes": 23040,
+      "sha256": "a7ad15f31f1780724b34b30f867fcc99b6e6cd8f99b723da337b8d4f27438433"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/Unity.Burst.dll",
+      "bytes": 296960,
+      "sha256": "5495a77c26defece96b81ba41347f74c8f256610aef83833e871944e93574475"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/Unity.Burst.Unsafe.dll",
+      "bytes": 5632,
+      "sha256": "9d9c1ff52411decbee5d9f0d1cd61ebeaa222077aa77a52101ea3debafae98e2"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/Unity.Collections.dll",
+      "bytes": 432128,
+      "sha256": "32b56d92c710c64c41be55beedeb9f6642b7f17853eddb9602ac59e3d5780a15"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/Unity.Collections.LowLevel.ILSupport.dll",
+      "bytes": 5120,
+      "sha256": "ff50383f807f9692e4913b97e47d86fefcb8faa33d6d48cd3e3fd6fc7ffb448d"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/Unity.InputSystem.dll",
+      "bytes": 1095168,
+      "sha256": "18bdbef5182a32f3f6bdb54988acc5cc96d66aff6a82ee074755457abc582df6"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/Unity.InputSystem.ForUI.dll",
+      "bytes": 15360,
+      "sha256": "e32fe3841f1998d7a54581f0cc2a076a50e907a7f92b2bb9da162ec9a4ceeb26"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/Unity.InternalAPIEngineBridge.004.dll",
+      "bytes": 4096,
+      "sha256": "617d0c1be5d94d7ba6fa33bf9328c510dd939bb99d12531144424abc086559df"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/Unity.Mathematics.dll",
+      "bytes": 737280,
+      "sha256": "3e4e7be751140b0abf82c4a12aebf33be075678e2889c118dcfa65db41a8842a"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/Unity.Multiplayer.Center.Common.dll",
+      "bytes": 8704,
+      "sha256": "c9afa731165564a33148ebb0f6e1cab9d439dce48ddfccf4e600cef304f96324"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/Unity.Pipeline.Attributes.dll",
+      "bytes": 6144,
+      "sha256": "36059b0a825fc5696a6014f506b2a549230a2be3b8d4b5061c946276ac7a6dcf"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/Unity.RenderPipeline.Universal.ShaderLibrary.dll",
+      "bytes": 7680,
+      "sha256": "b4d0bd8e5d205b6bc8e32b3e94cc4cfece96f4fe9a25291688ad99883892543c"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/Unity.RenderPipelines.Core.Runtime.dll",
+      "bytes": 1139712,
+      "sha256": "8c435d27b54d807e67c6d9401782076f2d0d899865ba6044f3bee76ab8ab2991"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/Unity.RenderPipelines.Core.Runtime.Shared.dll",
+      "bytes": 4608,
+      "sha256": "be1b19d1d42bac69dabaacf1fd91945b30a012358cce75c17efd2faa3a700db8"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/Unity.RenderPipelines.Core.ShaderLibrary.dll",
+      "bytes": 3584,
+      "sha256": "259fedd5bd1c1eb2dc5f83abfd947b8618c96ccc833e695fa78ada0c33006e15"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/Unity.RenderPipelines.GPUDriven.Runtime.dll",
+      "bytes": 220160,
+      "sha256": "4e016b32e81bc163f2f6d14f4cd5c9ced3417ae63b592f8a55b638c04e01ee07"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary.dll",
+      "bytes": 3584,
+      "sha256": "e83ea5994013a7406b57b10b50a36d7db221571317c81ede859184a71d701d4f"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/Unity.RenderPipelines.Universal.2D.Runtime.dll",
+      "bytes": 220672,
+      "sha256": "afcbb44b19d179728364b7006ac1025e707b912f215613907edb67c9497401f8"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/Unity.RenderPipelines.Universal.Config.Runtime.dll",
+      "bytes": 4096,
+      "sha256": "c293e215985efd6e4e8592c416bb0c7ecde01f17fc87a211e603d57a6317bb07"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/Unity.RenderPipelines.Universal.Runtime.dll",
+      "bytes": 714752,
+      "sha256": "3873ae36b1057b9d0d800b89e15e8f0f7226855bd3ff40033b34daa18cba6578"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/Unity.RenderPipelines.Universal.Shaders.dll",
+      "bytes": 3584,
+      "sha256": "b58eecfda4d8b7c88cca04e4d4279f0e77592f09d3c5fecf2b4b5bcdd871e75b"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/Unity.TextMeshPro.dll",
+      "bytes": 435712,
+      "sha256": "4eb41ee6c52d523db7f547708b21b1b3b2e320a7f0f188cd97260184f8db6887"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/Unity.Timeline.dll",
+      "bytes": 121856,
+      "sha256": "70651fceedf0b5271133f77ab6ff1ec708a6b161e697f8cc29c6233b5868fcee"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/Unity.UnifiedRayTracing.Runtime.dll",
+      "bytes": 90624,
+      "sha256": "edb8faec7d63c2a57731ef882a933da9aa534f8fb5ae3017b57978aaa8f9d969"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/Unity.VisualScripting.Antlr3.Runtime.dll",
+      "bytes": 86016,
+      "sha256": "ed7ce205f66eafe39bbb5d084d42e7fe11cb4b386ff208e5d5110891be0b7b37"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/Unity.VisualScripting.Core.dll",
+      "bytes": 549888,
+      "sha256": "d8c26bf9588b1681d3ea7e36ca3f4e6bf4c6a79be95235031780ffe1512b35c7"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/Unity.VisualScripting.DocCodeExamples.dll",
+      "bytes": 6144,
+      "sha256": "e7926660e52e45a785fa46408e35678df7ccdae8e1556cde2af820e11804dd0c"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/Unity.VisualScripting.Flow.dll",
+      "bytes": 335872,
+      "sha256": "d7e66b7b8497db32441c6f33ddb66b0bf722bf7f0fda2cbeeffe7cb98c68d833"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/Unity.VisualScripting.State.dll",
+      "bytes": 27136,
+      "sha256": "4f8beba7d807879b176996b41e5ce3428aa474986178878a51d77b498f5d8f79"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.AccessibilityModule.dll",
+      "bytes": 51120,
+      "sha256": "28c577be8bc71dac48a41ba0d5967381ffd03a8834c92919f5e93a69959003bc"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.AdaptivePerformanceModule.dll",
+      "bytes": 125360,
+      "sha256": "5da742d707b9ec7f6a34695980afd105a4a3546c567dd257029ba61882675eea"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.AIModule.dll",
+      "bytes": 77232,
+      "sha256": "50eb6155a1b519c8e108d35f67d85cfe623ece71a6f63f733bf7db4e52393862"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.AMDModule.dll",
+      "bytes": 21928,
+      "sha256": "5b3884922979b22278e5d6892330df53afb25ecfabe826589feeaf0d4315328f"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.AndroidJNIModule.dll",
+      "bytes": 121768,
+      "sha256": "ebd40a566bb6e7943f83e8a3f0c3b37236aed48ccb219997f53e466a77f13078"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.AnimationModule.dll",
+      "bytes": 225200,
+      "sha256": "2aa4e34c714358d4467281a11a29b2716a4b43b478dd3a8848b3644b19fb3b52"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.ARModule.dll",
+      "bytes": 25520,
+      "sha256": "d64cd47dfe9d94ee69c3f39fd4e2d202bbdd15ec221a3aabeed2c0326f3f5e7c"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.AssetBundleModule.dll",
+      "bytes": 41904,
+      "sha256": "6667d611183b45292458407ecdf874db52296554c5751c8d60d999bdb31a6f9f"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.AudioModule.dll",
+      "bytes": 142760,
+      "sha256": "e240e9d6e8a5dad86fbb1493c1132530e4417ad1c3bbc97425769c99628b87e1"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.ClothModule.dll",
+      "bytes": 36272,
+      "sha256": "585b97e8933eebef3c7c529b03833244c0fa9b0e389fca7098c23d61a6d01a8d"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.ClusterInputModule.dll",
+      "bytes": 28072,
+      "sha256": "7286d197c58b21bf74af53cdfb3ac967a7e730641c5f87c65fbedf540c4407d6"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.ClusterRendererModule.dll",
+      "bytes": 26544,
+      "sha256": "f75a352a528c8ec7f4731f74b8e42abeae04506dc2f28411e91fd92248f51fed"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.ContentLoadModule.dll",
+      "bytes": 32680,
+      "sha256": "74c87e0ab419891574837311312437f621cd2b0663f44e852ad93f5455d6aeb8"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.CoreModule.dll",
+      "bytes": 1985968,
+      "sha256": "741a4fa3682ad9d843f4df7a4dc1c54034c98c6ad6517e8ec0e9ad91380c7bfb"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.CrashReportingModule.dll",
+      "bytes": 26544,
+      "sha256": "a44480544150f8d4a7bc8bb3ecfd63db59bb3a7d6defe4f5e4ead3751f6ef340"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.DirectorModule.dll",
+      "bytes": 41896,
+      "sha256": "2ff4e7fef58b6beeb68fe8370b4749181bc4ba86a9bdcb81eb22197eccf54776"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.dll",
+      "bytes": 197544,
+      "sha256": "59f74ff5f9e4f4f8388ca269f41462ef965e0fd0fd9e98b6d06a6ba2d1ae16e7"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.DSPGraphModule.dll",
+      "bytes": 31656,
+      "sha256": "a2400cd3fafb250e1463a0f50ee5c7c4eda455103c93c4b9897ee4472b8e7b9d"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.GameCenterModule.dll",
+      "bytes": 45992,
+      "sha256": "e3a89c0bcc99f7d540c4b0cabb710b876e9f374b492da235d4cd369e448714c8"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.GIModule.dll",
+      "bytes": 24488,
+      "sha256": "34ce0a45554fe75fcf59b865e9adfdecc612060d45886d0ad73f6a1ed5498076"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.GraphicsStateCollectionSerializerModule.dll",
+      "bytes": 14256,
+      "sha256": "8eacb923819574d2f58e7ec83031601bb515235fb6f7f22051a223168ad8544d"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.GridModule.dll",
+      "bytes": 30632,
+      "sha256": "43fe702a67ec105da34cfc3e2bdd05f61ad4d55aa342452dc55f34c6b99cdbae"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.HierarchyCoreModule.dll",
+      "bytes": 109480,
+      "sha256": "9976e8aab177c1ed1dbd45d689ff8e237b3e47db3dc49003479aaf74395af102"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.HierarchyModule.dll",
+      "bytes": 102312,
+      "sha256": "e8592ae56cb5299c2500d4f2e1632af5325d07ad3d0675cd39b247828dd46af7"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.HotReloadModule.dll",
+      "bytes": 24496,
+      "sha256": "f569bb4935f4aa0c2c5fc73d2d359f8c4e883df8bea9630ee772475df3e4207a"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.IdentifiersModule.dll",
+      "bytes": 16816,
+      "sha256": "4e5bfc132d23764d5e591e21349b89f356d253a343184bcda3c842348bd9b6b4"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.ImageConversionModule.dll",
+      "bytes": 31144,
+      "sha256": "042f8bf85bb0100cffab12535a063dcad58963c4e2a091c7e629285682b1ff33"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.IMGUIModule.dll",
+      "bytes": 214448,
+      "sha256": "6f21c460f68bffcdcc2dcd462c27a3724022ff0b2dfb3ce427a2365e26257c04"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.InputForUIModule.dll",
+      "bytes": 57768,
+      "sha256": "833f0a18653011f2ab762e08b61d520f83ac34de679e15cff990470fb1f2a44f"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.InputLegacyModule.dll",
+      "bytes": 45488,
+      "sha256": "664101dbfc340c1c76b036bf18d95c0cc119b2c80871bb18b0ffc97117ca5ab1"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.InputModule.dll",
+      "bytes": 28592,
+      "sha256": "a4bffe147bf4ef678fe60548208e2de28d6bbf8a623c360e44479c5ecff886dd"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.InsightsModule.dll",
+      "bytes": 14248,
+      "sha256": "ff3070e0cb5758ae123d0ccb714b2111447d9ca7108e0a9416877558c1b8e18c"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.JSONSerializeModule.dll",
+      "bytes": 27048,
+      "sha256": "9345772be9d6ef4246c735e65872c0f0f010910f3fff10edf389f62426b7511e"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.LocalizationModule.dll",
+      "bytes": 27056,
+      "sha256": "57a9a970f7235109255b0c654aa4e6a0baa21f7820648f4188ca6ad96dc08e40"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.MarshallingModule.dll",
+      "bytes": 83880,
+      "sha256": "5bdba54d00a5d989a8341b1e222e01c1d1b9f2ef7e64a81acd2383882f3b9b2f"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.MultiplayerModule.dll",
+      "bytes": 17832,
+      "sha256": "054c57795a0ae886f4f8151309442b6622298655fd017557be23f9cad5d7fe19"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.NVIDIAModule.dll",
+      "bytes": 40872,
+      "sha256": "84e4337d23225a8712d60ce29b677d5092b53464b751180e54c60ada9b1dcb99"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.ParticleSystemModule.dll",
+      "bytes": 171944,
+      "sha256": "edd14546fdd9dfe73e9645db90329d90a295f65ad3b0612f4750962d00e438df"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.PerformanceReportingModule.dll",
+      "bytes": 25000,
+      "sha256": "2e73a4f4b2cf656e5a1c62e0301d8326c49fb433427d2c945d96411c528908d3"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.Physics2DModule.dll",
+      "bytes": 586672,
+      "sha256": "9aca11a2d68d3b6f0d42867ce538c2693952636862482f51484056a316217e24"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.PhysicsBackendPhysXModule.dll",
+      "bytes": 14248,
+      "sha256": "30acfabac0d49e0bc6a59bd0a1f0ee55d80b4d0f6a8c5d59fa1b39c5823992f4"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.PhysicsModule.dll",
+      "bytes": 183720,
+      "sha256": "56a466d60f720f60f2d344968937d8da3ff68375e2ed3075585045d5558f0b0f"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.PropertiesModule.dll",
+      "bytes": 134056,
+      "sha256": "7d5afd04d5b4e33c5fa0ff3f65a825fcfdfd2f48e9ff03ce2d3a5878c35bc68c"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.RenderAs2DModule.dll",
+      "bytes": 25520,
+      "sha256": "82e77543934f21244fdb2800413372f76b8456e690844cd307f84f829b40bbe2"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.RuntimeInitializeOnLoadManagerInitializerModule.dll",
+      "bytes": 24488,
+      "sha256": "34f7ec55df2d3428be83b6fa393de98d41d8a0af2cabe518bfcb92688f38951b"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.ScreenCaptureModule.dll",
+      "bytes": 26544,
+      "sha256": "d2826cd1a7600f3c5ce26e6632175dd701c6de8b869e1f2b71bea4e64c173929"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.ShaderRuntimeModule.dll",
+      "bytes": 25520,
+      "sha256": "bde8370f8bedc885253d2cf67e0bc8193379182be83f750028865fbb63d86078"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.ShaderVariantAnalyticsModule.dll",
+      "bytes": 24496,
+      "sha256": "6ef400da359c01c567ab71b443b60a67e6ad9df26bb722e6d8b409340954a24b"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.SharedInternalsModule.dll",
+      "bytes": 38320,
+      "sha256": "142dced44b20c4bc0e4d7fdf0bda71fde25926a53655fe659a49033c216114c4"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.SpriteMaskModule.dll",
+      "bytes": 28592,
+      "sha256": "eedd78347cc05a46b874bf4d954452ef1d48f4f1a4f4a1dcaa59169217032ef6"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.SpriteShapeModule.dll",
+      "bytes": 32688,
+      "sha256": "f3e5c2aec6c0961181f794c7569b2303247b54e240134d452bd1528ff9c3caa2"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.StreamingModule.dll",
+      "bytes": 26032,
+      "sha256": "146abd34aa8c7ceb91b2fbaf555da42d9ab745df9bc606799918444eb1d59a56"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.SubstanceModule.dll",
+      "bytes": 29096,
+      "sha256": "734e63c5f22f17c52564cba24cb0bc4511a3a077e66d18afeaf28612b83966b4"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.SubsystemsModule.dll",
+      "bytes": 41896,
+      "sha256": "8f3435bf2effca736ef1de69f7899e2c91b5fb7cd11b0078d6479e0629c89429"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.TerrainModule.dll",
+      "bytes": 134056,
+      "sha256": "bde6df98c69ab5975fddad5aabc93ffd2f1ff442306b666efde13675804f4846"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.TerrainPhysicsModule.dll",
+      "bytes": 25520,
+      "sha256": "42fbf2be413c94376ca1195c9488288945761b90d5e63694262ee95e7dcf705c"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.TextCoreFontEngineModule.dll",
+      "bytes": 81840,
+      "sha256": "b6e5b4346d58fd695727a4024799825962cdb226d86f7031b83d6bfa1aa4cc61"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.TextCoreTextEngineModule.dll",
+      "bytes": 334768,
+      "sha256": "1e032df88f01eaa3446dfc91a5ff8dbdbd6abb30e21a8f839e3be56ee3bd4258"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.TextRenderingModule.dll",
+      "bytes": 39344,
+      "sha256": "9357a86ad4aa30df67565209f467856bf405176c833182abde92b180a21daf03"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.TilemapModule.dll",
+      "bytes": 58800,
+      "sha256": "d47c3dfd4d31aaac56f9a299fa5ea6e283fd3f422303e0509301ce0d059b1793"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.TLSModule.dll",
+      "bytes": 32168,
+      "sha256": "b720d3c0dffb9c186ba736ed642ff8fbbb20da96ae930f5745ae7df1980f5fb6"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.UI.dll",
+      "bytes": 262656,
+      "sha256": "341f42368bfd748e058588302958028f599c8d7a0c66bd9718c7ce50fddedd95"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.UIElementsModule.dll",
+      "bytes": 2452392,
+      "sha256": "8c09008a87da11a5174534a6c5dce6fcc4714646c2b911ae758b2cbdc6c5eae8"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.UIModule.dll",
+      "bytes": 50088,
+      "sha256": "5709952a1fe5d536a8987dbf4de184a31ed3906f07c21252323c1abd481f428a"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.UmbraModule.dll",
+      "bytes": 24496,
+      "sha256": "913fe0875f7c9905e3444b9fba13e9cb89565a4e02b54a5d07cbf0670ccc006e"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.UnityAnalyticsCommonModule.dll",
+      "bytes": 35752,
+      "sha256": "69dfe3ca30961fb8eaad4307ee30dc2c6e824b841e13be77294b461a2ef3a62a"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.UnityAnalyticsModule.dll",
+      "bytes": 60848,
+      "sha256": "3e766eeb58d93ca5b5638cba7dc2fd4524a90c3026e849a39ca8659b1c408a5e"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.UnityConnectModule.dll",
+      "bytes": 27560,
+      "sha256": "6e207d973493db8b7be40a24361f7b6f30d3a4edaf4352c5ec2afc149421cee2"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.UnityConsentModule.dll",
+      "bytes": 16296,
+      "sha256": "0a6749c025815678fb59ffdf265c8c327797272089bdc37829975eee8bb864fb"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.UnityCurlModule.dll",
+      "bytes": 26032,
+      "sha256": "f4dba8ab5682e9445d0b4bdc3d4f5a6dfebb356d292063035b2cc8e514c15555"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.UnityWebRequestAssetBundleModule.dll",
+      "bytes": 28592,
+      "sha256": "b197f51cec317dd410b51e256ff857263539294cf655cfdf7183470f378a64c0"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.UnityWebRequestAudioModule.dll",
+      "bytes": 28592,
+      "sha256": "b4d3c9d1b0a186ad88750ff5f634d2e221a9499039914f25a32703cf6e363110"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.UnityWebRequestModule.dll",
+      "bytes": 70064,
+      "sha256": "819b06fc970bd005b1714c0bcdf4edf6032d1a09666dc88a072fbdd469972f3f"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.UnityWebRequestTextureModule.dll",
+      "bytes": 27560,
+      "sha256": "86fd0c97959b47326b52562a31fad5da630644d051a0b3114590c1345279dd65"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.UnityWebRequestWWWModule.dll",
+      "bytes": 36784,
+      "sha256": "c2681a20ca22f437717eca54eec60df600f4b4da758bc21c251121b99a189e9e"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.VectorGraphicsModule.dll",
+      "bytes": 252840,
+      "sha256": "92ef1faa333e63620c830d4e9a81dcbb1fe4965e7a815b5b4cffa69eeb369cb1"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.VehiclesModule.dll",
+      "bytes": 31656,
+      "sha256": "0edf35a593d7a40533c768af65fa71bcadff4310741562af84abb259f3ff96fe"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.VFXModule.dll",
+      "bytes": 78256,
+      "sha256": "093e8af986fd81afefea800def78715b7e7433b604b20effadebfd97eef1cbcf"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.VideoModule.dll",
+      "bytes": 49072,
+      "sha256": "b7381a3460344474da1e09751eb6ddc6bd0988b4b897b29eee5c64ea35dd8e9b"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.VirtualTexturingModule.dll",
+      "bytes": 42920,
+      "sha256": "3965e891239f7a09f35af8893c791a032b62cdd7b633acc8590045deca024ce0"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.VRModule.dll",
+      "bytes": 31664,
+      "sha256": "e70287a681b5499297f99e0a83ce602d20ee60d2fa004dce334834ac31dffb1b"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.WindModule.dll",
+      "bytes": 26544,
+      "sha256": "33a5de1b7a365d86df909ee9be5a4533eafc9986dd9e850e21e43fa6bb8deb20"
+    },
+    {
+      "path": "RhythmDojo_Data/Managed/UnityEngine.XRModule.dll",
+      "bytes": 88496,
+      "sha256": "9959456bd5119afcc5eadc5703b1e78c015dbd40220a59c40a3794c676422a3f"
+    },
+    {
+      "path": "RhythmDojo_Data/Plugins/x86_64/lib_burst_generated.dll",
+      "bytes": 446464,
+      "sha256": "34ea02ae241380c5dd1955c34bd18d2181e718d744733594a6cce0ad822433c3"
+    },
+    {
+      "path": "RhythmDojo_Data/Plugins/x86_64/libonigwrap.dll",
+      "bytes": 551336,
+      "sha256": "c22db1e7be04c50eb47e67362bf705830bb95df30c02c22dd7add835ee777583"
+    },
+    {
+      "path": "RhythmDojo_Data/Resources/unity default resources",
+      "bytes": 5883716,
+      "sha256": "32b58bdb9cf090212b46a8ca7436dcdae89e4ef43e9d55a835233c21d1347734"
+    },
+    {
+      "path": "RhythmDojo_Data/Resources/unity_builtin_extra",
+      "bytes": 401752,
+      "sha256": "388ecc81202a0c5e459046984dcb6e2318e0ec0e21be0a227c4156b16fa08476"
+    },
+    {
+      "path": "RhythmDojo_Data/resources.assets",
+      "bytes": 34728212,
+      "sha256": "f118274e680b2d3c63743f7f5844f82065c7a3b548205f87f6736da27dba9f4b"
+    },
+    {
+      "path": "RhythmDojo_Data/resources.assets.resS",
+      "bytes": 7232,
+      "sha256": "f12f30b4c1648273e460dab9f8ec974e616980f7a3027d54ac4ca0f19ba89cd3"
+    },
+    {
+      "path": "RhythmDojo_Data/resources.resource",
+      "bytes": 27264,
+      "sha256": "bb19f5e3f91ea87fbcb1df8c9b2f447f6fdc61e8d9447f0a2a6e474676d7f3b4"
+    },
+    {
+      "path": "RhythmDojo_Data/RuntimeInitializeOnLoads.json",
+      "bytes": 4930,
+      "sha256": "64726991d37181cf042ba2864d718eb3ad7bb64bf4af4e396006cd73dc7c004a"
+    },
+    {
+      "path": "RhythmDojo_Data/ScriptingAssemblies.json",
+      "bytes": 4448,
+      "sha256": "5c4735cac39ac8d4c5ff464d7a28bc94f7b5bb8928f54157735180d13ce6b932"
+    },
+    {
+      "path": "RhythmDojo_Data/sharedassets0.assets",
+      "bytes": 49256276,
+      "sha256": "65fb10f77c2ce7193647211fb8f03bb67aa69b6b0483de5a762c426588c7e2dc"
+    },
+    {
+      "path": "RhythmDojo_Data/sharedassets0.assets.resS",
+      "bytes": 655360,
+      "sha256": "77947d97f55172d516d04561c0424e53d008519d444ac2bc929d11904c13fff8"
+    },
+    {
+      "path": "RhythmDojo_Data/sharedassets0.resource",
+      "bytes": 4775552,
+      "sha256": "0984eb23bf6574a8265b3e263b3efdb0a9780fa1fd73dea5784f1ce1421b100c"
+    },
+    {
+      "path": "RhythmDojo_Data/sharedassets1.assets",
+      "bytes": 709,
+      "sha256": "a7d5ee1e73e204807323b1bf2638102efb9981041142d46dba6595c02a4ba131"
+    },
+    {
+      "path": "RhythmDojo_Data/sharedassets2.assets",
+      "bytes": 1165,
+      "sha256": "51d0502cdcef1aa165f799e4eeee3fbb46ebf0bfd5ffd54ecd0ab2afb52370ba"
+    },
+    {
+      "path": "RhythmDojo_Data/sharedassets3.assets",
+      "bytes": 71240,
+      "sha256": "fbddd0de383171302225e459152c4055256082229492f9584b6ac54d1ea66d80"
+    },
+    {
+      "path": "RhythmDojo_Data/sharedassets3.assets.resS",
+      "bytes": 18872992,
+      "sha256": "416c06a4df6d1d4b42550a55969123dbe4e0e7ddfb6cb0e978aa0d248fbe161c"
+    },
+    {
+      "path": "RhythmDojo_Data/sharedassets4.assets",
+      "bytes": 1045,
+      "sha256": "a65fc5759f55f3bb7f71a46d1866d709fc262484bff9c545b751cfae759e6a53"
+    },
+    {
+      "path": "RhythmDojo_Data/sharedassets5.assets",
+      "bytes": 1197,
+      "sha256": "6708bd559cf8ba20c8f8e677ced0e8951e29338516dfcbadb8e42c23e9929696"
+    },
+    {
+      "path": "RhythmDojo_Data/sharedassets6.assets",
+      "bytes": 1105,
+      "sha256": "b82e8e119bc6af754f743090315bb89b0aa7df4edf208cea65923bca8bc4d6ea"
+    },
+    {
+      "path": "UnityCrashHandler64.exe",
+      "bytes": 1669544,
+      "sha256": "4e65cef1be7996ccecec341c11a2f1319c1349b30288bf01455a2494451ddb69"
+    },
+    {
+      "path": "UnityPlayer.dll",
+      "bytes": 36730288,
+      "sha256": "6aaaa964ebb34fb3d72f14288729e64002e3b917062e313a3452f73a2a9c4cba"
+    }
+  ]
+}

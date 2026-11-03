@@ -1,0 +1,28 @@
+{
+    "phase": "restore",
+    "unity": "6000.3.23f1",
+    "platform": "WindowsPlayer",
+    "startedUtc": "2026-11-02T19:43:16.2590159Z",
+    "finishedUtc": "2026-11-02T19:43:16.3757651Z",
+    "step": "finished",
+    "error": "",
+    "editor": false,
+    "success": true,
+    "assertions": 11,
+    "requestedBuffer": 0,
+    "appliedBuffer": 0,
+    "sampleRate": 0,
+    "duration": 0.12086400000000008,
+    "clipPeak": 0.0,
+    "mixerPeak": 0.0,
+    "steps": [
+        {
+            "name": "restore",
+            "detail": "Restore saved preferences and probe-owned editor draft only.",
+            "utc": "2026-11-02T19:43:16.2751802Z",
+            "elapsed": 0.020507000000000276
+        }
+    ],
+    "clockMeasurements": [],
+    "alignment": []
+}

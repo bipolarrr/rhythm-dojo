@@ -220,6 +220,10 @@ namespace RhythmDojo.Tests
             Assert.That(game.Session.Health, Is.EqualTo(100));
             Assert.That(game.Clock.Running, Is.True);
             yield return Press(Key.Escape);
+            var pauseMenu = UnityEngine.Object.FindFirstObjectByType<GameplayPauseMenu>();
+            Assert.That(pauseMenu.panel.activeSelf, Is.True);
+            Assert.That(game.IsPaused, Is.True);
+            yield return Click(pauseMenu.exitButton);
             yield return Await(() => UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>());
         }
 
@@ -329,6 +333,10 @@ namespace RhythmDojo.Tests
             var view = UnityEngine.Object.FindFirstObjectByType<GameplayHudView>();
             Assert.That(view.returnButton.gameObject.activeSelf, Is.False);
             yield return Press(Key.Escape);
+            var pauseMenu = UnityEngine.Object.FindFirstObjectByType<GameplayPauseMenu>();
+            Assert.That(pauseMenu.panel.activeSelf, Is.True);
+            Assert.That(UnityEngine.Object.FindFirstObjectByType<RhythmGameController>().IsPaused, Is.True);
+            yield return Click(pauseMenu.exitButton);
             yield return Await(() =>
                 UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>()
             );

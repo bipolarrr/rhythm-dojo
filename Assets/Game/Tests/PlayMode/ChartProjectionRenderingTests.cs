@@ -12,6 +12,8 @@ using Object = UnityEngine.Object;
 
 namespace RhythmDojo.Tests
 {
+    [PrebuildSetup(typeof(TestRunStartup))]
+    [PostBuildCleanup(typeof(TestRunStartup))]
     public sealed class ChartProjectionRenderingTests
     {
         [UnityTest]

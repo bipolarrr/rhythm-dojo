@@ -1,0 +1,110 @@
+{
+  "sourceCommit": "cad59e6e96929b77761d4fd3771ff864918f4243",
+  "branch": "integrate/pr-quality-remediation",
+  "foundation": {
+    "editmode": {
+      "result": "Passed",
+      "total": "373",
+      "passed": "373",
+      "failed": "0",
+      "skipped": "0",
+      "inconclusive": "0",
+      "duration": "55.5611167"
+    },
+    "playmode": {
+      "result": "Passed",
+      "total": "156",
+      "passed": "156",
+      "failed": "0",
+      "skipped": "0",
+      "inconclusive": "0",
+      "duration": "812.5784315"
+    },
+    "build": {
+      "compiling": false,
+      "errors": false,
+      "playing": false,
+      "active": false,
+      "failed": false,
+      "build": "Succeeded",
+      "buildErrors": 0,
+      "buildWarnings": 3,
+      "bytes": 211439954,
+      "duration": 37.7878147,
+      "output": "C:/Users/song/RhythmDojo-pr-quality/Builds/Windows/RhythmDojo.exe"
+    }
+  },
+  "player": {
+    "exercise": {
+      "success": true,
+      "duration": 40.9899996
+    },
+    "persistence": {
+      "success": true,
+      "duration": 6.755173800000001
+    },
+    "loopback": {
+      "started_utc": "2026-11-02T19:41:07.483611+00:00",
+      "finished_utc": "2026-11-02T19:41:10.511174+00:00",
+      "speaker_id": "{0.0.0.00000000}.{99d735ce-8c10-4078-b76e-68ce88b6d5ba}",
+      "speaker_name": "스피커(Realtek High Definition Audio)",
+      "loopback": true,
+      "sample_rate": 48000,
+      "frames": 144000,
+      "peak": 0.047727324068546295,
+      "rms": 0.03373793885111809,
+      "dominant_hz": 440.0,
+      "power_fraction_438_to_442_hz": 0.9999999738872977,
+      "passed": true,
+      "scope": "Windows speaker loopback; does not measure acoustic speaker output or perceived quality."
+    },
+    "restoration": {
+      "preferenceCount": 6,
+      "ownedProjects": 0,
+      "restored": true
+    },
+    "shippingStartup": {
+      "observedUtc": "2026-11-02T19:42:04.3019981Z",
+      "scope": "Ordinary non-development Windows player startup and orderly close; functional paths covered by final development probe",
+      "pid": 14452,
+      "responding": true,
+      "exited": false,
+      "testAssemblies": [],
+      "running": true,
+      "windowHandle": 0,
+      "windowTitle": "",
+      "closeRequested": false
+    },
+    "shippingClose": {
+      "windowTitle": "RhythmDojo",
+      "closeMessagePosted": true,
+      "exitCode": null,
+      "pid": 14452,
+      "finishedUtc": "2026-11-02T19:43:01.1017135Z",
+      "windowHandle": 13960374,
+      "exited": true
+    }
+  },
+  "binaries": {
+    "Builds/Windows/RhythmDojo.exe": {
+      "sha256": "82efd5a8c297a5046f6bb72c240dab8972e64003851935eba0a46ad121ce0305",
+      "bytes": 667136
+    },
+    "Builds/RemediationProbe/RemediationProbe.exe": {
+      "sha256": "56c28afba054092826b7a8a80ba3767daa87967f182c0c562eb2f98799175b7a",
+      "bytes": 667136
+    }
+  },
+  "buildManifests": {
+    "shipping": {
+      "path": "Logs/pr-quality-remediation/final-shipping-build-manifest.json",
+      "files": 195,
+      "sha256": "00533996dc0200b947bb747360807716375b2d146fb2b4f8df397f7b53cf8255"
+    },
+    "diagnostic": {
+      "path": "Logs/pr-quality-remediation/final-diagnostic-build-manifest.json",
+      "files": 351,
+      "sha256": "68e03787a5e43af263a8ab71988577810cf05491f9100f23b98bc1cb12f1d8a2"
+    }
+  }
+}

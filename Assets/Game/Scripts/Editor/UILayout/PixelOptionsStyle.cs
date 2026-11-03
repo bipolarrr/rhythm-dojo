@@ -21,14 +21,17 @@ namespace RhythmDojo.EditorTools
             backdrop.transform.SetAsFirstSibling();
             Stretch((RectTransform)backdrop.transform);
             var image = backdrop.GetComponent<Image>();
-            image.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Game/Art/PixelDojo/TitleBackground.asset");
+            image.sprite = DojoEntranceAssets.Load("TrainingInterior", UiArtworkCrop.Full);
             image.raycastTarget = false;
             var fit = backdrop.GetComponent<AspectRatioFitter>();
             fit.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
             fit.aspectRatio = image.sprite.rect.width / image.sprite.rect.height;
             view.transform.Find("Modal Shade").GetComponent<Image>().color = new Color(.075f, .035f, .02f, .62f);
             var popup = view.transform.Find("Settings Popup");
-            PixelSongSelectionStyle.Frame((RectTransform)popup, Paper, 16);
+            var popupFrame = PixelSongSelectionStyle.Frame((RectTransform)popup, Color.white, 24);
+            popupFrame.artwork = SettingsArtAssets.Load("SettingsPanel", UiArtworkCrop.Full,
+                new Vector4(128, 128, 128, 128));
+            popupFrame.RefreshArtwork();
             foreach (var text in view.GetComponentsInChildren<Text>(true))
             {
                 text.font = AssetDatabase.LoadAssetAtPath<Font>(MainMenuLayoutBuilder.FontPath);
@@ -43,19 +46,132 @@ namespace RhythmDojo.EditorTools
             foreach (var button in new[] { view.soundTab, view.graphicsTab, view.gameplayTab, view.back })
             {
                 Button(button, new Color(.79f, .63f, .42f), Ink);
+                StyleSettingsButton(button);
             }
+            view.back.GetComponentInChildren<PixelDojoFrameGraphic>().color = Color.white;
             Button(view.apply, Red, Cream);
+            StyleSettingsButton(view.apply);
             foreach (var slider in view.GetComponentsInChildren<Slider>(true))
             {
                 StyleSlider(slider);
+                StyleSettingsSlider(slider);
             }
             foreach (var dropdown in view.GetComponentsInChildren<Dropdown>(true))
             {
                 StyleDropdown(dropdown);
+                StyleSettingsDropdown(dropdown);
             }
             foreach (var input in view.GetComponentsInChildren<InputField>(true))
             {
-                input.image.color = new Color(.98f, .88f, .68f);
+                SetSettingsSurface(input.image);
+            }
+        }
+
+        public static void StyleKeySettings(SettingsView view)
+        {
+            if (view.keyRowTemplate)
+            {
+                Button(view.keyRowTemplate.button, Color.white, Ink);
+                StyleSettingsButton(view.keyRowTemplate.button);
+            }
+            foreach (var button in view.keyBindingButtons)
+            {
+                Button(button, Color.white, Ink);
+                StyleSettingsButton(button);
+            }
+            foreach (var button in new[] { view.keySettingsTab, view.resetKeys })
+            {
+                Button(button, Color.white, Ink);
+                StyleSettingsButton(button);
+            }
+            foreach (var text in view.keySettingsPanel.GetComponentsInChildren<Text>(true))
+            {
+                text.color = Ink;
+            }
+        }
+
+        private static void StyleSettingsButton(Button button)
+        {
+            var frame = button.GetComponentInChildren<PixelDojoFrameGraphic>();
+            frame.artwork = SettingsArtAssets.Load("SettingsControl", UiArtworkCrop.Full,
+                new Vector4(128, 128, 128, 128));
+            frame.borderWidth = 8;
+            frame.RefreshArtwork();
+        }
+
+        private static void SetSettingsSurface(Image image)
+        {
+            image.sprite = SettingsArtAssets.Load("SettingsControl", UiArtworkCrop.Full,
+                new Vector4(128, 128, 128, 128));
+            image.type = Image.Type.Sliced;
+            image.pixelsPerUnitMultiplier = 16;
+            image.color = Color.white;
+        }
+
+        private static void StyleSettingsSlider(Slider slider)
+        {
+            var track = slider.transform.Find("Background");
+            if (track)
+            {
+                var image = track.GetComponent<Image>();
+                SetSettingsSurface(image);
+                image.color = new Color(.32f, .20f, .12f);
+            }
+
+            var fill = slider.fillRect.GetComponent<Image>();
+            SetSettingsSurface(fill);
+            fill.color = new Color(.95f, .62f, .26f);
+            SetSettingsSurface((Image)slider.targetGraphic);
+        }
+
+        private static void StyleSettingsDropdown(Dropdown dropdown)
+        {
+            SetSettingsSurface(dropdown.image);
+            SetSettingsSurface(dropdown.template.GetComponent<Image>());
+            foreach (var toggle in dropdown.template.GetComponentsInChildren<Toggle>(true))
+            {
+                var image = toggle.targetGraphic as Image;
+                if (image)
+                {
+                    SetSettingsSurface(image);
+                }
+
+                if (toggle.graphic)
+                {
+                    toggle.graphic.raycastTarget = false;
+                    toggle.graphic.gameObject.SetActive(false);
+                }
+            }
+
+            var arrow = dropdown.transform.Find("Arrow");
+            if (arrow)
+            {
+                arrow.GetComponent<Image>().enabled = false;
+            }
+
+            var ruleIndicator = dropdown.transform.Find("Rule Expand Indicator");
+            if (ruleIndicator)
+            {
+                ruleIndicator.gameObject.SetActive(false);
+            }
+
+            var indicator = new GameObject("Settings Expand Indicator", typeof(RectTransform));
+            indicator.transform.SetParent(dropdown.transform, false);
+            var rect = (RectTransform)indicator.transform;
+            rect.anchorMin = rect.anchorMax = new Vector2(1f, .5f);
+            rect.anchoredPosition = new Vector2(-22f, 0f);
+            rect.sizeDelta = new Vector2(16f, 12f);
+            for (int i = 0; i < 3; i++)
+            {
+                var step = new GameObject("Arrow Step " + i, typeof(RectTransform), typeof(Image));
+                step.transform.SetParent(indicator.transform, false);
+                var stepRect = (RectTransform)step.transform;
+                stepRect.anchorMin = stepRect.anchorMax = new Vector2(.5f, .5f);
+                stepRect.anchoredPosition = new Vector2(0f, 3f - i * 3f);
+                stepRect.sizeDelta = new Vector2(14f - i * 4f, 3f);
+                var image = step.GetComponent<Image>();
+                image.color = Ink;
+                image.raycastTarget = false;
             }
         }
 
