@@ -10,7 +10,8 @@ namespace RhythmDojo.Authoring
         Undo, Redo, Copy, Paste, Delete, SelectAll, SelectTaps, SelectHolds, Deselect,
         Mirror, Randomize, PlayPause, Stop, Loop, Slow, Test, TestHere, AutoTest, AutoTestHere,
         SaveExit, DiscardExit, CancelExit, Pencil, Select, Eraser, Position, Tap, Hold, ImportPupa,
-        SaveNew, DiscardNew, ConfirmSaveAs, CancelSaveAs, ProjectFiles, ChartSettings, ResetView
+        SaveNew, DiscardNew, ConfirmSaveAs, CancelSaveAs, ProjectFiles, ChartSettings, ResetView,
+        PlayReturn, Scroll
     }
 
     [Serializable]

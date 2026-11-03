@@ -46,6 +46,8 @@ namespace RhythmDojo.Authoring
         private bool looping;
         private bool previousLoopPlaying;
         private bool draggingSelection;
+        private bool draggingScroll;
+        private int scrollPointerId;
         private bool movingNote;
         private bool grabMoved;
         private int grabPointerId;
@@ -144,7 +146,7 @@ namespace RhythmDojo.Authoring
 
             view.selection.text = "선택 " + editing.Selected.Count + " / "
                 + cachedNotes.Length + " · 도구 "
-                + new[] { "그리기", "선택", "지우개", "잡기" }[tool];
+                + new[] { "그리기", "선택", "지우개", "잡기", "재생 위치" }[tool];
             if (view.playback)
             {
                 view.playback.text = "속도 " + (timeline.PreviewSpeed * 100).ToString("0") + "% · 루프 "
@@ -283,6 +285,11 @@ namespace RhythmDojo.Authoring
                 return;
             }
 
+            if (draggingScroll)
+            {
+                draggingScroll = false;
+                return;
+            }
             if (movingNote)
             {
                 CancelGrab();
@@ -680,6 +687,9 @@ namespace RhythmDojo.Authoring
                 case 3:
                     action = WorkspaceAction.Position;
                     break;
+                case 4:
+                    action = WorkspaceAction.Scroll;
+                    break;
                 default:
                     action = WorkspaceAction.Pencil;
                     break;
@@ -822,6 +832,7 @@ namespace RhythmDojo.Authoring
                     string relative = await menu.Store.ImportAsync(session.Snapshot.Id, audio, lifetime.Token);
                     session.Edit(edit => edit.SetAudio(relative));
                     view.status.text = "음원을 적용했습니다.";
+                    await AutoEstimateBpm();
                     break;
                 case WorkspaceAction.ImportJacket:
                     await ImportResources();
@@ -871,14 +882,10 @@ namespace RhythmDojo.Authoring
                     editing.Remap(session, screen.ChartId, lanes);
                     break;
                 case WorkspaceAction.PlayPause:
-                    if (timeline.IsPlaying)
-                    {
-                        timeline.PausePreview();
-                    }
-                    else
-                    {
-                        timeline.PlayPreview();
-                    }
+                    timeline.TogglePreview();
+                    break;
+                case WorkspaceAction.PlayReturn:
+                    timeline.TogglePreview(true);
                     break;
                 case WorkspaceAction.Stop:
                     timeline.StopPreview();
@@ -939,6 +946,9 @@ namespace RhythmDojo.Authoring
                     break;
                 case WorkspaceAction.Position:
                     tool = 3;
+                    break;
+                case WorkspaceAction.Scroll:
+                    tool = 4;
                     break;
                 case WorkspaceAction.Tap:
                     screen.MinimumHoldOnClick = false;
@@ -1163,6 +1173,33 @@ namespace RhythmDojo.Authoring
             }
         }
 
+        private async Task AutoEstimateBpm()
+        {
+            view.status.text = "음원을 적용했습니다. BPM 자동 분석 준비 중…";
+            while (timeline.IsLoadingAudio)
+            {
+                lifetime.Token.ThrowIfCancellationRequested();
+                await Task.Yield();
+            }
+            lifetime.Token.ThrowIfCancellationRequested();
+
+            try
+            {
+                await EstimateBpm();
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception error)
+            {
+                if (this)
+                {
+                    view.status.text = "음원은 적용했습니다. BPM 자동 분석 실패: " + error.Message;
+                }
+            }
+        }
+
         private async Task EstimateBpm()
         {
             var clip = timeline.PreviewClip;
@@ -1225,6 +1262,16 @@ namespace RhythmDojo.Authoring
             {
                 return true;
             }
+            if (tool == 4)
+            {
+                draggingScroll = data.button == PointerEventData.InputButton.Left;
+                scrollPointerId = data.pointerId;
+                if (draggingScroll)
+                {
+                    SetPlaybackPosition(point);
+                }
+                return true;
+            }
             long id = grid.HitTest(point);
             if (tool == 1)
             {
@@ -1283,6 +1330,11 @@ namespace RhythmDojo.Authoring
 
         private void PointerDrag(PointerEventData data)
         {
+            if (draggingScroll)
+            {
+                DragScroll(data);
+                return;
+            }
             if (movingNote)
             {
                 if (data.pointerId == grabPointerId)
@@ -1317,6 +1369,10 @@ namespace RhythmDojo.Authoring
 
         private void PointerUp(PointerEventData data)
         {
+            if (data.pointerId == scrollPointerId)
+            {
+                draggingScroll = false;
+            }
             draggingSelection = false;
             if (!movingNote || data.pointerId != grabPointerId)
             {
@@ -1336,6 +1392,36 @@ namespace RhythmDojo.Authoring
                 }
             }
             CancelGrab();
+        }
+
+        private void DragScroll(PointerEventData data)
+        {
+            if (tool != 4 || working || screen.IsBusy)
+            {
+                draggingScroll = false;
+                return;
+            }
+            if (data.pointerId != scrollPointerId)
+            {
+                return;
+            }
+
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(grid.rectTransform,
+                data.position, data.pressEventCamera, out var point);
+            SetPlaybackPosition(point);
+        }
+
+        private void SetPlaybackPosition(Vector2 point)
+        {
+            var rect = grid.rectTransform.rect;
+            double beat = grid.Projection.Unproject(Mathf.Clamp(point.y, rect.yMin, rect.yMax));
+            if (screen.SnapEnabled)
+            {
+                double topBeat = grid.Projection.Unproject(rect.yMax);
+                beat = timeline.Timing.SnapBeat(beat, screen.SnapBeats, screen.ScrollBeatOffset, topBeat);
+            }
+
+            timeline.SeekInViewport(timeline.Timing.TimeAtBeat(beat) - timeline.AudioOffset);
         }
 
         private bool PreviewGrab(PointerEventData data)

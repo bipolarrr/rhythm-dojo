@@ -368,13 +368,16 @@ namespace RhythmDojo.Tests
             Require(!Directory.Exists(folder), "Generated editor project must not already exist.");
             backup.ownedProjectIds.Add(id);
             SaveBackup();
-            yield return Click(Object.FindObjectsByType<Button>(FindObjectsSortMode.None)
-                .Single(button => button.name == "Showcase Main Menu"));
-            yield return Wait(() => SceneManager.GetActiveScene().path == TitlePath, "Editor Back autosave");
+            var workspace = Object.FindFirstObjectByType<WorkspaceEditor>();
+            yield return Click(workspace.view.menus[0].trigger);
+            yield return Click(workspace.view.actions.Single(binding => binding.action == WorkspaceAction.Exit).button);
+            yield return Wait(() => workspace.view.exitPopup.activeSelf, "Editor exit confirmation");
+            yield return Click(workspace.view.actions.Single(binding => binding.action == WorkspaceAction.SaveExit).button);
+            yield return Wait(() => SceneManager.GetActiveScene().path == TitlePath, "Editor save and exit");
             Require(File.Exists(Path.Combine(folder, FileSongProjectStore.FileName)),
                 "Editor Back saved its new draft through the real store.");
             CleanupProjects();
-            Step("editor-round-trip", "Real Back autosave verified; only the new probe-owned project file and empty folder removed.");
+            Step("editor-round-trip", "File menu save and exit verified; only the new probe-owned project file and empty folder removed.");
             yield return OpenTitleMenu();
         }
 

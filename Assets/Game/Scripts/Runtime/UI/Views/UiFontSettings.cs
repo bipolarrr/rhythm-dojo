@@ -30,11 +30,21 @@ namespace RhythmDojo.UI
             if (scope && scope.font)
             {
                 text.font = scope.font;
+                text.fontStyle = scope.style;
+                if (scope.style == FontStyle.Normal)
+                {
+                    var input = text.GetComponentInParent<InputField>(true);
+                    var dropdown = text.GetComponentInParent<Dropdown>(true);
+                    if (input || dropdown)
+                    {
+                        text.verticalOverflow = VerticalWrapMode.Overflow;
+                    }
+                }
+
+                return;
             }
-            else
-            {
-                text.font = currentFont;
-            }
+
+            text.font = currentFont;
             text.fontStyle = Style;
         }
 
