@@ -1,0 +1,36 @@
+{
+  "success": true,
+  "command": "command test_status",
+  "data": {
+    "command": "test_status",
+    "parameters": {},
+    "result": {
+      "status": "completed",
+      "duration": 61.76,
+      "summary": {
+        "total": 1,
+        "passed": 0,
+        "failed": 1,
+        "skipped": 0,
+        "inconclusive": 0
+      },
+      "results": [
+        {
+          "FullName": "RhythmDojo.Tests.PupaResultsFlowTests.RealPupaAudioFinishesAndAutomaticallyLoadsResults",
+          "Status": "Failed",
+          "Duration": 61.6812487,
+          "Message": "PUPA playback was reset before completion: FocusLost",
+          "StackTrace": "at RhythmDojo.Tests.PupaResultsFlowTests+<RealPupaAudioFinishesAndAutomaticallyLoadsResults>d__5.MoveNext () [0x004c3] in C:\\Users\\song\\RhythmDojo-pr-quality\\Assets\\Game\\Tests\\PlayMode\\PupaResultsFlowTests.cs:234\r\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@bd7f943e9647\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\r\n"
+        }
+      ]
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "C:\\Users\\song\\RhythmDojo-pr-quality"
+    },
+    "success": true
+  },
+  "errors": [],
+  "warnings": []
+}

@@ -36,7 +36,7 @@ namespace RhythmDojo.EditorTools
             Bounds((RectTransform)backdrop.transform, 0, 0, 1, 1);
             backdrop.transform.localScale = Vector3.one * DojoEntranceView.InteriorScale;
             var image = backdrop.GetComponent<Image>();
-            image.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Game/Art/PixelDojo/TitleBackground.asset");
+            image.sprite = DojoEntranceAssets.Load("SelectionBackground");
             image.raycastTarget = false;
             var fit = backdrop.GetComponent<AspectRatioFitter>();
             fit.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
@@ -44,24 +44,26 @@ namespace RhythmDojo.EditorTools
 
             foreach (var label in view.GetComponentsInChildren<Text>(true))
             {
+                label.font = AssetDatabase.LoadAssetAtPath<Font>(MainMenuLayoutBuilder.FontPath);
                 label.color = Ink;
-                label.verticalOverflow = VerticalWrapMode.Overflow;
+                label.verticalOverflow = VerticalWrapMode.Truncate;
             }
-            Bounds((RectTransform)header, .16f, .805f, .415f, .915f);
+            Bounds((RectTransform)header, .045f, .865f, .47f, .965f);
             foreach (Transform child in header)
             {
                 child.gameObject.SetActive(false);
             }
             Frame((RectTransform)header, Paper, 12);
-            var heading = UiElements.Label("Pixel Heading", header, "곡 선택", Vector2.zero, Vector2.zero, 43);
+            var heading = UiElements.Label("Pixel Heading", header, "곡 선택", Vector2.zero, Vector2.zero, 48);
             heading.font = AssetDatabase.LoadAssetAtPath<Font>(MainMenuLayoutBuilder.FontPath);
             heading.fontStyle = FontStyle.Bold;
             heading.color = Ink;
             heading.alignment = TextAnchor.MiddleCenter;
+            EmbossText(heading);
             Bounds(heading.rectTransform, 0, 0, 1, 1);
 
             // Retain view contracts; song information moves to the right, browser to the left.
-            Bounds((RectTransform)left, .45f, .17f, .86f, .815f);
+            Bounds((RectTransform)left, .49f, .145f, .955f, .85f);
             Frame((RectTransform)left, Paper, 20);
             foreach (Transform child in left)
             {
@@ -70,32 +72,38 @@ namespace RhythmDojo.EditorTools
                     child.gameObject.SetActive(false);
                 }
             }
-            Bounds((RectTransform)view.album.transform.parent, .055f, .47f, .435f, .905f);
+            Bounds((RectTransform)view.album.transform.parent, .055f, .51f, .41f, .935f);
             Frame((RectTransform)view.album.transform.parent, new Color(.25f, .13f, .09f), 8);
             var interior = new GameObject("Album Interior", typeof(RectTransform), typeof(RectMask2D));
             interior.transform.SetParent(view.album.transform.parent, false);
             Bounds((RectTransform)interior.transform, .035f, .035f, .965f, .965f);
             view.album.transform.SetParent(interior.transform, false);
-            Bounds(view.songTitle.rectTransform, .48f, .785f, .95f, .95f);
+            Bounds(view.songTitle.rectTransform, .445f, .805f, .945f, .955f);
             view.songTitle.fontStyle = FontStyle.Bold;
             view.songTitle.resizeTextForBestFit = true;
-            view.songTitle.resizeTextMinSize = 23;
-            view.songTitle.resizeTextMaxSize = 38;
-            Bounds(view.artistBpm.rectTransform, .48f, .49f, .95f, .755f);
-            view.artistBpm.fontSize = 23;
-            view.artistBpm.alignment = TextAnchor.UpperLeft;
+            view.songTitle.resizeTextMinSize = 28;
+            StyleSongTitle(view.songTitle, 48, 2);
+            Bounds(view.artistBpm.rectTransform, .445f, .51f, .945f, .80f);
+            view.artistBpm.fontSize = 42;
+            view.artistBpm.resizeTextForBestFit = true;
+            view.artistBpm.resizeTextMinSize = 34;
+            view.artistBpm.resizeTextMaxSize = 42;
+            view.artistBpm.lineSpacing = 1.45f;
+            view.artistBpm.alignment = TextAnchor.MiddleLeft;
             var caption = left.Find("Difficulty Caption").GetComponent<Text>();
             caption.text = "수련 난이도";
-            caption.fontSize = 20;
-            Bounds(caption.rectTransform, .055f, .415f, .95f, .46f);
+            caption.fontSize = 26;
+            caption.color = new Color(.48f, .22f, .10f);
+            EmbossText(caption);
+            Bounds(caption.rectTransform, .055f, .44f, .95f, .495f);
             for (int i = 0; i < view.difficultyButtons.Length; i++)
             {
                 var button = view.difficultyButtons[i];
                 float width = .89f / view.difficultyButtons.Length;
-                Bounds((RectTransform)button.transform, .055f + i * width + .005f, .25f, .055f + (i + 1) * width - .005f, .405f);
+                Bounds((RectTransform)button.transform, .055f + i * width + .005f, .35f, .055f + (i + 1) * width - .005f, .435f);
                 Frame((RectTransform)button.transform, Paper, 8);
                 var text = button.GetComponentInChildren<Text>();
-                text.fontSize = 27;
+                text.fontSize = 30;
                 text.fontStyle = FontStyle.Bold;
                 var accent = button.transform.Find("Difficulty Accent");
                 if (accent)
@@ -104,19 +112,35 @@ namespace RhythmDojo.EditorTools
                 }
                 button.GetComponent<Outline>().effectColor = new Color(1, .56f, .22f);
             }
-            Bounds(view.record.rectTransform, .055f, .035f, .95f, .235f);
+            Bounds(view.record.rectTransform, .055f, .025f, .435f, .335f);
+            view.record.fontSize = 40;
             view.record.resizeTextForBestFit = true;
-            view.record.resizeTextMinSize = 13;
-            view.record.resizeTextMaxSize = 20;
+            view.record.resizeTextMinSize = 34;
+            view.record.resizeTextMaxSize = 40;
+            view.record.alignment = TextAnchor.UpperLeft;
+            view.record.lineSpacing = 1.35f;
+            view.comboRecord = UiElements.Label("Combo and Completion Record", left, "", Vector2.zero, Vector2.zero, 36);
+            Bounds(view.comboRecord.rectTransform, .495f, .025f, .945f, .335f);
+            view.comboRecord.color = Ink;
+            view.comboRecord.alignment = TextAnchor.UpperLeft;
+            view.comboRecord.resizeTextForBestFit = true;
+            view.comboRecord.resizeTextMinSize = 32;
+            view.comboRecord.resizeTextMaxSize = 36;
+            view.comboRecord.lineSpacing = 1.08f;
+            var recordDivider = new GameObject("Record Column Divider", typeof(RectTransform), typeof(Image));
+            recordDivider.transform.SetParent(left, false);
+            Bounds((RectTransform)recordDivider.transform, .462f, .055f, .465f, .32f);
+            recordDivider.GetComponent<Image>().color = new Color(.46f, .25f, .12f, .45f);
+            recordDivider.GetComponent<Image>().raycastTarget = false;
 
-            Bounds((RectTransform)right, .13f, .15f, .435f, .80f);
+            Bounds((RectTransform)right, .045f, .145f, .47f, .85f);
             right.GetComponent<Image>().color = Color.clear;
             right.Find("List Header").gameObject.SetActive(false);
-            Bounds((RectTransform)view.scroll.transform, .015f, .005f, .965f, .905f);
-            Bounds((RectTransform)view.scroll.verticalScrollbar.transform, .978f, .005f, .995f, .905f);
-            Bounds((RectTransform)view.favoritesTab.transform, .015f, .925f, .295f, .995f);
-            Bounds((RectTransform)view.allTab.transform, .31f, .925f, .57f, .995f);
-            Bounds((RectTransform)view.sortList.transform, .59f, .925f, .965f, .995f);
+            Bounds((RectTransform)view.scroll.transform, .015f, .005f, .965f, .88f);
+            Bounds((RectTransform)view.scroll.verticalScrollbar.transform, .978f, .005f, .995f, .88f);
+            Bounds((RectTransform)view.favoritesTab.transform, .015f, .905f, .295f, .99f);
+            Bounds((RectTransform)view.allTab.transform, .31f, .905f, .57f, .99f);
+            Bounds((RectTransform)view.sortList.transform, .59f, .905f, .965f, .99f);
             view.rowContent.GetComponent<VerticalLayoutGroup>().spacing = 12;
             view.legacyFallbackCover = view.fallbackCover;
             view.fallbackCover = image.sprite;
@@ -133,7 +157,7 @@ namespace RhythmDojo.EditorTools
             Bounds((RectTransform)view.modeButton.transform, .43f, .08f, .56f, .67f);
             Bounds((RectTransform)view.settingsButton.transform, .575f, .08f, .67f, .67f);
             Bounds(view.details.rectTransform, .21f, .04f, .405f, .95f);
-            view.details.fontSize = 15;
+            view.details.fontSize = 20;
             view.details.color = new Color(1, .91f, .74f);
             StyleButton(view.back, new Color(.23f, .13f, .11f));
             StyleButton(view.play, Red);
@@ -161,13 +185,282 @@ namespace RhythmDojo.EditorTools
                 button.GetComponentInChildren<Text>().color = new Color(1, .92f, .76f);
             }
             PixelOptionsStyle.ApplySelection(view);
+            foreach (var frame in view.GetComponentsInChildren<PixelDojoFrameGraphic>(true))
+            {
+                frame.artwork = SettingsArtAssets.Load("SettingsControl");
+                frame.borderWidth = 12;
+            }
+            var informationFrame = left.GetComponentInChildren<PixelDojoFrameGraphic>();
+            informationFrame.artwork = SettingsArtAssets.Load("SettingsPanel");
+            informationFrame.color = Color.white;
+            informationFrame.borderWidth = 24;
+            header.GetComponentInChildren<PixelDojoFrameGraphic>().color = Color.white;
+            foreach (var dialog in new[] { view.backPopup.transform.Find("Dialog"),
+                view.modePopup.transform.Find("Mode Dialog") })
+            {
+                var frame = dialog.GetComponentInChildren<PixelDojoFrameGraphic>();
+                frame.artwork = SettingsArtAssets.Load("SettingsPanel");
+                frame.color = Color.white;
+                frame.borderWidth = 20;
+            }
+            view.sortList.image.sprite = SettingsArtAssets.Load("SettingsControl");
+            view.sortList.image.type = Image.Type.Sliced;
+            view.sortList.image.pixelsPerUnitMultiplier = 10;
+            view.sortList.image.color = Color.white;
+            view.sortList.captionText.fontSize = 26;
+            view.sortList.captionText.resizeTextForBestFit = true;
+            view.sortList.captionText.resizeTextMinSize = 20;
+            view.sortList.captionText.resizeTextMaxSize = 26;
             view.RefreshDifficultyButtons();
+            StyleSupportingText(view);
+            StyleFooterText(view);
+            StyleBackPopupText(view);
+            StyleModePopupText(view);
+            StyleSortDropdown(view);
+        }
+
+        public static void StyleSupportingText(SongSelectionView view)
+        {
+            var edge = new Color(.045f, .23f, .24f);
+            var material = AssetDatabase.LoadAssetAtPath<Material>("Assets/Game/Resources/UI/SelectionWoodText.mat");
+            if (!material)
+            {
+                var shader = Shader.Find("RhythmDojo/UI/Selection Wood Text");
+                if (!shader)
+                {
+                    throw new System.InvalidOperationException("Selection wood text shader missing.");
+                }
+                material = new Material(shader);
+                AssetDatabase.CreateAsset(material, "Assets/Game/Resources/UI/SelectionWoodText.mat");
+            }
+            foreach (var text in view.GetComponentsInChildren<Text>(true))
+            {
+                if (text == view.songTitle || text == view.rowTemplate.title)
+                {
+                    continue;
+                }
+                if (text.transform.IsChildOf(view.details.transform.parent))
+                {
+                    continue;
+                }
+
+                var outline = text.GetComponent<Outline>();
+                bool styled = text.material == material;
+                if (outline && outline.effectColor == edge)
+                {
+                    styled = true;
+                }
+                if (!styled)
+                {
+                    int size = text.fontSize;
+                    if (text.resizeTextForBestFit)
+                    {
+                        size = text.resizeTextMaxSize;
+                    }
+                    else
+                    {
+                        text.resizeTextMinSize = Mathf.Max(12, Mathf.RoundToInt(size * .85f));
+                    }
+                    text.fontSize = Mathf.CeilToInt(size * 1.08f);
+                    text.resizeTextMaxSize = text.fontSize;
+                    text.resizeTextForBestFit = true;
+                }
+
+                text.color = new Color(.84f, .66f, .45f);
+                text.material = material;
+                var shadow = text.GetComponent<Shadow>();
+                if (!shadow)
+                {
+                    shadow = text.gameObject.AddComponent<Shadow>();
+                }
+                shadow.enabled = true;
+                shadow.effectColor = new Color(.20f, .09f, .035f, .85f);
+                shadow.effectDistance = new Vector2(1, -2);
+                shadow.useGraphicAlpha = true;
+                if (!outline)
+                {
+                    outline = text.gameObject.AddComponent<Outline>();
+                }
+                outline.enabled = true;
+                outline.effectColor = new Color(.34f, .17f, .075f);
+                outline.effectDistance = new Vector2(1, -1);
+                outline.useGraphicAlpha = true;
+            }
+        }
+
+        public static void StyleFooterText(SongSelectionView view)
+        {
+            StyleFooterLabel(view.back.GetComponentInChildren<Text>(), 52, 36);
+            StyleFooterLabel(view.modeLabel, 48, 28);
+            StyleFooterLabel(view.settingsButton.GetComponentInChildren<Text>(), 48, 34);
+            StyleFooterLabel(view.play.GetComponentInChildren<Text>(), 66, 48);
+            StyleFooterLabel(view.details, 24, 20);
+
+            var backText = view.back.GetComponentInChildren<Text>();
+            backText.text = "뒤로";
+            Bounds(backText.rectTransform, .34f, 0, .88f, 1);
+            StyleFooterArrow(view.back, MainMenuIcon.IconKind.Back, .12f, .34f);
+            var playText = view.play.GetComponentInChildren<Text>();
+            playText.text = "시작";
+            Bounds(playText.rectTransform, .24f, 0, .55f, 1);
+            StyleFooterArrow(view.play, MainMenuIcon.IconKind.Play, .59f, .75f);
+
+            var icon = view.settingsButton.GetComponentInChildren<MainMenuIcon>(true);
+            if (icon)
+            {
+                icon.color = Color.white;
+            }
+        }
+
+        public static void StyleBackPopupText(SongSelectionView view)
+        {
+            foreach (var button in new[] { view.confirmBack, view.cancelBack })
+            {
+                var text = button.GetComponentInChildren<Text>(true);
+                text.fontSize = 44;
+                text.resizeTextForBestFit = true;
+                text.resizeTextMinSize = 34;
+                text.resizeTextMaxSize = 44;
+                text.alignment = TextAnchor.MiddleCenter;
+                text.rectTransform.offsetMin = new Vector2(10, 4);
+                text.rectTransform.offsetMax = new Vector2(-10, -4);
+            }
+
+            var question = view.backPopup.transform.Find("Dialog/Question").GetComponent<Text>();
+            question.fontSize = 48;
+            question.resizeTextForBestFit = true;
+            question.resizeTextMinSize = 30;
+            question.resizeTextMaxSize = 48;
+            question.alignment = TextAnchor.MiddleCenter;
+        }
+
+        public static void StyleSortDropdown(SongSelectionView view)
+        {
+            var dropdown = view.sortList;
+            Bounds((RectTransform)dropdown.transform, .59f, .895f, .985f, .995f);
+            dropdown.captionText.fontSize = 36;
+            dropdown.captionText.resizeTextForBestFit = true;
+            dropdown.captionText.resizeTextMinSize = 30;
+            dropdown.captionText.resizeTextMaxSize = 36;
+            dropdown.captionText.alignment = TextAnchor.MiddleLeft;
+            dropdown.captionText.rectTransform.offsetMin = new Vector2(18, 4);
+            dropdown.captionText.rectTransform.offsetMax = new Vector2(-42, -4);
+
+            dropdown.itemText.fontSize = 32;
+            dropdown.itemText.resizeTextForBestFit = true;
+            dropdown.itemText.resizeTextMinSize = 28;
+            dropdown.itemText.resizeTextMaxSize = 32;
+            dropdown.itemText.alignment = TextAnchor.MiddleLeft;
+            dropdown.itemText.rectTransform.offsetMin = new Vector2(30, 4);
+            dropdown.itemText.rectTransform.offsetMax = new Vector2(-16, -4);
+            dropdown.template.sizeDelta = new Vector2(dropdown.template.sizeDelta.x, 184);
+            var item = (RectTransform)dropdown.itemText.transform.parent;
+            item.sizeDelta = new Vector2(item.sizeDelta.x, 56);
+            var content = (RectTransform)item.parent;
+            content.sizeDelta = new Vector2(content.sizeDelta.x, 56);
+
+            var indicator = dropdown.transform.Find("Expand Indicator").GetComponent<Text>();
+            indicator.fontSize = 30;
+            indicator.resizeTextForBestFit = false;
+            StyleSortDropdownSurface(dropdown);
+        }
+
+        private static void StyleSortDropdownSurface(Dropdown dropdown)
+        {
+            var artwork = SettingsArtAssets.Load("SettingsControl");
+            var background = dropdown.template.GetComponent<Image>();
+            background.sprite = artwork;
+            background.type = Image.Type.Sliced;
+            background.pixelsPerUnitMultiplier = dropdown.image.pixelsPerUnitMultiplier;
+            background.color = Color.white;
+
+            foreach (var toggle in dropdown.template.GetComponentsInChildren<Toggle>(true))
+            {
+                var image = toggle.targetGraphic as Image;
+                if (image)
+                {
+                    image.sprite = artwork;
+                    image.type = Image.Type.Sliced;
+                    image.pixelsPerUnitMultiplier = dropdown.image.pixelsPerUnitMultiplier;
+                    image.color = Color.white;
+                    Bounds(image.rectTransform, 0, 0, 1, 1);
+                    image.rectTransform.offsetMin = new Vector2(2, 2);
+                    image.rectTransform.offsetMax = new Vector2(-2, -2);
+                }
+
+                var colors = dropdown.colors;
+                toggle.colors = colors;
+                if (toggle.graphic)
+                {
+                    toggle.graphic.raycastTarget = false;
+                    toggle.graphic.gameObject.SetActive(false);
+                }
+            }
+        }
+
+        public static void StyleModePopupText(SongSelectionView view)
+        {
+            foreach (var button in new[] { view.normalModeButton, view.hardModeButton })
+            {
+                var text = button.GetComponentInChildren<Text>(true);
+                text.fontSize = 52;
+                text.resizeTextForBestFit = true;
+                text.resizeTextMinSize = 40;
+                text.resizeTextMaxSize = 52;
+                text.alignment = TextAnchor.MiddleCenter;
+                text.horizontalOverflow = HorizontalWrapMode.Overflow;
+                text.rectTransform.offsetMin = new Vector2(16, 8);
+                text.rectTransform.offsetMax = new Vector2(-16, -8);
+            }
+
+            var title = view.modePopup.transform.Find("Mode Dialog/Mode Title").GetComponent<Text>();
+            title.fontSize = 48;
+            title.resizeTextForBestFit = true;
+            title.resizeTextMinSize = 40;
+            title.resizeTextMaxSize = 48;
+
+            var close = view.cancelMode.GetComponentInChildren<Text>(true);
+            close.fontSize = 34;
+            close.resizeTextForBestFit = true;
+            close.resizeTextMinSize = 28;
+            close.resizeTextMaxSize = 34;
+            close.alignment = TextAnchor.MiddleCenter;
+        }
+
+        private static void StyleFooterArrow(Button button, MainMenuIcon.IconKind kind, float x0, float x1)
+        {
+            var arrow = button.transform.Find("Footer Arrow");
+            if (!arrow)
+            {
+                var go = new GameObject("Footer Arrow", typeof(RectTransform), typeof(MainMenuIcon));
+                go.transform.SetParent(button.transform, false);
+                arrow = go.transform;
+            }
+
+            Bounds((RectTransform)arrow, x0, .15f, x1, .85f);
+            var icon = arrow.GetComponent<MainMenuIcon>();
+            icon.kind = kind;
+            icon.color = Color.white;
+            icon.raycastTarget = false;
+        }
+
+        private static void StyleFooterLabel(Text text, int size, int minimumSize)
+        {
+            text.color = Color.white;
+            text.fontSize = size;
+            text.resizeTextForBestFit = true;
+            text.resizeTextMinSize = minimumSize;
+            text.resizeTextMaxSize = size;
+            foreach (var effect in text.GetComponents<Shadow>())
+            {
+                effect.enabled = false;
+            }
         }
 
         private static void StyleRow(SongRowView row)
         {
             row.pixelTheme = true;
-            row.GetComponent<LayoutElement>().preferredHeight = 118;
+            row.GetComponent<LayoutElement>().preferredHeight = 132;
             Frame((RectTransform)row.transform, Paper, 10);
             Bounds((RectTransform)row.cover.transform.parent, .095f, .12f, .29f, .88f);
             row.indexLabel = UiElements.Label("Song Number", row.transform, "", Vector2.zero, Vector2.zero, 21);
@@ -177,20 +470,53 @@ namespace RhythmDojo.EditorTools
             Bounds(row.indexLabel.rectTransform, .02f, .1f, .09f, .9f);
             Bounds(row.title.rectTransform, .32f, .38f, .89f, .88f);
             Bounds(row.artist.rectTransform, .32f, .10f, .88f, .42f);
-            row.title.fontSize = 29;
             row.title.fontStyle = FontStyle.Bold;
             row.title.resizeTextForBestFit = true;
             row.title.resizeTextMinSize = 18;
-            row.title.resizeTextMaxSize = 29;
-            row.artist.fontSize = 18;
+            StyleSongTitle(row.title, 32, 1);
+            row.artist.fontSize = 23;
             row.artist.color = Ink;
-            row.title.color = Ink;
+            row.artist.color = new Color(.43f, .26f, .16f);
             Bounds(row.bpm.rectTransform, .65f, .10f, .88f, .37f);
             row.bpm.gameObject.SetActive(false);
             row.difficulty.gameObject.SetActive(false);
             Bounds((RectTransform)row.favorite.transform, .89f, .32f, .985f, .78f);
             row.favorite.GetComponent<Image>().color = Color.clear;
             row.favoriteLabel.color = Red;
+        }
+
+        public static void StyleSongTitle(Text text, int size, float depth)
+        {
+            text.fontSize = size;
+            text.resizeTextMaxSize = size;
+            text.color = new Color(1f, .89f, .63f);
+            var shadow = text.GetComponent<Shadow>();
+            if (!shadow)
+            {
+                shadow = text.gameObject.AddComponent<Shadow>();
+            }
+            shadow.effectColor = new Color(.18f, .055f, .025f, .95f);
+            shadow.effectDistance = new Vector2(depth, -depth * 2);
+            shadow.useGraphicAlpha = true;
+            var outline = text.GetComponent<Outline>();
+            if (!outline)
+            {
+                outline = text.gameObject.AddComponent<Outline>();
+            }
+            outline.effectColor = new Color(.59f, .12f, .065f);
+            outline.effectDistance = new Vector2(depth, -depth);
+            outline.useGraphicAlpha = true;
+        }
+
+        private static void EmbossText(Text text)
+        {
+            var shadow = text.GetComponent<Shadow>();
+            if (!shadow)
+            {
+                shadow = text.gameObject.AddComponent<Shadow>();
+            }
+            shadow.effectColor = new Color(1, .91f, .73f, .65f);
+            shadow.effectDistance = new Vector2(1, -1);
         }
 
         private static void StyleButton(Button button, Color fill)

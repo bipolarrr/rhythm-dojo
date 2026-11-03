@@ -65,6 +65,7 @@ namespace RhythmDojo.Tests
         public IEnumerator CompletionDisplaysThisPlayAndNextPlayReplacesIt()
         {
             var flow = Object.FindFirstObjectByType<AppFlowController>();
+            var expectedCover = Object.FindFirstObjectByType<SongSelectionView>().album.sprite;
             yield return LoadGameplay();
             var game = Object.FindFirstObjectByType<RhythmGameController>();
             var title = flow.CurrentRequest.Song.Title;
@@ -76,6 +77,8 @@ namespace RhythmDojo.Tests
             yield return Await(() => Object.FindFirstObjectByType<ResultsScreen>());
             yield return null;
             var view = Object.FindFirstObjectByType<ResultsView>();
+            Assert.That(view.cover.sprite, Is.SameAs(expectedCover));
+            Assert.That(view.cover.enabled, Is.True);
             Assert.That(SceneManager.GetActiveScene().path, Is.EqualTo(AppFlowController.ResultsPath));
             Assert.That(view.title.text, Is.EqualTo(title));
             Assert.That(view.artist.text, Is.EqualTo(artist));
@@ -272,15 +275,38 @@ namespace RhythmDojo.Tests
             yield return Click(view.moreButton);
             Assert.That(view.review.gameObject.activeSelf, Is.True);
             Assert.That(view.backButton.interactable, Is.False);
-            CaptureSelection("results-endpoints", 1920, 1080);
+            Assert.That(view.review.events.text, Does.Contain("시작: Good"));
+            view.review.zoom.Show();
+            yield return null;
+            Canvas.ForceUpdateCanvases();
+            var dropdownList = view.review.zoom.transform.Find("Dropdown List");
+            Assert.That(dropdownList, Is.Not.Null);
+            var options = dropdownList.GetComponentsInChildren<UnityEngine.UI.Toggle>()
+                .OrderByDescending(option => option.transform.position.y).ToArray();
+            Assert.That(options.Length, Is.EqualTo(4));
+            for (int i = 0; i < options.Length; i++)
+            {
+                var optionRect = (RectTransform)options[i].transform;
+                var optionLabel = options[i].GetComponentInChildren<UnityEngine.UI.Text>();
+                Assert.That(optionRect.rect.height, Is.GreaterThanOrEqualTo(60));
+                Assert.That(optionLabel.preferredHeight, Is.LessThanOrEqualTo(optionLabel.rectTransform.rect.height));
+                if (i > 0)
+                {
+                    Assert.That(Mathf.Abs(optionRect.anchoredPosition.y -
+                        ((RectTransform)options[i - 1].transform).anchoredPosition.y),
+                        Is.GreaterThanOrEqualTo(optionRect.rect.height));
+                }
+            }
+
             var review = view.review.GetComponent<ResultsChartReview>();
             review.SelectNote(result.Notes.First(note => note.Note.Kind == NoteKind.Hold).Index);
             Assert.That(view.review.events.text, Does.Contain("시작: Miss"));
             Assert.That(view.review.events.text, Does.Contain("끝: Miss"));
-            CaptureSelection("results-hold-endpoints", 1920, 1080);
             review.SelectNote(0);
             Assert.That(view.review.events.text, Does.Contain("시작: Good"));
-            Assert.That(view.review.events.text, Does.Contain("시작: Good"));
+            options[3].isOn = true;
+            Assert.That(view.review.zoom.value, Is.EqualTo(3));
+            yield return new WaitForSecondsRealtime(.2f);
             yield return null;
             Canvas.ForceUpdateCanvases();
             var rect = view.review.chart.rectTransform;

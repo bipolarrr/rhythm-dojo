@@ -34,7 +34,7 @@ namespace RhythmDojo.EditorTools
             view.entrance = entrance.AddComponent<DojoEntranceView>();
             var wall = Panel("Dojo Wall", entrance.transform, Color.white);
             Stretch(wall.rectTransform);
-            wall.sprite = LoadSprite("TitleBackground");
+            wall.sprite = DojoEntranceAssets.Load("SelectionBackground");
             entranceFit.aspectRatio = wall.sprite.rect.width / wall.sprite.rect.height;
             wall.raycastTarget = false;
             // Crop to fill ultrawide/portrait windows without stretching the artwork.

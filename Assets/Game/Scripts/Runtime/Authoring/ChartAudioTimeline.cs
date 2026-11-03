@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
@@ -63,9 +64,16 @@ namespace RhythmDojo.Authoring
         private int selected;
         private bool filling;
         private double lastScrollBeat;
+        private double tempoChangeTime;
+        private EditorSession tempoChangeSession;
+
+        public bool IsTempoChangeOpen => view.tempoChangePopup.activeSelf;
 
         public WaveformPeaks Peaks { get; private set; }
         public BeatGridTiming Timing { get; private set; }
+        public IReadOnlyList<TempoPoint> TempoPoints => snapshot?.TempoPoints ?? Array.Empty<TempoPoint>();
+
+        private double MinimumWindowStart => Timing.TimeAtBeat(screen.MinimumScrollBeat) - AudioOffset;
         public double WindowStart { get; private set; }
         public double WindowDuration { get; private set; } = 8;
         public double DisplayStep { get; private set; } = 0.25;
@@ -83,6 +91,35 @@ namespace RhythmDojo.Authoring
             }
         }
         public bool IsBusy => !screen || screen.IsBusy || loadingAudio;
+        public bool IsPlaying => playing;
+        public AudioClip PreviewClip => source.clip;
+        public float PreviewVolume
+        {
+            get => source.volume;
+            set => source.volume = Mathf.Clamp01(value);
+        }
+
+        public float PreviewSpeed { get; private set; } = 1f;
+
+        public void SetPreviewSpeed(float value)
+        {
+            bool resume = playing;
+            Pause();
+            PreviewSpeed = Mathf.Clamp(value, .5f, 1f);
+            source.pitch = PreviewSpeed;
+            if (resume)
+            {
+                Play();
+            }
+        }
+
+        public void PlayPreview() => Play();
+        public void PausePreview() => Pause();
+        public void StopPreview()
+        {
+            Pause();
+            Seek(0);
+        }
 
         public double MusicTime
         {
@@ -90,7 +127,7 @@ namespace RhythmDojo.Authoring
             {
                 if (playing)
                 {
-                    return Math.Min(Duration, playbackStart + Math.Max(0, AudioSettings.dspTime - playbackDsp));
+                    return Math.Min(Duration, playbackStart + Math.Max(0, AudioSettings.dspTime - playbackDsp) * PreviewSpeed);
                 }
 
                 return pausedTime;
@@ -188,6 +225,16 @@ namespace RhythmDojo.Authoring
                         return;
                     }
 
+                    if (view.extendedQuantization)
+                    {
+                        screen.SnapEnabled = value != 10;
+                        if (screen.SnapEnabled)
+                        {
+                            screen.SnapBeats = 4.0 / new[] { 4, 8, 12, 16, 24, 32, 48, 64, 96, 192 }[value];
+                        }
+                        return;
+                    }
+
                     screen.SnapEnabled = value != 6;
                     if (value < 6)
                     {
@@ -216,7 +263,140 @@ namespace RhythmDojo.Authoring
                     DisplayStep = new[] { 1.0, 0.5, 0.25, 0.125, 1.0 / 3, 1.0 / 6 }[value];
                     Redraw();
                 }, false));
-            view.advancedGridControl.onClick.AddListener(() => menu.ToggleAdvanced());
+            view.advancedGridControl.onClick.AddListener(OpenTempoChange);
+            view.gridSettingsControl.onClick.AddListener(ShowGridSettings);
+            view.applyTempoChangeControl.onClick.AddListener(ApplyTempoChange);
+            view.deleteTempoChangeControl.onClick.AddListener(DeleteTempoChange);
+            view.cancelTempoChangeControl.onClick.AddListener(CloseTempoChange);
+        }
+
+        public void ShowGridSettings()
+        {
+            if (IsBusy)
+            {
+                return;
+            }
+
+            var workspace = GetComponentInParent<WorkspaceEditor>();
+            workspace?.view.CloseMenus();
+            advanced.SetActive(false);
+            menu.ToggleAdvanced();
+        }
+
+        public void OpenTempoChange()
+        {
+            if (IsBusy || locked)
+            {
+                return;
+            }
+
+            Pause();
+            var workspace = GetComponentInParent<WorkspaceEditor>();
+            workspace?.view.CloseMenus();
+            advanced.SetActive(false);
+            double beat = Timing.BeatAtTime(MusicTime + AudioOffset);
+            if (screen.SnapEnabled)
+            {
+                beat = Timing.SnapBeat(beat, screen.SnapBeats, beat - screen.SnapBeats, beat + screen.SnapBeats);
+            }
+
+            tempoChangeTime = Timing.TimeAtBeat(beat);
+            if (Math.Abs(tempoChangeTime) < 1e-8)
+            {
+                tempoChangeTime = 0;
+            }
+
+            tempoChangeSession = screen.Session;
+            Timing.GetMusicalPosition(beat, out int measure, out double position);
+            view.tempoChangePosition.text = measure + "." + (position + 1).ToString("0.###", CultureInfo.InvariantCulture)
+                + "부터 · " + (tempoChangeTime - AudioOffset).ToString("0.000", CultureInfo.InvariantCulture) + "초";
+            view.tempoChangeBpm.SetTextWithoutNotify(Timing.BpmAt(tempoChangeTime).ToString("R", CultureInfo.InvariantCulture));
+            view.tempoChangeError.text = "";
+            view.deleteTempoChangeControl.interactable = tempoChangeTime > 0
+                && snapshot.TempoPoints.Any(point => Math.Abs(point.StartTimeSeconds - tempoChangeTime) < 1e-8);
+            view.tempoChangePopup.SetActive(true);
+            view.tempoChangePopup.transform.SetAsLastSibling();
+            screen.IsBusy = true;
+            view.tempoChangeBpm.Select();
+            view.tempoChangeBpm.ActivateInputField();
+        }
+
+        public void CloseTempoChange()
+        {
+            if (!IsTempoChangeOpen)
+            {
+                return;
+            }
+
+            view.tempoChangeBpm.DeactivateInputField();
+            UnityEngine.EventSystems.EventSystem.current?.SetSelectedGameObject(null);
+            view.tempoChangePopup.SetActive(false);
+            tempoChangeSession = null;
+            screen.IsBusy = false;
+        }
+
+        public void ApplyTempoChange()
+        {
+            CommitTempoChange(false);
+        }
+
+        private void DeleteTempoChange()
+        {
+            CommitTempoChange(true);
+        }
+
+        private void CommitTempoChange(bool delete)
+        {
+            if (!IsTempoChangeOpen || tempoChangeSession != screen.Session)
+            {
+                return;
+            }
+
+            try
+            {
+                if (tempoChangeTime < 0)
+                {
+                    throw new ArgumentException("BPM 변경점은 채보 시간 0초 이후에 지정하세요.");
+                }
+
+                var current = screen.Session.Snapshot;
+                var points = current.TempoPoints.ToList();
+                int index = points.FindIndex(point => Math.Abs(point.StartTimeSeconds - tempoChangeTime) < 1e-8);
+                if (delete)
+                {
+                    if (index <= 0)
+                    {
+                        throw new ArgumentException("첫 BPM은 삭제할 수 없습니다. 삭제할 변속 지점을 선택하세요.");
+                    }
+
+                    points.RemoveAt(index);
+                }
+                else
+                {
+                    double value = Number(view.tempoChangeBpm);
+                    if (value <= 0)
+                    {
+                        throw new ArgumentException("BPM은 0보다 큰 숫자를 입력하세요.");
+                    }
+
+                    if (index >= 0)
+                    {
+                        points[index] = new TempoPoint(points[index].StartTimeSeconds, value);
+                    }
+                    else
+                    {
+                        points.Add(new TempoPoint(tempoChangeTime, value));
+                    }
+                }
+
+                BeatGridEditing.Apply(screen.Session, points.OrderBy(point => point.StartTimeSeconds).ToArray(), current.Grid, false);
+                CloseTempoChange();
+                message.text = "변속 적용 완료 · 기존 노트 음악 시간 유지";
+            }
+            catch (Exception error)
+            {
+                view.tempoChangeError.text = error.Message;
+            }
         }
 
         [SerializeField] private ChartEditorMenu menu;
@@ -258,7 +438,7 @@ namespace RhythmDojo.Authoring
 
             if (playing && follow)
             {
-                WindowStart = Math.Max(0, time - WindowDuration * 0.3);
+                WindowStart = Math.Max(MinimumWindowStart, time - WindowDuration * 0.3);
                 SyncChart(time);
             }
 
@@ -269,7 +449,7 @@ namespace RhythmDojo.Authoring
 
             if (Math.Abs(lastScrollBeat - screen.ScrollBeatOffset) > 1e-8)
             {
-                WindowStart = Math.Max(0, Timing.TimeAtBeat(screen.ScrollBeatOffset) - AudioOffset);
+                WindowStart = Math.Max(MinimumWindowStart, Timing.TimeAtBeat(screen.ScrollBeatOffset) - AudioOffset);
                 lastScrollBeat = screen.ScrollBeatOffset;
                 Redraw();
             }
@@ -298,7 +478,13 @@ namespace RhythmDojo.Authoring
 
         private static string FormatTime(double time)
         {
-            return TimeSpan.FromSeconds(Math.Max(0, time)).ToString(@"mm\:ss\.fff");
+            string formatted = TimeSpan.FromSeconds(Math.Abs(time)).ToString(@"mm\:ss\.fff");
+            if (time < 0)
+            {
+                return "-" + formatted;
+            }
+
+            return formatted;
         }
 
         private void Observe()
@@ -419,18 +605,29 @@ namespace RhythmDojo.Authoring
 
         public void Seek(double time)
         {
-            if (IsBusy || !source.clip)
+            if (IsBusy || !source.clip || !double.IsFinite(time))
             {
                 return;
             }
 
             bool resume = playing;
             Pause();
-            pausedTime = Math.Max(0, Math.Min(Duration, time));
+            pausedTime = Math.Max(MinimumWindowStart, Math.Min(Duration, time));
             source.timeSamples = Math.Min(source.clip.samples - 1,
-                (int)(pausedTime * source.clip.frequency));
-            WindowStart = Math.Max(0, pausedTime - WindowDuration * 0.3);
-            SyncChart(pausedTime);
+                (int)(Math.Max(0, pausedTime) * source.clip.frequency));
+
+            // Keep the clicked pre-song position visible without moving the waveform.
+            if (time >= 0)
+            {
+                WindowStart = Math.Max(0, pausedTime - WindowDuration * 0.3);
+                SyncChart(pausedTime);
+            }
+            else if (pausedTime < WindowStart || pausedTime > WindowStart + WindowDuration)
+            {
+                WindowStart = Math.Max(MinimumWindowStart, pausedTime - WindowDuration * 0.3);
+                SyncChart(WindowStart);
+            }
+
             if (resume && pausedTime < Duration)
             {
                 Play();
@@ -452,10 +649,18 @@ namespace RhythmDojo.Authoring
             }
 
             source.Stop();
-            source.timeSamples = Math.Min(source.clip.samples - 1, (int)(pausedTime * source.clip.frequency));
+            source.timeSamples = Math.Min(source.clip.samples - 1,
+                (int)(Math.Max(0, pausedTime) * source.clip.frequency));
             playbackStart = (double)source.timeSamples / source.clip.frequency;
             playbackDsp = AudioSettings.dspTime + 0.05;
-            source.PlayScheduled(playbackDsp);
+            double audioDsp = playbackDsp;
+            if (pausedTime < 0)
+            {
+                playbackStart = pausedTime;
+                audioDsp -= pausedTime / PreviewSpeed;
+            }
+
+            source.PlayScheduled(audioDsp);
             playing = true;
             playLabel.text = "일시정지 / Pause";
         }
@@ -483,7 +688,7 @@ namespace RhythmDojo.Authoring
             }
 
             follow = false;
-            WindowStart = Math.Max(0, Math.Min(Math.Max(0, Duration - WindowDuration), start));
+            WindowStart = Math.Max(MinimumWindowStart, Math.Min(Math.Max(0, Duration - WindowDuration), start));
             SyncChart(WindowStart);
             Redraw();
         }
@@ -505,7 +710,7 @@ namespace RhythmDojo.Authoring
 
             WindowDuration = Math.Max(minimumDuration, Math.Min(Math.Max(8, Duration),
                 WindowDuration * Math.Pow(0.8, Math.Sign(steps))));
-            WindowStart = Math.Max(0, anchorTime - fraction * WindowDuration);
+            WindowStart = Math.Max(MinimumWindowStart, anchorTime - fraction * WindowDuration);
             SyncChart(WindowStart);
             Redraw();
         }
@@ -661,7 +866,9 @@ namespace RhythmDojo.Authoring
         {
             Edit(() =>
             {
-                ApplyOrigin(snapshot.TempoPoints, MusicTime + AudioOffset);
+                var points = (TempoPoint[])snapshot.TempoPoints.Clone();
+                points[0] = new TempoPoint(0, Number(bpm));
+                ApplyOrigin(points, MusicTime + AudioOffset);
             });
         }
 

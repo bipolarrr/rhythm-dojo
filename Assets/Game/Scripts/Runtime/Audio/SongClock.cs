@@ -24,6 +24,23 @@ namespace RhythmDojo.Audio
         private Func<bool> playbackReady;
         private double resumeDspTime;
         private double resumeRealtime;
+        private double editorStartPosition;
+
+        public void SetEditorStartPosition(double time)
+        {
+            if (!double.IsFinite(time) || time < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(time));
+            }
+
+            if (Running || ResumePending)
+            {
+                throw new InvalidOperationException("Stop playback before changing its start position.");
+            }
+
+            editorStartPosition = time;
+        }
+
 
         public bool ResumePending { get; private set; }
         public double ResumeDspTime => resumeDspTime;
@@ -93,6 +110,7 @@ namespace RhythmDojo.Audio
             }
 
             Stop();
+            editorStartPosition = 0;
             settings.Validate();
             source.clip = clip;
             playbackVolume = settings.Volume;
@@ -133,8 +151,15 @@ namespace RhythmDojo.Audio
             clockSampleRealtime = Time.realtimeSinceStartupAsDouble;
             clockSampleFrame = Time.frameCount;
             dspRealtimeOffset = dsp - clockSampleRealtime;
-            ScheduledStartDspTime = dsp + lead;
-            source.PlayScheduled(ScheduledStartDspTime);
+            double scheduledAudio = dsp + lead;
+            ScheduledStartDspTime = scheduledAudio - editorStartPosition;
+            int samplePosition = AudioResumeTiming.SamplePosition(
+                editorStartPosition, 0, source.clip.frequency, source.clip.samples);
+            if (samplePosition < source.clip.samples)
+            {
+                source.timeSamples = samplePosition;
+                source.PlayScheduled(scheduledAudio);
+            }
             Running = true;
         }
 

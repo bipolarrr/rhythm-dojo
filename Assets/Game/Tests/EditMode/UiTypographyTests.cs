@@ -115,6 +115,11 @@ namespace RhythmDojo.Tests
             var font = AssetDatabase.LoadAssetAtPath<Font>(MainMenuLayoutBuilder.FontPath);
             Assert.That(font, Is.Not.Null);
             Assert.That(UiFontSettings.Current, Is.SameAs(font));
+            if (name == "SongSelection" || name == "Results")
+            {
+                font = AssetDatabase.LoadAssetAtPath<Font>(SongSelectionLayoutBuilder.BrushFontPath);
+                Assert.That(font, Is.Not.Null);
+            }
             string path = "Assets/Game/Scenes/" + name + ".unity";
             var scene = SceneManager.GetSceneByPath(path);
             bool alreadyLoaded = scene.IsValid() && scene.isLoaded;
@@ -131,12 +136,17 @@ namespace RhythmDojo.Tests
                     foreach (var text in root.GetComponentsInChildren<Text>(true))
                     {
                         var expectedFont = font;
+                        if (name == "SongSelection" || name == "Results")
+                        {
+                            Assert.That(text.font, Is.SameAs(font), name + "/" + text.name);
+                        }
                         var scope = text.GetComponentInParent<UiFontScope>(true);
                         if (scope && scope.font)
                         {
                             expectedFont = scope.font;
                         }
                         Assert.That(text.font, Is.SameAs(expectedFont), name + "/" + text.name);
+                        Assert.That(text.fontStyle, Is.EqualTo(FontStyle.Bold), name + "/" + text.name);
                         count++;
                     }
                 }

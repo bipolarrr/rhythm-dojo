@@ -99,8 +99,8 @@ namespace RhythmDojo.Tests
                 Is.EqualTo("tempo-pulse")
             );
             Assert.That(
-                UnityEngine.Object.FindFirstObjectByType<AppFlowController>().SelectedSongIndex,
-                Is.EqualTo(1)
+                flow.Library.Entries[flow.SelectedSongIndex].Id,
+                Is.EqualTo("tempo-pulse")
             );
         }
 
@@ -322,8 +322,6 @@ namespace RhythmDojo.Tests
         [Category("Smoke")]
         public IEnumerator MouseClickUsesUiInputModuleToLoadSong()
         {
-            CaptureSelection();
-
             var button = UnityEngine
                 .Object.FindObjectsByType<Button>(FindObjectsSortMode.None)
                 .Single(b => b.name == "Play");

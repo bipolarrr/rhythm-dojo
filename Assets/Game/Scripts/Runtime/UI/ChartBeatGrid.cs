@@ -17,20 +17,24 @@ namespace RhythmDojo.UI
         private GameModeDefinition mode;
         private EditorNote[] notes = Array.Empty<EditorNote>();
         private int previewLane = -1;
+        private NoteData[] previewNotes = Array.Empty<NoteData>();
         private double previewStart,
             previewEnd;
         private readonly Dictionary<int, Color> lineRows = new Dictionary<int, Color>();
         private static readonly Color BeatColor = new Color(0.24f, 0.27f, 0.32f);
         private static readonly Color MeasureColor = new Color(0.65f, 0.61f, 0.23f);
+        private static readonly Color PreSongMeasureColor = new Color(1f, 0.22f, 0.19f);
         private static readonly BeatGridTiming DefaultTiming = new BeatGridTiming(
             new[] { new TempoPoint(0, 120) }, new BeatGridSettings());
         public double? PlayheadTime { get; set; }
+        public HashSet<long> SelectedNoteIds { get; set; }
 
         public BeatProjection Projection =>
             new BeatProjection(
                 bottomBeat,
                 rectTransform.rect.yMin,
-                Math.Max(0.001, rectTransform.rect.height) / visibleBeats
+                Math.Max(0.001, rectTransform.rect.height) / visibleBeats,
+                tempo ?? DefaultTiming
             );
 
         public void SetViewport(int beats, double offset)
@@ -55,9 +59,17 @@ namespace RhythmDojo.UI
 
         public void SetPreview(int lane, double startBeat = 0, double endBeat = 0)
         {
+            previewNotes = Array.Empty<NoteData>();
             previewLane = lane;
             previewStart = startBeat;
             previewEnd = endBeat;
+            SetVerticesDirty();
+        }
+
+        public void SetNotePreviews(NoteData[] source)
+        {
+            previewLane = -1;
+            previewNotes = source;
             SetVerticesDirty();
         }
 
@@ -144,14 +156,21 @@ namespace RhythmDojo.UI
             lineRows.Clear();
 
             var timing = tempo ?? DefaultTiming;
-            foreach (double beat in timing.Lines(bottomBeat, bottomBeat + visibleBeats, 1))
+            double topBeat = projection.Unproject(area.yMax);
+            foreach (double beat in timing.Lines(bottomBeat, topBeat, 1))
             {
                 bool measure = timing.IsMeasure(beat);
                 float y = (float)projection.Project(beat);
 
                 if (measure)
                 {
-                    AccumulateLine(area, y, 2, MeasureColor, screenBottom, scale);
+                    Color tint = MeasureColor;
+                    if (beat < 0)
+                    {
+                        tint = PreSongMeasureColor;
+                    }
+
+                    AccumulateLine(area, y, 2, tint, screenBottom, scale);
                 }
                 else
                 {
@@ -183,6 +202,12 @@ namespace RhythmDojo.UI
 
             foreach (var note in notes)
             {
+                Color noteColor = mode.GetLane(note.Data.Lane).color;
+                if (SelectedNoteIds != null && SelectedNoteIds.Contains(note.Id))
+                {
+                    noteColor = new Color(1f, .7f, .18f);
+                }
+
                 AddRect(
                     vertices,
                     NoteBounds(
@@ -190,7 +215,7 @@ namespace RhythmDojo.UI
                         tempo.BeatAtTime(note.Data.StartTime),
                         tempo.BeatAtTime(note.Data.EndTime)
                     ),
-                    mode.GetLane(note.Data.Lane).color
+                    noteColor
                 );
             }
 
@@ -203,10 +228,16 @@ namespace RhythmDojo.UI
                 );
             }
 
+            foreach (var note in previewNotes)
+            {
+                AddRect(vertices, NoteBounds(note.Lane, tempo.BeatAtTime(note.StartTime),
+                    tempo.BeatAtTime(note.EndTime)), new Color(1f, .7f, .18f, .55f));
+            }
+
             if (PlayheadTime.HasValue)
             {
                 double beat = tempo.BeatAtTime(PlayheadTime.Value);
-                if (beat >= bottomBeat && beat <= bottomBeat + visibleBeats)
+                if (beat >= bottomBeat && beat <= topBeat)
                 {
                     float y = (float)projection.Project(beat);
                     AddRect(vertices, new Rect(area.xMin, y - 1, area.width, 2), Color.white);

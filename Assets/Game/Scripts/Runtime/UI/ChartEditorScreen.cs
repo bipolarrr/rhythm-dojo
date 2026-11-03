@@ -19,6 +19,7 @@ namespace RhythmDojo.UI
         private const int MinVisibleBeats = 4;
         private const int MaxVisibleBeats = 7200;
         private const int BeatsPerWheelStep = 4;
+        private const int FirstVisibleMeasure = -10;
         private const double DefaultChartDuration = 8.5;
 
         [SerializeField]
@@ -26,10 +27,14 @@ namespace RhythmDojo.UI
 
         [SerializeField]
         private ChartBeatGrid beatGrid;
+
+        [SerializeField]
+        private RhythmDojo.Application.ChartSlot initialSlot = RhythmDojo.Application.ChartSlot.Standard;
         private EditorSession session;
         private Guid chartId;
         private int visibleBeats = DefaultVisibleBeats;
         private double scrollBeatOffset;
+        private double minimumScrollBeat;
         private bool pressing;
         private int pressPointerId;
         private int pressLane;
@@ -37,10 +42,16 @@ namespace RhythmDojo.UI
         private double previewEndBeat;
         public double SnapBeats { get; set; } = 1;
         public bool SnapEnabled { get; set; } = true;
+        public Func<PointerEventData, bool> PointerTool { get; set; }
+        public Action<PointerEventData> DragTool { get; set; }
+        public Action<PointerEventData> ReleaseTool { get; set; }
+        public bool MinimumHoldOnClick { get; set; }
 
         public int VisibleBeats => visibleBeats;
 
         public double ScrollBeatOffset => scrollBeatOffset;
+
+        public double MinimumScrollBeat => minimumScrollBeat;
 
         public EditorSession Session => session;
 
@@ -80,7 +91,7 @@ namespace RhythmDojo.UI
             session = new EditorSession(new SongProject());
             session.Edit(edit =>
                 chartId = edit.AddChartSlot(
-                    ChartSlot.Standard,
+                    initialSlot,
                     mode.name,
                     mode.LaneCount,
                     DefaultChartDuration
@@ -130,6 +141,10 @@ namespace RhythmDojo.UI
 
             var snapshot = session.Snapshot;
             tempo = new BeatGridTiming(snapshot.TempoPoints, snapshot.Grid);
+            var meter = snapshot.Grid.Meters[0];
+            double firstBeat = (FirstVisibleMeasure - 1) * meter.Numerator * 4.0 / meter.Denominator;
+            minimumScrollBeat = Math.Min(tempo.BeatAtTime(0), firstBeat);
+
             RefreshBeatLines();
             RefreshNotes();
         }
@@ -238,7 +253,7 @@ namespace RhythmDojo.UI
                 return;
             }
 
-            double firstBeat = tempo.BeatAtTime(0);
+            double firstBeat = MinimumScrollBeat;
             scrollBeatOffset = Math.Max(firstBeat, scrollBeatOffset + beats);
             RefreshBeatLines();
         }
@@ -277,6 +292,11 @@ namespace RhythmDojo.UI
 
         public void OnPointerDown(PointerEventData eventData)
         {
+            if (!IsBusy && PointerTool != null && PointerTool(eventData))
+            {
+                return;
+            }
+
             if (IsBusy || eventData.button != PointerEventData.InputButton.Left)
             {
                 return;
@@ -300,6 +320,7 @@ namespace RhythmDojo.UI
 
         public void OnDrag(PointerEventData eventData)
         {
+            DragTool?.Invoke(eventData);
             if (!pressing || eventData.pointerId != pressPointerId)
             {
                 return;
@@ -312,6 +333,7 @@ namespace RhythmDojo.UI
 
         public void OnPointerUp(PointerEventData eventData)
         {
+            ReleaseTool?.Invoke(eventData);
             if (!pressing || eventData.pointerId != pressPointerId)
             {
                 return;
@@ -332,8 +354,19 @@ namespace RhythmDojo.UI
                 return;
             }
 
+            if (MinimumHoldOnClick && endBeat == pressBeat)
+            {
+                endBeat = pressBeat + SnapBeats;
+            }
+
             double startTime = TimeAtBeat(pressBeat);
             double endTime = TimeAtBeat(endBeat);
+
+            if (startTime < 0)
+            {
+                return;
+            }
+
             bool isHold = endBeat > pressBeat;
             var overlaps = Array.FindAll(
                 session.GetNotes(chartId),
@@ -434,13 +467,14 @@ namespace RhythmDojo.UI
         private double BeatAt(float localY)
         {
             double beat = beatGrid.Projection.Unproject(localY);
+            double topBeat = beatGrid.Projection.Unproject(beatGrid.rectTransform.rect.yMax);
             if (!SnapEnabled)
             {
-                return Math.Max(scrollBeatOffset, Math.Min(scrollBeatOffset + visibleBeats, beat));
+                return Math.Max(scrollBeatOffset, Math.Min(topBeat, beat));
             }
 
             double step = SnapBeats;
-            return tempo.SnapBeat(beat, step, scrollBeatOffset, scrollBeatOffset + visibleBeats);
+            return tempo.SnapBeat(beat, step, scrollBeatOffset, topBeat);
         }
 
         private void RefreshNotes()

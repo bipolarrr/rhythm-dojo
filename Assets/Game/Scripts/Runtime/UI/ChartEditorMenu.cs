@@ -59,6 +59,15 @@ namespace RhythmDojo.UI
         private static EditorSession returningSession;
 
         public bool IsInitialized => store != null;
+        public FileSongProjectStore Store => store;
+        public void NotifySaved() => saved?.Invoke();
+
+        public void ReplaceSession(EditorSession replacement)
+        {
+            screen.SetSession(replacement);
+            Observe();
+            FillSettings();
+        }
 
         [SerializeField] private GameObject advancedPanel;
 
@@ -141,6 +150,21 @@ namespace RhythmDojo.UI
 
         public void ToggleTools() => Toggle(toolsPanel);
 
+        public bool ClosePanels()
+        {
+            bool open = filePanel.activeSelf || settingsPanel.activeSelf || toolsPanel.activeSelf;
+            if (advancedPanel && advancedPanel.activeSelf)
+            {
+                open = true;
+                advancedPanel.SetActive(false);
+            }
+
+            filePanel.SetActive(false);
+            settingsPanel.SetActive(false);
+            toolsPanel.SetActive(false);
+            return open;
+        }
+
         private void Toggle(GameObject panel)
         {
             if (screen.IsBusy)
@@ -157,6 +181,10 @@ namespace RhythmDojo.UI
                 advancedPanel.SetActive(false);
             }
             panel.SetActive(open);
+            if (open)
+            {
+                panel.transform.SetAsLastSibling();
+            }
         }
 
         private void FillSettings()
@@ -411,9 +439,17 @@ namespace RhythmDojo.UI
                 ShowStatus("음원을 가져왔습니다: " + Path.GetFileName(path));
             });
 
-        public void Playtest() =>
+        public void Playtest() => PlaytestFrom(0, false);
+
+        public void PlaytestFrom(double startTime, bool automatic) =>
             RunAsync(async () =>
             {
+                if (!double.IsFinite(startTime))
+                {
+                    throw new ArgumentOutOfRangeException(nameof(startTime));
+                }
+
+                startTime = Math.Max(0, startTime);
                 var snapshot = screen.Session.Snapshot;
                 var document = ChartPlaybackAdapter.ToDocument(
                     snapshot,
@@ -422,6 +458,13 @@ namespace RhythmDojo.UI
                     screen.Mode.ToRules(),
                     audio => store.AudioExists(snapshot.Id, audio)
                 );
+                if (startTime > 0)
+                {
+                    document.Notes = Array.FindAll(document.Notes,
+                        note => note.StartTime >= startTime + document.AudioOffset);
+                }
+
+                WorkspacePlaytest.Prepare(startTime, automatic);
                 returningSession = screen.Session;
 
                 try
@@ -430,7 +473,7 @@ namespace RhythmDojo.UI
                         document,
                         loaderFactory(snapshot),
                         snapshot.Id.ToString("D"),
-                        ScenePath,
+                        gameObject.scene.path,
                         Returned,
                         lifetime.Token
                     );
@@ -438,6 +481,7 @@ namespace RhythmDojo.UI
                 }
                 catch
                 {
+                    WorkspacePlaytest.Cancel();
                     returningSession = null;
                     throw;
                 }

@@ -16,6 +16,8 @@ namespace RhythmDojo.UI
         public Text accuracy;
         public Text maxCombo;
         public Image cover;
+        public Sprite fallbackCover;
+        public Sprite legacyFallbackCover;
         public Text coverPlaceholder;
         public RectTransform feedback;
         public Button backButton;

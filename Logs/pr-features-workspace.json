@@ -1,0 +1,302 @@
+{
+  "success": true,
+  "command": "command test_status",
+  "data": {
+    "command": "test_status",
+    "parameters": {},
+    "result": {
+      "status": "completed",
+      "duration": 94.95,
+      "summary": {
+        "total": 39,
+        "passed": 39,
+        "failed": 0,
+        "skipped": 0,
+        "inconclusive": 0
+      },
+      "results": [
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.BpmFieldsSynchronizeAndCommitBothWays",
+          "Status": "Passed",
+          "Duration": 3.3259687,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.ControlEnterAppliesSettingsWithoutSubmittingSelectedToolButton",
+          "Status": "Passed",
+          "Duration": 1.5741424,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.CurrentPositionAutoTestUsesTemporaryNotesAndReturnsToExtendedEditor",
+          "Status": "Passed",
+          "Duration": 6.3574086,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.DifficultyButtonsLiveInSettingsAndSelectAllSlots",
+          "Status": "Passed",
+          "Duration": 1.885699,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.EraserButtonDeletesSelectionAndUndoRestoresWholeGroup",
+          "Status": "Passed",
+          "Duration": 2.0431459,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.EraserMenuAndClickDeleteSelectedGroup",
+          "Status": "Passed",
+          "Duration": 1.9481951,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.EscapeReturnsToTitleWhenSavedAndNoMenuIsOpen",
+          "Status": "Passed",
+          "Duration": 2.4241452,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.FileShortcutsAndEscapeRespectMenusDialogsAndTyping",
+          "Status": "Passed",
+          "Duration": 2.4119377,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.GrabCancelsOutsideGridAndDoesNotDrawOnEmptySpace",
+          "Status": "Passed",
+          "Duration": 1.8477873,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.GrabMovesTapAndHoldWithPointerDragAndUndo",
+          "Status": "Passed",
+          "Duration": 2.0409044,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.GrabSelectedNoteMovesWholeSelectionAndLeavesOthersAlone",
+          "Status": "Passed",
+          "Duration": 2.070677,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.GrabSelectionClampsAsAGroupAtFirstLaneAndTimeZero",
+          "Status": "Passed",
+          "Duration": 1.550519,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.JacketAndVolumeSurviveSavingAndReloadingWithoutOptionalSound",
+          "Status": "Passed",
+          "Duration": 1.6537342,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.KindSelectionMirrorAndQuantizationUseTheExistingSession",
+          "Status": "Passed",
+          "Duration": 1.4866749,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.LeftToolIconsSelectDrawEraseAndGrabWithVisibleSelection",
+          "Status": "Passed",
+          "Duration": 2.532307,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.MenusOpenOnClickSwitchOnHoverAndCloseAfterAnAction",
+          "Status": "Passed",
+          "Duration": 1.8487947,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.MenusPreviewOnHoverPinOnClickAndExitCanBeCancelled",
+          "Status": "Passed",
+          "Duration": 1.3371079,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.NewAfterSavingDoesNotAskUntilResourcesChange",
+          "Status": "Passed",
+          "Duration": 1.483913,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.NewFilesStartWithEasySelected",
+          "Status": "Passed",
+          "Duration": 1.4306993,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.NewSaveFailureKeepsCurrentWorkAndAllowsNo",
+          "Status": "Passed",
+          "Duration": 1.6408895,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.NewWithUnsavedChangesWaitsForNoAndDoesNotSave",
+          "Status": "Passed",
+          "Duration": 1.6089661,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.NewWithYesSavesCurrentNotesAndResourcesBeforeReplacing",
+          "Status": "Passed",
+          "Duration": 1.6368231,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.OriginalEditorKeepsItsStandardDefault",
+          "Status": "Passed",
+          "Duration": 2.5419863,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.OutsideClickAndEscapeDismissMenusWithoutEditingTheChart",
+          "Status": "Passed",
+          "Duration": 2.1118914,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.QuantizationButtonStartsAtQuarterCyclesAndSynchronizesAllControls",
+          "Status": "Passed",
+          "Duration": 2.632136,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.Saiki128To256To64KeepsScrollSpeedAndPlacesNotesOnResizedBeatSpacing",
+          "Status": "Passed",
+          "Duration": 4.1103823,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.SaikiAt128BpmCanDragAndWheelBeforeFirstMeasure",
+          "Status": "Passed",
+          "Duration": 5.2204948,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.SaveAsCreatesIndependentSongAndKeepsOriginal",
+          "Status": "Passed",
+          "Duration": 1.7519723,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.SaveAsFailureKeepsCurrentSessionAndNameForRetry",
+          "Status": "Passed",
+          "Duration": 1.5779906,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.SaveAsRequiresANameAndCancelKeepsCurrentWork",
+          "Status": "Passed",
+          "Duration": 1.6990204,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.SettingsPathsImportOnEndEditAndKeepSettingsOpen",
+          "Status": "Passed",
+          "Duration": 2.2379566,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.SettingsTitleAndArtistCommitWhenFocusMoves",
+          "Status": "Passed",
+          "Duration": 6.8217431,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.ShortcutKeyEventsResolveEveryCommandWithExactModifiers",
+          "Status": "Passed",
+          "Duration": 3.1489727,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.ShortcutLabelsAndToolDifficultyEditingCommandsStayInSync",
+          "Status": "Passed",
+          "Duration": 3.1540613,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.SpaceTogglesPlaybackButNotWhileTypingOrConfirming",
+          "Status": "Passed",
+          "Duration": 2.421173,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.TempoButtonEditsCursorBpmAndSettingsKeepsDetailedGridControls",
+          "Status": "Passed",
+          "Duration": 3.2342917,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.TempoDialogRejectsInvalidBpmAndCancelsWithoutChangingTiming",
+          "Status": "Passed",
+          "Duration": 2.2611756,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.VolumeDragUpdatesPercentFillAndSavedValue",
+          "Status": "Passed",
+          "Duration": 1.8902928,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.WorkspaceMenusKeepLegacyImportsChartDurationAndViewResetAccessible",
+          "Status": "Passed",
+          "Duration": 1.8547919,
+          "Message": null,
+          "StackTrace": null
+        }
+      ]
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "C:\\Users\\song\\RhythmDojo-pr-quality"
+    },
+    "success": true
+  },
+  "errors": [],
+  "warnings": []
+}

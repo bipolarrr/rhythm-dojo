@@ -1,0 +1,64 @@
+{
+  "success": true,
+  "command": "command test_status",
+  "data": {
+    "command": "test_status",
+    "parameters": {},
+    "result": {
+      "status": "completed",
+      "duration": 7.21,
+      "summary": {
+        "total": 5,
+        "passed": 5,
+        "failed": 0,
+        "skipped": 0,
+        "inconclusive": 0
+      },
+      "results": [
+        {
+          "FullName": "RhythmDojo.Tests.ChartEditorMenuTests.FileActionsSaveLoadAndPreserveCurrentDraftOnFailure",
+          "Status": "Passed",
+          "Duration": 1.9686781,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ChartEditorMenuTests.FileMenuImportsShowcaseGridAndSavesVersionThree",
+          "Status": "Passed",
+          "Duration": 1.1133003,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ChartEditorMenuTests.GeneratedMenuAppliesTimingAndUndoRedoRestoresNotes",
+          "Status": "Passed",
+          "Duration": 0.9455796,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ChartEditorMenuTests.ImportedAudioPlaysAndReturnsWithUnsavedSessionAndUndoHistory",
+          "Status": "Passed",
+          "Duration": 2.0030807,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "RhythmDojo.Tests.ChartEditorMenuTests.PupaButtonPreservesDraftAndImportsBundledChartWithLocalAudio",
+          "Status": "Passed",
+          "Duration": 1.1079039,
+          "Message": null,
+          "StackTrace": null
+        }
+      ]
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "C:\\Users\\song\\RhythmDojo-pr-quality"
+    },
+    "success": true
+  },
+  "errors": [],
+  "warnings": []
+}

@@ -123,6 +123,8 @@ namespace RhythmDojo.Tests
             Assert.That(view.artistBpm.text, Does.Contain("120"));
             CaptureSelection("demo-selection-1920", 1920, 1080);
             CaptureSelection("demo-selection-1280");
+            CaptureSelection("demo-selection-4x3", 1024, 768);
+            CaptureSelection("demo-selection-ultrawide", 2560, 1080);
             yield return Click(view.play);
             yield return Await(() => Object.FindFirstObjectByType<RhythmGameController>());
             yield return null;
@@ -345,6 +347,10 @@ namespace RhythmDojo.Tests
                 Object.FindFirstObjectByType<SongSelectionView>().record.text,
                 Does.Contain("1,000,000")
             );
+            var recordView = Object.FindFirstObjectByType<SongSelectionView>();
+            Assert.That(recordView.record.text, Does.Not.Contain("최대 콤보"));
+            Assert.That(recordView.comboRecord.text, Does.Contain($"최대 콤보  {best.maxCombo:N0}"));
+            Assert.That(recordView.comboRecord.text, Does.Contain("Gauge"));
         }
 
         [UnityTest]

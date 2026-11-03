@@ -31,6 +31,33 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        public IEnumerator EditorStartPositionKeepsAudioAnchorAndDoesNotReplayPastEnd()
+        {
+            var clock = CreateClock(-.25, 200);
+            try
+            {
+                var source = clock.GetComponent<AudioSource>();
+                Assert.Throws<ArgumentOutOfRangeException>(() => clock.SetEditorStartPosition(double.NaN));
+                Assert.Throws<ArgumentOutOfRangeException>(() => clock.SetEditorStartPosition(-1));
+                clock.SetEditorStartPosition(1.25);
+                double before = AudioSettings.dspTime;
+                clock.Schedule();
+                Assert.That(clock.ScheduledStartDspTime + 1.25, Is.GreaterThan(before));
+                Assert.That(source.timeSamples, Is.EqualTo((int)(1.25 * source.clip.frequency)));
+                Assert.Throws<InvalidOperationException>(() => clock.SetEditorStartPosition(0));
+                clock.Stop();
+                clock.SetEditorStartPosition((double)source.clip.samples / source.clip.frequency + 1);
+                clock.Schedule();
+                yield return new WaitForSecondsRealtime(.4f);
+                Assert.That(source.isPlaying, Is.False, "A position beyond the clip must not replay its last sample.");
+            }
+            finally
+            {
+                Object.Destroy(clock.gameObject);
+            }
+        }
+
+        [UnityTest]
         public IEnumerator ResumeWaitsForScheduledAnchorWithoutAdvancingLogicalTime()
         {
             var clock = CreateClock(.25, 200);
