@@ -720,6 +720,55 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        public IEnumerator EditorUsesDefaultPresentationAndRestoresThemedPointerOnTitle()
+        {
+            var cursor = UnityEngine.Object.FindFirstObjectByType<DojoCursor>();
+            var feedback = UnityEngine.Object.FindFirstObjectByType<DojoClickFeedback>(FindObjectsInactive.Include);
+            var impact = UnityEngine.Object.FindFirstObjectByType<DojoPunchImpact>(FindObjectsInactive.Include);
+            Assert.That(DojoCursor.UsesDefaultPointer, Is.True);
+            Assert.That(cursor, Is.Not.Null);
+            Assert.That(feedback.enabled, Is.False);
+            Assert.That(impact.enabled, Is.False);
+            var texture = typeof(DojoCursor).GetField("currentTexture",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            Assert.That(texture.GetValue(cursor), Is.Null);
+            feedback.PlayAt(new Vector2(100, 100));
+            Assert.That(feedback.GetComponent<AudioSource>().isPlaying, Is.False);
+
+            var canvas = workspace.GetComponent<Canvas>();
+            var scope = canvas.GetComponent<UiFontScope>();
+            Assert.That(scope.font.name, Does.Contain("NotoSansKR"));
+            Assert.That(scope.style, Is.EqualTo(FontStyle.Normal));
+            UiFontSettings.ApplyTo(canvas.transform);
+            Canvas.ForceUpdateCanvases();
+            var timelineView = workspace.timeline.GetComponent<ChartAudioTimelineView>();
+            Assert.That(timelineView.bpm.textComponent.cachedTextGenerator.characterCountVisible, Is.GreaterThan(0),
+                "The regular font must keep numeric input values visible in compact fields.");
+            Assert.That(timelineView.noteSnapControl.captionText.cachedTextGenerator.characterCountVisible, Is.GreaterThan(0));
+            foreach (var text in canvas.GetComponentsInChildren<Text>(true))
+            {
+                Assert.That(text.font, Is.SameAs(scope.font), text.name);
+                Assert.That(text.fontStyle, Is.EqualTo(FontStyle.Normal), text.name);
+            }
+
+            yield return SceneManager.LoadSceneAsync("Assets/Game/Scenes/Title.unity");
+            yield return null;
+            Assert.That(DojoCursor.UsesDefaultPointer, Is.False);
+            Assert.That(feedback.enabled, Is.True);
+            Assert.That(impact.enabled, Is.True);
+            Assert.That(texture.GetValue(cursor), Is.Not.Null);
+            feedback.PlayAt(new Vector2(100, 100));
+            Assert.That(feedback.GetComponent<AudioSource>().isPlaying, Is.True);
+
+            yield return SceneManager.LoadSceneAsync(WorkspaceEditor.ScenePath);
+            yield return null;
+            Assert.That(DojoCursor.UsesDefaultPointer, Is.True);
+            Assert.That(feedback.enabled, Is.False);
+            Assert.That(impact.enabled, Is.False);
+            Assert.That(texture.GetValue(cursor), Is.Null);
+        }
+
+        [UnityTest]
         public IEnumerator EscapeReturnsToTitleWhenSavedAndNoMenuIsOpen()
         {
             yield return PressKeys(Key.S, Key.LeftCtrl);
@@ -886,7 +935,8 @@ namespace RhythmDojo.Tests
             var bindings = workspace.view.toolActions;
             Assert.That(bindings.Select(item => item.action), Is.EqualTo(new[]
             {
-                WorkspaceAction.Select, WorkspaceAction.Pencil, WorkspaceAction.Eraser, WorkspaceAction.Position
+                WorkspaceAction.Select, WorkspaceAction.Pencil, WorkspaceAction.Eraser, WorkspaceAction.Position,
+                WorkspaceAction.Scroll
             }));
             foreach (var binding in bindings)
             {
@@ -925,6 +975,86 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("BpmSuggestion")]
+        public IEnumerator ImportAudioAutomaticallyEstimatesBpmWithoutChangingSavedTiming()
+        {
+            string path = Path.GetFullPath("LocalAudio/Saiki.wav");
+            if (!File.Exists(path))
+            {
+                path = WriteTempoWave();
+            }
+            double original = workspace.screen.Session.Snapshot.TempoPoints[0].Bpm;
+            workspace.view.audioPath.text = path;
+            workspace.Run(WorkspaceAction.ImportAudio);
+            yield return Idle();
+
+            Assert.That(workspace.timeline.PreviewClip, Is.Not.Null);
+            Assert.That(workspace.timeline.IsLoadingAudio, Is.False);
+            Assert.That(double.Parse(workspace.view.bpm.text), Is.EqualTo(original));
+            Assert.That(workspace.timeline.GetComponent<ChartAudioTimelineView>().bpm.text,
+                Is.EqualTo(workspace.view.bpm.text));
+            Assert.That(workspace.view.bpmSuggestion.text, Does.StartWith("자동 분석된 BPM은 "));
+            Assert.That(workspace.screen.Session.Snapshot.TempoPoints[0].Bpm, Is.EqualTo(original));
+            string suggestion = workspace.view.bpmSuggestion.text;
+            var session = workspace.screen.Session;
+            session.Edit(edit =>
+            {
+                edit.SetMetadata("Suggestion survives editing", "Artist");
+                edit.SetTiming(.25, new TempoPoint(0, original), new TempoPoint(4, 256));
+                edit.AddNote(workspace.screen.ChartId, NoteData.Tap(0, 1));
+            });
+            workspace.view.difficulty[2].onClick.Invoke();
+            workspace.Run(WorkspaceAction.Save);
+            yield return Idle();
+            Assert.That(workspace.view.bpmSuggestion.text, Is.EqualTo(suggestion));
+            workspace.view.applyEstimatedBpm.onClick.Invoke();
+            yield return Idle();
+            Assert.That(session.Snapshot.TempoPoints[0].Bpm, Is.EqualTo(128).Within(2));
+            Assert.That(session.Snapshot.TempoPoints[1].Bpm, Is.EqualTo(256));
+            Assert.That(session.Snapshot.AudioOffsetSeconds, Is.EqualTo(.25));
+            Assert.That(workspace.view.bpmSuggestion.text, Is.Empty);
+            Assert.That(workspace.view.applyEstimatedBpm.gameObject.activeSelf, Is.False);
+            session.Undo();
+            Assert.That(session.Snapshot.TempoPoints[0].Bpm, Is.EqualTo(original));
+            Assert.That(session.Snapshot.TempoPoints[1].Bpm, Is.EqualTo(256));
+
+            workspace.Run(WorkspaceAction.EstimateBpm);
+            Assert.That(workspace.view.bpmSuggestion.text, Is.EqualTo("BPM 분석 중…"));
+            Assert.That(workspace.view.applyEstimatedBpm.gameObject.activeSelf, Is.False);
+            yield return Idle();
+            Assert.That(workspace.view.applyEstimatedBpm.gameObject.activeSelf, Is.True);
+            session.Edit(edit => edit.SetAudio(null));
+            Assert.That(workspace.view.bpmSuggestion.text, Is.Empty);
+            Assert.That(workspace.view.applyEstimatedBpm.gameObject.activeSelf, Is.False);
+        }
+
+        [UnityTest]
+        [Category("BpmSuggestion")]
+        public IEnumerator BpmAnalysisIgnoresReplacedAudioAndProject()
+        {
+            workspace.view.audioPath.text = WriteTempoWave();
+            workspace.Run(WorkspaceAction.ImportAudio);
+            yield return Idle();
+            workspace.Run(WorkspaceAction.EstimateBpm);
+            workspace.screen.Session.Edit(edit => edit.SetAudio(null));
+            yield return Idle();
+            Assert.That(workspace.view.bpmSuggestion.text, Is.Empty);
+            Assert.That(workspace.view.applyEstimatedBpm.gameObject.activeSelf, Is.False);
+
+            workspace.Run(WorkspaceAction.ImportAudio);
+            yield return Idle();
+            workspace.Run(WorkspaceAction.EstimateBpm);
+            var replacement = new EditorSession(new SongProject());
+            replacement.Edit(edit => edit.AddChartSlot(ChartSlot.Easy, workspace.screen.Mode.name, 4, 8.5));
+            workspace.menu.ReplaceSession(replacement);
+            yield return Idle();
+            yield return null;
+            Assert.That(workspace.view.bpmSuggestion.text, Is.Empty);
+            Assert.That(workspace.view.applyEstimatedBpm.gameObject.activeSelf, Is.False);
+        }
+
+        [UnityTest]
+        [Category("BpmSuggestion")]
         public IEnumerator SpaceTogglesPlaybackButNotWhileTypingOrConfirming()
         {
             Directory.CreateDirectory(root);
@@ -951,6 +1081,8 @@ namespace RhythmDojo.Tests
             workspace.view.audioPath.text = path;
             workspace.Run(WorkspaceAction.ImportAudio);
             yield return Idle();
+            Assert.That(workspace.view.status.text, Does.Contain("BPM 자동 분석 실패"),
+                "Silent audio should remain imported even when BPM cannot be estimated.");
             double deadline = Time.realtimeSinceStartupAsDouble + 10;
             while (!workspace.timeline.PreviewClip || workspace.timeline.IsBusy)
             {
@@ -997,6 +1129,118 @@ namespace RhythmDojo.Tests
             Assert.That(workspace.view.newPopup.activeSelf, Is.True);
             yield return PressSpace();
             Assert.That(workspace.timeline.IsPlaying, Is.False);
+        }
+
+        [UnityTest]
+        [Category("PreviewLoop")]
+        public IEnumerator ControlSpaceReturnsToPreviewStartAndOrdinarySpaceStillPauses()
+        {
+            string path = Path.GetFullPath("LocalAudio/Saiki.wav");
+            if (!File.Exists(path))
+            {
+                path = WriteTempoWave();
+            }
+
+            workspace.view.audioPath.text = path;
+            workspace.Run(WorkspaceAction.ImportAudio);
+            yield return Idle();
+            double deadline = Time.realtimeSinceStartupAsDouble + 60;
+            while (workspace.timeline.Peaks == null || !workspace.timeline.Peaks.Ready)
+            {
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                yield return null;
+            }
+
+            workspace.view.bpm.text = "128";
+            workspace.Run(WorkspaceAction.ApplySettings);
+            yield return Idle();
+            foreach (double start in new[] { 3.0, -1.5, 6.0 })
+            {
+                workspace.timeline.Seek(start);
+                EventSystem.current.SetSelectedGameObject(null);
+                yield return PressKeys(Key.Space, Key.LeftCtrl);
+                Assert.That(workspace.timeline.IsPlaying, Is.True);
+                yield return new WaitForSecondsRealtime(.3f);
+                Assert.That(workspace.timeline.MusicTime, Is.GreaterThan(start + .1));
+                yield return PressSpace();
+                Assert.That(workspace.timeline.IsPlaying, Is.False);
+                Assert.That(workspace.timeline.MusicTime, Is.EqualTo(start).Within(.001));
+            }
+
+            yield return PressSpace();
+            yield return new WaitForSecondsRealtime(.3f);
+            yield return PressSpace();
+            Assert.That(workspace.timeline.IsPlaying, Is.False);
+            Assert.That(workspace.timeline.MusicTime, Is.GreaterThan(6.1));
+
+            yield return PressKeys(Key.Space, Key.LeftCtrl);
+            yield return PressKeys(Key.Digit0);
+            Assert.That(workspace.timeline.MusicTime, Is.Zero.Within(.001));
+            yield return PressSpace();
+            yield return new WaitForSecondsRealtime(.3f);
+            yield return PressSpace();
+            Assert.That(workspace.timeline.MusicTime, Is.GreaterThan(.1));
+        }
+
+        [UnityTest]
+        [Category("PreviewLoop")]
+        public IEnumerator PreviewLoopPreservesReturnPositionAcrossBoundariesAndSpeedChanges()
+        {
+            workspace.view.audioPath.text = WriteTempoWave();
+            workspace.Run(WorkspaceAction.ImportAudio);
+            yield return Idle();
+            var loopStart = new GameObject("Test loop start", typeof(RectTransform), typeof(InputField));
+            loopStart.transform.SetParent(workspace.transform, false);
+            workspace.view.loopStart = loopStart.GetComponent<InputField>();
+            workspace.view.loopStart.text = (workspace.timeline.Duration - .3).ToString("R",
+                System.Globalization.CultureInfo.InvariantCulture);
+            double start = workspace.timeline.Duration - .15;
+            workspace.timeline.Seek(start);
+            workspace.Run(WorkspaceAction.Loop);
+            yield return PressKeys(Key.Space, Key.LeftCtrl);
+
+            for (int iteration = 0; iteration < 4; iteration++)
+            {
+                if (iteration == 2)
+                {
+                    workspace.timeline.SetPreviewSpeed(.5f);
+                }
+                double previous = workspace.timeline.MusicTime;
+                double deadline = Time.realtimeSinceStartupAsDouble + 3;
+                do
+                {
+                    previous = workspace.timeline.MusicTime;
+                    yield return null;
+                    Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                }
+                while (workspace.timeline.MusicTime >= previous);
+                Assert.That(workspace.timeline.IsPlaying, Is.True);
+            }
+            yield return PressSpace();
+            Assert.That(workspace.timeline.IsPlaying, Is.False);
+            Assert.That(workspace.timeline.MusicTime, Is.EqualTo(start).Within(.001));
+
+            workspace.Run(WorkspaceAction.Loop);
+            workspace.timeline.Seek(2);
+            workspace.timeline.TogglePreview(true);
+            workspace.timeline.RestartPreviewLoop(1);
+            workspace.timeline.Seek(3);
+            yield return new WaitForSecondsRealtime(.15f);
+            workspace.timeline.TogglePreview();
+            Assert.That(workspace.timeline.MusicTime, Is.GreaterThan(3));
+            workspace.timeline.TogglePreview(true);
+            workspace.timeline.StopPreview();
+            workspace.timeline.TogglePreview();
+            yield return new WaitForSecondsRealtime(.15f);
+            workspace.timeline.TogglePreview();
+            Assert.That(workspace.timeline.MusicTime, Is.GreaterThan(0));
+
+            workspace.timeline.Seek(2);
+            workspace.timeline.TogglePreview();
+            workspace.timeline.RestartPreviewLoop(1);
+            yield return new WaitForSecondsRealtime(.15f);
+            workspace.timeline.TogglePreview();
+            Assert.That(workspace.timeline.MusicTime, Is.InRange(1.01, 1.3));
         }
 
         private IEnumerator PressSpace()
@@ -1070,6 +1314,317 @@ namespace RhythmDojo.Tests
             return RectTransformUtility.WorldToScreenPoint(null, rect.TransformPoint(new Vector2(x, y)));
         }
 
+        [UnityTest]
+        [Category("PlaybackSeek")]
+        public IEnumerator PlaybackPositionToolSeeksClickedGridLineWithoutEditingNotes()
+        {
+            string path = Path.GetFullPath("LocalAudio/Saiki.wav");
+            if (!File.Exists(path))
+            {
+                path = WriteTempoWave();
+            }
+            workspace.view.audioPath.text = path;
+            workspace.Run(WorkspaceAction.ImportAudio);
+            yield return Idle();
+            double deadline = Time.realtimeSinceStartupAsDouble + 60;
+            while (workspace.timeline.Peaks == null || !workspace.timeline.Peaks.Ready)
+            {
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                yield return null;
+            }
+            workspace.screen.Session.Edit(edit => edit.SetTiming(.25,
+                new TempoPoint(0, 128), new TempoPoint(7.5, 256), new TempoPoint(15, 64)));
+
+            long id = 0;
+            workspace.screen.Session.Edit(edit => id = edit.AddNote(workspace.screen.ChartId, NoteData.Tap(0, 1)));
+            workspace.Editing.Selected.Add(id);
+            yield return null;
+            var notes = workspace.screen.Session.GetNotes(workspace.screen.ChartId);
+            var binding = workspace.view.toolActions.Single(item => item.action == WorkspaceAction.Scroll);
+            var grab = workspace.view.toolActions.Single(item => item.action == WorkspaceAction.Position);
+            Assert.That(binding.button.GetComponent<RectTransform>().anchoredPosition.y,
+                Is.LessThan(grab.button.GetComponent<RectTransform>().anchoredPosition.y));
+            Assert.That(binding.button.GetComponentInChildren<WorkspaceToolIcon>().kind,
+                Is.EqualTo(WorkspaceToolIcon.IconKind.Scroll));
+            Assert.That(workspace.view.quantizationCycle.GetComponent<RectTransform>().anchoredPosition.y,
+                Is.LessThan(binding.button.GetComponent<RectTransform>().anchoredPosition.y));
+
+            workspace.view.OpenMenu(workspace.view.menus[3]);
+            var menuButton = workspace.view.actions.Single(item => item.action == WorkspaceAction.Scroll).button;
+            Assert.That(menuButton.transform.IsChildOf(workspace.view.menus[3].panel.transform), Is.True);
+            Assert.That(menuButton.GetComponentInChildren<Text>().text, Is.EqualTo("재생 위치"));
+            yield return ClickAt(Center(menuButton.GetComponent<RectTransform>()));
+            Assert.That(binding.button.colors.normalColor.grayscale,
+                Is.LessThan(grab.button.colors.normalColor.grayscale));
+
+            int visibleBeats = workspace.screen.VisibleBeats;
+            foreach (double time in new[] { 1.875, 9.375, 16.875 })
+            {
+                double beat = workspace.timeline.Timing.BeatAtTime(time);
+                workspace.screen.Scroll(beat - 4 - workspace.screen.ScrollBeatOffset);
+                yield return null;
+                double original = workspace.screen.ScrollBeatOffset;
+                double windowStart = workspace.timeline.WindowStart;
+                yield return ClickAt(GridPoint(2, time));
+                Assert.That(workspace.timeline.MusicTime, Is.EqualTo(time - .25).Within(.001));
+                Assert.That(workspace.grid.PlayheadTime, Is.EqualTo(time).Within(.001));
+                Assert.That(workspace.timeline.IsPlaying, Is.False);
+                Assert.That(workspace.screen.ScrollBeatOffset, Is.EqualTo(original).Within(.001));
+                Assert.That(workspace.timeline.WindowStart, Is.EqualTo(windowStart).Within(.001));
+                Assert.That(workspace.screen.VisibleBeats, Is.EqualTo(visibleBeats));
+
+                yield return PressSpace();
+                yield return new WaitForSecondsRealtime(.3f);
+                Assert.That(workspace.timeline.IsPlaying, Is.True);
+                Assert.That(workspace.timeline.MusicTime, Is.GreaterThan(time - .15));
+                var source = workspace.timeline.GetComponent<AudioSource>();
+                Assert.That((double)source.timeSamples / source.clip.frequency,
+                    Is.GreaterThan(time - .25));
+                yield return PressSpace();
+            }
+
+            yield return ClickAt(Center(binding.button.GetComponent<RectTransform>()));
+            workspace.screen.ResetView();
+            yield return null;
+            yield return ClickAt(GridPoint(0, 1));
+            Assert.That(workspace.timeline.MusicTime, Is.EqualTo(.6875).Within(.001),
+                "The playhead snaps to beat 2 at 128 BPM, then subtracts the audio offset.");
+            yield return DragNote(GridPoint(2, .9375), GridPoint(2, 1.875));
+            Assert.That(workspace.timeline.MusicTime, Is.EqualTo(1.625).Within(.001));
+            workspace.screen.Scroll(-4 - workspace.screen.ScrollBeatOffset);
+            yield return null;
+            yield return ClickAt(GridPoint(2, -.9375));
+            Assert.That(workspace.timeline.MusicTime, Is.EqualTo(-1.1875).Within(.001));
+            Assert.That(workspace.grid.PlayheadTime, Is.EqualTo(-.9375).Within(.001));
+
+            Assert.That(workspace.screen.Session.GetNotes(workspace.screen.ChartId).Single().Data,
+                Is.EqualTo(notes.Single().Data));
+            Assert.That(workspace.Editing.Selected, Is.EquivalentTo(new[] { id }));
+        }
+
+        [UnityTest]
+        public IEnumerator GameplayPreviewFollowsAudioEditsAndChartSelectionAndReleasesTexture()
+        {
+            string path = Path.GetFullPath("LocalAudio/Saiki.wav");
+            if (!File.Exists(path))
+            {
+                path = WriteTempoWave();
+            }
+            workspace.view.audioPath.text = path;
+            workspace.Run(WorkspaceAction.ImportAudio);
+            yield return Idle();
+            workspace.screen.Session.Edit(edit =>
+            {
+                edit.SetTiming(0, new TempoPoint(0, 128));
+                edit.AddNote(workspace.screen.ChartId, NoteData.Tap(0, 1));
+                edit.AddNote(workspace.screen.ChartId, NoteData.Hold(1, 2, 4));
+                edit.AddNote(workspace.screen.ChartId, NoteData.Tap(3, 5));
+            });
+            yield return null;
+            yield return null;
+            var preview = UnityEngine.Object.FindFirstObjectByType<ChartGameplayPreview>();
+            Assert.That(preview, Is.Not.Null);
+            Assert.That(preview.Target.IsCreated(), Is.True);
+            Assert.That(preview.image.raycastTarget, Is.False);
+            Assert.That(preview.VisibleNoteCount, Is.EqualTo(3));
+            var camera = preview.playfield.GetComponentInChildren<Camera>();
+            Assert.That(camera.GetComponent<AudioListener>(), Is.Null);
+            Assert.That(camera.cullingMask, Is.EqualTo(1 << 31));
+            Assert.That(Camera.main.cullingMask & (1 << 31), Is.Zero);
+
+            workspace.timeline.Seek(3);
+            yield return null;
+            yield return null;
+            Assert.That(preview.SongTime, Is.EqualTo(3).Within(.001));
+            Assert.That(preview.VisibleNoteCount, Is.EqualTo(2));
+            Assert.That(preview.playfield.GetComponentsInChildren<RhythmDojo.Presentation.NoteView>()
+                .Count(view => view.HasBody), Is.EqualTo(1));
+            var previous = RenderTexture.active;
+            var snapshot = new Texture2D(preview.Target.width, preview.Target.height, TextureFormat.RGB24, false);
+            try
+            {
+                RenderTexture.active = preview.Target;
+                snapshot.ReadPixels(new Rect(0, 0, snapshot.width, snapshot.height), 0, 0);
+                snapshot.Apply();
+                Assert.That(snapshot.GetPixels32().Select(pixel => pixel.r).Distinct().Count(), Is.GreaterThan(5));
+                string evidence = Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath, "../Logs"));
+                Directory.CreateDirectory(evidence);
+                File.WriteAllBytes(Path.Combine(evidence, "editor-gameplay-preview.png"), snapshot.EncodeToPNG());
+            }
+            finally
+            {
+                RenderTexture.active = previous;
+                UnityEngine.Object.Destroy(snapshot);
+            }
+
+            workspace.timeline.PlayPreview();
+            yield return new WaitForSecondsRealtime(.3f);
+            workspace.timeline.PausePreview();
+            Assert.That(preview.SongTime, Is.GreaterThan(3.1));
+            workspace.screen.Session.Edit(edit => edit.AddNote(workspace.screen.ChartId, NoteData.Tap(2, 6)));
+            yield return null;
+            Assert.That(preview.VisibleNoteCount, Is.EqualTo(3));
+            workspace.screen.Session.Undo();
+            yield return null;
+            Assert.That(preview.VisibleNoteCount, Is.EqualTo(2));
+            workspace.screen.SelectSlot((int)ChartSlot.Hard);
+            yield return null;
+            Assert.That(preview.VisibleNoteCount, Is.Zero);
+            workspace.screen.SelectSlot((int)ChartSlot.Easy);
+            yield return null;
+            Assert.That(preview.VisibleNoteCount, Is.EqualTo(2));
+
+            var target = preview.Target;
+            yield return SceneManager.LoadSceneAsync("Assets/Game/Scenes/Title.unity");
+            yield return null;
+            Assert.That(target == null, Is.True);
+            Assert.That(UnityEngine.Object.FindFirstObjectByType<ChartGameplayPreview>(), Is.Null);
+            Assert.That(UnityEngine.Object.FindObjectsByType<Camera>(FindObjectsSortMode.None)
+                .Any(item => item.name == "Editor Preview Camera"), Is.False);
+        }
+
+        [UnityTest]
+        [Category("PlaybackSeek")]
+        public IEnumerator PlaybackPositionDragFreezesViewportAndRestoresOnlyEnabledFollow()
+        {
+            workspace.view.audioPath.text = WriteTempoWave();
+            workspace.Run(WorkspaceAction.ImportAudio);
+            yield return Idle();
+            workspace.screen.Session.Edit(edit => edit.SetTiming(.25,
+                new TempoPoint(0, 128), new TempoPoint(7.5, 256), new TempoPoint(15, 64)));
+            workspace.Run(WorkspaceAction.Scroll);
+            var timelineView = workspace.timeline.GetComponent<ChartAudioTimelineView>();
+
+            foreach (double time in new[] { -.9375, 9.375, 16.875 })
+            {
+                workspace.timeline.PausePreview();
+                workspace.screen.Scroll(workspace.timeline.Timing.BeatAtTime(time) - 4
+                    - workspace.screen.ScrollBeatOffset);
+                yield return null;
+                double windowStart = workspace.timeline.WindowStart;
+                double scroll = workspace.screen.ScrollBeatOffset;
+                var pointer = new PointerEventData(EventSystem.current)
+                {
+                    position = GridPoint(2, time),
+                    button = PointerEventData.InputButton.Left,
+                    pointerId = 55
+                };
+                workspace.screen.OnPointerDown(pointer);
+                Assert.That(workspace.timeline.MusicTime, Is.EqualTo(time - .25).Within(.001));
+                workspace.timeline.PlayPreview();
+                yield return new WaitForSecondsRealtime(.2f);
+                Assert.That(workspace.timeline.IsSeeking, Is.True);
+                Assert.That(workspace.timeline.IsPlaying, Is.True);
+                Assert.That(workspace.timeline.WindowStart, Is.EqualTo(windowStart));
+                Assert.That(workspace.screen.ScrollBeatOffset, Is.EqualTo(scroll));
+                workspace.screen.OnDrag(pointer);
+                Assert.That(workspace.timeline.MusicTime, Is.EqualTo(time - .25).Within(.001));
+                pointer.position = new Vector2(-100, -100);
+                workspace.screen.OnPointerUp(pointer);
+                Assert.That(workspace.timeline.IsSeeking, Is.False);
+                yield return null;
+                yield return null;
+                Assert.That(workspace.screen.ScrollBeatOffset, Is.Not.EqualTo(scroll));
+            }
+
+            workspace.timeline.PausePreview();
+            workspace.timeline.Pan(1);
+            double original = workspace.timeline.WindowStart;
+            double originalBeat = workspace.screen.ScrollBeatOffset;
+            var start = GridPoint(2, 2);
+            yield return MoveTo(start);
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = start, buttons = 1 });
+            yield return null;
+            yield return null;
+            Assert.That(workspace.timeline.IsSeeking, Is.True);
+            workspace.timeline.PlayPreview();
+            yield return new WaitForSecondsRealtime(.2f);
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = new Vector2(-100, -100) });
+            yield return null;
+            yield return null;
+            Assert.That(workspace.timeline.IsSeeking, Is.False);
+            yield return new WaitForSecondsRealtime(.2f);
+            Assert.That(workspace.timeline.WindowStart, Is.EqualTo(original));
+            Assert.That(workspace.screen.ScrollBeatOffset, Is.EqualTo(originalBeat));
+            timelineView.followAudioControl.onClick.Invoke();
+            yield return null;
+            Assert.That(workspace.screen.ScrollBeatOffset, Is.Not.EqualTo(originalBeat));
+        }
+
+        [UnityTest]
+        [Category("PlaybackSeek")]
+        public IEnumerator PlaybackPositionDragSuspendsLoopsAndCleansUpCancellationPaths()
+        {
+            workspace.view.audioPath.text = WriteTempoWave();
+            workspace.Run(WorkspaceAction.ImportAudio);
+            yield return Idle();
+            workspace.Run(WorkspaceAction.Scroll);
+            var loopEnd = new GameObject("Test loop end", typeof(RectTransform), typeof(InputField));
+            loopEnd.transform.SetParent(workspace.transform, false);
+            workspace.view.loopEnd = loopEnd.GetComponent<InputField>();
+            workspace.view.loopEnd.text = "1";
+            workspace.Run(WorkspaceAction.Loop);
+            var pointer = new PointerEventData(EventSystem.current)
+            {
+                position = GridPoint(2, 2),
+                button = PointerEventData.InputButton.Left,
+                pointerId = 55
+            };
+            workspace.screen.OnPointerDown(pointer);
+            workspace.timeline.PlayPreview();
+            double dsp = AudioSettings.dspTime;
+            Assert.That(workspace.timeline.IsPlaying, Is.True);
+            yield return new WaitForSecondsRealtime(.2f);
+            Assert.That(workspace.timeline.IsPlaying, Is.True, "Preview stopped while seeking");
+            Assert.That(workspace.timeline.MusicTime, Is.GreaterThan(2),
+                "DSP delta: " + (AudioSettings.dspTime - dsp) + "; seeking: " + workspace.timeline.IsSeeking);
+
+            workspace.screen.OnPointerUp(pointer);
+            yield return null;
+            yield return null;
+            Assert.That(workspace.timeline.MusicTime, Is.LessThan(1));
+            workspace.Run(WorkspaceAction.Loop);
+            workspace.timeline.PausePreview();
+
+            for (int cancellation = 0; cancellation < 5; cancellation++)
+            {
+                workspace.Run(WorkspaceAction.Scroll);
+                workspace.timeline.Pan(0);
+                yield return null;
+                pointer.position = GridPoint(2, 2);
+                workspace.screen.OnPointerDown(pointer);
+                Assert.That(workspace.timeline.IsSeeking, Is.True, "Cancellation case " + cancellation);
+                switch (cancellation)
+                {
+                    case 0:
+                        yield return PressKeys(Key.Escape);
+                        break;
+                    case 1:
+                        workspace.Run(WorkspaceAction.Pencil);
+                        break;
+                    case 2:
+                        workspace.SendMessage("OnApplicationFocus", false);
+                        break;
+                    case 3:
+                        workspace.enabled = false;
+                        workspace.enabled = true;
+                        break;
+                    case 4:
+                        workspace.screen.enabled = false;
+                        yield return null;
+                        workspace.screen.enabled = true;
+                        break;
+                }
+                Assert.That(workspace.timeline.IsSeeking, Is.False);
+                workspace.timeline.GetComponent<ChartAudioTimelineView>().followAudioControl.onClick.Invoke();
+                double scroll = workspace.screen.ScrollBeatOffset;
+                workspace.timeline.PlayPreview();
+                yield return new WaitForSecondsRealtime(.2f);
+                Assert.That(workspace.screen.ScrollBeatOffset, Is.Not.EqualTo(scroll));
+                workspace.timeline.PausePreview();
+            }
+        }
+
         private IEnumerator DragNote(Vector2 start, Vector2 end)
         {
             yield return MoveTo(start);
@@ -1083,6 +1638,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("BpmSuggestion")]
         public IEnumerator BpmFieldsSynchronizeAndCommitBothWays()
         {
             var timelineView = workspace.timeline.GetComponent<ChartAudioTimelineView>();
@@ -1227,7 +1783,7 @@ namespace RhythmDojo.Tests
             Assert.That(WorkspaceEditor.ScenePath, Is.EqualTo(ChartEditorMenu.ScenePath));
             Assert.That(UnityEngine.Object.FindFirstObjectByType<WorkspaceEditor>(), Is.Not.Null);
             var view = UnityEngine.Object.FindFirstObjectByType<WorkspaceView>();
-            Assert.That(view.toolActions.Length, Is.EqualTo(4));
+            Assert.That(view.toolActions.Length, Is.EqualTo(5));
             Assert.That(view.quantizationCycleValue.text, Is.EqualTo("1/4"));
         }
 
@@ -1405,8 +1961,14 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("BpmSuggestion")]
         public IEnumerator SaveAsCreatesIndependentSongAndKeepsOriginal()
         {
+            workspace.view.audioPath.text = WriteTempoWave();
+            workspace.Run(WorkspaceAction.ImportAudio);
+            yield return Idle();
+            Assert.That(workspace.view.applyEstimatedBpm.gameObject.activeSelf, Is.True);
+
             workspace.view.title.text = "Original";
             workspace.view.artist.text = "Team";
             workspace.Run(WorkspaceAction.ApplySettings);
@@ -1425,6 +1987,8 @@ namespace RhythmDojo.Tests
             yield return ClickAt(Center(button.GetComponent<RectTransform>()));
             yield return Idle();
             Assert.That(workspace.screen.Session.Snapshot.Id, Is.Not.EqualTo(original));
+            Assert.That(workspace.view.bpmSuggestion.text, Is.Empty);
+            Assert.That(workspace.view.applyEstimatedBpm.gameObject.activeSelf, Is.False);
             Assert.That(workspace.menu.Store.Read(original).Title, Is.EqualTo("Original"));
             Assert.That(workspace.screen.Session.Snapshot.Title, Is.EqualTo("Copy"));
             Assert.That(workspace.screen.Session.GetNotes(workspace.screen.ChartId).Length, Is.EqualTo(1));
@@ -1540,6 +2104,14 @@ namespace RhythmDojo.Tests
         [UnityTest]
         public IEnumerator JacketAndVolumeSurviveSavingAndReloadingWithoutOptionalSound()
         {
+            workspace.view.OpenMenu(workspace.view.menus[1]);
+            Canvas.ForceUpdateCanvases();
+            var notice = workspace.view.menus[1].panel.GetComponentsInChildren<Text>()
+                .Single(label => label.text == "임시, 자켓 정보만 받고 표시하는 엔드포인트가 없음.");
+            Assert.That(notice.preferredWidth, Is.LessThanOrEqualTo(notice.rectTransform.rect.width));
+            Assert.That(notice.preferredHeight, Is.LessThanOrEqualTo(notice.rectTransform.rect.height));
+            workspace.view.CloseMenus();
+
             Directory.CreateDirectory(root);
             string path = Path.Combine(root, "Jacket.png");
             var image = new Texture2D(2, 2);
@@ -1550,6 +2122,8 @@ namespace RhythmDojo.Tests
             workspace.view.jacketPath.text = path;
             workspace.Run(WorkspaceAction.ImportJacket);
             yield return Idle();
+            Assert.That(workspace.view.status.text,
+                Is.EqualTo("자켓 정보를 반영했습니다. 이미지 표시는 아직 지원하지 않습니다."));
             workspace.view.volume.text = "35";
             workspace.Run(WorkspaceAction.ApplySettings);
             yield return Idle();

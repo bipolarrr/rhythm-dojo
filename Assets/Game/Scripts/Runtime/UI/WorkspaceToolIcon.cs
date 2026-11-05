@@ -11,7 +11,8 @@ namespace RhythmDojo.UI
             Select,
             Pencil,
             Eraser,
-            Grab
+            Grab,
+            Scroll
         }
 
         public IconKind kind;
@@ -21,6 +22,11 @@ namespace RhythmDojo.UI
             helper.Clear();
             switch (kind)
             {
+                case IconKind.Scroll:
+                    Line(helper, new Vector2(.12f, .2f), new Vector2(.12f, .8f), .09f);
+                    Line(helper, new Vector2(.88f, .2f), new Vector2(.88f, .8f), .09f);
+                    Line(helper, new Vector2(.12f, .5f), new Vector2(.88f, .5f), .08f);
+                    break;
                 case IconKind.Select:
                     Polygon(helper, new Vector2(.2f, .9f), new Vector2(.2f, .25f), new Vector2(.7f, .48f));
                     Line(helper, new Vector2(.43f, .5f), new Vector2(.67f, .12f), .12f);

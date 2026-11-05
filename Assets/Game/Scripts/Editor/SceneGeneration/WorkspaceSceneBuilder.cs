@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using RhythmDojo.Authoring;
 using RhythmDojo.UI;
+using RhythmDojo.Gameplay;
+using RhythmDojo.Presentation;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -94,6 +96,7 @@ namespace RhythmDojo.EditorTools
             view.artist = Field(settings, "작곡가", "작곡가 이름");
             view.jacketPath = Field(settings, "자켓 이미지 전체 경로", "PNG / JPG 경로 입력 후 Enter");
             Action(settings, "자켓 이미지 적용", WorkspaceAction.ImportJacket, bindings);
+            Heading(settings, "임시, 자켓 정보만 받고 표시하는 엔드포인트가 없음.");
             Heading(settings, "난이도");
             var slots = new GameObject("Difficulty", typeof(RectTransform)).GetComponent<RectTransform>();
             slots.SetParent(settings, false);
@@ -145,6 +148,10 @@ namespace RhythmDojo.EditorTools
             view.volumeControl.value = 65;
             view.bpm = Field(settings, "BPM", "120");
             Action(settings, "BPM 자동 측정", WorkspaceAction.EstimateBpm, bindings);
+            view.bpmSuggestion = Heading(settings, "");
+            Action(settings, "이 BPM으로 설정", WorkspaceAction.ApplyEstimatedBpm, bindings);
+            view.applyEstimatedBpm = bindings.Last().button;
+            view.applyEstimatedBpm.gameObject.SetActive(false);
             view.offset = Field(settings, "악곡 시작 타이밍 (ms)", "0");
             Action(settings, "설정 적용", WorkspaceAction.ApplySettings, bindings);
             Action(settings, "채보 종료 시간 / 상세 설정", WorkspaceAction.ChartSettings, bindings);
@@ -172,6 +179,7 @@ namespace RhythmDojo.EditorTools
             Action(tools, "그리기", WorkspaceAction.Pencil, bindings);
             Action(tools, "지우개", WorkspaceAction.Eraser, bindings);
             Action(tools, "잡기", WorkspaceAction.Position, bindings);
+            Action(tools, "재생 위치", WorkspaceAction.Scroll, bindings);
             view.position = Field(tools, "작업 위치 (초)", "0");
             BuildToolBar(canvas.transform, view);
             Heading(tools, "퀀타이즈 · 4분음표 기준");
@@ -208,8 +216,9 @@ namespace RhythmDojo.EditorTools
             help.text = "채보 에디터\n\n메뉴: 클릭 열기 / 마우스로 전환\n바깥 클릭 / Esc: 메뉴 닫기\n선택: 클릭 토글 / 드래그 범위\n붙여넣기: 현재 파형 커서\n\n설정: 자켓 / 음원 / BPM\nSpace: 재생 / 일시정지\n게임 Esc: 편집 화면 복귀";
             help.fontSize = 14;
             UiElements.Position(help.rectTransform, new Vector2(176, -18), new Vector2(230, 210));
+            AddGameplayPreview(canvas, view);
 
-            // The existing help/preview area remains part of the cloned editor.
+            // Confirmation dialogs stay above the editor and its live preview.
             var popup = Panel("Unsaved Changes", canvas.transform, new Vector2(0, 0), new Vector2(1280, 720));
             popup.anchorMin = Vector2.zero;
             popup.anchorMax = Vector2.one;
@@ -274,6 +283,51 @@ namespace RhythmDojo.EditorTools
                 .Concat(new[] { new EditorBuildSettingsScene(WorkspaceEditor.ScenePath, true) }).ToArray();
             AssetDatabase.SaveAssets();
             Debug.Log("Rhythm Dojo: chart editor generated with the workspace interface.");
+        }
+
+        public static void AddGameplayPreview(Canvas canvas, WorkspaceView view)
+        {
+            var panel = canvas.transform.Find("Editor Content/Chart And Preview/Preview Space");
+            panel.Find("Help").gameObject.SetActive(false);
+            panel.Find("Next Chart").gameObject.SetActive(false);
+            view.jacket.gameObject.SetActive(false);
+            var title = UiElements.Label("Preview Heading", panel, "인게임 미리보기",
+                new Vector2(12, -6), new Vector2(350, 22), 14);
+            title.raycastTarget = false;
+            var go = new GameObject("Gameplay Preview", typeof(RectTransform), typeof(RawImage));
+            go.transform.SetParent(panel, false);
+            var image = go.GetComponent<RawImage>();
+            image.raycastTarget = false;
+            image.rectTransform.anchorMin = Vector2.zero;
+            image.rectTransform.anchorMax = Vector2.one;
+            image.rectTransform.offsetMin = new Vector2(10, 42);
+            image.rectTransform.offsetMax = new Vector2(-10, -32);
+            var clock = UiElements.Label("Preview Clock", panel, "미리보기 · 0.000 s · 1×",
+                Vector2.zero, new Vector2(350, 18), 11);
+            clock.rectTransform.anchorMin = clock.rectTransform.anchorMax = Vector2.zero;
+            clock.rectTransform.anchoredPosition = new Vector2(12, 40);
+            clock.raycastTarget = false;
+            view.selection.transform.SetParent(panel, false);
+            view.selection.rectTransform.anchorMin = view.selection.rectTransform.anchorMax = Vector2.zero;
+            view.selection.rectTransform.anchoredPosition = new Vector2(12, 21);
+            view.selection.rectTransform.sizeDelta = new Vector2(350, 18);
+            view.selection.fontSize = 11;
+            view.selection.raycastTarget = false;
+
+            var preview = go.AddComponent<ChartGameplayPreview>();
+            preview.workspace = canvas.GetComponent<WorkspaceEditor>();
+            preview.image = image;
+            preview.clock = clock;
+            preview.presentation = SceneResources.Require<GameplayPresentationSettings>("Assets/Game/Settings/PresentationSettings.asset");
+            preview.scrollSettings = SceneResources.Require<ScrollSettings>("Assets/Game/Settings/ScrollSettings.asset");
+            preview.tapTemplate = SceneResources.Require<GameObject>("Assets/Game/Prefabs/TapNote.prefab").GetComponent<NoteView>();
+            preview.holdTemplate = SceneResources.Require<GameObject>("Assets/Game/Prefabs/HoldNote.prefab").GetComponent<NoteView>();
+            preview.playfield = new GameObject("Editor Preview World").AddComponent<PlayfieldPresenter>();
+            var serialized = new SerializedObject(preview.playfield);
+            serialized.FindProperty("highwayMaterial").objectReferenceValue = SceneResources.Require<Material>("Assets/Game/Materials/Highway.mat");
+            serialized.FindProperty("railMaterial").objectReferenceValue = SceneResources.Require<Material>("Assets/Game/Materials/Rails.mat");
+            serialized.FindProperty("judgmentMaterial").objectReferenceValue = SceneResources.Require<Material>("Assets/Game/Materials/Judgement.mat");
+            serialized.ApplyModifiedPropertiesWithoutUndo();
         }
 
         private static readonly Dictionary<Transform, float> Positions = new Dictionary<Transform, float>();
@@ -357,9 +411,9 @@ namespace RhythmDojo.EditorTools
             var tool = parent.Find("Editor Content/Tool Space");
             var toolLabel = tool.Find("Tool Space Label").GetComponent<Text>();
             toolLabel.gameObject.SetActive(false);
-            var captions = new[] { "선택", "그리기", "지우개", "잡기" };
+            var captions = new[] { "선택", "그리기", "지우개", "잡기", "재생 위치" };
             var actions = new[] { WorkspaceAction.Select, WorkspaceAction.Pencil,
-                WorkspaceAction.Eraser, WorkspaceAction.Position };
+                WorkspaceAction.Eraser, WorkspaceAction.Position, WorkspaceAction.Scroll };
             view.toolActions = new WorkspaceActionBinding[actions.Length];
             for (int i = 0; i < actions.Length; i++)
             {
@@ -380,7 +434,7 @@ namespace RhythmDojo.EditorTools
                 view.toolActions[i] = new WorkspaceActionBinding { action = actions[i], button = button };
             }
             view.quantizationCycle = UiElements.Button("Quantization Cycle", tool, "",
-                new Vector2(4, -206), new Vector2(44, 44));
+                new Vector2(4, -6 - actions.Length * 50), new Vector2(44, 44));
             StyleMenuButton(view.quantizationCycle, TextAnchor.MiddleCenter, 9);
             var caption = view.quantizationCycle.GetComponentInChildren<Text>();
             caption.gameObject.SetActive(false);

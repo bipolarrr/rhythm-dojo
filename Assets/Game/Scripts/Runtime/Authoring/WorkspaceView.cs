@@ -10,7 +10,8 @@ namespace RhythmDojo.Authoring
         Undo, Redo, Copy, Paste, Delete, SelectAll, SelectTaps, SelectHolds, Deselect,
         Mirror, Randomize, PlayPause, Stop, Loop, Slow, Test, TestHere, AutoTest, AutoTestHere,
         SaveExit, DiscardExit, CancelExit, Pencil, Select, Eraser, Position, Tap, Hold, ImportPupa,
-        SaveNew, DiscardNew, ConfirmSaveAs, CancelSaveAs, ProjectFiles, ChartSettings, ResetView
+        SaveNew, DiscardNew, ConfirmSaveAs, CancelSaveAs, ProjectFiles, ChartSettings, ResetView,
+        PlayReturn, Scroll, ApplyEstimatedBpm
     }
 
     [Serializable]
@@ -31,6 +32,8 @@ namespace RhythmDojo.Authoring
         public Button quantizationCycle;
         public Text quantizationCycleValue;
         public Text status, selection, playback;
+        public Text bpmSuggestion;
+        public Button applyEstimatedBpm;
         public RawImage jacket;
         public GameObject exitPopup;
         public GameObject newPopup;

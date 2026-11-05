@@ -61,6 +61,9 @@ namespace RhythmDojo.EditorTools
             camera.backgroundColor = Background;
 
             var canvas = UiElements.Canvas("Chart Editor");
+            var fontScope = canvas.gameObject.AddComponent<UiFontScope>();
+            fontScope.font = SceneResources.Require<Font>("Assets/Game/Fonts/NotoSansKR-Regular.otf");
+            fontScope.style = FontStyle.Normal;
             var scaler = canvas.GetComponent<CanvasScaler>();
             scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
             scaler.matchWidthOrHeight = 0;
@@ -293,25 +296,6 @@ namespace RhythmDojo.EditorTools
                     14
                 )
             );
-
-            var returnToMainMenu = UiElements.Button(
-                "Showcase Main Menu",
-                canvas.transform,
-                "메인으로",
-                Vector2.zero,
-                new Vector2(100, 34)
-            );
-            var returnToMainMenuRect = (RectTransform)returnToMainMenu.transform;
-            returnToMainMenuRect.anchorMin = Vector2.one;
-            returnToMainMenuRect.anchorMax = Vector2.one;
-            returnToMainMenuRect.pivot = Vector2.one;
-            returnToMainMenuRect.anchoredPosition = new Vector2(-12, -9);
-            PixelSongSelectionStyle.Frame(returnToMainMenuRect, new Color(.48f, .32f, .18f), 4);
-            var returnToMainMenuLabel = returnToMainMenu.GetComponentInChildren<Text>();
-            returnToMainMenuLabel.font = AssetDatabase.LoadAssetAtPath<Font>(MainMenuLayoutBuilder.FontPath);
-            returnToMainMenuLabel.fontSize = 17;
-            returnToMainMenuLabel.color = new Color(1f, .90f, .70f);
-            UnityEventTools.AddPersistentListener(returnToMainMenu.onClick, menu.ReturnToMainMenu);
 
             var file = MenuPanel("File Panel", canvas.transform, 490);
             var settings = MenuPanel("Settings Panel", canvas.transform, 520);

@@ -146,7 +146,15 @@ namespace RhythmDojo.Tests
                             expectedFont = scope.font;
                         }
                         Assert.That(text.font, Is.SameAs(expectedFont), name + "/" + text.name);
-                        Assert.That(text.fontStyle, Is.EqualTo(FontStyle.Bold), name + "/" + text.name);
+                        if (name == "ChartEditor")
+                        {
+                            Assert.That(text.font, Is.SameAs(AssetDatabase.LoadAssetAtPath<Font>("Assets/Game/Fonts/NotoSansKR-Regular.otf")), text.name);
+                            Assert.That(text.fontStyle, Is.EqualTo(FontStyle.Normal), name + "/" + text.name);
+                        }
+                        else
+                        {
+                            Assert.That(text.fontStyle, Is.EqualTo(FontStyle.Bold), name + "/" + text.name);
+                        }
                         count++;
                     }
                 }

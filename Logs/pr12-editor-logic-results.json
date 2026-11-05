@@ -1,0 +1,128 @@
+{
+  "unity": "6000.3.23f1",
+  "basis": "13cb86a69a23ae1d5e48b05b303c8227d5cb7bd6",
+  "note": "Latest outcome per test across sequential scoped runs; not a full-suite run. Initial test setup failures and DSP stall are documented in pr12-editor-logic-verification.md.",
+  "total": 17,
+  "passed": 17,
+  "results": [
+    {
+      "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.BpmAnalysisIgnoresReplacedAudioAndProject",
+      "Status": "Passed",
+      "Duration": 1.9410153,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.BpmFieldsSynchronizeAndCommitBothWays",
+      "Status": "Passed",
+      "Duration": 1.4544406,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.ImportAudioAutomaticallyEstimatesBpmWithoutChangingSavedTiming",
+      "Status": "Passed",
+      "Duration": 1.29533,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.SpaceTogglesPlaybackButNotWhileTypingOrConfirming",
+      "Status": "Passed",
+      "Duration": 1.6621381,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.JacketAndVolumeSurviveSavingAndReloadingWithoutOptionalSound",
+      "Status": "Passed",
+      "Duration": 1.8131511,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.ControlSpaceReturnsToPreviewStartAndOrdinarySpaceStillPauses",
+      "Status": "Passed",
+      "Duration": 4.5101319,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.PreviewLoopPreservesReturnPositionAcrossBoundariesAndSpeedChanges",
+      "Status": "Passed",
+      "Duration": 3.5964576,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.PlaybackPositionDragFreezesViewportAndRestoresOnlyEnabledFollow",
+      "Status": "Passed",
+      "Duration": 3.1884303,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.PlaybackPositionDragSuspendsLoopsAndCleansUpCancellationPaths",
+      "Status": "Passed",
+      "Duration": 3.286072,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.PlaybackPositionToolSeeksClickedGridLineWithoutEditingNotes",
+      "Status": "Passed",
+      "Duration": 3.8375708,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.UiTypographyTests.SavedSceneUsesMonaForAllTextIncludingHiddenControls(\"ChartEditor\")",
+      "Status": "Passed",
+      "Duration": 0.0888276,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.ShortcutLabelsAndToolDifficultyEditingCommandsStayInSync",
+      "Status": "Passed",
+      "Duration": 2.8564064,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.WorkspaceEditorTests.SaveAsCreatesIndependentSongAndKeepsOriginal",
+      "Status": "Passed",
+      "Duration": 2.0658318,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.GameplayFlowTests.KeyboardNavigationAndStartRestartFocusLossUseActualActions",
+      "Status": "Passed",
+      "Duration": 2.5969421,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.GameplayHudFlowTests.ReturnButtonInReadyStateLoadsSongSelectionAndReleasesSong",
+      "Status": "Passed",
+      "Duration": 2.0816283,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.MainMenuFlowTests.StartLoadsBootstrapThenExistingSongSelection",
+      "Status": "Passed",
+      "Duration": 4.5522983,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.SongSelectionFlowTests.MouseClickUsesUiInputModuleToLoadSong",
+      "Status": "Passed",
+      "Duration": 1.4540152,
+      "Message": null,
+      "StackTrace": null
+    }
+  ]
+}

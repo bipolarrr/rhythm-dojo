@@ -34,6 +34,7 @@ namespace RhythmDojo.Authoring
         private double pausedTime;
         private double playbackStart;
         private double playbackDsp;
+        private double? previewReturnTime;
         private bool playing;
         private bool follow = true;
         private bool locked;
@@ -91,6 +92,7 @@ namespace RhythmDojo.Authoring
             }
         }
         public bool IsBusy => !screen || screen.IsBusy || loadingAudio;
+        public bool IsLoadingAudio => loadingAudio;
         public bool IsPlaying => playing;
         public AudioClip PreviewClip => source.clip;
         public float PreviewVolume
@@ -100,21 +102,70 @@ namespace RhythmDojo.Authoring
         }
 
         public float PreviewSpeed { get; private set; } = 1f;
+        public bool IsSeeking { get; private set; }
+
+        public void BeginSeek()
+        {
+            IsSeeking = true;
+        }
+
+        public void EndSeek()
+        {
+            IsSeeking = false;
+        }
 
         public void SetPreviewSpeed(float value)
         {
             bool resume = playing;
+            double? previewReturnTime = this.previewReturnTime;
             Pause();
             PreviewSpeed = Mathf.Clamp(value, .5f, 1f);
             source.pitch = PreviewSpeed;
             if (resume)
             {
                 Play();
+                this.previewReturnTime = previewReturnTime;
             }
         }
 
         public void PlayPreview() => Play();
         public void PausePreview() => Pause();
+
+        public void RestartPreviewLoop(double time)
+        {
+            if (IsBusy || !source.clip || !double.IsFinite(time))
+            {
+                return;
+            }
+
+            double? previewReturnTime = this.previewReturnTime;
+            Pause();
+            Seek(time);
+            Play();
+            this.previewReturnTime = previewReturnTime;
+        }
+
+        public void TogglePreview(bool returnToStart = false)
+        {
+            if (playing)
+            {
+                double? previewReturnTime = this.previewReturnTime;
+                Pause();
+                if (previewReturnTime.HasValue)
+                {
+                    Seek(previewReturnTime.Value);
+                }
+
+                return;
+            }
+
+            Play();
+            if (playing && returnToStart)
+            {
+                previewReturnTime = playbackStart;
+            }
+        }
+
         public void StopPreview()
         {
             Pause();
@@ -181,17 +232,7 @@ namespace RhythmDojo.Authoring
             }
 
             bound = true;
-            view.playAudioControl.onClick.AddListener(() =>
-                {
-                    if (playing)
-                    {
-                        Pause();
-                    }
-                    else
-                    {
-                        Play();
-                    }
-                });
+            view.playAudioControl.onClick.AddListener(() => TogglePreview());
             view.followAudioControl.onClick.AddListener(() =>
                 {
                     follow = true;
@@ -433,10 +474,13 @@ namespace RhythmDojo.Authoring
             double time = MusicTime;
             if (playing && time >= Duration)
             {
+                // An internal loop may restart after this frame reaches the clip end.
+                double? previewReturnTime = this.previewReturnTime;
                 Pause();
+                this.previewReturnTime = previewReturnTime;
             }
 
-            if (playing && follow)
+            if (playing && follow && !IsSeeking)
             {
                 WindowStart = Math.Max(MinimumWindowStart, time - WindowDuration * 0.3);
                 SyncChart(time);
@@ -489,6 +533,7 @@ namespace RhythmDojo.Authoring
 
         private void Observe()
         {
+            EndSeek();
             if (observed != null)
             {
                 observed.Changed -= Refresh;
@@ -516,6 +561,7 @@ namespace RhythmDojo.Authoring
 
         private async void LoadAudio(SongProject project)
         {
+            EndSeek();
             loading?.Cancel();
             loading?.Dispose();
             loading = new CancellationTokenSource();
@@ -605,6 +651,16 @@ namespace RhythmDojo.Authoring
 
         public void Seek(double time)
         {
+            Seek(time, true);
+        }
+
+        public void SeekInViewport(double time)
+        {
+            Seek(time, false);
+        }
+
+        private void Seek(double time, bool moveViewport)
+        {
             if (IsBusy || !source.clip || !double.IsFinite(time))
             {
                 return;
@@ -617,15 +673,18 @@ namespace RhythmDojo.Authoring
                 (int)(Math.Max(0, pausedTime) * source.clip.frequency));
 
             // Keep the clicked pre-song position visible without moving the waveform.
-            if (time >= 0)
+            if (moveViewport && time >= 0)
             {
                 WindowStart = Math.Max(0, pausedTime - WindowDuration * 0.3);
                 SyncChart(pausedTime);
             }
-            else if (pausedTime < WindowStart || pausedTime > WindowStart + WindowDuration)
+            else if (moveViewport)
             {
-                WindowStart = Math.Max(MinimumWindowStart, pausedTime - WindowDuration * 0.3);
-                SyncChart(WindowStart);
+                if (pausedTime < WindowStart || pausedTime > WindowStart + WindowDuration)
+                {
+                    WindowStart = Math.Max(MinimumWindowStart, pausedTime - WindowDuration * 0.3);
+                    SyncChart(WindowStart);
+                }
             }
 
             if (resume && pausedTime < Duration)
@@ -648,6 +707,7 @@ namespace RhythmDojo.Authoring
                 pausedTime = 0;
             }
 
+            previewReturnTime = null;
             source.Stop();
             source.timeSamples = Math.Min(source.clip.samples - 1,
                 (int)(Math.Max(0, pausedTime) * source.clip.frequency));
@@ -673,6 +733,7 @@ namespace RhythmDojo.Authoring
             }
 
             playing = false;
+            previewReturnTime = null;
             source?.Stop();
             if (playLabel)
             {
@@ -1001,11 +1062,21 @@ namespace RhythmDojo.Authoring
 
         private void OnDisable()
         {
+            EndSeek();
             Pause();
+        }
+
+        private void OnApplicationFocus(bool focus)
+        {
+            if (!focus)
+            {
+                EndSeek();
+            }
         }
 
         private void OnDestroy()
         {
+            EndSeek();
             loading?.Cancel();
             loading?.Dispose();
             if (observed != null)

@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 namespace RhythmDojo.UI
 {
@@ -19,6 +20,8 @@ namespace RhythmDojo.UI
         private int cursorSourceWidth;
         private DojoPunchImpact impact;
         private bool impactPending;
+
+        public static bool UsesDefaultPointer => SceneManager.GetActiveScene().path == ChartEditorMenu.ScenePath;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetStatics()
@@ -79,11 +82,53 @@ namespace RhythmDojo.UI
             impact = impactObject.GetComponent<DojoPunchImpact>();
             impact.Initialize(punchFrames[3], Hotspot);
             gameObject.AddComponent<DojoClickFeedback>().Initialize(impact);
+            RefreshSceneStyle();
+        }
+
+        private void OnEnable()
+        {
+            SceneManager.activeSceneChanged += OnActiveSceneChanged;
+            RefreshSceneStyle();
+        }
+
+        private void OnActiveSceneChanged(Scene previous, Scene next)
+        {
+            RefreshSceneStyle();
+        }
+
+        private void RefreshSceneStyle()
+        {
+            punchElapsed = PunchDuration;
+            impactPending = false;
+            if (impact)
+            {
+                impact.Clear();
+                impact.enabled = !UsesDefaultPointer;
+            }
+
+            var feedback = GetComponent<DojoClickFeedback>();
+            if (feedback)
+            {
+                feedback.enabled = !UsesDefaultPointer;
+            }
+
+            if (UsesDefaultPointer)
+            {
+                Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+                currentTexture = null;
+                return;
+            }
+
             Apply(normalTexture);
         }
 
         private void Update()
         {
+            if (UsesDefaultPointer)
+            {
+                return;
+            }
+
             if (Mouse.current == null || !UnityEngine.Application.isFocused)
             {
                 return;
@@ -215,6 +260,11 @@ namespace RhythmDojo.UI
 
         private void Apply(Texture2D texture)
         {
+            if (UsesDefaultPointer)
+            {
+                texture = null;
+            }
+
             if (currentTexture == texture)
             {
                 return;
@@ -285,6 +335,7 @@ namespace RhythmDojo.UI
 
         private void OnDisable()
         {
+            SceneManager.activeSceneChanged -= OnActiveSceneChanged;
             Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
             currentTexture = null;
             punchElapsed = PunchDuration;

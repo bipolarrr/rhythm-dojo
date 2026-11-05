@@ -1,0 +1,26 @@
+{
+  "success": true,
+  "command": "command run_script",
+  "data": {
+    "command": "run_script",
+    "parameters": {
+      "file": "Logs/Pr12SceneCheck.cs"
+    },
+    "result": {
+      "diagnostics": [],
+      "compileMs": 1667,
+      "executeMs": 478,
+      "assemblyName": "PipelineRunScript_Pr12SceneCheck_006bb51d48ec4f7286850fe6a1a99500",
+      "success": true,
+      "result": "Saved ChartEditor scene references, action binding, empty transient state, timeline references and jacket text bounds passed."
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7801,
+      "projectPath": "C:\\Users\\song\\RhythmDojo-pr12-logic"
+    },
+    "success": true
+  },
+  "errors": [],
+  "warnings": []
+}
