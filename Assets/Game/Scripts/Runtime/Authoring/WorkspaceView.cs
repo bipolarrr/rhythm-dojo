@@ -1,4 +1,5 @@
 using System;
+using RhythmDojo.UI;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,7 +12,7 @@ namespace RhythmDojo.Authoring
         Mirror, Randomize, PlayPause, Stop, Loop, Slow, Test, TestHere, AutoTest, AutoTestHere,
         SaveExit, DiscardExit, CancelExit, Pencil, Select, Eraser, Position, Tap, Hold, ImportPupa,
         SaveNew, DiscardNew, ConfirmSaveAs, CancelSaveAs, ProjectFiles, ChartSettings, ResetView,
-        PlayReturn, Scroll, ApplyEstimatedBpm, CloseNoteSpeedWarning
+        PlayReturn, Scroll, ApplyEstimatedBpm, CloseNoteSpeedWarning, OnAir, ConfirmOnAir, CancelOnAir
     }
 
     [Serializable]
@@ -40,6 +41,9 @@ namespace RhythmDojo.Authoring
         public GameObject newPopup;
         public GameObject saveAsPopup;
         public GameObject noteSpeedWarning;
+        public GameObject onAirPopup;
+        public Text onAirCountdown;
+        public WorkspaceToolIcon onAirIcon;
         public Text saveAsError;
         public WorkspaceMenuPopup[] menus;
         public Button[] difficulty;
@@ -70,7 +74,7 @@ namespace RhythmDojo.Authoring
                 return;
             }
 
-            if (saveAsPopup.activeSelf)
+            if (saveAsPopup.activeSelf || (onAirPopup && onAirPopup.activeSelf))
             {
                 return;
             }

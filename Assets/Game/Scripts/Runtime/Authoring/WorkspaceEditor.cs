@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 using RhythmDojo.Application;
 using RhythmDojo.Content;
 using RhythmDojo.Gameplay;
+using RhythmDojo.Services;
 using RhythmDojo.UI;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -20,6 +22,7 @@ namespace RhythmDojo.Authoring
     public sealed class WorkspaceEditor : MonoBehaviour
     {
         public const string ScenePath = ChartEditorMenu.ScenePath;
+        private const double OnAirHoldMinimumSeconds = .15;
         public WorkspaceView view;
         public ChartEditorScreen screen;
         public ChartEditorMenu menu;
@@ -74,6 +77,21 @@ namespace RhythmDojo.Authoring
         private string estimatedAudio;
 
         private ColorBlock[] difficultyColors;
+
+        private EditorSession onAirSession;
+        private Guid onAirChart;
+        private AudioClip onAirClip;
+        private Key[] onAirKeys;
+        private double?[] onAirPressTimes;
+        private Keyboard onAirKeyboard;
+        private readonly List<NoteData> onAirNotes = new List<NoteData>();
+        private double onAirStart;
+        private double onAirDeadline;
+        private bool onAirRecording;
+        private EventSystem onAirEventSystem;
+        private bool onAirNavigation;
+
+        private bool IsOnAirPromptOpen => view.onAirPopup && view.onAirPopup.activeSelf;
 
         public bool IsWorking => working;
 
@@ -133,6 +151,11 @@ namespace RhythmDojo.Authoring
         private void Update()
         {
             if (!menu.IsInitialized || observed == null)
+            {
+                return;
+            }
+
+            if (UpdateOnAir())
             {
                 return;
             }
@@ -278,9 +301,273 @@ namespace RhythmDojo.Authoring
             }
         }
 
+        private void ShowOnAirPrompt()
+        {
+            if (!view.onAirPopup || timeline.IsBusy)
+            {
+                return;
+            }
+
+            if (!timeline.PreviewClip || timeline.MusicTime >= timeline.Duration)
+            {
+                view.status.text = "ON AIR를 시작하려면 음원을 불러오고 재생할 위치를 선택하세요.";
+                return;
+            }
+
+            screen.IsBusy = true;
+            view.onAirPopup.transform.SetAsLastSibling();
+            view.onAirPopup.SetActive(true);
+        }
+
+        private bool HandleOnAirAction(WorkspaceAction action)
+        {
+            if (onAirSession != null)
+            {
+                if (action == WorkspaceAction.OnAir)
+                {
+                    FinishOnAir();
+                }
+
+                return true;
+            }
+
+            if (!IsOnAirPromptOpen)
+            {
+                return action == WorkspaceAction.ConfirmOnAir || action == WorkspaceAction.CancelOnAir;
+            }
+
+            if (action == WorkspaceAction.ConfirmOnAir)
+            {
+                CloseOnAirPrompt();
+                BeginOnAir();
+            }
+            else if (action == WorkspaceAction.CancelOnAir || action == WorkspaceAction.OnAir)
+            {
+                CloseOnAirPrompt();
+            }
+
+            return true;
+        }
+
+        private void CloseOnAirPrompt()
+        {
+            view.onAirPopup.SetActive(false);
+            screen.IsBusy = false;
+        }
+
+        private void BeginOnAir()
+        {
+            if (timeline.IsBusy || !timeline.PreviewClip || timeline.MusicTime >= timeline.Duration)
+            {
+                return;
+            }
+
+            EndPlaybackSeek();
+            CancelGrab();
+            draggingSelection = false;
+            timeline.PausePreview();
+            onAirStart = timeline.MusicTime;
+            onAirSession = screen.Session;
+            onAirChart = screen.ChartId;
+            onAirClip = timeline.PreviewClip;
+            var mode = screen.Mode;
+            onAirKeys = new Key[mode.LaneCount];
+            onAirPressTimes = new double?[mode.LaneCount];
+            for (int lane = 0; lane < onAirKeys.Length; lane++)
+            {
+                onAirKeys[lane] = PlayKeyBindings.GetKey(mode, mode.name, lane);
+            }
+
+            onAirEventSystem = EventSystem.current;
+            if (onAirEventSystem)
+            {
+                onAirNavigation = onAirEventSystem.sendNavigationEvents;
+                onAirEventSystem.SetSelectedGameObject(null);
+                onAirEventSystem.sendNavigationEvents = false;
+            }
+
+            onAirDeadline = Time.realtimeSinceStartupAsDouble + 3;
+            view.onAirCountdown.text = "3";
+            view.onAirCountdown.gameObject.SetActive(true);
+            view.onAirIcon.color = new Color(.85f, .48f, .12f);
+            view.status.text = "ON AIR 준비 · Esc 또는 F8로 취소";
+        }
+
+        private bool UpdateOnAir()
+        {
+            var keyboard = Keyboard.current;
+            if (IsOnAirPromptOpen)
+            {
+                if (keyboard != null && (keyboard.escapeKey.wasPressedThisFrame || keyboard.f8Key.wasPressedThisFrame))
+                {
+                    CloseOnAirPrompt();
+                }
+
+                return true;
+            }
+
+            if (onAirSession == null)
+            {
+                return false;
+            }
+
+            if (screen.Session != onAirSession || screen.ChartId != onAirChart || timeline.PreviewClip != onAirClip)
+            {
+                FinishOnAir();
+                return true;
+            }
+
+            if (keyboard != null)
+            {
+                bool stopWithF8 = keyboard.f8Key.wasPressedThisFrame
+                    && (!onAirRecording || Array.IndexOf(onAirKeys, Key.F8) < 0);
+                if (keyboard.escapeKey.wasPressedThisFrame || stopWithF8)
+                {
+                    FinishOnAir();
+                    return true;
+                }
+            }
+
+            if (!onAirRecording)
+            {
+                double remaining = onAirDeadline - Time.realtimeSinceStartupAsDouble;
+                if (remaining > 0)
+                {
+                    view.onAirCountdown.text = Math.Ceiling(remaining).ToString(CultureInfo.InvariantCulture);
+                    return true;
+                }
+
+                timeline.SeekInViewport(onAirStart);
+                timeline.PlayPreview();
+                onAirRecording = true;
+                view.onAirCountdown.gameObject.SetActive(false);
+                view.onAirIcon.color = new Color(.83f, .12f, .15f);
+                view.status.text = "● ON AIR · Esc 또는 ON AIR 버튼으로 종료";
+            }
+            else if (!timeline.IsPlaying || timeline.MusicTime >= timeline.Duration)
+            {
+                FinishOnAir();
+            }
+            else
+            {
+                RecordOnAirNotes(keyboard);
+            }
+
+            return true;
+        }
+
+        private void RecordOnAirNotes(Keyboard keyboard)
+        {
+            if (onAirKeyboard != keyboard)
+            {
+                Array.Clear(onAirPressTimes, 0, onAirPressTimes.Length);
+                onAirKeyboard = keyboard;
+            }
+
+            if (keyboard == null)
+            {
+                return;
+            }
+
+            double time = timeline.MusicTime + timeline.AudioOffset;
+            onAirNotes.Clear();
+            for (int lane = 0; lane < onAirKeys.Length; lane++)
+            {
+                var key = onAirKeys[lane];
+                if (key == Key.None)
+                {
+                    continue;
+                }
+
+                var control = keyboard[key];
+                if (time >= 0 && control.wasPressedThisFrame && !onAirPressTimes[lane].HasValue)
+                {
+                    onAirPressTimes[lane] = time;
+                }
+
+                if (!control.wasReleasedThisFrame || !onAirPressTimes[lane].HasValue)
+                {
+                    continue;
+                }
+
+                double start = onAirPressTimes[lane].Value;
+                onAirPressTimes[lane] = null;
+                if (time >= 0 && control.isPressed)
+                {
+                    onAirPressTimes[lane] = time;
+                }
+
+                if (time < start)
+                {
+                    continue;
+                }
+
+                var recorded = NoteData.Tap(lane, start);
+                if (time - start >= OnAirHoldMinimumSeconds)
+                {
+                    recorded = NoteData.Hold(lane, start, time);
+                }
+
+                int pressedLane = lane;
+                if (!cachedNotes.Any(note => note.Data.Lane == pressedLane
+                    && note.Data.StartTime <= recorded.EndTime && note.Data.EndTime >= recorded.StartTime))
+                {
+                    onAirNotes.Add(recorded);
+                }
+            }
+
+            if (onAirNotes.Count == 0)
+            {
+                return;
+            }
+
+            var chart = onAirSession.Snapshot.Charts.Single(item => item.Id == onAirChart);
+            onAirSession.Edit(edit =>
+            {
+                double lastNoteEnd = onAirNotes.Max(note => note.EndTime);
+                if (lastNoteEnd >= chart.CompletionTimeSeconds)
+                {
+                    double end = timeline.Timing.TimeAtBeat(timeline.Timing.BeatAtTime(lastNoteEnd) + 1);
+                    edit.SetChartSettings(chart.Id, chart.ModeId, chart.LaneCount, end);
+                }
+
+                foreach (var note in onAirNotes)
+                {
+                    edit.AddNote(chart.Id, note);
+                }
+            });
+        }
+
+        private void FinishOnAir()
+        {
+            if (timeline && timeline.PreviewClip == onAirClip)
+            {
+                timeline.PausePreview();
+                timeline.Seek(onAirStart);
+            }
+
+            if (onAirEventSystem)
+            {
+                onAirEventSystem.SetSelectedGameObject(null);
+                onAirEventSystem.sendNavigationEvents = onAirNavigation;
+            }
+
+            onAirEventSystem = null;
+            onAirSession = null;
+            onAirClip = null;
+            onAirKeys = null;
+            onAirPressTimes = null;
+            onAirKeyboard = null;
+            onAirRecording = false;
+            view.CloseMenus();
+            view.onAirCountdown.gameObject.SetActive(false);
+            view.onAirIcon.color = new Color(.16f, .16f, .16f);
+            view.status.text = "ON AIR 종료";
+        }
+
         private void PrepareShortcutInput()
         {
-            if (!isActiveAndEnabled)
+            if (!isActiveAndEnabled || onAirSession != null)
             {
                 return;
             }
@@ -617,6 +904,11 @@ namespace RhythmDojo.Authoring
 
         public async void Run(WorkspaceAction action, bool closeMenus = true)
         {
+            if (HandleOnAirAction(action))
+            {
+                return;
+            }
+
             if (view.IsNoteSpeedWarningOpen)
             {
                 if (action == WorkspaceAction.CloseNoteSpeedWarning)
@@ -1030,6 +1322,9 @@ namespace RhythmDojo.Authoring
                 case WorkspaceAction.Scroll:
                     tool = 4;
                     break;
+                case WorkspaceAction.OnAir:
+                    ShowOnAirPrompt();
+                    break;
                 case WorkspaceAction.Tap:
                     screen.MinimumHoldOnClick = false;
                     tool = 0;
@@ -1383,7 +1678,7 @@ namespace RhythmDojo.Authoring
 
         private bool PointerDown(PointerEventData data)
         {
-            if (working)
+            if (working || onAirSession != null)
             {
                 return true;
             }
@@ -1573,12 +1868,24 @@ namespace RhythmDojo.Authoring
             if (!focus)
             {
                 EndPlaybackSeek();
+                if (onAirPressTimes != null)
+                {
+                    Array.Clear(onAirPressTimes, 0, onAirPressTimes.Length);
+                }
             }
         }
 
         private void OnDisable()
         {
             EndPlaybackSeek();
+            if (onAirSession != null)
+            {
+                FinishOnAir();
+            }
+            else if (view && IsOnAirPromptOpen)
+            {
+                CloseOnAirPrompt();
+            }
         }
 
         private void SetPlaybackPosition(Vector2 point)

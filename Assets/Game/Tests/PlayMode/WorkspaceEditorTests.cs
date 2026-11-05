@@ -8,6 +8,7 @@ using RhythmDojo.Authoring;
 using RhythmDojo.Core;
 using RhythmDojo.Content;
 using RhythmDojo.Gameplay;
+using RhythmDojo.Services;
 using RhythmDojo.UI;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -1898,6 +1899,113 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        public IEnumerator OnAirRecordsConfiguredLaneKeysAndReturnsToStart()
+        {
+            workspace.view.audioPath.text = WriteTempoWave();
+            workspace.Run(WorkspaceAction.ImportAudio);
+            yield return Idle();
+
+            var mode = workspace.screen.Mode;
+            string savedKeys = PlayerPrefs.GetString(PlayKeyBindings.ModeStorageKey, null);
+            bool hadSavedKeys = PlayerPrefs.HasKey(PlayKeyBindings.ModeStorageKey);
+            try
+            {
+                PlayKeyBindings.Reset(mode.name);
+                Assert.That(PlayKeyBindings.TrySetKey(mode, mode.name, 0, Key.S, out _), Is.True);
+                Assert.That(PlayKeyBindings.TrySetKey(mode, mode.name, 1, Key.D, out _), Is.True);
+                Assert.That(PlayKeyBindings.TrySetKey(mode, mode.name, 3, Key.L, out _), Is.True);
+                Assert.That(PlayKeyBindings.TrySetKey(mode, mode.name, 2, Key.K, out _), Is.True);
+
+                var view = workspace.view;
+                var chart = workspace.screen.ChartId;
+                var session = workspace.screen.Session;
+                var toolbarButton = view.toolActions.Single(item => item.action == WorkspaceAction.OnAir).button;
+                var menuButton = view.actions.Single(item => item.action == WorkspaceAction.OnAir).button;
+                var scrollButton = view.actions.Single(item => item.action == WorkspaceAction.Scroll).button;
+                var yes = view.actions.Single(item => item.action == WorkspaceAction.ConfirmOnAir).button;
+                var no = view.actions.Single(item => item.action == WorkspaceAction.CancelOnAir).button;
+                Assert.That(menuButton.transform.GetSiblingIndex(), Is.EqualTo(scrollButton.transform.GetSiblingIndex() + 1));
+                Assert.That(view.toolActions.All(item => ((RectTransform)item.button.transform).sizeDelta == new Vector2(38, 38)), Is.True);
+                workspace.timeline.Seek(2);
+
+                yield return PressKeys(Key.F8);
+                Assert.That(view.onAirPopup.activeSelf, Is.True);
+                yield return ClickAt(Center((RectTransform)no.transform));
+                Assert.That(view.onAirPopup.activeSelf, Is.False);
+                Assert.That(workspace.timeline.IsPlaying, Is.False);
+
+                yield return ClickAt(Center((RectTransform)toolbarButton.transform));
+                yield return ClickAt(Center((RectTransform)yes.transform));
+                Assert.That(view.onAirCountdown.text, Is.EqualTo("3"));
+                yield return PressKeys(Key.S);
+                Assert.That(workspace.timeline.MusicTime, Is.EqualTo(2).Within(.001));
+                Assert.That(session.GetNotes(chart), Is.Empty);
+                yield return ClickAt(Center((RectTransform)toolbarButton.transform));
+                Assert.That(view.onAirCountdown.gameObject.activeSelf, Is.False);
+
+                view.OpenMenu(view.menus[3]);
+                yield return ClickAt(Center((RectTransform)menuButton.transform));
+                yield return ClickAt(Center((RectTransform)yes.transform));
+                Assert.That(view.onAirCountdown.gameObject.activeSelf, Is.True);
+                yield return new WaitForSecondsRealtime(3.1f);
+                Assert.That(workspace.timeline.IsPlaying, Is.True);
+                Assert.That(view.onAirCountdown.gameObject.activeSelf, Is.False);
+
+                double before = workspace.timeline.MusicTime;
+                yield return PressKeys(Key.S, Key.K);
+                var notes = session.GetNotes(chart);
+                Assert.That(notes.Select(note => note.Data.Lane), Is.EquivalentTo(new[] { 0, 2 }));
+                Assert.That(notes.All(note => note.Data.Kind == NoteKind.Tap), Is.True);
+                Assert.That(notes[0].Data.StartTime, Is.InRange(before, workspace.timeline.MusicTime));
+                Assert.That(notes[1].Data.StartTime, Is.EqualTo(notes[0].Data.StartTime));
+
+                double beforeHold = workspace.timeline.MusicTime;
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.D));
+                yield return null;
+                yield return null;
+                double afterHoldPress = workspace.timeline.MusicTime;
+                yield return new WaitForSecondsRealtime(.25f);
+                Assert.That(session.GetNotes(chart).Length, Is.EqualTo(2));
+
+                double beforeRelease = workspace.timeline.MusicTime;
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+                yield return null;
+                yield return null;
+                var hold = session.GetNotes(chart).Single(note => note.Data.Lane == 1).Data;
+                Assert.That(hold.Kind, Is.EqualTo(NoteKind.Hold));
+                Assert.That(hold.StartTime, Is.InRange(beforeHold, afterHoldPress));
+                Assert.That(hold.EndTime, Is.InRange(beforeRelease, workspace.timeline.MusicTime));
+
+                yield return PressKeys(Key.LeftCtrl, Key.Z);
+                Assert.That(session.GetNotes(chart).Length, Is.EqualTo(3));
+
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.L));
+                yield return new WaitForSecondsRealtime(.2f);
+                yield return PressKeys(Key.L, Key.Escape);
+                Assert.That(workspace.timeline.IsPlaying, Is.False);
+                Assert.That(workspace.timeline.MusicTime, Is.EqualTo(2).Within(.001));
+                yield return PressKeys(Key.S);
+                Assert.That(session.GetNotes(chart).Length, Is.EqualTo(3));
+                yield return PressKeys(Key.LeftCtrl, Key.Z);
+                Assert.That(session.GetNotes(chart).Length, Is.EqualTo(2));
+                yield return PressKeys(Key.LeftCtrl, Key.Z);
+                Assert.That(session.GetNotes(chart), Is.Empty);
+            }
+            finally
+            {
+                if (hadSavedKeys)
+                {
+                    PlayerPrefs.SetString(PlayKeyBindings.ModeStorageKey, savedKeys);
+                }
+                else
+                {
+                    PlayerPrefs.DeleteKey(PlayKeyBindings.ModeStorageKey);
+                }
+                PlayerPrefs.Save();
+            }
+        }
+
+        [UnityTest]
         public IEnumerator OriginalEditorKeepsItsStandardDefault()
         {
             yield return SceneManager.LoadSceneAsync(ChartEditorMenu.ScenePath);
@@ -1907,7 +2015,7 @@ namespace RhythmDojo.Tests
             Assert.That(WorkspaceEditor.ScenePath, Is.EqualTo(ChartEditorMenu.ScenePath));
             Assert.That(UnityEngine.Object.FindFirstObjectByType<WorkspaceEditor>(), Is.Not.Null);
             var view = UnityEngine.Object.FindFirstObjectByType<WorkspaceView>();
-            Assert.That(view.toolActions.Length, Is.EqualTo(5));
+            Assert.That(view.toolActions.Length, Is.EqualTo(6));
             Assert.That(view.quantizationCycleValue.text, Is.EqualTo("1/4"));
         }
 

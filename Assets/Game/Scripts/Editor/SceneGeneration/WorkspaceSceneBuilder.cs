@@ -180,6 +180,7 @@ namespace RhythmDojo.EditorTools
             Action(tools, "지우개", WorkspaceAction.Eraser, bindings);
             Action(tools, "잡기", WorkspaceAction.Position, bindings);
             Action(tools, "재생 위치", WorkspaceAction.Scroll, bindings);
+            Action(tools, "ON AIR", WorkspaceAction.OnAir, bindings);
             view.position = Field(tools, "작업 위치 (초)", "0");
             BuildToolBar(canvas.transform, view);
             Heading(tools, "퀀타이즈 · 4분음표 기준");
@@ -218,6 +219,7 @@ namespace RhythmDojo.EditorTools
             UiElements.Position(help.rectTransform, new Vector2(176, -18), new Vector2(230, 210));
             AddGameplayPreview(canvas, view);
             AddNoteSpeedWarning(canvas.transform, view, bindings);
+            AddOnAirDialog(canvas.transform, view, bindings);
 
             // Confirmation dialogs stay above the editor and its live preview.
             var popup = Panel("Unsaved Changes", canvas.transform, new Vector2(0, 0), new Vector2(1280, 720));
@@ -457,44 +459,88 @@ namespace RhythmDojo.EditorTools
             return label;
         }
 
+        private static void AddOnAirDialog(Transform parent, WorkspaceView view, List<WorkspaceActionBinding> bindings)
+        {
+            var countdown = UiElements.Label("ON AIR Countdown", parent, "3", Vector2.zero, new Vector2(96, 96), 64);
+            countdown.rectTransform.anchorMin = countdown.rectTransform.anchorMax = new Vector2(.5f, .5f);
+            countdown.rectTransform.pivot = new Vector2(.5f, .5f);
+            countdown.rectTransform.anchoredPosition = new Vector2(-190, 100);
+            countdown.alignment = TextAnchor.MiddleCenter;
+            countdown.gameObject.SetActive(false);
+            view.onAirCountdown = countdown;
+
+            var popup = Panel("ON AIR Confirmation", parent, Vector2.zero, Vector2.zero);
+            popup.anchorMin = Vector2.zero;
+            popup.anchorMax = Vector2.one;
+            popup.offsetMin = popup.offsetMax = Vector2.zero;
+            var heading = UiElements.Label("Question", popup, "ON AIR 모드에서는 다른 편집 단축키를 사용할 수 없습니다.\n3초 뒤 현재 위치부터 노트 입력을 시작할까요?",
+                new Vector2(250, -230), new Vector2(780, 88), 23);
+            heading.alignment = TextAnchor.MiddleCenter;
+            PopupAction(popup, "YES", WorkspaceAction.ConfirmOnAir, 390, bindings);
+            PopupAction(popup, "NO", WorkspaceAction.CancelOnAir, 660, bindings);
+            popup.gameObject.SetActive(false);
+            view.onAirPopup = popup.gameObject;
+        }
+
         private static void BuildToolBar(Transform parent, WorkspaceView view)
         {
             var tool = parent.Find("Editor Content/Tool Space");
             var toolLabel = tool.Find("Tool Space Label").GetComponent<Text>();
             toolLabel.gameObject.SetActive(false);
-            var captions = new[] { "선택", "그리기", "지우개", "잡기", "재생 위치" };
+            var captions = new[] { "선택", "그리기", "지우개", "잡기", "재생 위치", "ON AIR" };
             var actions = new[] { WorkspaceAction.Select, WorkspaceAction.Pencil,
-                WorkspaceAction.Eraser, WorkspaceAction.Position, WorkspaceAction.Scroll };
+                WorkspaceAction.Eraser, WorkspaceAction.Position, WorkspaceAction.Scroll, WorkspaceAction.OnAir };
             view.toolActions = new WorkspaceActionBinding[actions.Length];
             for (int i = 0; i < actions.Length; i++)
             {
-                var button = UiElements.Button("Tool " + actions[i], tool, captions[i],
-                    new Vector2(4, -6 - i * 50), new Vector2(44, 44));
-                StyleMenuButton(button, TextAnchor.MiddleLeft, 10);
-                var label = button.GetComponentInChildren<Text>();
-                label.gameObject.SetActive(false);
-                var shortcutLabel = AddShortcutLabel(button, WorkspaceShortcuts.Label(actions[i]), 9);
-                UiElements.Position(shortcutLabel.rectTransform, new Vector2(0, -29), new Vector2(41, 12));
-                var icon = new GameObject("Icon", typeof(RectTransform), typeof(WorkspaceToolIcon))
-                    .GetComponent<WorkspaceToolIcon>();
-                icon.transform.SetParent(button.transform, false);
-                UiElements.Position(icon.rectTransform, new Vector2(9, -9), new Vector2(26, 26));
-                icon.kind = (WorkspaceToolIcon.IconKind)i;
-                icon.color = MenuText;
-                icon.raycastTarget = false;
-                view.toolActions[i] = new WorkspaceActionBinding { action = actions[i], button = button };
+                view.toolActions[i] = AddToolBarButton(tool, view, actions[i], captions[i], i);
             }
             view.quantizationCycle = UiElements.Button("Quantization Cycle", tool, "",
-                new Vector2(4, -6 - actions.Length * 50), new Vector2(44, 44));
+                Vector2.zero, Vector2.zero);
             StyleMenuButton(view.quantizationCycle, TextAnchor.MiddleCenter, 9);
             var caption = view.quantizationCycle.GetComponentInChildren<Text>();
             caption.gameObject.SetActive(false);
             caption.raycastTarget = false;
             view.quantizationCycleValue = UiElements.Label("Value", view.quantizationCycle.transform,
-                "1/4", Vector2.zero, new Vector2(44, 44), 13);
+                "1/4", Vector2.zero, new Vector2(38, 38), 13);
             view.quantizationCycleValue.alignment = TextAnchor.MiddleCenter;
             view.quantizationCycleValue.color = MenuText;
             view.quantizationCycleValue.raycastTarget = false;
+            PositionToolBarButton(view.quantizationCycle, actions.Length);
+        }
+
+        private static WorkspaceActionBinding AddToolBarButton(Transform tool, WorkspaceView view,
+            WorkspaceAction action, string caption, int index)
+        {
+            var button = UiElements.Button("Tool " + action, tool, caption, Vector2.zero, Vector2.zero);
+            StyleMenuButton(button, TextAnchor.MiddleLeft, 10);
+            var label = button.GetComponentInChildren<Text>();
+            label.gameObject.SetActive(false);
+            AddShortcutLabel(button, WorkspaceShortcuts.Label(action), 9);
+            var icon = new GameObject("Icon", typeof(RectTransform), typeof(WorkspaceToolIcon))
+                .GetComponent<WorkspaceToolIcon>();
+            icon.transform.SetParent(button.transform, false);
+            icon.kind = (WorkspaceToolIcon.IconKind)index;
+            icon.color = MenuText;
+            icon.raycastTarget = false;
+            if (action == WorkspaceAction.OnAir)
+            {
+                view.onAirIcon = icon;
+            }
+
+            PositionToolBarButton(button, index);
+            return new WorkspaceActionBinding { action = action, button = button };
+        }
+
+        private static void PositionToolBarButton(Button button, int index)
+        {
+            UiElements.Position((RectTransform)button.transform, new Vector2(7, -6 - index * 42), new Vector2(38, 38));
+            var shortcut = button.transform.Find("Shortcut") as RectTransform;
+            if (shortcut)
+            {
+                UiElements.Position(shortcut, new Vector2(0, -25), new Vector2(35, 11));
+                UiElements.Position((RectTransform)button.transform.Find("Icon"), new Vector2(8, -4), new Vector2(22, 22));
+            }
         }
 
         private static void StyleMenuButton(Button button, TextAnchor alignment, int fontSize)
