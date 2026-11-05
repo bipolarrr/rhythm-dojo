@@ -1316,6 +1316,83 @@ namespace RhythmDojo.Tests
 
         [UnityTest]
         [Category("PlaybackSeek")]
+        public IEnumerator ControlClickSeeksNearestVisibleBeatLineWithoutEditingNotes()
+        {
+            workspace.view.audioPath.text = WriteTempoWave();
+            workspace.Run(WorkspaceAction.ImportAudio);
+            yield return Idle();
+
+            long id = 0;
+            workspace.screen.Session.Edit(edit =>
+            {
+                edit.SetTiming(.25, new TempoPoint(0, 120), new TempoPoint(1.2, 240));
+                id = edit.AddNote(workspace.screen.ChartId, NoteData.Tap(0, 2.13));
+            });
+            workspace.screen.SnapEnabled = false;
+            workspace.Run(WorkspaceAction.Pencil);
+            yield return null;
+
+            double scrollOffset = workspace.screen.ScrollBeatOffset;
+            double windowStart = workspace.timeline.WindowStart;
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.LeftCtrl));
+            yield return ClickAt(GridPoint(1, 1.18));
+            Assert.That(workspace.grid.PlayheadTime, Is.EqualTo(1.35).Within(.001),
+                "Across the BPM change, screen distance is closer to beat 3 than beat 2.");
+            Assert.That(workspace.timeline.MusicTime, Is.EqualTo(1.10).Within(.001));
+            Assert.That(workspace.screen.Session.GetNotes(workspace.screen.ChartId).Single().Id, Is.EqualTo(id));
+
+            workspace.Run(WorkspaceAction.Eraser);
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.RightCtrl));
+            yield return ClickAt(GridPoint(0, 2.13));
+            Assert.That(workspace.grid.PlayheadTime, Is.EqualTo(2.10).Within(.001));
+            Assert.That(workspace.screen.Session.GetNotes(workspace.screen.ChartId).Single().Id, Is.EqualTo(id));
+            Assert.That(workspace.screen.ScrollBeatOffset, Is.EqualTo(scrollOffset));
+            Assert.That(workspace.timeline.WindowStart, Is.EqualTo(windowStart));
+
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+            yield return ClickAt(GridPoint(0, 2.13));
+            Assert.That(workspace.screen.Session.GetNotes(workspace.screen.ChartId), Is.Empty);
+        }
+
+        [UnityTest]
+        [Category("PlaybackSeek")]
+        public IEnumerator ControlClickSeeksNearestVisibleWaveformLine()
+        {
+            workspace.view.audioPath.text = WriteTempoWave();
+            workspace.Run(WorkspaceAction.ImportAudio);
+            yield return Idle();
+
+            workspace.screen.Session.Edit(edit => edit.SetTiming(.25, new TempoPoint(0, 120)));
+            workspace.screen.SnapEnabled = false;
+            workspace.timeline.Zoom(1, 0);
+            workspace.timeline.Zoom(1, 0);
+            yield return null;
+
+            Canvas.ForceUpdateCanvases();
+            var timeline = workspace.timeline;
+            var detail = timeline.GetComponent<ChartAudioTimelineView>().detail.rectTransform;
+            Assert.That(detail.GetComponentsInChildren<Text>().Any(label => label.text == "2.2"), Is.True);
+            double windowStart = timeline.WindowStart;
+            double scrollOffset = workspace.screen.ScrollBeatOffset;
+            const double clickTime = 2.10;
+            float fraction = (float)((clickTime - windowStart) / timeline.WindowDuration);
+            float x = Mathf.Lerp(detail.rect.xMin, detail.rect.xMax, fraction);
+            var point = RectTransformUtility.WorldToScreenPoint(null, detail.TransformPoint(x, detail.rect.center.y, 0));
+
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.LeftCtrl));
+            yield return ClickAt(point);
+            Assert.That(timeline.MusicTime, Is.EqualTo(2.25).Within(.001));
+            Assert.That(workspace.grid.PlayheadTime, Is.EqualTo(2.5).Within(.001));
+            Assert.That(timeline.WindowStart, Is.EqualTo(windowStart));
+            Assert.That(workspace.screen.ScrollBeatOffset, Is.EqualTo(scrollOffset));
+
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+            yield return ClickAt(point);
+            Assert.That(timeline.MusicTime, Is.EqualTo(clickTime).Within(.005));
+        }
+
+        [UnityTest]
+        [Category("PlaybackSeek")]
         public IEnumerator PlaybackPositionToolSeeksClickedGridLineWithoutEditingNotes()
         {
             string path = Path.GetFullPath("LocalAudio/Saiki.wav");
@@ -1481,6 +1558,52 @@ namespace RhythmDojo.Tests
             Assert.That(UnityEngine.Object.FindFirstObjectByType<ChartGameplayPreview>(), Is.Null);
             Assert.That(UnityEngine.Object.FindObjectsByType<Camera>(FindObjectsSortMode.None)
                 .Any(item => item.name == "Editor Preview Camera"), Is.False);
+        }
+
+        [UnityTest]
+        public IEnumerator GameplayPreviewNoteSpeedAcceptsDecimalsAndRejectsOutOfRangeValues()
+        {
+            workspace.screen.Session.Edit(edit =>
+            {
+                edit.AddNote(workspace.screen.ChartId, NoteData.Tap(0, 1));
+                edit.AddNote(workspace.screen.ChartId, NoteData.Tap(1, 5));
+            });
+            yield return null;
+
+            var preview = UnityEngine.Object.FindFirstObjectByType<ChartGameplayPreview>();
+            var field = workspace.view.noteSpeed;
+            Assert.That(field.text, Is.EqualTo("1.0"));
+            Assert.That(preview.VisibleNoteCount, Is.EqualTo(2));
+
+            yield return EnterText(field, "5.5");
+            yield return PressKeys(Key.Enter);
+            Assert.That(field.text, Is.EqualTo("5.5"));
+            Assert.That(preview.VisibleNoteCount, Is.EqualTo(1));
+            Assert.That(workspace.timeline.PreviewSpeed, Is.EqualTo(1));
+
+            var warning = workspace.view.noteSpeedWarning;
+            var confirm = workspace.view.actions.Single(item => item.action == WorkspaceAction.CloseNoteSpeedWarning).button;
+            foreach (string invalidSpeed in new[] { "0.9", "10.1" })
+            {
+                yield return EnterText(field, invalidSpeed);
+                yield return PressKeys(Key.Enter);
+                Assert.That(warning.activeInHierarchy, Is.True);
+                Assert.That(warning.GetComponentsInChildren<Text>().Any(label =>
+                    label.text == "속도는 1.0 ~ 10.0 안에서만 조절 할 수 있습니다"), Is.True);
+                Assert.That(field.text, Is.EqualTo("5.5"));
+                Assert.That(preview.VisibleNoteCount, Is.EqualTo(1));
+                yield return ClickAt(Center(confirm.GetComponent<RectTransform>()));
+                Assert.That(warning.activeInHierarchy, Is.False);
+            }
+
+            foreach (string validSpeed in new[] { "2.0", "10.0", "1.0" })
+            {
+                yield return EnterText(field, validSpeed);
+                yield return ClickAt(Center(preview.clock.rectTransform));
+                Assert.That(field.text, Is.EqualTo(validSpeed));
+                Assert.That(warning.activeInHierarchy, Is.False);
+            }
+            Assert.That(preview.VisibleNoteCount, Is.EqualTo(2));
         }
 
         [UnityTest]

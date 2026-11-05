@@ -117,6 +117,32 @@ namespace RhythmDojo.UI
             return 0;
         }
 
+        public bool TryGetNearestBeatLine(float y, out double beat)
+        {
+            var projection = Projection;
+            double topBeat = projection.Unproject(rectTransform.rect.yMax);
+            double nearestDistance = double.PositiveInfinity;
+            beat = 0;
+
+            foreach (double line in VisibleBeatLines(topBeat))
+            {
+                double distance = Math.Abs(projection.Project(line) - y);
+                if (distance < nearestDistance)
+                {
+                    nearestDistance = distance;
+                    beat = line;
+                }
+            }
+
+            return double.IsFinite(nearestDistance);
+        }
+
+        private IEnumerable<double> VisibleBeatLines(double topBeat)
+        {
+            var timing = tempo ?? DefaultTiming;
+            return timing.Lines(bottomBeat, topBeat, 1);
+        }
+
         protected override void OnPopulateMesh(VertexHelper vertices)
         {
             vertices.Clear();
@@ -157,7 +183,7 @@ namespace RhythmDojo.UI
 
             var timing = tempo ?? DefaultTiming;
             double topBeat = projection.Unproject(area.yMax);
-            foreach (double beat in timing.Lines(bottomBeat, topBeat, 1))
+            foreach (double beat in VisibleBeatLines(topBeat))
             {
                 bool measure = timing.IsMeasure(beat);
                 float y = (float)projection.Project(beat);

@@ -249,8 +249,18 @@ namespace RhythmDojo.Authoring
 
             if (EventSystem.current && EventSystem.current.currentSelectedGameObject)
             {
-                if (EventSystem.current.currentSelectedGameObject.GetComponent<InputField>())
+                var field = EventSystem.current.currentSelectedGameObject.GetComponent<InputField>();
+                if (field)
                 {
+                    if (field == view.noteSpeed && field.isFocused)
+                    {
+                        if (keyboard.enterKey.wasPressedThisFrame || keyboard.numpadEnterKey.wasPressedThisFrame)
+                        {
+                            field.DeactivateInputField();
+                            EventSystem.current.SetSelectedGameObject(null);
+                        }
+                    }
+
                     return;
                 }
             }
@@ -304,6 +314,12 @@ namespace RhythmDojo.Authoring
 
         private void HandleEscape()
         {
+            if (view.IsNoteSpeedWarningOpen)
+            {
+                Run(WorkspaceAction.CloseNoteSpeedWarning);
+                return;
+            }
+
             if (timeline.IsTempoChangeOpen)
             {
                 timeline.CloseTempoChange();
@@ -372,6 +388,11 @@ namespace RhythmDojo.Authoring
 
         private bool HandlePopupKeyboard(Keyboard keyboard)
         {
+            if (view.IsNoteSpeedWarningOpen)
+            {
+                return true;
+            }
+
             if (timeline.IsTempoChangeOpen)
             {
                 if (keyboard.enterKey.wasPressedThisFrame || keyboard.numpadEnterKey.wasPressedThisFrame)
@@ -596,6 +617,16 @@ namespace RhythmDojo.Authoring
 
         public async void Run(WorkspaceAction action, bool closeMenus = true)
         {
+            if (view.IsNoteSpeedWarningOpen)
+            {
+                if (action == WorkspaceAction.CloseNoteSpeedWarning)
+                {
+                    view.noteSpeedWarning.SetActive(false);
+                }
+
+                return;
+            }
+
             if (working || !menu.IsInitialized)
             {
                 return;
@@ -1356,6 +1387,18 @@ namespace RhythmDojo.Authoring
             {
                 return true;
             }
+
+            var keyboard = Keyboard.current;
+            if (data.button == PointerEventData.InputButton.Left && keyboard != null && keyboard.ctrlKey.isPressed)
+            {
+                if (Point(data, out var click) && grid.TryGetNearestBeatLine(click.y, out double beat))
+                {
+                    timeline.SeekInViewport(timeline.Timing.TimeAtBeat(beat) - timeline.AudioOffset);
+                }
+
+                return true;
+            }
+
             if (tool == 0)
             {
                 return false;

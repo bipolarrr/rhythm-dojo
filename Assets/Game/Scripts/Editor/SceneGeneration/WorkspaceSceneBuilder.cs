@@ -217,6 +217,7 @@ namespace RhythmDojo.EditorTools
             help.fontSize = 14;
             UiElements.Position(help.rectTransform, new Vector2(176, -18), new Vector2(230, 210));
             AddGameplayPreview(canvas, view);
+            AddNoteSpeedWarning(canvas.transform, view, bindings);
 
             // Confirmation dialogs stay above the editor and its live preview.
             var popup = Panel("Unsaved Changes", canvas.transform, new Vector2(0, 0), new Vector2(1280, 720));
@@ -302,7 +303,7 @@ namespace RhythmDojo.EditorTools
             image.rectTransform.anchorMax = Vector2.one;
             image.rectTransform.offsetMin = new Vector2(10, 42);
             image.rectTransform.offsetMax = new Vector2(-10, -32);
-            var clock = UiElements.Label("Preview Clock", panel, "미리보기 · 0.000 s · 1×",
+            var clock = UiElements.Label("Preview Clock", panel, "미리보기 · 0.000 s",
                 Vector2.zero, new Vector2(350, 18), 11);
             clock.rectTransform.anchorMin = clock.rectTransform.anchorMax = Vector2.zero;
             clock.rectTransform.anchoredPosition = new Vector2(12, 40);
@@ -318,6 +319,8 @@ namespace RhythmDojo.EditorTools
             preview.workspace = canvas.GetComponent<WorkspaceEditor>();
             preview.image = image;
             preview.clock = clock;
+            view.noteSpeed = AddNoteSpeedField(panel);
+            UnityEventTools.AddPersistentListener(view.noteSpeed.onEndEdit, preview.ApplyNoteSpeed);
             preview.presentation = SceneResources.Require<GameplayPresentationSettings>("Assets/Game/Settings/PresentationSettings.asset");
             preview.scrollSettings = SceneResources.Require<ScrollSettings>("Assets/Game/Settings/ScrollSettings.asset");
             preview.tapTemplate = SceneResources.Require<GameObject>("Assets/Game/Prefabs/TapNote.prefab").GetComponent<NoteView>();
@@ -328,6 +331,54 @@ namespace RhythmDojo.EditorTools
             serialized.FindProperty("railMaterial").objectReferenceValue = SceneResources.Require<Material>("Assets/Game/Materials/Rails.mat");
             serialized.FindProperty("judgmentMaterial").objectReferenceValue = SceneResources.Require<Material>("Assets/Game/Materials/Judgement.mat");
             serialized.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static InputField AddNoteSpeedField(Transform panel)
+        {
+            var root = new GameObject("Preview Note Speed", typeof(RectTransform));
+            root.transform.SetParent(panel, false);
+            var rect = (RectTransform)root.transform;
+            rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(1, 0);
+            rect.anchoredPosition = new Vector2(-10, 9);
+            rect.sizeDelta = new Vector2(150, 24);
+
+            var label = UiElements.Label("Note Speed Label", rect, "노트 속도", Vector2.zero, new Vector2(68, 24), 14);
+            label.alignment = TextAnchor.MiddleRight;
+            var go = DefaultControls.CreateInputField(new DefaultControls.Resources());
+            go.name = "Note Speed Input";
+            go.transform.SetParent(rect, false);
+            UiElements.Position((RectTransform)go.transform, new Vector2(76, 0), new Vector2(58, 24));
+            var field = go.GetComponent<InputField>();
+            field.contentType = InputField.ContentType.DecimalNumber;
+            field.text = "1.0";
+            field.textComponent.fontSize = 14;
+            field.textComponent.alignment = TextAnchor.MiddleCenter;
+            field.placeholder.gameObject.SetActive(false);
+
+            var unit = UiElements.Label("Note Speed Unit", rect, "x", new Vector2(138, 0), new Vector2(12, 24), 14);
+            unit.alignment = TextAnchor.MiddleCenter;
+            return field;
+        }
+
+        private static void AddNoteSpeedWarning(Transform canvas, WorkspaceView view, List<WorkspaceActionBinding> bindings)
+        {
+            var overlay = Panel("Note Speed Warning", canvas, Vector2.zero, Vector2.zero);
+            overlay.anchorMin = Vector2.zero;
+            overlay.anchorMax = Vector2.one;
+            overlay.offsetMin = overlay.offsetMax = Vector2.zero;
+            overlay.GetComponent<Image>().color = new Color(0, 0, 0, .65f);
+
+            var dialog = Panel("Dialog", overlay, Vector2.zero, new Vector2(480, 126));
+            dialog.anchorMin = dialog.anchorMax = dialog.pivot = new Vector2(.5f, .5f);
+            var message = UiElements.Label("Message", dialog, "속도는 1.0 ~ 10.0 안에서만 조절 할 수 있습니다",
+                new Vector2(16, -16), new Vector2(448, 44), 18);
+            message.alignment = TextAnchor.MiddleCenter;
+            var confirm = UiElements.Button("Close Note Speed Warning", dialog, "확인",
+                new Vector2(180, -75), new Vector2(120, 32));
+            StyleMenuButton(confirm, TextAnchor.MiddleCenter, 14);
+            bindings.Add(new WorkspaceActionBinding { action = WorkspaceAction.CloseNoteSpeedWarning, button = confirm });
+            view.noteSpeedWarning = overlay.gameObject;
+            overlay.gameObject.SetActive(false);
         }
 
         private static readonly Dictionary<Transform, float> Positions = new Dictionary<Transform, float>();

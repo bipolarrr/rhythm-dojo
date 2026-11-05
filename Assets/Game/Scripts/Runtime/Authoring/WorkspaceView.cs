@@ -11,7 +11,7 @@ namespace RhythmDojo.Authoring
         Mirror, Randomize, PlayPause, Stop, Loop, Slow, Test, TestHere, AutoTest, AutoTestHere,
         SaveExit, DiscardExit, CancelExit, Pencil, Select, Eraser, Position, Tap, Hold, ImportPupa,
         SaveNew, DiscardNew, ConfirmSaveAs, CancelSaveAs, ProjectFiles, ChartSettings, ResetView,
-        PlayReturn, Scroll, ApplyEstimatedBpm
+        PlayReturn, Scroll, ApplyEstimatedBpm, CloseNoteSpeedWarning
     }
 
     [Serializable]
@@ -27,6 +27,7 @@ namespace RhythmDojo.Authoring
         public WorkspaceActionBinding[] toolActions;
         public InputField title, artist, audioPath, jacketPath, soundPath, bpm, offset, volume,
             saveAsName, position, loopStart, loopEnd;
+        public InputField noteSpeed;
         public Slider volumeControl;
         public Dropdown recent, quantization;
         public Button quantizationCycle;
@@ -38,10 +39,13 @@ namespace RhythmDojo.Authoring
         public GameObject exitPopup;
         public GameObject newPopup;
         public GameObject saveAsPopup;
+        public GameObject noteSpeedWarning;
         public Text saveAsError;
         public WorkspaceMenuPopup[] menus;
         public Button[] difficulty;
         public GameObject menuDismissArea;
+
+        public bool IsNoteSpeedWarningOpen => noteSpeedWarning && noteSpeedWarning.activeSelf;
 
         public bool HasOpenMenu
         {

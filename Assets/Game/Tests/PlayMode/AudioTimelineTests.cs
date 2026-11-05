@@ -220,7 +220,7 @@ namespace RhythmDojo.Tests
                 Assert.That(timeline.MusicTime, Is.EqualTo(paused));
                 Assert.That(screen.Session.GetNotes(screen.ChartId), Is.EqualTo(before));
                 detail.rectTransform.sizeDelta = originalSize;
-                Assert.That(detail.FirstVisibleGridTime, Is.EqualTo(0.525).Within(1e-8));
+                Assert.That(detail.FirstVisibleGridTime, Is.EqualTo(0.9).Within(1e-8));
                 Assert.That(buttons.Single(b => b.name == "Cursor Origin")
                     .GetComponentInChildren<Text>().text, Is.EqualTo("그리드 수정"));
 
