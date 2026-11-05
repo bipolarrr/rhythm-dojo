@@ -96,6 +96,7 @@ namespace RhythmDojo.EditorTools
             view.artist = Field(settings, "작곡가", "작곡가 이름");
             view.jacketPath = Field(settings, "자켓 이미지 전체 경로", "PNG / JPG 경로 입력 후 Enter");
             Action(settings, "자켓 이미지 적용", WorkspaceAction.ImportJacket, bindings);
+            Heading(settings, "임시, 자켓 정보만 받고 표시하는 엔드포인트가 없음.");
             Heading(settings, "난이도");
             var slots = new GameObject("Difficulty", typeof(RectTransform)).GetComponent<RectTransform>();
             slots.SetParent(settings, false);
@@ -147,6 +148,10 @@ namespace RhythmDojo.EditorTools
             view.volumeControl.value = 65;
             view.bpm = Field(settings, "BPM", "120");
             Action(settings, "BPM 자동 측정", WorkspaceAction.EstimateBpm, bindings);
+            view.bpmSuggestion = Heading(settings, "");
+            Action(settings, "이 BPM으로 설정", WorkspaceAction.ApplyEstimatedBpm, bindings);
+            view.applyEstimatedBpm = bindings.Last().button;
+            view.applyEstimatedBpm.gameObject.SetActive(false);
             view.offset = Field(settings, "악곡 시작 타이밍 (ms)", "0");
             Action(settings, "설정 적용", WorkspaceAction.ApplySettings, bindings);
             Action(settings, "채보 종료 시간 / 상세 설정", WorkspaceAction.ChartSettings, bindings);
