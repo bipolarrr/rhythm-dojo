@@ -85,6 +85,8 @@ namespace RhythmDojo.Authoring
         private double?[] onAirPressTimes;
         private Keyboard onAirKeyboard;
         private readonly List<NoteData> onAirNotes = new List<NoteData>();
+        private readonly List<long> onAirRecordedIds = new List<long>();
+        private Coroutine onAirQuantization;
         private double onAirStart;
         private double onAirDeadline;
         private bool onAirRecording;
@@ -93,7 +95,7 @@ namespace RhythmDojo.Authoring
 
         private bool IsOnAirPromptOpen => view.onAirPopup && view.onAirPopup.activeSelf;
 
-        public bool IsWorking => working;
+        public bool IsWorking => working || onAirQuantization != null;
 
         public WorkspaceNoteEditing Editing => editing;
         public bool HasUnsavedChanges => screen.Session.IsDirty || resourcesDirty;
@@ -321,6 +323,11 @@ namespace RhythmDojo.Authoring
 
         private bool HandleOnAirAction(WorkspaceAction action)
         {
+            if (onAirQuantization != null)
+            {
+                return true;
+            }
+
             if (onAirSession != null)
             {
                 if (action == WorkspaceAction.OnAir)
@@ -366,7 +373,9 @@ namespace RhythmDojo.Authoring
             CancelGrab();
             draggingSelection = false;
             timeline.PausePreview();
+            timeline.UseOnAirPageFollow = true;
             onAirStart = timeline.MusicTime;
+            onAirRecordedIds.Clear();
             onAirSession = screen.Session;
             onAirChart = screen.ChartId;
             onAirClip = timeline.PreviewClip;
@@ -395,6 +404,11 @@ namespace RhythmDojo.Authoring
 
         private bool UpdateOnAir()
         {
+            if (onAirQuantization != null)
+            {
+                return true;
+            }
+
             var keyboard = Keyboard.current;
             if (IsOnAirPromptOpen)
             {
@@ -522,6 +536,7 @@ namespace RhythmDojo.Authoring
             }
 
             var chart = onAirSession.Snapshot.Charts.Single(item => item.Id == onAirChart);
+            var addedIds = new List<long>(onAirNotes.Count);
             onAirSession.Edit(edit =>
             {
                 double lastNoteEnd = onAirNotes.Max(note => note.EndTime);
@@ -533,17 +548,23 @@ namespace RhythmDojo.Authoring
 
                 foreach (var note in onAirNotes)
                 {
-                    edit.AddNote(chart.Id, note);
+                    addedIds.Add(edit.AddNote(chart.Id, note));
                 }
             });
+            onAirRecordedIds.AddRange(addedIds);
         }
 
         private void FinishOnAir()
         {
-            if (timeline && timeline.PreviewClip == onAirClip)
+            var session = onAirSession;
+            if (timeline)
             {
-                timeline.PausePreview();
-                timeline.Seek(onAirStart);
+                timeline.UseOnAirPageFollow = false;
+                if (timeline.PreviewClip == onAirClip)
+                {
+                    timeline.PausePreview();
+                    timeline.Seek(onAirStart);
+                }
             }
 
             if (onAirEventSystem)
@@ -563,11 +584,55 @@ namespace RhythmDojo.Authoring
             view.onAirCountdown.gameObject.SetActive(false);
             view.onAirIcon.color = new Color(.16f, .16f, .16f);
             view.status.text = "ON AIR 종료";
+
+            if (!isActiveAndEnabled || session != screen.Session || screen.IsBusy)
+            {
+                return;
+            }
+
+            if (screen.SnapEnabled && onAirRecordedIds.Count > 0)
+            {
+                screen.IsBusy = true;
+                view.SetOnAirQuantizing(true);
+                onAirQuantization = StartCoroutine(QuantizeOnAir(session, onAirChart, screen.SnapBeats));
+            }
+        }
+
+        private IEnumerator QuantizeOnAir(EditorSession session, Guid chart, double step)
+        {
+            // Give the modal a rendered frame before changing the chart.
+            yield return null;
+            yield return null;
+
+            try
+            {
+                int skipped = editing.QuantizeRecordedNotes(session, chart, onAirRecordedIds, step);
+                view.status.text = "ON AIR 종료 · 퀀타이즈 완료";
+                if (skipped > 0)
+                {
+                    view.status.text += $" · 겹치는 노트 {skipped}개는 원래 위치 유지";
+                }
+            }
+            catch (Exception error)
+            {
+                view.status.text = "ON AIR 퀀타이즈 실패 · " + error.Message;
+            }
+            finally
+            {
+                CloseOnAirQuantization();
+            }
+        }
+
+        private void CloseOnAirQuantization()
+        {
+            onAirQuantization = null;
+            view.SetOnAirQuantizing(false);
+            screen.IsBusy = false;
         }
 
         private void PrepareShortcutInput()
         {
-            if (!isActiveAndEnabled || onAirSession != null)
+            if (!isActiveAndEnabled || onAirSession != null || onAirQuantization != null)
             {
                 return;
             }
@@ -1878,6 +1943,12 @@ namespace RhythmDojo.Authoring
         private void OnDisable()
         {
             EndPlaybackSeek();
+            if (onAirQuantization != null)
+            {
+                StopCoroutine(onAirQuantization);
+                CloseOnAirQuantization();
+            }
+
             if (onAirSession != null)
             {
                 FinishOnAir();

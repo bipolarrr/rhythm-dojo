@@ -26,6 +26,37 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        public void QuantizeRecordedNotesUsesClosestTimesAndPreservesCollisionsAndHolds()
+        {
+            long tap = 0;
+            long blocked = 0;
+            long hold = 0;
+            session.Edit(edit =>
+            {
+                edit.SetTiming(0, new TempoPoint(0, 120), new TempoPoint(.7, 240));
+                edit.AddNote(chartId, NoteData.Tap(0, 1.1));
+                tap = edit.AddNote(chartId, NoteData.Tap(2, .69));
+                blocked = edit.AddNote(chartId, NoteData.Tap(0, 1.06));
+                hold = edit.AddNote(chartId, NoteData.Hold(3, 3.76, 3.92));
+            });
+
+            Assert.That(editing.QuantizeRecordedNotes(session, chartId, new[] { tap, blocked, hold }, 1), Is.EqualTo(1));
+            var notes = session.GetNotes(chartId);
+            Assert.That(notes.Single(note => note.Id == tap).Data.StartTime, Is.EqualTo(.85).Within(1e-8));
+            Assert.That(notes.Single(note => note.Id == blocked).Data.StartTime, Is.EqualTo(1.06));
+            var adjustedHold = notes.Single(note => note.Id == hold).Data;
+            Assert.That(adjustedHold.Kind, Is.EqualTo(NoteKind.Hold));
+            Assert.That(adjustedHold.StartTime, Is.EqualTo(3.60).Within(1e-8));
+            Assert.That(adjustedHold.EndTime, Is.EqualTo(3.85).Within(1e-8));
+            Assert.That(notes.Any(note => note.Data.Lane == 0 && note.Data.StartTime == 1.1), Is.True);
+
+            session.Undo();
+            notes = session.GetNotes(chartId);
+            Assert.That(notes.Single(note => note.Id == tap).Data.StartTime, Is.EqualTo(.69));
+            Assert.That(notes.Single(note => note.Id == hold).Data.StartTime, Is.EqualTo(3.76));
+        }
+
+        [Test]
         public void MoveGroupKeepsSpacingIdsAndSelectionWithOneUndo()
         {
             editing.Select(session, chartId);

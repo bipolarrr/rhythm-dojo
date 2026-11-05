@@ -13,6 +13,7 @@ namespace RhythmDojo.UI
     {
         private int visibleBeats = 16;
         private double bottomBeat;
+        private double? pageTurnTime;
         private BeatGridTiming tempo;
         private GameModeDefinition mode;
         private EditorNote[] notes = Array.Empty<EditorNote>();
@@ -41,6 +42,7 @@ namespace RhythmDojo.UI
         {
             visibleBeats = beats;
             bottomBeat = offset;
+            pageTurnTime = null;
             SetVerticesDirty();
         }
 
@@ -52,6 +54,7 @@ namespace RhythmDojo.UI
         public void SetNotes(BeatGridTiming timing, GameModeDefinition gameMode, EditorNote[] source)
         {
             tempo = timing;
+            pageTurnTime = null;
             mode = gameMode;
             notes = source;
             SetVerticesDirty();
@@ -135,6 +138,45 @@ namespace RhythmDojo.UI
             }
 
             return double.IsFinite(nearestDistance);
+        }
+
+        internal double? GetPlaybackPageStart(double chartTime)
+        {
+            var area = rectTransform.rect;
+            if (area.height <= 0)
+            {
+                return null;
+            }
+
+            var timing = tempo ?? DefaultTiming;
+            double topBeat = Projection.Unproject(area.yMax);
+            double bottomTime = timing.TimeAtBeat(bottomBeat);
+            double span = timing.TimeAtBeat(topBeat) - bottomTime;
+            double overlap = span * .15;
+            if (!pageTurnTime.HasValue)
+            {
+                double? lastMeasureTime = null;
+                foreach (double beat in VisibleBeatLines(topBeat))
+                {
+                    if (beat >= 0 && timing.IsMeasure(beat))
+                    {
+                        double time = timing.TimeAtBeat(beat);
+                        if (time > bottomTime + overlap)
+                        {
+                            lastMeasureTime = time;
+                        }
+                    }
+                }
+
+                pageTurnTime = lastMeasureTime ?? (bottomTime + span * .9);
+            }
+
+            if (chartTime >= pageTurnTime.Value || chartTime < bottomTime - 1e-8)
+            {
+                return chartTime - overlap;
+            }
+
+            return null;
         }
 
         private IEnumerable<double> VisibleBeatLines(double topBeat)

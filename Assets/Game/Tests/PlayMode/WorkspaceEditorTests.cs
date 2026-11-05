@@ -301,7 +301,6 @@ namespace RhythmDojo.Tests
             foreach (double boundary in new[] { 7.5, 15.0 })
             {
                 workspace.timeline.Seek(boundary - 0.25);
-                workspace.timeline.GetComponent<ChartAudioTimelineView>().followAudioControl.onClick.Invoke();
                 yield return null;
                 double startTime = timing.TimeAtBeat(workspace.screen.ScrollBeatOffset);
                 double startY = grid.Projection.Project(timing.BeatAtTime(20));
@@ -1926,6 +1925,8 @@ namespace RhythmDojo.Tests
                 var no = view.actions.Single(item => item.action == WorkspaceAction.CancelOnAir).button;
                 Assert.That(menuButton.transform.GetSiblingIndex(), Is.EqualTo(scrollButton.transform.GetSiblingIndex() + 1));
                 Assert.That(view.toolActions.All(item => ((RectTransform)item.button.transform).sizeDelta == new Vector2(38, 38)), Is.True);
+                view.quantization.value = view.quantization.options.Count - 1;
+                Assert.That(workspace.screen.SnapEnabled, Is.False);
                 workspace.timeline.Seek(2);
 
                 yield return PressKeys(Key.F8);
@@ -2003,6 +2004,115 @@ namespace RhythmDojo.Tests
                 }
                 PlayerPrefs.Save();
             }
+        }
+
+        [UnityTest]
+        public IEnumerator OnAirQuantizesRecordedNotesAndBlocksActionsUntilDone()
+        {
+            workspace.view.audioPath.text = WriteTempoWave();
+            workspace.Run(WorkspaceAction.ImportAudio);
+            yield return Idle();
+
+            var screen = workspace.screen;
+            var session = screen.Session;
+            var chart = screen.ChartId;
+            long existing = 0;
+            session.Edit(edit =>
+            {
+                edit.SetTiming(0, new TempoPoint(0, 120));
+                existing = edit.AddNote(chart, NoteData.Tap(1, 2.12));
+            });
+            workspace.timeline.Seek(2.05);
+            workspace.Run(WorkspaceAction.OnAir);
+            workspace.Run(WorkspaceAction.ConfirmOnAir);
+            double deadline = Time.realtimeSinceStartupAsDouble + 5;
+            while (!workspace.timeline.IsPlaying)
+            {
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                yield return null;
+            }
+
+            yield return PressKeys(PlayKeyBindings.GetKey(screen.Mode, screen.Mode.name, 0));
+            var recorded = session.GetNotes(chart).Single(note => note.Id != existing);
+            Assert.That(recorded.Data.StartTime, Is.InRange(2.04, 2.24));
+
+            workspace.Run(WorkspaceAction.OnAir);
+            Assert.That(workspace.IsWorking && screen.IsBusy, Is.True);
+            var popup = workspace.view.onAirPopup;
+            Assert.That(popup.activeInHierarchy, Is.True);
+            Assert.That(popup.GetComponentInChildren<Text>().text, Does.Contain("로딩 중"));
+            workspace.Run(WorkspaceAction.Undo);
+            Assert.That(session.GetNotes(chart).Length, Is.EqualTo(2));
+
+            yield return Idle();
+            Assert.That(popup.activeSelf || screen.IsBusy, Is.False);
+            Assert.That(workspace.timeline.MusicTime, Is.EqualTo(2.05).Within(.001));
+            var notes = session.GetNotes(chart);
+            Assert.That(notes.Single(note => note.Id == recorded.Id).Data.StartTime, Is.EqualTo(2).Within(.001));
+            Assert.That(notes.Single(note => note.Id == existing).Data.StartTime, Is.EqualTo(2.12));
+        }
+
+        [UnityTest]
+        public IEnumerator OnAirTurnsGridPageAtLastVisibleMeasure()
+        {
+            workspace.view.audioPath.text = WriteTempoWave();
+            workspace.Run(WorkspaceAction.ImportAudio);
+            yield return Idle();
+
+            var timeline = workspace.timeline;
+            var screen = workspace.screen;
+            screen.Session.Edit(edit => edit.SetTiming(0, new TempoPoint(0, 120)));
+            var followButton = timeline.GetComponent<ChartAudioTimelineView>().followAudioControl;
+            var followLabel = followButton.GetComponentInChildren<Text>();
+            Assert.That(followLabel.text, Does.Contain("켜짐"));
+            timeline.Pan(.5);
+            Assert.That(followLabel.text, Does.Contain("꺼짐"));
+            timeline.Seek(1.5);
+            screen.Zoom(3);
+            screen.Scroll(1 - screen.ScrollBeatOffset);
+            double originalOffset = screen.ScrollBeatOffset;
+            Assert.That(screen.VisibleBeats, Is.EqualTo(4));
+
+            workspace.Run(WorkspaceAction.OnAir);
+            workspace.Run(WorkspaceAction.ConfirmOnAir);
+            Assert.That(followLabel.text, Does.Contain("켜짐"));
+            yield return new WaitForSecondsRealtime(3.1f);
+            Assert.That(timeline.IsPlaying, Is.True);
+            Assert.That(screen.ScrollBeatOffset, Is.EqualTo(originalOffset).Within(.001));
+
+            followButton.onClick.Invoke();
+            Assert.That(followLabel.text, Does.Contain("꺼짐"));
+            double deadline = Time.realtimeSinceStartupAsDouble + 2;
+            while (timeline.MusicTime < 2.01)
+            {
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                yield return null;
+            }
+
+            Assert.That(screen.ScrollBeatOffset, Is.EqualTo(originalOffset).Within(.001));
+            followButton.onClick.Invoke();
+            Assert.That(followLabel.text, Does.Contain("켜짐"));
+            while (screen.ScrollBeatOffset == originalOffset)
+            {
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                yield return null;
+            }
+
+            // Beats 1–5 are visible. The yellow line at beat 4 is reached at 2 seconds.
+            Assert.That(timeline.MusicTime, Is.InRange(2, 2.25));
+            double playheadBeat = timeline.Timing.BeatAtTime(workspace.grid.PlayheadTime.Value);
+            Assert.That((playheadBeat - screen.ScrollBeatOffset) / screen.VisibleBeats, Is.EqualTo(.15).Within(.005));
+            double newOffset = screen.ScrollBeatOffset;
+            yield return new WaitForSecondsRealtime(.12f);
+            Assert.That(screen.ScrollBeatOffset, Is.EqualTo(newOffset).Within(.001));
+
+            yield return PressKeys(Key.Escape);
+            Assert.That(timeline.MusicTime, Is.EqualTo(1.5).Within(.001));
+            Assert.That(followLabel.text, Does.Contain("꺼짐"));
+            followButton.onClick.Invoke();
+            Assert.That(followLabel.text, Does.Contain("켜짐"));
+            followButton.onClick.Invoke();
+            Assert.That(followLabel.text, Does.Contain("꺼짐"));
         }
 
         [UnityTest]

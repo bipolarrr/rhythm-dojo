@@ -49,6 +49,33 @@ namespace RhythmDojo.Authoring
         public Button[] difficulty;
         public GameObject menuDismissArea;
 
+        private string onAirPromptText;
+
+        public void SetOnAirQuantizing(bool quantizing)
+        {
+            var heading = onAirPopup.transform.Find("Question").GetComponent<Text>();
+            if (quantizing)
+            {
+                onAirPromptText = heading.text;
+                heading.text = "로딩 중…\nON AIR 노트를 퀀타이즈에 맞춰 조정하고 있습니다.";
+                onAirPopup.transform.SetAsLastSibling();
+            }
+            else
+            {
+                heading.text = onAirPromptText;
+            }
+
+            foreach (var binding in actions)
+            {
+                if (binding.action == WorkspaceAction.ConfirmOnAir || binding.action == WorkspaceAction.CancelOnAir)
+                {
+                    binding.button.gameObject.SetActive(!quantizing);
+                }
+            }
+
+            onAirPopup.SetActive(quantizing);
+        }
+
         public bool IsNoteSpeedWarningOpen => noteSpeedWarning && noteSpeedWarning.activeSelf;
 
         public bool HasOpenMenu
