@@ -219,7 +219,7 @@ namespace RhythmDojo.Authoring
 
                 timing.GetMusicalPosition(beat, out int measure, out double position);
                 int beatIndex = (int)Math.Round(position);
-                if (Math.Abs(position - beatIndex) >= 1e-6 || (beatIndex != 0 && last - first > 12))
+                if (Math.Abs(position - beatIndex) >= 1e-6 || (beatIndex != 0 && last - first > 16))
                 {
                     continue;
                 }

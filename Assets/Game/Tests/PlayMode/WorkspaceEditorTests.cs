@@ -1362,27 +1362,28 @@ namespace RhythmDojo.Tests
             workspace.Run(WorkspaceAction.ImportAudio);
             yield return Idle();
 
-            workspace.screen.Session.Edit(edit => edit.SetTiming(.25, new TempoPoint(0, 120)));
+            workspace.screen.Session.Edit(edit => edit.SetTiming(.25, new TempoPoint(0, 128)));
             workspace.screen.SnapEnabled = false;
-            workspace.timeline.Zoom(1, 0);
             workspace.timeline.Zoom(1, 0);
             yield return null;
 
             Canvas.ForceUpdateCanvases();
             var timeline = workspace.timeline;
             var detail = timeline.GetComponent<ChartAudioTimelineView>().detail.rectTransform;
-            Assert.That(detail.GetComponentsInChildren<Text>().Any(label => label.text == "2.2"), Is.True);
+            Assert.That(timeline.WindowDuration, Is.EqualTo(6.4).Within(.001));
+            Assert.That(detail.GetComponentsInChildren<Text>().Select(label => label.text),
+                Does.Contain("1.2").And.Contain("1.3").And.Contain("1.4").And.Contain("2.2"));
             double windowStart = timeline.WindowStart;
             double scrollOffset = workspace.screen.ScrollBeatOffset;
-            const double clickTime = 2.10;
+            const double clickTime = 2.04;
             float fraction = (float)((clickTime - windowStart) / timeline.WindowDuration);
             float x = Mathf.Lerp(detail.rect.xMin, detail.rect.xMax, fraction);
             var point = RectTransformUtility.WorldToScreenPoint(null, detail.TransformPoint(x, detail.rect.center.y, 0));
 
             InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.LeftCtrl));
             yield return ClickAt(point);
-            Assert.That(timeline.MusicTime, Is.EqualTo(2.25).Within(.001));
-            Assert.That(workspace.grid.PlayheadTime, Is.EqualTo(2.5).Within(.001));
+            Assert.That(timeline.MusicTime, Is.EqualTo(2.09375).Within(.001));
+            Assert.That(workspace.grid.PlayheadTime, Is.EqualTo(2.34375).Within(.001));
             Assert.That(timeline.WindowStart, Is.EqualTo(windowStart));
             Assert.That(workspace.screen.ScrollBeatOffset, Is.EqualTo(scrollOffset));
 
