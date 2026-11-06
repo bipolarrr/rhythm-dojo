@@ -15,6 +15,7 @@ namespace RhythmDojo.Authoring
         private double dragTime;
         private double dragStart;
         private bool dragged;
+        private bool snapSeek;
         [SerializeField] private Text[] labels;
         [SerializeField] private Text[] tempoLabels;
         private double[] labelBeats;
@@ -87,47 +88,25 @@ namespace RhythmDojo.Authoring
                 }
             }
 
-            double first = Owner.Timing.BeatAtTime(StartTime + Owner.AudioOffset);
-            double last = Owner.Timing.BeatAtTime(StartTime + Duration + Owner.AudioOffset);
             int count = 0;
-            float previousX = -100;
-            foreach (double beat in Owner.Timing.Lines(first, last, 1))
+            foreach (var line in VisibleGridLines())
             {
-                float x = (float)((Owner.Timing.TimeAtBeat(beat) - Owner.AudioOffset - StartTime)
-                    / Duration * rectTransform.rect.width);
-                if (x - previousX < 60)
-                {
-                    continue;
-                }
-
-                bool measure = Owner.Timing.IsMeasure(beat);
-                if (!measure && last - first > 12)
-                {
-                    continue;
-                }
-
                 var label = labels[count];
                 label.gameObject.SetActive(true);
-                label.rectTransform.anchoredPosition = new Vector2(x + 3, -2);
-                if (labelBeats[count] != beat)
+                label.rectTransform.anchoredPosition = new Vector2(line.X + 3, -2);
+                if (labelBeats[count] != line.Beat)
                 {
-                    Owner.Timing.GetMusicalPosition(beat, out int bar, out double position);
-                    label.text = bar + "." + (position + 1).ToString("0.#");
-                    labelBeats[count] = beat;
+                    label.text = line.Measure + "." + line.BeatNumber;
+                    labelBeats[count] = line.Beat;
                 }
 
                 label.color = new Color(0.8f, 0.83f, 0.87f);
-                if (measure)
+                if (line.BeatNumber == 1)
                 {
                     label.color = new Color(1, 0.4f, 0.35f);
                 }
 
-                previousX = x;
                 count++;
-                if (count == labels.Length)
-                {
-                    break;
-                }
             }
 
             for (int i = count; i < labels.Length; i++)
@@ -204,27 +183,55 @@ namespace RhythmDojo.Authoring
         {
             get
             {
-                int columns = Math.Min(1500, Mathf.CeilToInt(rectTransform.rect.width));
-                foreach (double beat in VisibleGridLines(Math.Max(1, columns)))
+                foreach (var line in VisibleGridLines())
                 {
-                    return Owner.Timing.TimeAtBeat(beat) - Owner.AudioOffset;
+                    return line.Time;
                 }
 
                 return StartTime;
             }
         }
 
-        private IEnumerable<double> VisibleGridLines(int columns)
+        private IEnumerable<(double Beat, double Time, float X, int Measure, int BeatNumber)> VisibleGridLines()
         {
-            double first = Owner.Timing.BeatAtTime(StartTime + Owner.AudioOffset);
-            double last = Owner.Timing.BeatAtTime(StartTime + Duration + Owner.AudioOffset);
-            double step = Owner.DisplayStep;
-            while ((last - first) / step > columns / 3.0)
+            var timing = Owner.Timing;
+            if (labels == null || labels.Length == 0 || timing == null)
             {
-                step *= 2;
+                yield break;
             }
 
-            return Owner.Timing.Lines(first, last, step, Math.Max(1, columns / 2));
+            double start = StartTime;
+            double duration = Duration;
+            double offset = Owner.AudioOffset;
+            float width = rectTransform.rect.width;
+            double first = timing.BeatAtTime(start + offset);
+            double last = timing.BeatAtTime(start + duration + offset);
+            int count = 0;
+            float previousX = -100;
+            foreach (double beat in timing.Lines(first, last, 1))
+            {
+                double time = timing.TimeAtBeat(beat) - offset;
+                float x = (float)((time - start) / duration * width);
+                if (x - previousX < 60 || x + 3 >= width)
+                {
+                    continue;
+                }
+
+                timing.GetMusicalPosition(beat, out int measure, out double position);
+                int beatIndex = (int)Math.Round(position);
+                if (Math.Abs(position - beatIndex) >= 1e-6 || (beatIndex != 0 && last - first > 16))
+                {
+                    continue;
+                }
+
+                yield return (beat, time, x, measure, beatIndex + 1);
+                previousX = x;
+                count++;
+                if (count == labels.Length)
+                {
+                    yield break;
+                }
+            }
         }
 
         protected override void OnPopulateMesh(VertexHelper vertices)
@@ -242,7 +249,6 @@ namespace RhythmDojo.Authoring
             }
 
             AddRect(vertices, area, new Color(0.025f, 0.035f, 0.05f));
-            int columns = Math.Min(1500, Mathf.CeilToInt(area.width));
             double start = StartTime;
             double duration = Duration;
             if (Owner.Peaks != null && Owner.Peaks.Ready)
@@ -273,31 +279,17 @@ namespace RhythmDojo.Authoring
             }
             else if (Owner.Timing != null)
             {
-                int lineCount = 0;
-                foreach (double beat in VisibleGridLines(columns))
+                foreach (var line in VisibleGridLines())
                 {
-                    lineCount++;
-                    if (lineCount > 5000)
-                    {
-                        break;
-                    }
-
-                    double time = Owner.Timing.TimeAtBeat(beat) - Owner.AudioOffset;
-                    bool measure = Owner.Timing.IsMeasure(beat);
-                    Color tint = new Color(0.35f, 0.4f, 0.48f, 0.65f);
-                    float thickness = 0.7f;
-                    if (measure)
+                    Color tint = new Color(0.65f, 0.69f, 0.74f, 0.8f);
+                    float thickness = 1;
+                    if (line.BeatNumber == 1)
                     {
                         tint = new Color(1, 0.22f, 0.19f, 0.9f);
                         thickness = 2;
                     }
-                    else if (Math.Abs(beat - Math.Round(beat)) < 1e-6)
-                    {
-                        tint = new Color(0.65f, 0.69f, 0.74f, 0.8f);
-                        thickness = 1;
-                    }
 
-                    float x = X(time, area, start, duration);
+                    float x = area.xMin + line.X;
                     AddRect(vertices, new Rect(x - thickness * 0.5f, area.yMin, thickness, area.height), tint);
                 }
 
@@ -501,6 +493,14 @@ namespace RhythmDojo.Authoring
             dragTime = TimeAtPointer(data);
             dragStart = Owner.WindowStart;
             dragged = false;
+            var keyboard = Keyboard.current;
+            snapSeek = !Overview && keyboard != null && keyboard.ctrlKey.isPressed;
+            if (snapSeek)
+            {
+                SeekNearestGridLine(dragTime);
+                return;
+            }
+
             if (Overview)
             {
                 Owner.Seek(dragTime);
@@ -509,7 +509,7 @@ namespace RhythmDojo.Authoring
 
         public void OnDrag(PointerEventData data)
         {
-            if (data.button != PointerEventData.InputButton.Left || Owner.IsBusy)
+            if (data.button != PointerEventData.InputButton.Left || Owner.IsBusy || snapSeek)
             {
                 return;
             }
@@ -527,9 +527,45 @@ namespace RhythmDojo.Authoring
 
         public void OnPointerUp(PointerEventData data)
         {
-            if (!dragged && data.button == PointerEventData.InputButton.Left)
+            if (data.button != PointerEventData.InputButton.Left)
+            {
+                return;
+            }
+
+            if (snapSeek)
+            {
+                snapSeek = false;
+                return;
+            }
+
+            if (!dragged)
             {
                 Owner.Seek(TimeAtPointer(data));
+            }
+        }
+
+        private void SeekNearestGridLine(double pointerTime)
+        {
+            if (Owner.Timing == null)
+            {
+                return;
+            }
+
+            double nearestTime = 0;
+            double nearestDistance = double.PositiveInfinity;
+            foreach (var line in VisibleGridLines())
+            {
+                double distance = Math.Abs(line.Time - pointerTime);
+                if (distance < nearestDistance)
+                {
+                    nearestTime = line.Time;
+                    nearestDistance = distance;
+                }
+            }
+
+            if (double.IsFinite(nearestDistance))
+            {
+                Owner.SeekInViewport(nearestTime);
             }
         }
 

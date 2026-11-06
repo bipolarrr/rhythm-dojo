@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 using RhythmDojo.Application;
 using RhythmDojo.Content;
 using RhythmDojo.Gameplay;
+using RhythmDojo.Services;
 using RhythmDojo.UI;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -20,6 +22,8 @@ namespace RhythmDojo.Authoring
     public sealed class WorkspaceEditor : MonoBehaviour
     {
         public const string ScenePath = ChartEditorMenu.ScenePath;
+        private const double OnAirHoldMinimumSeconds = .15;
+        private const string HiddenRecentProjectKeyPrefix = "RhythmDojo.Workspace.HiddenRecent.";
         public WorkspaceView view;
         public ChartEditorScreen screen;
         public ChartEditorMenu menu;
@@ -75,7 +79,24 @@ namespace RhythmDojo.Authoring
 
         private ColorBlock[] difficultyColors;
 
-        public bool IsWorking => working;
+        private EditorSession onAirSession;
+        private Guid onAirChart;
+        private AudioClip onAirClip;
+        private Key[] onAirKeys;
+        private double?[] onAirPressTimes;
+        private Keyboard onAirKeyboard;
+        private readonly List<NoteData> onAirNotes = new List<NoteData>();
+        private readonly List<long> onAirRecordedIds = new List<long>();
+        private Coroutine onAirQuantization;
+        private double onAirStart;
+        private double onAirDeadline;
+        private bool onAirRecording;
+        private EventSystem onAirEventSystem;
+        private bool onAirNavigation;
+
+        private bool IsOnAirPromptOpen => view.onAirPopup && view.onAirPopup.activeSelf;
+
+        public bool IsWorking => working || onAirQuantization != null;
 
         public WorkspaceNoteEditing Editing => editing;
         public bool HasUnsavedChanges => screen.Session.IsDirty || resourcesDirty;
@@ -133,6 +154,11 @@ namespace RhythmDojo.Authoring
         private void Update()
         {
             if (!menu.IsInitialized || observed == null)
+            {
+                return;
+            }
+
+            if (UpdateOnAir())
             {
                 return;
             }
@@ -249,8 +275,18 @@ namespace RhythmDojo.Authoring
 
             if (EventSystem.current && EventSystem.current.currentSelectedGameObject)
             {
-                if (EventSystem.current.currentSelectedGameObject.GetComponent<InputField>())
+                var field = EventSystem.current.currentSelectedGameObject.GetComponent<InputField>();
+                if (field)
                 {
+                    if (field == view.noteSpeed && field.isFocused)
+                    {
+                        if (keyboard.enterKey.wasPressedThisFrame || keyboard.numpadEnterKey.wasPressedThisFrame)
+                        {
+                            field.DeactivateInputField();
+                            EventSystem.current.SetSelectedGameObject(null);
+                        }
+                    }
+
                     return;
                 }
             }
@@ -268,9 +304,336 @@ namespace RhythmDojo.Authoring
             }
         }
 
+        private void ShowOnAirPrompt()
+        {
+            if (!view.onAirPopup || timeline.IsBusy)
+            {
+                return;
+            }
+
+            if (!timeline.PreviewClip || timeline.MusicTime >= timeline.Duration)
+            {
+                view.status.text = "ON AIR를 시작하려면 음원을 불러오고 재생할 위치를 선택하세요.";
+                return;
+            }
+
+            screen.IsBusy = true;
+            view.onAirPopup.transform.SetAsLastSibling();
+            view.onAirPopup.SetActive(true);
+        }
+
+        private bool HandleOnAirAction(WorkspaceAction action)
+        {
+            if (onAirQuantization != null)
+            {
+                return true;
+            }
+
+            if (onAirSession != null)
+            {
+                if (action == WorkspaceAction.OnAir)
+                {
+                    FinishOnAir();
+                }
+
+                return true;
+            }
+
+            if (!IsOnAirPromptOpen)
+            {
+                return action == WorkspaceAction.ConfirmOnAir || action == WorkspaceAction.CancelOnAir;
+            }
+
+            if (action == WorkspaceAction.ConfirmOnAir)
+            {
+                CloseOnAirPrompt();
+                BeginOnAir();
+            }
+            else if (action == WorkspaceAction.CancelOnAir || action == WorkspaceAction.OnAir)
+            {
+                CloseOnAirPrompt();
+            }
+
+            return true;
+        }
+
+        private void CloseOnAirPrompt()
+        {
+            view.onAirPopup.SetActive(false);
+            screen.IsBusy = false;
+        }
+
+        private void BeginOnAir()
+        {
+            if (timeline.IsBusy || !timeline.PreviewClip || timeline.MusicTime >= timeline.Duration)
+            {
+                return;
+            }
+
+            EndPlaybackSeek();
+            CancelGrab();
+            draggingSelection = false;
+            timeline.PausePreview();
+            timeline.UseOnAirPageFollow = true;
+            onAirStart = timeline.MusicTime;
+            onAirRecordedIds.Clear();
+            onAirSession = screen.Session;
+            onAirChart = screen.ChartId;
+            onAirClip = timeline.PreviewClip;
+            var mode = screen.Mode;
+            onAirKeys = new Key[mode.LaneCount];
+            onAirPressTimes = new double?[mode.LaneCount];
+            for (int lane = 0; lane < onAirKeys.Length; lane++)
+            {
+                onAirKeys[lane] = PlayKeyBindings.GetKey(mode, mode.name, lane);
+            }
+
+            onAirEventSystem = EventSystem.current;
+            if (onAirEventSystem)
+            {
+                onAirNavigation = onAirEventSystem.sendNavigationEvents;
+                onAirEventSystem.SetSelectedGameObject(null);
+                onAirEventSystem.sendNavigationEvents = false;
+            }
+
+            onAirDeadline = Time.realtimeSinceStartupAsDouble + 3;
+            view.onAirCountdown.text = "3";
+            view.onAirCountdown.gameObject.SetActive(true);
+            view.onAirIcon.color = new Color(.85f, .48f, .12f);
+            view.status.text = "ON AIR 준비 · Esc 또는 F8로 취소";
+        }
+
+        private bool UpdateOnAir()
+        {
+            if (onAirQuantization != null)
+            {
+                return true;
+            }
+
+            var keyboard = Keyboard.current;
+            if (IsOnAirPromptOpen)
+            {
+                if (keyboard != null && (keyboard.escapeKey.wasPressedThisFrame || keyboard.f8Key.wasPressedThisFrame))
+                {
+                    CloseOnAirPrompt();
+                }
+
+                return true;
+            }
+
+            if (onAirSession == null)
+            {
+                return false;
+            }
+
+            if (screen.Session != onAirSession || screen.ChartId != onAirChart || timeline.PreviewClip != onAirClip)
+            {
+                FinishOnAir();
+                return true;
+            }
+
+            if (keyboard != null)
+            {
+                bool stopWithF8 = keyboard.f8Key.wasPressedThisFrame
+                    && (!onAirRecording || Array.IndexOf(onAirKeys, Key.F8) < 0);
+                if (keyboard.escapeKey.wasPressedThisFrame || stopWithF8)
+                {
+                    FinishOnAir();
+                    return true;
+                }
+            }
+
+            if (!onAirRecording)
+            {
+                double remaining = onAirDeadline - Time.realtimeSinceStartupAsDouble;
+                if (remaining > 0)
+                {
+                    view.onAirCountdown.text = Math.Ceiling(remaining).ToString(CultureInfo.InvariantCulture);
+                    return true;
+                }
+
+                timeline.SeekInViewport(onAirStart);
+                timeline.PlayPreview();
+                onAirRecording = true;
+                view.onAirCountdown.gameObject.SetActive(false);
+                view.onAirIcon.color = new Color(.83f, .12f, .15f);
+                view.status.text = "● ON AIR · Esc 또는 ON AIR 버튼으로 종료";
+            }
+            else if (!timeline.IsPlaying || timeline.MusicTime >= timeline.Duration)
+            {
+                FinishOnAir();
+            }
+            else
+            {
+                RecordOnAirNotes(keyboard);
+            }
+
+            return true;
+        }
+
+        private void RecordOnAirNotes(Keyboard keyboard)
+        {
+            if (onAirKeyboard != keyboard)
+            {
+                Array.Clear(onAirPressTimes, 0, onAirPressTimes.Length);
+                onAirKeyboard = keyboard;
+            }
+
+            if (keyboard == null)
+            {
+                return;
+            }
+
+            double time = timeline.MusicTime + timeline.AudioOffset;
+            onAirNotes.Clear();
+            for (int lane = 0; lane < onAirKeys.Length; lane++)
+            {
+                var key = onAirKeys[lane];
+                if (key == Key.None)
+                {
+                    continue;
+                }
+
+                var control = keyboard[key];
+                if (time >= 0 && control.wasPressedThisFrame && !onAirPressTimes[lane].HasValue)
+                {
+                    onAirPressTimes[lane] = time;
+                }
+
+                if (!control.wasReleasedThisFrame || !onAirPressTimes[lane].HasValue)
+                {
+                    continue;
+                }
+
+                double start = onAirPressTimes[lane].Value;
+                onAirPressTimes[lane] = null;
+                if (time >= 0 && control.isPressed)
+                {
+                    onAirPressTimes[lane] = time;
+                }
+
+                if (time < start)
+                {
+                    continue;
+                }
+
+                var recorded = NoteData.Tap(lane, start);
+                if (time - start >= OnAirHoldMinimumSeconds)
+                {
+                    recorded = NoteData.Hold(lane, start, time);
+                }
+
+                int pressedLane = lane;
+                if (!cachedNotes.Any(note => note.Data.Lane == pressedLane
+                    && note.Data.StartTime <= recorded.EndTime && note.Data.EndTime >= recorded.StartTime))
+                {
+                    onAirNotes.Add(recorded);
+                }
+            }
+
+            if (onAirNotes.Count == 0)
+            {
+                return;
+            }
+
+            var chart = onAirSession.Snapshot.Charts.Single(item => item.Id == onAirChart);
+            var addedIds = new List<long>(onAirNotes.Count);
+            onAirSession.Edit(edit =>
+            {
+                double lastNoteEnd = onAirNotes.Max(note => note.EndTime);
+                if (lastNoteEnd >= chart.CompletionTimeSeconds)
+                {
+                    double end = timeline.Timing.TimeAtBeat(timeline.Timing.BeatAtTime(lastNoteEnd) + 1);
+                    edit.SetChartSettings(chart.Id, chart.ModeId, chart.LaneCount, end);
+                }
+
+                foreach (var note in onAirNotes)
+                {
+                    addedIds.Add(edit.AddNote(chart.Id, note));
+                }
+            });
+            onAirRecordedIds.AddRange(addedIds);
+        }
+
+        private void FinishOnAir()
+        {
+            var session = onAirSession;
+            if (timeline)
+            {
+                timeline.UseOnAirPageFollow = false;
+                if (timeline.PreviewClip == onAirClip)
+                {
+                    timeline.PausePreview();
+                    timeline.Seek(onAirStart);
+                }
+            }
+
+            if (onAirEventSystem)
+            {
+                onAirEventSystem.SetSelectedGameObject(null);
+                onAirEventSystem.sendNavigationEvents = onAirNavigation;
+            }
+
+            onAirEventSystem = null;
+            onAirSession = null;
+            onAirClip = null;
+            onAirKeys = null;
+            onAirPressTimes = null;
+            onAirKeyboard = null;
+            onAirRecording = false;
+            view.CloseMenus();
+            view.onAirCountdown.gameObject.SetActive(false);
+            view.onAirIcon.color = new Color(.16f, .16f, .16f);
+            view.status.text = "ON AIR 종료";
+
+            if (!isActiveAndEnabled || session != screen.Session || screen.IsBusy)
+            {
+                return;
+            }
+
+            if (screen.SnapEnabled && onAirRecordedIds.Count > 0)
+            {
+                screen.IsBusy = true;
+                view.SetOnAirQuantizing(true);
+                onAirQuantization = StartCoroutine(QuantizeOnAir(session, onAirChart, screen.SnapBeats));
+            }
+        }
+
+        private IEnumerator QuantizeOnAir(EditorSession session, Guid chart, double step)
+        {
+            // Give the modal a rendered frame before changing the chart.
+            yield return null;
+            yield return null;
+
+            try
+            {
+                int skipped = editing.QuantizeRecordedNotes(session, chart, onAirRecordedIds, step);
+                view.status.text = "ON AIR 종료 · 퀀타이즈 완료";
+                if (skipped > 0)
+                {
+                    view.status.text += $" · 겹치는 노트 {skipped}개는 원래 위치 유지";
+                }
+            }
+            catch (Exception error)
+            {
+                view.status.text = "ON AIR 퀀타이즈 실패 · " + error.Message;
+            }
+            finally
+            {
+                CloseOnAirQuantization();
+            }
+        }
+
+        private void CloseOnAirQuantization()
+        {
+            onAirQuantization = null;
+            view.SetOnAirQuantizing(false);
+            screen.IsBusy = false;
+        }
+
         private void PrepareShortcutInput()
         {
-            if (!isActiveAndEnabled)
+            if (!isActiveAndEnabled || onAirSession != null || onAirQuantization != null)
             {
                 return;
             }
@@ -304,6 +667,18 @@ namespace RhythmDojo.Authoring
 
         private void HandleEscape()
         {
+            if (view.IsProjectListOpen)
+            {
+                Run(WorkspaceAction.CloseProjectList);
+                return;
+            }
+
+            if (view.IsNoteSpeedWarningOpen)
+            {
+                Run(WorkspaceAction.CloseNoteSpeedWarning);
+                return;
+            }
+
             if (timeline.IsTempoChangeOpen)
             {
                 timeline.CloseTempoChange();
@@ -372,6 +747,11 @@ namespace RhythmDojo.Authoring
 
         private bool HandlePopupKeyboard(Keyboard keyboard)
         {
+            if (view.IsNoteSpeedWarningOpen || view.IsProjectListOpen)
+            {
+                return true;
+            }
+
             if (timeline.IsTempoChangeOpen)
             {
                 if (keyboard.enterKey.wasPressedThisFrame || keyboard.numpadEnterKey.wasPressedThisFrame)
@@ -594,9 +974,36 @@ namespace RhythmDojo.Authoring
             Run(action, false);
         }
 
-        public async void Run(WorkspaceAction action, bool closeMenus = true)
+        public void Run(WorkspaceAction action, bool closeMenus = true)
         {
+            Run(action, closeMenus, Guid.Empty);
+        }
+
+        private async void Run(WorkspaceAction action, bool closeMenus, Guid listedProjectId)
+        {
+            if (HandleOnAirAction(action))
+            {
+                return;
+            }
+
+            if (view.IsNoteSpeedWarningOpen)
+            {
+                if (action == WorkspaceAction.CloseNoteSpeedWarning)
+                {
+                    view.noteSpeedWarning.SetActive(false);
+                }
+
+                return;
+            }
+
             if (working || !menu.IsInitialized)
+            {
+                return;
+            }
+
+            bool projectListAction = action == WorkspaceAction.CloseProjectList ||
+                action == WorkspaceAction.OpenListedProject;
+            if (view.IsProjectListOpen != projectListAction)
             {
                 return;
             }
@@ -676,7 +1083,7 @@ namespace RhythmDojo.Authoring
                     view.CloseMenus();
                 }
 
-                await Execute(action);
+                await Execute(action, listedProjectId);
                 if (this)
                 {
                     grid.SetVerticesDirty();
@@ -693,6 +1100,10 @@ namespace RhythmDojo.Authoring
                     if (view.saveAsPopup.activeSelf)
                     {
                         view.saveAsError.text = error.Message;
+                    }
+                    if (view.IsProjectListOpen)
+                    {
+                        view.projectListStatus.text = error.Message;
                     }
                 }
             }
@@ -751,11 +1162,21 @@ namespace RhythmDojo.Authoring
             }
         }
 
-        private async Task Execute(WorkspaceAction action)
+        private async Task Execute(WorkspaceAction action, Guid listedProjectId)
         {
             var session = screen.Session;
             switch (action)
             {
+                case WorkspaceAction.ShowProjectList:
+                    ShowProjectList();
+                    break;
+                case WorkspaceAction.CloseProjectList:
+                    view.projectListPopup.SetActive(false);
+                    break;
+                case WorkspaceAction.OpenListedProject:
+                    await OpenProject(listedProjectId);
+                    view.projectListPopup.SetActive(false);
+                    break;
                 case WorkspaceAction.ProjectFiles:
                     menu.ToggleFile();
                     break;
@@ -790,11 +1211,16 @@ namespace RhythmDojo.Authoring
                         throw new InvalidOperationException("저장된 채보가 없습니다.");
                     }
                     Guid id = recentIds[view.recent.value];
-                    await Save();
-                    menu.ReplaceSession(await EditorSession.LoadAsync(menu.Store, id, lifetime.Token));
-                    Observe();
-                    view.CloseMenus();
-                    view.status.text = "채보를 불러왔습니다.";
+                    await OpenProject(id);
+                    break;
+                case WorkspaceAction.OpenByProjectId:
+                    if (!Guid.TryParse(view.openProjectId.text, out Guid projectId) || projectId == Guid.Empty)
+                    {
+                        throw new InvalidOperationException("불러올 채보의 전체 프로젝트 ID를 입력하세요.");
+                    }
+
+                    await OpenProject(projectId);
+                    view.openProjectId.SetTextWithoutNotify("");
                     break;
                 case WorkspaceAction.Save:
                     await Save();
@@ -999,6 +1425,9 @@ namespace RhythmDojo.Authoring
                 case WorkspaceAction.Scroll:
                     tool = 4;
                     break;
+                case WorkspaceAction.OnAir:
+                    ShowOnAirPrompt();
+                    break;
                 case WorkspaceAction.Tap:
                     screen.MinimumHoldOnClick = false;
                     tool = 0;
@@ -1015,8 +1444,7 @@ namespace RhythmDojo.Authoring
 
         private void CreateNew()
         {
-            var replacement = new EditorSession(new SongProject());
-            replacement.Edit(edit => edit.AddChartSlot(ChartSlot.Easy, screen.Mode.name, 4, 8.5));
+            var replacement = screen.CreateDraft(ChartSlot.Easy);
             menu.ReplaceSession(replacement);
             Observe();
             SetQuantization(0);
@@ -1045,6 +1473,21 @@ namespace RhythmDojo.Authoring
                     button.colors = colors;
                 }
             }
+        }
+
+        private async Task OpenProject(Guid id)
+        {
+            if (HasUnsavedChanges)
+            {
+                await Save();
+            }
+
+            var replacement = await EditorSession.LoadAsync(menu.Store, id, lifetime.Token);
+            lifetime.Token.ThrowIfCancellationRequested();
+            menu.ReplaceSession(replacement);
+            Observe();
+            view.CloseMenus();
+            view.status.text = "채보를 불러왔습니다.";
         }
 
         private async Task Save()
@@ -1130,21 +1573,104 @@ namespace RhythmDojo.Authoring
 
         private void RefreshRecent()
         {
-            recentIds = menu.Store.ListSongIds().OrderByDescending(id =>
-                File.GetLastWriteTimeUtc(Path.Combine(menu.Store.GetSongFolder(id), FileSongProjectStore.FileName)))
-                .Take(20).ToArray();
+            recentIds = SavedProjectIds().Where(ShowsInRecent).Take(20).ToArray();
             view.recent.ClearOptions();
-            view.recent.AddOptions(recentIds.Select(id =>
+            view.recent.AddOptions(recentIds.Select(ProjectLabel).ToList());
+        }
+
+        private IEnumerable<Guid> SavedProjectIds()
+        {
+            return menu.Store.ListSongIds().OrderByDescending(LastSavedUtc);
+        }
+
+        private DateTime LastSavedUtc(Guid id)
+        {
+            return File.GetLastWriteTimeUtc(Path.Combine(menu.Store.GetSongFolder(id), FileSongProjectStore.FileName));
+        }
+
+        private string ProjectLabel(Guid id)
+        {
+            try
             {
-                try
+                string title = menu.Store.Read(id).Title;
+                if (string.IsNullOrWhiteSpace(title))
                 {
-                    return menu.Store.Read(id).Title + " · " + id.ToString("D").Substring(0, 8);
+                    title = "제목 없음";
                 }
-                catch
+
+                return title + " · " + id.ToString("D").Substring(0, 8);
+            }
+            catch
+            {
+                return "읽기 오류 · " + id.ToString("D");
+            }
+        }
+
+        private static bool ShowsInRecent(Guid id)
+        {
+            return !PlayerPrefs.HasKey(HiddenRecentProjectKeyPrefix + id.ToString("D"));
+        }
+
+        private bool ToggleRecent(Guid id)
+        {
+            if (working)
+            {
+                return ShowsInRecent(id);
+            }
+
+            string key = HiddenRecentProjectKeyPrefix + id.ToString("D");
+            bool show = !ShowsInRecent(id);
+            if (show)
+            {
+                PlayerPrefs.DeleteKey(key);
+            }
+            else
+            {
+                PlayerPrefs.SetInt(key, 1);
+            }
+
+            PlayerPrefs.Save();
+            RefreshRecent();
+            return show;
+        }
+
+        private void ShowProjectList()
+        {
+            var content = view.projectListScroll.content;
+            foreach (Transform row in content)
+            {
+                row.gameObject.SetActive(false);
+                Destroy(row.gameObject);
+            }
+
+            var ids = SavedProjectIds().ToArray();
+            foreach (Guid id in ids)
+            {
+                var row = Instantiate(view.projectListRow, content);
+                row.Initialize(ProjectLabel(id), ShowsInRecent(id),
+                    () => Run(WorkspaceAction.OpenListedProject, false, id), () => ToggleRecent(id));
+                string savedAt = LastSavedUtc(id).ToLocalTime().ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+                row.savedAtLabel.text = "마지막 저장 " + savedAt;
+                row.copyProjectId.onClick.AddListener(() =>
                 {
-                    return "읽기 오류 · " + id.ToString("D");
-                }
-            }).ToList());
+                    GUIUtility.systemCopyBuffer = id.ToString("D");
+                    view.projectListStatus.text = "전체 프로젝트 ID를 복사했습니다.";
+                });
+                row.gameObject.SetActive(true);
+            }
+
+            view.projectListStatus.text = "";
+            if (ids.Length == 0)
+            {
+                view.projectListStatus.text = "저장된 채보가 없습니다.";
+            }
+
+            menu.ClosePanels();
+            EventSystem.current?.SetSelectedGameObject(null);
+            view.projectListPopup.transform.SetAsLastSibling();
+            view.projectListPopup.SetActive(true);
+            LayoutRebuilder.ForceRebuildLayoutImmediate(content);
+            view.projectListScroll.verticalNormalizedPosition = 1;
         }
 
         private async Task ImportResources()
@@ -1352,10 +1878,22 @@ namespace RhythmDojo.Authoring
 
         private bool PointerDown(PointerEventData data)
         {
-            if (working)
+            if (working || onAirSession != null)
             {
                 return true;
             }
+
+            var keyboard = Keyboard.current;
+            if (data.button == PointerEventData.InputButton.Left && keyboard != null && keyboard.ctrlKey.isPressed)
+            {
+                if (Point(data, out var click) && grid.TryGetNearestBeatLine(click.y, out double beat))
+                {
+                    timeline.SeekInViewport(timeline.Timing.TimeAtBeat(beat) - timeline.AudioOffset);
+                }
+
+                return true;
+            }
+
             if (tool == 0)
             {
                 return false;
@@ -1530,12 +2068,30 @@ namespace RhythmDojo.Authoring
             if (!focus)
             {
                 EndPlaybackSeek();
+                if (onAirPressTimes != null)
+                {
+                    Array.Clear(onAirPressTimes, 0, onAirPressTimes.Length);
+                }
             }
         }
 
         private void OnDisable()
         {
             EndPlaybackSeek();
+            if (onAirQuantization != null)
+            {
+                StopCoroutine(onAirQuantization);
+                CloseOnAirQuantization();
+            }
+
+            if (onAirSession != null)
+            {
+                FinishOnAir();
+            }
+            else if (view && IsOnAirPromptOpen)
+            {
+                CloseOnAirPrompt();
+            }
         }
 
         private void SetPlaybackPosition(Vector2 point)

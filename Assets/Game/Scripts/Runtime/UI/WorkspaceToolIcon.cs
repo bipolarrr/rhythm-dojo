@@ -12,7 +12,8 @@ namespace RhythmDojo.UI
             Pencil,
             Eraser,
             Grab,
-            Scroll
+            Scroll,
+            OnAir
         }
 
         public IconKind kind;
@@ -22,6 +23,15 @@ namespace RhythmDojo.UI
             helper.Clear();
             switch (kind)
             {
+                case IconKind.OnAir:
+                    var circle = new Vector2[16];
+                    for (int i = 0; i < circle.Length; i++)
+                    {
+                        float angle = i * Mathf.PI * 2 / circle.Length;
+                        circle[i] = new Vector2(.5f + .32f * Mathf.Cos(angle), .5f + .32f * Mathf.Sin(angle));
+                    }
+                    Polygon(helper, circle);
+                    break;
                 case IconKind.Scroll:
                     Line(helper, new Vector2(.12f, .2f), new Vector2(.12f, .8f), .09f);
                     Line(helper, new Vector2(.88f, .2f), new Vector2(.88f, .8f), .09f);

@@ -50,6 +50,7 @@ namespace RhythmDojo.Authoring
             new Binding(WorkspaceAction.PlayPause, Key.Space, "Space"),
             new Binding(WorkspaceAction.PlayReturn, Key.Space, "Ctrl+Space", true),
             new Binding(WorkspaceAction.Stop, Key.Digit0, "0"),
+            new Binding(WorkspaceAction.OnAir, Key.F8, "F8"),
             new Binding(WorkspaceAction.Test, Key.F5, "F5"),
             new Binding(WorkspaceAction.TestHere, Key.F5, "Shift+F5", false, true),
             new Binding(WorkspaceAction.AutoTest, Key.F5, "Ctrl+F5", true),

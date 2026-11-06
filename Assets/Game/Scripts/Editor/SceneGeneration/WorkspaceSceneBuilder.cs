@@ -82,9 +82,12 @@ namespace RhythmDojo.EditorTools
             dismissArea.gameObject.SetActive(false);
             var file = Menu(canvas.transform, view, "파일", 0, menus);
             Action(file, "새로 만들기", WorkspaceAction.New, bindings);
+            view.openProjectId = Field(file, "프로젝트 ID", "전체 곡 ID 입력");
+            Action(file, "프로젝트 ID로 불러오기", WorkspaceAction.OpenByProjectId, bindings);
             Heading(file, "최근 파일 · 최신 저장 순");
             view.recent = Dropdown(file, "Recent Projects", new[] { "저장된 파일" });
             Action(file, "파일 열기", WorkspaceAction.Open, bindings);
+            Action(file, "전체 파일 목록 열기", WorkspaceAction.ShowProjectList, bindings);
             Action(file, "프로젝트 ID / 이전 형식 가져오기", WorkspaceAction.ProjectFiles, bindings);
             Action(file, "저장", WorkspaceAction.Save, bindings);
             Action(file, "다른 이름으로 저장", WorkspaceAction.SaveAs, bindings);
@@ -180,6 +183,7 @@ namespace RhythmDojo.EditorTools
             Action(tools, "지우개", WorkspaceAction.Eraser, bindings);
             Action(tools, "잡기", WorkspaceAction.Position, bindings);
             Action(tools, "재생 위치", WorkspaceAction.Scroll, bindings);
+            Action(tools, "ON AIR", WorkspaceAction.OnAir, bindings);
             view.position = Field(tools, "작업 위치 (초)", "0");
             BuildToolBar(canvas.transform, view);
             Heading(tools, "퀀타이즈 · 4분음표 기준");
@@ -217,6 +221,9 @@ namespace RhythmDojo.EditorTools
             help.fontSize = 14;
             UiElements.Position(help.rectTransform, new Vector2(176, -18), new Vector2(230, 210));
             AddGameplayPreview(canvas, view);
+            AddNoteSpeedWarning(canvas.transform, view, bindings);
+            AddOnAirDialog(canvas.transform, view, bindings);
+            AddProjectList(canvas.transform, view, bindings);
 
             // Confirmation dialogs stay above the editor and its live preview.
             var popup = Panel("Unsaved Changes", canvas.transform, new Vector2(0, 0), new Vector2(1280, 720));
@@ -285,6 +292,82 @@ namespace RhythmDojo.EditorTools
             Debug.Log("Rhythm Dojo: chart editor generated with the workspace interface.");
         }
 
+        private static void AddProjectList(Transform parent, WorkspaceView view, List<WorkspaceActionBinding> bindings)
+        {
+            var overlay = Panel("Project List", parent, Vector2.zero, Vector2.zero);
+            overlay.anchorMin = Vector2.zero;
+            overlay.anchorMax = Vector2.one;
+            overlay.offsetMin = Vector2.zero;
+            overlay.offsetMax = Vector2.zero;
+            overlay.GetComponent<Image>().color = new Color(0, 0, 0, .55f);
+            view.projectListPopup = overlay.gameObject;
+
+            var dialog = Panel("Dialog", overlay, Vector2.zero, new Vector2(640, 520));
+            dialog.anchorMin = dialog.anchorMax = dialog.pivot = new Vector2(.5f, .5f);
+            dialog.GetComponent<Image>().color = MenuSurface;
+            UiElements.Label("Title", dialog, "전체 파일 목록", new Vector2(20, -14), new Vector2(520, 32), 22)
+                .color = MenuText;
+            UiElements.Label("Instructions", dialog, "더블 클릭하여 열기   ·   별표로 최근 파일 표시 설정",
+                new Vector2(20, -49), new Vector2(600, 28), 15).color = MenuText;
+
+            var viewport = Panel("Viewport", dialog, new Vector2(20, -86), new Vector2(600, 364));
+            viewport.GetComponent<Image>().color = new Color(.85f, .86f, .88f);
+            viewport.gameObject.AddComponent<RectMask2D>();
+            var content = new GameObject("Content", typeof(RectTransform)).GetComponent<RectTransform>();
+            content.SetParent(viewport, false);
+            content.anchorMin = new Vector2(0, 1);
+            content.anchorMax = Vector2.one;
+            content.pivot = new Vector2(.5f, 1);
+            content.sizeDelta = Vector2.zero;
+            var layout = content.gameObject.AddComponent<VerticalLayoutGroup>();
+            layout.spacing = 4;
+            layout.childControlHeight = false;
+            layout.childForceExpandHeight = false;
+            content.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            var scroll = viewport.gameObject.AddComponent<ScrollRect>();
+            scroll.viewport = viewport;
+            scroll.content = content;
+            scroll.horizontal = false;
+            scroll.movementType = ScrollRect.MovementType.Clamped;
+            scroll.scrollSensitivity = 30;
+            view.projectListScroll = scroll;
+
+            var row = UiElements.Button("Project Row Template", dialog, "", Vector2.zero, new Vector2(600, 46));
+            StyleMenuButton(row, TextAnchor.MiddleLeft, 16);
+            view.projectListRow = row.gameObject.AddComponent<WorkspaceProjectRow>();
+            view.projectListRow.projectLabel = row.GetComponentInChildren<Text>();
+            view.projectListRow.projectLabel.rectTransform.offsetMin = new Vector2(10, 14);
+            view.projectListRow.projectLabel.rectTransform.offsetMax = new Vector2(-158, -2);
+            view.projectListRow.savedAtLabel = UiElements.Label("Last Saved", row.transform, "",
+                new Vector2(10, -24), new Vector2(432, 18), 13);
+            view.projectListRow.savedAtLabel.color = new Color(.38f, .38f, .38f);
+
+            var copyId = UiElements.Button("Copy Project ID", row.transform, "ID 복사", Vector2.zero, new Vector2(94, 46));
+            StyleMenuButton(copyId, TextAnchor.MiddleCenter, 15);
+            view.projectListRow.copyProjectId = copyId;
+            var copyIdRect = (RectTransform)copyId.transform;
+            copyIdRect.anchorMin = copyIdRect.anchorMax = copyIdRect.pivot = new Vector2(1, 1);
+            copyIdRect.anchoredPosition = new Vector2(-48, 0);
+
+            var star = UiElements.Button("Recent Visibility", row.transform, "★", Vector2.zero, new Vector2(48, 46));
+            StyleMenuButton(star, TextAnchor.MiddleCenter, 22);
+            view.projectListRow.recentToggle = star;
+            var starRect = (RectTransform)star.transform;
+            starRect.anchorMin = starRect.anchorMax = starRect.pivot = new Vector2(1, 1);
+            starRect.anchoredPosition = Vector2.zero;
+            row.gameObject.SetActive(false);
+
+            view.projectListStatus = UiElements.Label("Status", dialog, "", new Vector2(20, -461),
+                new Vector2(498, 42), 14);
+            view.projectListStatus.color = MenuText;
+            var close = UiElements.Button("CloseProjectList", dialog, "닫기",
+                new Vector2(532, -466), new Vector2(88, 34));
+            StyleMenuButton(close, TextAnchor.MiddleCenter, 16);
+            bindings.Add(new WorkspaceActionBinding { action = WorkspaceAction.CloseProjectList, button = close });
+            overlay.gameObject.SetActive(false);
+        }
+
         public static void AddGameplayPreview(Canvas canvas, WorkspaceView view)
         {
             var panel = canvas.transform.Find("Editor Content/Chart And Preview/Preview Space");
@@ -302,7 +385,7 @@ namespace RhythmDojo.EditorTools
             image.rectTransform.anchorMax = Vector2.one;
             image.rectTransform.offsetMin = new Vector2(10, 42);
             image.rectTransform.offsetMax = new Vector2(-10, -32);
-            var clock = UiElements.Label("Preview Clock", panel, "미리보기 · 0.000 s · 1×",
+            var clock = UiElements.Label("Preview Clock", panel, "미리보기 · 0.000 s",
                 Vector2.zero, new Vector2(350, 18), 11);
             clock.rectTransform.anchorMin = clock.rectTransform.anchorMax = Vector2.zero;
             clock.rectTransform.anchoredPosition = new Vector2(12, 40);
@@ -318,6 +401,8 @@ namespace RhythmDojo.EditorTools
             preview.workspace = canvas.GetComponent<WorkspaceEditor>();
             preview.image = image;
             preview.clock = clock;
+            view.noteSpeed = AddNoteSpeedField(panel);
+            UnityEventTools.AddPersistentListener(view.noteSpeed.onEndEdit, preview.ApplyNoteSpeed);
             preview.presentation = SceneResources.Require<GameplayPresentationSettings>("Assets/Game/Settings/PresentationSettings.asset");
             preview.scrollSettings = SceneResources.Require<ScrollSettings>("Assets/Game/Settings/ScrollSettings.asset");
             preview.tapTemplate = SceneResources.Require<GameObject>("Assets/Game/Prefabs/TapNote.prefab").GetComponent<NoteView>();
@@ -328,6 +413,54 @@ namespace RhythmDojo.EditorTools
             serialized.FindProperty("railMaterial").objectReferenceValue = SceneResources.Require<Material>("Assets/Game/Materials/Rails.mat");
             serialized.FindProperty("judgmentMaterial").objectReferenceValue = SceneResources.Require<Material>("Assets/Game/Materials/Judgement.mat");
             serialized.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static InputField AddNoteSpeedField(Transform panel)
+        {
+            var root = new GameObject("Preview Note Speed", typeof(RectTransform));
+            root.transform.SetParent(panel, false);
+            var rect = (RectTransform)root.transform;
+            rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(1, 0);
+            rect.anchoredPosition = new Vector2(-10, 9);
+            rect.sizeDelta = new Vector2(150, 24);
+
+            var label = UiElements.Label("Note Speed Label", rect, "노트 속도", Vector2.zero, new Vector2(68, 24), 14);
+            label.alignment = TextAnchor.MiddleRight;
+            var go = DefaultControls.CreateInputField(new DefaultControls.Resources());
+            go.name = "Note Speed Input";
+            go.transform.SetParent(rect, false);
+            UiElements.Position((RectTransform)go.transform, new Vector2(76, 0), new Vector2(58, 24));
+            var field = go.GetComponent<InputField>();
+            field.contentType = InputField.ContentType.DecimalNumber;
+            field.text = "1.0";
+            field.textComponent.fontSize = 14;
+            field.textComponent.alignment = TextAnchor.MiddleCenter;
+            field.placeholder.gameObject.SetActive(false);
+
+            var unit = UiElements.Label("Note Speed Unit", rect, "x", new Vector2(138, 0), new Vector2(12, 24), 14);
+            unit.alignment = TextAnchor.MiddleCenter;
+            return field;
+        }
+
+        private static void AddNoteSpeedWarning(Transform canvas, WorkspaceView view, List<WorkspaceActionBinding> bindings)
+        {
+            var overlay = Panel("Note Speed Warning", canvas, Vector2.zero, Vector2.zero);
+            overlay.anchorMin = Vector2.zero;
+            overlay.anchorMax = Vector2.one;
+            overlay.offsetMin = overlay.offsetMax = Vector2.zero;
+            overlay.GetComponent<Image>().color = new Color(0, 0, 0, .65f);
+
+            var dialog = Panel("Dialog", overlay, Vector2.zero, new Vector2(480, 126));
+            dialog.anchorMin = dialog.anchorMax = dialog.pivot = new Vector2(.5f, .5f);
+            var message = UiElements.Label("Message", dialog, "속도는 1.0 ~ 10.0 안에서만 조절 할 수 있습니다",
+                new Vector2(16, -16), new Vector2(448, 44), 18);
+            message.alignment = TextAnchor.MiddleCenter;
+            var confirm = UiElements.Button("Close Note Speed Warning", dialog, "확인",
+                new Vector2(180, -75), new Vector2(120, 32));
+            StyleMenuButton(confirm, TextAnchor.MiddleCenter, 14);
+            bindings.Add(new WorkspaceActionBinding { action = WorkspaceAction.CloseNoteSpeedWarning, button = confirm });
+            view.noteSpeedWarning = overlay.gameObject;
+            overlay.gameObject.SetActive(false);
         }
 
         private static readonly Dictionary<Transform, float> Positions = new Dictionary<Transform, float>();
@@ -406,44 +539,88 @@ namespace RhythmDojo.EditorTools
             return label;
         }
 
+        private static void AddOnAirDialog(Transform parent, WorkspaceView view, List<WorkspaceActionBinding> bindings)
+        {
+            var countdown = UiElements.Label("ON AIR Countdown", parent, "3", Vector2.zero, new Vector2(96, 96), 64);
+            countdown.rectTransform.anchorMin = countdown.rectTransform.anchorMax = new Vector2(.5f, .5f);
+            countdown.rectTransform.pivot = new Vector2(.5f, .5f);
+            countdown.rectTransform.anchoredPosition = new Vector2(-190, 100);
+            countdown.alignment = TextAnchor.MiddleCenter;
+            countdown.gameObject.SetActive(false);
+            view.onAirCountdown = countdown;
+
+            var popup = Panel("ON AIR Confirmation", parent, Vector2.zero, Vector2.zero);
+            popup.anchorMin = Vector2.zero;
+            popup.anchorMax = Vector2.one;
+            popup.offsetMin = popup.offsetMax = Vector2.zero;
+            var heading = UiElements.Label("Question", popup, "ON AIR 모드에서는 다른 편집 단축키를 사용할 수 없습니다.\n3초 뒤 현재 위치부터 노트 입력을 시작할까요?",
+                new Vector2(250, -230), new Vector2(780, 88), 23);
+            heading.alignment = TextAnchor.MiddleCenter;
+            PopupAction(popup, "YES", WorkspaceAction.ConfirmOnAir, 390, bindings);
+            PopupAction(popup, "NO", WorkspaceAction.CancelOnAir, 660, bindings);
+            popup.gameObject.SetActive(false);
+            view.onAirPopup = popup.gameObject;
+        }
+
         private static void BuildToolBar(Transform parent, WorkspaceView view)
         {
             var tool = parent.Find("Editor Content/Tool Space");
             var toolLabel = tool.Find("Tool Space Label").GetComponent<Text>();
             toolLabel.gameObject.SetActive(false);
-            var captions = new[] { "선택", "그리기", "지우개", "잡기", "재생 위치" };
+            var captions = new[] { "선택", "그리기", "지우개", "잡기", "재생 위치", "ON AIR" };
             var actions = new[] { WorkspaceAction.Select, WorkspaceAction.Pencil,
-                WorkspaceAction.Eraser, WorkspaceAction.Position, WorkspaceAction.Scroll };
+                WorkspaceAction.Eraser, WorkspaceAction.Position, WorkspaceAction.Scroll, WorkspaceAction.OnAir };
             view.toolActions = new WorkspaceActionBinding[actions.Length];
             for (int i = 0; i < actions.Length; i++)
             {
-                var button = UiElements.Button("Tool " + actions[i], tool, captions[i],
-                    new Vector2(4, -6 - i * 50), new Vector2(44, 44));
-                StyleMenuButton(button, TextAnchor.MiddleLeft, 10);
-                var label = button.GetComponentInChildren<Text>();
-                label.gameObject.SetActive(false);
-                var shortcutLabel = AddShortcutLabel(button, WorkspaceShortcuts.Label(actions[i]), 9);
-                UiElements.Position(shortcutLabel.rectTransform, new Vector2(0, -29), new Vector2(41, 12));
-                var icon = new GameObject("Icon", typeof(RectTransform), typeof(WorkspaceToolIcon))
-                    .GetComponent<WorkspaceToolIcon>();
-                icon.transform.SetParent(button.transform, false);
-                UiElements.Position(icon.rectTransform, new Vector2(9, -9), new Vector2(26, 26));
-                icon.kind = (WorkspaceToolIcon.IconKind)i;
-                icon.color = MenuText;
-                icon.raycastTarget = false;
-                view.toolActions[i] = new WorkspaceActionBinding { action = actions[i], button = button };
+                view.toolActions[i] = AddToolBarButton(tool, view, actions[i], captions[i], i);
             }
             view.quantizationCycle = UiElements.Button("Quantization Cycle", tool, "",
-                new Vector2(4, -6 - actions.Length * 50), new Vector2(44, 44));
+                Vector2.zero, Vector2.zero);
             StyleMenuButton(view.quantizationCycle, TextAnchor.MiddleCenter, 9);
             var caption = view.quantizationCycle.GetComponentInChildren<Text>();
             caption.gameObject.SetActive(false);
             caption.raycastTarget = false;
             view.quantizationCycleValue = UiElements.Label("Value", view.quantizationCycle.transform,
-                "1/4", Vector2.zero, new Vector2(44, 44), 13);
+                "1/4", Vector2.zero, new Vector2(38, 38), 13);
             view.quantizationCycleValue.alignment = TextAnchor.MiddleCenter;
             view.quantizationCycleValue.color = MenuText;
             view.quantizationCycleValue.raycastTarget = false;
+            PositionToolBarButton(view.quantizationCycle, actions.Length);
+        }
+
+        private static WorkspaceActionBinding AddToolBarButton(Transform tool, WorkspaceView view,
+            WorkspaceAction action, string caption, int index)
+        {
+            var button = UiElements.Button("Tool " + action, tool, caption, Vector2.zero, Vector2.zero);
+            StyleMenuButton(button, TextAnchor.MiddleLeft, 10);
+            var label = button.GetComponentInChildren<Text>();
+            label.gameObject.SetActive(false);
+            AddShortcutLabel(button, WorkspaceShortcuts.Label(action), 9);
+            var icon = new GameObject("Icon", typeof(RectTransform), typeof(WorkspaceToolIcon))
+                .GetComponent<WorkspaceToolIcon>();
+            icon.transform.SetParent(button.transform, false);
+            icon.kind = (WorkspaceToolIcon.IconKind)index;
+            icon.color = MenuText;
+            icon.raycastTarget = false;
+            if (action == WorkspaceAction.OnAir)
+            {
+                view.onAirIcon = icon;
+            }
+
+            PositionToolBarButton(button, index);
+            return new WorkspaceActionBinding { action = action, button = button };
+        }
+
+        private static void PositionToolBarButton(Button button, int index)
+        {
+            UiElements.Position((RectTransform)button.transform, new Vector2(7, -6 - index * 42), new Vector2(38, 38));
+            var shortcut = button.transform.Find("Shortcut") as RectTransform;
+            if (shortcut)
+            {
+                UiElements.Position(shortcut, new Vector2(0, -25), new Vector2(35, 11));
+                UiElements.Position((RectTransform)button.transform.Find("Icon"), new Vector2(8, -4), new Vector2(22, 22));
+            }
         }
 
         private static void StyleMenuButton(Button button, TextAnchor alignment, int fontSize)

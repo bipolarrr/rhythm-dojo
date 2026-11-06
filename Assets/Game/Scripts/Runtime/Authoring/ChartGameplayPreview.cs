@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using RhythmDojo.Application;
 using RhythmDojo.Gameplay;
 using RhythmDojo.Presentation;
@@ -29,6 +31,7 @@ namespace RhythmDojo.Authoring
         private EditorSession observed;
         private EditorNote[] notes = System.Array.Empty<EditorNote>();
         private System.Guid chartId;
+        private double noteSpeedMultiplier = 1;
 
         public double SongTime { get; private set; }
         public int VisibleNoteCount { get; private set; }
@@ -93,7 +96,40 @@ namespace RhythmDojo.Authoring
             HideUnused(taps, tapCount);
             HideUnused(holds, holdCount);
             VisibleNoteCount = tapCount + holdCount;
-            clock.text = "미리보기 · " + workspace.timeline.MusicTime.ToString("0.000") + " s · 1×";
+            clock.text = "미리보기 · " + workspace.timeline.MusicTime.ToString("0.000") + " s";
+        }
+
+        public void ApplyNoteSpeed(string value)
+        {
+            if (!double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out double multiplier)
+                || !double.IsFinite(multiplier))
+            {
+                ShowNoteSpeedWarning();
+                return;
+            }
+
+            if (multiplier < 1 || multiplier > 10)
+            {
+                ShowNoteSpeedWarning();
+                return;
+            }
+
+            noteSpeedMultiplier = Math.Round(multiplier, 1, MidpointRounding.AwayFromZero);
+            UpdateNoteSpeedText();
+            UpdateScroll();
+        }
+
+        private void ShowNoteSpeedWarning()
+        {
+            UpdateNoteSpeedText();
+            var warning = workspace.view.noteSpeedWarning;
+            warning.transform.SetAsLastSibling();
+            warning.SetActive(true);
+        }
+
+        private void UpdateNoteSpeedText()
+        {
+            workspace.view.noteSpeed.SetTextWithoutNotify(noteSpeedMultiplier.ToString("0.0", CultureInfo.InvariantCulture));
         }
 
         private void Initialize()
@@ -130,8 +166,12 @@ namespace RhythmDojo.Authoring
         {
             chartId = workspace.screen.ChartId;
             notes = observed.GetNotes(chartId);
-            scroll = scrollSettings.CreateTimeline(ScrollMode.Constant,
-                new TempoMap(observed.Snapshot.TempoPoints), 1);
+            UpdateScroll();
+        }
+
+        private void UpdateScroll()
+        {
+            scroll = scrollSettings.CreateTimeline(ScrollMode.Constant, null, noteSpeedMultiplier);
         }
 
         private void Resize()
