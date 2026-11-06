@@ -12,7 +12,8 @@ namespace RhythmDojo.Authoring
         Mirror, Randomize, PlayPause, Stop, Loop, Slow, Test, TestHere, AutoTest, AutoTestHere,
         SaveExit, DiscardExit, CancelExit, Pencil, Select, Eraser, Position, Tap, Hold, ImportPupa,
         SaveNew, DiscardNew, ConfirmSaveAs, CancelSaveAs, ProjectFiles, ChartSettings, ResetView,
-        PlayReturn, Scroll, ApplyEstimatedBpm, CloseNoteSpeedWarning, OnAir, ConfirmOnAir, CancelOnAir
+        PlayReturn, Scroll, ApplyEstimatedBpm, CloseNoteSpeedWarning, OnAir, ConfirmOnAir, CancelOnAir,
+        OpenByProjectId, ShowProjectList, CloseProjectList, OpenListedProject
     }
 
     [Serializable]
@@ -29,6 +30,7 @@ namespace RhythmDojo.Authoring
         public InputField title, artist, audioPath, jacketPath, soundPath, bpm, offset, volume,
             saveAsName, position, loopStart, loopEnd;
         public InputField noteSpeed;
+        public InputField openProjectId;
         public Slider volumeControl;
         public Dropdown recent, quantization;
         public Button quantizationCycle;
@@ -40,6 +42,10 @@ namespace RhythmDojo.Authoring
         public GameObject exitPopup;
         public GameObject newPopup;
         public GameObject saveAsPopup;
+        public GameObject projectListPopup;
+        public ScrollRect projectListScroll;
+        public WorkspaceProjectRow projectListRow;
+        public Text projectListStatus;
         public GameObject noteSpeedWarning;
         public GameObject onAirPopup;
         public Text onAirCountdown;
@@ -77,6 +83,7 @@ namespace RhythmDojo.Authoring
         }
 
         public bool IsNoteSpeedWarningOpen => noteSpeedWarning && noteSpeedWarning.activeSelf;
+        public bool IsProjectListOpen => projectListPopup && projectListPopup.activeSelf;
 
         public bool HasOpenMenu
         {
@@ -96,6 +103,11 @@ namespace RhythmDojo.Authoring
 
         public void OpenMenu(WorkspaceMenuPopup menu)
         {
+            if (IsProjectListOpen)
+            {
+                return;
+            }
+
             if (exitPopup.activeSelf || newPopup.activeSelf)
             {
                 return;

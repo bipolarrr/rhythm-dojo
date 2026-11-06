@@ -188,6 +188,141 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        public IEnumerator ProjectIdFieldOpensSavedChartAndPreservesCurrentDraft()
+        {
+            var saved = workspace.screen.Session;
+            saved.Edit(edit => edit.SetMetadata("Saved chart", "Artist"));
+            workspace.Run(WorkspaceAction.Save);
+            yield return Idle();
+
+            workspace.Run(WorkspaceAction.New);
+            yield return Idle();
+            var draft = workspace.screen.Session;
+            draft.Edit(edit => edit.SetMetadata("Current draft", "Artist"));
+
+            var field = workspace.view.openProjectId;
+            var open = workspace.view.actions.Single(binding => binding.action == WorkspaceAction.OpenByProjectId).button;
+            Assert.That(field.transform.GetSiblingIndex(), Is.LessThan(workspace.view.recent.transform.GetSiblingIndex()));
+
+            var fileMenu = workspace.view.menus[0].trigger.GetComponent<RectTransform>();
+            yield return ClickAt(Center(fileMenu));
+            field.text = saved.Snapshot.Id.ToString("D").Substring(0, 8);
+            yield return ClickAt(Center(open.GetComponent<RectTransform>()));
+            yield return Idle();
+            Assert.That(workspace.screen.Session, Is.SameAs(draft));
+            Assert.That(workspace.view.status.text, Does.Contain("전체 프로젝트 ID"));
+
+            yield return ClickAt(Center(fileMenu));
+            field.text = saved.Snapshot.Id.ToString("D");
+            yield return ClickAt(Center(open.GetComponent<RectTransform>()));
+            yield return Idle();
+
+            Assert.That(workspace.screen.Session.Snapshot.Id, Is.EqualTo(saved.Snapshot.Id));
+            Assert.That(workspace.screen.Session.Snapshot.Title, Is.EqualTo("Saved chart"));
+            Assert.That(workspace.menu.Store.Read(draft.Snapshot.Id).Title, Is.EqualTo("Current draft"));
+            Assert.That(field.text, Is.Empty);
+        }
+
+        [UnityTest]
+        public IEnumerator OpeningARecentFileOnlySavesWhenTheCurrentProjectHasChanges()
+        {
+            Assert.That(workspace.HasUnsavedChanges, Is.False);
+            var saved = workspace.screen.Session;
+            saved.Edit(edit => edit.SetMetadata("Recent chart", "Artist"));
+            workspace.Run(WorkspaceAction.Save);
+            yield return Idle();
+
+            workspace.Run(WorkspaceAction.New);
+            yield return Idle();
+            Guid blankId = workspace.screen.Session.Snapshot.Id;
+            Assert.That(workspace.HasUnsavedChanges, Is.False);
+            workspace.Run(WorkspaceAction.Open);
+            yield return Idle();
+
+            Assert.That(workspace.screen.Session.Snapshot.Id, Is.EqualTo(saved.Snapshot.Id));
+            Assert.That(workspace.menu.Store.ListSongIds(), Has.No.Member(blankId));
+
+            workspace.Run(WorkspaceAction.New);
+            yield return Idle();
+            var draft = workspace.screen.Session;
+            draft.Edit(edit => edit.SetMetadata("Unsaved draft", "Artist"));
+            workspace.Run(WorkspaceAction.Open);
+            yield return Idle();
+
+            Assert.That(workspace.screen.Session.Snapshot.Id, Is.EqualTo(saved.Snapshot.Id));
+            Assert.That(workspace.menu.Store.Read(draft.Snapshot.Id).Title, Is.EqualTo("Unsaved draft"));
+        }
+
+        [UnityTest]
+        public IEnumerator AllFilesCanHideARecentProjectAndStillOpenItWithADoubleClick()
+        {
+            var saved = workspace.screen.Session;
+            saved.Edit(edit => edit.SetMetadata("", "Artist"));
+            workspace.Run(WorkspaceAction.Save);
+            yield return Idle();
+
+            string projectPath = Path.Combine(workspace.menu.Store.GetSongFolder(saved.Snapshot.Id),
+                FileSongProjectStore.FileName);
+            var savedAt = new DateTime(2025, 4, 12, 9, 30, 0, DateTimeKind.Local);
+            File.SetLastWriteTimeUtc(projectPath, savedAt.ToUniversalTime());
+
+            string preference = "RhythmDojo.Workspace.HiddenRecent." + saved.Snapshot.Id.ToString("D");
+            string previousClipboard = GUIUtility.systemCopyBuffer;
+            try
+            {
+                workspace.Run(WorkspaceAction.New);
+                yield return Idle();
+                var draft = workspace.screen.Session;
+                draft.Edit(edit => edit.SetMetadata("Current draft", "Artist"));
+
+                var fileMenu = workspace.view.menus[0].trigger.GetComponent<RectTransform>();
+                yield return ClickAt(Center(fileMenu));
+                var showList = workspace.view.actions.Single(binding => binding.action == WorkspaceAction.ShowProjectList).button;
+                yield return ClickAt(Center(showList.GetComponent<RectTransform>()));
+                Assert.That(workspace.view.IsProjectListOpen, Is.True, workspace.view.status.text);
+
+                var content = workspace.view.projectListScroll.content;
+                var row = content.GetComponentsInChildren<WorkspaceProjectRow>().Single();
+                Assert.That(row.projectLabel.text, Does.StartWith("제목 없음"));
+                Assert.That(row.projectLabel.preferredHeight, Is.LessThanOrEqualTo(row.projectLabel.rectTransform.rect.height));
+                Assert.That(row.savedAtLabel.text, Is.EqualTo("마지막 저장 2025-04-12 09:30"));
+                yield return ClickAt(Center(row.copyProjectId.GetComponent<RectTransform>()));
+                Assert.That(GUIUtility.systemCopyBuffer, Is.EqualTo(saved.Snapshot.Id.ToString("D")));
+                Assert.That(workspace.screen.Session, Is.SameAs(draft));
+
+                var star = row.recentToggle.GetComponentInChildren<Text>();
+                Assert.That(star.text, Is.EqualTo("★"));
+                yield return ClickAt(Center(row.recentToggle.GetComponent<RectTransform>()));
+                Assert.That(star.text, Is.EqualTo("☆"));
+                Assert.That(PlayerPrefs.HasKey(preference), Is.True);
+                Assert.That(workspace.view.recent.options, Is.Empty);
+                Assert.That(workspace.screen.Session, Is.SameAs(draft));
+
+                workspace.Run(WorkspaceAction.CloseProjectList);
+                workspace.Run(WorkspaceAction.ShowProjectList);
+                yield return null;
+                row = content.GetComponentsInChildren<WorkspaceProjectRow>().Single();
+                Assert.That(row.recentToggle.GetComponentInChildren<Text>().text, Is.EqualTo("☆"));
+
+                var rowCenter = Center(row.GetComponent<RectTransform>());
+                yield return ClickAt(rowCenter);
+                Assert.That(workspace.screen.Session, Is.SameAs(draft));
+                yield return ClickAt(rowCenter);
+                yield return Idle();
+
+                Assert.That(workspace.screen.Session.Snapshot.Id, Is.EqualTo(saved.Snapshot.Id));
+                Assert.That(workspace.menu.Store.Read(draft.Snapshot.Id).Title, Is.EqualTo("Current draft"));
+                Assert.That(workspace.view.IsProjectListOpen, Is.False);
+            }
+            finally
+            {
+                GUIUtility.systemCopyBuffer = previousClipboard;
+                PlayerPrefs.DeleteKey(preference);
+                PlayerPrefs.Save();
+            }
+        }
+
+        [UnityTest]
         public IEnumerator SaikiAt128BpmCanDragAndWheelBeforeFirstMeasure()
         {
             string path = WriteTempoWave();
@@ -2413,6 +2548,7 @@ namespace RhythmDojo.Tests
             Assert.That(menu.panel.activeSelf, Is.True);
             workspace.view.menus[1].OnPointerEnter(data);
             Assert.That(menu.panel.activeSelf, Is.False);
+            workspace.view.title.text = "Unsaved chart";
             workspace.Run(WorkspaceAction.Exit);
             Assert.That(workspace.view.exitPopup.activeSelf, Is.True);
             workspace.Run(WorkspaceAction.CancelExit);

@@ -82,9 +82,12 @@ namespace RhythmDojo.EditorTools
             dismissArea.gameObject.SetActive(false);
             var file = Menu(canvas.transform, view, "파일", 0, menus);
             Action(file, "새로 만들기", WorkspaceAction.New, bindings);
+            view.openProjectId = Field(file, "프로젝트 ID", "전체 곡 ID 입력");
+            Action(file, "프로젝트 ID로 불러오기", WorkspaceAction.OpenByProjectId, bindings);
             Heading(file, "최근 파일 · 최신 저장 순");
             view.recent = Dropdown(file, "Recent Projects", new[] { "저장된 파일" });
             Action(file, "파일 열기", WorkspaceAction.Open, bindings);
+            Action(file, "전체 파일 목록 열기", WorkspaceAction.ShowProjectList, bindings);
             Action(file, "프로젝트 ID / 이전 형식 가져오기", WorkspaceAction.ProjectFiles, bindings);
             Action(file, "저장", WorkspaceAction.Save, bindings);
             Action(file, "다른 이름으로 저장", WorkspaceAction.SaveAs, bindings);
@@ -220,6 +223,7 @@ namespace RhythmDojo.EditorTools
             AddGameplayPreview(canvas, view);
             AddNoteSpeedWarning(canvas.transform, view, bindings);
             AddOnAirDialog(canvas.transform, view, bindings);
+            AddProjectList(canvas.transform, view, bindings);
 
             // Confirmation dialogs stay above the editor and its live preview.
             var popup = Panel("Unsaved Changes", canvas.transform, new Vector2(0, 0), new Vector2(1280, 720));
@@ -286,6 +290,82 @@ namespace RhythmDojo.EditorTools
                 .Concat(new[] { new EditorBuildSettingsScene(WorkspaceEditor.ScenePath, true) }).ToArray();
             AssetDatabase.SaveAssets();
             Debug.Log("Rhythm Dojo: chart editor generated with the workspace interface.");
+        }
+
+        private static void AddProjectList(Transform parent, WorkspaceView view, List<WorkspaceActionBinding> bindings)
+        {
+            var overlay = Panel("Project List", parent, Vector2.zero, Vector2.zero);
+            overlay.anchorMin = Vector2.zero;
+            overlay.anchorMax = Vector2.one;
+            overlay.offsetMin = Vector2.zero;
+            overlay.offsetMax = Vector2.zero;
+            overlay.GetComponent<Image>().color = new Color(0, 0, 0, .55f);
+            view.projectListPopup = overlay.gameObject;
+
+            var dialog = Panel("Dialog", overlay, Vector2.zero, new Vector2(640, 520));
+            dialog.anchorMin = dialog.anchorMax = dialog.pivot = new Vector2(.5f, .5f);
+            dialog.GetComponent<Image>().color = MenuSurface;
+            UiElements.Label("Title", dialog, "전체 파일 목록", new Vector2(20, -14), new Vector2(520, 32), 22)
+                .color = MenuText;
+            UiElements.Label("Instructions", dialog, "더블 클릭하여 열기   ·   별표로 최근 파일 표시 설정",
+                new Vector2(20, -49), new Vector2(600, 28), 15).color = MenuText;
+
+            var viewport = Panel("Viewport", dialog, new Vector2(20, -86), new Vector2(600, 364));
+            viewport.GetComponent<Image>().color = new Color(.85f, .86f, .88f);
+            viewport.gameObject.AddComponent<RectMask2D>();
+            var content = new GameObject("Content", typeof(RectTransform)).GetComponent<RectTransform>();
+            content.SetParent(viewport, false);
+            content.anchorMin = new Vector2(0, 1);
+            content.anchorMax = Vector2.one;
+            content.pivot = new Vector2(.5f, 1);
+            content.sizeDelta = Vector2.zero;
+            var layout = content.gameObject.AddComponent<VerticalLayoutGroup>();
+            layout.spacing = 4;
+            layout.childControlHeight = false;
+            layout.childForceExpandHeight = false;
+            content.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            var scroll = viewport.gameObject.AddComponent<ScrollRect>();
+            scroll.viewport = viewport;
+            scroll.content = content;
+            scroll.horizontal = false;
+            scroll.movementType = ScrollRect.MovementType.Clamped;
+            scroll.scrollSensitivity = 30;
+            view.projectListScroll = scroll;
+
+            var row = UiElements.Button("Project Row Template", dialog, "", Vector2.zero, new Vector2(600, 46));
+            StyleMenuButton(row, TextAnchor.MiddleLeft, 16);
+            view.projectListRow = row.gameObject.AddComponent<WorkspaceProjectRow>();
+            view.projectListRow.projectLabel = row.GetComponentInChildren<Text>();
+            view.projectListRow.projectLabel.rectTransform.offsetMin = new Vector2(10, 14);
+            view.projectListRow.projectLabel.rectTransform.offsetMax = new Vector2(-158, -2);
+            view.projectListRow.savedAtLabel = UiElements.Label("Last Saved", row.transform, "",
+                new Vector2(10, -24), new Vector2(432, 18), 13);
+            view.projectListRow.savedAtLabel.color = new Color(.38f, .38f, .38f);
+
+            var copyId = UiElements.Button("Copy Project ID", row.transform, "ID 복사", Vector2.zero, new Vector2(94, 46));
+            StyleMenuButton(copyId, TextAnchor.MiddleCenter, 15);
+            view.projectListRow.copyProjectId = copyId;
+            var copyIdRect = (RectTransform)copyId.transform;
+            copyIdRect.anchorMin = copyIdRect.anchorMax = copyIdRect.pivot = new Vector2(1, 1);
+            copyIdRect.anchoredPosition = new Vector2(-48, 0);
+
+            var star = UiElements.Button("Recent Visibility", row.transform, "★", Vector2.zero, new Vector2(48, 46));
+            StyleMenuButton(star, TextAnchor.MiddleCenter, 22);
+            view.projectListRow.recentToggle = star;
+            var starRect = (RectTransform)star.transform;
+            starRect.anchorMin = starRect.anchorMax = starRect.pivot = new Vector2(1, 1);
+            starRect.anchoredPosition = Vector2.zero;
+            row.gameObject.SetActive(false);
+
+            view.projectListStatus = UiElements.Label("Status", dialog, "", new Vector2(20, -461),
+                new Vector2(498, 42), 14);
+            view.projectListStatus.color = MenuText;
+            var close = UiElements.Button("CloseProjectList", dialog, "닫기",
+                new Vector2(532, -466), new Vector2(88, 34));
+            StyleMenuButton(close, TextAnchor.MiddleCenter, 16);
+            bindings.Add(new WorkspaceActionBinding { action = WorkspaceAction.CloseProjectList, button = close });
+            overlay.gameObject.SetActive(false);
         }
 
         public static void AddGameplayPreview(Canvas canvas, WorkspaceView view)

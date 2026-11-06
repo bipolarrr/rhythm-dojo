@@ -88,16 +88,23 @@ namespace RhythmDojo.UI
                 );
             }
 
-            session = new EditorSession(new SongProject());
-            session.Edit(edit =>
-                chartId = edit.AddChartSlot(
-                    initialSlot,
-                    mode.name,
-                    mode.LaneCount,
-                    DefaultChartDuration
-                )
-            );
-            SetSession(ChartEditorMenu.TakeReturningSession() ?? session);
+            SetSession(ChartEditorMenu.TakeReturningSession() ?? CreateDraft(initialSlot));
+        }
+
+        internal EditorSession CreateDraft(ChartSlot slot)
+        {
+            var chart = new ChartDocument
+            {
+                Slot = slot,
+                Name = slot.ToString(),
+                ModeId = mode.name,
+                LaneCount = mode.LaneCount,
+                CompletionTimeSeconds = DefaultChartDuration,
+            };
+            var project = new SongProject { Charts = new[] { chart } };
+
+            // Compare future edits to the default draft even before its first save.
+            return new EditorSession(project, isSaved: true);
         }
 
         public void SetSession(EditorSession replacement)

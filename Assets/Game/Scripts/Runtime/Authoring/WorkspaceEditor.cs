@@ -23,6 +23,7 @@ namespace RhythmDojo.Authoring
     {
         public const string ScenePath = ChartEditorMenu.ScenePath;
         private const double OnAirHoldMinimumSeconds = .15;
+        private const string HiddenRecentProjectKeyPrefix = "RhythmDojo.Workspace.HiddenRecent.";
         public WorkspaceView view;
         public ChartEditorScreen screen;
         public ChartEditorMenu menu;
@@ -666,6 +667,12 @@ namespace RhythmDojo.Authoring
 
         private void HandleEscape()
         {
+            if (view.IsProjectListOpen)
+            {
+                Run(WorkspaceAction.CloseProjectList);
+                return;
+            }
+
             if (view.IsNoteSpeedWarningOpen)
             {
                 Run(WorkspaceAction.CloseNoteSpeedWarning);
@@ -740,7 +747,7 @@ namespace RhythmDojo.Authoring
 
         private bool HandlePopupKeyboard(Keyboard keyboard)
         {
-            if (view.IsNoteSpeedWarningOpen)
+            if (view.IsNoteSpeedWarningOpen || view.IsProjectListOpen)
             {
                 return true;
             }
@@ -967,7 +974,12 @@ namespace RhythmDojo.Authoring
             Run(action, false);
         }
 
-        public async void Run(WorkspaceAction action, bool closeMenus = true)
+        public void Run(WorkspaceAction action, bool closeMenus = true)
+        {
+            Run(action, closeMenus, Guid.Empty);
+        }
+
+        private async void Run(WorkspaceAction action, bool closeMenus, Guid listedProjectId)
         {
             if (HandleOnAirAction(action))
             {
@@ -985,6 +997,13 @@ namespace RhythmDojo.Authoring
             }
 
             if (working || !menu.IsInitialized)
+            {
+                return;
+            }
+
+            bool projectListAction = action == WorkspaceAction.CloseProjectList ||
+                action == WorkspaceAction.OpenListedProject;
+            if (view.IsProjectListOpen != projectListAction)
             {
                 return;
             }
@@ -1064,7 +1083,7 @@ namespace RhythmDojo.Authoring
                     view.CloseMenus();
                 }
 
-                await Execute(action);
+                await Execute(action, listedProjectId);
                 if (this)
                 {
                     grid.SetVerticesDirty();
@@ -1081,6 +1100,10 @@ namespace RhythmDojo.Authoring
                     if (view.saveAsPopup.activeSelf)
                     {
                         view.saveAsError.text = error.Message;
+                    }
+                    if (view.IsProjectListOpen)
+                    {
+                        view.projectListStatus.text = error.Message;
                     }
                 }
             }
@@ -1139,11 +1162,21 @@ namespace RhythmDojo.Authoring
             }
         }
 
-        private async Task Execute(WorkspaceAction action)
+        private async Task Execute(WorkspaceAction action, Guid listedProjectId)
         {
             var session = screen.Session;
             switch (action)
             {
+                case WorkspaceAction.ShowProjectList:
+                    ShowProjectList();
+                    break;
+                case WorkspaceAction.CloseProjectList:
+                    view.projectListPopup.SetActive(false);
+                    break;
+                case WorkspaceAction.OpenListedProject:
+                    await OpenProject(listedProjectId);
+                    view.projectListPopup.SetActive(false);
+                    break;
                 case WorkspaceAction.ProjectFiles:
                     menu.ToggleFile();
                     break;
@@ -1178,11 +1211,16 @@ namespace RhythmDojo.Authoring
                         throw new InvalidOperationException("저장된 채보가 없습니다.");
                     }
                     Guid id = recentIds[view.recent.value];
-                    await Save();
-                    menu.ReplaceSession(await EditorSession.LoadAsync(menu.Store, id, lifetime.Token));
-                    Observe();
-                    view.CloseMenus();
-                    view.status.text = "채보를 불러왔습니다.";
+                    await OpenProject(id);
+                    break;
+                case WorkspaceAction.OpenByProjectId:
+                    if (!Guid.TryParse(view.openProjectId.text, out Guid projectId) || projectId == Guid.Empty)
+                    {
+                        throw new InvalidOperationException("불러올 채보의 전체 프로젝트 ID를 입력하세요.");
+                    }
+
+                    await OpenProject(projectId);
+                    view.openProjectId.SetTextWithoutNotify("");
                     break;
                 case WorkspaceAction.Save:
                     await Save();
@@ -1406,8 +1444,7 @@ namespace RhythmDojo.Authoring
 
         private void CreateNew()
         {
-            var replacement = new EditorSession(new SongProject());
-            replacement.Edit(edit => edit.AddChartSlot(ChartSlot.Easy, screen.Mode.name, 4, 8.5));
+            var replacement = screen.CreateDraft(ChartSlot.Easy);
             menu.ReplaceSession(replacement);
             Observe();
             SetQuantization(0);
@@ -1436,6 +1473,21 @@ namespace RhythmDojo.Authoring
                     button.colors = colors;
                 }
             }
+        }
+
+        private async Task OpenProject(Guid id)
+        {
+            if (HasUnsavedChanges)
+            {
+                await Save();
+            }
+
+            var replacement = await EditorSession.LoadAsync(menu.Store, id, lifetime.Token);
+            lifetime.Token.ThrowIfCancellationRequested();
+            menu.ReplaceSession(replacement);
+            Observe();
+            view.CloseMenus();
+            view.status.text = "채보를 불러왔습니다.";
         }
 
         private async Task Save()
@@ -1521,21 +1573,104 @@ namespace RhythmDojo.Authoring
 
         private void RefreshRecent()
         {
-            recentIds = menu.Store.ListSongIds().OrderByDescending(id =>
-                File.GetLastWriteTimeUtc(Path.Combine(menu.Store.GetSongFolder(id), FileSongProjectStore.FileName)))
-                .Take(20).ToArray();
+            recentIds = SavedProjectIds().Where(ShowsInRecent).Take(20).ToArray();
             view.recent.ClearOptions();
-            view.recent.AddOptions(recentIds.Select(id =>
+            view.recent.AddOptions(recentIds.Select(ProjectLabel).ToList());
+        }
+
+        private IEnumerable<Guid> SavedProjectIds()
+        {
+            return menu.Store.ListSongIds().OrderByDescending(LastSavedUtc);
+        }
+
+        private DateTime LastSavedUtc(Guid id)
+        {
+            return File.GetLastWriteTimeUtc(Path.Combine(menu.Store.GetSongFolder(id), FileSongProjectStore.FileName));
+        }
+
+        private string ProjectLabel(Guid id)
+        {
+            try
             {
-                try
+                string title = menu.Store.Read(id).Title;
+                if (string.IsNullOrWhiteSpace(title))
                 {
-                    return menu.Store.Read(id).Title + " · " + id.ToString("D").Substring(0, 8);
+                    title = "제목 없음";
                 }
-                catch
+
+                return title + " · " + id.ToString("D").Substring(0, 8);
+            }
+            catch
+            {
+                return "읽기 오류 · " + id.ToString("D");
+            }
+        }
+
+        private static bool ShowsInRecent(Guid id)
+        {
+            return !PlayerPrefs.HasKey(HiddenRecentProjectKeyPrefix + id.ToString("D"));
+        }
+
+        private bool ToggleRecent(Guid id)
+        {
+            if (working)
+            {
+                return ShowsInRecent(id);
+            }
+
+            string key = HiddenRecentProjectKeyPrefix + id.ToString("D");
+            bool show = !ShowsInRecent(id);
+            if (show)
+            {
+                PlayerPrefs.DeleteKey(key);
+            }
+            else
+            {
+                PlayerPrefs.SetInt(key, 1);
+            }
+
+            PlayerPrefs.Save();
+            RefreshRecent();
+            return show;
+        }
+
+        private void ShowProjectList()
+        {
+            var content = view.projectListScroll.content;
+            foreach (Transform row in content)
+            {
+                row.gameObject.SetActive(false);
+                Destroy(row.gameObject);
+            }
+
+            var ids = SavedProjectIds().ToArray();
+            foreach (Guid id in ids)
+            {
+                var row = Instantiate(view.projectListRow, content);
+                row.Initialize(ProjectLabel(id), ShowsInRecent(id),
+                    () => Run(WorkspaceAction.OpenListedProject, false, id), () => ToggleRecent(id));
+                string savedAt = LastSavedUtc(id).ToLocalTime().ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+                row.savedAtLabel.text = "마지막 저장 " + savedAt;
+                row.copyProjectId.onClick.AddListener(() =>
                 {
-                    return "읽기 오류 · " + id.ToString("D");
-                }
-            }).ToList());
+                    GUIUtility.systemCopyBuffer = id.ToString("D");
+                    view.projectListStatus.text = "전체 프로젝트 ID를 복사했습니다.";
+                });
+                row.gameObject.SetActive(true);
+            }
+
+            view.projectListStatus.text = "";
+            if (ids.Length == 0)
+            {
+                view.projectListStatus.text = "저장된 채보가 없습니다.";
+            }
+
+            menu.ClosePanels();
+            EventSystem.current?.SetSelectedGameObject(null);
+            view.projectListPopup.transform.SetAsLastSibling();
+            view.projectListPopup.SetActive(true);
+            LayoutRebuilder.ForceRebuildLayoutImmediate(content);
+            view.projectListScroll.verticalNormalizedPosition = 1;
         }
 
         private async Task ImportResources()
