@@ -209,9 +209,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: 39bcbf68896a6bf43b8a98c73e10f749, type: 3}
+    m_Font: {fileID: 12800000, guid: 48e743fcd0114a80a9bcb2d09dfec16a, type: 3}
     m_FontSize: 30
-    m_FontStyle: 1
+    m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
     m_MaxSize: 40
@@ -1216,9 +1216,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: 39bcbf68896a6bf43b8a98c73e10f749, type: 3}
+    m_Font: {fileID: 12800000, guid: 48e743fcd0114a80a9bcb2d09dfec16a, type: 3}
     m_FontSize: 30
-    m_FontStyle: 1
+    m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
     m_MaxSize: 40
@@ -1341,9 +1341,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: 39bcbf68896a6bf43b8a98c73e10f749, type: 3}
+    m_Font: {fileID: 12800000, guid: 48e743fcd0114a80a9bcb2d09dfec16a, type: 3}
     m_FontSize: 30
-    m_FontStyle: 1
+    m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
     m_MaxSize: 40
@@ -1624,7 +1624,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 111418b7a313409478b97aaa324a2714, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.UiFontScope
-  font: {fileID: 12800000, guid: 39bcbf68896a6bf43b8a98c73e10f749, type: 3}
+  font: {fileID: 12800000, guid: 43cae541878c42a7b7e67ed2f96c4f68, type: 3}
 --- !u!225 &823067515
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -1727,9 +1727,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: 39bcbf68896a6bf43b8a98c73e10f749, type: 3}
+    m_Font: {fileID: 12800000, guid: 48e743fcd0114a80a9bcb2d09dfec16a, type: 3}
     m_FontSize: 30
-    m_FontStyle: 1
+    m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
     m_MaxSize: 40
@@ -1847,7 +1847,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Text
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: f141c7de8ef54517a7239664b841db91, type: 2}
   m_Color: {r: 0.24, g: 0.12, b: 0.085, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
@@ -1856,9 +1856,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: 39bcbf68896a6bf43b8a98c73e10f749, type: 3}
+    m_Font: {fileID: 12800000, guid: 43cae541878c42a7b7e67ed2f96c4f68, type: 3}
     m_FontSize: 26
-    m_FontStyle: 1
+    m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
     m_MaxSize: 40
@@ -2197,7 +2197,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Text
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: f141c7de8ef54517a7239664b841db91, type: 2}
   m_Color: {r: 1, g: 0.88, b: 0.64, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
@@ -2206,9 +2206,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: 39bcbf68896a6bf43b8a98c73e10f749, type: 3}
+    m_Font: {fileID: 12800000, guid: 48e743fcd0114a80a9bcb2d09dfec16a, type: 3}
     m_FontSize: 20
-    m_FontStyle: 1
+    m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
     m_MaxSize: 40
@@ -2360,7 +2360,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Text
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: f141c7de8ef54517a7239664b841db91, type: 2}
   m_Color: {r: 0.24, g: 0.12, b: 0.085, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
@@ -2369,9 +2369,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: 39bcbf68896a6bf43b8a98c73e10f749, type: 3}
+    m_Font: {fileID: 12800000, guid: 43cae541878c42a7b7e67ed2f96c4f68, type: 3}
     m_FontSize: 24
-    m_FontStyle: 1
+    m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
     m_MaxSize: 40
@@ -3004,7 +3004,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Text
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: f141c7de8ef54517a7239664b841db91, type: 2}
   m_Color: {r: 1, g: 0.9, b: 0.7, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
@@ -3013,9 +3013,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: 39bcbf68896a6bf43b8a98c73e10f749, type: 3}
+    m_Font: {fileID: 12800000, guid: 43cae541878c42a7b7e67ed2f96c4f68, type: 3}
     m_FontSize: 24
-    m_FontStyle: 1
+    m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
     m_MaxSize: 40
@@ -3388,7 +3388,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Text
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: f141c7de8ef54517a7239664b841db91, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
@@ -3397,9 +3397,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: 39bcbf68896a6bf43b8a98c73e10f749, type: 3}
+    m_Font: {fileID: 12800000, guid: 48e743fcd0114a80a9bcb2d09dfec16a, type: 3}
     m_FontSize: 48
-    m_FontStyle: 1
+    m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
     m_MaxSize: 40

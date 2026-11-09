@@ -19,6 +19,21 @@ namespace RhythmDojo.Tests
     [Category("UI")]
     public sealed class MainMenuFlowTests
     {
+        private NativeInputScope nativeInput;
+
+        [SetUp]
+        public void IsolateInput()
+        {
+            nativeInput = new NativeInputScope();
+        }
+
+        [TearDown]
+        public void RestoreInput()
+        {
+            nativeInput?.Dispose();
+            nativeInput = null;
+        }
+
         private MainMenuView view;
         private MainMenuScreen screen;
         private Mouse mouse;
@@ -741,7 +756,17 @@ namespace RhythmDojo.Tests
             Assert.That(view.entrance.frame.alpha, Is.EqualTo(1f));
             Assert.That(view.entrance.leftDoor.anchoredPosition.x, Is.Zero);
             Assert.That(view.slidingPlaque.Separation, Is.EqualTo(220f).Within(.01f));
-            settingsView.back.onClick.Invoke();
+            var keyboard = InputSystem.AddDevice<Keyboard>();
+            try
+            {
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.Escape));
+                yield return null;
+                yield return null;
+            }
+            finally
+            {
+                InputSystem.RemoveDevice(keyboard);
+            }
 
             while (SceneManager.GetActiveScene().path != "Assets/Game/Scenes/Title.unity")
             {
@@ -751,6 +776,8 @@ namespace RhythmDojo.Tests
 
             yield return null;
             Assert.That(UnityEngine.Object.FindFirstObjectByType<MainMenuView>(), Is.SameAs(view));
+            Assert.That(settingsView.gameObject.activeInHierarchy, Is.False);
+            Assert.That(view.menuPanel.alpha, Is.EqualTo(1f));
             Assert.That(
                 view.menuPanel.gameObject.activeSelf,
                 Is.True,

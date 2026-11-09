@@ -36,6 +36,7 @@ namespace RhythmDojo.UI
         private float expansion;
         private AudioSource effects;
         private float knockTime;
+        private int modalClosedFrame = -1;
         public const float MenuExpansionSeconds = .85f;
 
         public void Validate()
@@ -65,6 +66,7 @@ namespace RhythmDojo.UI
             actions = menuActions ?? throw new ArgumentNullException(nameof(menuActions));
             beatClock = menuBeatClock;
             starting = quitting = false;
+            modalClosedFrame = -1;
             menuExpanded = view.alwaysVisibleMenu;
             expansion = 0f;
             if (view.alwaysVisibleMenu)
@@ -109,6 +111,21 @@ namespace RhythmDojo.UI
         {
             if (!bounceInitialized)
             {
+                return;
+            }
+
+            var keyboard = UnityEngine.InputSystem.Keyboard.current;
+            if (!Busy && Time.frameCount != modalClosedFrame && keyboard?.escapeKey.wasPressedThisFrame == true)
+            {
+                if (view.quitPopup.activeSelf)
+                {
+                    CancelQuit();
+                }
+                else if (menuExpanded)
+                {
+                    ToggleMenu();
+                }
+
                 return;
             }
 
@@ -350,7 +367,11 @@ namespace RhythmDojo.UI
             view.SetMenuInteractable(true);
         }
 
-        public void ResumeAfterModal() => ResumeFromSettings();
+        public void ResumeAfterModal()
+        {
+            modalClosedFrame = Time.frameCount;
+            ResumeFromSettings();
+        }
 
         private void OpenSettings()
         {
