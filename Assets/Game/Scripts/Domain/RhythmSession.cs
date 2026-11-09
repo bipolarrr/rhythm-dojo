@@ -92,6 +92,7 @@ namespace RhythmDojo.Gameplay
         {
         }
 
+        // Compatibility overload: callers supply logical times; calibration belongs to Application.
         public RhythmSession(
             ChartData chart,
             GameModeRules mode,
@@ -101,7 +102,7 @@ namespace RhythmDojo.Gameplay
         )
             : this(chart, rules.Timing, mode)
         {
-            ruleSession = new RuleSession(chart, mode, tempo, rules, records, timingOffsetSeconds);
+            ruleSession = new RuleSession(chart, mode, tempo, rules, records);
 
             ruleSession.Judged += result =>
             {
@@ -222,17 +223,15 @@ namespace RhythmDojo.Gameplay
             }
         }
 
-        public void PressLane(int lane, double songTime) => PressLane(lane, songTime, false);
+        public void PressLaneFromClock(int lane, double songTime) => PressLane(lane, songTime);
 
-        public void PressLaneFromClock(int lane, double songTime) => PressLane(lane, songTime, true);
-
-        private void PressLane(int lane, double songTime, bool calibratedInput)
+        public void PressLane(int lane, double songTime)
         {
             ValidateInput(lane, songTime);
 
             if (ruleSession != null)
             {
-                ruleSession.PressLane(lane, songTime, calibratedInput);
+                ruleSession.PressLane(lane, songTime);
                 SyncRules();
 
                 return;
@@ -305,17 +304,15 @@ namespace RhythmDojo.Gameplay
             }
         }
 
-        public void ReleaseLane(int lane, double songTime) => ReleaseLane(lane, songTime, false);
+        public void ReleaseLaneFromClock(int lane, double songTime) => ReleaseLane(lane, songTime);
 
-        public void ReleaseLaneFromClock(int lane, double songTime) => ReleaseLane(lane, songTime, true);
-
-        private void ReleaseLane(int lane, double songTime, bool calibratedInput)
+        public void ReleaseLane(int lane, double songTime)
         {
             ValidateInput(lane, songTime);
 
             if (ruleSession != null)
             {
-                ruleSession.ReleaseLane(lane, songTime, calibratedInput);
+                ruleSession.ReleaseLane(lane, songTime);
                 SyncRules();
 
                 return;

@@ -27,46 +27,25 @@ namespace RhythmDojo.Core
 
         internal void RecommendTimingOffset(int timingOffsetMs)
         {
+            TimingOffsetRecommendationMs = null;
             if (Session.State != SessionState.Completed || Session.Failure.Failed)
             {
                 return;
             }
 
-            var beats = new HashSet<double>();
-            var hits = new HashSet<double>();
-            var errors = new List<double>();
+            var samples = new TimingSampleSet();
             foreach (var note in Notes)
             {
-                beats.Add(note.Note.StartTime);
-
-                if (note.Start is not { } start || start.Grade == Judgment.Miss)
+                double? error = null;
+                if (note.Start is { } start && start.Grade != Judgment.Miss)
                 {
-                    continue;
+                    error = start.ErrorSeconds;
                 }
 
-                if (double.IsFinite(start.ErrorSeconds) && hits.Add(note.Note.StartTime))
-                {
-                    errors.Add(start.ErrorSeconds);
-                }
+                samples.Add(note.Note.StartTime, error);
             }
 
-            if (hits.Count < beats.Count * .70)
-            {
-                return;
-            }
-
-            int? recommendation = InputTiming.RecommendOffsetMs(errors, timingOffsetMs, 12);
-            if (!recommendation.HasValue)
-            {
-                return;
-            }
-
-            if (Math.Abs(recommendation.Value - timingOffsetMs) < 5)
-            {
-                return;
-            }
-
-            TimingOffsetRecommendationMs = recommendation;
+            TimingOffsetRecommendationMs = samples.RecommendOffsetMs(timingOffsetMs);
         }
 
         public PlayResult(

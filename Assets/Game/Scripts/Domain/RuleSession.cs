@@ -36,8 +36,6 @@ namespace RhythmDojo.Gameplay
 
         private readonly ChartData chart;
         private readonly PlayRules rules;
-        private readonly double automaticHoldOffset;
-        private readonly double headTimeoutDelay;
         private readonly List<Check> checks = new List<Check>();
         private readonly List<InputChange> history = new List<InputChange>();
         private readonly bool[] heads,
@@ -80,21 +78,13 @@ namespace RhythmDojo.Gameplay
             GameModeRules mode,
             TempoMap tempo,
             PlayRules rules,
-            NoteJudgmentRecord[] records,
-            double timingOffsetSeconds
+            NoteJudgmentRecord[] records
         )
         {
             chart.Validate(mode);
             rules.Validate();
             this.chart = chart;
             this.rules = rules.Copy();
-
-            if (rules.HoldEnd == HoldEndMode.Automatic)
-            {
-                // Automatic hold checks use chart time. Keep the calibrated hit window for presses.
-                automaticHoldOffset = timingOffsetSeconds;
-                headTimeoutDelay = Math.Max(0, automaticHoldOffset);
-            }
 
             this.records = records;
             broken = new bool[chart.Count];
@@ -106,7 +96,7 @@ namespace RhythmDojo.Gameplay
             for (int i = 0; i < chart.Count; i++)
             {
                 var note = chart[i];
-                checks.Add(new Check(i, 0, note.StartTime + rules.Timing.GoodWindow + headTimeoutDelay));
+                checks.Add(new Check(i, 0, note.StartTime + rules.Timing.GoodWindow));
 
                 if (note.Kind != NoteKind.Hold)
                 {
@@ -220,14 +210,14 @@ namespace RhythmDojo.Gameplay
             return false;
         }
 
-        public void PressLane(int lane, double time, bool calibratedInput)
+        public void PressLane(int lane, double time)
         {
             if (State != SessionState.Playing || held[lane])
             {
                 return;
             }
 
-            double checkTime = GetCheckTime(time, calibratedInput);
+            double checkTime = time;
             Sweep(checkTime, false);
 
             if (State != SessionState.Playing)
@@ -292,7 +282,7 @@ namespace RhythmDojo.Gameplay
             Sweep(checkTime, true);
         }
 
-        public void ReleaseLane(int lane, double time, bool calibratedInput)
+        public void ReleaseLane(int lane, double time)
         {
             if (State != SessionState.Playing)
             {
@@ -300,7 +290,7 @@ namespace RhythmDojo.Gameplay
             }
 
             // A key held through an automatic tail completes it before the release.
-            double checkTime = GetCheckTime(time, calibratedInput);
+            double checkTime = time;
             Sweep(checkTime, true);
 
             if (State != SessionState.Playing)
@@ -374,16 +364,6 @@ namespace RhythmDojo.Gameplay
             }
         }
 
-        private double GetCheckTime(double time, bool calibratedInput)
-        {
-            if (calibratedInput)
-            {
-                return time + automaticHoldOffset;
-            }
-
-            return time;
-        }
-
         public void Advance(double time) => Sweep(time, true);
 
         private void Sweep(double time, bool inclusive)
@@ -447,7 +427,7 @@ namespace RhythmDojo.Gameplay
                         broken[i] = true;
                     }
 
-                    Apply(i, Judgment.Miss, check.Time - headTimeoutDelay - note.StartTime, check.Time, 0);
+                    Apply(i, Judgment.Miss, check.Time - note.StartTime, check.Time, 0);
                 }
                 else if (check.Part == 1)
                 {

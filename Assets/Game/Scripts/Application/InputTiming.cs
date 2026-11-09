@@ -12,9 +12,17 @@ namespace RhythmDojo.Application
 
         public static int? RecommendOffsetMs(List<double> errors, int currentOffsetMs, int minimumSamples)
         {
-            if (errors.Count < minimumSamples)
+            if (errors == null || errors.Count < Math.Max(1, minimumSamples))
             {
                 return null;
+            }
+
+            foreach (double error in errors)
+            {
+                if (!double.IsFinite(error))
+                {
+                    return null;
+                }
             }
 
             var sorted = errors.ToArray();
