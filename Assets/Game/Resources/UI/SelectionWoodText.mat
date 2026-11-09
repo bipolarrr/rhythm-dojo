@@ -30,6 +30,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _ColorMask: 15
+    - _PixelSize: 2
     - _Stencil: 0
     - _StencilComp: 8
     - _StencilOp: 0

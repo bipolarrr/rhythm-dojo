@@ -59,24 +59,46 @@ namespace RhythmDojo.Content
             cancellationToken.ThrowIfCancellationRequested();
 
             var snapshot = (document ?? throw new ArgumentNullException(nameof(document))).Copy();
-            var mode = resolveMode(snapshot.ModeId);
-
-            if (!mode)
+            GameModeDefinition mode;
+            try
             {
-                throw new InvalidOperationException("ModeId: unknown mode " + snapshot.ModeId);
+                mode = resolveMode(snapshot.ModeId);
+                if (!mode)
+                {
+                    throw new ArgumentException("ModeId: unknown mode " + snapshot.ModeId);
+                }
+
+                snapshot.Validate(mode.ToRules());
+            }
+            catch (Exception e) when (e is not OperationCanceledException)
+            {
+                throw new SongLoadException(SongLoadFailure.FromChartValidation(e));
             }
 
-            snapshot.Validate(mode.ToRules());
-
-            var lease = await loadAudio(snapshot.AudioId, cancellationToken);
+            SongAudioLease lease;
+            try
+            {
+                lease = await loadAudio(snapshot.AudioId, cancellationToken);
+            }
+            catch (Exception e) when (e is not OperationCanceledException)
+            {
+                throw new SongLoadException(SongLoadFailure.FromAudio(e));
+            }
 
             try
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                if (lease == null)
+                if (lease == null || !lease.Clip)
                 {
-                    throw new InvalidOperationException("AudioId: loader returned no audio.");
+                    throw new SongLoadException(new SongLoadFailure(
+                        SongLoadFailureKind.AudioLoadFailed, "AudioId: loader returned no audio."));
+                }
+
+                if (lease.Clip.length <= 0)
+                {
+                    throw new SongLoadException(new SongLoadFailure(
+                        SongLoadFailureKind.AudioLoadFailed, "AudioId: audio is empty."));
                 }
 
                 return new PlayableSong(snapshot, mode, lease);

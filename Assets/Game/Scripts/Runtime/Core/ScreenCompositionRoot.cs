@@ -1,4 +1,6 @@
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using RhythmDojo.Gameplay;
 using RhythmDojo.UI;
 using UnityEngine;
@@ -63,6 +65,17 @@ namespace RhythmDojo.Core
             }
         }
 
+        internal static void EnableInput(UnityEngine.SceneManagement.Scene scene)
+        {
+            foreach (var root in scene.GetRootGameObjects())
+            {
+                foreach (var system in root.GetComponentsInChildren<UnityEngine.EventSystems.EventSystem>(true))
+                {
+                    system.enabled = true;
+                }
+            }
+        }
+
         private void Start()
         {
             Initialize(AppFlowController.Create(settings));
@@ -83,11 +96,28 @@ namespace RhythmDojo.Core
 
             if (results)
             {
-                results.Initialize(flow.LastResult, flow.ReturnFromGameplay);
+                Func<CancellationToken, Task> retry = null;
+                if (flow.CanRetryResult)
+                {
+                    retry = flow.RetryResultAsync;
+                }
+
+                results.Initialize(
+                    flow.LastResult,
+                    flow.ReturnFromGameplay,
+                    retry,
+                    flow.Preferences,
+                    flow.ShowResultTimingCalibration
+                );
             }
 
             if (selection)
             {
+                if (UnityEngine.SceneManagement.SceneManager.GetActiveScene() == gameObject.scene)
+                {
+                    EnableInput(gameObject.scene);
+                }
+
                 selection.Initialize(
                     settings,
                     flow.Selection,

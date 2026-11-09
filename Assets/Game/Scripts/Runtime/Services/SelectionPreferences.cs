@@ -16,6 +16,7 @@ namespace RhythmDojo.Services
         public double rate;
         public bool failed,
             gaugeClear;
+        public bool fullCombo;
         public int challengeAchievements;
 
         public string Rank
@@ -227,6 +228,12 @@ namespace RhythmDojo.Services
             {
                 if (record.score > score || record.score == score && record.maxCombo >= maxCombo)
                 {
+                    if (snapshot.IsFullCombo && !record.fullCombo)
+                    {
+                        record.fullCombo = true;
+                        Save();
+                    }
+
                     return;
                 }
             }
@@ -245,6 +252,7 @@ namespace RhythmDojo.Services
             record.score = score;
             record.rate = rate;
             record.maxCombo = maxCombo;
+            record.fullCombo |= snapshot.IsFullCombo;
             Save();
         }
 

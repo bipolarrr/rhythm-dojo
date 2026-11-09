@@ -281,6 +281,7 @@ namespace RhythmDojo.UI
             var label = new GameObject("Message", typeof(RectTransform), typeof(Text));
             label.transform.SetParent(go.transform, false);
             var text = label.GetComponent<Text>();
+            UiFontSettings.Apply(text, UiTextRole.Help);
             text.font = font;
             text.fontStyle = UiFontSettings.Style;
             text.text = "곡 선택 화면을 열지 못했습니다.\n클릭하여 타이틀로 돌아가기";

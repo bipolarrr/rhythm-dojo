@@ -56,6 +56,7 @@ namespace RhythmDojo.Core
                 AppFlowController.SelectionPath, LoadSceneMode.Additive));
             this.readyTimeout = readyTimeout;
             SceneManager.sceneLoaded += SceneLoaded;
+            SceneManager.sceneUnloaded += SceneUnloaded;
         }
 
         public void PrepareSelection(Scene priorScene)
@@ -109,15 +110,28 @@ namespace RhythmDojo.Core
 
         private void SceneLoaded(Scene scene, LoadSceneMode mode)
         {
-            HandleSceneLoaded(scene);
+            if (mode == LoadSceneMode.Single)
+            {
+                Cancel();
+                return;
+            }
+
+            HandleSceneLoaded(scene, mode);
             if (scene.path != AppFlowController.SelectionPath && scene != entrancePriorScene)
             {
                 Cancel();
             }
         }
 
-        public bool HandleSceneLoaded(Scene scene)
+        public bool HandleSceneLoaded(Scene scene) => HandleSceneLoaded(scene, LoadSceneMode.Additive);
+
+        public bool HandleSceneLoaded(Scene scene, LoadSceneMode mode)
         {
+            if (mode != LoadSceneMode.Additive)
+            {
+                return false;
+            }
+
             if (ownedScenes.Contains(scene.handle))
             {
                 return true;
@@ -142,6 +156,21 @@ namespace RhythmDojo.Core
                 Fail(exception);
             }
             return true;
+        }
+
+        private void SceneUnloaded(Scene scene)
+        {
+            ownedScenes.Remove(scene.handle);
+            if (scene != preparedSelectionScene)
+            {
+                return;
+            }
+
+            ReleaseScopes();
+            if (cleanup == null)
+            {
+                FinishDiscard();
+            }
         }
 
         private void SuspendPreparedSelection(Scene scene)
@@ -373,6 +402,8 @@ namespace RhythmDojo.Core
             priorScope.Dispose();
             priorScope = null;
             RestoreCanvasOrders();
+            ScreenCompositionRoot.EnableInput(preparedSelectionScene);
+
             var scene = preparedSelectionScene;
             ownedScenes.Remove(scene.handle);
             ClearState();
@@ -422,22 +453,47 @@ namespace RhythmDojo.Core
 
         private void DiscardLoadedScene()
         {
+            // Drain activation's previous-scene unload before deciding whether the
+            // prepared screen can be discarded. Do not hide the only remaining view.
+            if (cleanup != null)
+            {
+                return;
+            }
+
             if (!preparedSelectionScene.IsValid() || !preparedSelectionScene.isLoaded)
             {
                 FinishDiscard();
                 return;
             }
             var scene = preparedSelectionScene;
+            bool hasOtherLoadedScene = false;
+            for (int i = 0; i < SceneManager.sceneCount; i++)
+            {
+                var other = SceneManager.GetSceneAt(i);
+                if (other != scene && other.isLoaded)
+                {
+                    hasOtherLoadedScene = true;
+                    break;
+                }
+            }
+
+            if (!hasOtherLoadedScene)
+            {
+                // A previous-scene unload may have completed before cancellation.
+                // Keep the remaining screen usable; Unity cannot unload its last scene.
+                ownedScenes.Remove(scene.handle);
+                ReleaseScopes();
+                ScreenCompositionRoot.EnableInput(scene);
+                FinishDiscard();
+                return;
+            }
+
             foreach (var root in scene.GetRootGameObjects())
             {
                 // Start must not attach services, even if this was an uncancellable late load.
                 root.SetActive(false);
             }
             ReleaseScopes();
-            if (cleanup != null)
-            {
-                return;
-            }
             cleanup = SceneManager.UnloadSceneAsync(scene);
             if (cleanup == null)
             {
@@ -514,6 +570,7 @@ namespace RhythmDojo.Core
             if (subscribed)
             {
                 SceneManager.sceneLoaded -= SceneLoaded;
+                SceneManager.sceneUnloaded -= SceneUnloaded;
                 subscribed = false;
             }
         }

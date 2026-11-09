@@ -25,6 +25,7 @@ namespace RhythmDojo.UI
         public Button resetKeys;
         public Text keyBindingStatus;
         public GameObject gameplayPanel;
+        public Dropdown judgmentPositionList;
         public Slider speedSlider,
             timingOffset;
         public Text speedLabel,

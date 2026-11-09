@@ -58,8 +58,7 @@ namespace RhythmDojo.EditorTools
             }
             foreach (var dropdown in view.GetComponentsInChildren<Dropdown>(true))
             {
-                StyleDropdown(dropdown);
-                StyleSettingsDropdown(dropdown);
+                ApplyDropdownStyle(dropdown);
             }
             foreach (var input in view.GetComponentsInChildren<InputField>(true))
             {
@@ -122,6 +121,12 @@ namespace RhythmDojo.EditorTools
             SetSettingsSurface(fill);
             fill.color = new Color(.95f, .62f, .26f);
             SetSettingsSurface((Image)slider.targetGraphic);
+        }
+
+        internal static void ApplyDropdownStyle(Dropdown dropdown)
+        {
+            StyleDropdown(dropdown);
+            StyleSettingsDropdown(dropdown);
         }
 
         private static void StyleSettingsDropdown(Dropdown dropdown)

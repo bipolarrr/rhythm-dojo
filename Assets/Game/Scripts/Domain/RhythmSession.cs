@@ -88,9 +88,22 @@ namespace RhythmDojo.Gameplay
         public bool IsHeld(int lane) => ruleSession?.IsHeld(lane) ?? held[lane];
 
         public RhythmSession(ChartData chart, GameModeRules mode, TempoMap tempo, PlayRules rules)
+            : this(chart, mode, tempo, rules, 0)
+        {
+        }
+
+        // Compatibility overload: callers supply logical times; calibration belongs to Application.
+        public RhythmSession(
+            ChartData chart,
+            GameModeRules mode,
+            TempoMap tempo,
+            PlayRules rules,
+            double timingOffsetSeconds
+        )
             : this(chart, rules.Timing, mode)
         {
             ruleSession = new RuleSession(chart, mode, tempo, rules, records);
+
             ruleSession.Judged += result =>
             {
                 SyncRules();
@@ -210,6 +223,8 @@ namespace RhythmDojo.Gameplay
             }
         }
 
+        public void PressLaneFromClock(int lane, double songTime) => PressLane(lane, songTime);
+
         public void PressLane(int lane, double songTime)
         {
             ValidateInput(lane, songTime);
@@ -288,6 +303,8 @@ namespace RhythmDojo.Gameplay
                 );
             }
         }
+
+        public void ReleaseLaneFromClock(int lane, double songTime) => ReleaseLane(lane, songTime);
 
         public void ReleaseLane(int lane, double songTime)
         {

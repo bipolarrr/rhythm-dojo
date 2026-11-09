@@ -9,12 +9,15 @@ namespace RhythmDojo.UI
 {
     public sealed class RhythmHud : MonoBehaviour
     {
+        private const float JudgmentOpacity = .55f;
+
         [SerializeField]
         private GameplayHudView view;
         private IGameplayReadModel model;
         private GameplayPresentationSettings settings;
         private Image[] indicators;
         private Text[] keyLabels;
+        private Image gameOverBackground;
         private GameModeDefinition bindingMode;
         private string bindingModeId;
         private double[] flashUntil;
@@ -26,6 +29,9 @@ namespace RhythmDojo.UI
         private int displayedCombo = -1;
         private int maximumCombo;
         private bool showingJudgment;
+        private RectTransform judgmentRect;
+        private Vector2 judgmentAnchorMin;
+        private Vector2 judgmentAnchorMax;
         private Color Cream = new Color(.94f, .93f, .85f);
         private Color Cyan = new Color(.46f, .84f, .81f);
         private Color Gold = new Color(1f, .77f, .42f);
@@ -64,6 +70,13 @@ namespace RhythmDojo.UI
             model = readModel;
             indicators = view.lanes.Build(mode, presentation, bindingModeId);
             keyLabels = new Text[indicators.Length];
+            gameOverBackground = view.gameOverPanel.GetComponent<Image>();
+            if (!judgmentRect)
+            {
+                judgmentRect = (RectTransform)view.judgmentGroup.transform;
+                judgmentAnchorMin = judgmentRect.anchorMin;
+                judgmentAnchorMax = judgmentRect.anchorMax;
+            }
 
             for (int i = 0; i < indicators.Length; i++)
             {
@@ -105,6 +118,8 @@ namespace RhythmDojo.UI
         {
             judgmentAt = Time.unscaledTimeAsDouble;
             showingJudgment = true;
+            SetJudgmentPosition((PresentationPreferences.Current ?? PresentationPreferences.Load()).judgmentPosition);
+            view.judgmentGroup.alpha = JudgmentOpacity;
             nextTextRefresh = 0;
             maximumCombo = Math.Max(maximumCombo, model.Snapshot.Session.Combo);
 
@@ -119,12 +134,14 @@ namespace RhythmDojo.UI
 
             if (hold)
             {
-                view.judgment.fontSize = 23;
+                view.judgment.fontSize = 19;
             }
             else
             {
-                view.judgment.fontSize = 31;
+                view.judgment.fontSize = 25;
             }
+
+            view.timing.fontSize = 14;
 
             if (result.Grade == Judgment.Miss)
             {
@@ -147,19 +164,37 @@ namespace RhythmDojo.UI
             }
             else if (Math.Abs(milliseconds) < .5)
             {
-                view.timing.text = "ON TIME";
+                view.timing.text = "정박";
             }
             else
             {
                 if (milliseconds < 0)
                 {
-                    view.timing.text = $"EARLY  {milliseconds:+0;-0;0} ms";
+                    view.timing.text = $"빠름  {milliseconds:+0;-0;0} ms";
                 }
                 else
                 {
-                    view.timing.text = $"LATE  {milliseconds:+0;-0;0} ms";
+                    view.timing.text = $"늦음  {milliseconds:+0;-0;0} ms";
                 }
             }
+        }
+
+        private void SetJudgmentPosition(JudgmentPosition position)
+        {
+            float offset = 0;
+            switch (position)
+            {
+                case JudgmentPosition.Upper:
+                    offset = .22f;
+                    break;
+                case JudgmentPosition.Lower:
+                    offset = -.09f;
+                    break;
+            }
+
+            var displacement = new Vector2(0, offset);
+            judgmentRect.anchorMin = judgmentAnchorMin + displacement;
+            judgmentRect.anchorMax = judgmentAnchorMax + displacement;
         }
 
         private void Flash(JudgmentEvent result)
@@ -191,11 +226,13 @@ namespace RhythmDojo.UI
             maximumCombo = 0;
             view.combo.color = Cream;
             view.combo.rectTransform.localScale = Vector3.one;
+            SetJudgmentPosition(JudgmentPosition.Middle);
             view.judgmentGroup.alpha = 1;
             view.judgmentGroup.transform.localScale = Vector3.one;
-            view.judgment.fontSize = 31;
-            view.judgment.text = "READY";
+            view.judgment.fontSize = 36;
+            view.judgment.text = "SPACE로 수련 시작";
             view.judgment.color = Cyan;
+            view.timing.fontSize = 18;
             view.timing.text = "";
             RefreshHealth(model.Snapshot.Session);
         }
@@ -281,34 +318,62 @@ namespace RhythmDojo.UI
             else
             {
                 view.healthLabel.text =
-                    $"Challenge · Hmm... {snapshot.Good} / Nope. {snapshot.Miss}";
+                    $"Challenge · Good {snapshot.Good} / Miss {snapshot.Miss}";
             }
 
-            bool completed = snapshot.State == SessionState.Completed;
-            view.gameOverPanel.SetActive(completed || snapshot.State == SessionState.GameOver);
-
-            if (completed && !snapshot.Failure.Failed)
-            {
-                view.gameOverText.text = "GAME CLEAR";
-            }
-            else
-            {
-                view.gameOverText.text = "GAME OVER";
-            }
-
-            if (completed && !snapshot.Failure.Failed)
-            {
-                view.gameOverText.color = Cyan;
-            }
-            else
-            {
-                view.gameOverText.color = Red;
-            }
+            RefreshOutcome(snapshot);
 
             if (snapshot.Failure.Failed && snapshot.State == SessionState.Playing)
             {
                 view.healthLabel.text = "FAILED · 끝까지 진행";
             }
+        }
+
+        private void RefreshOutcome(SessionSnapshot snapshot)
+        {
+            bool completed = snapshot.State == SessionState.Completed;
+            bool showOutcome = completed || snapshot.State == SessionState.GameOver;
+            view.gameOverPanel.SetActive(showOutcome);
+
+            if (!showOutcome)
+            {
+                return;
+            }
+
+            bool cleared = completed && !snapshot.Failure.Failed;
+            gameOverBackground.enabled = false;
+            view.gameOverHint.gameObject.SetActive(false);
+
+            if (view.gameOverFrame)
+            {
+                view.gameOverFrame.SetActive(false);
+            }
+
+            var outcomeRect = view.gameOverText.rectTransform;
+            outcomeRect.anchorMin = new Vector2(.15f, .42f);
+            outcomeRect.anchorMax = new Vector2(.85f, .58f);
+            float outcomeScale = 1f;
+            if (cleared && !snapshot.IsFullCombo)
+            {
+                outcomeScale = 1.16f;
+            }
+            outcomeRect.localScale = Vector3.one * outcomeScale;
+
+            if (cleared)
+            {
+                view.gameOverText.text = "GAME CLEAR";
+                view.gameOverText.color = Cyan;
+
+                if (snapshot.IsFullCombo)
+                {
+                    view.gameOverText.text = "Full Combo";
+                }
+
+                return;
+            }
+
+            view.gameOverText.text = "GAME OVER";
+            view.gameOverText.color = Red;
         }
 
         private void AnimateFeedback(double now)
@@ -323,9 +388,9 @@ namespace RhythmDojo.UI
             }
 
             float age = (float)(now - judgmentAt);
-            view.judgmentGroup.alpha = 1 - Mathf.Clamp01((age - .65f) / .35f);
+            view.judgmentGroup.alpha = JudgmentOpacity * (1 - Mathf.Clamp01((age - .32f) / .30f));
             view.judgmentGroup.transform.localScale =
-                Vector3.one * (1 + .08f * Mathf.Clamp01(1 - age / .16f));
+                Vector3.one * (1 + .025f * Mathf.Clamp01(1 - age / .16f));
         }
 
         private void RefreshTrainingDisplay(GameplaySnapshot snapshot, double now)
@@ -337,22 +402,11 @@ namespace RhythmDojo.UI
 
             if (s.State == SessionState.Ready)
             {
-                if (snapshot.ReadyReason == ReadyReason.FocusLost)
-                {
-                    view.sessionState.text = "SPACE로 다시 시작";
-                }
-                else
-                {
-                    view.sessionState.text = "SPACE로 수련 시작";
-                }
+                view.sessionState.text = "수련 준비";
             }
-            else if (s.State == SessionState.GameOver)
+            else if (s.State == SessionState.GameOver || s.State == SessionState.Completed)
             {
-                view.sessionState.text = "GAME OVER · SPACE로 다시 도전";
-            }
-            else if (s.State == SessionState.Completed)
-            {
-                view.sessionState.text = "수련 완료 · 다시 도전!";
+                view.sessionState.text = "결과 화면으로 이동";
             }
             else if (s.Failure.Failed)
             {
@@ -385,7 +439,7 @@ namespace RhythmDojo.UI
             }
 
             view.bestCombo.text = $"BEST  {maximumCombo}";
-            view.counts.text = $"Perfect    {s.Perfect}\nHmm...    {s.Good}\nNope.       {s.Miss}";
+            view.counts.text = $"Perfect    {s.Perfect}\nGood       {s.Good}\nMiss        {s.Miss}";
 
             if (s.TotalNotes == 0)
             {
@@ -410,24 +464,16 @@ namespace RhythmDojo.UI
                 view.progressFill.rectTransform.anchorMax = new Vector2(0, 1);
             }
 
-            if (s.State == SessionState.Completed && now - judgmentAt > 1)
+            if (s.State == SessionState.Completed || s.State == SessionState.GameOver)
             {
                 showingJudgment = false;
-                view.judgmentGroup.alpha = 1;
-                view.judgmentGroup.transform.localScale = Vector3.one;
-                view.judgment.fontSize = 31;
-                view.judgment.color = Cyan;
             }
 
             if (!showingJudgment)
             {
                 if (s.State == SessionState.Ready)
                 {
-                    view.judgment.text = "READY";
-                }
-                else if (s.State == SessionState.Completed)
-                {
-                    view.judgment.text = "FINISH";
+                    view.judgment.text = "SPACE로 수련 시작";
                 }
                 else
                 {

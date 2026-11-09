@@ -54,7 +54,7 @@ namespace RhythmDojo.EditorTools
                 child.gameObject.SetActive(false);
             }
             Frame((RectTransform)header, Paper, 12);
-            var heading = UiElements.Label("Pixel Heading", header, "곡 선택", Vector2.zero, Vector2.zero, 48);
+            var heading = UiElements.Label("Pixel Heading", header, "곡 선택", Vector2.zero, Vector2.zero, 48, role: UiTextRole.Title);
             heading.font = AssetDatabase.LoadAssetAtPath<Font>(MainMenuLayoutBuilder.FontPath);
             heading.fontStyle = FontStyle.Bold;
             heading.color = Ink;
@@ -83,7 +83,7 @@ namespace RhythmDojo.EditorTools
             view.songTitle.resizeTextForBestFit = true;
             view.songTitle.resizeTextMinSize = 28;
             StyleSongTitle(view.songTitle, 48, 2);
-            Bounds(view.artistBpm.rectTransform, .445f, .51f, .945f, .80f);
+            Bounds(view.artistBpm.rectTransform, .445f, .55f, .945f, .80f);
             view.artistBpm.fontSize = 42;
             view.artistBpm.resizeTextForBestFit = true;
             view.artistBpm.resizeTextMinSize = 34;
@@ -163,7 +163,7 @@ namespace RhythmDojo.EditorTools
             StyleButton(view.play, Red);
             StyleButton(view.modeButton, new Color(.25f, .15f, .11f));
             StyleButton(view.settingsButton, new Color(.25f, .15f, .11f));
-            view.play.GetComponentInChildren<Text>().text = "시작  ▶";
+            view.play.GetComponentInChildren<Text>().text = "입장  ▶";
             view.play.GetComponentInChildren<Text>().fontSize = 38;
             foreach (var button in new[] { view.play, view.back, view.modeButton, view.settingsButton })
             {
@@ -288,12 +288,55 @@ namespace RhythmDojo.EditorTools
             }
         }
 
+        public static void RefineHierarchy(SongSelectionView view)
+        {
+            view.songTitle.resizeTextMaxSize = 54;
+            view.songTitle.fontSize = 54;
+            view.artistBpm.resizeTextMinSize = 23;
+            view.artistBpm.resizeTextMaxSize = 31;
+            view.artistBpm.fontSize = 31;
+            view.artistBpm.lineSpacing = 1.18f;
+            view.record.resizeTextMinSize = 18;
+            view.record.resizeTextMaxSize = 29;
+            view.record.fontSize = 29;
+            view.record.lineSpacing = 1.12f;
+            view.comboRecord.resizeTextMinSize = 18;
+            view.comboRecord.resizeTextMaxSize = 27;
+            view.comboRecord.fontSize = 27;
+
+            var metadata = new[] { view.artistBpm, view.record, view.comboRecord, view.rowTemplate.artist,
+                view.rowTemplate.indexLabel };
+            SceneResources.ApplyReadableFont(metadata);
+            foreach (var label in metadata)
+            {
+                label.color = new Color(.28f, .16f, .105f);
+                ClearTextEffects(label);
+            }
+
+            foreach (var button in view.difficultyButtons)
+            {
+                var label = button.GetComponentInChildren<Text>(true);
+                label.resizeTextMaxSize = 36;
+                label.fontSize = 36;
+                ClearTextEffects(label);
+            }
+        }
+
+        private static void ClearTextEffects(Text label)
+        {
+            label.material = null;
+            foreach (var effect in label.GetComponents<Shadow>())
+            {
+                effect.enabled = false;
+            }
+        }
+
         public static void StyleFooterText(SongSelectionView view)
         {
-            StyleFooterLabel(view.back.GetComponentInChildren<Text>(), 52, 36);
-            StyleFooterLabel(view.modeLabel, 48, 28);
-            StyleFooterLabel(view.settingsButton.GetComponentInChildren<Text>(), 48, 34);
-            StyleFooterLabel(view.play.GetComponentInChildren<Text>(), 66, 48);
+            StyleFooterLabel(view.back.GetComponentInChildren<Text>(), 46, 36);
+            StyleFooterLabel(view.modeLabel, 42, 28);
+            StyleFooterLabel(view.settingsButton.GetComponentInChildren<Text>(), 42, 34);
+            StyleFooterLabel(view.play.GetComponentInChildren<Text>(), 58, 48);
             StyleFooterLabel(view.details, 24, 20);
 
             var backText = view.back.GetComponentInChildren<Text>();
@@ -301,7 +344,7 @@ namespace RhythmDojo.EditorTools
             Bounds(backText.rectTransform, .34f, 0, .88f, 1);
             StyleFooterArrow(view.back, MainMenuIcon.IconKind.Back, .12f, .34f);
             var playText = view.play.GetComponentInChildren<Text>();
-            playText.text = "시작";
+            playText.text = "입장";
             Bounds(playText.rectTransform, .24f, 0, .55f, 1);
             StyleFooterArrow(view.play, MainMenuIcon.IconKind.Play, .59f, .75f);
 

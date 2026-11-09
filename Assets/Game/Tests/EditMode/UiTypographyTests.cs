@@ -19,8 +19,8 @@ namespace RhythmDojo.Tests
             Assert.That(popup.GetComponent<UiFontScope>().font, Is.SameAs(font));
             foreach (var text in popup.GetComponentsInChildren<Text>(true))
             {
-                Assert.That(text.font, Is.SameAs(font), text.name);
-                Assert.That(text.fontStyle, Is.EqualTo(FontStyle.Bold), text.name);
+                AssertRoleFont(text);
+                Assert.That(text.fontStyle, Is.EqualTo(FontStyle.Normal), text.name);
             }
 
             var root = new GameObject("Runtime typography test");
@@ -33,7 +33,7 @@ namespace RhythmDojo.Tests
                 foreach (var text in root.GetComponentsInChildren<Text>(true))
                 {
                     Assert.That(text.font, Is.SameAs(UiFontSettings.Current), text.name);
-                    Assert.That(text.fontStyle, Is.EqualTo(FontStyle.Bold), text.name);
+                    Assert.That(text.fontStyle, Is.EqualTo(FontStyle.Normal), text.name);
                 }
             }
             finally
@@ -65,7 +65,7 @@ namespace RhythmDojo.Tests
                 foreach (var text in root.GetComponentsInChildren<Text>(true))
                 {
                     Assert.That(text.font, Is.SameAs(font), text.name);
-                    Assert.That(text.fontStyle, Is.EqualTo(FontStyle.Bold), text.name);
+                    Assert.That(text.fontStyle, Is.EqualTo(FontStyle.Normal), text.name);
                 }
             }
             finally
@@ -135,26 +135,17 @@ namespace RhythmDojo.Tests
                 {
                     foreach (var text in root.GetComponentsInChildren<Text>(true))
                     {
-                        var expectedFont = font;
-                        if (name == "SongSelection" || name == "Results")
-                        {
-                            Assert.That(text.font, Is.SameAs(font), name + "/" + text.name);
-                        }
-                        var scope = text.GetComponentInParent<UiFontScope>(true);
-                        if (scope && scope.font)
-                        {
-                            expectedFont = scope.font;
-                        }
-                        Assert.That(text.font, Is.SameAs(expectedFont), name + "/" + text.name);
                         if (name == "ChartEditor")
                         {
-                            Assert.That(text.font, Is.SameAs(AssetDatabase.LoadAssetAtPath<Font>("Assets/Game/Fonts/NotoSansKR-Regular.otf")), text.name);
-                            Assert.That(text.fontStyle, Is.EqualTo(FontStyle.Normal), name + "/" + text.name);
+                            Assert.That(text.font, Is.SameAs(AssetDatabase.LoadAssetAtPath<Font>(
+                                "Assets/Game/Fonts/NotoSansKR-Regular.otf")), text.name);
                         }
                         else
                         {
-                            Assert.That(text.fontStyle, Is.EqualTo(FontStyle.Bold), name + "/" + text.name);
+                            AssertRoleFont(text);
                         }
+
+                        Assert.That(text.fontStyle, Is.EqualTo(FontStyle.Normal), name + "/" + text.name);
                         count++;
                     }
                 }
@@ -167,6 +158,100 @@ namespace RhythmDojo.Tests
                 {
                     EditorSceneManager.CloseScene(scene, true);
                 }
+            }
+        }
+        private static void AssertRoleFont(Text text)
+        {
+            var settings = Resources.Load<UiFontSettings>("UI/UiFontSettings");
+            var style = text.GetComponent<UiTextStyle>();
+            Assert.That(style, Is.Not.Null, text.name);
+            Font expected = settings.font;
+            switch (style.role)
+            {
+                case UiTextRole.Title:
+                    expected = settings.bold;
+                    break;
+                case UiTextRole.Help:
+                    expected = settings.regular;
+                    break;
+            }
+
+            Assert.That(text.font, Is.SameAs(expected), text.name);
+        }
+
+        [Test]
+        public void ExplicitRolesIgnoreNamesAndSurviveTreeReapplication()
+        {
+            var root = new GameObject("Play", typeof(UiFontScope));
+            try
+            {
+                var settings = Resources.Load<UiFontSettings>("UI/UiFontSettings");
+                var title = UiElements.Label("Help", root.transform, "제목", Vector2.zero,
+                    Vector2.one, role: UiTextRole.Title);
+                var body = UiElements.Label("Title", root.transform, "본문", Vector2.zero, Vector2.one);
+                var help = UiElements.Label("Score Value", root.transform, "도움말", Vector2.zero,
+                    Vector2.one, role: UiTextRole.Help);
+                help.gameObject.SetActive(false);
+                root.GetComponent<UiFontScope>().font = settings.font;
+                UiFontSettings.ApplyTo(root.transform);
+                UiFontSettings.ApplyTo(root.transform);
+                Assert.That(title.font, Is.SameAs(settings.bold));
+                Assert.That(body.font, Is.SameAs(settings.font));
+                Assert.That(help.font, Is.SameAs(settings.regular));
+                title.name = "Renamed";
+                UiFontSettings.Apply(title);
+                Assert.That(title.font, Is.SameAs(settings.bold));
+            }
+            finally
+            {
+                Object.DestroyImmediate(root);
+            }
+        }
+
+        [TestCase(false)]
+        [TestCase(true)]
+        public void ScopeOrderAndPixelSmoothRoundTripsPreserveCustomMaterials(bool configureFirst)
+        {
+            var root = new GameObject("Rendering scope", typeof(UiFontScope));
+            var scope = root.GetComponent<UiFontScope>();
+            var settings = Resources.Load<UiFontSettings>("UI/UiFontSettings");
+            var custom = new Material(settings.pixelText);
+            try
+            {
+                scope.useSmoothRendering = configureFirst;
+                var text = UiElements.Label("Label", root.transform, "표시", Vector2.zero, Vector2.one,
+                    role: UiTextRole.Title);
+                scope.useSmoothRendering = true;
+                UiFontSettings.ApplyTo(root.transform);
+                Assert.That(text.material, Is.SameAs(text.defaultMaterial));
+                scope.useSmoothRendering = false;
+                UiFontSettings.Apply(text);
+                Assert.That(text.material, Is.SameAs(settings.pixelText));
+                scope.useSmoothRendering = true;
+                UiFontSettings.Apply(text);
+                Assert.That(text.material, Is.SameAs(text.defaultMaterial));
+                text.material = custom;
+                UiFontSettings.Apply(text);
+                scope.useSmoothRendering = false;
+                UiFontSettings.ApplyTo(root.transform);
+                Assert.That(text.material, Is.SameAs(custom));
+                var font = AssetDatabase.LoadAssetAtPath<Font>("Assets/Game/Fonts/NotoSansKR-Regular.otf");
+                scope.font = font;
+                scope.style = FontStyle.Normal;
+                UiFontSettings.Apply(text);
+                Assert.That(text.font, Is.SameAs(font));
+                scope.font = settings.font;
+                UiFontSettings.Apply(text);
+                Assert.That(text.font, Is.SameAs(settings.bold));
+                text.font = font;
+                UiFontSettings.Apply(text);
+                UiFontSettings.ApplyTo(root.transform);
+                Assert.That(text.font, Is.SameAs(font), "Explicit per-text font takes precedence.");
+            }
+            finally
+            {
+                Object.DestroyImmediate(root);
+                Object.DestroyImmediate(custom);
             }
         }
     }

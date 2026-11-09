@@ -22,6 +22,7 @@ namespace RhythmDojo.Application
 
         void Schedule();
         void Stop();
+        // Returns logical song time with the input timing offset already subtracted.
         double InputTimeToSongTime(double eventTime);
     }
 

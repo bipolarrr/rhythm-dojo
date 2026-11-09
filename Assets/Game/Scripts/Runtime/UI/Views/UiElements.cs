@@ -45,14 +45,15 @@ namespace RhythmDojo.UI
             string text,
             Vector2 position,
             Vector2 size,
-            int fontSize = 22
+            int fontSize = 22,
+            UiTextRole role = UiTextRole.Body
         )
         {
             var go = new GameObject(name, typeof(RectTransform));
             go.transform.SetParent(parent, false);
 
             var label = go.AddComponent<Text>();
-            RhythmDojo.UI.UiFontSettings.Apply(label);
+            RhythmDojo.UI.UiFontSettings.Apply(label, role);
             label.text = text;
             label.fontSize = fontSize;
             label.color = Color.white;
@@ -72,13 +73,14 @@ namespace RhythmDojo.UI
             Transform parent,
             string caption,
             Vector2 position,
-            Vector2 size
+            Vector2 size,
+            UiTextRole role = UiTextRole.Body
         )
         {
             var go = DefaultControls.CreateButton(new DefaultControls.Resources());
             go.name = name;
             go.transform.SetParent(parent, false);
-            Font(go);
+            UiFontSettings.Apply(go.GetComponentInChildren<Text>(), role);
             Position((RectTransform)go.transform, position, size);
             go.GetComponentInChildren<Text>().text = caption;
 

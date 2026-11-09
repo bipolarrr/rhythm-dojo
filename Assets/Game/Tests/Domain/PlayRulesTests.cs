@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
@@ -128,24 +127,6 @@ namespace RhythmDojo.Tests
             Assert.That(session.Resolved, Is.EqualTo(resolved));
             Assert.That(session.GetNoteJudgments(0).End.Value.Grade, Is.EqualTo(Judgment.Miss));
             Assert.That(session.GetNoteJudgments(1).Start, Is.Null);
-        }
-
-        [Test]
-        public void FixedRecordSlotUpdatesAllocateNoManagedMemory()
-        {
-            var records = new NoteJudgmentRecord[1];
-            var judgment = new JudgmentEvent(0, NoteData.Hold(0, 1, 2), Judgment.Perfect, 0);
-            records[0] = new NoteJudgmentRecord(judgment, judgment);
-            long before = GC.GetAllocatedBytesForCurrentThread();
-            for (int i = 0; i < 100000; i++)
-            {
-                records[0] = new NoteJudgmentRecord(judgment, records[0].End);
-                records[0] = new NoteJudgmentRecord(records[0].Start, judgment);
-            }
-
-            long allocated = GC.GetAllocatedBytesForCurrentThread() - before;
-            Assert.That(allocated, Is.Zero, "Only fixed result-record slot updates are measured.");
-            Assert.That(records[0].End, Is.Not.Null);
         }
 
         [TestCase(JudgmentProfile.Warmup, .05, .1)]

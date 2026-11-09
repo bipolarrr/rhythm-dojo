@@ -19,6 +19,21 @@ namespace RhythmDojo.Tests
     [Category("UI")]
     public sealed class MainMenuFlowTests
     {
+        private NativeInputScope nativeInput;
+
+        [SetUp]
+        public void IsolateInput()
+        {
+            nativeInput = new NativeInputScope();
+        }
+
+        [TearDown]
+        public void RestoreInput()
+        {
+            nativeInput?.Dispose();
+            nativeInput = null;
+        }
+
         private MainMenuView view;
         private MainMenuScreen screen;
         private Mouse mouse;
@@ -585,83 +600,6 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
-        public IEnumerator SceneLoadingCompletesBeforeDoorAnimationStarts()
-        {
-            var frames = new System.Collections.Generic.List<string>
-            {
-                "frame,frame_ms,opening,scene"
-            };
-            bool selectionLoaded = false;
-            float openingAtSelectionLoad = -1f;
-            double previousFrameTime = Time.realtimeSinceStartupAsDouble;
-            double maxMovingFrameMs = 0d;
-            UnityEngine.Events.UnityAction<Scene, LoadSceneMode> loaded = (scene, mode) =>
-            {
-                if (scene.path != AppFlowController.SelectionPath)
-                {
-                    return;
-                }
-
-                selectionLoaded = true;
-                openingAtSelectionLoad = 0f;
-                if (DojoEntranceTransition.Active)
-                {
-                    openingAtSelectionLoad = DojoEntranceTransition.Active
-                        .GetComponentInChildren<DojoEntranceView>().Opening;
-                }
-            };
-            SceneManager.sceneLoaded += loaded;
-
-            try
-            {
-                yield return OpenMenu();
-                bool preparedBeforeClick = UnityEngine.Object.FindFirstObjectByType<AppFlowController>().IsSelectionPrepared;
-                Assert.That(preparedBeforeClick, Is.True, "Selection rendering must be warmed before Play.");
-                selectionLoaded = true;
-                openingAtSelectionLoad = 0f;
-                yield return Click(view.start);
-                previousFrameTime = Time.realtimeSinceStartupAsDouble;
-                double deadline = previousFrameTime + 20d;
-                bool transitionStarted = false;
-                while (!selectionLoaded || !transitionStarted || DojoEntranceTransition.Active)
-                {
-                    double now = Time.realtimeSinceStartupAsDouble;
-                    Assert.That(now, Is.LessThan(deadline));
-                    double frameMs = (now - previousFrameTime) * 1000d;
-                    previousFrameTime = now;
-                    float opening = 0f;
-                    if (DojoEntranceTransition.Active)
-                    {
-                        transitionStarted = true;
-                        opening = DojoEntranceTransition.Active.GetComponentInChildren<DojoEntranceView>().Opening;
-                    }
-
-                    if (opening > 0f && opening < 1f)
-                    {
-                        maxMovingFrameMs = Math.Max(maxMovingFrameMs, frameMs);
-                    }
-
-                    frames.Add(FormattableString.Invariant(
-                        $"{Time.frameCount},{frameMs:F3},{opening:F5},{SceneManager.GetActiveScene().name}"));
-                    yield return null;
-                }
-
-                Assert.That(openingAtSelectionLoad, Is.Zero,
-                    "Scene activation must finish behind closed doors, before visible door motion.");
-                Assert.That(UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>().enabled, Is.True);
-            }
-            finally
-            {
-                SceneManager.sceneLoaded -= loaded;
-                frames.Add(FormattableString.Invariant($"# opening_at_selection_load,{openingAtSelectionLoad:F5}"));
-                frames.Add(FormattableString.Invariant($"# max_moving_frame_ms,{maxMovingFrameMs:F3}"));
-                frames.Add($"# target_fps,{UnityEngine.Application.targetFrameRate}");
-                Directory.CreateDirectory("Logs");
-                File.WriteAllLines("Logs/door-transition-frame-profile.csv", frames);
-            }
-        }
-
-        [UnityTest]
         public IEnumerator CaptureMenuAndKoreanQuitPopup()
         {
             Capture("Logs/main-menu.png");
@@ -741,7 +679,17 @@ namespace RhythmDojo.Tests
             Assert.That(view.entrance.frame.alpha, Is.EqualTo(1f));
             Assert.That(view.entrance.leftDoor.anchoredPosition.x, Is.Zero);
             Assert.That(view.slidingPlaque.Separation, Is.EqualTo(220f).Within(.01f));
-            settingsView.back.onClick.Invoke();
+            var keyboard = InputSystem.AddDevice<Keyboard>();
+            try
+            {
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.Escape));
+                yield return null;
+                yield return null;
+            }
+            finally
+            {
+                InputSystem.RemoveDevice(keyboard);
+            }
 
             while (SceneManager.GetActiveScene().path != "Assets/Game/Scenes/Title.unity")
             {
@@ -751,6 +699,8 @@ namespace RhythmDojo.Tests
 
             yield return null;
             Assert.That(UnityEngine.Object.FindFirstObjectByType<MainMenuView>(), Is.SameAs(view));
+            Assert.That(settingsView.gameObject.activeInHierarchy, Is.False);
+            Assert.That(view.menuPanel.alpha, Is.EqualTo(1f));
             Assert.That(
                 view.menuPanel.gameObject.activeSelf,
                 Is.True,

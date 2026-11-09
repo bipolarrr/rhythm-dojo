@@ -1,5 +1,13 @@
 # 동작별 검증 가이드
 
+최신 #15–#21 통합 범위와 실행 결과는 [통합 검증 기록](integration-pr-15-21.md)을 참조한다. 아래 날짜별 과거 실행 기록은 해당 시점의 결과이다.
+
+## 2026-11-03 Unity error follow-up
+
+The remaining scene-ownership, input/focus-isolation and rendering verification issues were corrected. Final Domain/EditMode: 399/399 passed. Latest PlayMode results by unique test: 202/202 passed, with no skips. The PlayMode total combines the full 202-test run (197 passed, 5 failed) with passing affected-fixture reruns (resume 9/9, chart editor 4/4, timeline 3/3, title 19/19); it is not a single clean final full run. Continuous 929-note playback and automatic Results passed. Native focus behavior remains the default and is regression-tested separately from controlled test focus. Builds were omitted because build/platform settings were unchanged.
+
+See `Logs/unity-errors-verification.md` and `Logs/unity-errors-playmode-consolidated.json` for exact scope, measurements and source results. The historical PR integration results below describe the earlier state.
+
 ## 2026-11-03 PR 기능 통합 검증
 
 로컬 `12218cf`의 PR #5~#7 품질 수정을 기준으로 #8 곡 선택, #9 결과 화면, #10 에디터 기능을 `integrate/pr-features`에 선택 통합했다. 원래 `RhythmDojo` 작업 폴더의 Results 씬과 임시 씬은 보존했다. 씬은 PR 스냅샷 대신 로컬 빌더로 재생성했다.
@@ -126,11 +134,11 @@ $unity = 'C:/Program Files/Unity/Hub/Editor/6000.3.23f1/Editor/Unity.exe'
 전체 적용 검사는 준비·복구·일시정지·장치 변경을 포함해 최대 20초이다. 일시정지와 설정 변경은 관측을 폐기하되 제한 시간을 다시 시작하지 않는다. 제한 시간 만료와 복원 요청 수락은 정상 판정이 아니다. `ClockRateVerified`, `ConsecutiveClockRateMeasurements`, `ClockRateMeasurements`, `ValidationElapsedSeconds`가 판정 근거를 제공하며 `AudioFlowTests`는 실제 요청/적용 버퍼와 구간을 `Logs/audio-buffers.txt`에 기록한다. 이는 출력 품질이나 체감 지연을 보증하지 않는다.
 
 
-## 결과 기록과 롱노트 규칙 v3
+## 결과 기록과 롱노트 규칙 v4
 
-`PlayRules.CurrentVersion`은 3이다. Automatic은 시작 Miss나 중간 해제 후에도 재입력할 수 있고, 끝 시각의 키 상태로 자동 끝 판정을 적용한다. Release는 조기 해제 순간 끝 Miss와 HP·콤보·실패를 한 번 적용하며 재입력으로 복구하지 않는다. 남은 유지 시각에는 키 상태와 무관하게 Miss를 적용한다. Release의 시작 Miss도 복구할 수 없다. 정상/늦은 해제는 기존 판정창과 시간 허용 오차를 사용한다.
+`PlayRules.CurrentVersion`은 4이다. 입력과 Tick은 모두 `GameplayTiming`의 논리 시각(곡 시각 − 입력 보정값)을 사용한다. 시작·유지·자동 끝·해제 판정에 같은 기준을 적용하며 Presenter는 표시용 곡 시간을 사용한다. Automatic은 시작 Miss나 중간 해제 후에도 재입력할 수 있고, 끝 시각의 키 상태로 자동 끝 판정을 적용한다. Release는 조기 해제 순간 끝 Miss와 HP·콤보·실패를 한 번 적용하며 재입력으로 복구하지 않는다. 남은 유지 시각에는 키 상태와 무관하게 Miss를 적용한다. Release의 시작 Miss도 복구할 수 없다. 정상/늦은 해제는 기존 판정창과 시간 허용 오차를 사용한다.
 
-최고 기록 키에는 규칙 버전이 포함되므로 v2 기록을 삭제하거나 변환하지 않는다. Automatic을 포함한 모든 v3 기록은 이전 버전과 분리된다. enum 값과 저장 필드 이름은 유지한다.
+최고 기록 키에는 규칙 버전이 포함되므로 v2·v3 기록을 삭제하거나 변환하지 않는다. Automatic을 포함한 모든 v4 기록은 이전 버전과 분리된다. enum 값과 저장 필드 이름은 유지한다.
 
 세션은 노트 수만큼 `NoteJudgmentRecord` 배열을 할당하고 시작·끝 확정 시 해당 슬롯만 갱신한다. Reset은 같은 배열을 비운다. 유지 판정은 HP·콤보·정확도와 상단 집계에 계속 포함되지만 상세 기록에는 포함되지 않는다. 아직 도달하지 않은 시작·끝은 null이며 Miss와 구분한다. 구형 세션 경로는 기존 한 노트당 최종 점수 규칙을 유지하면서 성공한 홀드 시작과 최종 판정을 각각 기록한다.
 
@@ -138,7 +146,7 @@ $unity = 'C:/Program Files/Unity/Hub/Editor/6000.3.23f1/Editor/Unity.exe'
 
 Results는 `ScreenCompositionRoot`가 결과와 복귀 Action을 주입한다. 직접 Results를 실행하면 빈 결과를 표시하고 곡 선택으로 돌아간다. 에디터 테스트 플레이는 기존 AppFlow의 반환 경로를 사용한다. 레이아웃은 Build Results와 Build Settings로 재생성하며 SettingsPopup도 함께 갱신한다.
 
-검증 fixture: `PlayRulesTests`, `RhythmSessionTests`, `PlayResultReviewTests`, `ResultsLayoutTests`, `ResultsFlowTests`, `PupaResultsFlowTests`, `SettingsFlowTests`. `FixedRecordSlotUpdatesAllocateNoManagedMemory`는 초기화 이후 고정 결과 슬롯 20만 회 갱신만 측정한다. 전체 게임플레이(입력 이력 등), 결과 객체 생성 또는 열거가 무할당이라는 의미는 아니다.
+검증 fixture: `PlayRulesTests`, `RhythmSessionTests`, `PlayResultReviewTests`, `ResultsLayoutTests`, `ResultsFlowTests`, `PupaResultsFlowTests`, `SettingsFlowTests`. 실제 판정의 시작·끝 기록과 세션 초기화 후 결과 스냅샷 보존을 검증한다. 고정 결과 슬롯 대입만 반복하는 할당 측정은 검증 범위에서 제외한다.
 
 ### 2026-10-29 실행 결과
 

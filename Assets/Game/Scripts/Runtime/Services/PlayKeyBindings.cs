@@ -256,7 +256,8 @@ namespace RhythmDojo.Services
             {
                 return false;
             }
-            return key != Key.Escape && key != Key.IMESelected;
+            // Reject the legacy dummy value without referencing its obsolete enum member.
+            return key != Key.Escape && key.ToString() != "IMESelected";
         }
 
         private static bool ConflictsWithCommands(GameModeDefinition mode, Key key)

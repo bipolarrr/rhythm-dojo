@@ -13,6 +13,7 @@ namespace RhythmDojo.Content
         public string Id { get; }
         public ChartSlot Slot { get; }
         public string Error { get; }
+        public SongLoadFailure Failure { get; }
         public string Revision { get; }
         public int? NoteCount { get; }
         public double? Duration { get; }
@@ -27,12 +28,14 @@ namespace RhythmDojo.Content
             int? notes = null,
             double? duration = null,
             GameModeDefinition mode = null,
-            string modeId = null
+            string modeId = null,
+            SongLoadFailure failure = null
         )
         {
             Id = id;
             Slot = slot;
-            Error = error;
+            Error = error ?? failure?.Message;
+            Failure = failure;
             Revision = revision;
             NoteCount = notes;
             Duration = duration;
@@ -41,7 +44,11 @@ namespace RhythmDojo.Content
         }
     }
 
-    public interface IChartSongProvider : ISongProvider
+    public interface IChartSongProvider : ISongProvider, ISongChartLoader
+    {
+    }
+
+    public interface ISongChartLoader
     {
         Task<PlayableSong> LoadChartAsync(
             string songId,
@@ -61,6 +68,7 @@ namespace RhythmDojo.Content
         public double MinBpm { get; }
         public double MaxBpm { get; }
         public string Error { get; }
+        public SongLoadFailure Failure { get; }
         public UnityEngine.Sprite Cover { get; }
         public IReadOnlyList<ChartEntry> Charts { get; }
         public GameModeDefinition Mode { get; }
@@ -79,7 +87,8 @@ namespace RhythmDojo.Content
             UnityEngine.Sprite cover = null,
             IReadOnlyList<ChartEntry> charts = null,
             GameModeDefinition mode = null,
-            string modeId = null
+            string modeId = null,
+            SongLoadFailure failure = null
         )
         {
             Id = id;
@@ -90,15 +99,16 @@ namespace RhythmDojo.Content
             LaneCount = lanes;
             MinBpm = minBpm;
             MaxBpm = maxBpm;
-            Error = error;
+            Error = error ?? failure?.Message;
+            Failure = failure;
             Cover = cover;
             Mode = mode;
             ModeId = modeId;
             Charts =
-                charts ?? new[] { new ChartEntry(id + ":standard", ChartSlot.Standard, error) };
+                charts ?? new[] { new ChartEntry(id + ":standard", ChartSlot.Standard, Error, failure: failure) };
         }
 
-        public SongEntry WithError(string error) =>
+        public SongEntry WithError(string error, SongLoadFailure failure = null) =>
             new SongEntry(
                 Id,
                 Title,
@@ -112,7 +122,8 @@ namespace RhythmDojo.Content
                 Cover,
                 Charts,
                 Mode,
-                ModeId
+                ModeId,
+                failure ?? Failure
             );
     }
 
@@ -142,7 +153,7 @@ namespace RhythmDojo.Content
         Task<PlayableSong> LoadAsync(SongDocument document, CancellationToken cancellationToken);
     }
 
-    public sealed class SongLibrary : ISongLibrary, ISongLoader
+    public sealed class SongLibrary : ISongLibrary, ISongLoader, ISongChartLoader
     {
         private readonly List<ISongProvider> providers = new List<ISongProvider>();
         private readonly Dictionary<string, ISongProvider> sources = new Dictionary<
@@ -225,9 +236,9 @@ namespace RhythmDojo.Content
 
             if (songId == null || !sources.TryGetValue(songId, out var provider))
             {
-                throw new InvalidOperationException(
-                    Find(songId)?.Error ?? "Song not available: " + songId
-                );
+                var entry = Find(songId);
+                throw new SongLoadException(entry?.Failure ?? new SongLoadFailure(
+                    SongLoadFailureKind.Other, entry?.Error ?? "Song not available: " + songId));
             }
 
             var song = await provider.LoadAsync(songId, cancellationToken);
@@ -252,14 +263,26 @@ namespace RhythmDojo.Content
             CancellationToken cancellationToken
         )
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var entry = Find(songId);
             var chart = entry?.Charts.FirstOrDefault(c => c.Slot == slot);
 
             if (chart == null || chart.Error != null || entry.Error != null)
             {
-                throw new InvalidOperationException(
-                    chart?.Error ?? entry?.Error ?? "이 난이도의 채보가 없습니다."
-                );
+                var failure = chart?.Failure ?? entry?.Failure;
+                if (failure == null)
+                {
+                    var kind = SongLoadFailureKind.Other;
+                    if (chart == null && entry?.Error == null)
+                    {
+                        kind = SongLoadFailureKind.MissingChart;
+                    }
+
+                    failure = new SongLoadFailure(kind,
+                        chart?.Error ?? entry?.Error ?? "이 난이도의 채보가 없습니다.");
+                }
+
+                throw new SongLoadException(failure);
             }
 
             if (!sources.TryGetValue(songId, out var provider))

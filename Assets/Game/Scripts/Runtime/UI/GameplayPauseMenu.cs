@@ -84,6 +84,59 @@ namespace RhythmDojo.UI
             EventSystem.current?.SetSelectedGameObject(resumeButton.gameObject);
         }
 
+        internal bool HandleEscape()
+        {
+            if (!isActiveAndEnabled)
+            {
+                return true;
+            }
+
+            if (CountingDown)
+            {
+                Open();
+                return true;
+            }
+
+            if (panel.activeSelf)
+            {
+                if (RecoveringAudio)
+                {
+                    Open();
+                }
+                else
+                {
+                    BeginResume();
+                }
+
+                return true;
+            }
+
+            if (controller.Session.State != SessionState.Playing)
+            {
+                return false;
+            }
+
+            Open();
+            return true;
+        }
+
+        internal void PauseForFocusLoss()
+        {
+            if (!CountingDown && !RecoveringAudio)
+            {
+                if (panel.activeSelf || controller.IsPaused)
+                {
+                    return;
+                }
+            }
+
+            Open();
+            if (panel.activeSelf)
+            {
+                SetRecoveryStatus("창이 전환되어 수련을 멈췄습니다.");
+            }
+        }
+
         public async void BeginResume()
         {
             if (!panel.activeSelf)
@@ -212,6 +265,12 @@ namespace RhythmDojo.UI
 
         private async Task<bool> PreparePlayback()
         {
+            if (!root.NeedsAudioRecovery)
+            {
+                SetRecoveryStatus("");
+                return true;
+            }
+
             var cancellation = new CancellationTokenSource();
             recoveryCancellation = cancellation;
             RecoveryError = null;
@@ -236,7 +295,7 @@ namespace RhythmDojo.UI
                     RecoveryError = error.Message;
                     panel.SetActive(true);
                     countdown.SetActive(false);
-                    SetRecoveryStatus("음원 복구 실패 · 재개로 다시 시도\n" + error.Message);
+                    SetRecoveryStatus("음원을 복구하지 못했습니다. 이어하기로 다시 시도하세요.");
                     EventSystem.current?.SetSelectedGameObject(resumeButton.gameObject);
                 }
                 return false;
@@ -288,14 +347,6 @@ namespace RhythmDojo.UI
             if (panel.activeSelf)
             {
                 EventSystem.current?.SetSelectedGameObject(settingsButton.gameObject);
-            }
-        }
-
-        private void OnApplicationFocus(bool focused)
-        {
-            if (!focused && CountingDown)
-            {
-                Open();
             }
         }
 

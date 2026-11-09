@@ -415,6 +415,120 @@ namespace RhythmDojo.Tests
             Assert.That(clock.Schedules, Is.EqualTo(2));
         }
 
+        [TestCase(.2, true)]
+        [TestCase(-.2, true)]
+        [TestCase(-.2, false)]
+        public void AutomaticHoldResolvesAtTheUncalibratedSongTail(double offset, bool keyboardInput)
+        {
+            var input = new FakeInput();
+            var clock = new FakeClock { InputTimingOffsetSeconds = offset };
+            using var coordinator = Coordinator(input, clock, new FakePresenter(), rules: new PlayRules());
+            coordinator.Start();
+
+            if (keyboardInput)
+            {
+                input.Press(1, 5.2 + offset);
+            }
+            else
+            {
+                coordinator.Session.PressLane(1, 5.2);
+            }
+
+            clock.SongTime = 6.79 + offset;
+            coordinator.Tick();
+            Assert.That(coordinator.Session.GetNoteJudgments(1).End, Is.Null);
+
+            clock.SongTime = 6.8 + offset;
+            if (keyboardInput)
+            {
+                input.Release(1, clock.SongTime);
+            }
+            else
+            {
+                coordinator.Session.ReleaseLane(1, 6.8);
+            }
+
+            coordinator.Tick();
+
+
+            Assert.That(coordinator.Session.Miss, Is.EqualTo(1), "Only the unplayed tap may miss.");
+            var end = coordinator.Session.GetNoteJudgments(1).End;
+            Assert.That(end.HasValue, Is.True);
+            Assert.That(end.Value.Grade, Is.EqualTo(Judgment.Perfect));
+            Assert.That(end.Value.ErrorSeconds, Is.Zero);
+            Assert.That(coordinator.Session.GetState(1), Is.EqualTo(NoteState.Completed));
+        }
+
+        [Test]
+        public void LogicalTimelineIsIndependentOfTicksAndPresentation(
+            [Values(0, .2, -.2)] double offset,
+            [Values(HoldEndMode.Automatic, HoldEndMode.Release)] HoldEndMode holdEnd,
+            [Values(.007, .09, .4)] double tickInterval,
+            [Values(false, true)] bool presentation)
+        {
+            var input = new FakeInput();
+            var clock = new FakeClock { InputTimingOffsetSeconds = offset };
+            var tempo = new TempoMap(new[] { new TempoPoint(0, 120), new TempoPoint(1.25, 240) });
+            var chart = new ChartData(new[]
+            {
+                NoteData.Hold(0, 1, 1.7), NoteData.Hold(1, 1.8, 1.84), NoteData.Tap(2, 2)
+            }, 3);
+            var rules = new PlayRules { HoldEnd = holdEnd };
+            INotePresenter presenter = null;
+            if (presentation)
+            {
+                presenter = new FakePresenter();
+            }
+
+            using var c = new RhythmSessionCoordinator(chart, rules.Timing, new GameModeRules(4),
+                tempo, "Test", "Standard", ScrollMode.Constant, 1, new ConstantScrollTimeline(8, 1),
+                input, clock, presenter, null, rules);
+            var expected = new RhythmSession(chart, new GameModeRules(4), tempo, rules);
+            var actualEvents = new System.Collections.Generic.List<string>();
+            var expectedEvents = new System.Collections.Generic.List<string>();
+            c.Judged += e => actualEvents.Add($"{e.NoteIndex}/{e.Grade}/{e.ErrorSeconds:R}");
+            expected.Judged += e => expectedEvents.Add($"{e.NoteIndex}/{e.Grade}/{e.ErrorSeconds:R}");
+            c.Start();
+            expected.Start();
+            var times = new[] { 1.0, 1.7, 1.8, 1.84, 2.0, 2.01 };
+            var lanes = new[] { 0, 0, 1, 1, 2, 2 };
+            double nextTick = 0;
+            for (int i = 0; i < times.Length; i++)
+            {
+                double timestamp = times[i] + offset;
+                while (nextTick < timestamp - 1e-9)
+                {
+                    clock.SongTime = nextTick;
+                    c.Tick();
+                    nextTick += tickInterval;
+                }
+
+                // The baseline receives the identical calibrated timestamp without any Tick calls.
+                double logical = clock.InputTimeToSongTime(timestamp);
+                if (i % 2 == 0)
+                {
+                    input.Press(lanes[i], timestamp);
+                    expected.PressLane(lanes[i], logical);
+                }
+                else
+                {
+                    input.Release(lanes[i], timestamp);
+                    expected.ReleaseLane(lanes[i], logical);
+                }
+            }
+
+            clock.SongTime = 3 + offset;
+            c.Tick();
+            expected.Advance(3);
+            Assert.That(actualEvents, Is.EqualTo(expectedEvents));
+            Assert.That(c.Session.Miss, Is.Zero);
+            Assert.That(c.Session.Perfect, Is.EqualTo(expected.Perfect));
+            Assert.That(c.Session.Combo, Is.EqualTo(expected.Combo));
+            Assert.That(c.Session.Snapshot.Health, Is.EqualTo(expected.Snapshot.Health));
+            Assert.That(c.Session.Snapshot.AccuracyRate, Is.EqualTo(expected.Snapshot.AccuracyRate));
+            Assert.That(c.Session.State, Is.EqualTo(SessionState.Completed));
+        }
+
         [Test]
         public void PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(
             [Values(0, .2, -.2)] double offset,

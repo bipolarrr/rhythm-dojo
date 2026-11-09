@@ -73,12 +73,19 @@ namespace RhythmDojo.Gameplay
         public event Action<HoldStartedEvent> HoldStarted;
         public event Action<FailureSnapshot> Failed;
 
-        public RuleSession(ChartData chart, GameModeRules mode, TempoMap tempo, PlayRules rules, NoteJudgmentRecord[] records)
+        public RuleSession(
+            ChartData chart,
+            GameModeRules mode,
+            TempoMap tempo,
+            PlayRules rules,
+            NoteJudgmentRecord[] records
+        )
         {
             chart.Validate(mode);
             rules.Validate();
             this.chart = chart;
             this.rules = rules.Copy();
+
             this.records = records;
             broken = new bool[chart.Count];
             heads = new bool[chart.Count];
@@ -210,7 +217,8 @@ namespace RhythmDojo.Gameplay
                 return;
             }
 
-            Sweep(time, false);
+            double checkTime = time;
+            Sweep(checkTime, false);
 
             if (State != SessionState.Playing)
             {
@@ -218,7 +226,7 @@ namespace RhythmDojo.Gameplay
             }
 
             held[lane] = true;
-            history.Add(new InputChange(lane, time, true));
+            history.Add(new InputChange(lane, checkTime, true));
 
             int best = -1;
             double nearest = double.MaxValue;
@@ -249,7 +257,10 @@ namespace RhythmDojo.Gameplay
 
                 if (note.Kind == NoteKind.Hold)
                 {
-                    states[best] = NoteState.Holding;
+                    if (!tails[best])
+                    {
+                        states[best] = NoteState.Holding;
+                    }
                 }
                 else
                 {
@@ -268,7 +279,7 @@ namespace RhythmDojo.Gameplay
                 }
             }
 
-            Sweep(time, true);
+            Sweep(checkTime, true);
         }
 
         public void ReleaseLane(int lane, double time)
@@ -279,7 +290,8 @@ namespace RhythmDojo.Gameplay
             }
 
             // A key held through an automatic tail completes it before the release.
-            Sweep(time, true);
+            double checkTime = time;
+            Sweep(checkTime, true);
 
             if (State != SessionState.Playing)
             {
@@ -287,7 +299,7 @@ namespace RhythmDojo.Gameplay
             }
 
             held[lane] = false;
-            history.Add(new InputChange(lane, time, false));
+            history.Add(new InputChange(lane, checkTime, false));
 
             for (int i = 0; i < chart.Count; i++)
             {
@@ -335,7 +347,7 @@ namespace RhythmDojo.Gameplay
 
                     Apply(i, grade, error, time, 2);
                 }
-                else if (time < note.EndTime)
+                else if (checkTime < note.EndTime)
                 {
                     if (rules.HoldEnd == HoldEndMode.Release && heads[i])
                     {
@@ -400,7 +412,10 @@ namespace RhythmDojo.Gameplay
 
                     if (note.Kind == NoteKind.Hold)
                     {
-                        states[i] = NoteState.Holding;
+                        if (!tails[i])
+                        {
+                            states[i] = NoteState.Holding;
+                        }
                     }
                     else
                     {

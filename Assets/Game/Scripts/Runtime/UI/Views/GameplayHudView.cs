@@ -26,6 +26,12 @@ namespace RhythmDojo.UI
         public Text healthLabel;
         public GameObject gameOverPanel;
         public Text gameOverText;
+        public Text gameOverHint;
+        public GameObject gameOverFrame;
+        public Slider railOpacity;
+        public Button focusHudButton;
+        public GameObject songInformationPanel;
+        public GameObject judgmentRecordPanel;
 
         public void Validate()
         {
@@ -59,12 +65,32 @@ namespace RhythmDojo.UI
                 throw new InvalidOperationException("Training HUD references missing.");
             }
 
-            if (!gameOverText)
+            if (!gameOverText || !gameOverHint || !railOpacity)
             {
                 throw new InvalidOperationException("Training HUD references missing.");
             }
 
+            if (!focusHudButton || !songInformationPanel || !judgmentRecordPanel)
+            {
+                throw new InvalidOperationException("Gameplay focus HUD references missing.");
+            }
+
             lanes.Validate();
+        }
+
+        public void SetFocusHud(bool enabled)
+        {
+            songInformationPanel.SetActive(!enabled);
+            judgmentRecordPanel.SetActive(!enabled);
+            var caption = focusHudButton.GetComponentInChildren<Text>(true);
+            if (enabled)
+            {
+                caption.text = "HUD · 집중";
+            }
+            else
+            {
+                caption.text = "HUD · 기본";
+            }
         }
     }
 }

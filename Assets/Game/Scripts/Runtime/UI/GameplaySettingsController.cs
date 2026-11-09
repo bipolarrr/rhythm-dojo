@@ -12,14 +12,28 @@ namespace RhythmDojo.UI
 {
     public sealed class GameplaySettingsController : IDisposable
     {
+        private static readonly JudgmentPosition[] JudgmentPositions =
+        {
+            JudgmentPosition.Upper,
+            JudgmentPosition.Middle,
+            JudgmentPosition.Lower,
+        };
+
         private readonly SettingsView view;
         private readonly GameSettings settings;
         private readonly ISongSelectionService selection;
         private readonly ISelectionPreferences preferences;
         private readonly HardModePreferences hardMode;
+        private readonly float speedSliderMinimum;
+        private readonly TimingCalibrationDialog calibration;
+        private readonly PresentationPreferences presentation;
         private GameplayRulesSettings gameplayRules;
         private UnityEngine.Events.UnityAction<int>[] hardRuleActions;
         private UnityEngine.Events.UnityAction<string>[] hardCountActions;
+
+        private ScrollMode speedScrollMode = ScrollMode.Constant;
+        private Action<double> gameplaySpeedChanged;
+        private Action<int> calibrationApplied;
 
         public GameplaySettingsController(
             SettingsView view,
@@ -29,12 +43,36 @@ namespace RhythmDojo.UI
             HardModePreferences hardMode,
             IPlayRulesService rules
         )
+            : this(view, settings, selection, preferences, hardMode, rules, new PresentationPreferences())
+        {
+        }
+
+        public GameplaySettingsController(
+            SettingsView view,
+            GameSettings settings,
+            ISongSelectionService selection,
+            ISelectionPreferences preferences,
+            HardModePreferences hardMode,
+            IPlayRulesService rules,
+            PresentationPreferences presentation
+        )
         {
             this.view = view;
             this.settings = settings;
             this.selection = selection;
             this.preferences = preferences;
             this.hardMode = hardMode;
+            this.presentation = presentation ?? new PresentationPreferences();
+            speedScrollMode = selection?.SelectedScrollMode ?? preferences.ScrollMode;
+            speedSliderMinimum = view.speedSlider.minValue;
+            calibration = new TimingCalibrationDialog(
+                view,
+                this.presentation,
+                preferences,
+                ApplyCalibration,
+                CreateSpeedTestTimeline,
+                () => rules?.Snapshot.Timing ?? new PlayRules().Timing
+            );
 
             if (rules != null && view.playRuleLists != null && view.playRuleLists.Length == 5)
             {
@@ -66,6 +104,18 @@ namespace RhythmDojo.UI
             view.timingOffset.SetValueWithoutNotify(preferences.TimingOffsetMs);
             view.speedSlider.onValueChanged.AddListener(SpeedChanged);
             view.timingOffset.onValueChanged.AddListener(TimingChanged);
+            if (view.judgmentPositionList)
+            {
+                int index = Array.IndexOf(JudgmentPositions, this.presentation.judgmentPosition);
+                if (index < 0)
+                {
+                    index = Array.IndexOf(JudgmentPositions, JudgmentPosition.Middle);
+                }
+
+                Configure(view.judgmentPositionList, new[] { "상단", "중앙", "하단" }, index);
+                view.judgmentPositionList.onValueChanged.AddListener(JudgmentPositionChanged);
+            }
+
             RefreshGameplay();
         }
 
@@ -176,6 +226,39 @@ namespace RhythmDojo.UI
                 timingNavigation.selectOnDown = view.hardRuleLists[0];
             }
 
+            var nextControl = timingNavigation.selectOnDown;
+            var nextNavigation = nextControl.navigation;
+            nextNavigation.selectOnUp = calibration.Entry;
+            nextControl.navigation = nextNavigation;
+
+            calibration.Entry.navigation = new Navigation
+            {
+                mode = Navigation.Mode.Explicit,
+                selectOnUp = view.timingOffset,
+                selectOnDown = nextControl,
+                selectOnRight = calibration.SpeedEntry,
+            };
+            calibration.SpeedEntry.navigation = new Navigation
+            {
+                mode = Navigation.Mode.Explicit,
+                selectOnUp = view.timingOffset,
+                selectOnDown = nextControl,
+                selectOnLeft = calibration.Entry,
+                selectOnRight = view.judgmentPositionList,
+            };
+
+            if (view.judgmentPositionList)
+            {
+                view.judgmentPositionList.navigation = new Navigation
+                {
+                    mode = Navigation.Mode.Explicit,
+                    selectOnUp = view.gameplayTab,
+                    selectOnLeft = calibration.SpeedEntry,
+                    selectOnDown = view.timingOffset,
+                };
+            }
+
+            timingNavigation.selectOnDown = calibration.Entry;
             view.timingOffset.navigation = timingNavigation;
 
             if (view.gameplayPanel.activeSelf)
@@ -184,6 +267,41 @@ namespace RhythmDojo.UI
                 nav.selectOnUp = HardModeLastControl();
                 view.apply.navigation = nav;
             }
+        }
+
+        public bool TickCalibration() => calibration.Tick();
+
+        internal void OpenTimingCalibration(Action<int> onApplied)
+        {
+            calibrationApplied = onApplied;
+            calibration.Open(false);
+        }
+
+        private void ApplyCalibration(int value)
+        {
+            TimingChanged(value);
+            calibrationApplied?.Invoke(value);
+        }
+
+        private IScrollTimeline CreateSpeedTestTimeline()
+        {
+            if (!settings || !settings.scroll)
+            {
+                return new ConstantScrollTimeline(8, view.speedSlider.value);
+            }
+
+            var tempo = new TempoMap(new[] { new TempoPoint(0, TimingCalibrationDialog.TestBpm) });
+            return settings.scroll.CreateTimeline(speedScrollMode, tempo, view.speedSlider.value);
+        }
+
+        public void BindGameplaySpeed(ScrollMode mode, double multiplier, Action<double> onSpeedChanged)
+        {
+            speedScrollMode = mode;
+            gameplaySpeedChanged = onSpeedChanged;
+
+            view.speedSlider.minValue = Mathf.Min(speedSliderMinimum, (float)multiplier);
+            view.speedSlider.SetValueWithoutNotify((float)multiplier);
+            RefreshGameplay();
         }
 
         private void SpeedChanged(float value)
@@ -211,19 +329,21 @@ namespace RhythmDojo.UI
 
             view.speedSlider.SetValueWithoutNotify((float)rounded);
             preferences.Multiplier = rounded;
-            preferences.ScrollMode = ScrollMode.Constant;
+            preferences.ScrollMode = speedScrollMode;
 
             if (selection != null && selection.Library.Find(selection.SelectedSongId) != null)
             {
                 selection.UpdateSelection(
                     selection.SelectedSongId,
                     selection.SelectedDifficulty,
-                    ScrollMode.Constant,
+                    speedScrollMode,
                     rounded
                 );
             }
 
             preferences.Save();
+
+            gameplaySpeedChanged?.Invoke(rounded);
             RefreshGameplay();
         }
 
@@ -235,9 +355,20 @@ namespace RhythmDojo.UI
             RefreshGameplay();
         }
 
+        private void JudgmentPositionChanged(int value)
+        {
+            if (value < 0 || value >= JudgmentPositions.Length)
+            {
+                return;
+            }
+
+            presentation.judgmentPosition = JudgmentPositions[value];
+            presentation.SaveValues();
+        }
+
         private void RefreshGameplay()
         {
-            view.speedLabel.text = $"속도  {view.speedSlider.value:0.0}x";
+            view.speedLabel.text = $"속도  {view.speedSlider.value:0.0#}x";
             view.timingLabel.text = $"입력 타이밍 보정  {preferences.TimingOffsetMs:+0;-0;0} ms";
         }
 
@@ -250,6 +381,7 @@ namespace RhythmDojo.UI
 
         public void Dispose()
         {
+            calibration.Dispose();
             gameplayRules?.Dispose();
 
             for (int i = 0; i < hardRuleActions.Length; i++)
@@ -263,7 +395,12 @@ namespace RhythmDojo.UI
             }
 
             view.speedSlider.onValueChanged.RemoveListener(SpeedChanged);
+            view.speedSlider.minValue = speedSliderMinimum;
             view.timingOffset.onValueChanged.RemoveListener(TimingChanged);
+            if (view.judgmentPositionList)
+            {
+                view.judgmentPositionList.onValueChanged.RemoveListener(JudgmentPositionChanged);
+            }
         }
     }
 }

@@ -110,6 +110,15 @@ namespace RhythmDojo.Tests
             Assert.That(PlayKeyBindings.GetKey(0), Is.EqualTo(Key.D));
         }
 
+        [Test]
+        public void LegacyImeDummyKeyLeavesSavedBindingsUnchanged()
+        {
+            var key = (Key)System.Enum.Parse(typeof(Key), "IMESelected");
+            Assert.That(PlayKeyBindings.TrySetKey(0, key, out var message), Is.False);
+            Assert.That(message, Is.Not.Empty);
+            Assert.That(PlayKeyBindings.GetKey(0), Is.EqualTo(Key.D));
+        }
+
         private GameModeDefinition Mode(string name, params string[] bindings)
         {
             var mode = ScriptableObject.CreateInstance<GameModeDefinition>();

@@ -15,7 +15,8 @@ namespace RhythmDojo.Application
         private readonly string title,
             difficulty;
         private readonly ScrollMode scrollMode;
-        private readonly double multiplier;
+        private readonly GameplayTiming timing;
+        private double multiplier;
         private double songTime;
         private double pausedInputTime;
         private bool resumeRequested;
@@ -96,7 +97,8 @@ namespace RhythmDojo.Application
         {
             this.input = input ?? throw new ArgumentNullException(nameof(input));
             this.clock = clock ?? throw new ArgumentNullException(nameof(clock));
-            this.presenter = presenter ?? throw new ArgumentNullException(nameof(presenter));
+            this.presenter = presenter;
+            timing = new GameplayTiming(clock);
             this.tempo = tempo ?? throw new ArgumentNullException(nameof(tempo));
 
             if (input.LaneCount != mode.LaneCount)
@@ -118,12 +120,12 @@ namespace RhythmDojo.Application
                 Session = new RhythmSession(chart, mode, tempo, rules);
             }
 
-            presenter.Initialize(
+            presenter?.Initialize(
                 chart,
                 mode,
                 scroll ?? throw new ArgumentNullException(nameof(scroll))
             );
-            presenter.Render(Session, songTime);
+            presenter?.Render(Session, songTime);
             Session.Judged += OnJudged;
             Session.HoldStarted += OnHoldStarted;
             Session.Failed += OnFailed;
@@ -192,7 +194,7 @@ namespace RhythmDojo.Application
                 {
                     return;
                 }
-                Session.PressLane(lane, clock.InputTimeToSongTime(timestamp));
+                Session.PressLaneFromClock(lane, timing.InputToLogicalTime(timestamp));
             }
         }
 
@@ -219,10 +221,10 @@ namespace RhythmDojo.Application
             {
                 if (resumeInputCutoff && !((IScheduledResumeClock)clock).IsInputAfterResume(timestamp))
                 {
-                    Session.ReleaseLane(lane, pausedInputTime);
+                    Session.ReleaseLaneFromClock(lane, pausedInputTime);
                     return;
                 }
-                Session.ReleaseLane(lane, clock.InputTimeToSongTime(timestamp));
+                Session.ReleaseLaneFromClock(lane, timing.InputToLogicalTime(timestamp));
             }
         }
 
@@ -244,14 +246,14 @@ namespace RhythmDojo.Application
             resumeInputCutoff = false;
             Session.Reset();
             input.ResetHeld();
-            presenter.Reset();
+            presenter?.Reset();
             reason = ReadyReason.Initial;
             songTime = 0;
             ResetOccurred?.Invoke();
             clock.Schedule();
             Session.Start();
             songTime = clock.SongTime;
-            presenter.Render(Session, songTime);
+            presenter?.Render(Session, songTime);
         }
 
         public void Tick()
@@ -275,20 +277,11 @@ namespace RhythmDojo.Application
                 songTime = clock.SongTime;
             }
 
-            double sweepTime;
-
-            if (clock is IInputTimingClock calibrated)
-            {
-                sweepTime = songTime - Math.Max(0, calibrated.InputTimingOffsetSeconds);
-            }
-            else
-            {
-                sweepTime = songTime - 0;
-            }
+            double sweepTime = timing.SongToLogicalTime(songTime);
 
             Session.Advance(sweepTime);
             FreezeGameOver();
-            presenter.Render(Session, songTime);
+            presenter?.Render(Session, songTime);
 
             if (Session.State == SessionState.Completed && clock.Running)
             {
@@ -306,11 +299,11 @@ namespace RhythmDojo.Application
             clock.Stop();
             Session.Reset();
             input.ResetHeld();
-            presenter.Reset();
+            presenter?.Reset();
             songTime = 0;
             reason = ReadyReason.FocusLost;
             ResetOccurred?.Invoke();
-            presenter.Render(Session, songTime);
+            presenter?.Render(Session, songTime);
         }
 
         public void Pause()
@@ -344,17 +337,21 @@ namespace RhythmDojo.Application
             {
                 resumeInputCutoff = false;
                 songTime = clock.SongTime;
-                double timingOffsetSeconds = 0;
-
-                if (clock is IInputTimingClock calibrated)
-                {
-                    timingOffsetSeconds = calibrated.InputTimingOffsetSeconds;
-                }
-
-                pausedInputTime = InputTiming.Calibrate(songTime, timingOffsetSeconds);
+                pausedInputTime = timing.SongToLogicalTime(songTime);
                 pausable.Pause();
                 IsPaused = true;
             }
+        }
+
+        public void RefreshScrollMultiplier(double multiplier)
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            this.multiplier = multiplier;
+            presenter?.Render(Session, songTime);
         }
 
         public void Resume()
@@ -409,7 +406,7 @@ namespace RhythmDojo.Application
 
                 if (Session.IsHeld(lane))
                 {
-                    Session.ReleaseLane(lane, pausedInputTime);
+                    Session.ReleaseLaneFromClock(lane, pausedInputTime);
                 }
 
                 if (disposed || IsPaused)
@@ -500,7 +497,7 @@ namespace RhythmDojo.Application
             Session.HoldStarted -= OnHoldStarted;
             Session.Failed -= OnFailed;
             clock.Stop();
-            presenter.Clear();
+            presenter?.Clear();
         }
     }
 }

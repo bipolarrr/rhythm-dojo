@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using RhythmDojo.Core;
+using RhythmDojo.Application;
 using RhythmDojo.Gameplay;
 using RhythmDojo.UI;
 using UnityEditor.SceneManagement;
@@ -11,6 +12,67 @@ namespace RhythmDojo.Tests
 {
     public sealed class PlayResultReviewTests
     {
+        [UnityEngine.TestTools.UnityTest]
+        public System.Collections.IEnumerator ReinitializedResultsIgnoreLateRetryFailures()
+        {
+            var scene = EditorSceneManager.OpenScene(EditorTools.SceneBuilder.ResultsPath, OpenSceneMode.Additive);
+            try
+            {
+                var view = scene.GetRootGameObjects()
+                    .SelectMany(root => root.GetComponentsInChildren<ResultsView>()).Single();
+                var screen = view.GetComponent<ResultsScreen>();
+                var pending = new System.Threading.Tasks.TaskCompletionSource<bool>();
+                screen.Initialize(null, () => { }, token => pending.Task);
+                view.retryButton.onClick.Invoke();
+                screen.Initialize(null, () => { }, token => System.Threading.Tasks.Task.CompletedTask);
+                string status = view.retryStatus.text;
+                pending.SetException(new SongLoadException(new SongLoadFailure(
+                    SongLoadFailureKind.MissingChart, "Old request")));
+                yield return null;
+                Assert.That(view.retryStatus.text, Is.EqualTo(status));
+                Assert.That(view.retryButton.interactable, Is.True);
+            }
+            finally
+            {
+                EditorSceneManager.CloseScene(scene, true);
+            }
+        }
+
+        [TestCase(SongLoadFailureKind.MissingChart, false, "채보 파일")]
+        [TestCase(SongLoadFailureKind.InvalidChart, false, "에디터")]
+        [TestCase(SongLoadFailureKind.MissingAudio, false, "음원 파일")]
+        [TestCase(SongLoadFailureKind.AudioLoadFailed, true, "다시 시도")]
+        [TestCase(SongLoadFailureKind.Other, true, "다시 시도")]
+        public void RetryUsesSharedRecoveryPolicyAfterClosingReview(
+            SongLoadFailureKind kind, bool canRetry, string message)
+        {
+            var scene = EditorSceneManager.OpenScene(EditorTools.SceneBuilder.ResultsPath, OpenSceneMode.Additive);
+            try
+            {
+                var view = scene.GetRootGameObjects()
+                    .SelectMany(root => root.GetComponentsInChildren<ResultsView>()).Single();
+                var chart = new ChartData(new[] { NoteData.Tap(0, 1) }, 2);
+                var tempo = new TempoMap(new[] { new TempoPoint(0, 120) });
+                var session = new RhythmSession(chart, new GameModeRules(1), tempo, new PlayRules());
+                var result = new PlayResult("Retry", "", "", null, session.Snapshot, 0,
+                    chart, tempo, new[] { "D" }, session);
+                var error = new SongLoadException(new SongLoadFailure(kind, "Cause"));
+                view.GetComponent<ResultsScreen>().Initialize(result, () => { },
+                    token => System.Threading.Tasks.Task.FromException(error));
+                view.retryButton.onClick.Invoke();
+                Assert.That(view.retryStatus.text, Does.Contain(message));
+                Assert.That(view.retryButton.interactable, Is.EqualTo(canRetry));
+                Assert.That(view.backButton.interactable, Is.True);
+                view.moreButton.onClick.Invoke();
+                view.review.closeButton.onClick.Invoke();
+                Assert.That(view.retryButton.interactable, Is.EqualTo(canRetry));
+            }
+            finally
+            {
+                EditorSceneManager.CloseScene(scene, true);
+            }
+        }
+
         [Test]
         public void FixedSnapshotSurvivesResetAndKeepsAggregateMaintenanceMisses()
         {

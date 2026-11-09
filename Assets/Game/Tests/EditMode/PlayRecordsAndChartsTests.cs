@@ -47,10 +47,11 @@ namespace RhythmDojo.Tests
                 preferences.SaveCompleted(
                     "song",
                     "rules",
-                    new SessionSnapshot(SessionState.Completed, 9, 1, 0, 10, 10),
-                    10,
+                    new SessionSnapshot(SessionState.Completed, 9, 1, 0, 9, 10),
+                    9,
                     rules
                 );
+                Assert.That(preferences.FindRecord("song", "rules").fullCombo, Is.False);
                 rules.Mode = RhythmDojo.Gameplay.PlayMode.Challenge;
                 rules.SelectChallenge(2);
                 preferences.SaveCompleted(
@@ -64,6 +65,7 @@ namespace RhythmDojo.Tests
                 var loaded = new SelectionPreferences(key);
                 Assert.That(loaded.FindRecord("song", "rules").score, Is.EqualTo(950000));
                 Assert.That(loaded.FindRecord("song", "rules").gaugeClear, Is.True);
+                Assert.That(loaded.FindRecord("song", "rules").fullCombo, Is.True);
                 Assert.That(
                     loaded.FindRecord("song", "rules").challengeAchievements,
                     Is.EqualTo(2)
@@ -76,6 +78,34 @@ namespace RhythmDojo.Tests
                     1
                 );
                 Assert.That(preferences.FindRecord("song", "interrupted"), Is.Null);
+            }
+            finally
+            {
+                PlayerPrefs.DeleteKey(key);
+            }
+        }
+
+        [Test]
+        public void RuleVersionFourKeepsEarlierRecordsWithoutComparingThem()
+        {
+            string key = "RhythmDojo.Tests." + Guid.NewGuid();
+            try
+            {
+                var preferences = new SelectionPreferences(key);
+                var rules = new PlayRules();
+                string current = RecordIdentity.Rules("chart", "revision", rules);
+                Assert.That(PlayRules.CurrentVersion, Is.EqualTo(4));
+                string previous = current.Replace("|4|", "|3|");
+                preferences.SaveCompleted("song", previous,
+                    new SessionSnapshot(SessionState.Completed, 10, 0, 0, 10, 10), 10, rules);
+                preferences = new SelectionPreferences(key);
+                Assert.That(preferences.FindRecord("song", previous), Is.Not.Null);
+                Assert.That(preferences.FindRecord("song", current), Is.Null);
+                preferences.SaveCompleted("song", current,
+                    new SessionSnapshot(SessionState.Completed, 8, 2, 0, 10, 10), 10, rules);
+                preferences = new SelectionPreferences(key);
+                Assert.That(preferences.FindRecord("song", previous).score, Is.EqualTo(1000000));
+                Assert.That(preferences.FindRecord("song", current).score, Is.EqualTo(900000));
             }
             finally
             {

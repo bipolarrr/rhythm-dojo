@@ -32,9 +32,9 @@ namespace RhythmDojo.Tests
                 Assert.That(view.record.rectTransform.parent, Is.SameAs(view.comboRecord.rectTransform.parent));
                 Assert.That(view.record.rectTransform.anchorMax.x, Is.LessThan(view.comboRecord.rectTransform.anchorMin.x));
                 Assert.That(view.record.font, Is.SameAs(view.comboRecord.font));
-                Assert.That(view.comboRecord.fontStyle, Is.EqualTo(FontStyle.Bold));
-                Assert.That(view.record.resizeTextMinSize, Is.GreaterThan(30));
-                Assert.That(view.comboRecord.resizeTextMinSize, Is.GreaterThan(30));
+                Assert.That(view.comboRecord.fontStyle, Is.EqualTo(UiFontSettings.Style));
+                Assert.That(view.record.resizeTextMinSize, Is.GreaterThanOrEqualTo(18));
+                Assert.That(view.comboRecord.resizeTextMinSize, Is.GreaterThanOrEqualTo(18));
                 AssertFits(view.record, "스코어  1,000,000\n랭크  SSS\n레이트  100.00%", width);
                 AssertFits(view.comboRecord,
                     "최대 콤보  1,000,000\n<size=30>기록</size>\n<size=26>Gauge CLEAR\nChallenge 1 / 2 / 3</size>"

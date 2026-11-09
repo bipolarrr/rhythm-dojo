@@ -61,6 +61,12 @@ namespace RhythmDojo.EditorTools
             viewportRect.offsetMax = new Vector2(-10, 0);
             viewport.GetComponent<RawImage>().raycastTarget = false;
             viewport.AddComponent<GameplayViewport>().gameplayCamera = camera;
+
+            var shade = new Color(.025f, .018f, .015f, .32f);
+            AddLaneShade("Lane Shade Left", field, .25f, .40f, Color.clear, shade);
+            AddLaneShade("Lane Shade Center", field, .40f, .60f, shade, shade);
+            AddLaneShade("Lane Shade Right", field, .60f, .75f, shade, Color.clear);
+
             view.lanes.pixelTheme = true;
             view.lanes.font = headingFont;
             view.lanes.sprite = DojoGameplayAssets.Tile;
@@ -107,7 +113,7 @@ namespace RhythmDojo.EditorTools
             view.progressFill.color = new Color(.84f, .57f, .27f);
             view.progress.color = Cream;
 
-            Frame((RectTransform)view.returnButton.transform, new Color(.40f, .12f, .085f), 8);
+            Frame((RectTransform)view.returnButton.transform, new Color(.24f, .10f, .075f), 8);
             view.returnButton.GetComponentInChildren<Text>().color = Cream;
             var outline = view.returnButton.GetComponent<Outline>();
             if (outline)
@@ -117,12 +123,67 @@ namespace RhythmDojo.EditorTools
             var result = Panel("Result Scroll", view.gameOverPanel.transform, Paper, .28f, .33f, .72f, .65f);
             Frame(result, new Color(.24f, .10f, .075f), 16);
             result.SetAsFirstSibling();
+            view.gameOverFrame = result.gameObject;
             view.gameOverText.fontStyle = FontStyle.Bold;
             foreach (var text in view.GetComponentsInChildren<Text>(true))
             {
                 text.font = headingFont;
                 text.fontStyle = UiFontSettings.Style;
             }
+        }
+
+        public static void RefineReadability(GameplayHudView view)
+        {
+            var feedback = (RectTransform)view.combo.transform.parent;
+            Bounds(feedback, .76f, .57f, .965f, .88f);
+            view.combo.fontSize = 58;
+            Bounds((RectTransform)view.transform.Find("Resolved Track"), .035f, .365f, .24f, .37f);
+            Bounds(view.progress.rectTransform, .035f, .323f, .24f, .36f);
+            Bounds((RectTransform)feedback.Find("Combo Caption"), .06f, .82f, .94f, .96f);
+            Bounds(view.combo.rectTransform, .04f, .45f, .96f, .83f);
+            Bounds(view.bestCombo.rectTransform, .06f, .36f, .94f, .46f);
+            Bounds((RectTransform)feedback.Find("Feedback Divider"), .12f, .31f, .88f, .317f);
+            Bounds(view.healthLabel.rectTransform, .12f, .19f, .88f, .30f);
+            Bounds((RectTransform)feedback.Find("Health Track"), .12f, .105f, .88f, .17f);
+            view.healthLabel.fontSize = 16;
+            view.timing.color = Cream;
+
+            var menu = view.GetComponent<GameplayPauseMenu>();
+            var dialog = menu.settingsButton.transform.parent;
+            var railOpacityLabel = (dialog.Find("Rail Opacity Label") ?? view.transform.Find("Rail Opacity Label"))
+                .GetComponent<Text>();
+            railOpacityLabel.transform.SetParent(dialog, false);
+            railOpacityLabel.color = Ink;
+            Bounds(railOpacityLabel.rectTransform, .14f, .095f, .44f, .18f);
+            var railOpacity = (RectTransform)view.railOpacity.transform;
+            railOpacity.SetParent(dialog, false);
+            Bounds(railOpacity, .44f, .095f, .86f, .18f);
+            view.railOpacity.targetGraphic.color = new Color(.50f, .18f, .10f);
+            Bounds((RectTransform)menu.settingsButton.transform, .14f, .61f, .86f, .75f);
+            Bounds((RectTransform)menu.restartButton.transform, .14f, .42f, .86f, .56f);
+            Bounds((RectTransform)menu.exitButton.transform, .14f, .23f, .86f, .37f);
+            Bounds(menu.recoveryStatus.rectTransform, .08f, .034f, .92f, .092f);
+
+            SceneResources.ApplyReadableFont(view.songDetails, view.counts, view.accuracy, view.combo,
+                view.bestCombo, view.healthLabel, view.timing, view.progress, railOpacityLabel);
+        }
+
+        private static void AddLaneShade(string name, Transform field, float x0, float x1, Color left, Color right)
+        {
+            var shade = field.parent.Find(name);
+            if (!shade)
+            {
+                shade = new GameObject(name, typeof(RectTransform), typeof(SelectionGradientImage)).transform;
+                shade.SetParent(field.parent, false);
+                shade.SetSiblingIndex(field.GetSiblingIndex());
+            }
+
+            var graphic = shade.GetComponent<SelectionGradientImage>();
+            Bounds(graphic.rectTransform, x0, 0, x1, .825f);
+            graphic.useGradient = true;
+            graphic.leftColor = left;
+            graphic.rightColor = right;
+            graphic.raycastTarget = false;
         }
 
         private static void Frame(RectTransform rect, Color fill, float width)

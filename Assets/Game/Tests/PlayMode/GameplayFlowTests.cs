@@ -24,6 +24,43 @@ namespace RhythmDojo.Tests
     public sealed class GameplayFlowTests : GameplayTestContext
     {
         [UnityTest]
+        public IEnumerator ControlledFocusKeepsPlaybackRunningUntilNativeFocusOwnsTheSession()
+        {
+            var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
+            flow.PlaySelected();
+            yield return Await(() => UnityEngine.Object.FindFirstObjectByType<RhythmGameController>());
+            var game = UnityEngine.Object.FindFirstObjectByType<RhythmGameController>();
+            game.StartSession();
+            game.SendMessage("OnApplicationFocus", false);
+            Assert.That(game.Session.State, Is.EqualTo(SessionState.Playing));
+            Assert.That(game.Clock.Running, Is.True);
+
+            var previousFocusProvider = RhythmDojo.Input.ApplicationFocusState.Provider;
+            RhythmDojo.Input.ApplicationFocusState.Provider = null;
+            double pausedTime;
+            try
+            {
+                game.SendMessage("OnApplicationFocus", false);
+                Assert.That(game.Session.State, Is.EqualTo(SessionState.Playing));
+                Assert.That(game.IsPaused, Is.True);
+                Assert.That(game.Clock.Running, Is.False);
+                pausedTime = game.Clock.SongTime;
+            }
+            finally
+            {
+                RhythmDojo.Input.ApplicationFocusState.Provider = previousFocusProvider;
+            }
+
+            var menu = UnityEngine.Object.FindFirstObjectByType<GameplayPauseMenu>();
+            Assert.That(menu.panel.activeSelf, Is.True);
+            yield return Press(Key.Escape);
+            Assert.That(menu.CountingDown, Is.True);
+            Assert.That(game.Clock.SongTime, Is.EqualTo(pausedTime));
+            yield return Await(() => !game.IsPaused && !menu.countdown.activeSelf);
+            Assert.That(game.Clock.SongTime, Is.GreaterThanOrEqualTo(pausedTime));
+        }
+
+        [UnityTest]
         public IEnumerator DirectGameplaySceneUsesCopiedPlayRules()
         {
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
@@ -173,13 +210,22 @@ namespace RhythmDojo.Tests
             InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.F));
             yield return null;
             Assert.That(game.Session.IsHeld(1), Is.False);
-            game.SendMessage("OnApplicationFocus", false);
-            Assert.That(game.Session.State, Is.EqualTo(SessionState.Ready));
-            Assert.That(game.Clock.Running, Is.False);
+            var previousFocusProvider = RhythmDojo.Input.ApplicationFocusState.Provider;
+            RhythmDojo.Input.ApplicationFocusState.Provider = null;
+            try
+            {
+                game.SendMessage("OnApplicationFocus", false);
+                Assert.That(game.Session.State, Is.EqualTo(SessionState.Playing));
+                Assert.That(game.IsPaused, Is.True);
+                Assert.That(game.Clock.Running, Is.False);
+            }
+            finally
+            {
+                RhythmDojo.Input.ApplicationFocusState.Provider = previousFocusProvider;
+            }
             InputSystem.QueueStateEvent(keyboard, new KeyboardState());
             yield return null;
-            InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.Escape));
-            yield return null;
+            yield return Click(UnityEngine.Object.FindFirstObjectByType<GameplayPauseMenu>().exitButton);
             yield return Await(() =>
                 UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>()
             );

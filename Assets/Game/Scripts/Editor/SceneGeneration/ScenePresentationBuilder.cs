@@ -140,6 +140,10 @@ namespace RhythmDojo.EditorTools
                 )
             );
 
+            // Preparation loads this scene additively behind the title. Register input
+            // only after direct composition or prepared-scene activation takes ownership.
+            UnityEngine.Object.FindFirstObjectByType<UnityEngine.EventSystems.EventSystem>().enabled = false;
+
             return scene;
         }
 
