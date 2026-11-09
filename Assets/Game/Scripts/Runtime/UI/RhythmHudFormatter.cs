@@ -38,7 +38,7 @@ namespace RhythmDojo.UI
 
             return $"RHYTHM DOJO / {s.State}\n{snapshot.SongTitle}\n"
                 + $"Judgment: {snapshot.DifficultyName} | Scroll: {mode} {snapshot.ScrollMultiplier:0.##}x\n\n"
-                + $"COMBO {s.Combo}    {prompt}\nPerfect {s.Perfect} / Hmm... {s.Good} / Nope. {s.Miss}\n"
+                + $"COMBO {s.Combo}    {prompt}\nPerfect {s.Perfect} / Good {s.Good} / Miss {s.Miss}\n"
                 + $"Resolved {s.Resolved}/{s.TotalNotes}  Song {snapshot.SongTime:F2}s  BPM {snapshot.CurrentBpm:0.##}\n\n"
                 + "SPACE start / restart | ESC song list\nHold the long notes; release at the tail.";
         }

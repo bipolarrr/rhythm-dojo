@@ -97,15 +97,17 @@ namespace RhythmDojo.UI
                 var frame = GetComponentInChildren<PixelDojoFrameGraphic>();
                 if (selected)
                 {
-                    frame.color = new Color(.98f, .85f, .62f);
-                    frame.borderColor = new Color(.76f, .25f, .11f);
-                    frame.trimColor = new Color(1, .72f, .29f);
+                    frame.color = new Color(1f, .88f, .62f);
+                    frame.borderColor = new Color(.72f, .30f, .12f);
+                    frame.trimColor = new Color(1f, .88f, .52f);
+                    title.color = new Color(1f, .94f, .77f);
                 }
                 else
                 {
-                    frame.color = new Color(.86f, .71f, .50f);
-                    frame.borderColor = new Color(.29f, .13f, .09f);
-                    frame.trimColor = new Color(.72f, .46f, .24f);
+                    frame.color = new Color(.74f, .65f, .53f);
+                    frame.borderColor = new Color(.33f, .24f, .18f);
+                    frame.trimColor = new Color(.59f, .46f, .34f);
+                    title.color = new Color(.88f, .80f, .68f);
                 }
                 frame.SetVerticesDirty();
                 return;

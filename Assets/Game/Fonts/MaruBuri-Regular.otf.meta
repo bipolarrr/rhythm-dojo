@@ -1,0 +1,23 @@
+fileFormatVersion: 2
+guid: 6eb1c1c79feb4a59a193b54ef0a3c318
+TrueTypeFontImporter:
+  externalObjects: {}
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontNames:
+  - MaruBuri Regular
+  - Mona12 Text KR
+  fallbackFontReferences:
+  - {fileID: 12800000, guid: 657698f3fff2c4b4cb9a297aad88bd3b, type: 3}
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  useLegacyBoundsCalculation: 0
+  shouldRoundAdvanceValue: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

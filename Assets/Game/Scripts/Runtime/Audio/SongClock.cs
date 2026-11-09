@@ -19,7 +19,6 @@ namespace RhythmDojo.Audio
         private double dspRealtimeOffset;
         private double clockSampleRealtime;
         private int clockSampleFrame = -1;
-        private bool pausedAudioReset;
         private int pausedSamplePosition;
         private Func<bool> playbackReady;
         private double resumeDspTime;
@@ -66,7 +65,6 @@ namespace RhythmDojo.Audio
 
             CancelResume();
             source.clip = clip;
-            pausedAudioReset = true;
         }
 
         public double ScheduledStartDspTime { get; private set; }
@@ -202,7 +200,6 @@ namespace RhythmDojo.Audio
 
             pausedSongTime = SongTime;
             paused = true;
-            pausedAudioReset = false;
 
             if (source)
             {
@@ -285,7 +282,6 @@ namespace RhythmDojo.Audio
             clockSampleFrame = Time.frameCount;
             dspRealtimeOffset = dsp - clockSampleRealtime;
             ResumePending = false;
-            pausedAudioReset = false;
             paused = false;
             Running = true;
             return true;
@@ -364,7 +360,6 @@ namespace RhythmDojo.Audio
             if (paused)
             {
                 CancelResume();
-                pausedAudioReset = true;
             }
         }
     }

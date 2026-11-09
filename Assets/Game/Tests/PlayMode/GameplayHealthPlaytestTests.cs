@@ -220,7 +220,7 @@ namespace RhythmDojo.Tests
             Assert.That(view.gameOverPanel.activeSelf, Is.False);
         }
 
-        private IEnumerator CheckResult(SessionState state, string capture)
+        private IEnumerator CheckResult(SessionState state, string capture, string expectedRank = null)
         {
             yield return Await(() => UnityEngine.Object.FindFirstObjectByType<ResultsScreen>(), "Expected result: " + state);
             yield return null;
@@ -231,7 +231,7 @@ namespace RhythmDojo.Tests
 
             if (state == SessionState.Completed && !session.Failure.Failed)
             {
-                Assert.That(resultView.outcome.text, Is.EqualTo("CLEAR"));
+                Assert.That(resultView.outcome.text, Is.EqualTo(expectedRank));
             }
             else
             {
@@ -269,7 +269,7 @@ namespace RhythmDojo.Tests
             yield return CheckHealth(80, "before-recovery-combo");
             yield return Await(() => session.Good == 1);
             yield return CheckHealth(80, "good-no-recovery");
-            yield return CheckResult(SessionState.Completed, "normal-clear");
+            yield return CheckResult(SessionState.Completed, "normal-clear", "A");
             Assert.That(session.Perfect, Is.EqualTo(session.Snapshot.TotalNotes - 3));
             Assert.That(session.Good, Is.EqualTo(1));
             Assert.That(session.Miss, Is.EqualTo(2));
@@ -410,7 +410,7 @@ namespace RhythmDojo.Tests
             events.Sort((a, b) => a.time.CompareTo(b.time));
             yield return Press(Key.Space);
             yield return Await(() => session.Miss > 0);
-            yield return CheckResult(SessionState.Completed, "hold-regrab");
+            yield return CheckResult(SessionState.Completed, "hold-regrab", "B");
             Assert.That(session.Miss, Is.GreaterThan(0));
             Assert.That(session.Resolved, Is.EqualTo(session.Snapshot.TotalNotes));
             Assert.That(session.GetState(index), Is.EqualTo(NoteState.Completed));

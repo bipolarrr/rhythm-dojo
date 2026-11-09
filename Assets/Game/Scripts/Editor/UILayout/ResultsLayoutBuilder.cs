@@ -38,12 +38,14 @@ namespace RhythmDojo.EditorTools
             Panel("Scenery Shade", surface, new Color(.08f, .035f, .02f, .16f), 0, 0, 1, 1);
             var header = Panel("Result Header", surface, Color.clear, .045f, .86f, .955f, .965f);
             TexturedFrame(header, "SettingsControl", 12, Color.white);
-            var heading = Label("Heading", header, "수련 결과", .05f, .08f, .95f, .92f, 52);
+            var heading = Label("Heading", header, "수련 결과", .05f, .08f, .95f, .92f, 64);
             heading.alignment = TextAnchor.MiddleCenter;
 
-            view.backButton = Button("Back", surface, "←  곡 선택", .045f, .03f, .225f, .115f);
+            view.backButton = Button("Back", surface, "곡 선택", .045f, .03f, .225f, .115f);
 
-            var summary = Panel("Song Summary", surface, PanelColor, .045f, .36f, .69f, .84f);
+            view.backButton.GetComponentInChildren<Text>().fontSize = 56;
+
+            var summary = Panel("Song Summary", surface, PanelColor, .045f, .155f, .69f, .65f);
             Border(summary);
             var album = Panel("Album", summary, Color.clear, .04f, .16f, .36f, .935f);
             TexturedFrame(album, "SettingsControl", 10, new Color(.60f, .43f, .27f));
@@ -57,43 +59,108 @@ namespace RhythmDojo.EditorTools
             view.coverPlaceholder = Label("Album Placeholder", album, "앨범", .08f, .1f, .92f, .9f, 48);
             view.coverPlaceholder.alignment = TextAnchor.MiddleCenter;
 
-            view.title = Label("Song Title", summary, "노래 제목", .40f, .77f, .95f, .945f, 42);
-            view.artist = Label("Artist", summary, "작곡가", .40f, .65f, .95f, .755f, 30);
-            view.difficulty = Label("Difficulty", summary, "", .40f, .535f, .95f, .64f, 26);
+            view.title = Label("Song Title", summary, "노래 제목", .40f, .77f, .95f, .945f, 68);
+            view.artist = Label("Artist", summary, "작곡가", .40f, .65f, .95f, .755f, 46);
+            view.difficulty = Label("Difficulty", summary, "", .40f, .535f, .95f, .64f, 44);
             view.perfect = Stat(summary, "Perfect", .40f);
             view.good = Stat(summary, "Good", .27f);
             view.miss = Stat(summary, "Miss", .14f);
-            view.accuracy = Label("Accuracy", summary, "정확도  —", .04f, .025f, .49f, .115f, 27);
-            view.maxCombo = Label("Max Combo", summary, "최대 콤보  —", .53f, .025f, .96f, .115f, 27);
+            view.accuracy = Label("Accuracy", summary, "정확도  —", .04f, .025f, .49f, .115f, 44);
+            view.maxCombo = Label("Max Combo", summary, "최대 콤보  —", .53f, .025f, .96f, .115f, 44);
             Panel("Record Divider", summary, new Color(.46f, .25f, .12f, .35f), .40f, .525f, .95f, .528f);
 
-            // Intentionally empty: feedback content and the character will be added later.
-            view.feedback = Panel("Feedback", surface, PanelColor, .045f, .15f, .955f, .33f);
+            view.feedback = Panel("Feedback", surface, PanelColor, .045f, .675f, .955f, .835f);
             Border(view.feedback);
-            view.moreButton = Button("More", surface, "더보기  ▶", .73f, .03f, .955f, .115f);
-            view.moreButton.GetComponentInChildren<PixelDojoFrameGraphic>().color = new Color(.57f, .14f, .10f);
-            view.moreButton.GetComponentInChildren<Text>().color = new Color(1f, .92f, .76f);
-            var result = Panel("Result Plaque", surface, PanelColor, .715f, .36f, .955f, .84f);
+            BuildScorePanel(view);
+            view.moreButton = Button("More", surface, "더보기", .73f, .03f, .955f, .115f);
+            view.moreButton.GetComponentInChildren<Text>().fontSize = 56;
+            var result = Panel("Result Plaque", surface, PanelColor, .715f, .155f, .955f, .65f);
             Border(result);
-            var resultCaption = Label("Result Caption", result, "수련 판정", .08f, .85f, .92f, .965f, 30);
+            var resultCaption = Label("Result Caption", result, "수련 판정", .08f, .85f, .92f, .965f, 46);
             resultCaption.alignment = TextAnchor.MiddleCenter;
             var seal = Panel("Wooden Result Seal", result, Color.white, .10f, .18f, .90f, .85f);
             seal.GetComponent<Image>().sprite = DojoEntranceAssets.Load("RoundPlaque");
             seal.GetComponent<Image>().preserveAspect = true;
-            view.outcome = Label("Outcome", result, "플레이 결과", .12f, .32f, .88f, .67f, 64);
+            view.outcome = Label("Outcome", result, "플레이 결과", .18f, .255f, .82f, .775f, 220);
             view.outcome.alignment = TextAnchor.MiddleCenter;
+            view.outcome.alignByGeometry = true;
             view.outcome.color = new Color(1f, .91f, .69f);
             var outcomeShadow = view.outcome.gameObject.AddComponent<Shadow>();
             outcomeShadow.effectColor = new Color(.12f, .045f, .02f, .95f);
             outcomeShadow.effectDistance = new Vector2(2, -2);
-            var resultNote = Label("Result Note", result, "이번 수련의 결과", .08f, .04f, .92f, .15f, 23);
+            var resultNote = Label("Result Note", result, "이번 수련의 결과", .08f, .04f, .92f, .15f, 36);
             resultNote.alignment = TextAnchor.MiddleCenter;
-            Label("Aggregate Help", summary, "전체 판정 집계에는 유지 판정 포함", .04f, .12f, .36f, .16f, 17);
+            view.progressNote = resultNote;
+            Label("Aggregate Help", summary, "전체 판정 집계에는 유지 판정 포함", .04f, .115f, .36f, .16f, 24);
             view.review = BuildReview(surface);
             UiFontSettings.ApplyTo(view.transform);
+            RefineScoreHierarchy(view);
+            AddFooterArrow(view.backButton, "←", 46, -82, -2);
+            AddFooterArrow(view.moreButton, "▶", -44, 71);
             view.Validate();
 
             return view;
+        }
+
+        private static void AddFooterArrow(Button button, string arrow, float labelX, float arrowX, float arrowY = 0)
+        {
+            var label = button.GetComponentInChildren<Text>();
+            var icon = UiElements.Label("Arrow", button.transform, arrow, Vector2.zero, Vector2.zero, label.fontSize);
+            icon.color = label.color;
+            icon.alignment = TextAnchor.MiddleCenter;
+            label.fontSize = 42;
+            CenterFooterText(label, labelX, 168);
+            CenterFooterText(icon, arrowX, 72, arrowY);
+        }
+
+        private static void CenterFooterText(Text text, float x, float width, float y = 0)
+        {
+            text.alignByGeometry = true;
+            var rect = text.rectTransform;
+            rect.anchorMin = new Vector2(.5f, 0);
+            rect.anchorMax = new Vector2(.5f, 1);
+            rect.pivot = new Vector2(.5f, .5f);
+            rect.anchoredPosition = new Vector2(x, y);
+            rect.sizeDelta = new Vector2(width, 0);
+        }
+
+        public static void BuildScorePanel(ResultsView view)
+        {
+            view.scoreSummary = Label("Score Summary", view.feedback, "", .035f, .12f, .71f, .88f, 42);
+            view.retryButton = Button("Retry", view.feedback, "다시 하기", .73f, .26f, .97f, .76f);
+            view.retryButton.GetComponentInChildren<Text>().fontSize = 40;
+            view.retryStatus = Label("Retry Status", view.feedback, "", .68f, .03f, .97f, .25f, 25);
+            view.retryStatus.alignment = TextAnchor.MiddleCenter;
+        }
+
+        public static void RefineScoreHierarchy(ResultsView view)
+        {
+            if (!view.scoreValue)
+            {
+                Label("Score Caption", view.feedback, "이번 점수", .035f, .70f, .36f, .91f, 31);
+                view.scoreValue = Label("Score Value", view.feedback, "—", .035f, .12f, .38f, .70f, 86);
+                var badge = Panel("New Record Badge", view.feedback, new Color(.26f, .37f, .22f),
+                    .39f, .64f, .51f, .87f);
+                var badgeText = Label("New Record Text", badge, "신기록", 0, 0, 1, 1, 28);
+                badgeText.color = new Color(1f, .95f, .76f);
+                badgeText.alignment = TextAnchor.MiddleCenter;
+                view.newRecordBadge = badge.gameObject;
+                view.newRecordBadge.SetActive(false);
+            }
+
+            Place(view.scoreSummary.rectTransform, .39f, .32f, .68f, .65f);
+            view.scoreSummary.resizeTextMinSize = 18;
+            view.scoreSummary.resizeTextMaxSize = 31;
+            var retryFrame = view.retryButton.GetComponentInChildren<PixelDojoFrameGraphic>();
+            retryFrame.color = new Color(.57f, .14f, .10f);
+            var retryLabel = view.retryButton.GetComponentInChildren<Text>();
+            retryLabel.fontSize = 44;
+            retryLabel.color = new Color(1f, .92f, .76f);
+            view.EnsureScoreActions();
+            view.moreButton.GetComponentInChildren<PixelDojoFrameGraphic>().color = Color.white;
+            view.moreButton.GetComponentInChildren<Text>().color = Ink;
+            SceneResources.ApplyReadableFont(view.scoreValue, view.scoreSummary, view.perfect, view.good,
+                view.miss, view.accuracy, view.maxCombo);
         }
 
         private static ResultsReviewView BuildReview(Transform parent)
@@ -179,7 +246,7 @@ namespace RhythmDojo.EditorTools
 
         private static Text Stat(Transform parent, string name, float y)
         {
-            var label = Label(name + " Label", parent, name, .40f, y, .72f, y + .12f, 31);
+            var label = Label(name + " Label", parent, name, .40f, y, .72f, y + .12f, 49);
             if (name == "Perfect")
             {
                 label.color = new Color(.13f, .37f, .28f);
@@ -193,7 +260,7 @@ namespace RhythmDojo.EditorTools
                 label.color = new Color(.57f, .16f, .12f);
             }
 
-            var value = Label(name + " Count", parent, "—", .74f, y, .95f, y + .12f, 38);
+            var value = Label(name + " Count", parent, "—", .74f, y, .95f, y + .12f, 54);
             value.alignment = TextAnchor.MiddleRight;
 
             return value;

@@ -8,7 +8,7 @@ namespace RhythmDojo.EditorTools
 {
     public static class MainMenuLayoutBuilder
     {
-        public const string FontPath = "Assets/Game/Fonts/Dokdo-Regular.ttf";
+        public const string FontPath = "Assets/Game/Fonts/MaruBuri-SemiBold.otf";
 
         public static MainMenuView Build()
         {
@@ -184,18 +184,16 @@ namespace RhythmDojo.EditorTools
 
         public static void ApplyMenuTextStyle(MainMenuView view)
         {
-            var font = AssetDatabase.LoadAssetAtPath<Font>(SongSelectionLayoutBuilder.BrushFontPath);
             var material = AssetDatabase.LoadAssetAtPath<Material>("Assets/Game/Resources/UI/SelectionWoodText.mat");
-            if (!font || !material)
+            if (!material)
             {
-                throw new InvalidOperationException("Selection brush font or wood text material missing.");
+                throw new InvalidOperationException("Selection wood text material missing.");
             }
 
             foreach (var button in new[] { view.start, view.settings, view.editor, view.quit })
             {
                 var text = button.GetComponentInChildren<Text>(true);
-                text.font = font;
-                text.fontStyle = FontStyle.Bold;
+                UiFontSettings.Apply(text);
                 text.color = new Color(.84f, .66f, .45f);
                 text.material = material;
                 var shadow = text.GetComponent<Shadow>();

@@ -47,10 +47,11 @@ namespace RhythmDojo.Tests
                 preferences.SaveCompleted(
                     "song",
                     "rules",
-                    new SessionSnapshot(SessionState.Completed, 9, 1, 0, 10, 10),
-                    10,
+                    new SessionSnapshot(SessionState.Completed, 9, 1, 0, 9, 10),
+                    9,
                     rules
                 );
+                Assert.That(preferences.FindRecord("song", "rules").fullCombo, Is.False);
                 rules.Mode = RhythmDojo.Gameplay.PlayMode.Challenge;
                 rules.SelectChallenge(2);
                 preferences.SaveCompleted(
@@ -64,6 +65,7 @@ namespace RhythmDojo.Tests
                 var loaded = new SelectionPreferences(key);
                 Assert.That(loaded.FindRecord("song", "rules").score, Is.EqualTo(950000));
                 Assert.That(loaded.FindRecord("song", "rules").gaugeClear, Is.True);
+                Assert.That(loaded.FindRecord("song", "rules").fullCombo, Is.True);
                 Assert.That(
                     loaded.FindRecord("song", "rules").challengeAchievements,
                     Is.EqualTo(2)

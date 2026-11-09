@@ -3,6 +3,13 @@ using UnityEngine;
 
 namespace RhythmDojo.Services
 {
+    public enum JudgmentPosition
+    {
+        Middle,
+        Upper,
+        Lower,
+    }
+
     [Serializable]
     public sealed class PresentationPreferences
     {
@@ -14,6 +21,8 @@ namespace RhythmDojo.Services
             resolution,
             frameRate = 1,
             quality = 1;
+        public bool focusHud;
+        public JudgmentPosition judgmentPosition;
         public static readonly int[] FrameRates = { 30, 60, 120, 144, 240, -1 };
 
         public static event Action Changed;
@@ -49,6 +58,10 @@ namespace RhythmDojo.Services
             Current.resolution = Mathf.Clamp(Current.resolution, 0, 1);
             Current.frameRate = Mathf.Clamp(Current.frameRate, 0, FrameRates.Length - 1);
             Current.quality = Mathf.Clamp(Current.quality, 0, 2);
+            if (!Enum.IsDefined(typeof(JudgmentPosition), Current.judgmentPosition))
+            {
+                Current.judgmentPosition = JudgmentPosition.Middle;
+            }
 
             return Current;
         }

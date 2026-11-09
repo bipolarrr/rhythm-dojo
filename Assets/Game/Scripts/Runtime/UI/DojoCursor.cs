@@ -40,6 +40,7 @@ namespace RhythmDojo.UI
             var cursorObject = new GameObject("Dojo Cursor");
             DontDestroyOnLoad(cursorObject);
             instance = cursorObject.AddComponent<DojoCursor>();
+            cursorObject.AddComponent<DojoButtonFocus>();
         }
 
         private void Awake()
@@ -129,7 +130,7 @@ namespace RhythmDojo.UI
                 return;
             }
 
-            if (Mouse.current == null || !UnityEngine.Application.isFocused)
+            if (Mouse.current == null || !RhythmDojo.Input.ApplicationFocusState.IsFocused)
             {
                 return;
             }
@@ -286,6 +287,11 @@ namespace RhythmDojo.UI
 
         private void OnApplicationFocus(bool focused)
         {
+            if (!RhythmDojo.Input.ApplicationFocusState.UsesPlatformEvents)
+            {
+                return;
+            }
+
             currentTexture = null;
             punchElapsed = PunchDuration;
             impactPending = false;

@@ -46,6 +46,8 @@ namespace RhythmDojo.Tests
             previousVsync;
         private AnisotropicFiltering previousFiltering;
 
+        private NativeInputScope nativeInput;
+
         [UnitySetUp]
         public IEnumerator SetUp()
         {
@@ -92,6 +94,7 @@ namespace RhythmDojo.Tests
                 .EditorInputBehaviorInPlayMode
                 .AllDeviceInputAlwaysGoesToGameView;
             original.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
+            nativeInput = new NativeInputScope();
             keyboard = InputSystem.AddDevice<Keyboard>();
             keyboard.MakeCurrent();
             mouse = InputSystem.AddDevice<Mouse>();
@@ -201,6 +204,8 @@ namespace RhythmDojo.Tests
                 InputSystem.RemoveDevice(mouse);
             }
 
+            nativeInput?.Dispose();
+            nativeInput = null;
             original.editorInputBehaviorInPlayMode = priorEditorBehavior;
             original.backgroundBehavior = priorBackgroundBehavior;
 

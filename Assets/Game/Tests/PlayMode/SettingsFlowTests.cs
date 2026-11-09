@@ -24,6 +24,143 @@ namespace RhythmDojo.Tests
     public sealed class SettingsFlowTests : GameplayTestContext
     {
         [UnityTest]
+        public IEnumerator SpeedTestUsesOneLaneAndReportsCalibratedJudgment()
+        {
+            var flow = Object.FindFirstObjectByType<AppFlowController>();
+            yield return Click(Object.FindFirstObjectByType<SongSelectionView>().settingsButton);
+            yield return Await(() => Object.FindFirstObjectByType<SettingsView>());
+            var view = Object.FindFirstObjectByType<SettingsView>();
+            yield return Click(view.gameplayTab);
+            view.speedSlider.value = 2;
+            view.timingOffset.value = 10;
+            var entry = view.gameplayPanel.transform.Find("Speed Test").GetComponent<Button>();
+            AssertSettingsButtonStyle(entry, view.back);
+            yield return Click(entry);
+            var panel = view.transform.Find("Timing Calibration Overlay/Timing Calibration Panel");
+            var rail = panel.Find("Speed Test Lane");
+            var status = rail.Find("Timing Calibration Status").GetComponent<Text>();
+            var judgment = rail.Find("Speed Test Feedback/Judgment Grade").GetComponent<Text>();
+            var timing = rail.Find("Speed Test Feedback/Judgment Timing").GetComponent<Text>();
+            var start = panel.Find("Start Calibration").GetComponent<Button>();
+
+            Assert.That(rail.gameObject.activeInHierarchy, Is.True);
+            Assert.That(panel.Find("Timing Calibration Heading").GetComponent<Text>().text, Is.EqualTo("2.0x"));
+            Assert.That(((RectTransform)panel).rect.height, Is.GreaterThan(((RectTransform)panel).rect.width));
+            Canvas.ForceUpdateCanvases();
+            var perspective = rail.Find("Perspective Rail").GetComponent<SpeedTestLaneGraphic>();
+            var vertices = perspective.canvasRenderer.GetMesh().vertices;
+            Assert.That(vertices.Length, Is.EqualTo(8));
+            Assert.That(vertices[3].x - vertices[0].x, Is.GreaterThan(vertices[2].x - vertices[1].x));
+            Assert.That(rail.Find("Speed Test Hit Line").GetComponent<Image>().color.b, Is.GreaterThan(.8f));
+            Assert.That(panel.Find("Apply Calibration").gameObject.activeSelf, Is.False);
+
+            start.onClick.Invoke();
+            double hitAt = Time.realtimeSinceStartupAsDouble + 1.75 + .030;
+            yield return Await(() => rail.Find("Beat Note 0").gameObject.activeSelf);
+            float before = ((RectTransform)rail.Find("Beat Note 0")).anchoredPosition.y;
+            yield return new WaitForSecondsRealtime(.1f);
+            Assert.That(((RectTransform)rail.Find("Beat Note 0")).anchoredPosition.y, Is.LessThan(before));
+
+
+            while (Time.realtimeSinceStartupAsDouble < hitAt)
+            {
+                yield return null;
+            }
+
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.Space), hitAt);
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState(), hitAt + .001);
+            yield return Await(() => judgment.text == "Perfect");
+            Assert.That(timing.text, Does.Match(@"\+\d+ ms"));
+
+
+            double lateHitAt = hitAt + .5 + .130;
+            while (Time.realtimeSinceStartupAsDouble < lateHitAt)
+            {
+                yield return null;
+            }
+
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.Space), lateHitAt);
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState(), lateHitAt + .001);
+            yield return Await(() => judgment.text == "Nope." && timing.text.Contains("ms"));
+
+            yield return Click(start);
+            var note = (RectTransform)rail.Find("Beat Note 0");
+            Vector2 frozen = note.anchoredPosition;
+            Assert.That(status.gameObject.activeInHierarchy, Is.True);
+            Assert.That(status.text, Is.EqualTo("일시정지"));
+            Assert.That(start.GetComponentInChildren<Text>().text, Is.EqualTo("계속하기"));
+            Assert.That(panel.parent.GetComponent<AudioSource>().isPlaying, Is.False);
+            yield return new WaitForSecondsRealtime(.25f);
+            Assert.That(note.anchoredPosition, Is.EqualTo(frozen));
+            yield return Press(Key.P);
+            Assert.That(status.gameObject.activeSelf, Is.False);
+            Assert.That(start.GetComponentInChildren<Text>().text, Is.EqualTo("일시정지"));
+            yield return Await(() => note.anchoredPosition != frozen);
+            yield return Press(Key.Escape);
+            Assert.That(panel.gameObject.activeInHierarchy, Is.False);
+            Assert.That(flow.Preferences.TimingOffsetMs, Is.EqualTo(10));
+        }
+
+        [UnityTest]
+        public IEnumerator CalibrationMeasuresSpaceTapsAndWaitsForApply()
+        {
+            var flow = Object.FindFirstObjectByType<AppFlowController>();
+            yield return Click(Object.FindFirstObjectByType<SongSelectionView>().settingsButton);
+            yield return Await(() => Object.FindFirstObjectByType<SettingsView>());
+            var view = Object.FindFirstObjectByType<SettingsView>();
+            yield return Click(view.gameplayTab);
+            var entry = view.gameplayPanel.transform.Find("Timing Calibration").GetComponent<Button>();
+            AssertSettingsButtonStyle(entry, view.back);
+            yield return Click(entry);
+            var panel = view.transform.Find("Timing Calibration Overlay/Timing Calibration Panel");
+            var start = panel.Find("Start Calibration").GetComponent<Button>();
+            var apply = panel.Find("Apply Calibration").GetComponent<Button>();
+            var close = panel.Find("Close Calibration").GetComponent<Button>();
+            AssertSettingsButtonStyle(start, view.apply);
+            AssertSettingsButtonStyle(apply, view.apply);
+            AssertSettingsButtonStyle(close, view.back);
+            Assert.That(apply.interactable, Is.False);
+            start.onClick.Invoke();
+            double firstBeat = Time.realtimeSinceStartupAsDouble + .25;
+            for (int beat = 4; beat < 16; beat++)
+            {
+                double timestamp = firstBeat + beat * .5 + .035;
+                while (Time.realtimeSinceStartupAsDouble < timestamp)
+                {
+                    yield return null;
+                }
+
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.Space), timestamp);
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState(), timestamp + .001);
+            }
+
+            yield return Await(() => apply.interactable);
+            Assert.That(flow.Preferences.TimingOffsetMs, Is.Zero);
+            yield return Click(apply);
+            Assert.That(view.timingOffset.value, Is.InRange(32, 40));
+            Assert.That(flow.Preferences.TimingOffsetMs, Is.EqualTo((int)view.timingOffset.value));
+            Assert.That(panel.gameObject.activeInHierarchy, Is.False);
+        }
+
+        private static void AssertSettingsButtonStyle(Button button, Button style)
+        {
+            var frame = button.targetGraphic as PixelDojoFrameGraphic;
+            var sourceFrame = (PixelDojoFrameGraphic)style.targetGraphic;
+            Assert.That(frame, Is.Not.Null);
+            Assert.That(frame.artwork, Is.SameAs(sourceFrame.artwork));
+            Assert.That(frame.color, Is.EqualTo(sourceFrame.color));
+            Assert.That(frame.borderWidth, Is.EqualTo(sourceFrame.borderWidth));
+            Assert.That(button.colors, Is.EqualTo(style.colors));
+
+            var label = button.GetComponentInChildren<Text>();
+            var sourceLabel = style.GetComponentInChildren<Text>();
+            Assert.That(label.font, Is.SameAs(sourceLabel.font));
+            Assert.That(label.material, Is.SameAs(sourceLabel.material));
+            Assert.That(label.fontSize, Is.EqualTo(sourceLabel.fontSize));
+            Assert.That(label.color, Is.EqualTo(sourceLabel.color));
+        }
+
+        [UnityTest]
         public IEnumerator SettingsPopupOpensImmediatelyAndReusesInstanceWithoutLoadingScene()
         {
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
@@ -82,6 +219,15 @@ namespace RhythmDojo.Tests
             Assert.That(view.timingOffset.gameObject.activeInHierarchy, Is.True);
             Assert.That(view.timingOffset.minValue, Is.EqualTo(-200));
             Assert.That(view.timingOffset.maxValue, Is.EqualTo(200));
+            Assert.That(view.judgmentPositionList.gameObject.activeInHierarchy, Is.True);
+            Assert.That(view.judgmentPositionList.options.Select(option => option.text),
+                Is.EqualTo(new[] { "상단", "중앙", "하단" }));
+            Assert.That(view.judgmentPositionList.value, Is.EqualTo(1));
+            view.judgmentPositionList.value = 2;
+            var presentation = JsonUtility.FromJson<RhythmDojo.Services.PresentationPreferences>(
+                PlayerPrefs.GetString(RhythmDojo.Services.PresentationPreferences.StorageKey)
+            );
+            Assert.That(presentation.judgmentPosition, Is.EqualTo(RhythmDojo.Services.JudgmentPosition.Lower));
 
             foreach (int value in new[] { -200, 0, 200 })
             {
@@ -414,6 +560,8 @@ namespace RhythmDojo.Tests
             float beforeShadowDistance = QualitySettings.shadowDistance,
                 beforeLodBias = QualitySettings.lodBias;
             var beforeFiltering = QualitySettings.anisotropicFiltering;
+            var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
+            var beforeAudio = AudioSettings.GetConfiguration();
             yield return Click(view.apply);
 
             var presentation = RhythmDojo.Services.PresentationPreferences.Load();
@@ -423,8 +571,9 @@ namespace RhythmDojo.Tests
             Assert.That(QualitySettings.shadowDistance, Is.EqualTo(beforeShadowDistance));
             Assert.That(QualitySettings.lodBias, Is.EqualTo(beforeLodBias));
             Assert.That(QualitySettings.anisotropicFiltering, Is.EqualTo(beforeFiltering));
-            yield return Await(() => !UnityEngine.Object.FindFirstObjectByType<AppFlowController>()
-                .Audio.IsBufferValidationPending, "Audio verification did not finish before closing settings.", timeoutSeconds: RhythmDojo.Services.AudioSettingsService.ClockValidationTimeoutSeconds + 2);
+            Assert.That(flow.Audio.IsBufferValidationPending, Is.False);
+            Assert.That(flow.Audio.HasBufferValidationResult, Is.False);
+            Assert.That(AudioSettings.GetConfiguration().dspBufferSize, Is.EqualTo(beforeAudio.dspBufferSize));
             yield return Click(view.back);
             yield return Await(() => !UnityEngine.Object.FindFirstObjectByType<SettingsScreen>());
             Assert.That(selection.enabled, Is.True);

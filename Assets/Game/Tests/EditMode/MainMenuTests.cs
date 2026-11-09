@@ -110,7 +110,7 @@ namespace RhythmDojo.Tests
                     Assert.That(((RectTransform)button.transform).sizeDelta, Is.EqualTo(new Vector2(80, 290)));
                     Assert.That(button.GetComponent<UnityEngine.UI.Image>().sprite.name, Is.EqualTo("VerticalMenuBoard"));
                     Assert.That(button.GetComponentInChildren<UnityEngine.UI.Text>().font,
-                        Is.SameAs(AssetDatabase.LoadAssetAtPath<Font>(SongSelectionLayoutBuilder.BrushFontPath)));
+                        Is.SameAs(Resources.Load<UiFontSettings>("UI/UiFontSettings").bold));
                     Assert.That(button.GetComponent<DojoBoardBreak>(), Is.Null);
                     var graphic = button.GetComponent<UnityEngine.UI.Image>();
                     Assert.That(graphic, Is.Not.Null);

@@ -415,6 +415,49 @@ namespace RhythmDojo.Tests
             Assert.That(clock.Schedules, Is.EqualTo(2));
         }
 
+        [TestCase(.2, true)]
+        [TestCase(-.2, true)]
+        [TestCase(-.2, false)]
+        public void AutomaticHoldResolvesAtTheUncalibratedSongTail(double offset, bool keyboardInput)
+        {
+            var input = new FakeInput();
+            var clock = new FakeClock { InputTimingOffsetSeconds = offset };
+            using var coordinator = Coordinator(input, clock, new FakePresenter(), rules: new PlayRules());
+            coordinator.Start();
+
+            if (keyboardInput)
+            {
+                input.Press(1, 5.2 + offset);
+            }
+            else
+            {
+                coordinator.Session.PressLane(1, 5.2);
+            }
+
+            clock.SongTime = 6.79;
+            coordinator.Tick();
+            Assert.That(coordinator.Session.GetNoteJudgments(1).End, Is.Null);
+
+            clock.SongTime = 6.8;
+            if (keyboardInput)
+            {
+                input.Release(1, clock.SongTime);
+            }
+            else
+            {
+                coordinator.Session.ReleaseLane(1, clock.SongTime);
+            }
+
+            coordinator.Tick();
+
+
+            var end = coordinator.Session.GetNoteJudgments(1).End;
+            Assert.That(end.HasValue, Is.True);
+            Assert.That(end.Value.Grade, Is.EqualTo(Judgment.Perfect));
+            Assert.That(end.Value.ErrorSeconds, Is.Zero);
+            Assert.That(coordinator.Session.GetState(1), Is.EqualTo(NoteState.Completed));
+        }
+
         [Test]
         public void PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(
             [Values(0, .2, -.2)] double offset,

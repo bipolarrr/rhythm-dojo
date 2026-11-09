@@ -23,6 +23,100 @@ namespace RhythmDojo.Tests
     [Category("UI")]
     public sealed class SongSelectionFlowTests : GameplayTestContext
     {
+        private sealed class DelayedSongProvider : ISongProvider
+        {
+            public const string SongId = "delayed-alpha-test";
+            public int LoadCount { get; private set; }
+            public TaskCompletionSource<PlayableSong> Pending { get; private set; }
+
+            public System.Collections.Generic.IReadOnlyList<SongEntry> GetEntries() =>
+                new[] { new SongEntry(SongId, "Delayed Alpha Test", "", 12, 8, 4, 120, 120) };
+
+            public Task<PlayableSong> LoadAsync(string songId, CancellationToken cancellationToken)
+            {
+                LoadCount++;
+                Pending = new TaskCompletionSource<PlayableSong>(TaskCreationOptions.RunContinuationsAsynchronously);
+                return Pending.Task;
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator SongPreviewStopsOnSelectionChangeAndGameplayEntry()
+        {
+            var view = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
+            var screen = UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>();
+            yield return Click(view.previewButton);
+            yield return Await(() => view.previewSource.isPlaying, "Preview did not play.");
+            Assert.That(view.previewButton.GetComponentInChildren<Text>().text, Does.Contain("멈추기"));
+            Assert.That(view.previewSource.time, Is.GreaterThan(0));
+
+            screen.SelectSong("tempo-pulse");
+            Assert.That(view.previewSource.isPlaying, Is.False);
+            Assert.That(view.previewSource.clip, Is.Null);
+            Assert.That(view.previewButton.GetComponentInChildren<Text>().text, Does.Contain("미리듣기"));
+
+            screen.SelectSong("test-pulse");
+            yield return Click(view.previewButton);
+            yield return Await(() => view.previewSource.isPlaying, "Preview did not restart.");
+            view.play.onClick.Invoke();
+            Assert.That(view.previewSource.isPlaying, Is.False);
+            Assert.That(view.previewSource.clip, Is.Null);
+            yield return Await(() => UnityEngine.Object.FindFirstObjectByType<RhythmGameController>());
+        }
+
+        [UnityTest]
+        public IEnumerator LoadingLocksEntryAndRestoresNavigationWithActionableErrors()
+        {
+            var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
+            var screen = UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>();
+            var view = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
+            var provider = new DelayedSongProvider();
+            flow.Library.Register(provider);
+            screen.SelectSong(DelayedSongProvider.SongId);
+
+            yield return Click(view.play);
+            Assert.That(provider.LoadCount, Is.EqualTo(1));
+            Assert.That(view.play.interactable, Is.False);
+            Assert.That(view.playStatusLabel.gameObject.activeSelf, Is.True);
+            Assert.That(view.playStatusLabel.text, Does.StartWith("불러오는 중"));
+            Assert.That(view.songTitle.text, Is.EqualTo("Delayed Alpha Test"));
+            Assert.That(view.Rows.All(row => !row.select.interactable), Is.True);
+
+            string loadingCaption = view.playStatusLabel.text;
+            double deadline = Time.realtimeSinceStartupAsDouble + 3;
+            while (view.playStatusLabel.text == loadingCaption)
+            {
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline), "Loading indicator did not animate.");
+                yield return null;
+            }
+
+            yield return Press(Key.Enter);
+            Assert.That(provider.LoadCount, Is.EqualTo(1));
+
+            provider.Pending.SetException(new System.IO.IOException("Temporary load failure."));
+            yield return Await(() => view.playErrorPanel.activeSelf, "Retryable playback error did not appear.");
+            Assert.That(view.playErrorLabel.text, Does.Contain("다시 시도"));
+            Assert.That(view.playStatusLabel.text, Is.EqualTo("다시 시도"));
+            Assert.That(view.play.interactable, Is.True);
+            Assert.That(EventSystem.current.currentSelectedGameObject, Is.SameAs(view.play.gameObject));
+
+            yield return Press(Key.Enter);
+            Assert.That(provider.LoadCount, Is.EqualTo(2), "Enter should retry the selected song.");
+            Assert.That(view.playErrorPanel.activeSelf, Is.False);
+            provider.Pending.SetException(new System.IO.FileNotFoundException("Missing audio."));
+            yield return Await(() => view.playErrorPanel.activeSelf, "Missing audio error did not appear.");
+            Assert.That(view.playErrorLabel.text, Does.Contain("음원 파일을 찾을 수 없어요"));
+            Assert.That(view.play.interactable, Is.False);
+            Assert.That(view.Rows.All(row => row.select.interactable), Is.True);
+
+            var row = view.Rows.Single(item => item.Entry.Id == "test-pulse");
+            yield return Click(row.select);
+            Assert.That(view.playErrorPanel.activeSelf, Is.False);
+            Assert.That(view.playStatusLabel.gameObject.activeSelf, Is.False);
+            Assert.That(view.playCaption.gameObject.activeSelf, Is.True);
+            Assert.That(view.play.interactable, Is.True);
+        }
+
         [UnityTest]
         public IEnumerator ModePopupSelectsNormalAndHardWithoutChangingGameplayOptions()
         {

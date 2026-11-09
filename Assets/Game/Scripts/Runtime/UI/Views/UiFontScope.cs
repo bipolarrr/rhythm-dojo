@@ -6,5 +6,6 @@ namespace RhythmDojo.UI
     {
         public Font font;
         public FontStyle style = FontStyle.Bold;
+        public bool useSmoothRendering;
     }
 }

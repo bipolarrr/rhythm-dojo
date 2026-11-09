@@ -97,7 +97,6 @@ namespace RhythmDojo.UI
                 if (pixelTheme)
                 {
                     key.color = new Color(.24f, .12f, .085f);
-                    key.fontStyle = FontStyle.Bold;
                 }
             }
 

@@ -185,19 +185,28 @@ namespace RhythmDojo.Tests
                 InputSystem.Update();
                 cursor.SendMessage("Update");
                 Assert.That((float)elapsed.GetValue(cursor), Is.Zero,
-                    $"focus={UnityEngine.Application.isFocused}, current={Mouse.current?.deviceId}, test={mouse.deviceId}");
+                    $"focus={RhythmDojo.Input.ApplicationFocusState.IsFocused}, current={Mouse.current?.deviceId}, test={mouse.deviceId}");
                 Assert.That(field.GetValue(cursor), Is.SameAs(frames[0]));
             }
 
             Assert.That(framesField.GetValue(cursor), Is.SameAs(frames));
             Assert.That(Object.FindFirstObjectByType<DojoPunchImpact>(), Is.Not.Null);
-            cursor.SendMessage("OnApplicationFocus", false);
-            Assert.That(field.GetValue(cursor), Is.Null);
-            Assert.That((float)elapsed.GetValue(cursor), Is.GreaterThanOrEqualTo(.18f));
-            InputSystem.QueueStateEvent(mouse, new MouseState { position = point });
-            InputSystem.Update();
-            cursor.SendMessage("OnApplicationFocus", true);
-            Assert.That(field.GetValue(cursor), Is.Not.Null);
+            var previousFocusProvider = RhythmDojo.Input.ApplicationFocusState.Provider;
+            RhythmDojo.Input.ApplicationFocusState.Provider = null;
+            try
+            {
+                cursor.SendMessage("OnApplicationFocus", false);
+                Assert.That(field.GetValue(cursor), Is.Null);
+                Assert.That((float)elapsed.GetValue(cursor), Is.GreaterThanOrEqualTo(.18f));
+                InputSystem.QueueStateEvent(mouse, new MouseState { position = point });
+                InputSystem.Update();
+                cursor.SendMessage("OnApplicationFocus", true);
+                Assert.That(field.GetValue(cursor), Is.Not.Null);
+            }
+            finally
+            {
+                RhythmDojo.Input.ApplicationFocusState.Provider = previousFocusProvider;
+            }
             yield return null;
         }
 

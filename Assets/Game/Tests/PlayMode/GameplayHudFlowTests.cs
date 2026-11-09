@@ -5,10 +5,13 @@ using NUnit.Framework;
 using RhythmDojo.Application;
 using RhythmDojo.Core;
 using RhythmDojo.Gameplay;
+using RhythmDojo.Presentation;
+using RhythmDojo.Services;
 using RhythmDojo.UI;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.TestTools;
+using UnityEngine.UI;
 
 namespace RhythmDojo.Tests
 {
@@ -46,16 +49,95 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        public IEnumerator PauseMenuFocusHudKeepsPlayIndicatorsAndSavesChoice()
+        {
+            yield return LoadGameplay();
+            var view = UnityEngine.Object.FindFirstObjectByType<GameplayHudView>();
+            var game = UnityEngine.Object.FindFirstObjectByType<RhythmGameController>();
+            var pauseMenu = view.GetComponent<GameplayPauseMenu>();
+            Assert.That(view.songInformationPanel.activeInHierarchy, Is.True);
+            Assert.That(view.judgmentRecordPanel.activeInHierarchy, Is.True);
+
+            yield return Press(Key.Space);
+            yield return Press(Key.Escape);
+            yield return Await(() => pauseMenu.panel.activeSelf);
+            yield return Click(view.focusHudButton);
+            Assert.That(game.IsPaused, Is.True);
+            Assert.That(view.focusHudButton.GetComponentInChildren<Text>().text, Is.EqualTo("HUD · 집중"));
+            Assert.That(view.songInformationPanel.activeInHierarchy, Is.False);
+            Assert.That(view.judgmentRecordPanel.activeInHierarchy, Is.False);
+            Assert.That(view.combo.gameObject.activeInHierarchy, Is.True);
+            Assert.That(view.healthFill.gameObject.activeInHierarchy, Is.True);
+            Assert.That(view.progress.gameObject.activeInHierarchy, Is.True);
+            Assert.That(view.judgmentGroup.gameObject.activeInHierarchy, Is.True);
+            var saved = JsonUtility.FromJson<PresentationPreferences>(
+                PlayerPrefs.GetString(PresentationPreferences.StorageKey)
+            );
+            Assert.That(saved.focusHud, Is.True);
+
+            yield return Click(view.focusHudButton);
+            Assert.That(view.focusHudButton.GetComponentInChildren<Text>().text, Is.EqualTo("HUD · 기본"));
+            Assert.That(view.songInformationPanel.activeInHierarchy, Is.True);
+            Assert.That(view.judgmentRecordPanel.activeInHierarchy, Is.True);
+        }
+
+        [UnityTest]
+        public IEnumerator RailOpacityAndMeasureLinesKeepJudgmentLineVisible()
+        {
+            yield return LoadGameplay();
+            var view = UnityEngine.Object.FindFirstObjectByType<GameplayHudView>();
+            var pauseMenu = view.GetComponent<GameplayPauseMenu>();
+            Assert.That(view.railOpacity.transform.IsChildOf(pauseMenu.panel.transform), Is.True);
+            Assert.That(view.railOpacity.gameObject.activeInHierarchy, Is.False);
+            var playfield = UnityEngine.Object.FindFirstObjectByType<PlayfieldPresenter>();
+            var lane = playfield.transform.Find("Lane 0").GetComponent<Renderer>();
+            var rail = playfield.transform.Find("Rail 0").GetComponent<Renderer>();
+            var centerRail = playfield.transform.Find("Rail 2");
+            var judgment = playfield.transform.Find("Judgement Line").GetComponent<Renderer>();
+            Assert.That(centerRail.localScale.x, Is.GreaterThan(rail.transform.localScale.x));
+
+            var hold = UnityEngine.Object.FindObjectsByType<NoteView>(FindObjectsSortMode.None)
+                .First(note => note.HasBody);
+            var tailMarker = hold.transform.Find("Hold End Marker");
+            var holdBody = hold.transform.Find("Hold Body");
+            Assert.That(tailMarker, Is.Not.Null);
+            Assert.That(holdBody, Is.Not.Null);
+            Assert.That(tailMarker.localScale.x, Is.GreaterThan(holdBody.localScale.x));
+
+            view.railOpacity.value = .5f;
+            Assert.That(lane.sharedMaterial.GetColor("_BaseColor").a, Is.EqualTo(.5f));
+            Assert.That(rail.sharedMaterial.GetColor("_BaseColor").a, Is.EqualTo(.5f));
+            view.railOpacity.value = 0;
+            Assert.That(lane.enabled, Is.False);
+            Assert.That(rail.enabled, Is.False);
+            Assert.That(judgment.enabled, Is.True);
+            view.railOpacity.value = 1;
+            Assert.That(lane.enabled, Is.True);
+            Assert.That(rail.enabled, Is.True);
+
+            var tempo = new TempoMap(new[] { new TempoPoint(0, 120), new TempoPoint(1, 60) });
+            var scroll = new ConstantScrollTimeline(10, 1);
+            var chart = new ChartData(new[] { NoteData.Tap(0, 4) }, 5);
+            playfield.ConfigureMeasureLines(tempo, scroll, chart);
+            playfield.RenderMeasureLines(SessionState.Playing, 1);
+            var line = playfield.transform.Find("Measure Line");
+            Assert.That(line.position.z, Is.EqualTo(20).Within(.001));
+            playfield.RenderMeasureLines(SessionState.Playing, 3);
+            Assert.That(line.position.z, Is.Zero.Within(.001));
+            playfield.RenderMeasureLines(SessionState.Ready, 0);
+            Assert.That(line.gameObject.activeSelf, Is.False);
+        }
+
+        [UnityTest]
         public IEnumerator GameplayWindowRendersJudgmentLineBelowCenter()
         {
             yield return LoadGameplay();
-            yield return new WaitForEndOfFrame();
-
             var viewport = UnityEngine.Object.FindFirstObjectByType<GameplayViewport>();
             var point = viewport.gameplayCamera.WorldToScreenPoint(new Vector3(.2f, .05f, 0));
             Assert.That(point.y, Is.LessThan(Screen.height * .5f));
 
-            var capture = ScreenCapture.CaptureScreenshotAsTexture();
+            var capture = CaptureGameplayDisplay(viewport);
+
             try
             {
                 bool foundJudgmentLine = false;
@@ -81,6 +163,73 @@ namespace RhythmDojo.Tests
             finally
             {
                 UnityEngine.Object.Destroy(capture);
+            }
+        }
+
+        private static Texture2D CaptureGameplayDisplay(GameplayViewport viewport)
+        {
+            Canvas.ForceUpdateCanvases();
+            viewport.gameplayCamera.Render();
+            var camera = Camera.allCameras.Single(candidate =>
+                candidate.targetTexture == null && candidate.targetDisplay == viewport.gameplayCamera.targetDisplay);
+            var canvases = UnityEngine.Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None)
+                .Where(canvas => canvas.isRootCanvas && canvas.renderMode == RenderMode.ScreenSpaceOverlay)
+                .Select(canvas => (canvas, canvas.worldCamera, canvas.planeDistance))
+                .ToArray();
+            var layers = canvases.SelectMany(item => item.canvas.GetComponentsInChildren<Transform>(true))
+                .Select(item => (item.gameObject, item.gameObject.layer)).ToArray();
+            int previousMask = camera.cullingMask;
+            var target = new RenderTexture(Screen.width, Screen.height, 24);
+            var previous = RenderTexture.active;
+            var capture = new Texture2D(Screen.width, Screen.height, TextureFormat.RGB24, false);
+            try
+            {
+                camera.targetTexture = target;
+                camera.cullingMask = 1 << LayerMask.NameToLayer("UI");
+                foreach (var item in layers)
+                {
+                    item.gameObject.layer = LayerMask.NameToLayer("UI");
+                }
+
+                foreach (var item in canvases)
+                {
+                    item.canvas.renderMode = RenderMode.ScreenSpaceCamera;
+                    item.canvas.worldCamera = camera;
+                    item.canvas.planeDistance = 1;
+                }
+
+                Canvas.ForceUpdateCanvases();
+                camera.Render();
+                RenderTexture.active = target;
+                capture.ReadPixels(new Rect(0, 0, target.width, target.height), 0, 0);
+                capture.Apply();
+                return capture;
+            }
+            catch
+            {
+                UnityEngine.Object.Destroy(capture);
+                throw;
+            }
+            finally
+            {
+                camera.targetTexture = null;
+                camera.cullingMask = previousMask;
+                foreach (var item in layers)
+                {
+                    item.gameObject.layer = item.layer;
+                }
+
+                foreach (var item in canvases)
+                {
+                    item.canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+                    item.canvas.worldCamera = item.worldCamera;
+                    item.canvas.planeDistance = item.planeDistance;
+                }
+
+                RenderTexture.active = previous;
+                target.Release();
+                UnityEngine.Object.Destroy(target);
+                Canvas.ForceUpdateCanvases();
             }
         }
 
@@ -243,13 +392,26 @@ namespace RhythmDojo.Tests
             );
             yield return new WaitForSecondsRealtime(.07f);
             Assert.That(view.songTitle.text, Is.EqualTo("HUD 검증곡"));
+            var judgmentRect = (RectTransform)view.judgmentGroup.transform;
+            Vector2 middle = judgmentRect.anchorMin;
+            var presentation = PresentationPreferences.Current;
             model.Set(SessionState.Playing, 1, 0, 0, 1);
+            presentation.judgmentPosition = JudgmentPosition.Upper;
             model.Judge(Judgment.Perfect, -.012);
+            Assert.That(judgmentRect.anchorMin.y, Is.GreaterThan(middle.y));
+            Assert.That(view.judgment.transform.IsChildOf(judgmentRect), Is.True);
+            Assert.That(view.timing.transform.IsChildOf(judgmentRect), Is.True);
+            Assert.That(view.judgmentGroup.alpha, Is.EqualTo(.55f));
+            Assert.That(view.judgment.fontSize, Is.EqualTo(25));
+            Assert.That(view.timing.fontSize, Is.EqualTo(14));
             yield return new WaitForSecondsRealtime(.07f);
             Assert.That(view.combo.text, Is.EqualTo("1"));
             Assert.That(view.judgment.text, Is.EqualTo("Perfect"));
-            StringAssert.Contains("EARLY", view.timing.text);
+            StringAssert.Contains("빠름", view.timing.text);
+            presentation.judgmentPosition = JudgmentPosition.Middle;
             model.Hold();
+            Assert.That(judgmentRect.anchorMin, Is.EqualTo(middle));
+            Assert.That(view.judgment.fontSize, Is.EqualTo(19));
             yield return new WaitForSecondsRealtime(.07f);
             Assert.That(view.judgment.text, Is.EqualTo("HOLD · Perfect"));
             Assert.That(
@@ -258,7 +420,11 @@ namespace RhythmDojo.Tests
                 "Hold heads must not add combo before resolution."
             );
             model.Set(SessionState.Playing, 1, 1, 0, 2);
+            presentation.judgmentPosition = JudgmentPosition.Lower;
             model.Judge(Judgment.Good, .055);
+            Assert.That(judgmentRect.anchorMin.y, Is.LessThan(middle.y));
+            StringAssert.Contains("늦음", view.timing.text);
+            Assert.That(view.judgment.text, Is.EqualTo("Hmm..."));
             model.Set(SessionState.Playing, 1, 1, 1, 0);
             model.Judge(Judgment.Miss, .25);
             yield return new WaitForSecondsRealtime(.07f);
@@ -279,21 +445,25 @@ namespace RhythmDojo.Tests
             model.Reset();
             yield return new WaitForSecondsRealtime(.07f);
             Assert.That(view.bestCombo.text, Is.EqualTo("BEST  0"));
-            Assert.That(view.judgment.text, Is.EqualTo("READY"));
+            Assert.That(view.judgment.text, Is.EqualTo("SPACE로 수련 시작"));
+            Assert.That(judgmentRect.anchorMin, Is.EqualTo(middle));
+            Assert.That(view.judgmentGroup.transform.parent, Is.EqualTo(view.transform));
             StringAssert.Contains("창 전환", view.timing.text);
             Assert.That(view.judgmentGroup.alpha, Is.EqualTo(1));
+            Assert.That(view.judgment.fontSize, Is.EqualTo(36));
+            Assert.That(view.timing.fontSize, Is.EqualTo(18));
             Assert.That(view.progressFill.rectTransform.anchorMax.x, Is.Zero);
-            model.Set(SessionState.Completed, 8, 0, 0, 8);
+            model.Set(SessionState.Completed, 8, 0, 0, 7);
             model.Judge(Judgment.Perfect, 0);
             yield return Await(
-                () => view.judgment.text == "FINISH",
+                () => view.sessionState.text == "결과 화면으로 이동",
                 "Completed HUD feedback did not settle."
             );
-            Assert.That(view.judgment.text, Is.EqualTo("FINISH"));
-            Assert.That(view.judgmentGroup.alpha, Is.EqualTo(1));
+            Assert.That(view.judgment.text, Is.Empty);
             Assert.That(view.gameOverPanel.activeSelf, Is.True);
             Assert.That(view.gameOverText.text, Is.EqualTo("GAME CLEAR"));
             Assert.That(view.gameOverText.color.g, Is.GreaterThan(view.gameOverText.color.r));
+            Assert.That(view.gameOverText.rectTransform.localScale.x, Is.GreaterThan(1f));
             model.Set(SessionState.Ready, 0, 0, 0, 0);
             model.Reset();
             Assert.That(view.gameOverPanel.activeSelf, Is.False);
@@ -395,12 +565,15 @@ namespace RhythmDojo.Tests
             var view = UnityEngine.Object.FindFirstObjectByType<ResultsView>();
             var result = UnityEngine.Object.FindFirstObjectByType<AppFlowController>().LastResult;
             Assert.That(result.Session.Resolved, Is.EqualTo(result.Session.TotalNotes));
-            Assert.That(view.outcome.text, Is.EqualTo("CLEAR"));
+            Assert.That(result.Session.IsFullCombo, Is.True);
+            Assert.That(view.outcome.text, Is.EqualTo("S"));
             Assert.That(view.backButton.gameObject.activeSelf, Is.True);
             yield return Click(view.backButton);
             yield return Await(() =>
                 UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>()
             );
+            var selectionView = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
+            StringAssert.DoesNotContain("Full Combo", selectionView.comboRecord.text);
         }
     }
 }

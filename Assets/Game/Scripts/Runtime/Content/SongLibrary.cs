@@ -41,7 +41,11 @@ namespace RhythmDojo.Content
         }
     }
 
-    public interface IChartSongProvider : ISongProvider
+    public interface IChartSongProvider : ISongProvider, ISongChartLoader
+    {
+    }
+
+    public interface ISongChartLoader
     {
         Task<PlayableSong> LoadChartAsync(
             string songId,
@@ -142,7 +146,7 @@ namespace RhythmDojo.Content
         Task<PlayableSong> LoadAsync(SongDocument document, CancellationToken cancellationToken);
     }
 
-    public sealed class SongLibrary : ISongLibrary, ISongLoader
+    public sealed class SongLibrary : ISongLibrary, ISongLoader, ISongChartLoader
     {
         private readonly List<ISongProvider> providers = new List<ISongProvider>();
         private readonly Dictionary<string, ISongProvider> sources = new Dictionary<

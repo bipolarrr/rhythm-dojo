@@ -14,6 +14,14 @@ namespace RhythmDojo.Audio
 
         public double BeatPosition => settings.BeatPositionAt(AudioSettings.dspTime - startDspTime);
 
+        public void SetCalibrationMuted(bool muted)
+        {
+            if (source)
+            {
+                source.mute = muted;
+            }
+        }
+
         public void Initialize(TitleMusicSettings musicSettings)
         {
             if (!musicSettings)

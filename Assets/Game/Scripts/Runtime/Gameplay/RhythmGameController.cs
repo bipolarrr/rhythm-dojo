@@ -89,24 +89,41 @@ namespace RhythmDojo.Gameplay
 
         public bool IsPaused => coordinator?.IsPaused ?? false;
 
+        internal Action FocusLost { get; set; }
+
         public void PauseSession() => coordinator?.Pause();
 
         public void ResumeSession() => coordinator?.Resume();
 
         public void RestartSession() => coordinator?.Restart();
 
+        public void RefreshScrollMultiplier(double multiplier) => coordinator?.RefreshScrollMultiplier(multiplier);
+
         private void Update() => coordinator?.Tick();
 
         private void OnApplicationFocus(bool focused)
         {
+            if (!RhythmDojo.Input.ApplicationFocusState.UsesPlatformEvents)
+            {
+                return;
+            }
+
             if (!focused)
             {
-                coordinator?.LoseFocus();
+                if (FocusLost != null)
+                {
+                    FocusLost();
+                }
+                else
+                {
+                    coordinator?.LoseFocus();
+                }
             }
         }
 
         public void Shutdown()
         {
+            FocusLost = null;
             coordinator?.Dispose();
             coordinator = null;
         }
