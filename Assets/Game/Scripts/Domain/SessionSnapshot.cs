@@ -18,6 +18,19 @@ namespace RhythmDojo.Gameplay
         public int MaximumHealth { get; }
         public PlayMode Mode { get; }
 
+        public bool IsFullCombo
+        {
+            get
+            {
+                if (State != SessionState.Completed || Failure.Failed)
+                {
+                    return false;
+                }
+
+                return TotalNotes > 0 && Combo == TotalNotes;
+            }
+        }
+
         public SessionSnapshot(
             SessionState state,
             int perfect,

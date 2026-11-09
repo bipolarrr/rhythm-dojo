@@ -33,7 +33,7 @@ namespace RhythmDojo.UI
 
             if (
                 mouse == null
-                || !UnityEngine.Application.isFocused
+                || !RhythmDojo.Input.ApplicationFocusState.IsFocused
                 || Cursor.lockState == CursorLockMode.Locked
             )
             {
@@ -85,6 +85,11 @@ namespace RhythmDojo.UI
 
         private void OnApplicationFocus(bool focused)
         {
+            if (!RhythmDojo.Input.ApplicationFocusState.UsesPlatformEvents)
+            {
+                return;
+            }
+
             if (!focused)
             {
                 Clear();

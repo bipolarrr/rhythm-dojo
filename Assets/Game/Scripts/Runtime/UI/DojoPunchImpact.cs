@@ -213,6 +213,11 @@ namespace RhythmDojo.UI
 
         private void OnApplicationFocus(bool focused)
         {
+            if (!RhythmDojo.Input.ApplicationFocusState.UsesPlatformEvents)
+            {
+                return;
+            }
+
             if (!focused)
             {
                 Clear();
