@@ -371,8 +371,40 @@ namespace RhythmDojo.EditorTools
             ApplyFont(view);
             ApplyCaptionSizes(view);
             ApplyPlayRuleSizes(view);
+            BuildJudgmentPosition(view);
 
             return view;
+        }
+
+        internal static void BuildJudgmentPosition(SettingsView view)
+        {
+            var parent = view.gameplayPanel.transform;
+            var label = UiElements.Label(
+                "Judgment Position Label",
+                parent,
+                "판정 표시 위치",
+                new Vector2(320, 0),
+                new Vector2(168, 34),
+                24
+            );
+            label.alignment = TextAnchor.MiddleLeft;
+            label.color = new Color(.24f, .12f, .085f);
+
+            var dropdown = UiElements.Dropdown(
+                "Judgment Position",
+                parent,
+                new Vector2(500, 0),
+                new Vector2(200, 34)
+            );
+            dropdown.ClearOptions();
+            dropdown.AddOptions(new System.Collections.Generic.List<string> { "상단", "중앙", "하단" });
+            dropdown.SetValueWithoutNotify(1);
+            PixelOptionsStyle.ApplyDropdownStyle(dropdown);
+            SetCaptionSize(dropdown.captionText, 24, 20);
+            SetCaptionSize(dropdown.itemText, 24, 20);
+            dropdown.captionText.rectTransform.offsetMin = new Vector2(12, 2);
+            dropdown.captionText.rectTransform.offsetMax = new Vector2(-40, -2);
+            view.judgmentPositionList = dropdown;
         }
 
         public static void BuildKeySettings(SettingsView view)

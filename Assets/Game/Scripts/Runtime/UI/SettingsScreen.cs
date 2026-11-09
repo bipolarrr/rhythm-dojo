@@ -63,7 +63,8 @@ namespace RhythmDojo.UI
                 songs,
                 savedPreferences ?? new SelectionPreferences(null),
                 hardMode ?? new HardModePreferences(null),
-                rules
+                rules,
+                presentation
             );
             view.back.onClick.AddListener(Back);
             if (!keyMode && modeId == null && gameSettings)
@@ -82,6 +83,17 @@ namespace RhythmDojo.UI
             {
                 EventSystem.current.SetSelectedGameObject(view.soundTab.gameObject);
             }
+        }
+
+        public void BindGameplaySpeed(ScrollMode mode, double multiplier, Action<double> onSpeedChanged)
+        {
+            gameplay.BindGameplaySpeed(mode, multiplier, onSpeedChanged);
+        }
+
+        internal void OpenTimingCalibration(Action<int> onApplied)
+        {
+            ShowGameplay();
+            gameplay.OpenTimingCalibration(onApplied);
         }
 
         private void ShowSound() => SelectTab(false);
@@ -188,6 +200,11 @@ namespace RhythmDojo.UI
 
         private void Update()
         {
+            if (gameplay?.TickCalibration() == true)
+            {
+                return;
+            }
+
             sound?.Tick();
             graphics?.Tick();
             if (keys?.Tick() == true)

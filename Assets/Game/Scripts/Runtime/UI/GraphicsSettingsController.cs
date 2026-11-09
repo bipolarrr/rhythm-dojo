@@ -19,6 +19,7 @@ namespace RhythmDojo.UI
         private float frameSampleSeconds,
             measuredFrameRate;
         private int frameSampleCount;
+        private bool bufferSelectionChanged;
 
         public GraphicsSettingsController(
             SettingsView view,
@@ -82,6 +83,7 @@ namespace RhythmDojo.UI
         private void Changed(int option)
         {
             audio.SelectBufferOption(option);
+            bufferSelectionChanged = true;
             Refresh();
         }
 
@@ -89,12 +91,21 @@ namespace RhythmDojo.UI
         {
             if (view.graphicsPanel.activeSelf)
             {
+                bool graphicsChanged = presentation.aspect != view.aspectList.value
+                    || presentation.resolution != view.resolutionList.value
+                    || presentation.frameRate != view.fpsList.value;
+
                 presentation.aspect = view.aspectList.value;
                 presentation.resolution = view.resolutionList.value;
                 presentation.frameRate = view.fpsList.value;
                 presentation.ApplyGraphicsValues();
                 presentation.SaveValues();
-                audio.ApplyBufferSize();
+
+                if (!graphicsChanged || bufferSelectionChanged || audio.RequestedBufferSize != audio.Actual.BufferSize)
+                {
+                    bufferSelectionChanged = false;
+                    audio.ApplyBufferSize();
+                }
             }
 
             Refresh();
