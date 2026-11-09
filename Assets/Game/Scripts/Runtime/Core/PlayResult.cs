@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using RhythmDojo.Application;
 using RhythmDojo.Gameplay;
 using UnityEngine;
 
@@ -14,10 +15,59 @@ namespace RhythmDojo.Core
         public Sprite Cover { get; }
         public SessionSnapshot Session { get; }
         public int MaxCombo { get; }
+        public int Score => ScoreRules.Score(Session.AccuracyRate);
+        public int? PreviousBestScore { get; internal set; }
+        public bool CanCompareScore { get; internal set; }
+        public int? TimingOffsetRecommendationMs { get; private set; }
+        internal int? AppliedTimingOffsetMs { get; set; }
         public ChartData Chart { get; }
         public TempoMap Tempo { get; }
         public IReadOnlyList<string> LaneLabels { get; }
         public IReadOnlyList<PlayNoteResult> Notes { get; }
+
+        internal void RecommendTimingOffset(int timingOffsetMs)
+        {
+            if (Session.State != SessionState.Completed || Session.Failure.Failed)
+            {
+                return;
+            }
+
+            var beats = new HashSet<double>();
+            var hits = new HashSet<double>();
+            var errors = new List<double>();
+            foreach (var note in Notes)
+            {
+                beats.Add(note.Note.StartTime);
+
+                if (note.Start is not { } start || start.Grade == Judgment.Miss)
+                {
+                    continue;
+                }
+
+                if (double.IsFinite(start.ErrorSeconds) && hits.Add(note.Note.StartTime))
+                {
+                    errors.Add(start.ErrorSeconds);
+                }
+            }
+
+            if (hits.Count < beats.Count * .70)
+            {
+                return;
+            }
+
+            int? recommendation = InputTiming.RecommendOffsetMs(errors, timingOffsetMs, 12);
+            if (!recommendation.HasValue)
+            {
+                return;
+            }
+
+            if (Math.Abs(recommendation.Value - timingOffsetMs) < 5)
+            {
+                return;
+            }
+
+            TimingOffsetRecommendationMs = recommendation;
+        }
 
         public PlayResult(
             string title, string artist, string difficulty, Sprite cover,

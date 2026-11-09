@@ -41,6 +41,7 @@ namespace RhythmDojo.Core
         private string settingsKeyModeId;
         private Action<string> returned;
         private PreparedSelectionScene selectionPreparation;
+        private Func<CancellationToken, Task> retryPlay;
 
         public bool IsSelectionPrepared => selectionPreparation != null && selectionPreparation.IsSelectionPrepared;
 
@@ -57,6 +58,7 @@ namespace RhythmDojo.Core
 
         public PlayRequest CurrentRequest { get; private set; }
         public PlayResult LastResult { get; private set; }
+        public bool CanRetryResult => retryPlay != null && SceneManager.GetSceneByPath(ResultsPath).isLoaded;
         public bool Transitioning { get; private set; }
 
         // Compatibility facade for existing integration callers. Screens use injected services.
@@ -201,6 +203,11 @@ namespace RhythmDojo.Core
             {
                 ReleaseRequest();
 
+                if (scene.path != ResultsPath)
+                {
+                    retryPlay = null;
+                }
+
                 if (returned != null && scene.path == returnScenePath)
                 {
                     var callback = returned;
@@ -272,6 +279,22 @@ namespace RhythmDojo.Core
             }
 
             var rules = Rules.Snapshot;
+            await LoadCatalogPlayAsync(songId, difficulty, scrollMode, multiplier, timingOffsetMs,
+                healthRules, rules, cancellationToken);
+        }
+
+        private async Task LoadCatalogPlayAsync(
+            string songId,
+            DifficultyProfile difficulty,
+            ScrollMode scrollMode,
+            double multiplier,
+            int timingOffsetMs,
+            HardModeHealthRules healthRules,
+            PlayRules rules,
+            CancellationToken cancellationToken,
+            (string Id, string Revision)? expectedChart = null
+        )
+        {
             Audio.CancelBufferValidation();
             Transitioning = true;
 
@@ -290,6 +313,14 @@ namespace RhythmDojo.Core
                 );
                 linked.Token.ThrowIfCancellationRequested();
 
+                if (expectedChart.HasValue)
+                {
+                    if (song.ChartId != expectedChart.Value.Id || song.Revision != expectedChart.Value.Revision)
+                    {
+                        throw new InvalidOperationException("채보가 변경됐습니다. 곡 선택에서 다시 입장해 주세요.");
+                    }
+                }
+
                 var request = new PlayRequest(
                     song,
                     difficulty,
@@ -301,10 +332,11 @@ namespace RhythmDojo.Core
                 );
                 ReleaseRequest();
                 CurrentRequest = request;
-                LastResult = null;
                 song = null;
-                ClearEditorReturn();
                 Load(GameplayPath);
+                LastResult = null;
+                retryPlay = null;
+                ClearEditorReturn();
             }
             catch
             {
@@ -436,13 +468,54 @@ namespace RhythmDojo.Core
 
         public void ShowResults(PlayResult result)
         {
+            ShowResults(result, CurrentRequest?.Multiplier ?? 1);
+        }
+
+        internal void ShowResults(PlayResult result, double multiplier)
+        {
             if (Transitioning)
             {
                 return;
             }
 
             LastResult = result ?? throw new ArgumentNullException(nameof(result));
+            retryPlay = null;
+            if (CurrentRequest != null && !IsEditorPlaytest)
+            {
+                var songId = CurrentRequest.Song.SongId;
+                var expectedChart = (CurrentRequest.Song.ChartId, CurrentRequest.Song.Revision);
+                var difficulty = CurrentRequest.Difficulty;
+                var scrollMode = CurrentRequest.ScrollMode;
+                int timingOffsetMs = CurrentRequest.TimingOffsetMs;
+
+                result.RecommendTimingOffset(timingOffsetMs);
+
+                var healthRules = CurrentRequest.HardModeRules;
+                var rules = CurrentRequest.Rules;
+                retryPlay = token => LoadCatalogPlayAsync(
+                    songId,
+                    difficulty,
+                    scrollMode,
+                    multiplier,
+                    result.AppliedTimingOffsetMs ?? timingOffsetMs,
+                    healthRules,
+                    rules,
+                    token,
+                    expectedChart
+                );
+            }
+
             Load(ResultsPath);
+        }
+
+        public Task RetryResultAsync(CancellationToken cancellationToken)
+        {
+            if (Transitioning || !CanRetryResult)
+            {
+                return Task.CompletedTask;
+            }
+
+            return retryPlay(cancellationToken);
         }
 
         public void ShowSelection()
@@ -519,6 +592,24 @@ namespace RhythmDojo.Core
             OpenSettingsPopup();
         }
 
+        internal void ShowResultTimingCalibration()
+        {
+            if (Transitioning || !SceneManager.GetSceneByPath(ResultsPath).isLoaded)
+            {
+                return;
+            }
+
+            var result = LastResult;
+            if (result == null)
+            {
+                return;
+            }
+
+            settingsReturnPath = ResultsPath;
+            SelectSettingsKeyMode();
+            OpenSettingsPopup(onApplied: offset => result.AppliedTimingOffsetMs = offset);
+        }
+
         public void ShowGameplaySettings()
         {
             if (Transitioning || !SceneManager.GetSceneByPath(GameplayPath).isLoaded)
@@ -592,7 +683,7 @@ namespace RhythmDojo.Core
             }
 
             Audio.CancelBufferValidation();
-            if (settingsReturnPath != GameplayPath)
+            if (settingsReturnPath != GameplayPath && settingsReturnPath != ResultsPath)
             {
                 ClearEditorReturn();
             }
@@ -609,7 +700,7 @@ namespace RhythmDojo.Core
             settingsInputScope = null;
         }
 
-        private void OpenSettingsPopup()
+        private void OpenSettingsPopup(Action<int> onApplied = null)
         {
             if (SceneManager.GetSceneByPath(SettingsPath).isLoaded)
             {
@@ -640,8 +731,22 @@ namespace RhythmDojo.Core
 
                 settingsPopup.gameObject.SetActive(true);
                 settingsPopup.Initialize(
-                    Audio, this, settings, Selection, Preferences, HardMode, Rules,
-                    PresentationPreferences.Current, settingsKeyMode, settingsKeyModeId);
+                    Audio,
+                    this,
+                    settings,
+                    Selection,
+                    Preferences,
+                    HardMode,
+                    Rules,
+                    PresentationPreferences.Current,
+                    settingsKeyMode,
+                    settingsKeyModeId
+                );
+
+                if (onApplied != null)
+                {
+                    settingsPopup.OpenTimingCalibration(onApplied);
+                }
             }
             catch
             {

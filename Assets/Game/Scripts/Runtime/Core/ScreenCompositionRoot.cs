@@ -1,4 +1,6 @@
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using RhythmDojo.Gameplay;
 using RhythmDojo.UI;
 using UnityEngine;
@@ -94,7 +96,19 @@ namespace RhythmDojo.Core
 
             if (results)
             {
-                results.Initialize(flow.LastResult, flow.ReturnFromGameplay);
+                Func<CancellationToken, Task> retry = null;
+                if (flow.CanRetryResult)
+                {
+                    retry = flow.RetryResultAsync;
+                }
+
+                results.Initialize(
+                    flow.LastResult,
+                    flow.ReturnFromGameplay,
+                    retry,
+                    flow.Preferences,
+                    flow.ShowResultTimingCalibration
+                );
             }
 
             if (selection)
