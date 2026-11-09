@@ -95,6 +95,12 @@ namespace RhythmDojo.Content
                         SongLoadFailureKind.AudioLoadFailed, "AudioId: loader returned no audio."));
                 }
 
+                if (lease.Clip.length <= 0)
+                {
+                    throw new SongLoadException(new SongLoadFailure(
+                        SongLoadFailureKind.AudioLoadFailed, "AudioId: audio is empty."));
+                }
+
                 return new PlayableSong(snapshot, mode, lease);
             }
             catch

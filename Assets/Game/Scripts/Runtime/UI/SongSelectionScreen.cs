@@ -171,7 +171,7 @@ namespace RhythmDojo.UI
             view.cancelBack.onClick.AddListener(CancelBack);
             view.allTab.onClick.AddListener(ShowAll);
             view.favoritesTab.onClick.AddListener(ShowFavorites);
-            selection.Library.Changed += RefreshLibrary;
+            selection.Library.Changed += OnLibraryChanged;
             RefreshLibrary();
             FocusSelected();
         }
@@ -296,6 +296,13 @@ namespace RhythmDojo.UI
             {
                 Play();
             }
+        }
+
+        private void OnLibraryChanged()
+        {
+            playbackFailure = null;
+            StopPreview();
+            RefreshLibrary();
         }
 
         private void RefreshLibrary()
@@ -1250,7 +1257,7 @@ namespace RhythmDojo.UI
 
             if (selection != null)
             {
-                selection.Library.Changed -= RefreshLibrary;
+                selection.Library.Changed -= OnLibraryChanged;
             }
 
             if (!view)

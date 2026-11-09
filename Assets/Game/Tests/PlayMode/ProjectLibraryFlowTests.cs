@@ -18,6 +18,60 @@ namespace RhythmDojo.Tests
     public sealed class ProjectLibraryFlowTests : GameplayTestContext
     {
         [UnityTest]
+        public IEnumerator RestoredAudioLoadsAfterStructuredFailureAndRefresh()
+        {
+            string root = Path.Combine(UnityEngine.Application.temporaryCachePath, "Recovery-" + Guid.NewGuid());
+            var store = new FileSongProjectStore(root);
+            var flow = Object.FindFirstObjectByType<AppFlowController>();
+            var mode = flow.Settings.catalog[0].Mode;
+            var project = new SongProject
+            {
+                Title = "Recovered project",
+                Charts = new[] { new ChartDocument
+                {
+                    Slot = ChartSlot.Standard, ModeId = mode.name, LaneCount = 4,
+                    CompletionTimeSeconds = 3, Notes = new[] { NoteData.Tap(0, 1) }
+                } }
+            };
+            PlayableSong loaded = null;
+            try
+            {
+                var import = store.ImportAsync(project.Id, Path.GetFullPath("Assets/Game/Audio/TestPulse.wav"), default);
+                yield return new WaitUntil(() => import.IsCompleted);
+                project.Audio = import.GetAwaiter().GetResult();
+                var save = store.SaveAsync(project, default);
+                yield return new WaitUntil(() => save.IsCompleted);
+                save.GetAwaiter().GetResult();
+                var library = new SongLibrary();
+                library.Register(new ProjectSongProvider(store, mode));
+                string id = project.Id.ToString("D");
+                string path = store.ResolveAudioPath(project.Id, project.Audio);
+                byte[] bytes = File.ReadAllBytes(path);
+                File.Delete(path);
+                var missing = library.LoadChartAsync(id, ChartSlot.Standard, default);
+                yield return new WaitUntil(() => missing.IsCompleted);
+                Assert.That(missing.Exception.InnerException, Is.TypeOf<SongLoadException>());
+                Assert.That(((SongLoadException)missing.Exception.InnerException).Failure.Kind,
+                    Is.EqualTo(SongLoadFailureKind.MissingAudio));
+                File.WriteAllBytes(path, bytes);
+                library.Refresh();
+                var retry = library.LoadChartAsync(id, ChartSlot.Standard, default);
+                yield return new WaitUntil(() => retry.IsCompleted);
+                loaded = retry.GetAwaiter().GetResult();
+                Assert.That(loaded.AudioClip.samples, Is.GreaterThan(0));
+                Assert.That(loaded.ChartId, Is.EqualTo(project.Charts[0].Id.ToString("D")));
+            }
+            finally
+            {
+                loaded?.Dispose();
+                if (Directory.Exists(root))
+                {
+                    Directory.Delete(root, true);
+                }
+            }
+        }
+
+        [UnityTest]
         public IEnumerator SavedThreeChartProjectSelectsLoadsAndRefreshesEachSlot()
         {
             string root = Path.Combine(

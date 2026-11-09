@@ -317,7 +317,9 @@ namespace RhythmDojo.Core
                 {
                     if (song.ChartId != expectedChart.Value.Id || song.Revision != expectedChart.Value.Revision)
                     {
-                        throw new InvalidOperationException("채보가 변경됐습니다. 곡 선택에서 다시 입장해 주세요.");
+                        throw new SongLoadException(new SongLoadFailure(
+                            SongLoadFailureKind.InvalidChart,
+                            "채보가 변경되었습니다. 곡 선택에서 새로고침한 뒤 다시 입장해 주세요."));
                     }
                 }
 

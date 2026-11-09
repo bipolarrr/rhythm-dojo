@@ -120,6 +120,39 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        public IEnumerator LatePreviewCompletionIsReleasedAndRefreshClearsTheFailure()
+        {
+            var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
+            var screen = UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>();
+            var view = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
+            var provider = new DelayedSongProvider();
+            flow.Library.Register(provider);
+            screen.SelectSong(DelayedSongProvider.SongId);
+            yield return Click(view.previewButton);
+            var pending = provider.Pending;
+            screen.SelectSong("test-pulse");
+            int releases = 0;
+            var source = flow.Settings.catalog[0];
+            pending.SetResult(new PlayableSong(SongAssetAdapter.ToDocument(source), source.AudioClip,
+                source.Mode, () => releases++));
+            yield return Await(() => releases == 1);
+            Assert.That(view.previewSource.clip, Is.Null);
+            Assert.That(view.previewSource.isPlaying, Is.False);
+
+            screen.SelectSong(DelayedSongProvider.SongId);
+            yield return Click(view.play);
+            provider.Pending.SetException(new SongLoadException(new SongLoadFailure(
+                SongLoadFailureKind.MissingChart, "missing chart")));
+            yield return Await(() => view.playErrorPanel.activeSelf);
+            Assert.That(view.playErrorLabel.text, Does.Contain("채보 파일"));
+            Assert.That(view.play.interactable, Is.False);
+            flow.Library.Refresh();
+            Assert.That(view.play.interactable, Is.True);
+            Assert.That(view.playErrorPanel.activeSelf, Is.False);
+            Assert.That(releases, Is.EqualTo(1));
+        }
+
+        [UnityTest]
         public IEnumerator ModePopupSelectsNormalAndHardWithoutChangingGameplayOptions()
         {
             var view = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
