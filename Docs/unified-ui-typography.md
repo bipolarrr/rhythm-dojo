@@ -1,9 +1,11 @@
-# Unified start-button typography
+# UI 글꼴
 
-The shared default for all UI Text components is Dokdo-Regular.ttf with FontStyle.Bold. Title, Song Selection, Settings, Gameplay, Results, detailed review and Chart Editor use the same Dokdo lettering. UiFontSettings.Current keeps its existing resource interface and now resolves Dokdo; UiFontSettings.Style, Apply and ApplyTo provide the common style for scene builders and dynamic control factories, respecting the nearest font scope.
+리듬도장의 UI 기본 글꼴은 네이버 마루부리입니다. `UiFontSettings` 리소스가 세 굵기의 OTF 에셋을 참조합니다. 실제 굵기별 파일을 사용하므로 Unity Text의 Font Style은 Normal로 설정합니다.
 
-Title, Song Selection, Settings, Gameplay, Results and Chart Editor builders apply the common typography after composing their controls, including inactive popup and dropdown templates. UiElements and AudioTimelineUi apply it when creating runtime labels, buttons, fields and dropdowns; entrance recovery messages and lane key labels use the same style. Font size, color, positioning, control references and behavior are retained.
+- Bold — 화면 제목, 타이틀 메뉴, 주요 플레이 버튼, 콤보와 주요 점수
+- SemiBold — 곡명, 난이도, 설정 항목, 레인 키와 일반 UI
+- Regular — 도움말, 단축키 설명, 입력 자리표시자
 
-The final unification updates all saved scenes and SettingsPopup through Unity APIs without regenerating their layouts. Existing font fields, scopes, hidden controls and runtime defaults all reference Dokdo. Bootstrap has no text. Mona remains only as the existing fallback for glyphs absent from Dokdo and is never configured as Dokdo's own fallback through the UI default.
+씬 빌더와 런타임 UI 팩터리는 `UiFontSettings.Apply`와 `ApplyTo`를 사용합니다. 현재 기본 글꼴을 참조하는 기존 씬 범위에도 같은 굵기 규칙을 적용합니다. 마루부리에 없는 기호는 기존 Mona12 Text KR 대체 글꼴에서 표시합니다.
 
-UiTypographyTests checks every saved UI scene, the common popup and dynamically created controls, including inactive text and input placeholders. It also checks scoped brush-font controls, common Korean/digit glyphs, embedded font data and the Mona fallback reference.
+타이틀 로고처럼 글자가 그림에 포함된 에셋은 이미지로 표시됩니다. 마루부리 배포 조건과 출처는 `Assets/Game/Resources/UI/MaruBuri-OFL.txt`에 있습니다.
