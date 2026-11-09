@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using RhythmDojo.Application;
@@ -33,8 +32,6 @@ namespace RhythmDojo.UI
         private double loadingStartedAt;
         private (string SongId, DifficultyProfile Difficulty, string Message, bool CanRetry)? playbackFailure;
 
-        private const string MissingAudioMessage = "음원 파일을 찾을 수 없어요.\n다른 곡을 선택해 주세요.";
-        private const string InvalidChartMessage = "채보를 읽을 수 없어요.\n다른 곡을 선택해 주세요.";
         private static readonly string[] LoadingCaptions = { "불러오는 중.", "불러오는 중..", "불러오는 중..." };
 
         public bool HardModeSelected { get; private set; }
@@ -914,12 +911,26 @@ namespace RhythmDojo.UI
                 song = null;
                 view.previewButton.GetComponentInChildren<Text>().text = "■ 멈추기";
             }
-            catch (Exception)
+            catch (OperationCanceledException)
             {
                 if (previewCancellation == request)
                 {
                     StopPreview();
-                    view.previewButton.GetComponentInChildren<Text>().text = "미리듣기 실패 · 재시도";
+                }
+            }
+            catch (Exception e)
+            {
+                if (previewCancellation == request)
+                {
+                    StopPreview();
+                    var display = SongLoadErrorDisplay.FromException(e);
+                    view.SetPlaybackStatus(message: display.Message);
+                    view.previewButton.interactable = display.CanRetry;
+                    view.play.interactable &= display.CanRetry;
+                    if (display.CanRetry)
+                    {
+                        view.previewButton.GetComponentInChildren<Text>().text = "미리듣기 실패 · 재시도";
+                    }
                 }
             }
             finally
@@ -984,23 +995,8 @@ namespace RhythmDojo.UI
                     return;
                 }
 
-                string message = "곡을 불러오지 못했어요.\n다시 시도해 주세요.";
-                bool canRetry = true;
-                switch (e)
-                {
-                    case FileNotFoundException:
-                    case DirectoryNotFoundException:
-                    case ProjectValidationException { FieldPath: "song.audio" }:
-                        message = MissingAudioMessage;
-                        canRetry = false;
-                        break;
-                    case ProjectValidationException:
-                        message = InvalidChartMessage;
-                        canRetry = false;
-                        break;
-                }
-
-                playbackFailure = (songId, difficulty, message, canRetry);
+                var display = SongLoadErrorDisplay.FromException(e);
+                playbackFailure = (songId, difficulty, display.Message, display.CanRetry);
                 SetLoading(false);
                 RefreshLibrary();
                 if (view.play.interactable && EventSystem.current)
@@ -1049,13 +1045,8 @@ namespace RhythmDojo.UI
             string error = chart?.Error ?? song.Error;
             if (error != null)
             {
-                string message = "이 곡을 재생할 수 없어요.\n다른 곡을 선택해 주세요.";
-                if (error.StartsWith("song.audio:", StringComparison.Ordinal))
-                {
-                    message = MissingAudioMessage;
-                }
-
-                view.SetPlaybackStatus(message: message);
+                var display = new SongLoadErrorDisplay(chart?.Failure ?? song.Failure);
+                view.SetPlaybackStatus(message: display.Message);
                 return;
             }
 

@@ -103,7 +103,9 @@ namespace RhythmDojo.Tests
             yield return Press(Key.Enter);
             Assert.That(provider.LoadCount, Is.EqualTo(2), "Enter should retry the selected song.");
             Assert.That(view.playErrorPanel.activeSelf, Is.False);
-            provider.Pending.SetException(new System.IO.FileNotFoundException("Missing audio."));
+            provider.Pending.SetException(new SongLoadException(new SongLoadFailure(
+                SongLoadFailureKind.MissingAudio, "Missing audio.",
+                new System.IO.FileNotFoundException("Missing audio."))));
             yield return Await(() => view.playErrorPanel.activeSelf, "Missing audio error did not appear.");
             Assert.That(view.playErrorLabel.text, Does.Contain("음원 파일을 찾을 수 없어요"));
             Assert.That(view.play.interactable, Is.False);

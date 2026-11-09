@@ -161,7 +161,7 @@ namespace RhythmDojo.Tests
                 await loader.LoadAsync(Document, CancellationToken.None);
                 Assert.Fail();
             }
-            catch (InvalidOperationException e)
+            catch (SongLoadException e)
             {
                 Assert.That(e.Message, Does.Contain("AudioId"));
             }
@@ -177,7 +177,7 @@ namespace RhythmDojo.Tests
                 await loader.LoadAsync(Document, CancellationToken.None);
                 Assert.Fail();
             }
-            catch (InvalidOperationException e)
+            catch (SongLoadException e)
             {
                 Assert.That(e.Message, Does.Contain("ModeId"));
             }
@@ -214,7 +214,7 @@ namespace RhythmDojo.Tests
                 library.Entries.Where(e => e.Id == "b").All(e => e.Error.Contains("Duplicate")),
                 Is.True
             );
-            Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            Assert.ThrowsAsync<SongLoadException>(async () =>
                 await library.LoadAsync("b", CancellationToken.None)
             );
             library.Unregister(duplicate);

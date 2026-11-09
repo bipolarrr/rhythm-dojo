@@ -20,6 +20,7 @@ namespace RhythmDojo.UI
         private Action flow;
         private Func<CancellationToken, Task> retry;
         private CancellationTokenSource retryLifetime;
+        private SongLoadErrorDisplay retryFailure;
         private bool retrying;
         private PlayResult result;
         private ISelectionPreferences preferences;
@@ -75,6 +76,7 @@ namespace RhythmDojo.UI
             preferences = savedPreferences;
             this.openTimingCalibration = openTimingCalibration;
             retryLifetime = new CancellationTokenSource();
+            retryFailure = null;
             retrying = false;
             modalClosedFrame = -1;
 
@@ -107,7 +109,7 @@ namespace RhythmDojo.UI
             view.cover.enabled = false;
             view.coverPlaceholder.gameObject.SetActive(true);
             view.retryButton.gameObject.SetActive(result != null && retry != null);
-            view.retryButton.interactable = !retrying;
+            view.retryButton.interactable = !retrying && (retryFailure?.CanRetry ?? true);
             view.retryStatus.text = "";
             view.scoreValue.text = "—";
             view.scoreSummary.text = "";
@@ -276,6 +278,11 @@ namespace RhythmDojo.UI
                 return;
             }
 
+            if (retryFailure != null && !retryFailure.CanRetry)
+            {
+                return;
+            }
+
             retrying = true;
             view.retryButton.interactable = false;
             view.backButton.interactable = false;
@@ -286,9 +293,9 @@ namespace RhythmDojo.UI
             {
                 await retry(retryLifetime.Token);
             }
-            catch (Exception e)
+            catch (OperationCanceledException)
             {
-                if (!this)
+                if (!this || retryLifetime == null || retryLifetime.IsCancellationRequested)
                 {
                     return;
                 }
@@ -297,7 +304,24 @@ namespace RhythmDojo.UI
                 view.retryButton.interactable = true;
                 view.backButton.interactable = true;
                 view.moreButton.interactable = result?.Chart != null;
-                view.retryStatus.text = e.Message;
+                view.retryStatus.text = "";
+                RefreshTimingRecommendation();
+            }
+            catch (Exception e)
+            {
+                if (!this || retryLifetime == null || retryLifetime.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                retrying = false;
+                view.retryButton.interactable = true;
+                view.backButton.interactable = true;
+                view.moreButton.interactable = result?.Chart != null;
+                var display = SongLoadErrorDisplay.FromException(e);
+                retryFailure = display;
+                view.retryButton.interactable = display.CanRetry;
+                view.retryStatus.text = display.Message;
                 RefreshTimingRecommendation();
             }
         }
@@ -323,7 +347,7 @@ namespace RhythmDojo.UI
         {
             view.backButton.interactable = true;
             view.moreButton.interactable = result?.Chart != null;
-            view.retryButton.interactable = !retrying;
+            view.retryButton.interactable = !retrying && (retryFailure?.CanRetry ?? true);
             RefreshTimingRecommendation();
 
             if (UnityEngine.EventSystems.EventSystem.current)

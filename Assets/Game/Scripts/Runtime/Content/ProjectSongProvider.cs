@@ -28,11 +28,20 @@ namespace RhythmDojo.Content
             {
                 try
                 {
-                    var project = store.Read(id);
+                    SongProject project;
+                    try
+                    {
+                        project = store.Read(id);
+                    }
+                    catch (Exception e) when (e is not OperationCanceledException)
+                    {
+                        throw new SongLoadException(SongLoadFailure.FromChartRead(e));
+                    }
                     var charts = new List<ChartEntry>();
 
                     foreach (var chart in project.Charts.Where(c => c.Slot.HasValue))
                     {
+                        SongLoadFailure failure = null;
                         string error = null,
                             revision = null;
 
@@ -40,8 +49,9 @@ namespace RhythmDojo.Content
                         {
                             revision = RecordIdentity.Chart(Document(project, chart));
                         }
-                        catch (Exception e)
+                        catch (Exception e) when (e is not OperationCanceledException)
                         {
+                            failure = SongLoadFailure.FromChartValidation(e);
                             error = e.Message;
                         }
 
@@ -54,7 +64,8 @@ namespace RhythmDojo.Content
                                 chart.Notes.Length,
                                 chart.CompletionTimeSeconds,
                                 mode,
-                                mode.name
+                                mode.name,
+                                failure
                             )
                         );
                     }
@@ -110,7 +121,7 @@ namespace RhythmDojo.Content
                         )
                     );
                 }
-                catch (Exception e)
+                catch (Exception e) when (e is not OperationCanceledException)
                 {
                     entries.Add(
                         new SongEntry(
@@ -122,7 +133,8 @@ namespace RhythmDojo.Content
                             0,
                             0,
                             0,
-                            e.Message
+                            e.Message,
+                            failure: SongLoadFailure.FromException(e)
                         )
                     );
                 }
@@ -149,10 +161,19 @@ namespace RhythmDojo.Content
             CancellationToken cancellationToken
         )
         {
-            var project = await store.LoadAsync(Guid.Parse(songId), cancellationToken);
+            SongProject project;
+            try
+            {
+                project = await store.LoadAsync(Guid.Parse(songId), cancellationToken);
+            }
+            catch (Exception e) when (e is not OperationCanceledException)
+            {
+                throw new SongLoadException(SongLoadFailure.FromChartRead(e));
+            }
             var chart =
                 project.Charts.FirstOrDefault(c => c.Slot == slot)
-                ?? throw new InvalidOperationException("Chart slot missing.");
+                ?? throw new SongLoadException(new SongLoadFailure(
+                    SongLoadFailureKind.MissingChart, "Chart slot missing."));
             var loader = new DocumentSongLoader(
                 id =>
                 {
@@ -172,7 +193,17 @@ namespace RhythmDojo.Content
                     )
             );
 
-            return await loader.LoadAsync(Document(project, chart), cancellationToken);
+            SongDocument document;
+            try
+            {
+                document = Document(project, chart);
+            }
+            catch (Exception e) when (e is not OperationCanceledException)
+            {
+                throw new SongLoadException(SongLoadFailure.FromChartValidation(e));
+            }
+
+            return await loader.LoadAsync(document, cancellationToken);
         }
     }
 }
