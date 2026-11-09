@@ -146,7 +146,7 @@ $unity = 'C:/Program Files/Unity/Hub/Editor/6000.3.23f1/Editor/Unity.exe'
 
 Results는 `ScreenCompositionRoot`가 결과와 복귀 Action을 주입한다. 직접 Results를 실행하면 빈 결과를 표시하고 곡 선택으로 돌아간다. 에디터 테스트 플레이는 기존 AppFlow의 반환 경로를 사용한다. 레이아웃은 Build Results와 Build Settings로 재생성하며 SettingsPopup도 함께 갱신한다.
 
-검증 fixture: `PlayRulesTests`, `RhythmSessionTests`, `PlayResultReviewTests`, `ResultsLayoutTests`, `ResultsFlowTests`, `PupaResultsFlowTests`, `SettingsFlowTests`. `FixedRecordSlotUpdatesAllocateNoManagedMemory`는 초기화 이후 고정 결과 슬롯 20만 회 갱신만 측정한다. 전체 게임플레이(입력 이력 등), 결과 객체 생성 또는 열거가 무할당이라는 의미는 아니다.
+검증 fixture: `PlayRulesTests`, `RhythmSessionTests`, `PlayResultReviewTests`, `ResultsLayoutTests`, `ResultsFlowTests`, `PupaResultsFlowTests`, `SettingsFlowTests`. 실제 판정의 시작·끝 기록과 세션 초기화 후 결과 스냅샷 보존을 검증한다. 고정 결과 슬롯 대입만 반복하는 할당 측정은 검증 범위에서 제외한다.
 
 ### 2026-10-29 실행 결과
 

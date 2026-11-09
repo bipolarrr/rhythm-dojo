@@ -620,28 +620,6 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
-        public IEnumerator BufferSelectionWithoutApplyLeavesActualAudioUnchanged()
-        {
-            yield return Click(
-                UnityEngine.Object.FindFirstObjectByType<SongSelectionView>().settingsButton
-            );
-            yield return Await(() => UnityEngine.Object.FindFirstObjectByType<SettingsScreen>());
-            yield return null;
-
-            var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
-            var view = UnityEngine.Object.FindFirstObjectByType<SettingsView>();
-            var before = AudioSettings.GetConfiguration();
-            view.bufferList.value = 1;
-            yield return null;
-            Assert.That(flow.SelectedBufferOption, Is.EqualTo(1));
-            Assert.That(
-                AudioSettings.GetConfiguration().dspBufferSize,
-                Is.EqualTo(before.dspBufferSize)
-            );
-            Assert.That(view.actualState.text, Does.Contain($"{before.dspBufferSize} samples"));
-        }
-
-        [UnityTest]
         public IEnumerator BufferValidationBlocksEarlyCloseAndShowsTheAppliedConfiguration()
         {
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
@@ -701,6 +679,10 @@ namespace RhythmDojo.Tests
                 AudioSettings.GetConfiguration().dspBufferSize,
                 Is.EqualTo(before.dspBufferSize),
                 "Selection alone must not reset audio."
+            );
+            Assert.That(
+                UnityEngine.Object.FindFirstObjectByType<SettingsView>().actualState.text,
+                Does.Contain($"{before.dspBufferSize} samples")
             );
             yield return Press(Key.DownArrow);
             Assert.That(

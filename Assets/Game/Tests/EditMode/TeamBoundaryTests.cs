@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,7 +12,6 @@ using RhythmDojo.Gameplay;
 using RhythmDojo.Services;
 using RhythmDojo.UI;
 using UnityEditor;
-using UnityEditor.SceneManagement;
 using UnityEngine;
 
 namespace RhythmDojo.Tests
@@ -252,33 +250,6 @@ namespace RhythmDojo.Tests
                 UnityEngine.Object.DestroyImmediate(view.gameObject);
                 UnityEngine.Object.DestroyImmediate(mode);
             }
-        }
-
-        [Test]
-        public void SceneGenerationDoesNotWriteContentAssets()
-        {
-            using var generated = new GeneratedSceneSnapshot();
-            // Earlier fixtures may leave a dirty temporary scene. Give this builder test its own scene.
-            EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
-
-            var files = new[]
-            {
-                "Assets/Game/Settings",
-                "Assets/Game/Audio",
-                "Assets/Game/Materials",
-                "Assets/Game/Prefabs",
-            }
-                .SelectMany(p => Directory.GetFiles(p, "*", SearchOption.AllDirectories))
-                .ToDictionary(p => p, File.ReadAllBytes);
-            SceneBuilder.BuildAll();
-            SceneBuilder.BuildAll();
-
-            foreach (var pair in files)
-            {
-                Assert.That(File.ReadAllBytes(pair.Key), Is.EqualTo(pair.Value), pair.Key);
-            }
-
-            EditorSceneManager.OpenScene(SceneBuilder.BootstrapPath);
         }
     }
 }

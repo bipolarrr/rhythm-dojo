@@ -400,12 +400,34 @@ namespace RhythmDojo.Tests
         public void GeneratedScenesRemainStableAndSettingsAreNotOverwritten()
         {
             using var generated = new GeneratedSceneSnapshot();
+            // Earlier fixtures may leave a dirty temporary scene. Give this builder test its own scene.
+            EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+
+            var files = new[]
+            {
+                "Assets/Game/Settings",
+                "Assets/Game/Audio",
+                "Assets/Game/Materials",
+                "Assets/Game/Prefabs",
+            }
+                .SelectMany(p => Directory.GetFiles(p, "*", SearchOption.AllDirectories))
+                .ToDictionary(p => p, File.ReadAllBytes);
             string before = EditorJsonUtility.ToJson(Settings.defaultDifficulty);
             string scrollBefore = EditorJsonUtility.ToJson(Settings.scroll);
             SceneBuilder.BuildAll();
 
+            foreach (var pair in files)
+            {
+                Assert.That(File.ReadAllBytes(pair.Key), Is.EqualTo(pair.Value), pair.Key);
+            }
+
             string first = Signature();
             SceneBuilder.BuildAll();
+
+            foreach (var pair in files)
+            {
+                Assert.That(File.ReadAllBytes(pair.Key), Is.EqualTo(pair.Value), pair.Key);
+            }
 
             string second = Signature();
             Assert.That(second, Is.EqualTo(first));

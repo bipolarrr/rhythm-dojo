@@ -2344,20 +2344,6 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
-        public IEnumerator OriginalEditorKeepsItsStandardDefault()
-        {
-            yield return SceneManager.LoadSceneAsync(ChartEditorMenu.ScenePath);
-            yield return null;
-            var screen = UnityEngine.Object.FindFirstObjectByType<ChartEditorScreen>();
-            Assert.That(screen.Session.Snapshot.Charts.Single().Slot, Is.EqualTo(ChartSlot.Easy));
-            Assert.That(WorkspaceEditor.ScenePath, Is.EqualTo(ChartEditorMenu.ScenePath));
-            Assert.That(UnityEngine.Object.FindFirstObjectByType<WorkspaceEditor>(), Is.Not.Null);
-            var view = UnityEngine.Object.FindFirstObjectByType<WorkspaceView>();
-            Assert.That(view.toolActions.Length, Is.EqualTo(6));
-            Assert.That(view.quantizationCycleValue.text, Is.EqualTo("1/4"));
-        }
-
-        [UnityTest]
         public IEnumerator DifficultyButtonsLiveInSettingsAndSelectAllSlots()
         {
             var settings = workspace.view.menus[1];

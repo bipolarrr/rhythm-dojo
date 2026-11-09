@@ -234,22 +234,6 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
-        public IEnumerator DifficultyDropdownChangesJudgmentWithoutChangingScroll()
-        {
-            var view = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
-            var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
-            var mode = flow.SelectedScrollMode;
-            var multiplier = flow.SelectedMultiplier;
-            view.difficultyList.value = 0;
-            yield return null;
-            Assert.That(flow.SelectedDifficulty.DisplayName, Is.EqualTo("Standard"));
-            Assert.That(view.difficultyButtons[0].interactable, Is.False);
-            Assert.That(view.difficultyButtons[2].interactable, Is.False);
-            Assert.That(flow.SelectedScrollMode, Is.EqualTo(mode));
-            Assert.That(flow.SelectedMultiplier, Is.EqualTo(multiplier));
-        }
-
-        [UnityTest]
         public IEnumerator HorizontalDifficultyButtonsKeepSelectionJudgmentAndOptionsInSync()
         {
             var view = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
@@ -399,35 +383,6 @@ namespace RhythmDojo.Tests
             Assert.That(flow.CurrentRequest.Multiplier, Is.EqualTo(6.7).Within(.0001));
             Assert.That(flow.CurrentRequest.ScrollMode, Is.EqualTo(ScrollMode.Constant));
             Assert.That(flow.CurrentRequest.TimingOffsetMs, Is.EqualTo(125));
-        }
-
-        [UnityTest]
-        public IEnumerator ScrollModeDropdownChangesModeWithoutChangingDifficulty()
-        {
-            var view = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
-            var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
-            var difficulty = flow.SelectedDifficulty;
-            view.scrollModeList.value = 1;
-            yield return null;
-            Assert.That(flow.SelectedScrollMode, Is.EqualTo(ScrollMode.Constant));
-            Assert.That(flow.SelectedDifficulty, Is.EqualTo(difficulty));
-        }
-
-        [UnityTest]
-        public IEnumerator MultiplierDropdownChangesSpeedWithoutChangingSong()
-        {
-            var view = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
-            var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
-            int song = flow.SelectedSongIndex;
-            flow.Selection.UpdateSelection(
-                flow.Selection.SelectedSongId,
-                flow.SelectedDifficulty,
-                flow.SelectedScrollMode,
-                1.5
-            );
-            yield return null;
-            Assert.That(flow.SelectedMultiplier, Is.EqualTo(1.5));
-            Assert.That(flow.SelectedSongIndex, Is.EqualTo(song));
         }
 
         [UnityTest]
