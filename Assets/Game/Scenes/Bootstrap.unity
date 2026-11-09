@@ -119,7 +119,7 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &1200396065
+--- !u!1 &628266593
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -127,8 +127,8 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1200396067}
-  - component: {fileID: 1200396066}
+  - component: {fileID: 628266595}
+  - component: {fileID: 628266594}
   m_Layer: 0
   m_Name: Bootstrap
   m_TagString: Untagged
@@ -136,36 +136,36 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1200396066
+--- !u!114 &628266594
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1200396065}
+  m_GameObject: {fileID: 628266593}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1cb34e797fc0f7b46b1634b2d6f62cfd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Runtime::RhythmDojo.Core.Bootstrap
   settings: {fileID: 11400000, guid: 293acdc66de59954591db52e1beeb837, type: 2}
---- !u!4 &1200396067
+--- !u!4 &628266595
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1200396065}
+  m_GameObject: {fileID: 628266593}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1999412011}
+  - {fileID: 2120113383}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1999412010
+--- !u!1 &2120113382
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -173,9 +173,9 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1999412011}
-  - component: {fileID: 1999412013}
-  - component: {fileID: 1999412012}
+  - component: {fileID: 2120113383}
+  - component: {fileID: 2120113385}
+  - component: {fileID: 2120113384}
   m_Layer: 0
   m_Name: Loading Camera
   m_TagString: Untagged
@@ -183,36 +183,36 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1999412011
+--- !u!4 &2120113383
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1999412010}
+  m_GameObject: {fileID: 2120113382}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1200396067}
+  m_Father: {fileID: 628266595}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!81 &1999412012
+--- !u!81 &2120113384
 AudioListener:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1999412010}
+  m_GameObject: {fileID: 2120113382}
   m_Enabled: 1
---- !u!20 &1999412013
+--- !u!20 &2120113385
 Camera:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1999412010}
+  m_GameObject: {fileID: 2120113382}
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
@@ -261,4 +261,4 @@ Camera:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 1200396067}
+  - {fileID: 628266595}
