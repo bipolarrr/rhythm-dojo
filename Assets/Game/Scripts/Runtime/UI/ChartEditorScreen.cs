@@ -60,6 +60,8 @@ namespace RhythmDojo.UI
         public GameModeDefinition Mode => mode;
 
         public bool IsBusy { get; set; }
+        public bool IsEditingLocked { get; internal set; }
+        public bool IsEditingBlocked => IsBusy || IsEditingLocked;
 
         private BeatGridTiming tempo;
 
@@ -88,16 +90,23 @@ namespace RhythmDojo.UI
                 );
             }
 
-            session = new EditorSession(new SongProject());
-            session.Edit(edit =>
-                chartId = edit.AddChartSlot(
-                    initialSlot,
-                    mode.name,
-                    mode.LaneCount,
-                    DefaultChartDuration
-                )
-            );
-            SetSession(ChartEditorMenu.TakeReturningSession() ?? session);
+            SetSession(ChartEditorMenu.TakeReturningSession() ?? CreateDraft(initialSlot));
+        }
+
+        internal EditorSession CreateDraft(ChartSlot slot)
+        {
+            var chart = new ChartDocument
+            {
+                Slot = slot,
+                Name = slot.ToString(),
+                ModeId = mode.name,
+                LaneCount = mode.LaneCount,
+                CompletionTimeSeconds = DefaultChartDuration,
+            };
+            var project = new SongProject { Charts = new[] { chart } };
+
+            // Compare future edits to the default draft even before its first save.
+            return new EditorSession(project, isSaved: true);
         }
 
         public void SetSession(EditorSession replacement)
@@ -151,7 +160,7 @@ namespace RhythmDojo.UI
 
         public void SelectSlot(int value)
         {
-            if (IsBusy || value < 0 || value > 2)
+            if (IsEditingBlocked || value < 0 || value > 2)
             {
                 return;
             }
@@ -184,7 +193,7 @@ namespace RhythmDojo.UI
 
         public void SelectNextChart()
         {
-            if (IsBusy)
+            if (IsEditingBlocked)
             {
                 return;
             }
@@ -292,6 +301,13 @@ namespace RhythmDojo.UI
 
         public void OnPointerDown(PointerEventData eventData)
         {
+            if (IsEditingBlocked)
+            {
+                pressing = false;
+                beatGrid.SetPreview(-1);
+                return;
+            }
+
             if (!IsBusy && PointerTool != null && PointerTool(eventData))
             {
                 return;
@@ -349,7 +365,7 @@ namespace RhythmDojo.UI
 
             double endBeat = Math.Max(pressBeat, BeatAtPointer(eventData));
 
-            if (IsBusy)
+            if (IsEditingBlocked)
             {
                 return;
             }
@@ -414,7 +430,7 @@ namespace RhythmDojo.UI
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            if (IsBusy || eventData.button != PointerEventData.InputButton.Right)
+            if (IsEditingBlocked || eventData.button != PointerEventData.InputButton.Right)
             {
                 return;
             }

@@ -154,6 +154,38 @@ namespace RhythmDojo.Gameplay
             return Math.Max(first, Math.Min(last, rounded));
         }
 
+        public void GetSnapTimeBounds(double time, double step, out double? earlier, out double later)
+        {
+            int index = MeterIndexAt(time);
+            double anchor = 0;
+            if (index > 0)
+            {
+                anchor = BeatAtTime(settings.Meters[index].TimeSeconds);
+            }
+
+            double lowerIndex = Math.Floor((BeatAtTime(time) - anchor) / step + 1e-9);
+            double lowerTime = TimeAtBeat(anchor + lowerIndex * step);
+            if (index > 0 && lowerIndex == 0)
+            {
+                lowerTime = settings.Meters[index].TimeSeconds;
+            }
+            earlier = null;
+            if (lowerTime >= -1e-9)
+            {
+                earlier = Math.Max(0, lowerTime);
+            }
+
+            later = Math.Max(0, TimeAtBeat(anchor + (lowerIndex + 1) * step));
+            if (index + 1 < settings.Meters.Length)
+            {
+                double nextAnchor = settings.Meters[index + 1].TimeSeconds;
+                if (later >= nextAnchor - 1e-9)
+                {
+                    later = nextAnchor;
+                }
+            }
+        }
+
         public IEnumerable<double> Lines(double firstBeat, double lastBeat, double subdivision, int maxLines = 200000)
         {
             double range = lastBeat - firstBeat;

@@ -37,6 +37,8 @@ namespace RhythmDojo.Authoring
         private double? previewReturnTime;
         private bool playing;
         private bool follow = true;
+        private bool useOnAirPageFollow;
+        private bool onAirFollow;
         private bool locked;
         private bool preserveBeats;
         private float panelHeight = 280;
@@ -50,6 +52,7 @@ namespace RhythmDojo.Authoring
         private Text tooltip;
         private Text ruler;
         private Text playLabel;
+        private Text followLabel;
         private InputField bpm;
         private InputField origin;
         private InputField nudge;
@@ -92,6 +95,7 @@ namespace RhythmDojo.Authoring
             }
         }
         public bool IsBusy => !screen || screen.IsBusy || loadingAudio;
+        public bool IsEditingBlocked => IsBusy || screen.IsEditingLocked;
         public bool IsLoadingAudio => loadingAudio;
         public bool IsPlaying => playing;
         public AudioClip PreviewClip => source.clip;
@@ -103,6 +107,18 @@ namespace RhythmDojo.Authoring
 
         public float PreviewSpeed { get; private set; } = 1f;
         public bool IsSeeking { get; private set; }
+        private bool IsFollowing => (useOnAirPageFollow && onAirFollow) || (!useOnAirPageFollow && follow);
+
+        internal bool UseOnAirPageFollow
+        {
+            get => useOnAirPageFollow;
+            set
+            {
+                useOnAirPageFollow = value;
+                onAirFollow = value;
+                RefreshFollowLabel();
+            }
+        }
 
         public void BeginSeek()
         {
@@ -147,6 +163,11 @@ namespace RhythmDojo.Authoring
 
         public void TogglePreview(bool returnToStart = false)
         {
+            if (IsEditingBlocked)
+            {
+                return;
+            }
+
             if (playing)
             {
                 double? previewReturnTime = this.previewReturnTime;
@@ -233,11 +254,9 @@ namespace RhythmDojo.Authoring
 
             bound = true;
             view.playAudioControl.onClick.AddListener(() => TogglePreview());
-            view.followAudioControl.onClick.AddListener(() =>
-                {
-                    follow = true;
-                    SyncChart(MusicTime);
-                });
+            followLabel = view.followAudioControl.GetComponentInChildren<Text>();
+            RefreshFollowLabel();
+            view.followAudioControl.onClick.AddListener(ToggleFollowing);
             view.applyGridControl.onClick.AddListener(ApplyBasic);
             view.cursorOriginControl.onClick.AddListener(SetOrigin);
             view.nudgeUnitsControl.onValueChanged.AddListener(_ => { });
@@ -247,7 +266,7 @@ namespace RhythmDojo.Authoring
             view.halfBPMControl.onClick.AddListener(() => ScaleBpm(0.5));
             view.gridLockControl.onClick.AddListener(() =>
             {
-                if (IsBusy)
+                if (IsEditingBlocked)
                 {
                     return;
                 }
@@ -261,7 +280,7 @@ namespace RhythmDojo.Authoring
             });
             view.noteSnapControl.onValueChanged.AddListener(value =>
                 {
-                    if (IsBusy || locked)
+                    if (IsEditingBlocked || locked)
                     {
                         return;
                     }
@@ -313,7 +332,7 @@ namespace RhythmDojo.Authoring
 
         public void ShowGridSettings()
         {
-            if (IsBusy)
+            if (IsEditingBlocked)
             {
                 return;
             }
@@ -326,7 +345,7 @@ namespace RhythmDojo.Authoring
 
         public void OpenTempoChange()
         {
-            if (IsBusy || locked)
+            if (IsEditingBlocked || locked)
             {
                 return;
             }
@@ -468,8 +487,13 @@ namespace RhythmDojo.Authoring
 
             foreach (var control in view.editControls)
             {
-                control.interactable = !IsBusy && !locked;
+                control.interactable = !IsEditingBlocked && !locked;
             }
+
+            view.advancedGridControl.interactable = !IsEditingBlocked && !locked;
+            view.gridSettingsControl.interactable = !IsEditingBlocked;
+            view.gridLockControl.interactable = !IsEditingBlocked;
+            view.playAudioControl.interactable = !IsEditingBlocked;
 
             double time = MusicTime;
             if (playing && time >= Duration)
@@ -480,10 +504,21 @@ namespace RhythmDojo.Authoring
                 this.previewReturnTime = previewReturnTime;
             }
 
-            if (playing && follow && !IsSeeking)
+            if (playing && IsFollowing && !IsSeeking)
             {
                 WindowStart = Math.Max(MinimumWindowStart, time - WindowDuration * 0.3);
-                SyncChart(time);
+                if (UseOnAirPageFollow)
+                {
+                    double? pageStart = grid.GetPlaybackPageStart(time + AudioOffset);
+                    if (pageStart.HasValue)
+                    {
+                        SyncChart(pageStart.Value - AudioOffset);
+                    }
+                }
+                else
+                {
+                    SyncChart(time);
+                }
             }
 
             if (playing)
@@ -748,7 +783,7 @@ namespace RhythmDojo.Authoring
                 return;
             }
 
-            follow = false;
+            StopFollowingForManualNavigation();
             WindowStart = Math.Max(MinimumWindowStart, Math.Min(Math.Max(0, Duration - WindowDuration), start));
             SyncChart(WindowStart);
             Redraw();
@@ -761,7 +796,7 @@ namespace RhythmDojo.Authoring
                 return;
             }
 
-            follow = false;
+            StopFollowingForManualNavigation();
             double fraction = (anchorTime - WindowStart) / WindowDuration;
             double minimumDuration = 0.001;
             if (source.clip)
@@ -774,6 +809,52 @@ namespace RhythmDojo.Authoring
             WindowStart = Math.Max(MinimumWindowStart, anchorTime - fraction * WindowDuration);
             SyncChart(WindowStart);
             Redraw();
+        }
+
+        private void ToggleFollowing()
+        {
+            if (IsBusy)
+            {
+                return;
+            }
+
+            if (UseOnAirPageFollow)
+            {
+                onAirFollow = !onAirFollow;
+            }
+            else
+            {
+                follow = !follow;
+                if (follow)
+                {
+                    SyncChart(MusicTime);
+                }
+            }
+
+            RefreshFollowLabel();
+        }
+
+        private void StopFollowingForManualNavigation()
+        {
+            if (!UseOnAirPageFollow)
+            {
+                follow = false;
+                RefreshFollowLabel();
+            }
+        }
+
+        private void RefreshFollowLabel()
+        {
+            if (!followLabel)
+            {
+                return;
+            }
+
+            followLabel.text = "재생 따라가기 · 꺼짐";
+            if (IsFollowing)
+            {
+                followLabel.text = "재생 따라가기 · 켜짐";
+            }
         }
 
         private void SyncChart(double musicTime)
@@ -845,7 +926,7 @@ namespace RhythmDojo.Authoring
 
         private void Edit(Action action, bool notify = true)
         {
-            if (IsBusy)
+            if (IsEditingBlocked)
             {
                 return;
             }

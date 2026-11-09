@@ -116,12 +116,16 @@ namespace RhythmDojo.Tests
                         new Vector3(grid.rect.width * 0.125f, -grid.rect.height * 0.05f)
                     )
                 );
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+                yield return null;
                 yield return Click(mouse, laterPoint, MouseButton.Left);
                 Assert.That(
                     notes.childCount,
                     Is.EqualTo(4),
                     "The chart must accept a note after 10 seconds."
                 );
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.LeftCtrl));
+                yield return null;
                 yield return Scroll(mouse, point, 120);
                 yield return Scroll(mouse, point, 120);
                 Assert.That(notes.childCount, Is.EqualTo(3), "Zooming in only hides later notes.");
@@ -135,14 +139,14 @@ namespace RhythmDojo.Tests
                 }
 
                 Assert.That(editor.VisibleBeats, Is.EqualTo(36));
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+                yield return null;
                 yield return Click(mouse, laterPoint, MouseButton.Left);
                 Assert.That(
                     notes.childCount,
                     Is.EqualTo(5),
                     "The chart must grow beyond its old 16-second limit."
                 );
-                InputSystem.QueueStateEvent(keyboard, new KeyboardState());
-                yield return null;
                 yield return Scroll(mouse, point, 120);
                 Assert.That(editor.VisibleBeats, Is.EqualTo(36));
             }
