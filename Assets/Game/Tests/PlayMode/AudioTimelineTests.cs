@@ -152,7 +152,15 @@ namespace RhythmDojo.Tests
             string root = Path.Combine(UnityEngine.Application.temporaryCachePath,
                 "AudioTimelineTests", Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(root);
+            var input = InputSystem.settings;
+            var editorBehavior = input.editorInputBehaviorInPlayMode;
+            var backgroundBehavior = input.backgroundBehavior;
+            input.editorInputBehaviorInPlayMode = InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+            input.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
             var mouse = InputSystem.AddDevice<Mouse>();
+            mouse.MakeCurrent();
+            var keyboard = InputSystem.AddDevice<Keyboard>();
+            keyboard.MakeCurrent();
             try
             {
                 string path = Path.Combine(root, "beats.wav");
@@ -422,6 +430,9 @@ namespace RhythmDojo.Tests
             finally
             {
                 InputSystem.RemoveDevice(mouse);
+                InputSystem.RemoveDevice(keyboard);
+                input.editorInputBehaviorInPlayMode = editorBehavior;
+                input.backgroundBehavior = backgroundBehavior;
                 // Unload and release the clip before the fixture removes its private files.
                 screen.Session.Edit(edit => edit.SetAudio(null));
                 if (Directory.Exists(root))

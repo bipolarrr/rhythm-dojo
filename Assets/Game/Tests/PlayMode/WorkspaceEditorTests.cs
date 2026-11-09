@@ -100,10 +100,10 @@ namespace RhythmDojo.Tests
             yield return null;
         }
 
-        private IEnumerator ClickAt(Vector2 point)
+        private IEnumerator ClickAt(Vector2 point, MouseButton button = MouseButton.Left)
         {
             yield return MoveTo(point);
-            InputSystem.QueueStateEvent(mouse, new MouseState { position = point, buttons = 1 });
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = point }.WithButton(button));
             yield return null;
             yield return null;
             yield return MoveTo(point);
@@ -1071,7 +1071,7 @@ namespace RhythmDojo.Tests
             Assert.That(bindings.Select(item => item.action), Is.EqualTo(new[]
             {
                 WorkspaceAction.Select, WorkspaceAction.Pencil, WorkspaceAction.Eraser, WorkspaceAction.Position,
-                WorkspaceAction.Scroll
+                WorkspaceAction.Scroll, WorkspaceAction.OnAir
             }));
             foreach (var binding in bindings)
             {
@@ -2030,6 +2030,99 @@ namespace RhythmDojo.Tests
             Assert.That(workspace.screen.ChartId, Is.EqualTo(chart.Id));
             Assert.That(workspace.view.difficulty[0].colors.normalColor.grayscale,
                 Is.LessThan(workspace.view.difficulty[2].colors.normalColor.grayscale));
+        }
+
+        [UnityTest]
+        public IEnumerator OnAirPreventsNoteDeletionDuringCountdownAndRecording()
+        {
+            workspace.view.audioPath.text = WriteTempoWave();
+            workspace.Run(WorkspaceAction.ImportAudio);
+            yield return Idle();
+
+            var screen = workspace.screen;
+            screen.Session.Edit(edit =>
+            {
+                edit.SetTiming(0, new TempoPoint(0, 120));
+                edit.AddNote(screen.ChartId, NoteData.Tap(1, 3));
+            });
+            var before = screen.Session.GetNotes(screen.ChartId);
+            workspace.timeline.Seek(2);
+            workspace.Run(WorkspaceAction.OnAir);
+            workspace.Run(WorkspaceAction.ConfirmOnAir);
+            yield return ClickAt(GridPoint(1, 3), MouseButton.Right);
+            Assert.That(screen.Session.GetNotes(screen.ChartId), Is.EqualTo(before),
+                "Right-click must not delete notes during the countdown.");
+
+            double deadline = Time.realtimeSinceStartupAsDouble + 5;
+            while (!workspace.timeline.IsPlaying)
+            {
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                yield return null;
+            }
+
+            yield return ClickAt(GridPoint(1, 3), MouseButton.Right);
+            Assert.That(screen.Session.GetNotes(screen.ChartId), Is.EqualTo(before),
+                "Right-click must not delete notes during recording.");
+            yield return PressKeys(Key.Escape);
+            yield return Idle();
+            Assert.That(workspace.timeline.MusicTime, Is.EqualTo(2).Within(.001));
+            yield return ClickAt(GridPoint(1, 3), MouseButton.Right);
+            Assert.That(screen.Session.GetNotes(screen.ChartId), Is.Empty,
+                "Normal note editing must resume after recording ends.");
+        }
+
+        [UnityTest]
+        public IEnumerator OnAirBlocksTimingEditsAndSeekingAndStillQuantizesOnExit()
+        {
+            workspace.view.audioPath.text = WriteTempoWave();
+            workspace.Run(WorkspaceAction.ImportAudio);
+            yield return Idle();
+
+            var screen = workspace.screen;
+            var timeline = workspace.timeline;
+            var view = timeline.GetComponent<ChartAudioTimelineView>();
+            screen.Session.Edit(edit => edit.SetTiming(0, new TempoPoint(0, 120)));
+            Guid chart = screen.ChartId;
+            timeline.Seek(2.05);
+            workspace.Run(WorkspaceAction.OnAir);
+            workspace.Run(WorkspaceAction.ConfirmOnAir);
+
+            view.advancedGridControl.onClick.Invoke();
+            Assert.That(timeline.IsTempoChangeOpen, Is.False,
+                "The BPM dialog must remain closed during the countdown.");
+            workspace.view.difficulty[1].onClick.Invoke();
+            Assert.That(screen.ChartId, Is.EqualTo(chart));
+            view.bpm.onEndEdit.Invoke("180");
+            Assert.That(screen.Session.Snapshot.TempoPoints[0].Bpm, Is.EqualTo(120));
+            yield return ClickAt(Center(view.overview.rectTransform));
+            Assert.That(timeline.MusicTime, Is.EqualTo(2.05).Within(.001));
+
+            double deadline = Time.realtimeSinceStartupAsDouble + 5;
+            while (!timeline.IsPlaying)
+            {
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                yield return null;
+            }
+
+            yield return PressKeys(PlayKeyBindings.GetKey(screen.Mode, screen.Mode.name, 0));
+            var recorded = screen.Session.GetNotes(chart).Single();
+            double expected = Math.Round(recorded.Data.StartTime / .5) * .5;
+            yield return ClickAt(Center(view.advancedGridControl.GetComponent<RectTransform>()));
+            view.advancedGridControl.onClick.Invoke();
+            Assert.That(timeline.IsTempoChangeOpen, Is.False,
+                "The BPM dialog must not interrupt recording.");
+            Assert.That(timeline.IsPlaying, Is.True);
+            view.doubleBPMControl.onClick.Invoke();
+            Assert.That(screen.Session.Snapshot.TempoPoints[0].Bpm, Is.EqualTo(120));
+
+            workspace.Run(WorkspaceAction.OnAir);
+            yield return Idle();
+            Assert.That(timeline.MusicTime, Is.EqualTo(2.05).Within(.001));
+            Assert.That(screen.Session.GetNotes(chart).Single().Data.StartTime, Is.EqualTo(expected).Within(.001));
+            view.advancedGridControl.onClick.Invoke();
+            Assert.That(timeline.IsTempoChangeOpen, Is.True,
+                "Timing editing must resume after recording ends.");
+            timeline.CloseTempoChange();
         }
 
         [UnityTest]

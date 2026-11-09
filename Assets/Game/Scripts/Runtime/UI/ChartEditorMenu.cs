@@ -167,7 +167,7 @@ namespace RhythmDojo.UI
 
         private void Toggle(GameObject panel)
         {
-            if (screen.IsBusy)
+            if (screen.IsEditingBlocked)
             {
                 return;
             }
@@ -492,7 +492,7 @@ namespace RhythmDojo.UI
 
         private void Run(Action action)
         {
-            if (screen.IsBusy)
+            if (screen.IsEditingBlocked)
             {
                 return;
             }
@@ -509,7 +509,7 @@ namespace RhythmDojo.UI
 
         private async void RunAsync(Func<Task> action)
         {
-            if (screen.IsBusy || store == null)
+            if (screen.IsEditingBlocked || store == null)
             {
                 return;
             }

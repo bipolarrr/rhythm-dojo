@@ -396,6 +396,7 @@ namespace RhythmDojo.Authoring
                 onAirEventSystem.sendNavigationEvents = false;
             }
 
+            screen.IsEditingLocked = true;
             onAirDeadline = Time.realtimeSinceStartupAsDouble + 3;
             view.onAirCountdown.text = "3";
             view.onAirCountdown.gameObject.SetActive(true);
@@ -558,6 +559,7 @@ namespace RhythmDojo.Authoring
         private void FinishOnAir()
         {
             var session = onAirSession;
+            screen.IsEditingLocked = false;
             if (timeline)
             {
                 timeline.UseOnAirPageFollow = false;
@@ -885,7 +887,7 @@ namespace RhythmDojo.Authoring
 
         private void ApplyBpm(string value)
         {
-            if (!this || working || screen.IsBusy)
+            if (!this || working || screen.IsEditingBlocked)
             {
                 return;
             }
@@ -944,7 +946,7 @@ namespace RhythmDojo.Authoring
                 return;
             }
 
-            if (working || screen.IsBusy || !menu.IsInitialized)
+            if (working || screen.IsEditingBlocked || !menu.IsInitialized)
             {
                 return;
             }

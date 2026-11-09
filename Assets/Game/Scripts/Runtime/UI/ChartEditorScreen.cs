@@ -60,6 +60,8 @@ namespace RhythmDojo.UI
         public GameModeDefinition Mode => mode;
 
         public bool IsBusy { get; set; }
+        public bool IsEditingLocked { get; internal set; }
+        public bool IsEditingBlocked => IsBusy || IsEditingLocked;
 
         private BeatGridTiming tempo;
 
@@ -158,7 +160,7 @@ namespace RhythmDojo.UI
 
         public void SelectSlot(int value)
         {
-            if (IsBusy || value < 0 || value > 2)
+            if (IsEditingBlocked || value < 0 || value > 2)
             {
                 return;
             }
@@ -191,7 +193,7 @@ namespace RhythmDojo.UI
 
         public void SelectNextChart()
         {
-            if (IsBusy)
+            if (IsEditingBlocked)
             {
                 return;
             }
@@ -299,6 +301,13 @@ namespace RhythmDojo.UI
 
         public void OnPointerDown(PointerEventData eventData)
         {
+            if (IsEditingBlocked)
+            {
+                pressing = false;
+                beatGrid.SetPreview(-1);
+                return;
+            }
+
             if (!IsBusy && PointerTool != null && PointerTool(eventData))
             {
                 return;
@@ -356,7 +365,7 @@ namespace RhythmDojo.UI
 
             double endBeat = Math.Max(pressBeat, BeatAtPointer(eventData));
 
-            if (IsBusy)
+            if (IsEditingBlocked)
             {
                 return;
             }
@@ -421,7 +430,7 @@ namespace RhythmDojo.UI
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            if (IsBusy || eventData.button != PointerEventData.InputButton.Right)
+            if (IsEditingBlocked || eventData.button != PointerEventData.InputButton.Right)
             {
                 return;
             }

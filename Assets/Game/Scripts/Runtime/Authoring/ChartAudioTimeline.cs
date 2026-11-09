@@ -95,6 +95,7 @@ namespace RhythmDojo.Authoring
             }
         }
         public bool IsBusy => !screen || screen.IsBusy || loadingAudio;
+        public bool IsEditingBlocked => IsBusy || screen.IsEditingLocked;
         public bool IsLoadingAudio => loadingAudio;
         public bool IsPlaying => playing;
         public AudioClip PreviewClip => source.clip;
@@ -162,6 +163,11 @@ namespace RhythmDojo.Authoring
 
         public void TogglePreview(bool returnToStart = false)
         {
+            if (IsEditingBlocked)
+            {
+                return;
+            }
+
             if (playing)
             {
                 double? previewReturnTime = this.previewReturnTime;
@@ -260,7 +266,7 @@ namespace RhythmDojo.Authoring
             view.halfBPMControl.onClick.AddListener(() => ScaleBpm(0.5));
             view.gridLockControl.onClick.AddListener(() =>
             {
-                if (IsBusy)
+                if (IsEditingBlocked)
                 {
                     return;
                 }
@@ -274,7 +280,7 @@ namespace RhythmDojo.Authoring
             });
             view.noteSnapControl.onValueChanged.AddListener(value =>
                 {
-                    if (IsBusy || locked)
+                    if (IsEditingBlocked || locked)
                     {
                         return;
                     }
@@ -326,7 +332,7 @@ namespace RhythmDojo.Authoring
 
         public void ShowGridSettings()
         {
-            if (IsBusy)
+            if (IsEditingBlocked)
             {
                 return;
             }
@@ -339,7 +345,7 @@ namespace RhythmDojo.Authoring
 
         public void OpenTempoChange()
         {
-            if (IsBusy || locked)
+            if (IsEditingBlocked || locked)
             {
                 return;
             }
@@ -481,8 +487,13 @@ namespace RhythmDojo.Authoring
 
             foreach (var control in view.editControls)
             {
-                control.interactable = !IsBusy && !locked;
+                control.interactable = !IsEditingBlocked && !locked;
             }
+
+            view.advancedGridControl.interactable = !IsEditingBlocked && !locked;
+            view.gridSettingsControl.interactable = !IsEditingBlocked;
+            view.gridLockControl.interactable = !IsEditingBlocked;
+            view.playAudioControl.interactable = !IsEditingBlocked;
 
             double time = MusicTime;
             if (playing && time >= Duration)
@@ -915,7 +926,7 @@ namespace RhythmDojo.Authoring
 
         private void Edit(Action action, bool notify = true)
         {
-            if (IsBusy)
+            if (IsEditingBlocked)
             {
                 return;
             }

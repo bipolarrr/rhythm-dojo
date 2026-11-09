@@ -485,7 +485,7 @@ namespace RhythmDojo.Authoring
 
         public void OnPointerDown(PointerEventData data)
         {
-            if (data.button != PointerEventData.InputButton.Left || Owner.IsBusy)
+            if (data.button != PointerEventData.InputButton.Left || Owner.IsEditingBlocked)
             {
                 return;
             }
@@ -509,7 +509,7 @@ namespace RhythmDojo.Authoring
 
         public void OnDrag(PointerEventData data)
         {
-            if (data.button != PointerEventData.InputButton.Left || Owner.IsBusy || snapSeek)
+            if (data.button != PointerEventData.InputButton.Left || Owner.IsEditingBlocked || snapSeek)
             {
                 return;
             }
@@ -527,6 +527,12 @@ namespace RhythmDojo.Authoring
 
         public void OnPointerUp(PointerEventData data)
         {
+            if (Owner.IsEditingBlocked)
+            {
+                snapSeek = false;
+                return;
+            }
+
             if (data.button != PointerEventData.InputButton.Left)
             {
                 return;
