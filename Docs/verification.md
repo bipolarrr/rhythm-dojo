@@ -1,5 +1,7 @@
 # 동작별 검증 가이드
 
+최신 #15–#21 통합 범위와 실행 결과는 [통합 검증 기록](integration-pr-15-21.md)을 참조한다. 아래 날짜별 과거 실행 기록은 해당 시점의 결과이다.
+
 ## 2026-11-03 Unity error follow-up
 
 The remaining scene-ownership, input/focus-isolation and rendering verification issues were corrected. Final Domain/EditMode: 399/399 passed. Latest PlayMode results by unique test: 202/202 passed, with no skips. The PlayMode total combines the full 202-test run (197 passed, 5 failed) with passing affected-fixture reruns (resume 9/9, chart editor 4/4, timeline 3/3, title 19/19); it is not a single clean final full run. Continuous 929-note playback and automatic Results passed. Native focus behavior remains the default and is regression-tested separately from controlled test focus. Builds were omitted because build/platform settings were unchanged.
