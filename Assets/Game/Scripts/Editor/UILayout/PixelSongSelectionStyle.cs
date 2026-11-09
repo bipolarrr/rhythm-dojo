@@ -28,6 +28,19 @@ namespace RhythmDojo.EditorTools
                 (RectTransform)view.backPopup.transform,
                 (RectTransform)view.modePopup.transform
             };
+            if (!view.GetComponent<CanvasGroup>())
+            {
+                view.gameObject.AddComponent<CanvasGroup>();
+            }
+
+            foreach (var panel in view.entrancePanels)
+            {
+                if (!panel.GetComponent<CanvasGroup>())
+                {
+                    panel.gameObject.AddComponent<CanvasGroup>();
+                }
+            }
+
             surface.GetComponent<Image>().enabled = false;
             surface.Find("Ambient Light").gameObject.SetActive(false);
             var backdrop = new GameObject("Pixel Dojo Background", typeof(RectTransform), typeof(Image), typeof(AspectRatioFitter));

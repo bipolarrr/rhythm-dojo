@@ -115,6 +115,29 @@ namespace RhythmDojo.Tests
                 .Count(g => g.name.StartsWith("Hold Glow"));
 
         [UnityTest]
+        public IEnumerator RebindingFeedbackReusesBurstAndSameModeHoldObjects()
+        {
+            yield return LoadGameplay();
+            var feedback = UnityEngine.Object.FindFirstObjectByType<GameplayHitFeedback>();
+            var objects = feedback.GetComponentsInChildren<GameplayImpactGraphic>(true)
+                .Select(item => item.GetInstanceID()).OrderBy(id => id).ToArray();
+            var first = new FeedbackReadModel();
+            Bind(feedback, first);
+            first.Hit(0);
+            Assert.That(ActiveBursts(feedback), Is.EqualTo(1));
+            var second = new FeedbackReadModel();
+            Bind(feedback, second);
+            yield return null;
+            CollectionAssert.AreEqual(objects, feedback.GetComponentsInChildren<GameplayImpactGraphic>(true)
+                .Select(item => item.GetInstanceID()).OrderBy(id => id).ToArray());
+            Assert.That(ActiveBursts(feedback), Is.Zero);
+            first.Hit(0);
+            Assert.That(ActiveBursts(feedback), Is.Zero, "Rebinding must release the previous model.");
+            second.Hit(0);
+            Assert.That(ActiveBursts(feedback), Is.EqualTo(1));
+        }
+
+        [UnityTest]
         public IEnumerator HitsReachAudioOutputWhileMissesStayQuietAndPoolsRemainBounded()
         {
             yield return LoadGameplay();

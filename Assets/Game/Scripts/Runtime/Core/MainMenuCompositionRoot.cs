@@ -12,6 +12,9 @@ namespace RhythmDojo.Core
         private MainMenuScreen screen;
 
         [SerializeField]
+        private TitleMusicPlayer music;
+
+        [SerializeField]
         private TitleMusicSettings titleMusic;
 
         [SerializeField]
@@ -28,6 +31,11 @@ namespace RhythmDojo.Core
 
             if (titleMusic)
             {
+                if (!music)
+                {
+                    throw new InvalidOperationException("Title music player missing.");
+                }
+
                 titleMusic.Validate();
             }
 
@@ -52,15 +60,14 @@ namespace RhythmDojo.Core
                 ?? RhythmDojo.Services.PresentationPreferences.Load();
             AudioListener.volume = presentation.masterVolume;
 
-            TitleMusicPlayer music = null;
-
+            RhythmDojo.Services.IMainMenuBeatClock beatClock = null;
             if (titleMusic)
             {
-                music = gameObject.AddComponent<TitleMusicPlayer>();
                 music.Initialize(titleMusic);
+                beatClock = music;
             }
 
-            screen.Initialize(new MainMenuActions(gameSettings, screen.GetComponent<MainMenuView>()), music);
+            screen.Initialize(new MainMenuActions(gameSettings, screen.GetComponent<MainMenuView>()), beatClock);
             flow.PrepareSelection();
         }
     }

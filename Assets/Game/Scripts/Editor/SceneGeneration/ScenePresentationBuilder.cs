@@ -91,10 +91,12 @@ namespace RhythmDojo.EditorTools
             var game = new GameObject("Rhythm Game");
             parts.Controller = game.AddComponent<RhythmGameController>();
             parts.Root = game.AddComponent<GameplayCompositionRoot>();
+            SceneDependencyAssembler.Wire(parts.Root, "gameplayCamera", camera);
             parts.HudView = GameplayHudLayoutBuilder.Build();
             parts.Hud = parts.HudView.gameObject.AddComponent<RhythmHud>();
             parts.Ui = parts.HudView.gameObject.AddComponent<GameplayUiController>();
             parts.Hits = parts.HudView.gameObject.AddComponent<GameplayHitFeedback>();
+            GameplayFeedbackBuilder.Build(parts.Hits, parts.HudView.transform);
             UiElements.EventSystem(
                 AssetDatabase.LoadAssetAtPath<UnityEngine.InputSystem.InputActionAsset>(
                     "Assets/InputSystem_Actions.inputactions"

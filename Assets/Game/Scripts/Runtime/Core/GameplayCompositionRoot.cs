@@ -24,6 +24,9 @@ namespace RhythmDojo.Core
         private GameSettings settings;
 
         [SerializeField]
+        private Camera gameplayCamera;
+
+        [SerializeField]
         private RhythmGameController controller;
 
         [SerializeField]
@@ -238,7 +241,7 @@ namespace RhythmDojo.Core
             hits.Initialize(
                 controller.ReadModel,
                 runtimeMode,
-                Camera.main,
+                gameplayCamera,
                 hud.GetComponent<Canvas>()
             );
             controller.ReadModel.Judged += TrackCombo;

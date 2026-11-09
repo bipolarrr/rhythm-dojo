@@ -13,9 +13,13 @@ namespace RhythmDojo.UI
         private readonly float[] ages = new float[Capacity];
         private readonly bool[] active = new bool[Capacity];
         private int nextImpact;
+        [SerializeField]
         private Texture2D stampTexture;
+        [SerializeField]
         private Vector2 stampOffset;
+        [SerializeField]
         private Vector2 stampSize;
+        [SerializeField]
         private Rect stampUv = new Rect(0, 0, 1, 1);
 
         public override Texture mainTexture
@@ -40,98 +44,12 @@ namespace RhythmDojo.UI
         public void Initialize(Texture2D texture, Vector2 hotspot)
         {
             Clear();
-            if (stampTexture)
+            // The prefab stores the baked imprint and geometry for its extended cursor frame.
+            if (!stampTexture)
             {
-                Destroy(stampTexture);
+                throw new System.InvalidOperationException("Baked fist imprint missing.");
             }
 
-            stampTexture = null;
-            if (!texture)
-            {
-                return;
-            }
-
-            var sourcePixels = texture.GetPixels32();
-            int left = texture.width;
-            int right = -1;
-            int bottom = texture.height;
-            int top = -1;
-            for (int y = 0; y < texture.height; y++)
-            {
-                for (int x = 0; x < texture.width; x++)
-                {
-                    if (sourcePixels[y * texture.width + x].a < 128)
-                    {
-                        continue;
-                    }
-
-                    left = Mathf.Min(left, x);
-                    right = Mathf.Max(right, x);
-                    bottom = Mathf.Min(bottom, y);
-                    top = Mathf.Max(top, y);
-                }
-            }
-
-            if (right < left || top < bottom)
-            {
-                return;
-            }
-
-            var artwork = Resources.Load<Texture2D>("UI/DojoFistImprint");
-            if (!artwork)
-            {
-                throw new System.InvalidOperationException("Gray frontal fist imprint artwork missing.");
-            }
-
-            var pixels = artwork.GetPixels32();
-            int imprintLeft = artwork.width;
-            int imprintRight = -1;
-            int imprintBottom = artwork.height;
-            int imprintTop = -1;
-            for (int y = 0; y < artwork.height; y++)
-            {
-                for (int x = 0; x < artwork.width; x++)
-                {
-                    int index = y * artwork.width + x;
-                    var pixel = pixels[index];
-                    byte gray = (byte)((pixel.r * 77 + pixel.g * 150 + pixel.b * 29) >> 8);
-                    pixels[index] = new Color32(gray, gray, gray, pixel.a);
-                    if (pixel.a < 128)
-                    {
-                        continue;
-                    }
-
-                    imprintLeft = Mathf.Min(imprintLeft, x);
-                    imprintRight = Mathf.Max(imprintRight, x);
-                    imprintBottom = Mathf.Min(imprintBottom, y);
-                    imprintTop = Mathf.Max(imprintTop, y);
-                }
-            }
-
-            if (imprintRight < imprintLeft || imprintTop < imprintBottom)
-            {
-                throw new System.InvalidOperationException("Gray frontal fist imprint artwork is empty.");
-            }
-
-            // Preserve the generated pixel shading, with strictly neutral gray and genuine alpha.
-            stampTexture = new Texture2D(artwork.width, artwork.height, TextureFormat.RGBA32, false);
-            stampTexture.name = "DojoFistImprint";
-            stampTexture.filterMode = FilterMode.Point;
-            stampTexture.wrapMode = TextureWrapMode.Clamp;
-            stampTexture.SetPixels32(pixels);
-            stampTexture.Apply();
-            float width = right - left + 1;
-            float height = top - bottom + 1;
-            float imprintWidth = imprintRight - imprintLeft + 1;
-            float imprintHeight = imprintTop - imprintBottom + 1;
-            stampUv = new Rect(imprintLeft / (float)artwork.width, imprintBottom / (float)artwork.height,
-                imprintWidth / artwork.width, imprintHeight / artwork.height);
-            stampSize = new Vector2(imprintWidth, imprintHeight)
-                * (Mathf.Round(Mathf.Max(width, height) * .5f) / Mathf.Max(imprintWidth, imprintHeight));
-            // Place the print at the leading knuckles of the extended diagonal cursor.
-            // Cursor hotspots use top-left coordinates; canvas positions use bottom-left coordinates.
-            stampOffset = new Vector2(left + width * .28f - hotspot.x,
-                bottom + height * .78f - texture.height + hotspot.y);
             SetMaterialDirty();
         }
 
@@ -228,16 +146,6 @@ namespace RhythmDojo.UI
         {
             Clear();
             base.OnDisable();
-        }
-
-        protected override void OnDestroy()
-        {
-            if (stampTexture)
-            {
-                Destroy(stampTexture);
-            }
-
-            base.OnDestroy();
         }
 
         public void Clear()

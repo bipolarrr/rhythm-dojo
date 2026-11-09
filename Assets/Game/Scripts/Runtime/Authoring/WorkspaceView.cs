@@ -49,6 +49,7 @@ namespace RhythmDojo.Authoring
         public GameObject noteSpeedWarning;
         public GameObject onAirPopup;
         public Text onAirCountdown;
+        public Text onAirHeading;
         public WorkspaceToolIcon onAirIcon;
         public Text saveAsError;
         public WorkspaceMenuPopup[] menus;
@@ -59,7 +60,7 @@ namespace RhythmDojo.Authoring
 
         public void SetOnAirQuantizing(bool quantizing)
         {
-            var heading = onAirPopup.transform.Find("Question").GetComponent<Text>();
+            var heading = onAirHeading;
             if (quantizing)
             {
                 onAirPromptText = heading.text;

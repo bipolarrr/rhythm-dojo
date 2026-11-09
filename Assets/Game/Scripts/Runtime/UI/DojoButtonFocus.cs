@@ -5,9 +5,13 @@ using UnityEngine.UI;
 
 namespace RhythmDojo.UI
 {
-    internal sealed class DojoButtonFocus : MonoBehaviour
+    public sealed class DojoButtonFocus : MonoBehaviour
     {
+        [SerializeField]
         private RectTransform border;
+
+        [SerializeField]
+        private RectTransform borderTemplate;
         private bool keyboardFocus;
 
         private void LateUpdate()
@@ -55,7 +59,9 @@ namespace RhythmDojo.UI
 
             if (!border)
             {
-                BuildBorder();
+                // The previous border can be destroyed with the selected scene object.
+                border = Instantiate(borderTemplate);
+                border.name = "Dojo Focus Border";
             }
 
             if (border.parent != control.transform)
@@ -79,29 +85,12 @@ namespace RhythmDojo.UI
             }
         }
 
-        private void BuildBorder()
+        private void OnDestroy()
         {
-            border = new GameObject("Dojo Focus Border", typeof(RectTransform)).GetComponent<RectTransform>();
-            AddEdge("Top", new Vector2(0, 1), Vector2.one, new Vector2(0, -3), Vector2.zero);
-            AddEdge("Bottom", Vector2.zero, new Vector2(1, 0), Vector2.zero, new Vector2(0, 3));
-            AddEdge("Left", Vector2.zero, new Vector2(0, 1), Vector2.zero, new Vector2(3, 0));
-            AddEdge("Right", new Vector2(1, 0), Vector2.one, new Vector2(-3, 0), Vector2.zero);
-        }
-
-        private void AddEdge(string name, Vector2 minimum, Vector2 maximum, Vector2 inset, Vector2 outset)
-        {
-            var edge = new GameObject(name, typeof(Image), typeof(Shadow)).GetComponent<Image>();
-            var rect = edge.rectTransform;
-            rect.SetParent(border, false);
-            rect.anchorMin = minimum;
-            rect.anchorMax = maximum;
-            rect.offsetMin = inset;
-            rect.offsetMax = outset;
-            edge.color = new Color(1f, .94f, .70f);
-            edge.raycastTarget = false;
-            var shadow = edge.GetComponent<Shadow>();
-            shadow.effectColor = new Color(.13f, .05f, .025f);
-            shadow.effectDistance = new Vector2(1.5f, -1.5f);
+            if (border && UnityEngine.Application.isPlaying)
+            {
+                Destroy(border.gameObject);
+            }
         }
     }
 }

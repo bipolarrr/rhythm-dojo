@@ -51,7 +51,7 @@ namespace RhythmDojo.Tests
             yield return null;
             cursor.SendMessage("RefreshTexture");
             var normal = (Texture2D)field.GetValue(cursor);
-            Assert.That(normal.name, Is.EqualTo("DojoHandrapV5Cursor"));
+            Assert.That(normal.name, Is.EqualTo("DojoCursorRest"));
             Assert.That(normal.width, Is.EqualTo(128));
             Assert.That(normal.height, Is.EqualTo(128));
             Assert.That(normal.format, Is.EqualTo(TextureFormat.RGBA32));
@@ -82,8 +82,8 @@ namespace RhythmDojo.Tests
             yield return new WaitForSecondsRealtime(.25f);
             cursor.SendMessage("RefreshTexture");
             var pressed = (Texture2D)field.GetValue(cursor);
-            Assert.That(pressed.name, Is.EqualTo("DojoHandrapV5Cursor"));
-            Assert.That(pressed, Is.Not.SameAs(normal));
+            Assert.That(pressed.name, Is.EqualTo("DojoCursorRest"));
+            Assert.That(pressed, Is.SameAs(normal), "Identical idle and held artwork shares the baked texture.");
             Assert.That(pressed, Is.Not.SameAs(punch));
             yield return null;
             cursor.SendMessage("RefreshTexture");

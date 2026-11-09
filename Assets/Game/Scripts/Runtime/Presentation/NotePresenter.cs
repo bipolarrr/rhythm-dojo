@@ -18,7 +18,6 @@ namespace RhythmDojo.Presentation
 
         [SerializeField]
         private NoteView[] views;
-        private Material[] laneMaterials;
         private GameModeDefinition mode;
         private GameplayPresentationSettings settings;
         private ChartData chart;
@@ -90,15 +89,6 @@ namespace RhythmDojo.Presentation
 
             this.chart = chart;
             this.scroll = scroll;
-            ClearMaterials();
-            laneMaterials = new Material[mode.LaneCount];
-
-            for (int lane = 0; lane < laneMaterials.Length; lane++)
-            {
-                laneMaterials[lane] = new Material(noteMaterial);
-                laneMaterials[lane].SetColor("_BaseColor", Color.white);
-            }
-
             bool reusable = views != null && views.Length == chart.Count;
 
             if (reusable)
@@ -132,7 +122,7 @@ namespace RhythmDojo.Presentation
             for (int i = 0; i < views.Length; i++)
             {
                 views[i].name = $"Note {i:00} - {chart[i].Kind} - Lane {chart[i].Lane}";
-                views[i].SetMaterial(laneMaterials[chart[i].Lane]);
+                views[i].SetMaterial(noteMaterial);
                 views[i].Render(chart[i], NoteState.Pending, 0, scroll, mode, settings);
             }
         }
@@ -160,7 +150,6 @@ namespace RhythmDojo.Presentation
         public void Clear()
         {
             ClearViews();
-            ClearMaterials();
         }
 
         private void ClearViews()
@@ -179,22 +168,6 @@ namespace RhythmDojo.Presentation
             views = null;
         }
 
-        private void ClearMaterials()
-        {
-            if (laneMaterials != null)
-            {
-                foreach (var material in laneMaterials)
-                {
-                    if (material)
-                    {
-                        Remove(material);
-                    }
-                }
-            }
-
-            laneMaterials = null;
-        }
-
         private static void Remove(UnityEngine.Object value)
         {
             if (UnityEngine.Application.isPlaying)
@@ -207,6 +180,5 @@ namespace RhythmDojo.Presentation
             }
         }
 
-        private void OnDestroy() => ClearMaterials();
     }
 }

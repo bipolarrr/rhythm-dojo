@@ -40,6 +40,9 @@ namespace RhythmDojo.EditorTools
             serializedScreen.FindProperty("initialSlot").intValue = (int)RhythmDojo.Application.ChartSlot.Easy;
             serializedScreen.ApplyModifiedPropertiesWithoutUndo();
             var workspace = canvas.gameObject.AddComponent<WorkspaceEditor>();
+            var soundSource = canvas.gameObject.AddComponent<AudioSource>();
+            soundSource.playOnAwake = false;
+            SceneDependencyAssembler.Wire(workspace, "soundSource", soundSource);
             var view = canvas.gameObject.AddComponent<WorkspaceView>();
             workspace.view = view;
             workspace.screen = screen;
@@ -408,6 +411,30 @@ namespace RhythmDojo.EditorTools
             preview.tapTemplate = SceneResources.Require<GameObject>("Assets/Game/Prefabs/TapNote.prefab").GetComponent<NoteView>();
             preview.holdTemplate = SceneResources.Require<GameObject>("Assets/Game/Prefabs/HoldNote.prefab").GetComponent<NoteView>();
             preview.playfield = new GameObject("Editor Preview World").AddComponent<PlayfieldPresenter>();
+            var previewRig = new GameObject("Editor Preview Rig");
+            SceneDependencyAssembler.Wire(preview, "previewRig", previewRig.transform);
+            var previewCamera = new GameObject("Editor Preview Camera").AddComponent<Camera>();
+            previewCamera.transform.SetParent(previewRig.transform, false);
+            previewCamera.transform.position = new Vector3(0, 10, -10);
+            previewCamera.transform.LookAt(new Vector3(0, 0, 9));
+            previewCamera.fieldOfView = 52;
+            previewCamera.farClipPlane = 180;
+            previewCamera.clearFlags = CameraClearFlags.SolidColor;
+            previewCamera.backgroundColor = new Color(.025f, .035f, .065f);
+            previewCamera.cullingMask = 1 << 31;
+            previewCamera.allowHDR = false;
+            previewCamera.allowMSAA = false;
+            previewCamera.depth = -50;
+            previewCamera.enabled = false;
+            SceneDependencyAssembler.Wire(preview, "previewCamera", previewCamera);
+            SceneDependencyAssembler.Wire(preview, "displayCamera", Camera.main);
+            var light = new GameObject("Editor Preview Light").AddComponent<Light>();
+            light.transform.SetParent(previewRig.transform, false);
+            light.type = LightType.Directional;
+            light.intensity = 1.3f;
+            light.cullingMask = 1 << 31;
+            light.transform.rotation = Quaternion.Euler(50, -25, 0);
+
             var serialized = new SerializedObject(preview.playfield);
             serialized.FindProperty("highwayMaterial").objectReferenceValue = SceneResources.Require<Material>("Assets/Game/Materials/Highway.mat");
             serialized.FindProperty("railMaterial").objectReferenceValue = SceneResources.Require<Material>("Assets/Game/Materials/Rails.mat");
@@ -560,6 +587,7 @@ namespace RhythmDojo.EditorTools
             PopupAction(popup, "NO", WorkspaceAction.CancelOnAir, 660, bindings);
             popup.gameObject.SetActive(false);
             view.onAirPopup = popup.gameObject;
+            view.onAirHeading = heading;
         }
 
         private static void BuildToolBar(Transform parent, WorkspaceView view)

@@ -375,6 +375,7 @@ namespace RhythmDojo.EditorTools
             ApplyCaptionSizes(view);
             ApplyPlayRuleSizes(view);
             BuildJudgmentPosition(view);
+            TimingCalibrationLayoutBuilder.Build(view);
 
             return view;
         }

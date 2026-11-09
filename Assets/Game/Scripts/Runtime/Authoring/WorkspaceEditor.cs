@@ -66,6 +66,7 @@ namespace RhythmDojo.Authoring
         private int tool;
         private Texture2D jacketTexture;
         private SongAudioLease soundLease;
+        [SerializeField]
         private AudioSource soundSource;
         private double previousPreviewTime;
         private static Guid returningProject;
@@ -108,7 +109,10 @@ namespace RhythmDojo.Authoring
                 yield return null;
             }
 
-            soundSource = gameObject.AddComponent<AudioSource>();
+            if (!soundSource)
+            {
+                throw new InvalidOperationException("Workspace effect audio source missing.");
+            }
             difficultyColors = Array.ConvertAll(view.difficulty, button => button.colors);
             soundSource.playOnAwake = false;
             grid.SelectedNoteIds = editing.Selected;

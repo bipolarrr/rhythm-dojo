@@ -4,9 +4,11 @@ using UnityEngine;
 
 namespace RhythmDojo.Audio
 {
+    [RequireComponent(typeof(AudioSource))]
     public sealed class TitleMusicPlayer : MonoBehaviour, IMainMenuBeatClock
     {
         private TitleMusicSettings settings;
+        [SerializeField]
         private AudioSource source;
         private double startDspTime;
         private bool initialized;
@@ -34,7 +36,7 @@ namespace RhythmDojo.Audio
 
             if (!source)
             {
-                source = gameObject.AddComponent<AudioSource>();
+                source = GetComponent<AudioSource>();
             }
 
             source.playOnAwake = false;

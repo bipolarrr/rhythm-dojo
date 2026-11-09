@@ -267,7 +267,13 @@ namespace RhythmDojo.Tests
             view.entrance.SetOpening(0f);
             var transition = DojoEntranceTransition.Begin(view.entrance, null, view.startPrompt.font, () => { });
             var copiedEntrance = transition.GetComponentInChildren<DojoEntranceView>();
-            var host = new GameObject("Door motion readiness test");
+            Assert.That(copiedEntrance.startPrompt.gameObject.activeSelf,
+                Is.EqualTo(view.startPrompt.gameObject.activeSelf));
+            Assert.That(copiedEntrance.slidingLogo.rectTransform.localScale,
+                Is.EqualTo(view.entrance.slidingLogo.rectTransform.localScale));
+            Assert.That(copiedEntrance.trainingInterior.localScale,
+                Is.EqualTo(view.trainingInterior.localScale));
+            var host = new GameObject("Door motion readiness test", typeof(CanvasGroup));
             var selection = host.AddComponent<SongSelectionScreen>();
             host.AddComponent<SongSelectionView>().entrancePanels = Array.Empty<RectTransform>();
             DojoEntranceTransition.SelectionReady(selection);
@@ -768,9 +774,9 @@ namespace RhythmDojo.Tests
             Assert.That(transition.GetComponentInChildren<DojoEntranceView>().Opening, Is.Zero,
                 "Door motion must wait for selection loading and UI initialization.");
 
-            var host = new GameObject("Selection readiness test");
+            var host = new GameObject("Selection readiness test", typeof(CanvasGroup));
             var selection = host.AddComponent<SongSelectionScreen>();
-            var panel = new GameObject("Selection panel", typeof(RectTransform)).GetComponent<RectTransform>();
+            var panel = new GameObject("Selection panel", typeof(RectTransform), typeof(CanvasGroup)).GetComponent<RectTransform>();
             panel.SetParent(host.transform, false);
             panel.anchoredPosition = new Vector2(10f, 20f);
             host.AddComponent<SongSelectionView>().entrancePanels = new[] { panel };

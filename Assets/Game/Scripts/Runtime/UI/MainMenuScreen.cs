@@ -34,6 +34,7 @@ namespace RhythmDojo.UI
         private bool bounceInitialized;
         private bool menuExpanded;
         private float expansion;
+        [SerializeField]
         private AudioSource effects;
         private float knockTime;
         private int modalClosedFrame = -1;
@@ -95,8 +96,7 @@ namespace RhythmDojo.UI
             view.cancelQuit.onClick.AddListener(CancelQuit);
             if (!effects)
             {
-                effects = gameObject.AddComponent<AudioSource>();
-                effects.playOnAwake = false;
+                throw new InvalidOperationException("Main menu effect audio source missing.");
             }
 
             if (EventSystem.current)

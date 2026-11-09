@@ -6,6 +6,7 @@ namespace RhythmDojo.UI
 {
     public sealed class SettingsView : MonoBehaviour
     {
+        public TimingCalibrationView calibration;
         public bool pixelTheme;
         public GameObject backdrop;
         public Dropdown bufferList;
@@ -51,6 +52,12 @@ namespace RhythmDojo.UI
 
         public void Validate()
         {
+            if (!calibration)
+            {
+                throw new InvalidOperationException("Timing calibration view missing.");
+            }
+
+            calibration.Validate();
             if (!keySettingsTab || !keySettingsPanel || !resetKeys)
             {
                 throw new InvalidOperationException("Key settings view references missing.");

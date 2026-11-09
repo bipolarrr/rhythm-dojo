@@ -7,19 +7,17 @@ namespace RhythmDojo.UI
     public sealed class DojoClickFeedback : MonoBehaviour
     {
         private DojoPunchImpact impact;
+        [SerializeField]
         private AudioSource clickSource;
+        [SerializeField]
         private AudioClip clickSound;
 
         private void Awake()
         {
-            clickSound = Resources.Load<AudioClip>("UI/DojoClick");
-            clickSource = gameObject.AddComponent<AudioSource>();
-            clickSource.playOnAwake = false;
-            clickSource.loop = false;
-            clickSource.spatialBlend = 0;
-            clickSource.volume = .32f;
-            clickSource.priority = 128;
-            clickSource.ignoreListenerPause = true;
+            if (!clickSource || !clickSound)
+            {
+                throw new System.InvalidOperationException("Click feedback audio references missing.");
+            }
         }
 
         public void Initialize(DojoPunchImpact impact)

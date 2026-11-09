@@ -341,17 +341,7 @@ namespace RhythmDojo.UI
             }
 
             bool cleared = completed && !snapshot.Failure.Failed;
-            gameOverBackground.enabled = false;
-            view.gameOverHint.gameObject.SetActive(false);
-
-            if (view.gameOverFrame)
-            {
-                view.gameOverFrame.SetActive(false);
-            }
-
             var outcomeRect = view.gameOverText.rectTransform;
-            outcomeRect.anchorMin = new Vector2(.15f, .42f);
-            outcomeRect.anchorMax = new Vector2(.85f, .58f);
             float outcomeScale = 1f;
             if (cleared && !snapshot.IsFullCombo)
             {

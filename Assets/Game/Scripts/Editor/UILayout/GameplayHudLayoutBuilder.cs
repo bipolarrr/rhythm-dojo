@@ -278,6 +278,11 @@ namespace RhythmDojo.EditorTools
             UiFontSettings.ApplyTo(view.transform);
             PixelGameplayStyle.RefineReadability(view);
             BuildFocusHud(view);
+            view.gameOverPanel.GetComponent<Image>().enabled = false;
+            view.gameOverHint.gameObject.SetActive(false);
+            view.gameOverFrame.SetActive(false);
+            view.gameOverText.rectTransform.anchorMin = new Vector2(.15f, .42f);
+            view.gameOverText.rectTransform.anchorMax = new Vector2(.85f, .58f);
 
             return view;
         }

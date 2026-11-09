@@ -31,12 +31,25 @@ namespace RhythmDojo.EditorTools
 
             var view = MainMenuLayoutBuilder.Build();
             SceneManager.MoveGameObjectToScene(view.gameObject, scene);
+            DojoTransitionAssetBuilder.Build(view.entrance);
 
             var screen = view.gameObject.AddComponent<MainMenuScreen>();
             SceneDependencyAssembler.Wire(screen, "view", view);
+            var effects = view.gameObject.AddComponent<AudioSource>();
+            effects.playOnAwake = false;
+            SceneDependencyAssembler.Wire(screen, "effects", effects);
 
             var root = view.gameObject.AddComponent<MainMenuCompositionRoot>();
             SceneDependencyAssembler.Wire(root, "screen", screen);
+            var musicObject = new GameObject("Title Music", typeof(AudioSource), typeof(TitleMusicPlayer));
+            musicObject.transform.SetParent(root.transform, false);
+            var music = musicObject.GetComponent<TitleMusicPlayer>();
+            var source = musicObject.GetComponent<AudioSource>();
+            source.playOnAwake = false;
+            source.loop = true;
+            source.spatialBlend = 0;
+            SceneDependencyAssembler.Wire(music, "source", source);
+            SceneDependencyAssembler.Wire(root, "music", music);
 
             var titleMusic = AssetDatabase.LoadAssetAtPath<TitleMusicSettings>(TitleMusicPath);
 

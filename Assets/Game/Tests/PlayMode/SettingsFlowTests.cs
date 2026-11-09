@@ -24,6 +24,41 @@ namespace RhythmDojo.Tests
     public sealed class SettingsFlowTests : GameplayTestContext
     {
         [UnityTest]
+        public IEnumerator ReopeningSettingsReusesCalibrationObjectsAndSwitchesBothLayouts()
+        {
+            var selection = Object.FindFirstObjectByType<SongSelectionView>();
+            yield return Click(selection.settingsButton);
+            var view = Object.FindFirstObjectByType<SettingsView>();
+            var calibration = view.calibration;
+            var notes = calibration.speedLane.notes.ToArray();
+            var objects = calibration.overlay.GetComponentsInChildren<Transform>(true)
+                .Select(item => item.GetInstanceID()).OrderBy(id => id).ToArray();
+
+            for (int pass = 0; pass < 2; pass++)
+            {
+                yield return Click(view.gameplayTab);
+                yield return Click(calibration.speedEntry);
+                Assert.That(calibration.overlay.activeSelf, Is.True);
+                Assert.That(calibration.status.transform.parent, Is.SameAs(calibration.speedLane.rail));
+                yield return Click(calibration.close);
+                yield return Click(calibration.entry);
+                Assert.That(calibration.status.transform.parent, Is.SameAs(calibration.panelRect));
+                Assert.That(calibration.apply.gameObject.activeSelf, Is.True);
+                yield return Click(calibration.close);
+                yield return Click(view.back);
+                yield return null;
+                Assert.That(calibration, Is.Not.Null);
+                Assert.That(calibration.overlay.activeSelf, Is.False);
+                yield return Click(selection.settingsButton);
+                Assert.That(Object.FindFirstObjectByType<SettingsView>(), Is.SameAs(view));
+                Assert.That(view.calibration, Is.SameAs(calibration));
+                CollectionAssert.AreEqual(notes, calibration.speedLane.notes);
+                CollectionAssert.AreEqual(objects, calibration.overlay.GetComponentsInChildren<Transform>(true)
+                    .Select(item => item.GetInstanceID()).OrderBy(id => id).ToArray());
+            }
+        }
+
+        [UnityTest]
         public IEnumerator SpeedTestUsesOneLaneAndReportsCalibratedJudgment()
         {
             var flow = Object.FindFirstObjectByType<AppFlowController>();

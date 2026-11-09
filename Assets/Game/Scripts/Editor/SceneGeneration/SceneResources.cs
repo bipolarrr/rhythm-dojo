@@ -31,6 +31,7 @@ namespace RhythmDojo.EditorTools
 
         public static GeneratedContent Load()
         {
+            PresentationAssetBuilder.PrepareNoteTemplates();
             var content = new GeneratedContent();
             content.ReloadAfterSceneChange();
             GameContentValidator.Validate(content.Settings);

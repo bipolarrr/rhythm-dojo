@@ -18,16 +18,23 @@ namespace RhythmDojo.Presentation
         private Camera targetCamera;
         private Canvas canvas;
         private Vector3 cameraOrigin;
+        [SerializeField]
         private GameplayImpactGraphic[] bursts;
+        [SerializeField]
         private GameplayImpactGraphic[] holdGlows;
+        [SerializeField]
+        private GameplayImpactGraphic holdTemplate;
         private int[] holdNotes;
         private int nextBurst;
         private int lastSoundFrame = -1;
         private AudioSource source;
+        [SerializeField]
         private AudioClip perfectSound;
+        [SerializeField]
         private AudioClip goodSound;
         private double kickAt = -10;
         private float kickStrength;
+        [SerializeField]
         private RectTransform effectsRoot;
 
         public void Initialize(
@@ -63,63 +70,57 @@ namespace RhythmDojo.Presentation
             source.spatialBlend = 0;
             source.volume = .25f;
             source.priority = 96;
-            perfectSound = Resources.Load<AudioClip>("UI/DojoHitPerfect");
-            goodSound = Resources.Load<AudioClip>("UI/DojoHitGood");
 
             if (!perfectSound || !goodSound)
             {
                 throw new InvalidOperationException("Dojo hit sounds missing.");
             }
 
-            if (effectsRoot)
+            if (!effectsRoot || !holdTemplate)
             {
-                effectsRoot.gameObject.SetActive(false);
-                Destroy(effectsRoot.gameObject);
+                throw new InvalidOperationException("Authored hit feedback layout missing.");
             }
 
-            effectsRoot = new GameObject(
-                "Gameplay Impacts",
-                typeof(RectTransform)
-            ).GetComponent<RectTransform>();
-            effectsRoot.SetParent(canvas.transform, false);
-            effectsRoot.anchorMin = Vector2.zero;
-            effectsRoot.anchorMax = Vector2.one;
-            effectsRoot.offsetMin = effectsRoot.offsetMax = Vector2.zero;
-            bursts = new GameplayImpactGraphic[PoolSize];
-            holdGlows = new GameplayImpactGraphic[mode.LaneCount];
+            if (bursts == null || bursts.Length != PoolSize)
+            {
+                throw new InvalidOperationException("Authored hit burst pool missing.");
+            }
+
+            if (Array.Exists(bursts, burst => !burst))
+            {
+                throw new InvalidOperationException("Authored hit burst reference missing.");
+            }
+
+            // Only the mode-dependent hold count is dynamic; fixed burst objects are reused.
+            if (holdGlows == null || holdGlows.Length != mode.LaneCount)
+            {
+                if (holdGlows != null)
+                {
+                    foreach (var graphic in holdGlows)
+                    {
+                        if (graphic)
+                        {
+                            graphic.gameObject.SetActive(false);
+                            Destroy(graphic.gameObject);
+                        }
+                    }
+                }
+
+                holdGlows = new GameplayImpactGraphic[mode.LaneCount];
+                for (int i = 0; i < mode.LaneCount; i++)
+                {
+                    holdGlows[i] = Instantiate(holdTemplate, effectsRoot);
+                    holdGlows[i].name = "Hold Glow " + i;
+                    holdGlows[i].Lane = i;
+                }
+            }
+
             holdNotes = new int[mode.LaneCount];
-
-            for (int i = 0; i < PoolSize; i++)
-            {
-                bursts[i] = CreateGraphic("Hit Burst " + i);
-            }
-
-            for (int i = 0; i < mode.LaneCount; i++)
-            {
-                holdGlows[i] = CreateGraphic("Hold Glow " + i);
-                holdGlows[i].Lane = i;
-            }
 
             model.Judged += OnJudged;
             model.HoldStarted += OnHoldStarted;
             model.ResetOccurred += ResetFeedback;
             ResetFeedback();
-        }
-
-        private GameplayImpactGraphic CreateGraphic(string name)
-        {
-            var go = new GameObject(name, typeof(RectTransform), typeof(GameplayImpactGraphic));
-            go.transform.SetParent(effectsRoot, false);
-
-            var graphic = go.GetComponent<GameplayImpactGraphic>();
-            graphic.raycastTarget = false;
-            graphic.rectTransform.anchorMin = graphic.rectTransform.anchorMax = new Vector2(
-                .5f,
-                .5f
-            );
-            go.SetActive(false);
-
-            return graphic;
         }
 
         private void OnHoldStarted(HoldStartedEvent result)

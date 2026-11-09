@@ -27,6 +27,7 @@ namespace RhythmDojo.UI
         private readonly Func<IScrollTimeline> createSpeedTimeline;
         private readonly Func<JudgmentSettings> getJudgmentTiming;
 
+        private readonly TimingCalibrationView calibration;
         private readonly GameObject overlay;
         private readonly Button entry;
         private readonly Button speedEntry;
@@ -81,126 +82,32 @@ namespace RhythmDojo.UI
             this.getJudgmentTiming = getJudgmentTiming;
             speedSlider = view.speedSlider;
 
-            entry = CreateButton(
-                "Timing Calibration",
-                view.gameplayPanel.transform,
-                "박자 테스트",
-                new Vector2(375, -77),
-                new Vector2(155, 38),
-                view.back
-            );
-            speedEntry = CreateButton(
-                "Speed Test",
-                view.gameplayPanel.transform,
-                "속도 테스트",
-                new Vector2(540, -77),
-                new Vector2(155, 38),
-                view.back
-            );
-            entry.onClick.AddListener(() => Open(false));
-            speedEntry.onClick.AddListener(() => Open(true));
-
-            overlay = new GameObject("Timing Calibration Overlay", typeof(RectTransform), typeof(Image));
-            var overlayRect = (RectTransform)overlay.transform;
-            overlayRect.SetParent(view.transform, false);
-            overlayRect.anchorMin = Vector2.zero;
-            overlayRect.anchorMax = Vector2.one;
-            overlayRect.offsetMax = Vector2.zero;
-            overlayRect.offsetMin = Vector2.zero;
-            overlay.GetComponent<Image>().color = new Color(.13f, .07f, .04f, .85f);
-
-            var panel = new GameObject("Timing Calibration Panel", typeof(RectTransform), typeof(Image));
-            panelRect = (RectTransform)panel.transform;
-            panelRect.SetParent(overlayRect, false);
-            panelRect.pivot = new Vector2(.5f, .5f);
-            panelRect.anchorMax = panelRect.pivot;
-            panelRect.anchorMin = panelRect.pivot;
-            panelRect.sizeDelta = new Vector2(660, 320);
-            panel.GetComponent<Image>().color = new Color(.89f, .76f, .55f);
-
-            heading = UiElements.Label(
-                "Timing Calibration Heading",
-                panelRect,
-                "입력 타이밍 테스트",
-                new Vector2(30, -25),
-                new Vector2(600, 50),
-                34,
-                role: UiTextRole.Title
-            );
-            status = UiElements.Label(
-                "Timing Calibration Status",
-                panelRect,
-                "",
-                new Vector2(38, -83),
-                new Vector2(584, 135),
-                23
-            );
-            status.color = new Color(.25f, .12f, .08f);
-            heading.color = status.color;
-            status.alignment = TextAnchor.MiddleCenter;
-            heading.alignment = TextAnchor.MiddleCenter;
-
-            start = CreateButton(
-                "Start Calibration",
-                panelRect,
-                "테스트 시작",
-                new Vector2(38, -240),
-                new Vector2(176, 52),
-                view.apply,
-                UiTextRole.Title
-            );
-            apply = CreateButton(
-                "Apply Calibration",
-                panelRect,
-                "보정값 적용",
-                new Vector2(240, -240),
-                new Vector2(180, 52),
-                view.apply,
-                UiTextRole.Title
-            );
-            close = CreateButton(
-                "Close Calibration",
-                panelRect,
-                "닫기",
-                new Vector2(446, -240),
-                new Vector2(176, 52),
-                view.back
-            );
+            var calibration = view.calibration;
+            calibration.Validate();
+            this.calibration = calibration;
+            entry = calibration.entry;
+            speedEntry = calibration.speedEntry;
+            overlay = calibration.overlay;
+            panelRect = calibration.panelRect;
+            heading = calibration.heading;
+            status = calibration.status;
+            start = calibration.start;
+            apply = calibration.apply;
+            close = calibration.close;
+            speedLane = new SpeedTestLane(calibration.speedLane);
+            source = calibration.source;
+            entry.onClick.AddListener(OpenTiming);
+            speedEntry.onClick.AddListener(OpenSpeed);
             start.onClick.AddListener(StartTest);
             apply.onClick.AddListener(Apply);
             close.onClick.AddListener(Close);
-            speedLane = new SpeedTestLane(panelRect);
-
-            source = overlay.AddComponent<AudioSource>();
-            source.playOnAwake = false;
             tap.performed += RecordTap;
             overlay.SetActive(false);
         }
 
-        private static Button CreateButton(
-            string name,
-            Transform parent,
-            string caption,
-            Vector2 position,
-            Vector2 size,
-            Button style,
-            UiTextRole role = UiTextRole.Body
-        )
-        {
-            var button = Object.Instantiate(style, parent);
-            button.name = name;
-            UiElements.Position((RectTransform)button.transform, position, size);
+        private void OpenTiming() => Open(false);
 
-            button.onClick = new Button.ButtonClickedEvent();
-            button.navigation = Navigation.defaultNavigation;
-            button.interactable = true;
-
-            var label = button.GetComponentInChildren<Text>();
-            label.text = caption;
-            UiFontSettings.Apply(label, role);
-
-            return button;
-        }
+        private void OpenSpeed() => Open(true);
 
         internal void Open(bool useSpeedTest)
         {
@@ -216,12 +123,7 @@ namespace RhythmDojo.UI
 
             if (speedTest)
             {
-                panelRect.sizeDelta = new Vector2(336, 572);
-                UiElements.Position(heading.rectTransform, new Vector2(18, -4), new Vector2(300, 48));
-                status.transform.SetParent(speedLane.Transform, false);
-                UiElements.Position(status.rectTransform, new Vector2(18, -174), new Vector2(264, 82));
-                UiElements.Position((RectTransform)start.transform, new Vector2(18, -518), new Vector2(147, 42));
-                UiElements.Position((RectTransform)close.transform, new Vector2(171, -518), new Vector2(147, 42));
+                calibration.speedLayout.Apply(panelRect, heading, status, start, close);
                 heading.text = $"{speedSlider.value:0.0#}x";
                 status.color = new Color(1f, .94f, .80f);
                 status.text = "Space · 노트 입력\nP · 일시정지";
@@ -229,12 +131,7 @@ namespace RhythmDojo.UI
             }
             else
             {
-                panelRect.sizeDelta = new Vector2(660, 320);
-                UiElements.Position(heading.rectTransform, new Vector2(30, -25), new Vector2(600, 50));
-                status.transform.SetParent(panelRect, false);
-                UiElements.Position(status.rectTransform, new Vector2(38, -83), new Vector2(584, 135));
-                UiElements.Position((RectTransform)start.transform, new Vector2(38, -240), new Vector2(176, 52));
-                UiElements.Position((RectTransform)close.transform, new Vector2(446, -240), new Vector2(176, 52));
+                calibration.timingLayout.Apply(panelRect, heading, status, start, close);
                 heading.text = "입력 타이밍 테스트";
                 status.color = heading.color;
                 status.text = "소리를 듣고 박자마다 Space를 누르세요.\n처음 네 박은 준비, 이후 열두 박을 측정합니다.";
@@ -597,11 +494,11 @@ namespace RhythmDojo.UI
             tap.Dispose();
             DestroyClip();
             overlay.SetActive(false);
-            Object.Destroy(overlay);
-            entry.gameObject.SetActive(false);
-            Object.Destroy(entry.gameObject);
-            speedEntry.gameObject.SetActive(false);
-            Object.Destroy(speedEntry.gameObject);
+            entry.onClick.RemoveListener(OpenTiming);
+            speedEntry.onClick.RemoveListener(OpenSpeed);
+            start.onClick.RemoveListener(StartTest);
+            apply.onClick.RemoveListener(Apply);
+            close.onClick.RemoveListener(Close);
         }
     }
 }

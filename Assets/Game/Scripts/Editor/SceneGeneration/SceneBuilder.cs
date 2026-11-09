@@ -25,6 +25,7 @@ namespace RhythmDojo.EditorTools
         {
             Guard();
 
+            DojoCursorAssetBuilder.Build();
             var content = SceneResources.Load();
             SaveGameplay(content);
             Save(ScenePresentationBuilder.Selection(content), SelectionPath);

@@ -216,7 +216,7 @@ namespace RhythmDojo.Core
                 selectionPreparationGroup = screen.GetComponent<CanvasGroup>();
                 if (!selectionPreparationGroup)
                 {
-                    selectionPreparationGroup = screen.gameObject.AddComponent<CanvasGroup>();
+                    throw new InvalidOperationException("Selection preparation CanvasGroup missing.");
                 }
                 inputScope.Block(selectionPreparationGroup);
             }

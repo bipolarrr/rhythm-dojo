@@ -49,6 +49,7 @@ namespace RhythmDojo.EditorTools
             interiorArt.artwork = DojoEntranceAssets.Load("TrainingInterior", UiArtworkCrop.Full);
             interiorArt.raycastTarget = false;
             view.trainingInterior = (RectTransform)interior.transform;
+            view.entrance.trainingInterior = view.trainingInterior;
             view.entranceTrigger = Button("Door Interaction", entrance.transform, Color.clear);
             Stretch((RectTransform)view.entranceTrigger.transform);
             view.entranceTrigger.transition = Selectable.Transition.None;
@@ -101,6 +102,7 @@ namespace RhythmDojo.EditorTools
             view.startPrompt.color = new Color(1f, .88f, .64f);
             Anchor(view.startPrompt.rectTransform, new Vector2(.5f, .5f), new Vector2(0, -110), new Vector2(250, 40));
             view.startPrompt.raycastTarget = false;
+            view.entrance.startPrompt = view.startPrompt.rectTransform;
 
             var menu = new GameObject("Menu Buttons", typeof(RectTransform), typeof(CanvasGroup));
             menu.transform.SetParent(canvas.transform, false);

@@ -40,6 +40,13 @@ Before adding or changing code, read the corresponding implementation on the loc
 
 Follow existing C# style: four-space indentation, brace-delimited namespaces, PascalCase types/methods/properties, camelCase parameters/private fields, and `I`-prefixed interfaces. Use `RhythmDojo` namespaces and descriptive filenames. No repository formatter configuration was found. Preserve Unity `.meta` files with their assets; avoid editing generated `.csproj` files or `Library/` caches.
 
+### Runtime creation and authored composition
+
+- Create objects, components, and resources at runtime only when runtime data or lifetime requires it. Fixed screen layouts, controls, cameras, lights, audio sources, decorative children, and fixed-size effect pools belong in scenes or prefabs with serialized references.
+- Keep lasting composition in the corresponding editor builders and regenerate affected assets. Runtime controllers bind services, update state, and animate authored views; they must not reconstruct fixed UI or silently repair missing required composition with `AddComponent`, name-based searches, or ad hoc object creation. Validate missing references explicitly.
+- Runtime creation remains appropriate for data-dependent counts (song rows, chart notes, mode lanes), imported user content, size/device-dependent buffers, isolated mutable session data, and instances with a genuinely dynamic lifetime. Instantiate authored templates for their fixed structure, reuse instances when practical, and define ownership and cleanup.
+- Bake deterministic image transformations and other fixed presentation resources in the editor. Share immutable materials and assets; clone only when an instance needs independent mutation. Record the runtime requirement near non-obvious creation sites, and test that fixed composition survives initialization and reopening without replacement.
+
 ### Branches and conditions
 
 - Avoid ternary expressions (`?:`); use explicit `if`/`else` blocks or a readable `switch`. Never introduce nested or chained ternaries. Null-conditional (`?.`), null-coalescing (`??`), and nullable type syntax are separate features and may be used normally.

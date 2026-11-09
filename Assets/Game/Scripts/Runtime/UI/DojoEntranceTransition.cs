@@ -13,12 +13,14 @@ namespace RhythmDojo.UI
         public static DojoEntranceTransition Active { get; private set; }
         public bool Failed { get; private set; }
 
+        [SerializeField]
         private DojoEntranceView entrance;
+        [SerializeField]
         private CanvasGroup overlay;
         private CanvasGroup selectionGroup;
         private SongSelectionScreen selection;
         private Action recover;
-        private Font font;
+        [SerializeField]
         private AudioSource audioSource;
         private AudioClip slide;
         private InputStateScope selectionInputScope;
@@ -27,8 +29,12 @@ namespace RhythmDojo.UI
         private float[] priorAlphas;
         private Vector2[] priorPositions;
         private Vector3[] priorScales;
+        [SerializeField]
         private GameObject recoveryInput;
+        [SerializeField]
         private Button recoveryButton;
+        [SerializeField]
+        private Text recoveryMessage;
         private AsyncOperation sceneCleanup;
         [SerializeField]
         private float readyTimeout = 20f;
@@ -41,49 +47,21 @@ namespace RhythmDojo.UI
                 throw new InvalidOperationException("A dojo entrance transition is already active.");
             }
 
-            var go = new GameObject("Dojo Entrance Transition", typeof(RectTransform), typeof(Canvas));
-            DontDestroyOnLoad(go);
-            var canvas = go.GetComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.sortingOrder = 30000;
-            var scaler = go.AddComponent<CanvasScaler>();
-            var sourceScaler = source.GetComponentInParent<CanvasScaler>();
-            scaler.uiScaleMode = sourceScaler.uiScaleMode;
-            scaler.referenceResolution = sourceScaler.referenceResolution;
-            scaler.screenMatchMode = sourceScaler.screenMatchMode;
-            scaler.matchWidthOrHeight = sourceScaler.matchWidthOrHeight;
-            go.AddComponent<GraphicRaycaster>();
-            var blocker = go.AddComponent<Image>();
-            blocker.color = Color.clear;
-            blocker.raycastTarget = true;
-
-            var transition = go.AddComponent<DojoEntranceTransition>();
-            transition.overlay = go.AddComponent<CanvasGroup>();
-            transition.entrance = Instantiate(source, go.transform, false);
-            transition.entrance.SetLogoSeparation(source.MenuLogoSeparation);
-            transition.entrance.SetOpening(source.Opening);
-
-            if (transition.entrance.trainingMenu)
+            if (!source || !source.transitionTemplate)
             {
-                transition.entrance.trainingMenu.gameObject.SetActive(false);
-                Destroy(transition.entrance.trainingMenu.gameObject);
+                throw new InvalidOperationException("Authored entrance transition prefab missing.");
             }
 
-            foreach (var button in transition.entrance.GetComponentsInChildren<Button>(true))
-            {
-                button.interactable = false;
-                Destroy(button);
-            }
-            foreach (var graphic in transition.entrance.GetComponentsInChildren<Graphic>(true))
-            {
-                graphic.raycastTarget = false;
-            }
+            // A transient prefab instance preserves presentation across scene unloading.
+            var transition = Instantiate(source.transitionTemplate);
+            transition.name = "Dojo Entrance Transition";
+            DontDestroyOnLoad(transition.gameObject);
+            transition.entrance.CopyPresentationStateFrom(source);
             transition.entrance.SetApproach(0f);
-            transition.font = font;
             transition.slide = slide;
             transition.recover = recover;
-            transition.audioSource = go.AddComponent<AudioSource>();
-            transition.audioSource.playOnAwake = false;
+            transition.recoveryMessage.font = font;
+            transition.recoveryButton.onClick.AddListener(transition.ReturnToTitle);
             Active = transition;
             transition.StartCoroutine(transition.Reveal());
             return transition;
@@ -106,7 +84,7 @@ namespace RhythmDojo.UI
             var group = screen.GetComponent<CanvasGroup>();
             if (!group)
             {
-                group = screen.gameObject.AddComponent<CanvasGroup>();
+                throw new InvalidOperationException("Selection transition CanvasGroup missing.");
             }
 
             Active.selectionGroup = group;
@@ -115,13 +93,12 @@ namespace RhythmDojo.UI
             if (Active.recoveryInput)
             {
                 Active.recoveryInput.SetActive(false);
-                Destroy(Active.recoveryInput);
             }
 
             if (EventSystem.current)
             {
                 EventSystem.current.SetSelectedGameObject(null);
-                if (Active.recoveryButton)
+                if (Active.recoveryButton && Active.recoveryButton.gameObject.activeInHierarchy)
                 {
                     EventSystem.current.SetSelectedGameObject(Active.recoveryButton.gameObject);
                 }
@@ -215,7 +192,7 @@ namespace RhythmDojo.UI
                 var group = panel.GetComponent<CanvasGroup>();
                 if (!group)
                 {
-                    group = panel.gameObject.AddComponent<CanvasGroup>();
+                    throw new InvalidOperationException("Selection panel CanvasGroup missing.");
                 }
 
                 panelGroups[i] = group;
@@ -262,39 +239,13 @@ namespace RhythmDojo.UI
             Failed = true;
             if (!EventSystem.current)
             {
-                var events = new GameObject("Recovery Input", typeof(EventSystem));
-                events.transform.SetParent(transform, false);
-                recoveryInput = events;
-                var input = events.AddComponent<UnityEngine.InputSystem.UI.InputSystemUIInputModule>();
-                input.AssignDefaultActions();
+                recoveryInput.SetActive(true);
             }
 
-            var go = new GameObject("Return To Title", typeof(RectTransform), typeof(Image), typeof(Button));
-            go.transform.SetParent(transform, false);
-            var rect = (RectTransform)go.transform;
-            rect.anchorMin = rect.anchorMax = new Vector2(.5f, .5f);
-            rect.sizeDelta = new Vector2(620f, 130f);
-            go.GetComponent<Image>().color = new Color(.15f, .07f, .04f, .98f);
-            var button = go.GetComponent<Button>();
-            recoveryButton = button;
-            button.onClick.AddListener(ReturnToTitle);
-            var label = new GameObject("Message", typeof(RectTransform), typeof(Text));
-            label.transform.SetParent(go.transform, false);
-            var text = label.GetComponent<Text>();
-            UiFontSettings.Apply(text, UiTextRole.Help);
-            text.font = font;
-            text.fontStyle = UiFontSettings.Style;
-            text.text = "곡 선택 화면을 열지 못했습니다.\n클릭하여 타이틀로 돌아가기";
-            text.fontSize = 25;
-            text.alignment = TextAnchor.MiddleCenter;
-            text.color = new Color(1f, .88f, .66f);
-            text.raycastTarget = false;
-            text.rectTransform.anchorMin = Vector2.zero;
-            text.rectTransform.anchorMax = Vector2.one;
-            text.rectTransform.offsetMin = text.rectTransform.offsetMax = Vector2.zero;
+            recoveryButton.gameObject.SetActive(true);
             if (EventSystem.current)
             {
-                EventSystem.current.SetSelectedGameObject(go);
+                EventSystem.current.SetSelectedGameObject(recoveryButton.gameObject);
             }
         }
 

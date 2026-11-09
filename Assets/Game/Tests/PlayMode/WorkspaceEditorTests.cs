@@ -1640,7 +1640,7 @@ namespace RhythmDojo.Tests
             Assert.That(preview.Target.IsCreated(), Is.True);
             Assert.That(preview.image.raycastTarget, Is.False);
             Assert.That(preview.VisibleNoteCount, Is.EqualTo(3));
-            var camera = preview.playfield.GetComponentInChildren<Camera>();
+            var camera = Camera.allCameras.Single(item => item.targetTexture == preview.Target);
             Assert.That(camera.GetComponent<AudioListener>(), Is.Null);
             Assert.That(camera.cullingMask, Is.EqualTo(1 << 31));
             Assert.That(Camera.main.cullingMask & (1 << 31), Is.Zero);

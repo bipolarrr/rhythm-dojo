@@ -23,8 +23,16 @@ namespace RhythmDojo.Authoring
 
         private readonly List<NoteView> taps = new List<NoteView>();
         private readonly List<NoteView> holds = new List<NoteView>();
+        [SerializeField]
         private Camera previewCamera;
+
+        [SerializeField]
+        private Transform previewRig;
+
+        [SerializeField]
         private Camera displayCamera;
+
+        private bool initialized;
         private int displayMask;
         private RenderTexture target;
         private IScrollTimeline scroll;
@@ -43,7 +51,7 @@ namespace RhythmDojo.Authoring
             {
                 return;
             }
-            if (!previewCamera)
+            if (!initialized)
             {
                 Initialize();
             }
@@ -136,30 +144,15 @@ namespace RhythmDojo.Authoring
         {
             playfield.Build(workspace.screen.Mode, presentation);
             SetLayer(playfield.gameObject);
-            previewCamera = new GameObject("Editor Preview Camera").AddComponent<Camera>();
-            previewCamera.transform.SetParent(playfield.transform, false);
-            previewCamera.transform.position = new Vector3(0, 10, -10);
-            previewCamera.transform.LookAt(new Vector3(0, 0, 9));
-            previewCamera.fieldOfView = 52;
-            previewCamera.farClipPlane = 180;
-            previewCamera.clearFlags = CameraClearFlags.SolidColor;
-            previewCamera.backgroundColor = new Color(.025f, .035f, .065f);
-            previewCamera.cullingMask = 1 << PreviewLayer;
-            previewCamera.allowHDR = false;
-            previewCamera.allowMSAA = false;
-            previewCamera.depth = -50;
-            displayCamera = Camera.main;
-            if (displayCamera)
+            if (!previewCamera || !displayCamera)
             {
-                displayMask = displayCamera.cullingMask;
-                displayCamera.cullingMask &= ~(1 << PreviewLayer);
+                throw new InvalidOperationException("Editor preview cameras missing.");
             }
-            var light = new GameObject("Editor Preview Light").AddComponent<Light>();
-            light.transform.SetParent(playfield.transform, false);
-            light.type = LightType.Directional;
-            light.intensity = 1.3f;
-            light.cullingMask = 1 << PreviewLayer;
-            light.transform.rotation = Quaternion.Euler(50, -25, 0);
+
+            displayMask = displayCamera.cullingMask;
+            displayCamera.cullingMask &= ~(1 << PreviewLayer);
+            previewCamera.enabled = true;
+            initialized = true;
         }
 
         private void Refresh()
@@ -228,7 +221,7 @@ namespace RhythmDojo.Authoring
             {
                 observed.Changed -= Refresh;
             }
-            if (displayCamera)
+            if (initialized && displayCamera)
             {
                 displayCamera.cullingMask = displayMask;
             }
@@ -244,6 +237,11 @@ namespace RhythmDojo.Authoring
             if (playfield)
             {
                 Destroy(playfield.gameObject);
+            }
+
+            if (previewRig)
+            {
+                Destroy(previewRig.gameObject);
             }
         }
     }

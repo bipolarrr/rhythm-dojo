@@ -11,13 +11,24 @@ namespace RhythmDojo.Presentation
         private Transform head;
 
         [SerializeField]
+        private Renderer headRenderer;
+
+        [SerializeField]
         private Transform body;
 
-        private static Sprite songpanSkin;
+        [SerializeField]
         private SpriteRenderer headSkin;
+
+        [SerializeField]
         private MeshRenderer tailMarker;
 
         public bool HasBody => body;
+
+        private void Awake()
+        {
+            headSkin.enabled = true;
+            headRenderer.enabled = false;
+        }
 
         public void Validate(NoteKind kind)
         {
@@ -25,11 +36,21 @@ namespace RhythmDojo.Presentation
             {
                 throw new InvalidOperationException($"Missing head/body on {name}.");
             }
+
+            if (!headRenderer || !headSkin || !headSkin.sprite)
+            {
+                throw new InvalidOperationException($"Missing authored head skin on {name}.");
+            }
+
+            if (kind == NoteKind.Hold && !tailMarker)
+            {
+                throw new InvalidOperationException($"Missing authored hold end marker on {name}.");
+            }
         }
 
         public void SetMaterial(Material material)
         {
-            head.GetComponent<Renderer>().sharedMaterial = material;
+            headRenderer.sharedMaterial = material;
 
             if (body)
             {
@@ -79,11 +100,6 @@ namespace RhythmDojo.Presentation
             head.position = new Vector3(x, settings.headHeight, start);
             if (UnityEngine.Application.isPlaying)
             {
-                if (!headSkin)
-                {
-                    CreateHeadSkin();
-                }
-
                 head.localScale = Vector3.one * settings.headSize.x;
             }
             else
@@ -94,6 +110,11 @@ namespace RhythmDojo.Presentation
             if (body)
             {
                 body.gameObject.SetActive(note.Kind == NoteKind.Hold);
+            }
+
+            if (tailMarker)
+            {
+                tailMarker.enabled = UnityEngine.Application.isPlaying && note.Kind == NoteKind.Hold;
             }
 
             if (note.Kind == NoteKind.Hold)
@@ -115,40 +136,10 @@ namespace RhythmDojo.Presentation
 
         private void RenderTailMarker(float x, float tail, GameplayPresentationSettings settings)
         {
-            if (!tailMarker)
-            {
-                var marker = new GameObject("Hold End Marker", typeof(MeshFilter), typeof(MeshRenderer));
-                marker.layer = body.gameObject.layer;
-                marker.transform.SetParent(transform, false);
-                marker.GetComponent<MeshFilter>().sharedMesh = body.GetComponent<MeshFilter>().sharedMesh;
-                tailMarker = marker.GetComponent<MeshRenderer>();
-                tailMarker.sharedMaterial = body.GetComponent<Renderer>().sharedMaterial;
-            }
-
             var markerTransform = tailMarker.transform;
             markerTransform.position = new Vector3(x, settings.bodyElevation + settings.bodyHeight * .5f, tail);
             markerTransform.localScale = new Vector3(settings.headSize.x, settings.bodyHeight, settings.headSize.z * .45f);
         }
 
-        private void CreateHeadSkin()
-        {
-            if (!songpanSkin)
-            {
-                songpanSkin = Resources.Load<Sprite>("UI/SongpanNote");
-                if (!songpanSkin)
-                {
-                    throw new InvalidOperationException("Songpan note sprite missing.");
-                }
-            }
-
-            var skin = new GameObject("Songpan Skin", typeof(SpriteRenderer));
-            skin.layer = head.gameObject.layer;
-            skin.transform.SetParent(head, false);
-            // Match the playfield camera's tilt so the flat sprite reads at the hit line.
-            skin.transform.localRotation = Quaternion.Euler(28f, 0, 0);
-            headSkin = skin.GetComponent<SpriteRenderer>();
-            headSkin.sprite = songpanSkin;
-            head.GetComponent<Renderer>().enabled = false;
-        }
     }
 }

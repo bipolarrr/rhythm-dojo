@@ -64,13 +64,15 @@ namespace RhythmDojo.EditorTools
 
             if (existing)
             {
-                if (hold)
+                var contents = PrefabUtility.LoadPrefabContents(path);
+                try
                 {
-                    existing.GetComponent<NoteView>().Validate(NoteKind.Hold);
+                    ConfigureNote(contents.GetComponent<NoteView>(), hold);
+                    PrefabUtility.SaveAsPrefabAsset(contents, path);
                 }
-                else
+                finally
                 {
-                    existing.GetComponent<NoteView>().Validate(NoteKind.Tap);
+                    PrefabUtility.UnloadPrefabContents(contents);
                 }
 
                 return existing.GetComponent<NoteView>();
@@ -96,11 +98,66 @@ namespace RhythmDojo.EditorTools
                     );
                 }
 
+                ConfigureNote(view, hold);
                 return PrefabUtility.SaveAsPrefabAsset(root, path).GetComponent<NoteView>();
             }
             finally
             {
                 UnityEngine.Object.DestroyImmediate(root);
+            }
+        }
+
+        public static void PrepareNoteTemplates()
+        {
+            var settings = SceneResources.Require<GameSettings>(TestContentBuilder.SettingsPath);
+            var material = SceneResources.Require<Material>("Assets/Game/Materials/Note Base.mat");
+            Template("TapNote", false, material, settings.presentation);
+            Template("HoldNote", true, material, settings.presentation);
+        }
+
+        private static void ConfigureNote(NoteView view, bool hold)
+        {
+            var serialized = new SerializedObject(view);
+            var head = (Transform)serialized.FindProperty("head").objectReferenceValue;
+            var body = (Transform)serialized.FindProperty("body").objectReferenceValue;
+            var headSkin = (SpriteRenderer)serialized.FindProperty("headSkin").objectReferenceValue;
+            if (!headSkin)
+            {
+                var skin = new GameObject("Songpan Skin", typeof(SpriteRenderer));
+                skin.transform.SetParent(head, false);
+                headSkin = skin.GetComponent<SpriteRenderer>();
+            }
+
+            SceneDependencyAssembler.Wire(view, "headRenderer", head.GetComponent<Renderer>());
+            headSkin.gameObject.layer = head.gameObject.layer;
+            headSkin.transform.localRotation = Quaternion.Euler(28f, 0, 0);
+            headSkin.sprite = SceneResources.Require<Sprite>("Assets/Game/Resources/UI/SongpanNote.png");
+            headSkin.enabled = false;
+            SceneDependencyAssembler.Wire(view, "headSkin", headSkin);
+            if (hold)
+            {
+                var tailMarker = (MeshRenderer)serialized.FindProperty("tailMarker").objectReferenceValue;
+                if (!tailMarker)
+                {
+                    var marker = new GameObject("Hold End Marker", typeof(MeshFilter), typeof(MeshRenderer));
+                    marker.transform.SetParent(view.transform, false);
+                    tailMarker = marker.GetComponent<MeshRenderer>();
+                }
+
+                tailMarker.gameObject.layer = body.gameObject.layer;
+                tailMarker.GetComponent<MeshFilter>().sharedMesh = body.GetComponent<MeshFilter>().sharedMesh;
+                tailMarker.sharedMaterial = body.GetComponent<Renderer>().sharedMaterial;
+                tailMarker.enabled = false;
+                SceneDependencyAssembler.Wire(view, "tailMarker", tailMarker);
+            }
+
+            if (hold)
+            {
+                view.Validate(NoteKind.Hold);
+            }
+            else
+            {
+                view.Validate(NoteKind.Tap);
             }
         }
 

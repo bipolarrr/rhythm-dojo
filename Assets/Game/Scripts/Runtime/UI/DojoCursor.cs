@@ -8,17 +8,20 @@ namespace RhythmDojo.UI
     public sealed class DojoCursor : MonoBehaviour
     {
         private static DojoCursor instance;
+        [SerializeField]
         private Texture2D normalTexture,
             hoverTexture;
         private Texture2D currentTexture;
         private static readonly Vector2 Hotspot = new Vector2(48, 48);
+        [SerializeField]
         private Texture2D[] punchFrames;
         private float punchElapsed = PunchDuration;
         private const float PunchDuration = .18f;
-        private Color32[] cursorPixels;
-        private RectInt cursorBounds;
-        private int cursorSourceWidth;
+        [SerializeField]
         private DojoPunchImpact impact;
+
+        [SerializeField]
+        private DojoClickFeedback feedback;
         private bool impactPending;
 
         public static bool UsesDefaultPointer => SceneManager.GetActiveScene().path == ChartEditorMenu.ScenePath;
@@ -37,52 +40,37 @@ namespace RhythmDojo.UI
                 return;
             }
 
-            var cursorObject = new GameObject("Dojo Cursor");
-            DontDestroyOnLoad(cursorObject);
-            instance = cursorObject.AddComponent<DojoCursor>();
-            cursorObject.AddComponent<DojoButtonFocus>();
+            // A single authored cursor survives scene changes, including direct scene play.
+            var prefab = Resources.Load<DojoCursor>("UI/DojoCursor");
+            if (!prefab)
+            {
+                throw new System.InvalidOperationException("Dojo cursor prefab missing.");
+            }
+
+            instance = Instantiate(prefab);
+            instance.name = "Dojo Cursor";
+            DontDestroyOnLoad(instance.gameObject);
         }
 
         private void Awake()
         {
-            var texture = Resources.Load<Texture2D>("UI/DojoFistCursor");
-            if (!texture)
+            if (!normalTexture || !hoverTexture || !impact)
             {
-                throw new System.InvalidOperationException("Hand-wrap cursor artwork missing.");
+                throw new System.InvalidOperationException("Authored cursor references missing.");
             }
 
-            cursorPixels = texture.GetPixels32();
-            cursorSourceWidth = texture.width;
-            cursorBounds = GetVisibleBounds(cursorPixels, texture.width, texture.height);
-            normalTexture = CreateCursor(72);
-            hoverTexture = CreateCursor(72);
-            punchFrames = new[]
+            if (!feedback || punchFrames == null || punchFrames.Length != 7)
             {
-                CreateCursor(69, new Vector2Int(6, -6)),
-                CreateCursor(72),
-                CreateCursor(78, new Vector2Int(-9, 9)),
-                CreateCursor(81, new Vector2Int(-12, 12)),
-                CreateCursor(78, new Vector2Int(-9, 9)),
-                CreateCursor(75, new Vector2Int(-3, 3)),
-                CreateCursor(72)
-            };
-            cursorPixels = null;
-            var canvasObject = new GameObject("Fist Imprints", typeof(RectTransform), typeof(Canvas));
-            canvasObject.transform.SetParent(transform, false);
-            var canvas = canvasObject.GetComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.sortingOrder = 32001;
-            canvas.pixelPerfect = true;
-            // No GraphicRaycaster: a mark can never consume a menu click.
-            var impactObject = new GameObject("Fist Marks", typeof(RectTransform), typeof(DojoPunchImpact));
-            impactObject.transform.SetParent(canvasObject.transform, false);
-            var rect = (RectTransform)impactObject.transform;
-            rect.anchorMin = Vector2.zero;
-            rect.anchorMax = Vector2.one;
-            rect.offsetMin = rect.offsetMax = Vector2.zero;
-            impact = impactObject.GetComponent<DojoPunchImpact>();
+                throw new System.InvalidOperationException("Authored cursor animation missing.");
+            }
+
+            if (System.Array.Exists(punchFrames, frame => !frame))
+            {
+                throw new System.InvalidOperationException("Authored cursor frame missing.");
+            }
+
             impact.Initialize(punchFrames[3], Hotspot);
-            gameObject.AddComponent<DojoClickFeedback>().Initialize(impact);
+            feedback.Initialize(impact);
             RefreshSceneStyle();
         }
 
@@ -107,7 +95,6 @@ namespace RhythmDojo.UI
                 impact.enabled = !UsesDefaultPointer;
             }
 
-            var feedback = GetComponent<DojoClickFeedback>();
             if (feedback)
             {
                 feedback.enabled = !UsesDefaultPointer;
@@ -191,74 +178,6 @@ namespace RhythmDojo.UI
             }
         }
 
-        private Texture2D CreateCursor(int size)
-        {
-            return CreateCursor(size, Vector2Int.zero);
-        }
-
-        private Texture2D CreateCursor(int size, Vector2Int offset)
-        {
-            // Fit the complete v5 silhouette, including its loose tail, without filtering the pixels.
-            // Extra transparent padding fits the longer punch; the matching hotspot shift
-            // preserves the resting artwork's screen position and its visible size.
-            const int canvasSize = 128;
-            var output = new Color32[canvasSize * canvasSize];
-            float scale = (float)size / Mathf.Max(cursorBounds.width, cursorBounds.height);
-            int width = Mathf.Max(1, Mathf.RoundToInt(cursorBounds.width * scale));
-            int height = Mathf.Max(1, Mathf.RoundToInt(cursorBounds.height * scale));
-            int left = (canvasSize - width) / 2 + offset.x;
-            int bottom = (canvasSize - height) / 2 + offset.y;
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    int sourceX = cursorBounds.x + Mathf.Min(cursorBounds.width - 1,
-                        Mathf.FloorToInt((x + .5f) * cursorBounds.width / width));
-                    int sourceY = cursorBounds.y + Mathf.Min(cursorBounds.height - 1,
-                        Mathf.FloorToInt((y + .5f) * cursorBounds.height / height));
-                    output[(bottom + y) * canvasSize + left + x] = cursorPixels[sourceY * cursorSourceWidth + sourceX];
-                }
-            }
-
-            var texture = new Texture2D(canvasSize, canvasSize, TextureFormat.RGBA32, false);
-            texture.name = "DojoHandrapV5Cursor";
-            texture.filterMode = FilterMode.Point;
-            texture.wrapMode = TextureWrapMode.Clamp;
-            texture.SetPixels32(output);
-            texture.Apply();
-            return texture;
-        }
-
-        private static RectInt GetVisibleBounds(Color32[] pixels, int width, int height)
-        {
-            int left = width;
-            int bottom = height;
-            int right = -1;
-            int top = -1;
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    if (pixels[y * width + x].a < 128)
-                    {
-                        continue;
-                    }
-
-                    left = Mathf.Min(left, x);
-                    bottom = Mathf.Min(bottom, y);
-                    right = Mathf.Max(right, x);
-                    top = Mathf.Max(top, y);
-                }
-            }
-
-            if (right < left || top < bottom)
-            {
-                throw new System.InvalidOperationException("Hand-wrap cursor artwork is empty.");
-            }
-
-            return new RectInt(left, bottom, right - left + 1, top - bottom + 1);
-        }
-
         private void Apply(Texture2D texture)
         {
             if (UsesDefaultPointer)
@@ -312,27 +231,6 @@ namespace RhythmDojo.UI
 
         private void OnDestroy()
         {
-            if (normalTexture)
-            {
-                Destroy(normalTexture);
-            }
-
-            if (hoverTexture)
-            {
-                Destroy(hoverTexture);
-            }
-
-            if (punchFrames != null)
-            {
-                foreach (var texture in punchFrames)
-                {
-                    if (texture)
-                    {
-                        Destroy(texture);
-                    }
-                }
-            }
-
             if (instance == this)
             {
                 instance = null;
