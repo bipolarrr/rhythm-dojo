@@ -12,6 +12,32 @@ namespace RhythmDojo.Tests
 {
     public sealed class PlayResultReviewTests
     {
+        [UnityEngine.TestTools.UnityTest]
+        public System.Collections.IEnumerator ReinitializedResultsIgnoreLateRetryFailures()
+        {
+            var scene = EditorSceneManager.OpenScene(EditorTools.SceneBuilder.ResultsPath, OpenSceneMode.Additive);
+            try
+            {
+                var view = scene.GetRootGameObjects()
+                    .SelectMany(root => root.GetComponentsInChildren<ResultsView>()).Single();
+                var screen = view.GetComponent<ResultsScreen>();
+                var pending = new System.Threading.Tasks.TaskCompletionSource<bool>();
+                screen.Initialize(null, () => { }, token => pending.Task);
+                view.retryButton.onClick.Invoke();
+                screen.Initialize(null, () => { }, token => System.Threading.Tasks.Task.CompletedTask);
+                string status = view.retryStatus.text;
+                pending.SetException(new SongLoadException(new SongLoadFailure(
+                    SongLoadFailureKind.MissingChart, "Old request")));
+                yield return null;
+                Assert.That(view.retryStatus.text, Is.EqualTo(status));
+                Assert.That(view.retryButton.interactable, Is.True);
+            }
+            finally
+            {
+                EditorSceneManager.CloseScene(scene, true);
+            }
+        }
+
         [TestCase(SongLoadFailureKind.MissingChart, false, "채보 파일")]
         [TestCase(SongLoadFailureKind.InvalidChart, false, "에디터")]
         [TestCase(SongLoadFailureKind.MissingAudio, false, "음원 파일")]

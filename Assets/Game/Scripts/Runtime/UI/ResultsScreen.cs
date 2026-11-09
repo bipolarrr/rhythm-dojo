@@ -283,6 +283,7 @@ namespace RhythmDojo.UI
                 return;
             }
 
+            var currentLifetime = retryLifetime;
             retrying = true;
             view.retryButton.interactable = false;
             view.backButton.interactable = false;
@@ -291,11 +292,16 @@ namespace RhythmDojo.UI
             RefreshTimingRecommendation();
             try
             {
-                await retry(retryLifetime.Token);
+                await retry(currentLifetime.Token);
             }
             catch (OperationCanceledException)
             {
-                if (!this || retryLifetime == null || retryLifetime.IsCancellationRequested)
+                if (!this || retryLifetime != currentLifetime)
+                {
+                    return;
+                }
+
+                if (currentLifetime.IsCancellationRequested)
                 {
                     return;
                 }
@@ -309,7 +315,12 @@ namespace RhythmDojo.UI
             }
             catch (Exception e)
             {
-                if (!this || retryLifetime == null || retryLifetime.IsCancellationRequested)
+                if (!this || retryLifetime != currentLifetime)
+                {
+                    return;
+                }
+
+                if (currentLifetime.IsCancellationRequested)
                 {
                     return;
                 }
