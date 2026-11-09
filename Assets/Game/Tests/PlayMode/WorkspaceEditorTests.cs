@@ -32,6 +32,8 @@ namespace RhythmDojo.Tests
         private InputSettings.EditorInputBehaviorInPlayMode editorBehavior;
         private InputSettings.BackgroundBehavior backgroundBehavior;
 
+        private NativeInputScope nativeInput;
+
         [UnitySetUp]
         public IEnumerator SetUp()
         {
@@ -40,6 +42,7 @@ namespace RhythmDojo.Tests
             backgroundBehavior = input.backgroundBehavior;
             input.editorInputBehaviorInPlayMode = InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
             input.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
+            nativeInput = new NativeInputScope();
             mouse = InputSystem.AddDevice<Mouse>();
             mouse.MakeCurrent();
             keyboard = InputSystem.AddDevice<Keyboard>();
@@ -66,6 +69,8 @@ namespace RhythmDojo.Tests
                 InputSystem.RemoveDevice(keyboard);
             }
 
+            nativeInput?.Dispose();
+            nativeInput = null;
             input.editorInputBehaviorInPlayMode = editorBehavior;
             input.backgroundBehavior = backgroundBehavior;
             yield return SceneManager.LoadSceneAsync(AppFlowController.SelectionPath);
@@ -933,11 +938,20 @@ namespace RhythmDojo.Tests
         public IEnumerator LeftToolIconsSelectDrawEraseAndGrabWithVisibleSelection()
         {
             var bindings = workspace.view.toolActions;
-            Assert.That(bindings.Select(item => item.action), Is.EqualTo(new[]
+            var expected = new System.Collections.Generic.List<WorkspaceAction>
             {
-                WorkspaceAction.Select, WorkspaceAction.Pencil, WorkspaceAction.Eraser, WorkspaceAction.Position,
-                WorkspaceAction.Scroll
-            }));
+                WorkspaceAction.Select,
+                WorkspaceAction.Pencil,
+                WorkspaceAction.Eraser,
+                WorkspaceAction.Position,
+                WorkspaceAction.Scroll,
+            };
+            if (System.Enum.TryParse("OnAir", out WorkspaceAction onAir))
+            {
+                expected.Add(onAir);
+            }
+
+            Assert.That(bindings.Select(item => item.action), Is.EqualTo(expected));
             foreach (var binding in bindings)
             {
                 var icon = binding.button.GetComponentInChildren<WorkspaceToolIcon>();

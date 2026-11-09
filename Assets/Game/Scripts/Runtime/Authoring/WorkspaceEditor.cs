@@ -643,7 +643,7 @@ namespace RhythmDojo.Authoring
 
                 if (action == WorkspaceAction.DiscardExit)
                 {
-                    SceneManager.LoadSceneAsync("Assets/Game/Scenes/Title.unity");
+                    _ = SceneManager.LoadSceneAsync("Assets/Game/Scenes/Title.unity");
                     return;
                 }
 
@@ -829,12 +829,12 @@ namespace RhythmDojo.Authoring
                     }
                     else
                     {
-                        SceneManager.LoadSceneAsync("Assets/Game/Scenes/Title.unity");
+                        _ = SceneManager.LoadSceneAsync("Assets/Game/Scenes/Title.unity");
                     }
                     break;
                 case WorkspaceAction.SaveExit:
                     await Save();
-                    SceneManager.LoadSceneAsync("Assets/Game/Scenes/Title.unity");
+                    _ = SceneManager.LoadSceneAsync("Assets/Game/Scenes/Title.unity");
                     break;
                 case WorkspaceAction.ApplySettings:
                     double bpm = Number(view.bpm);

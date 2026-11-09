@@ -23,6 +23,21 @@ namespace RhythmDojo.Tests
     [PostBuildCleanup(typeof(TestRunStartup))]
     public sealed class AudioTimelineTests
     {
+        private NativeInputScope nativeInput;
+
+        [SetUp]
+        public void IsolateInput()
+        {
+            nativeInput = new NativeInputScope();
+        }
+
+        [TearDown]
+        public void RestoreInput()
+        {
+            nativeInput?.Dispose();
+            nativeInput = null;
+        }
+
         [UnityTest]
         public IEnumerator GridScrollsAndPansToNegativeTenMeasureWithMeterAndOriginChanges()
         {

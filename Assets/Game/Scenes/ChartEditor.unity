@@ -50958,6 +50958,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.UiFontScope
   font: {fileID: 12800000, guid: 50b4af72e8c58404d8b31e07a15daac6, type: 3}
   style: 0
+  useSmoothRendering: 1
 --- !u!114 &2128946678
 MonoBehaviour:
   m_ObjectHideFlags: 0
