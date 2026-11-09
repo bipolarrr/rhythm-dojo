@@ -45,8 +45,7 @@ namespace RhythmDojo.Tests
                 byte[] audioBytes = File.ReadAllBytes(audio);
 
                 File.Delete(path);
-                var missingChart = Assert.ThrowsAsync<SongLoadException>(async () =>
-                    await library.LoadChartAsync(id, ChartSlot.Standard, default));
+                var missingChart = await LoadFailure(library, id);
                 Assert.That(missingChart.Failure.Kind, Is.EqualTo(SongLoadFailureKind.MissingChart));
                 Assert.That(missingChart.InnerException, Is.InstanceOf<FileNotFoundException>());
                 Assert.That(File.Exists(audio), Is.True);
@@ -54,14 +53,12 @@ namespace RhythmDojo.Tests
 
                 File.WriteAllText(path, json);
                 File.Delete(audio);
-                var missingAudio = Assert.ThrowsAsync<SongLoadException>(async () =>
-                    await library.LoadChartAsync(id, ChartSlot.Standard, default));
+                var missingAudio = await LoadFailure(library, id);
                 Assert.That(missingAudio.Failure.Kind, Is.EqualTo(SongLoadFailureKind.MissingAudio));
                 library.Refresh();
                 Assert.That(library.Find(id).Charts.Single().Failure.Kind,
                     Is.EqualTo(SongLoadFailureKind.MissingAudio));
-                var cached = Assert.ThrowsAsync<SongLoadException>(async () =>
-                    await library.LoadChartAsync(id, ChartSlot.Standard, default));
+                var cached = await LoadFailure(library, id);
                 Assert.That(cached.Failure.Kind, Is.EqualTo(SongLoadFailureKind.MissingAudio));
 
                 File.WriteAllBytes(audio, audioBytes);
@@ -83,6 +80,20 @@ namespace RhythmDojo.Tests
                 {
                     Directory.Delete(root, true);
                 }
+            }
+        }
+
+        private static async Task<SongLoadException> LoadFailure(SongLibrary library, string id)
+        {
+            try
+            {
+                using var song = await library.LoadChartAsync(id, ChartSlot.Standard, default);
+                Assert.Fail("Expected a structured loading failure.");
+                return null;
+            }
+            catch (SongLoadException error)
+            {
+                return error;
             }
         }
 
