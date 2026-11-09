@@ -19,22 +19,32 @@ namespace RhythmDojo.Tests
             Assert.That(popup.GetComponent<UiFontScope>().font, Is.SameAs(font));
             foreach (var text in popup.GetComponentsInChildren<Text>(true))
             {
-                Assert.That(text.font, Is.SameAs(font), text.name);
-                Assert.That(text.fontStyle, Is.EqualTo(FontStyle.Bold), text.name);
+                AssertSavedTypography(text, text.name);
+                Assert.That(text.material.GetFloat("_PixelSize"), Is.GreaterThan(1), text.name);
             }
 
             var root = new GameObject("Runtime typography test");
             try
             {
-                UiElements.Label("Label", root.transform, "글씨 123", Vector2.zero, new Vector2(200, 40));
-                UiElements.Button("Button", root.transform, "시작", Vector2.zero, new Vector2(200, 40));
+                var settings = Resources.Load<UiFontSettings>("UI/UiFontSettings");
+                var label = UiElements.Label("Label", root.transform, "글씨 123", Vector2.zero, new Vector2(200, 40));
+                var play = UiElements.Button("Play", root.transform, "시작", Vector2.zero, new Vector2(200, 40));
+                var help = UiElements.Label("Help", root.transform, "도움말", Vector2.zero, new Vector2(200, 40));
                 UiElements.Dropdown("Dropdown", root.transform, Vector2.zero, new Vector2(200, 40));
                 RhythmDojo.Authoring.AudioTimelineUi.Field(root.transform, "Input", "입력", 0, 0, 200, "123");
+                Assert.That(label.font, Is.SameAs(settings.font));
+                Assert.That(label.material, Is.SameAs(settings.pixelText));
+                Assert.That(play.GetComponentInChildren<Text>().font, Is.SameAs(settings.bold));
+                Assert.That(help.font, Is.SameAs(settings.regular));
                 foreach (var text in root.GetComponentsInChildren<Text>(true))
                 {
-                    Assert.That(text.font, Is.SameAs(UiFontSettings.Current), text.name);
-                    Assert.That(text.fontStyle, Is.EqualTo(FontStyle.Bold), text.name);
+                    AssertSavedTypography(text, text.name);
                 }
+
+                root.AddComponent<UiFontScope>().useSmoothRendering = true;
+                var editorLabel = UiElements.Label("Editor Label", root.transform, "편집", Vector2.zero,
+                    new Vector2(200, 40));
+                Assert.That(editorLabel.material, Is.SameAs(editorLabel.defaultMaterial));
             }
             finally
             {
@@ -48,23 +58,27 @@ namespace RhythmDojo.Tests
             var root = new GameObject("Scoped typography test", typeof(UiFontScope));
             var font = AssetDatabase.LoadAssetAtPath<Font>(SongSelectionLayoutBuilder.BrushFontPath);
             Assert.That(font, Is.Not.Null);
-            root.GetComponent<UiFontScope>().font = font;
             try
             {
-                foreach (char character in "곡선택수련난이도스코어랭크레이트최대콤보기록시작설정뒤로0123456789")
+                var settings = Resources.Load<UiFontSettings>("UI/UiFontSettings");
+                foreach (var weight in new[] { font, settings.bold, settings.regular })
                 {
-                    Assert.That(font.HasCharacter(character), Is.True, "Missing brush glyph: " + character);
+                    foreach (char character in "곡선택수련난이도정확콤보기록시작설정뒤로0123456789+.%DFJK")
+                    {
+                        Assert.That(weight.HasCharacter(character), Is.True, weight.name + "/" + character);
+                    }
+                    var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(weight)) as TrueTypeFontImporter;
+                    Assert.That(importer.includeFontData, Is.True);
+                    Assert.That(importer.fontReferences, Does.Contain(
+                        AssetDatabase.LoadAssetAtPath<Font>("Assets/Game/Fonts/Mona12TextKR.ttf")));
                 }
-                var importer = AssetImporter.GetAtPath(SongSelectionLayoutBuilder.BrushFontPath) as TrueTypeFontImporter;
-                Assert.That(importer.includeFontData, Is.True);
-                Assert.That(importer.fontReferences, Does.Contain(
-                    AssetDatabase.LoadAssetAtPath<Font>("Assets/Game/Fonts/Mona12TextKR.ttf")));
+                root.GetComponent<UiFontScope>().font = settings.bold;
                 UiElements.Label("Label", root.transform, "곡 선택 123", Vector2.zero, new Vector2(300, 50));
                 UiElements.Button("Button", root.transform, "시작", Vector2.zero, new Vector2(200, 50));
                 UiElements.Dropdown("Dropdown", root.transform, Vector2.zero, new Vector2(200, 50));
                 foreach (var text in root.GetComponentsInChildren<Text>(true))
                 {
-                    Assert.That(text.font, Is.SameAs(font), text.name);
+                    Assert.That(text.font, Is.SameAs(settings.bold), text.name);
                     Assert.That(text.fontStyle, Is.EqualTo(FontStyle.Bold), text.name);
                 }
             }
@@ -78,8 +92,10 @@ namespace RhythmDojo.Tests
         public void IndividualAndTreeFontApplicationUseTheSameInactiveScope()
         {
             var root = new GameObject("Font resolver", typeof(UiFontScope));
-            var font = AssetDatabase.LoadAssetAtPath<Font>(SongSelectionLayoutBuilder.BrushFontPath);
-            root.GetComponent<UiFontScope>().font = font;
+            var font = Resources.Load<UiFontSettings>("UI/UiFontSettings").regular;
+            var scope = root.GetComponent<UiFontScope>();
+            scope.font = font;
+            scope.style = UiFontSettings.Style;
             try
             {
                 var text = UiElements.Label("Hidden label", root.transform, "Test", Vector2.zero,
@@ -115,11 +131,6 @@ namespace RhythmDojo.Tests
             var font = AssetDatabase.LoadAssetAtPath<Font>(MainMenuLayoutBuilder.FontPath);
             Assert.That(font, Is.Not.Null);
             Assert.That(UiFontSettings.Current, Is.SameAs(font));
-            if (name == "SongSelection" || name == "Results")
-            {
-                font = AssetDatabase.LoadAssetAtPath<Font>(SongSelectionLayoutBuilder.BrushFontPath);
-                Assert.That(font, Is.Not.Null);
-            }
             string path = "Assets/Game/Scenes/" + name + ".unity";
             var scene = SceneManager.GetSceneByPath(path);
             bool alreadyLoaded = scene.IsValid() && scene.isLoaded;
@@ -130,30 +141,28 @@ namespace RhythmDojo.Tests
 
             try
             {
+                Font editorFont = null;
+                if (name == "ChartEditor")
+                {
+                    editorFont = AssetDatabase.LoadAssetAtPath<Font>("Assets/Game/Fonts/NotoSansKR-Regular.otf");
+                    Assert.That(editorFont, Is.Not.Null);
+                }
+
                 int count = 0;
                 foreach (var root in scene.GetRootGameObjects())
                 {
                     foreach (var text in root.GetComponentsInChildren<Text>(true))
                     {
-                        var expectedFont = font;
-                        if (name == "SongSelection" || name == "Results")
+                        if (editorFont)
                         {
-                            Assert.That(text.font, Is.SameAs(font), name + "/" + text.name);
-                        }
-                        var scope = text.GetComponentInParent<UiFontScope>(true);
-                        if (scope && scope.font)
-                        {
-                            expectedFont = scope.font;
-                        }
-                        Assert.That(text.font, Is.SameAs(expectedFont), name + "/" + text.name);
-                        if (name == "ChartEditor")
-                        {
-                            Assert.That(text.font, Is.SameAs(AssetDatabase.LoadAssetAtPath<Font>("Assets/Game/Fonts/NotoSansKR-Regular.otf")), text.name);
-                            Assert.That(text.fontStyle, Is.EqualTo(FontStyle.Normal), name + "/" + text.name);
+                            Assert.That(text.font, Is.SameAs(editorFont), text.name);
+                            Assert.That(text.fontStyle, Is.EqualTo(FontStyle.Normal), text.name);
+                            Assert.That(text.material, Is.SameAs(text.defaultMaterial), text.name);
                         }
                         else
                         {
-                            Assert.That(text.fontStyle, Is.EqualTo(FontStyle.Bold), name + "/" + text.name);
+                            AssertSavedTypography(text, name + "/" + text.name);
+                            Assert.That(text.material.GetFloat("_PixelSize"), Is.GreaterThan(1), text.name);
                         }
                         count++;
                     }
@@ -167,6 +176,27 @@ namespace RhythmDojo.Tests
                 {
                     EditorSceneManager.CloseScene(scene, true);
                 }
+            }
+        }
+
+        private static void AssertSavedTypography(Text text, string context)
+        {
+            var settings = Resources.Load<UiFontSettings>("UI/UiFontSettings");
+            var font = text.font;
+            var style = text.fontStyle;
+            var overflow = text.verticalOverflow;
+            try
+            {
+                Assert.That(new[] { settings.font, settings.bold, settings.regular }, Does.Contain(font), context);
+                Assert.That(style, Is.EqualTo(FontStyle.Normal), context);
+                UiFontSettings.Apply(text);
+                Assert.That(font, Is.SameAs(text.font), context);
+            }
+            finally
+            {
+                text.font = font;
+                text.fontStyle = style;
+                text.verticalOverflow = overflow;
             }
         }
     }
