@@ -1,5 +1,11 @@
 # 동작별 검증 가이드
 
+## 2026-11-03 Unity error follow-up
+
+The remaining scene-ownership, input/focus-isolation and rendering verification issues were corrected. Final Domain/EditMode: 399/399 passed. Latest PlayMode results by unique test: 202/202 passed, with no skips. The PlayMode total combines the full 202-test run (197 passed, 5 failed) with passing affected-fixture reruns (resume 9/9, chart editor 4/4, timeline 3/3, title 19/19); it is not a single clean final full run. Continuous 929-note playback and automatic Results passed. Native focus behavior remains the default and is regression-tested separately from controlled test focus. Builds were omitted because build/platform settings were unchanged.
+
+See `Logs/unity-errors-verification.md` and `Logs/unity-errors-playmode-consolidated.json` for exact scope, measurements and source results. The historical PR integration results below describe the earlier state.
+
 ## 2026-11-03 PR 기능 통합 검증
 
 로컬 `12218cf`의 PR #5~#7 품질 수정을 기준으로 #8 곡 선택, #9 결과 화면, #10 에디터 기능을 `integrate/pr-features`에 선택 통합했다. 원래 `RhythmDojo` 작업 폴더의 Results 씬과 임시 씬은 보존했다. 씬은 PR 스냅샷 대신 로컬 빌더로 재생성했다.

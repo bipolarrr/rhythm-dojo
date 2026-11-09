@@ -36,6 +36,8 @@ Repeat with `PlayMode` and distinct result/log filenames. Close the project in U
 
 ## Coding Style & Naming Conventions
 
+Before adding or changing code, read the corresponding implementation on the local Git `main` branch and follow its patterns for structure, reuse, and style.
+
 Follow existing C# style: four-space indentation, brace-delimited namespaces, PascalCase types/methods/properties, camelCase parameters/private fields, and `I`-prefixed interfaces. Use `RhythmDojo` namespaces and descriptive filenames. No repository formatter configuration was found. Preserve Unity `.meta` files with their assets; avoid editing generated `.csproj` files or `Library/` caches.
 
 ### Branches and conditions
