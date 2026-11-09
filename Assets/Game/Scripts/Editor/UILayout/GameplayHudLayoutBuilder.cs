@@ -46,7 +46,7 @@ namespace RhythmDojo.EditorTools
                 1,
                 1
             );
-            Label("Dojo Brand", header, "RHYTHM DOJO  /  리듬 도장", .03f, 0, .55f, 1, 18);
+            Label("Dojo Brand", header, "RHYTHM DOJO  /  리듬 도장", .03f, 0, .55f, 1, 18, role: UiTextRole.Title);
             Label(
                 "Training Caption",
                 header,
@@ -56,13 +56,13 @@ namespace RhythmDojo.EditorTools
                 .97f,
                 1,
                 15
-            ).alignment = TextAnchor.MiddleRight;
+            , role: UiTextRole.Help).alignment = TextAnchor.MiddleRight;
             Panel("Header Red Line", header, Red, .03f, 0, .25f, .035f);
 
             var song = Card("Training Information", canvas.transform, .035f, .65f, .24f, .88f, Cyan);
-            Label("Song Caption", song, "지금 수련 중인 곡", .07f, .82f, .93f, .97f, 14).color =
+            Label("Song Caption", song, "지금 수련 중인 곡", .07f, .82f, .93f, .97f, 14, role: UiTextRole.Help).color =
                 Muted;
-            view.songTitle = Label("Song Title", song, "", .07f, .48f, .93f, .80f, 25);
+            view.songTitle = Label("Song Title", song, "", .07f, .48f, .93f, .80f, 25, role: UiTextRole.Title);
             view.songTitle.horizontalOverflow = HorizontalWrapMode.Wrap;
             view.songDetails = Label("Song Details", song, "", .07f, .24f, .93f, .47f, 14);
             view.songDetails.color = Muted;
@@ -70,7 +70,7 @@ namespace RhythmDojo.EditorTools
             view.sessionState.color = Cyan;
 
             var record = Card("Judgment Record", canvas.transform, .035f, .40f, .24f, .62f, Muted);
-            Label("Record Caption", record, "판정 기록", .07f, .78f, .93f, .96f, 14).color = Muted;
+            Label("Record Caption", record, "판정 기록", .07f, .78f, .93f, .96f, 14, role: UiTextRole.Help).color = Muted;
             view.counts = Label("Judgment Counts", record, "", .07f, .30f, .93f, .76f, 18);
             view.accuracy = Label("Accuracy", record, "", .07f, .04f, .93f, .28f, 17);
             view.accuracy.color = Cyan;
@@ -78,7 +78,7 @@ namespace RhythmDojo.EditorTools
             var feedback = Card("Rhythm Feedback", canvas.transform, .74f, .22f, .97f, .88f, Red);
             Label("Combo Caption", feedback, "C O M B O", .06f, .85f, .94f, .97f, 16).alignment =
                 TextAnchor.MiddleCenter;
-            view.combo = Label("Combo Value", feedback, "0", .04f, .56f, .96f, .87f, 76);
+            view.combo = Label("Combo Value", feedback, "0", .04f, .56f, .96f, .87f, 76, role: UiTextRole.Title);
             view.combo.alignment = TextAnchor.MiddleCenter;
             view.bestCombo = Label("Best Combo", feedback, "BEST  0", .06f, .49f, .94f, .57f, 13);
             view.bestCombo.alignment = TextAnchor.MiddleCenter;
@@ -134,7 +134,8 @@ namespace RhythmDojo.EditorTools
                 .43f,
                 .98f,
                 .96f,
-                31
+                31,
+                role: UiTextRole.Title
             );
             view.judgment.alignment = TextAnchor.MiddleCenter;
             view.judgment.color = Cyan;
@@ -247,7 +248,8 @@ namespace RhythmDojo.EditorTools
                 .44f,
                 .85f,
                 .60f,
-                58
+                58,
+                role: UiTextRole.Title
             );
             view.gameOverText.alignment = TextAnchor.MiddleCenter;
             view.gameOverText.color = Red;
@@ -260,7 +262,8 @@ namespace RhythmDojo.EditorTools
                 .36f,
                 .85f,
                 .44f,
-                20
+                20,
+                role: UiTextRole.Help
             );
             gameOverHint.alignment = TextAnchor.MiddleCenter;
             gameOverHint.color = Cream;
@@ -316,7 +319,7 @@ namespace RhythmDojo.EditorTools
             menu.resumeButton = PauseButton("Resume Play", dialog, "이어하기", .14f, .69f, .86f, .80f);
             menu.resumeButton.GetComponentInChildren<PixelDojoFrameGraphic>().color = new Color(.57f, .14f, .10f);
             menu.resumeButton.GetComponentInChildren<Text>().color = Cream;
-            var title = Label("Pause Heading", dialog, "수련 일시정지", .08f, .84f, .92f, .96f, 30);
+            var title = Label("Pause Heading", dialog, "수련 일시정지", .08f, .84f, .92f, .96f, 30, role: UiTextRole.Title);
             title.color = new Color(.24f, .12f, .085f);
             title.alignment = TextAnchor.MiddleCenter;
             menu.settingsButton = PauseButton("Pause Settings", dialog, "설정", .14f, .58f, .86f, .74f);
@@ -335,14 +338,14 @@ namespace RhythmDojo.EditorTools
             var plaque = Panel("Countdown Wooden Seal", countdown, Color.white, .412f, .348f, .588f, .652f);
             plaque.GetComponent<Image>().sprite = DojoEntranceAssets.Load("RoundPlaque", UiArtworkCrop.Alpha);
             plaque.GetComponent<Image>().preserveAspect = true;
-            menu.countdownText = Label("Countdown Number", plaque, "3", .08f, .03f, .92f, .97f, 102);
+            menu.countdownText = Label("Countdown Number", plaque, "3", .08f, .03f, .92f, .97f, 102, role: UiTextRole.Title);
             menu.countdownText.color = new Color(1, .91f, .72f);
             menu.countdownText.alignment = TextAnchor.MiddleCenter;
             var shadow = menu.countdownText.gameObject.AddComponent<Shadow>();
             shadow.effectColor = new Color(.20f, .07f, .025f);
             shadow.effectDistance = new Vector2(3, -3);
             var countdownHint = Label("Countdown Hint", countdown, "Esc  ·  일시정지로 돌아가기",
-                .25f, .27f, .75f, .32f, 18);
+                .25f, .27f, .75f, .32f, 18, role: UiTextRole.Help);
             countdownHint.alignment = TextAnchor.MiddleCenter;
             countdownHint.color = Cream;
             countdown.gameObject.SetActive(false);
@@ -431,10 +434,11 @@ namespace RhythmDojo.EditorTools
             float y0,
             float x1,
             float y1,
-            int size
+            int size,
+            UiTextRole role = UiTextRole.Body
         )
         {
-            var label = UiElements.Label(name, parent, text, Vector2.zero, Vector2.zero, size);
+            var label = UiElements.Label(name, parent, text, Vector2.zero, Vector2.zero, size, role);
             label.font = font;
             label.color = Cream;
             label.alignment = TextAnchor.MiddleLeft;

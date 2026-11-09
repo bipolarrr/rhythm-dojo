@@ -54,7 +54,7 @@ namespace RhythmDojo.EditorTools
                 child.gameObject.SetActive(false);
             }
             Frame((RectTransform)header, Paper, 12);
-            var heading = UiElements.Label("Pixel Heading", header, "곡 선택", Vector2.zero, Vector2.zero, 48);
+            var heading = UiElements.Label("Pixel Heading", header, "곡 선택", Vector2.zero, Vector2.zero, 48, role: UiTextRole.Title);
             heading.font = AssetDatabase.LoadAssetAtPath<Font>(MainMenuLayoutBuilder.FontPath);
             heading.fontStyle = FontStyle.Bold;
             heading.color = Ink;

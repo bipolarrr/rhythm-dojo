@@ -104,7 +104,7 @@ namespace RhythmDojo.UI
             }
 
             label.color = new Color(.24f, .12f, .085f);
-            UiFontSettings.Apply(label);
+            UiFontSettings.Apply(label, UiTextRole.Title);
             label.text = "";
             label.fontSize = 26;
             label.resizeTextForBestFit = true;

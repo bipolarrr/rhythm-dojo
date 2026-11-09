@@ -63,9 +63,9 @@ namespace RhythmDojo.EditorTools
                 1,
                 1
             );
-            Label("Brand", header, "RHYTHM DOJO  /  리듬 도장", .016f, 0, .34f, 1, 25);
+            Label("Brand", header, "RHYTHM DOJO  /  리듬 도장", .016f, 0, .34f, 1, 25, role: UiTextRole.Title);
             Panel("Header Accent", header, new Color(.94f, .25f, .26f), .025f, 0, .325f, .035f);
-            Label("Section", header, "곡 선택  /  MUSIC SELECT", .355f, 0, .75f, 1, 23);
+            Label("Section", header, "곡 선택  /  MUSIC SELECT", .355f, 0, .75f, 1, 23, role: UiTextRole.Title);
             Label("Mode", header, "4 KEY  ·  FREE PLAY", .78f, 0, .985f, 1, 20);
 
             var footer = Panel(
@@ -87,7 +87,7 @@ namespace RhythmDojo.EditorTools
                 .975f,
                 .89f
             );
-            view.songTitle = Label("Song Title", left, "곡을 선택하세요", 0, .925f, 1, 1, 32);
+            view.songTitle = Label("Song Title", left, "곡을 선택하세요", 0, .925f, 1, 1, 32, role: UiTextRole.Title);
             view.artistBpm = Label("Artist and BPM", left, "", 0, .865f, 1, .925f, 20);
 
             var artwork = Panel("Album Frame", left, Color.black, 0, .48f, 1, .865f);
@@ -364,7 +364,7 @@ namespace RhythmDojo.EditorTools
             coverFit.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
             coverFit.aspectRatio = 1;
             row.cover.raycastTarget = false;
-            row.title = Label("Title", row.transform, "", .085f, .37f, .59f, .96f, 27);
+            row.title = Label("Title", row.transform, "", .085f, .37f, .59f, .96f, 27, role: UiTextRole.Title);
             row.artist = Label("Artist", row.transform, "", .085f, .05f, .59f, .42f, 18);
             row.artist.color = new Color(.62f, .70f, .72f);
             row.bpm = Label("BPM", row.transform, "", .59f, .12f, .76f, .88f, 23);
@@ -378,7 +378,7 @@ namespace RhythmDojo.EditorTools
             view.rowTemplate = row;
             row.gameObject.SetActive(false);
             view.back = Button("Back", footer, "← 뒤로", .025f, .16f, .13f, .84f);
-            view.play = Button("Play", footer, "입장  ▶", .835f, .16f, .975f, .84f);
+            view.play = Button("Play", footer, "입장  ▶", .835f, .16f, .975f, .84f, role: UiTextRole.Title);
             view.details = Label(
                 "Details",
                 footer,
@@ -414,7 +414,7 @@ namespace RhythmDojo.EditorTools
             view.backPopup = overlay.gameObject;
 
             var dialog = Panel("Dialog", overlay, PanelColor, .32f, .34f, .68f, .66f);
-            Label("Question", dialog, "타이틀 화면으로 돌아갈까요?", .05f, .45f, .95f, .95f, 30);
+            Label("Question", dialog, "타이틀 화면으로 돌아갈까요?", .05f, .45f, .95f, .95f, 30, role: UiTextRole.Title);
             view.confirmBack = Button("Confirm Back", dialog, "돌아가기", .07f, .13f, .47f, .36f);
             view.cancelBack = Button("Cancel Back", dialog, "취소", .53f, .13f, .93f, .36f);
             overlay.gameObject.SetActive(false);
@@ -433,7 +433,7 @@ namespace RhythmDojo.EditorTools
 
             var modeDialog = Panel("Mode Dialog", modeOverlay, PanelColor, .32f, .33f, .68f, .67f);
             Panel("Mode Accent", modeDialog, new Color(.46f, .78f, .76f), 0, .99f, 1, 1);
-            Label("Mode Title", modeDialog, "모드 선택", .07f, .70f, .80f, .94f, 30);
+            Label("Mode Title", modeDialog, "모드 선택", .07f, .70f, .80f, .94f, 30, role: UiTextRole.Title);
             view.normalModeButton = Button(
                 "Normal Mode",
                 modeDialog,
@@ -613,10 +613,11 @@ namespace RhythmDojo.EditorTools
             float y0,
             float x1,
             float y1,
-            int size
+            int size,
+            UiTextRole role = UiTextRole.Body
         )
         {
-            var text = UiElements.Label(name, parent, caption, Vector2.zero, Vector2.zero, size);
+            var text = UiElements.Label(name, parent, caption, Vector2.zero, Vector2.zero, size, role);
             text.font = font;
             text.alignment = TextAnchor.MiddleLeft;
             text.raycastTarget = false;
@@ -636,7 +637,8 @@ namespace RhythmDojo.EditorTools
             float x0,
             float y0,
             float x1,
-            float y1
+            float y1,
+            UiTextRole role = UiTextRole.Body
         )
         {
             var rect = Panel(name, parent, new Color(.09f, .115f, .13f, .96f), x0, y0, x1, y1);
@@ -646,7 +648,7 @@ namespace RhythmDojo.EditorTools
             var button = rect.gameObject.AddComponent<Button>();
             button.targetGraphic = image;
 
-            var text = Label("Caption", rect, caption, 0, 0, 1, 1, 22);
+            var text = Label("Caption", rect, caption, 0, 0, 1, 1, 22, role);
             text.alignment = TextAnchor.MiddleCenter;
             text.rectTransform.offsetMin = new Vector2(4, 2);
             text.rectTransform.offsetMax = new Vector2(-4, -2);

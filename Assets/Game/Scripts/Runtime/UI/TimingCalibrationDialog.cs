@@ -124,7 +124,8 @@ namespace RhythmDojo.UI
                 "입력 타이밍 테스트",
                 new Vector2(30, -25),
                 new Vector2(600, 50),
-                34
+                34,
+                role: UiTextRole.Title
             );
             status = UiElements.Label(
                 "Timing Calibration Status",
@@ -145,7 +146,8 @@ namespace RhythmDojo.UI
                 "테스트 시작",
                 new Vector2(38, -240),
                 new Vector2(176, 52),
-                view.apply
+                view.apply,
+                UiTextRole.Title
             );
             apply = CreateButton(
                 "Apply Calibration",
@@ -153,7 +155,8 @@ namespace RhythmDojo.UI
                 "보정값 적용",
                 new Vector2(240, -240),
                 new Vector2(180, 52),
-                view.apply
+                view.apply,
+                UiTextRole.Title
             );
             close = CreateButton(
                 "Close Calibration",
@@ -180,7 +183,8 @@ namespace RhythmDojo.UI
             string caption,
             Vector2 position,
             Vector2 size,
-            Button style
+            Button style,
+            UiTextRole role = UiTextRole.Body
         )
         {
             var button = Object.Instantiate(style, parent);
@@ -193,6 +197,7 @@ namespace RhythmDojo.UI
 
             var label = button.GetComponentInChildren<Text>();
             label.text = caption;
+            UiFontSettings.Apply(label, role);
 
             return button;
         }

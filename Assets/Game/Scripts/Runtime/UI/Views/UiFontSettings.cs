@@ -28,101 +28,81 @@ namespace RhythmDojo.UI
             }
         }
 
+        public static void Apply(Text text, UiTextRole role)
+        {
+            var style = text.GetComponent<UiTextStyle>() ?? text.gameObject.AddComponent<UiTextStyle>();
+            style.role = role;
+            Apply(text);
+        }
+
         private static void Apply(Text text, UiFontSettings settings)
         {
             var scope = text.GetComponentInParent<UiFontScope>(true);
-            if ((!scope || !scope.useSmoothRendering) && text.material == text.defaultMaterial)
+            var style = text.GetComponent<UiTextStyle>() ?? text.gameObject.AddComponent<UiTextStyle>();
+            if (scope && scope.useSmoothRendering)
+            {
+                if (text.material == settings.pixelText)
+                {
+                    text.material = null;
+                }
+            }
+            else if (text.material == text.defaultMaterial)
             {
                 text.material = settings.pixelText;
             }
 
-            if (scope && scope.font)
+            // Preserve explicitly assigned fonts, but never capture our last application as an override.
+            if (text.font && text.font != style.appliedFont && !IsSharedFont(text.font, settings))
             {
-                if (scope.style == FontStyle.Normal)
+                if (text.font != Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf"))
                 {
-                    var input = text.GetComponentInParent<InputField>(true);
-                    var dropdown = text.GetComponentInParent<Dropdown>(true);
-                    if (input || dropdown)
-                    {
-                        text.verticalOverflow = VerticalWrapMode.Overflow;
-                    }
-                }
-
-                if (scope.font != settings.font)
-                {
-                    text.font = scope.font;
-                    text.fontStyle = scope.style;
-                    return;
+                    style.customFont = text.font;
+                    style.customStyle = text.fontStyle;
                 }
             }
 
-            text.font = ResolveFont(text, settings);
-            text.fontStyle = Style;
+            if (style.customFont)
+            {
+                text.font = style.customFont;
+                text.fontStyle = style.customStyle;
+            }
+            else if (scope && scope.font && !IsSharedFont(scope.font, settings))
+            {
+                text.font = scope.font;
+                text.fontStyle = scope.style;
+            }
+            else
+            {
+                text.font = ResolveFont(style.role, settings);
+                text.fontStyle = Style;
+            }
+
+            style.appliedFont = text.font;
+            if (text.fontStyle == FontStyle.Normal)
+            {
+                var input = text.GetComponentInParent<InputField>(true);
+                var dropdown = text.GetComponentInParent<Dropdown>(true);
+                if (input || dropdown)
+                {
+                    text.verticalOverflow = VerticalWrapMode.Overflow;
+                }
+            }
         }
 
-        private static Font ResolveFont(Text text, UiFontSettings settings)
+        private static bool IsSharedFont(Font font, UiFontSettings settings) =>
+            font == settings.font || font == settings.bold || font == settings.regular;
+
+        private static Font ResolveFont(UiTextRole role, UiFontSettings settings)
         {
-            switch (text.name)
+            switch (role)
             {
-                case "Dojo Brand":
-                case "Mode Title":
-                case "Combo Value":
-                case "Countdown Number":
-                case "ON AIR Countdown":
-                case "Judgment Grade":
-                case "Outcome":
-                case "Score Value":
-                case "New Record Text":
-                case "Start Prompt":
+                case UiTextRole.Title:
                     return settings.bold;
-                case "Placeholder":
-                case "Instructions":
-                case "Shortcut":
-                case "Result Note":
-                case "Review Legend":
-                case "Training Caption":
+                case UiTextRole.Help:
                     return settings.regular;
-                case "Title":
-                    if (!text.GetComponentInParent<SongRowView>(true))
-                    {
-                        return settings.bold;
-                    }
-                    break;
+                default:
+                    return settings.font;
             }
-
-            if (text.name.EndsWith("Heading", StringComparison.Ordinal)
-                || text.name == "Game Over Title")
-            {
-                return settings.bold;
-            }
-
-            var parent = text.transform.parent;
-            if (parent)
-            {
-                var group = parent.parent;
-                if (parent.name == "Play" || parent.name == "Retry")
-                {
-                    return settings.bold;
-                }
-
-                if (group && group.name == "Menu Buttons")
-                {
-                    return settings.bold;
-                }
-            }
-
-            if (text.name.EndsWith(" Help", StringComparison.Ordinal)
-                || text.name.EndsWith(" Hint", StringComparison.Ordinal))
-            {
-                return settings.regular;
-            }
-
-            if (text.name == "Help")
-            {
-                return settings.regular;
-            }
-
-            return settings.font;
         }
 
         public static Font Current => Load().font;

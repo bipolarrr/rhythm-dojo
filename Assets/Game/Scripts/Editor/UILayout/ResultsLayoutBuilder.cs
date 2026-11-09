@@ -38,7 +38,7 @@ namespace RhythmDojo.EditorTools
             Panel("Scenery Shade", surface, new Color(.08f, .035f, .02f, .16f), 0, 0, 1, 1);
             var header = Panel("Result Header", surface, Color.clear, .045f, .86f, .955f, .965f);
             TexturedFrame(header, "SettingsControl", 12, Color.white);
-            var heading = Label("Heading", header, "수련 결과", .05f, .08f, .95f, .92f, 64);
+            var heading = Label("Heading", header, "수련 결과", .05f, .08f, .95f, .92f, 64, role: UiTextRole.Title);
             heading.alignment = TextAnchor.MiddleCenter;
 
             view.backButton = Button("Back", surface, "곡 선택", .045f, .03f, .225f, .115f);
@@ -59,7 +59,7 @@ namespace RhythmDojo.EditorTools
             view.coverPlaceholder = Label("Album Placeholder", album, "앨범", .08f, .1f, .92f, .9f, 48);
             view.coverPlaceholder.alignment = TextAnchor.MiddleCenter;
 
-            view.title = Label("Song Title", summary, "노래 제목", .40f, .77f, .95f, .945f, 68);
+            view.title = Label("Song Title", summary, "노래 제목", .40f, .77f, .95f, .945f, 68, role: UiTextRole.Title);
             view.artist = Label("Artist", summary, "작곡가", .40f, .65f, .95f, .755f, 46);
             view.difficulty = Label("Difficulty", summary, "", .40f, .535f, .95f, .64f, 44);
             view.perfect = Stat(summary, "Perfect", .40f);
@@ -81,17 +81,17 @@ namespace RhythmDojo.EditorTools
             var seal = Panel("Wooden Result Seal", result, Color.white, .10f, .18f, .90f, .85f);
             seal.GetComponent<Image>().sprite = DojoEntranceAssets.Load("RoundPlaque");
             seal.GetComponent<Image>().preserveAspect = true;
-            view.outcome = Label("Outcome", result, "플레이 결과", .18f, .255f, .82f, .775f, 220);
+            view.outcome = Label("Outcome", result, "플레이 결과", .18f, .255f, .82f, .775f, 220, role: UiTextRole.Title);
             view.outcome.alignment = TextAnchor.MiddleCenter;
             view.outcome.alignByGeometry = true;
             view.outcome.color = new Color(1f, .91f, .69f);
             var outcomeShadow = view.outcome.gameObject.AddComponent<Shadow>();
             outcomeShadow.effectColor = new Color(.12f, .045f, .02f, .95f);
             outcomeShadow.effectDistance = new Vector2(2, -2);
-            var resultNote = Label("Result Note", result, "이번 수련의 결과", .08f, .04f, .92f, .15f, 36);
+            var resultNote = Label("Result Note", result, "이번 수련의 결과", .08f, .04f, .92f, .15f, 36, role: UiTextRole.Help);
             resultNote.alignment = TextAnchor.MiddleCenter;
             view.progressNote = resultNote;
-            Label("Aggregate Help", summary, "전체 판정 집계에는 유지 판정 포함", .04f, .115f, .36f, .16f, 24);
+            Label("Aggregate Help", summary, "전체 판정 집계에는 유지 판정 포함", .04f, .115f, .36f, .16f, 24, role: UiTextRole.Help);
             view.review = BuildReview(surface);
             UiFontSettings.ApplyTo(view.transform);
             RefineScoreHierarchy(view);
@@ -127,7 +127,7 @@ namespace RhythmDojo.EditorTools
         public static void BuildScorePanel(ResultsView view)
         {
             view.scoreSummary = Label("Score Summary", view.feedback, "", .035f, .12f, .71f, .88f, 42);
-            view.retryButton = Button("Retry", view.feedback, "다시 하기", .73f, .26f, .97f, .76f);
+            view.retryButton = Button("Retry", view.feedback, "다시 하기", .73f, .26f, .97f, .76f, role: UiTextRole.Title);
             view.retryButton.GetComponentInChildren<Text>().fontSize = 40;
             view.retryStatus = Label("Retry Status", view.feedback, "", .68f, .03f, .97f, .25f, 25);
             view.retryStatus.alignment = TextAnchor.MiddleCenter;
@@ -138,10 +138,10 @@ namespace RhythmDojo.EditorTools
             if (!view.scoreValue)
             {
                 Label("Score Caption", view.feedback, "이번 점수", .035f, .70f, .36f, .91f, 31);
-                view.scoreValue = Label("Score Value", view.feedback, "—", .035f, .12f, .38f, .70f, 86);
+                view.scoreValue = Label("Score Value", view.feedback, "—", .035f, .12f, .38f, .70f, 86, role: UiTextRole.Title);
                 var badge = Panel("New Record Badge", view.feedback, new Color(.26f, .37f, .22f),
                     .39f, .64f, .51f, .87f);
-                var badgeText = Label("New Record Text", badge, "신기록", 0, 0, 1, 1, 28);
+                var badgeText = Label("New Record Text", badge, "신기록", 0, 0, 1, 1, 28, role: UiTextRole.Title);
                 badgeText.color = new Color(1f, .95f, .76f);
                 badgeText.alignment = TextAnchor.MiddleCenter;
                 view.newRecordBadge = badge.gameObject;
@@ -171,7 +171,7 @@ namespace RhythmDojo.EditorTools
             var view = panel.gameObject.AddComponent<ResultsReviewView>();
             var review = panel.gameObject.AddComponent<ResultsChartReview>();
             SceneDependencyAssembler.Wire(review, "view", view);
-            view.heading = Label("Review Heading", panel, "전체 채보 판정", .05f, .89f, .75f, .965f, 38);
+            view.heading = Label("Review Heading", panel, "전체 채보 판정", .05f, .89f, .75f, .965f, 38, role: UiTextRole.Title);
             view.closeButton = Button("Close Review", panel, "결과로 돌아가기", .79f, .89f, .95f, .965f);
             view.lanes = Label("Review Lanes", panel, "", .07f, .84f, .63f, .89f, 24);
             var background = Panel("Chart Background", panel, new Color(.10f, .065f, .045f), .07f, .2f, .63f, .83f);
@@ -183,7 +183,7 @@ namespace RhythmDojo.EditorTools
             view.range = Label("Review Range", panel, "", .07f, .075f, .63f, .12f, 21);
             Label("Review Legend", panel,
                 "<color=#167A68>Perfect</color>  <color=#946218>Good</color>  <color=#B9382A>Miss</color>  <color=#6D6054>미판정</color>  · 롱노트 색상: 시작·끝 중 낮은 판정",
-                .07f, .02f, .75f, .07f, 21);
+                .07f, .02f, .75f, .07f, 21, role: UiTextRole.Help);
             view.zoom = UiElements.Dropdown("Review Zoom", panel, Vector2.zero, Vector2.zero);
             Place((RectTransform)view.zoom.transform, .65f, .825f, .95f, .885f);
             view.zoom.ClearOptions();
@@ -218,7 +218,7 @@ namespace RhythmDojo.EditorTools
             view.events.resizeTextMinSize = 24;
             view.previousButton = Button("Previous Note", panel, "이전 노트", .67f, .1f, .81f, .16f);
             view.nextButton = Button("Next Note", panel, "다음 노트", .82f, .1f, .96f, .16f);
-            Label("Review Help", panel, "노트 클릭: 상세 판정  /  Escape: 결과로 복귀", .67f, .055f, .97f, .095f, 18);
+            Label("Review Help", panel, "노트 클릭: 상세 판정  /  Escape: 결과로 복귀", .67f, .055f, .97f, .095f, 18, role: UiTextRole.Help);
             view.Validate();
             panel.gameObject.SetActive(false);
 
@@ -302,10 +302,11 @@ namespace RhythmDojo.EditorTools
 
         private static Text Label(
             string name, Transform parent, string text,
-            float x0, float y0, float x1, float y1, int size
+            float x0, float y0, float x1, float y1, int size,
+            UiTextRole role = UiTextRole.Body
         )
         {
-            var label = UiElements.Label(name, parent, text, Vector2.zero, Vector2.zero, size);
+            var label = UiElements.Label(name, parent, text, Vector2.zero, Vector2.zero, size, role);
             UiFontSettings.Apply(label);
             label.color = Ink;
             label.alignment = TextAnchor.MiddleLeft;
@@ -318,10 +319,11 @@ namespace RhythmDojo.EditorTools
         }
 
         private static Button Button(
-            string name, Transform parent, string caption, float x0, float y0, float x1, float y1
+            string name, Transform parent, string caption, float x0, float y0, float x1, float y1,
+            UiTextRole role = UiTextRole.Body
         )
         {
-            var button = UiElements.Button(name, parent, caption, Vector2.zero, Vector2.zero);
+            var button = UiElements.Button(name, parent, caption, Vector2.zero, Vector2.zero, role);
             Place((RectTransform)button.transform, x0, y0, x1, y1);
             var image = button.GetComponent<Image>();
             image.sprite = null;

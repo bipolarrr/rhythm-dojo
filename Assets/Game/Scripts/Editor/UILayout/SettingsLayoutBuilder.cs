@@ -43,7 +43,8 @@ namespace RhythmDojo.EditorTools
                 "설정",
                 new Vector2(32, -24),
                 new Vector2(700, 45),
-                32
+                32,
+                role: UiTextRole.Title
             );
             Panel(
                 "Header Line",
@@ -134,7 +135,8 @@ namespace RhythmDojo.EditorTools
                 "하드 모드 설정  ·  회복 없음",
                 new Vector2(0, -162),
                 new Vector2(700, 28),
-                20
+                20,
+                role: UiTextRole.Title
             );
             view.hardRuleLists = new Dropdown[3];
             view.hardLossCounts = new InputField[3];
@@ -195,7 +197,8 @@ namespace RhythmDojo.EditorTools
                 "하드 모드에서만 적용 · 체력 감소 5회 = 판정마다 20 감소 · 자동 저장",
                 new Vector2(0, -338),
                 new Vector2(700, 34),
-                14
+                14,
+                role: UiTextRole.Help
             );
 
             foreach (Transform child in view.gameplayPanel.transform)
@@ -233,7 +236,7 @@ namespace RhythmDojo.EditorTools
             UiElements.Label(
                 "Hold End Help", view.gameplayPanel.transform,
                 "Automatic: 재입력 허용 · 끝에서 누르고 있으면 자동 판정\nRelease: 조기 해제·시작 Miss 후 복구 불가 · 남은 유지 판정 Miss",
-                new Vector2(0, -398), new Vector2(700, 54), 17);
+                new Vector2(0, -398), new Vector2(700, 54), 17, role: UiTextRole.Help);
 
             view.masterLabel = UiElements.Label(
                 "Master Volume Label",
@@ -419,7 +422,7 @@ namespace RhythmDojo.EditorTools
                 new Vector2(740, 380), Color.clear);
             var parent = view.keySettingsPanel.transform;
             UiElements.Label("Key Settings Heading", parent, "플레이 키 설정", Vector2.zero,
-                new Vector2(700, 44), 34);
+                new Vector2(700, 44), 34, role: UiTextRole.Title);
             var mode = SceneResources.Require<GameSettings>(TestContentBuilder.SettingsPath).catalog[0].Mode;
             var viewport = Panel("Key Rows Viewport", parent, new Vector2(0, -58),
                 new Vector2(700, 208), Color.clear);
@@ -468,7 +471,7 @@ namespace RhythmDojo.EditorTools
             }
             UiElements.Label("Key Settings Help", parent,
                 "바꿀 키를 누른 뒤 원하는 키보드 키를 입력하세요.\nEsc: 변경 취소 · 시작·복귀 키 및 중복 키 사용 불가",
-                new Vector2(0, -274), new Vector2(700, 52), 23);
+                new Vector2(0, -274), new Vector2(700, 52), 23, role: UiTextRole.Help);
             view.keyBindingStatus = UiElements.Label("Key Binding Status", parent,
                 "변경한 키는 이 모드에 자동 저장됩니다.",
                 new Vector2(0, -328), new Vector2(700, 34), 22);
@@ -491,6 +494,7 @@ namespace RhythmDojo.EditorTools
                 scope = view.gameObject.AddComponent<UiFontScope>();
             }
             scope.font = font;
+            UiFontSettings.Apply(view.apply.GetComponentInChildren<Text>(true), UiTextRole.Title);
             UiFontSettings.ApplyTo(view.transform);
         }
 

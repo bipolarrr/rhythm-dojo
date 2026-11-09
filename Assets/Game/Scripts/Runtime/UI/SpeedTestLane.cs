@@ -72,7 +72,7 @@ namespace RhythmDojo.UI
             feedback = display.GetComponent<CanvasGroup>();
             feedback.interactable = false;
             feedback.blocksRaycasts = false;
-            judgment = CreateFeedbackLabel("Judgment Grade", display.transform, Vector2.zero, 26, 42);
+            judgment = CreateFeedbackLabel("Judgment Grade", display.transform, Vector2.zero, 26, 42, UiTextRole.Title);
             timingLabel = CreateFeedbackLabel("Judgment Timing", display.transform, new Vector2(0, -37), 16, 28);
             timingLabel.color = new Color(.98f, .92f, .77f);
 
@@ -85,10 +85,11 @@ namespace RhythmDojo.UI
             Transform parent,
             Vector2 position,
             int size,
-            float height
+            float height,
+            UiTextRole role = UiTextRole.Body
         )
         {
-            var label = UiElements.Label(name, parent, "", position, new Vector2(LaneWidth, height), size);
+            var label = UiElements.Label(name, parent, "", position, new Vector2(LaneWidth, height), size, role);
             label.alignment = TextAnchor.MiddleCenter;
             var outline = label.gameObject.AddComponent<Outline>();
             outline.effectColor = new Color(.08f, .05f, .035f, .9f);

@@ -94,10 +94,10 @@ namespace RhythmDojo.EditorTools
             logoArt.raycastTarget = false;
             view.logoArtwork = logoArt.rectTransform;
             Anchor(logoArt.rectTransform, new Vector2(.5f, .5f), new Vector2(0, 12), new Vector2(420, 150));
-            view.title = Label("Title", view.logo.transform, "리듬 도장", font, 48);
+            view.title = Label("Title", view.logo.transform, "리듬 도장", font, 48, role: UiTextRole.Title);
             Anchor(view.title.rectTransform, new Vector2(.5f, .5f), Vector2.zero, new Vector2(270, 90));
             view.title.enabled = false;
-            view.startPrompt = Label("Start Prompt", view.logo.transform, "두드려 시작", font, 20);
+            view.startPrompt = Label("Start Prompt", view.logo.transform, "두드려 시작", font, 20, role: UiTextRole.Title);
             view.startPrompt.color = new Color(1f, .88f, .64f);
             Anchor(view.startPrompt.rectTransform, new Vector2(.5f, .5f), new Vector2(0, -110), new Vector2(250, 40));
             view.startPrompt.raycastTarget = false;
@@ -151,7 +151,8 @@ namespace RhythmDojo.EditorTools
                 dialog.transform,
                 "게임을 종료 하시겠습니까?",
                 font,
-                26
+                26,
+                role: UiTextRole.Title
             );
             Anchor(
                 view.quitQuestion.rectTransform,
@@ -318,10 +319,11 @@ namespace RhythmDojo.EditorTools
             Transform parent,
             string caption,
             Font font,
-            int size
+            int size,
+            UiTextRole role = UiTextRole.Body
         )
         {
-            var text = UiElements.Label(name, parent, caption, Vector2.zero, Vector2.zero, size);
+            var text = UiElements.Label(name, parent, caption, Vector2.zero, Vector2.zero, size, role);
             text.font = font;
             text.alignment = TextAnchor.MiddleCenter;
             text.horizontalOverflow = HorizontalWrapMode.Wrap;
@@ -379,7 +381,7 @@ namespace RhythmDojo.EditorTools
             colors.disabledColor = new Color(.65f, .60f, .53f);
             colors.fadeDuration = .12f;
             button.colors = colors;
-            var captionText = Label("Caption", button.transform, string.Join("\n", caption.ToCharArray()), font, 30);
+            var captionText = Label("Caption", button.transform, string.Join("\n", caption.ToCharArray()), font, 30, UiTextRole.Title);
             captionText.color = new Color(1f, .95f, .84f);
             captionText.fontStyle = FontStyle.Bold;
             var captionHighlight = captionText.gameObject.AddComponent<Shadow>();
