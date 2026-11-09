@@ -71,7 +71,7 @@ namespace RhythmDojo.Tests
                 Assert.That(library.Find(id).Charts.Single().Error, Is.Null);
                 using var canceled = new CancellationTokenSource();
                 canceled.Cancel();
-                Assert.ThrowsAsync<OperationCanceledException>(async () =>
+                Assert.CatchAsync<OperationCanceledException>(async () =>
                     await library.LoadChartAsync(id, ChartSlot.Standard, canceled.Token));
             }
             finally
@@ -114,7 +114,7 @@ namespace RhythmDojo.Tests
             error = Assert.ThrowsAsync<SongLoadException>(async () => await loader.LoadAsync(document, default));
             Assert.That(error.Failure.Kind, Is.EqualTo(SongLoadFailureKind.MissingAudio));
             loader = new DocumentSongLoader(_ => song.Mode, (_, token) => throw new OperationCanceledException());
-            Assert.ThrowsAsync<OperationCanceledException>(async () => await loader.LoadAsync(document, default));
+            Assert.CatchAsync<OperationCanceledException>(async () => await loader.LoadAsync(document, default));
         }
 
         [Test]
