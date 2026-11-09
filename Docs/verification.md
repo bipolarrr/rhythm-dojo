@@ -132,11 +132,11 @@ $unity = 'C:/Program Files/Unity/Hub/Editor/6000.3.23f1/Editor/Unity.exe'
 전체 적용 검사는 준비·복구·일시정지·장치 변경을 포함해 최대 20초이다. 일시정지와 설정 변경은 관측을 폐기하되 제한 시간을 다시 시작하지 않는다. 제한 시간 만료와 복원 요청 수락은 정상 판정이 아니다. `ClockRateVerified`, `ConsecutiveClockRateMeasurements`, `ClockRateMeasurements`, `ValidationElapsedSeconds`가 판정 근거를 제공하며 `AudioFlowTests`는 실제 요청/적용 버퍼와 구간을 `Logs/audio-buffers.txt`에 기록한다. 이는 출력 품질이나 체감 지연을 보증하지 않는다.
 
 
-## 결과 기록과 롱노트 규칙 v3
+## 결과 기록과 롱노트 규칙 v4
 
-`PlayRules.CurrentVersion`은 3이다. Automatic은 시작 Miss나 중간 해제 후에도 재입력할 수 있고, 끝 시각의 키 상태로 자동 끝 판정을 적용한다. Release는 조기 해제 순간 끝 Miss와 HP·콤보·실패를 한 번 적용하며 재입력으로 복구하지 않는다. 남은 유지 시각에는 키 상태와 무관하게 Miss를 적용한다. Release의 시작 Miss도 복구할 수 없다. 정상/늦은 해제는 기존 판정창과 시간 허용 오차를 사용한다.
+`PlayRules.CurrentVersion`은 4이다. 입력과 Tick은 모두 `GameplayTiming`의 논리 시각(곡 시각 − 입력 보정값)을 사용한다. 시작·유지·자동 끝·해제 판정에 같은 기준을 적용하며 Presenter는 표시용 곡 시간을 사용한다. Automatic은 시작 Miss나 중간 해제 후에도 재입력할 수 있고, 끝 시각의 키 상태로 자동 끝 판정을 적용한다. Release는 조기 해제 순간 끝 Miss와 HP·콤보·실패를 한 번 적용하며 재입력으로 복구하지 않는다. 남은 유지 시각에는 키 상태와 무관하게 Miss를 적용한다. Release의 시작 Miss도 복구할 수 없다. 정상/늦은 해제는 기존 판정창과 시간 허용 오차를 사용한다.
 
-최고 기록 키에는 규칙 버전이 포함되므로 v2 기록을 삭제하거나 변환하지 않는다. Automatic을 포함한 모든 v3 기록은 이전 버전과 분리된다. enum 값과 저장 필드 이름은 유지한다.
+최고 기록 키에는 규칙 버전이 포함되므로 v2·v3 기록을 삭제하거나 변환하지 않는다. Automatic을 포함한 모든 v4 기록은 이전 버전과 분리된다. enum 값과 저장 필드 이름은 유지한다.
 
 세션은 노트 수만큼 `NoteJudgmentRecord` 배열을 할당하고 시작·끝 확정 시 해당 슬롯만 갱신한다. Reset은 같은 배열을 비운다. 유지 판정은 HP·콤보·정확도와 상단 집계에 계속 포함되지만 상세 기록에는 포함되지 않는다. 아직 도달하지 않은 시작·끝은 null이며 Miss와 구분한다. 구형 세션 경로는 기존 한 노트당 최종 점수 규칙을 유지하면서 성공한 홀드 시작과 최종 판정을 각각 기록한다.
 
