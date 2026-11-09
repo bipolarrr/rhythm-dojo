@@ -18,6 +18,7 @@ namespace RhythmDojo.Core
     public sealed class GameplayCompositionRoot : MonoBehaviour
     {
         private const double ResultTransitionDelaySeconds = 1;
+        private const double FullComboResultTransitionDelaySeconds = ResultTransitionDelaySeconds * 2;
 
         [SerializeField]
         private GameSettings settings;
@@ -49,6 +50,7 @@ namespace RhythmDojo.Core
         private bool initialized;
         private bool returnPending;
         private bool recordSaved;
+        private int? previousBestScore;
         private double resultTransitionTime = -1;
         private int maxCombo;
         private PlayRequest playRequest;
@@ -178,6 +180,7 @@ namespace RhythmDojo.Core
             input.Initialize(runtimeMode, song.ModeId);
             notes.Configure(runtimeMode, runtimePresentation);
             playfield.Build(runtimeMode, runtimePresentation);
+            playfield.ConfigureMeasureLines(tempo, scroll, chart);
 
             string ruleLabel;
 
@@ -244,9 +247,10 @@ namespace RhythmDojo.Core
             if (pauseMenu)
             {
                 pauseMenu.Initialize(controller, flow, this);
+                controller.FocusLost = pauseMenu.PauseForFocusLoss;
             }
             input.ReturnRequested += HandleGameplayEscape;
-            ui.Initialize(controller.ReadModel, ReturnToSelection);
+            ui.Initialize(controller.ReadModel, ReturnToSelection, playfield.SetRailOpacity);
             initialized = true;
             input.Activate();
 
@@ -304,6 +308,21 @@ namespace RhythmDojo.Core
             clock.ReplaceAudioClip(clip);
         }
 
+        public void SetScrollMultiplier(double multiplier)
+        {
+            if (!initialized || !controller.IsPaused)
+            {
+                return;
+            }
+
+            var tempo = playRequest.Song.Tempo;
+            var scroll = settings.scroll.CreateTimeline(playRequest.ScrollMode, tempo, multiplier);
+
+            notes.SetScrollTimeline(scroll);
+            playfield.ConfigureMeasureLines(tempo, scroll, controller.Chart);
+            controller.RefreshScrollMultiplier(multiplier);
+        }
+
         public async Task PreparePlaybackAsync(CancellationToken cancellationToken)
         {
             if (!initialized || returnPending)
@@ -336,13 +355,28 @@ namespace RhythmDojo.Core
             resultTransitionTime = -1;
             maxCombo = 0;
             recordSaved = false;
+            previousBestScore = null;
         }
 
         private void LateUpdate()
         {
             SaveRecord();
 
-            if (!initialized || !flow || flow.Transitioning)
+            if (!initialized)
+            {
+                return;
+            }
+
+            var readModel = controller.ReadModel;
+            if (readModel == null)
+            {
+                return;
+            }
+
+            var gameplay = readModel.Snapshot;
+            playfield.RenderMeasureLines(gameplay.Session.State, gameplay.SongTime);
+
+            if (!flow || flow.Transitioning)
             {
                 return;
             }
@@ -352,7 +386,7 @@ namespace RhythmDojo.Core
                 return;
             }
 
-            var snapshot = controller.ReadModel.Snapshot.Session;
+            var snapshot = gameplay.Session;
 
             if (snapshot.State != SessionState.Completed && snapshot.State != SessionState.GameOver)
             {
@@ -360,11 +394,17 @@ namespace RhythmDojo.Core
                 return;
             }
 
-            // Let the HUD display GAME CLEAR / GAME OVER before unloading Gameplay.
+            // Let the HUD display the outcome before unloading Gameplay.
             // Use real time because failure pauses the song clock.
             if (resultTransitionTime < 0)
             {
-                resultTransitionTime = Time.realtimeSinceStartupAsDouble + ResultTransitionDelaySeconds;
+                double delay = ResultTransitionDelaySeconds;
+                if (snapshot.IsFullCombo)
+                {
+                    delay = FullComboResultTransitionDelaySeconds;
+                }
+
+                resultTransitionTime = Time.realtimeSinceStartupAsDouble + delay;
                 return;
             }
 
@@ -391,9 +431,13 @@ namespace RhythmDojo.Core
                 playRequest.Song.Tempo,
                 laneLabels,
                 controller.Session
-            );
+            )
+            {
+                PreviousBestScore = previousBestScore,
+                CanCompareScore = recordSaved && snapshot.TotalNotes > 0,
+            };
             ShutdownGameplay();
-            flow.ShowResults(result);
+            flow.ShowResults(result, gameplay.ScrollMultiplier);
         }
 
         private void SaveRecord()
@@ -415,28 +459,43 @@ namespace RhythmDojo.Core
                 return;
             }
 
-            if (
-                playRequest.Rules != null
-                && flow.Preferences is RhythmDojo.Services.SelectionPreferences records
-            )
+            var rules = playRequest.Rules;
+            var songId = playRequest.Song.SongId;
+            var recordKey = playRequest.Difficulty.name;
+            if (rules != null && flow.Preferences is SelectionPreferences records)
             {
+                recordKey = RecordIdentity.Rules(playRequest.Song.ChartId, playRequest.Song.Revision, rules);
+                if (snapshot.Failure.Failed)
+                {
+                    previousBestScore = records.FindFailedRecord(songId, recordKey)?.score;
+                }
+                else
+                {
+                    previousBestScore = records.FindRecord(songId, recordKey)?.score;
+                }
+
                 records.SaveCompleted(
-                    playRequest.Song.SongId,
-                    RecordIdentity.Rules(
-                        playRequest.Song.ChartId,
-                        playRequest.Song.Revision,
-                        playRequest.Rules
-                    ),
+                    songId,
+                    recordKey,
                     snapshot,
                     maxCombo,
-                    playRequest.Rules
+                    rules
                 );
             }
             else
             {
+                if (!snapshot.Failure.Failed)
+                {
+                    previousBestScore = flow.Preferences.FindRecord(songId, recordKey)?.score;
+                }
+                else if (flow.Preferences is SelectionPreferences failedRecords)
+                {
+                    previousBestScore = failedRecords.FindFailedRecord(songId, recordKey)?.score;
+                }
+
                 flow.Preferences.SaveCompleted(
-                    playRequest.Song.SongId,
-                    playRequest.Difficulty.name,
+                    songId,
+                    recordKey,
                     snapshot,
                     maxCombo
                 );
@@ -456,9 +515,8 @@ namespace RhythmDojo.Core
 
         private void HandleGameplayEscape()
         {
-            if (pauseMenu && controller.Session.State == SessionState.Playing)
+            if (pauseMenu && pauseMenu.HandleEscape())
             {
-                pauseMenu.Open();
                 return;
             }
 

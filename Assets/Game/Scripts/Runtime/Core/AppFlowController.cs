@@ -626,7 +626,7 @@ namespace RhythmDojo.Core
             settingsReturnPath = GameplayPath;
             settingsKeyMode = CurrentRequest?.Song.Mode;
             settingsKeyModeId = CurrentRequest?.Song.ModeId ?? "";
-            OpenSettingsPopup();
+            OpenSettingsPopup(game);
         }
 
         public void ShowTitleSettings()
@@ -700,7 +700,7 @@ namespace RhythmDojo.Core
             settingsInputScope = null;
         }
 
-        private void OpenSettingsPopup(Action<int> onApplied = null)
+        private void OpenSettingsPopup(RhythmGameController game = null, Action<int> onApplied = null)
         {
             if (SceneManager.GetSceneByPath(SettingsPath).isLoaded)
             {
@@ -742,6 +742,17 @@ namespace RhythmDojo.Core
                     settingsKeyMode,
                     settingsKeyModeId
                 );
+
+                if (game)
+                {
+                    var snapshot = game.ReadModel.Snapshot;
+                    var gameplay = game.GetComponent<GameplayCompositionRoot>();
+                    settingsPopup.BindGameplaySpeed(
+                        snapshot.ScrollMode,
+                        snapshot.ScrollMultiplier,
+                        gameplay.SetScrollMultiplier
+                    );
+                }
 
                 if (onApplied != null)
                 {

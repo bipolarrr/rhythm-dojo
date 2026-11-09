@@ -190,7 +190,7 @@ namespace RhythmDojo.Tests
             var gameView = Resources.FindObjectsOfTypeAll<UnityEditor.EditorWindow>()
                 .FirstOrDefault(window => window.GetType().Name == "GameView");
 
-            if (gameView)
+            if (gameView && !UnityEngine.Application.isBatchMode)
             {
                 gameView.Focus();
             }

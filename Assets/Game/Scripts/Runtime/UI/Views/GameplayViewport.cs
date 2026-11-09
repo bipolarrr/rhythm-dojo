@@ -64,8 +64,14 @@ namespace RhythmDojo.UI
 
             gameplayCamera.aspect = (float)width / height;
             image.rectTransform.GetWorldCorners(corners);
-            var min = RectTransformUtility.WorldToScreenPoint(null, corners[0]);
-            var max = RectTransformUtility.WorldToScreenPoint(null, corners[2]);
+            Camera eventCamera = null;
+            if (canvas.renderMode != RenderMode.ScreenSpaceOverlay)
+            {
+                eventCamera = canvas.worldCamera;
+            }
+
+            var min = RectTransformUtility.WorldToScreenPoint(eventCamera, corners[0]);
+            var max = RectTransformUtility.WorldToScreenPoint(eventCamera, corners[2]);
             image.uvRect = new Rect(min.x / width, min.y / height,
                 (max.x - min.x) / width, (max.y - min.y) / height);
         }

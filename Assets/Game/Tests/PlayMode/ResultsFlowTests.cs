@@ -3,13 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using RhythmDojo.Audio;
+using RhythmDojo.Content;
 using RhythmDojo.Core;
 using RhythmDojo.Gameplay;
 using RhythmDojo.UI;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
+using UnityEngine.UI;
 
 namespace RhythmDojo.Tests
 {
@@ -23,7 +26,7 @@ namespace RhythmDojo.Tests
             yield return null;
         }
 
-        private static void Complete(RhythmGameController game, bool perfect)
+        private static void Complete(RhythmGameController game, bool perfect, double inputErrorSeconds = 0)
         {
             game.StartSession();
 
@@ -34,7 +37,7 @@ namespace RhythmDojo.Tests
                 for (int i = 0; i < game.Chart.Count; i++)
                 {
                     var note = game.Chart[i];
-                    inputs.Add((note.StartTime, note.Lane, true));
+                    inputs.Add((note.StartTime + inputErrorSeconds, note.Lane, true));
                     double end = note.StartTime + .01;
 
                     if (note.Kind == NoteKind.Hold)
@@ -42,7 +45,7 @@ namespace RhythmDojo.Tests
                         end = note.EndTime;
                     }
 
-                    inputs.Add((end, note.Lane, false));
+                    inputs.Add((end + inputErrorSeconds, note.Lane, false));
                 }
 
                 foreach (var input in inputs.OrderBy(item => item.time).ThenBy(item => item.press))
@@ -62,6 +65,98 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        public IEnumerator ConsistentTimingRecommendationIsSavedOnlyOnApplyAndUsedForRetry(
+            [Values(false, true)] bool olderScene
+        )
+        {
+            var flow = Object.FindFirstObjectByType<AppFlowController>();
+            flow.Preferences.TimingOffsetMs = 10;
+            yield return LoadGameplay();
+            var game = Object.FindFirstObjectByType<RhythmGameController>();
+            Complete(game, true, .020);
+            yield return Await(() => Object.FindFirstObjectByType<ResultsScreen>());
+            yield return null;
+
+            var view = Object.FindFirstObjectByType<ResultsView>();
+            if (olderScene)
+            {
+                Object.Destroy(view.recommendationButton.gameObject);
+                view.recommendationButton = null;
+                yield return null;
+
+                var screen = Object.FindFirstObjectByType<ResultsScreen>();
+                screen.Initialize(flow.LastResult, flow.ReturnFromGameplay, flow.RetryResultAsync, flow.Preferences);
+            }
+
+            var recommendation = view.recommendationButton;
+            Assert.That(recommendation.gameObject.activeInHierarchy, Is.True);
+            var recommendationRect = (RectTransform)recommendation.transform;
+            var retryRect = (RectTransform)view.retryButton.transform;
+            Assert.That(recommendationRect.anchorMax.y, Is.LessThan(retryRect.anchorMin.y));
+            Assert.That(recommendationRect.anchorMin.x, Is.EqualTo(retryRect.anchorMin.x));
+            Assert.That(recommendationRect.anchorMax.x, Is.EqualTo(retryRect.anchorMax.x));
+            Assert.That(recommendation.GetComponentInChildren<PixelDojoFrameGraphic>().artwork,
+                Is.SameAs(view.retryButton.GetComponentInChildren<PixelDojoFrameGraphic>().artwork));
+            Assert.That(recommendation.GetComponentInChildren<Text>().text, Does.Contain("+30 ms"));
+            Assert.That(flow.Preferences.TimingOffsetMs, Is.EqualTo(10));
+            yield return Click(recommendation);
+            Assert.That(flow.Preferences.TimingOffsetMs, Is.EqualTo(30));
+            Assert.That(new RhythmDojo.Services.SelectionPreferences().TimingOffsetMs, Is.EqualTo(30));
+            yield return Click(view.retryButton);
+            yield return Await(() => Object.FindFirstObjectByType<RhythmGameController>());
+            Assert.That(flow.CurrentRequest.TimingOffsetMs, Is.EqualTo(30));
+        }
+
+        [UnityTest]
+        public IEnumerator ResultsWithoutRecommendationCanOpenTimingTestAndRetryWithAppliedOffset()
+        {
+            var flow = Object.FindFirstObjectByType<AppFlowController>();
+            flow.Preferences.TimingOffsetMs = 0;
+            yield return LoadGameplay();
+            Complete(Object.FindFirstObjectByType<RhythmGameController>(), true);
+            yield return Await(() => Object.FindFirstObjectByType<ResultsScreen>());
+
+            var result = flow.LastResult;
+            Assert.That(result.TimingOffsetRecommendationMs, Is.Null);
+            var view = Object.FindFirstObjectByType<ResultsView>();
+            Assert.That(view.recommendationButton.GetComponentInChildren<Text>().text, Is.EqualTo("박자 보정 테스트"));
+            yield return Click(view.recommendationButton);
+
+            var settings = Object.FindFirstObjectByType<SettingsView>();
+            var panel = settings.transform.Find("Timing Calibration Overlay/Timing Calibration Panel");
+            Assert.That(panel.gameObject.activeInHierarchy, Is.True);
+            var start = panel.Find("Start Calibration").GetComponent<Button>();
+            var apply = panel.Find("Apply Calibration").GetComponent<Button>();
+            start.onClick.Invoke();
+            double firstBeat = Time.realtimeSinceStartupAsDouble + .25;
+            for (int beat = 4; beat < 16; beat++)
+            {
+                double timestamp = firstBeat + beat * .5 + .035;
+                while (Time.realtimeSinceStartupAsDouble < timestamp)
+                {
+                    yield return null;
+                }
+
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.Space), timestamp);
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState(), timestamp + .001);
+            }
+
+            yield return Await(() => apply.interactable);
+            Assert.That(flow.Preferences.TimingOffsetMs, Is.Zero);
+            yield return Click(apply);
+            int offset = flow.Preferences.TimingOffsetMs;
+            Assert.That(offset, Is.InRange(32, 40));
+
+            yield return Press(Key.Escape);
+            Assert.That(settings.gameObject.activeSelf, Is.False);
+            Assert.That(flow.LastResult, Is.SameAs(result));
+            Assert.That(SceneManager.GetActiveScene().path, Is.EqualTo(AppFlowController.ResultsPath));
+            yield return Click(view.retryButton);
+            yield return Await(() => Object.FindFirstObjectByType<RhythmGameController>());
+            Assert.That(flow.CurrentRequest.TimingOffsetMs, Is.EqualTo(offset));
+        }
+
+        [UnityTest]
         public IEnumerator CompletionDisplaysThisPlayAndNextPlayReplacesIt()
         {
             var flow = Object.FindFirstObjectByType<AppFlowController>();
@@ -71,9 +166,13 @@ namespace RhythmDojo.Tests
             var title = flow.CurrentRequest.Song.Title;
             var artist = flow.CurrentRequest.Song.Artist;
             var difficulty = flow.CurrentRequest.Difficulty.DisplayName;
+            var request = flow.CurrentRequest;
+            string recordKey = RecordIdentity.Rules(request.Song.ChartId, request.Song.Revision, request.Rules);
+            var previous = new SessionSnapshot(SessionState.Completed, 1, 0, 1, 1, 2);
+            flow.Preferences.SaveCompleted(request.Song.SongId, recordKey, previous, 1);
             Complete(game, true);
             var expected = game.Session.Snapshot;
-            yield return AssertOutcomeRemainsVisible("GAME CLEAR");
+            yield return AssertOutcomeRemainsVisible("Full Combo", 2);
             yield return Await(() => Object.FindFirstObjectByType<ResultsScreen>());
             yield return null;
             var view = Object.FindFirstObjectByType<ResultsView>();
@@ -87,21 +186,31 @@ namespace RhythmDojo.Tests
             Assert.That(view.perfect.text, Is.EqualTo(expected.Perfect.ToString()));
             Assert.That(view.good.text, Is.EqualTo("0"));
             Assert.That(view.miss.text, Is.EqualTo("0"));
-            Assert.That(view.outcome.text, Is.EqualTo("CLEAR"));
+            Assert.That(view.outcome.text, Is.EqualTo("S"));
             Assert.That(flow.LastResult.MaxCombo, Is.EqualTo(expected.TotalNotes));
             Assert.That(view.accuracy.text, Is.EqualTo("정확도  100.00%"));
             Assert.That(flow.CurrentRequest, Is.Null);
             Assert.That(Object.FindFirstObjectByType<RhythmGameController>(), Is.Null);
             Assert.That(Object.FindFirstObjectByType<SongClock>(), Is.Null);
-            Assert.That(view.feedback.GetComponentsInChildren<UnityEngine.UI.Text>(), Is.Empty);
+            Assert.That(flow.LastResult.PreviousBestScore, Is.EqualTo(ScoreRules.Score(previous.AccuracyRate)));
+            Assert.That(view.newRecordBadge.activeSelf, Is.True);
+            Assert.That(view.scoreValue.text, Is.EqualTo(flow.LastResult.Score.ToString("N0")));
+            Assert.That(view.retryButton.interactable, Is.True);
             Assert.That(view.moreButton.onClick.GetPersistentEventCount(), Is.Zero);
             yield return Click(view.moreButton);
             Assert.That(SceneManager.GetActiveScene().path, Is.EqualTo(AppFlowController.ResultsPath));
             Assert.That(view.review.gameObject.activeSelf, Is.True);
             yield return Click(view.review.closeButton);
-            yield return Click(view.backButton);
-            yield return Await(() => Object.FindFirstObjectByType<SongSelectionScreen>());
-            yield return LoadGameplay();
+            yield return Click(view.retryButton);
+            yield return Await(() => Object.FindFirstObjectByType<RhythmGameController>());
+            Assert.That(flow.CurrentRequest.Song.ChartId, Is.EqualTo(request.Song.ChartId));
+            Assert.That(flow.CurrentRequest.Song.Revision, Is.EqualTo(request.Song.Revision));
+            Assert.That(flow.CurrentRequest.Difficulty, Is.EqualTo(request.Difficulty));
+            Assert.That(flow.CurrentRequest.ScrollMode, Is.EqualTo(request.ScrollMode));
+            Assert.That(flow.CurrentRequest.Multiplier, Is.EqualTo(request.Multiplier));
+            Assert.That(flow.CurrentRequest.TimingOffsetMs, Is.EqualTo(request.TimingOffsetMs));
+            Assert.That(RecordIdentity.Rules(flow.CurrentRequest.Song.ChartId, flow.CurrentRequest.Song.Revision,
+                flow.CurrentRequest.Rules), Is.EqualTo(recordKey));
             Assert.That(flow.LastResult, Is.Null);
             game = Object.FindFirstObjectByType<RhythmGameController>();
             Complete(game, false);
@@ -134,6 +243,9 @@ namespace RhythmDojo.Tests
             var view = Object.FindFirstObjectByType<ResultsView>();
             Assert.That(view.outcome.text, Is.EqualTo("FAILED"));
             Assert.That(flow.LastResult.Session.State, Is.EqualTo(SessionState.GameOver));
+            StringAssert.StartsWith("수련 중단", view.progressNote.text);
+            Assert.That(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject,
+                Is.EqualTo(view.retryButton.gameObject));
             yield return Click(view.backButton);
             yield return Await(() => Object.FindFirstObjectByType<SongSelectionScreen>());
             yield return LoadGameplay();
@@ -163,11 +275,11 @@ namespace RhythmDojo.Tests
             Assert.That(game.Session.State, Is.EqualTo(SessionState.Playing));
             Assert.That(Object.FindFirstObjectByType<GameplayHudView>().gameOverPanel.activeSelf, Is.False);
             Complete(game, true);
-            yield return AssertOutcomeRemainsVisible("GAME CLEAR");
+            yield return AssertOutcomeRemainsVisible("Full Combo", 2);
             yield return Await(() => Object.FindFirstObjectByType<ResultsScreen>());
         }
 
-        private IEnumerator AssertOutcomeRemainsVisible(string outcome)
+        private IEnumerator AssertOutcomeRemainsVisible(string outcome, double minimumDelay = 1)
         {
             double started = Time.realtimeSinceStartupAsDouble;
             // The next frame lets both the HUD and the composition root observe the outcome.
@@ -176,11 +288,15 @@ namespace RhythmDojo.Tests
             var view = Object.FindFirstObjectByType<GameplayHudView>();
             Assert.That(view.gameOverPanel.activeSelf, Is.True);
             Assert.That(view.gameOverText.text, Is.EqualTo(outcome));
-            yield return new WaitForSecondsRealtime(.75f);
+            Assert.That(view.gameOverPanel.GetComponent<UnityEngine.UI.Image>().enabled, Is.False);
+            Assert.That(view.gameOverFrame.activeSelf, Is.False);
+            Assert.That(view.gameOverHint.gameObject.activeSelf, Is.False);
+            Assert.That(view.sessionState.text, Is.EqualTo("결과 화면으로 이동"));
+            yield return new WaitForSecondsRealtime((float)(minimumDelay - .25));
             Assert.That(Object.FindFirstObjectByType<ResultsScreen>(), Is.Null);
             Assert.That(view.gameOverPanel.activeSelf, Is.True);
             yield return Await(() => Object.FindFirstObjectByType<ResultsScreen>());
-            Assert.That(Time.realtimeSinceStartupAsDouble - started, Is.GreaterThanOrEqualTo(1));
+            Assert.That(Time.realtimeSinceStartupAsDouble - started, Is.GreaterThanOrEqualTo(minimumDelay));
         }
 
         [UnityTest]
@@ -325,6 +441,11 @@ namespace RhythmDojo.Tests
             yield return null;
             Assert.That(view.review.GetComponent<ResultsChartReview>().SelectedIndex, Is.EqualTo(1));
             Assert.That(view.review.selected.text, Does.Contain("노트 #2"));
+            view.review.zoom.Show();
+            Assert.That(view.review.zoom.GetComponentInChildren<Canvas>(), Is.Not.Null);
+            yield return Press(Key.Escape);
+            Assert.That(view.review.gameObject.activeSelf, Is.True);
+            yield return Await(() => !view.review.zoom.GetComponentInChildren<Canvas>());
             yield return Press(Key.Escape);
             Assert.That(view.review.gameObject.activeSelf, Is.False);
             Assert.That(flow.LastResult, Is.SameAs(result));

@@ -59,7 +59,7 @@ namespace RhythmDojo.EditorTools
             ).alignment = TextAnchor.MiddleRight;
             Panel("Header Red Line", header, Red, .03f, 0, .25f, .035f);
 
-            var song = Card("Training Information", canvas.transform, .03f, .58f, .26f, .88f, Cyan);
+            var song = Card("Training Information", canvas.transform, .035f, .65f, .24f, .88f, Cyan);
             Label("Song Caption", song, "지금 수련 중인 곡", .07f, .82f, .93f, .97f, 14).color =
                 Muted;
             view.songTitle = Label("Song Title", song, "", .07f, .48f, .93f, .80f, 25);
@@ -69,7 +69,7 @@ namespace RhythmDojo.EditorTools
             view.sessionState = Label("Training State", song, "", .07f, .04f, .93f, .23f, 16);
             view.sessionState.color = Cyan;
 
-            var record = Card("Judgment Record", canvas.transform, .03f, .29f, .26f, .55f, Muted);
+            var record = Card("Judgment Record", canvas.transform, .035f, .40f, .24f, .62f, Muted);
             Label("Record Caption", record, "판정 기록", .07f, .78f, .93f, .96f, 14).color = Muted;
             view.counts = Label("Judgment Counts", record, "", .07f, .30f, .93f, .76f, 18);
             view.accuracy = Label("Accuracy", record, "", .07f, .04f, .93f, .28f, 17);
@@ -129,7 +129,7 @@ namespace RhythmDojo.EditorTools
             view.judgment = Label(
                 "Judgment Grade",
                 judgmentRoot.transform,
-                "READY",
+                "SPACE로 수련 시작",
                 .02f,
                 .43f,
                 .98f,
@@ -150,6 +150,7 @@ namespace RhythmDojo.EditorTools
             );
             view.timing.alignment = TextAnchor.MiddleCenter;
             view.timing.color = Muted;
+            PositionJudgmentFeedback(view);
 
             var track = Panel(
                 "Resolved Track",
@@ -173,6 +174,31 @@ namespace RhythmDojo.EditorTools
                 13
             );
             view.progress.color = Muted;
+
+            var railOpacityLabel = Label(
+                "Rail Opacity Label",
+                canvas.transform,
+                "레일 투명도",
+                .03f,
+                .11f,
+                .26f,
+                .15f,
+                15
+            );
+            railOpacityLabel.raycastTarget = false;
+
+            var railOpacityObject = DefaultControls.CreateSlider(new DefaultControls.Resources());
+            railOpacityObject.name = "Rail Opacity";
+            railOpacityObject.transform.SetParent(canvas.transform, false);
+            Bounds((RectTransform)railOpacityObject.transform, .03f, .075f, .26f, .11f);
+            view.railOpacity = railOpacityObject.GetComponent<Slider>();
+            view.railOpacity.value = 1;
+            view.railOpacity.navigation = new Navigation { mode = Navigation.Mode.None };
+            railOpacityObject.transform.Find("Background").GetComponent<Image>().color =
+                new Color(.23f, .13f, .075f);
+            view.railOpacity.fillRect.GetComponent<Image>().color = new Color(.84f, .57f, .27f);
+            view.railOpacity.targetGraphic.color = Cream;
+
             var laneRoot = new GameObject(
                 "Lane Feedback",
                 typeof(RectTransform)
@@ -238,13 +264,42 @@ namespace RhythmDojo.EditorTools
             );
             gameOverHint.alignment = TextAnchor.MiddleCenter;
             gameOverHint.color = Cream;
+            view.gameOverHint = gameOverHint;
+            var resultOutline = view.gameOverText.gameObject.AddComponent<Outline>();
+            resultOutline.effectColor = new Color(.10f, .055f, .035f, .95f);
+            resultOutline.effectDistance = new Vector2(2, -2);
             view.gameOverPanel.SetActive(false);
 
             PixelGameplayStyle.Apply(view);
             BuildPauseMenu(view.transform);
             UiFontSettings.ApplyTo(view.transform);
+            PixelGameplayStyle.RefineReadability(view);
+            BuildFocusHud(view);
 
             return view;
+        }
+
+        public static void PositionJudgmentFeedback(GameplayHudView view)
+        {
+            var judgmentRoot = (RectTransform)view.judgmentGroup.transform;
+            judgmentRoot.SetParent(view.transform, false);
+            judgmentRoot.SetSiblingIndex(view.combo.transform.parent.GetSiblingIndex() + 1);
+            Bounds(judgmentRoot, .30f, .195f, .70f, .285f);
+            view.judgment.text = "SPACE로 수련 시작";
+            view.judgment.fontSize = 36;
+            view.timing.fontSize = 18;
+
+            foreach (var label in new[] { view.judgment, view.timing })
+            {
+                var outline = label.GetComponent<Outline>();
+                if (!outline)
+                {
+                    outline = label.gameObject.AddComponent<Outline>();
+                }
+
+                outline.effectColor = new Color(.08f, .04f, .02f, .95f);
+                outline.effectDistance = new Vector2(2, -2);
+            }
         }
 
         private static void BuildPauseMenu(Transform parent)
@@ -258,13 +313,15 @@ namespace RhythmDojo.EditorTools
             frame.artwork = SettingsArtAssets.Load("SettingsPanel", UiArtworkCrop.Full,
                 new Vector4(128, 128, 128, 128));
             frame.RefreshArtwork();
-            menu.resumeButton = PauseButton("Resume Play", dialog, "←", .04f, .81f, .20f, .95f);
-            var title = Label("Pause Heading", dialog, "수련 일시정지", .23f, .80f, .95f, .95f, 30);
+            menu.resumeButton = PauseButton("Resume Play", dialog, "이어하기", .14f, .69f, .86f, .80f);
+            menu.resumeButton.GetComponentInChildren<PixelDojoFrameGraphic>().color = new Color(.57f, .14f, .10f);
+            menu.resumeButton.GetComponentInChildren<Text>().color = Cream;
+            var title = Label("Pause Heading", dialog, "수련 일시정지", .08f, .84f, .92f, .96f, 30);
             title.color = new Color(.24f, .12f, .085f);
             title.alignment = TextAnchor.MiddleCenter;
             menu.settingsButton = PauseButton("Pause Settings", dialog, "설정", .14f, .58f, .86f, .74f);
-            menu.restartButton = PauseButton("Restart Play", dialog, "재시작", .14f, .35f, .86f, .51f);
-            menu.exitButton = PauseButton("Exit Play", dialog, "나가기", .14f, .12f, .86f, .28f);
+            menu.restartButton = PauseButton("Restart Play", dialog, "처음부터 다시", .14f, .35f, .86f, .51f);
+            menu.exitButton = PauseButton("Exit Play", dialog, "곡 선택", .14f, .12f, .86f, .28f);
             menu.recoveryStatus = Label("Audio Recovery Status", dialog, "", .04f, .005f, .96f, .115f, 14);
             menu.recoveryStatus.color = new Color(.24f, .12f, .085f);
             menu.recoveryStatus.alignment = TextAnchor.MiddleCenter;
@@ -284,8 +341,26 @@ namespace RhythmDojo.EditorTools
             var shadow = menu.countdownText.gameObject.AddComponent<Shadow>();
             shadow.effectColor = new Color(.20f, .07f, .025f);
             shadow.effectDistance = new Vector2(3, -3);
+            var countdownHint = Label("Countdown Hint", countdown, "Esc  ·  일시정지로 돌아가기",
+                .25f, .27f, .75f, .32f, 18);
+            countdownHint.alignment = TextAnchor.MiddleCenter;
+            countdownHint.color = Cream;
             countdown.gameObject.SetActive(false);
             menu.Validate();
+        }
+
+        internal static void BuildFocusHud(GameplayHudView view)
+        {
+            view.songInformationPanel = view.songTitle.transform.parent.gameObject;
+            view.judgmentRecordPanel = view.counts.transform.parent.gameObject;
+
+            var menu = view.GetComponent<GameplayPauseMenu>();
+            var dialog = menu.settingsButton.transform.parent;
+            Bounds((RectTransform)menu.settingsButton.transform, .14f, .45f, .86f, .55f);
+            Bounds((RectTransform)menu.restartButton.transform, .14f, .32f, .86f, .42f);
+            Bounds((RectTransform)menu.exitButton.transform, .14f, .19f, .86f, .29f);
+            view.focusHudButton = PauseButton("Focus HUD", dialog, "HUD · 기본", .14f, .57f, .86f, .67f);
+            view.focusHudButton.GetComponentInChildren<Text>().fontSize = 25;
         }
 
         private static Button PauseButton(string name, Transform parent, string text,

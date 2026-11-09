@@ -137,6 +137,11 @@ namespace RhythmDojo.Presentation
             }
         }
 
+        public void SetScrollTimeline(IScrollTimeline timeline)
+        {
+            scroll = timeline ?? throw new ArgumentNullException(nameof(timeline));
+        }
+
         public void Render(RhythmSession session, double songTime)
         {
             if (views == null)
