@@ -63,6 +63,17 @@ namespace RhythmDojo.Core
             }
         }
 
+        internal static void EnableInput(UnityEngine.SceneManagement.Scene scene)
+        {
+            foreach (var root in scene.GetRootGameObjects())
+            {
+                foreach (var system in root.GetComponentsInChildren<UnityEngine.EventSystems.EventSystem>(true))
+                {
+                    system.enabled = true;
+                }
+            }
+        }
+
         private void Start()
         {
             Initialize(AppFlowController.Create(settings));
@@ -88,6 +99,11 @@ namespace RhythmDojo.Core
 
             if (selection)
             {
+                if (UnityEngine.SceneManagement.SceneManager.GetActiveScene() == gameObject.scene)
+                {
+                    EnableInput(gameObject.scene);
+                }
+
                 selection.Initialize(
                     settings,
                     flow.Selection,

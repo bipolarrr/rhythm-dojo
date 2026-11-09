@@ -9,7 +9,7 @@ namespace RhythmDojo.EditorTools
 {
     public static class SongSelectionLayoutBuilder
     {
-        public const string BrushFontPath = "Assets/Game/Fonts/Dokdo-Regular.ttf";
+        public const string BrushFontPath = MainMenuLayoutBuilder.FontPath;
         private static readonly Color Background = new Color(.025f, .035f, .045f);
         private static readonly Color PanelColor = new Color(.055f, .068f, .08f, .98f);
         private static readonly Color Line = new Color(.46f, .55f, .57f, .24f);
@@ -378,7 +378,7 @@ namespace RhythmDojo.EditorTools
             view.rowTemplate = row;
             row.gameObject.SetActive(false);
             view.back = Button("Back", footer, "← 뒤로", .025f, .16f, .13f, .84f);
-            view.play = Button("Play", footer, "플레이  ▶", .835f, .16f, .975f, .84f);
+            view.play = Button("Play", footer, "입장  ▶", .835f, .16f, .975f, .84f);
             view.details = Label(
                 "Details",
                 footer,
@@ -463,10 +463,75 @@ namespace RhythmDojo.EditorTools
             view.cancelMode.navigation = modeNav;
             view.modePopup.SetActive(false);
             PixelSongSelectionStyle.Apply(view);
+            PixelSongSelectionStyle.RefineHierarchy(view);
+            BuildPlaybackStatus(view);
+            BuildSongPreview(view);
             UiFontSettings.ApplyTo(view.transform);
             view.Validate();
 
             return view;
+        }
+
+        internal static void BuildPlaybackStatus(SongSelectionView view)
+        {
+            view.playCaption = view.play.GetComponentInChildren<Text>(true);
+            view.playArrow = view.play.GetComponentInChildren<MainMenuIcon>(true);
+            view.playStatusLabel = UiElements.Label(
+                "Playback Status",
+                view.play.transform,
+                "",
+                Vector2.zero,
+                Vector2.zero,
+                36
+            );
+            Bounds(view.playStatusLabel.rectTransform, .06f, .10f, .94f, .90f);
+            view.playStatusLabel.alignment = TextAnchor.MiddleCenter;
+            view.playStatusLabel.color = view.playCaption.color;
+            view.playStatusLabel.resizeTextForBestFit = true;
+            view.playStatusLabel.resizeTextMinSize = 24;
+            view.playStatusLabel.resizeTextMaxSize = 36;
+            view.playStatusLabel.gameObject.SetActive(false);
+
+            var panel = Panel("Playback Error", view.transform, Color.white, .655f, .14f, .955f, .24f);
+            panel.SetSiblingIndex(view.backPopup.transform.GetSiblingIndex());
+            var frame = PixelSongSelectionStyle.Frame(panel, Color.white, 12);
+            frame.artwork = SettingsArtAssets.Load("SettingsPanel");
+            frame.RefreshArtwork();
+            view.playErrorPanel = panel.gameObject;
+            view.playErrorLabel = UiElements.Label("Playback Error Message", panel, "", Vector2.zero, Vector2.zero, 24);
+            Bounds(view.playErrorLabel.rectTransform, .06f, .10f, .94f, .90f);
+            view.playErrorLabel.alignment = TextAnchor.MiddleLeft;
+            view.playErrorLabel.color = new Color(.29f, .15f, .09f);
+            view.playErrorLabel.resizeTextForBestFit = true;
+            view.playErrorLabel.resizeTextMinSize = 18;
+            view.playErrorLabel.resizeTextMaxSize = 24;
+            view.playErrorPanel.SetActive(false);
+        }
+
+        internal static void BuildSongPreview(SongSelectionView view)
+        {
+            view.previewButton = Button(
+                "Song Preview",
+                view.songTitle.transform.parent,
+                "▶ 미리듣기",
+                .445f,
+                .465f,
+                .76f,
+                .54f
+            );
+            var frame = PixelSongSelectionStyle.Frame((RectTransform)view.previewButton.transform, Color.white, 8);
+            frame.artwork = SettingsArtAssets.Load("SettingsControl");
+            frame.RefreshArtwork();
+            var label = view.previewButton.GetComponentInChildren<Text>();
+            UiFontSettings.Apply(label);
+            label.color = new Color(.24f, .12f, .085f);
+            label.fontSize = 28;
+            label.resizeTextForBestFit = true;
+            label.resizeTextMinSize = 18;
+            label.resizeTextMaxSize = 28;
+
+            view.previewSource = view.gameObject.AddComponent<AudioSource>();
+            view.previewSource.playOnAwake = false;
         }
 
         private static void ConfigureBrushFont()

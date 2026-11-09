@@ -78,6 +78,79 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        public IEnumerator SingleSelectionLoadDoesNotBecomePreparationOwned()
+        {
+            yield return PrepareTitle();
+            yield return SceneManager.LoadSceneAsync(AppFlowController.SelectionPath, LoadSceneMode.Single);
+            yield return Wait(() => !preparation.IsBusy);
+            yield return null;
+
+            var screen = UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>();
+            Assert.That(screen, Is.Not.Null);
+            Assert.That(screen.enabled, Is.True);
+            Assert.That(screen.GetComponent<SongSelectionView>().Rows.Count, Is.GreaterThan(0));
+            Assert.That(preparation.CanInitialize(screen.gameObject.scene), Is.True);
+            Assert.That(EventSystem.current.currentSelectedGameObject, Is.Not.Null);
+            Assert.That(preparation.IsSelectionPrepared, Is.False);
+            Assert.That(SceneManager.sceneCount, Is.EqualTo(1));
+            Assert.That(EventSystem.current.isActiveAndEnabled, Is.True);
+            LogAssert.NoUnexpectedReceived();
+        }
+
+        [UnityTest]
+        public IEnumerator ReplacingReadyPreparationWithSingleSelectionReleasesItsOwnership()
+        {
+            yield return PrepareTitle();
+            ready = true;
+            yield return Wait(() => preparation.IsSelectionPrepared);
+            yield return SceneManager.LoadSceneAsync(AppFlowController.SelectionPath, LoadSceneMode.Single);
+            yield return Wait(() => !preparation.IsBusy);
+            yield return null;
+
+            var screen = UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>();
+            Assert.That(screen.enabled, Is.True);
+            Assert.That(screen.GetComponent<SongSelectionView>().Rows.Count, Is.GreaterThan(0));
+            Assert.That(preparation.CanInitialize(screen.gameObject.scene), Is.True);
+            Assert.That(EventSystem.current.currentSelectedGameObject, Is.Not.Null);
+            Assert.That(SceneManager.sceneCount, Is.EqualTo(1));
+            Assert.That(UnityEngine.Object.FindObjectsByType<EventSystem>(FindObjectsSortMode.None)
+                .Count(value => value.isActiveAndEnabled), Is.EqualTo(1));
+            LogAssert.NoUnexpectedReceived();
+        }
+
+        [UnityTest]
+        public IEnumerator CancellationAfterPriorSceneUnloadsKeepsLastSelectionUsable()
+        {
+            yield return PrepareTitle();
+            ready = true;
+            yield return Wait(() => preparation.IsSelectionPrepared);
+            var title = SceneManager.GetActiveScene();
+            UnityEngine.Events.UnityAction<Scene> cancelled = scene =>
+            {
+                if (scene == title)
+                {
+                    preparation.Cancel();
+                }
+            };
+            SceneManager.sceneUnloaded += cancelled;
+            try
+            {
+                preparation.ActivatePreparedSelection(title);
+                yield return Wait(() => !preparation.IsBusy);
+                yield return null;
+                Assert.That(SceneManager.sceneCount, Is.EqualTo(1));
+                Assert.That(SceneManager.GetActiveScene().path, Is.EqualTo(AppFlowController.SelectionPath));
+                Assert.That(UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>().enabled, Is.True);
+                Assert.That(EventSystem.current.isActiveAndEnabled, Is.True);
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                SceneManager.sceneUnloaded -= cancelled;
+            }
+        }
+
+        [UnityTest]
         public IEnumerator PopupKeepsFocusWhilePreparationFinishesThenEntranceRestoresSelectionFocus()
         {
             yield return PrepareTitle();

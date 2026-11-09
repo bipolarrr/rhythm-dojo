@@ -186,7 +186,7 @@ namespace RhythmDojo.Core
 
         private void SceneLoaded(Scene scene, LoadSceneMode mode)
         {
-            if (selectionPreparation != null && selectionPreparation.HandleSceneLoaded(scene))
+            if (selectionPreparation != null && selectionPreparation.HandleSceneLoaded(scene, mode))
             {
                 return;
             }

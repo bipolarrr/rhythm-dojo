@@ -21,6 +21,8 @@ namespace RhythmDojo.UI
         public Text comboRecord;
         public RectTransform[] entrancePanels;
         public Image album;
+        public Button previewButton;
+        public AudioSource previewSource;
         public Sprite fallbackCover;
         public Sprite legacyFallbackCover;
         public Slider timingOffset;
@@ -38,6 +40,11 @@ namespace RhythmDojo.UI
             hardModeButton,
             cancelMode;
         public Text modeLabel;
+        public Text playCaption;
+        public Text playStatusLabel;
+        public Text playErrorLabel;
+        public GameObject playErrorPanel;
+        public MainMenuIcon playArrow;
         public GameObject modePopup;
         public Button[] difficultyButtons;
         public GameObject[] difficultyIndicators;
@@ -59,9 +66,24 @@ namespace RhythmDojo.UI
                 throw new InvalidOperationException("Song selection view references missing.");
             }
 
+            if (!playCaption || !playStatusLabel)
+            {
+                throw new InvalidOperationException("Song selection playback labels missing.");
+            }
+
+            if (!playErrorPanel || !playErrorLabel)
+            {
+                throw new InvalidOperationException("Song selection playback error panel missing.");
+            }
+
             if ((!settingsButton || !album) || !songTitle)
             {
                 throw new InvalidOperationException("Song selection view references missing.");
+            }
+
+            if (!previewButton || !previewSource)
+            {
+                throw new InvalidOperationException("Song selection preview references missing.");
             }
 
             if ((!artistBpm || !record) || !timingOffset)
@@ -188,7 +210,7 @@ namespace RhythmDojo.UI
                     {
                         frame.color = new Color(.84f, .69f, .47f);
                         frame.borderColor = new Color(.29f, .13f, .09f);
-                        button.GetComponentInChildren<Text>().color = new Color(.84f, .66f, .45f);
+                        button.GetComponentInChildren<Text>().color = new Color(.29f, .15f, .09f);
                     }
                     var caption = button.GetComponentInChildren<Text>();
                     switch (caption.text)
@@ -236,6 +258,7 @@ namespace RhythmDojo.UI
                 sortList.interactable =
                 speedSlider.interactable =
                 timingOffset.interactable =
+                previewButton.interactable =
                 settingsButton.interactable =
                 modeButton.interactable =
                 back.interactable =
@@ -252,6 +275,21 @@ namespace RhythmDojo.UI
             {
                 row.select.interactable = row.favorite.interactable = value;
             }
+        }
+
+        public void SetPlaybackStatus(string caption = null, string message = null)
+        {
+            bool hasCaption = !string.IsNullOrEmpty(caption);
+            playCaption.gameObject.SetActive(!hasCaption);
+            if (playArrow)
+            {
+                playArrow.gameObject.SetActive(!hasCaption);
+            }
+
+            playStatusLabel.text = caption;
+            playStatusLabel.gameObject.SetActive(hasCaption);
+            playErrorLabel.text = message;
+            playErrorPanel.SetActive(!string.IsNullOrEmpty(message));
         }
     }
 }
