@@ -25,6 +25,7 @@ namespace RhythmDojo.Tests
     {
         [UnityTest]
         [Category("Results")]
+        [Category("SceneIntegration")]
         public IEnumerator UnsavedDocumentPlaytestReturnsSessionAndReleasesAudio()
         {
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
@@ -90,6 +91,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator CanceledEditorLoadStaysOnScreenAndAllowsRetry()
         {
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
@@ -127,6 +129,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator DelayedPlaytestKeepsOptionsCapturedAtRequest()
         {
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();

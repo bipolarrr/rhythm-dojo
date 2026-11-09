@@ -13,9 +13,11 @@ using SessionState = RhythmDojo.Gameplay.SessionState;
 
 namespace RhythmDojo.Tests
 {
+    [Category("Gameplay")]
     public sealed class PlayRecordsAndChartsTests
     {
         [Test]
+        [Category("Fast")]
         public void RecordMigrationOnlyRemovesOldScores()
         {
             string key = "RhythmDojo.Tests." + Guid.NewGuid();
@@ -86,6 +88,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void RuleVersionFourKeepsEarlierRecordsWithoutComparingThem()
         {
             string key = "RhythmDojo.Tests." + Guid.NewGuid();
@@ -114,6 +117,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void ComparisonSharesModesAndSeparatesTimingTailAndContent()
         {
             var rules = new PlayRules();
@@ -131,6 +135,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public async Task ThreeChartsPreserveSelectionEditsAndUndoAcrossSaveAndLoad()
         {
             string root = Path.Combine(Path.GetTempPath(), "RhythmDojo-Multi-" + Guid.NewGuid());
@@ -189,6 +194,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void LegacyImportIsExplicitAndKeepsIdsAndNotes()
         {
             string text = File.ReadAllText("Docs/examples/complete.rdchart.json");

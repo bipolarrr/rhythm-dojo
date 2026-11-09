@@ -9,9 +9,11 @@ using UnityEngine.UI;
 
 namespace RhythmDojo.Tests
 {
+    [Category("UI")]
     public sealed class UiTypographyTests
     {
         [Test]
+        [Category("Fast")]
         public void SharedPopupAndRuntimeControlsMatchStartButtonTypography()
         {
             var popup = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Game/Resources/UI/SettingsPopup.prefab");
@@ -43,6 +45,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void ScopedControlsKeepBrushFontWhenCreatedAtRuntime()
         {
             var root = new GameObject("Scoped typography test", typeof(UiFontScope));
@@ -75,6 +78,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void IndividualAndTreeFontApplicationUseTheSameInactiveScope()
         {
             var root = new GameObject("Font resolver", typeof(UiFontScope));
@@ -110,6 +114,7 @@ namespace RhythmDojo.Tests
         [TestCase("Gameplay")]
         [TestCase("ChartEditor")]
         [TestCase("Results")]
+        [Category("SceneIntegration")]
         public void SavedSceneUsesMonaForAllTextIncludingHiddenControls(string name)
         {
             var font = AssetDatabase.LoadAssetAtPath<Font>(MainMenuLayoutBuilder.FontPath);
@@ -180,6 +185,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void ExplicitRolesIgnoreNamesAndSurviveTreeReapplication()
         {
             var root = new GameObject("Play", typeof(UiFontScope));
@@ -210,6 +216,7 @@ namespace RhythmDojo.Tests
 
         [TestCase(false)]
         [TestCase(true)]
+        [Category("Fast")]
         public void ScopeOrderAndPixelSmoothRoundTripsPreserveCustomMaterials(bool configureFirst)
         {
             var root = new GameObject("Rendering scope", typeof(UiFontScope));

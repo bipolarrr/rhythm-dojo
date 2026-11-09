@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Globalization;
 using System.Reflection;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
@@ -46,10 +47,10 @@ namespace RhythmDojo.EditorTools
         }
 
         [MenuItem("Game Tools/Verification/Verify Foundation (Play Mode and Player Build)")]
-        public static void RunAll() => Begin("", true);
+        public static void RunAll() => Begin("All", true);
 
         [MenuItem("Game Tools/Verification/Verify All Tests (No Build)")]
-        public static void RunTestsOnly() => Begin("", false, true);
+        public static void RunTestsOnly() => Begin("All", false, true);
 
         [MenuItem("Game Tools/Verification/Verify Smoke Actions")]
         public static void RunSmoke() => Begin("Smoke", false);
@@ -66,8 +67,35 @@ namespace RhythmDojo.EditorTools
         [MenuItem("Game Tools/Verification/Verify Authoring Actions")]
         public static void RunAuthoring() => Begin("Authoring", false);
 
-        private static void Begin(string category, bool build, bool includeEditMode = false)
+        [MenuItem("Game Tools/Verification/Verify Fast Tests")]
+        public static void RunFast() => Begin("Fast", false);
+
+        [MenuItem("Game Tools/Verification/Verify Asset Generation")]
+        public static void RunAssetGeneration() => Begin("AssetGeneration", false);
+
+        [MenuItem("Game Tools/Verification/Verify Hardware")]
+        public static void RunHardware() => Begin("Hardware", false);
+
+        [MenuItem("Game Tools/Verification/Verify Endurance")]
+        public static void RunEndurance() => Begin("Endurance", false);
+
+        // Batch: -executeMethod RhythmDojo.EditorTools.FoundationVerification.RunProfile
+        // -verificationProfile UI. Menu methods and CLI use the same selector.
+        public static void RunProfile()
         {
+            var arguments = Environment.GetCommandLineArgs();
+            int index = Array.IndexOf(arguments, "-verificationProfile");
+            if (index < 0 || index + 1 >= arguments.Length)
+            {
+                throw new ArgumentException("Specify -verificationProfile.");
+            }
+
+            Begin(arguments[index + 1], false);
+        }
+
+        private static void Begin(string category, bool build, bool includeEditMode = true)
+        {
+            VerificationProfile.Includes(category, new[] { "Fast" });
             if (
                 SessionState.GetBool(ActiveKey, false)
                 || EditorApplication.isPlayingOrWillChangePlaymode
@@ -94,7 +122,9 @@ namespace RhythmDojo.EditorTools
             }
 
             Directory.CreateDirectory("Logs");
-            File.WriteAllText(ReportPath, $"Verification started: {DateTime.UtcNow:O}\n");
+            File.WriteAllText(ReportPath, $"Verification started: {DateTime.UtcNow:O}; profile={category}\n");
+            SessionState.SetString(Prefix + "Started", DateTime.UtcNow.Ticks.ToString(CultureInfo.InvariantCulture));
+            SessionState.SetInt(Prefix + "Count", 0);
             SessionState.SetString(
                 Prefix + "PreviousStart",
                 AssetDatabase.GetAssetPath(EditorSceneManager.playModeStartScene)
@@ -152,6 +182,12 @@ namespace RhythmDojo.EditorTools
 
                 if (phase == 2)
                 {
+                    if (SessionState.GetInt(Prefix + "Count", 0) == 0)
+                    {
+                        Finish(false);
+                        return;
+                    }
+
                     if (SessionState.GetBool(Prefix + "Build", false))
                     {
                         BuildPlayer();
@@ -176,25 +212,34 @@ namespace RhythmDojo.EditorTools
                     filter.assemblyNames = new[] { "Game.PlayMode.Tests" };
                 }
 
-                if (string.IsNullOrEmpty(category))
-                {
-                    filter.categoryNames = null;
-                }
-                else
-                {
-                    filter.categoryNames = new[] { category };
-                }
-
                 var api = ScriptableObject.CreateInstance<TestRunnerApi>();
+                api.RetrieveTestList(filter.testMode, root =>
+                {
+                    try
+                    {
+                        filter.testNames = VerificationProfile.Select(root, category, filter.assemblyNames);
+                        SessionState.SetInt(Prefix + "Expected", filter.testNames.Length);
+                        if (filter.testNames.Length == 0)
+                        {
+                            File.AppendAllText(ReportPath, $"{filter.testMode}: no matching cases; phase not run.\n");
+                            SessionState.SetInt(Prefix + "Phase", phase + 1);
+                            SessionState.SetBool(Prefix + "Pending", true);
+                            return;
+                        }
 
-                try
-                {
-                    api.Execute(new ExecutionSettings(filter));
-                }
-                finally
-                {
-                    UnityEngine.Object.DestroyImmediate(api);
-                }
+                        api.Execute(new ExecutionSettings(filter));
+                    }
+                    catch (Exception error)
+                    {
+                        File.AppendAllText(ReportPath, $"FAIL: {error}\n");
+                        Debug.LogException(error);
+                        Finish(false);
+                    }
+                    finally
+                    {
+                        UnityEngine.Object.DestroyImmediate(api);
+                    }
+                });
             }
             catch (Exception error)
             {
@@ -212,6 +257,11 @@ namespace RhythmDojo.EditorTools
             SessionState.SetBool(ActiveKey, false);
             SessionState.SetBool(Prefix + "Pending", false);
             SessionState.SetBool(Prefix + "Failed", !passed);
+
+            double seconds = TimeSpan.FromTicks(DateTime.UtcNow.Ticks - long.Parse(
+                SessionState.GetString(Prefix + "Started", "0"), CultureInfo.InvariantCulture)).TotalSeconds;
+            File.AppendAllText(ReportPath,
+                $"profile={SessionState.GetString(Prefix + "Category", "")}; unique cases={SessionState.GetInt(Prefix + "Count", 0)}; elapsed={seconds:F2}s\n");
 
             if (passed)
             {
@@ -257,10 +307,11 @@ namespace RhythmDojo.EditorTools
                     return;
                 }
 
-                File.AppendAllText(
-                    ReportPath,
-                    $"{result.ResultState}: {result.FullName}\n{result.Message}\n"
-                );
+                if (result.ResultState != "Passed")
+                {
+                    File.AppendAllText(ReportPath,
+                        $"{result.ResultState}: {result.FullName}\n{result.Message}\n{result.StackTrace}\n");
+                }
             }
 
             public void RunFinished(ITestResultAdaptor result)
@@ -278,26 +329,26 @@ namespace RhythmDojo.EditorTools
                 {
                     name = "editmode";
                 }
-                else if (string.IsNullOrEmpty(category))
+                else
                 {
                     name = "playmode";
                 }
-                else
+
+                if (category != "All")
                 {
-                    name = category.ToLowerInvariant();
+                    name = category.ToLowerInvariant() + "-" + name;
                 }
 
                 TestRunnerApi.SaveResultToFile(result, $"Logs/verification-{name}.xml");
 
-                bool passed =
-                    result.ResultState == "Passed"
-                    && result.PassCount > 0
-                    && result.FailCount == 0
-                    && result.SkipCount == 0
-                    && result.InconclusiveCount == 0;
+                bool passed = VerificationProfile.Passed(result.ResultState,
+                    SessionState.GetInt(Prefix + "Expected", 0), result.PassCount,
+                    result.FailCount, result.SkipCount, result.InconclusiveCount);
+                SessionState.SetInt(Prefix + "Count", SessionState.GetInt(Prefix + "Count", 0)
+                    + result.PassCount + result.FailCount + result.SkipCount + result.InconclusiveCount);
                 File.AppendAllText(
                     ReportPath,
-                    $"{name}: {result.PassCount} passed, {result.FailCount} failed, {result.SkipCount} skipped, {result.InconclusiveCount} inconclusive.\n"
+                    $"{name}: {result.PassCount} passed, {result.FailCount} failed, {result.SkipCount} skipped, {result.InconclusiveCount} inconclusive; duration={result.Duration:F2}s.\n"
                 );
                 SessionState.SetBool(Prefix + "Failed", !passed);
                 SessionState.SetInt(Prefix + "Phase", phase + 1);

@@ -4,9 +4,11 @@ using RhythmDojo.Gameplay;
 
 namespace RhythmDojo.Tests
 {
+    [Category("Authoring")]
     public sealed class BeatProjectionTests
     {
         [Test]
+        [Category("Fast")]
         public void TimeProjectionKeepsScrollSpeedAndChangesSpacingAt256And64Bpm()
         {
             var timing = new BeatGridTiming(new[]
@@ -34,6 +36,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void TimeProjectionRoundTripsWithGridOriginAndFractionalTempoBoundaries()
         {
             var timing = new BeatGridTiming(new[]
@@ -58,6 +61,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void TempoRoundTripsAcrossFractionalBoundariesWithoutQuantizing()
         {
             var tempo = new TempoMap(
@@ -100,6 +104,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void ProjectionRoundTripsAndZoomKeepsBottomFixedAtEverySizeAndScroll()
         {
             foreach (double height in new[] { 96.0, 217.5, 479, 720 })

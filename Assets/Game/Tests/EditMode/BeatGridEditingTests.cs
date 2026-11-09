@@ -7,9 +7,11 @@ using RhythmDojo.Gameplay;
 
 namespace RhythmDojo.Tests
 {
+    [Category("Authoring")]
     public sealed class BeatGridEditingTests
     {
         [Test]
+        [Category("Fast")]
         public void GridOriginAndTempoChangesRoundTripWithoutAccumulatedDrift()
         {
             var timing = new BeatGridTiming(new[]
@@ -26,6 +28,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void CompoundMeterAndMidBeatMeterChangesEmitSharedMeasureLines()
         {
             var timing = new BeatGridTiming(new[] { new TempoPoint(0, 120) }, new BeatGridSettings
@@ -44,6 +47,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void MovingWholeGridShiftsEveryTempoAndMeterBySameMusicTime()
         {
             var project = new SongProject
@@ -71,6 +75,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void LargeCompoundMeterOverviewKeepsGridLinesAtFarEnd()
         {
             var timing = new BeatGridTiming(new[] { new TempoPoint(0, 120) }, new BeatGridSettings
@@ -85,6 +90,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void FineMeterDoesNotRemoveTripletSubdivisionLines()
         {
             var timing = new BeatGridTiming(new[] { new TempoPoint(0, 120) }, new BeatGridSettings
@@ -97,6 +103,7 @@ namespace RhythmDojo.Tests
 
         [TestCase(false)]
         [TestCase(true)]
+        [Category("Fast")]
         public void GridEditProtectsNotesAndUndoRestoresAllChartsAndHoldEndpoints(bool preserveBeats)
         {
             var session = new EditorSession(new SongProject { AudioOffsetSeconds = 0.07 });
@@ -134,6 +141,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void InvalidGridEditLeavesDocumentAndHistoryUntouched()
         {
             var session = new EditorSession(new SongProject());
@@ -154,6 +162,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void JsonRestoresGridAndLoadsOldV2WithDefaultGrid()
         {
             var json = new SongProjectJson();
@@ -180,6 +189,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void MalformedTimingStillReportsOriginalValidationFieldPath()
         {
             var json = new SongProjectJson();

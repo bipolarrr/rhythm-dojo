@@ -47,6 +47,19 @@ namespace RhythmDojo.Tests
         private AnisotropicFiltering previousFiltering;
 
         private NativeInputScope nativeInput;
+        private bool audioConfigurationChanged;
+
+        private void AudioConfigurationChanged(bool deviceWasChanged)
+        {
+            // A reset can invalidate clips even if the reported configuration is unchanged.
+            audioConfigurationChanged = true;
+        }
+
+        private bool AudioNeedsRestore()
+        {
+            var current = AudioSettings.GetConfiguration();
+            return audioConfigurationChanged || !current.Equals(originalAudio);
+        }
 
         [UnitySetUp]
         public IEnumerator SetUp()
@@ -87,6 +100,8 @@ namespace RhythmDojo.Tests
             );
             PlayerPrefs.DeleteKey(RhythmDojo.Services.SelectionPreferences.StorageKey);
             originalAudio = AudioSettings.GetConfiguration();
+            audioConfigurationChanged = false;
+            AudioSettings.OnAudioConfigurationChanged += AudioConfigurationChanged;
             original = InputSystem.settings;
             priorEditorBehavior = original.editorInputBehaviorInPlayMode;
             priorBackgroundBehavior = original.backgroundBehavior;
@@ -192,7 +207,13 @@ namespace RhythmDojo.Tests
             QualitySettings.anisotropicFiltering = previousFiltering;
             PlayerPrefs.Save();
 
-            bool audioRestored = AudioSettings.Reset(originalAudio);
+            bool audioRestored = true;
+            bool restoreAudio = AudioNeedsRestore();
+            AudioSettings.OnAudioConfigurationChanged -= AudioConfigurationChanged;
+            if (restoreAudio)
+            {
+                audioRestored = AudioSettings.Reset(originalAudio);
+            }
 
             if (keyboard != null && keyboard.added)
             {
@@ -218,6 +239,8 @@ namespace RhythmDojo.Tests
 
             yield return null;
             Assert.That(audioRestored, Is.True, "Restore original audio configuration.");
+            Assert.That(AudioSettings.GetConfiguration(), Is.EqualTo(originalAudio),
+                "Audio configuration must match the pre-test state.");
         }
 
         protected static IEnumerator Await(

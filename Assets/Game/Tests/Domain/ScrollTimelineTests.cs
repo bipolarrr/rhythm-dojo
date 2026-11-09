@@ -5,6 +5,7 @@ using RhythmDojo.Gameplay;
 
 namespace RhythmDojo.Tests
 {
+    [Category("Gameplay")]
     public sealed class ScrollTimelineTests
     {
         private static TempoMap Map() =>
@@ -13,6 +14,7 @@ namespace RhythmDojo.Tests
         [TestCase(.5)]
         [TestCase(1)]
         [TestCase(2)]
+        [Category("Fast")]
         public void IntegratesEverySegmentAndAppliesIndependentMultiplier(double multiplier)
         {
             var scroll = new BpmScrollTimeline(Map(), 8, 120, multiplier);
@@ -25,6 +27,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void BoundaryIsContinuousAndVelocityChanges()
         {
             var scroll = new BpmScrollTimeline(Map(), 8, 120, 1);
@@ -41,6 +44,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void CountdownAndLastSegmentExtendAndInputsAreCopied()
         {
             var points = new[] { new TempoPoint(0, 120), new TempoPoint(6, 180) };
@@ -55,6 +59,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void HoldAcrossBoundaryHasConsistentLength()
         {
             var scroll = new BpmScrollTimeline(Map(), 8, 120, 1);
@@ -67,6 +72,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void MalformedTempoAndSpeedAreRejected()
         {
             foreach (

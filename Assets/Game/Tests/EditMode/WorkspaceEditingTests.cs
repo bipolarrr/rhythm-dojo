@@ -6,6 +6,7 @@ using RhythmDojo.Gameplay;
 
 namespace RhythmDojo.Tests
 {
+    [Category("Authoring")]
     public sealed class WorkspaceEditingTests
     {
         private EditorSession session;
@@ -26,6 +27,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void QuantizeRecordedNotesUsesClosestTimesAndPreservesCollisionsAndHolds()
         {
             long tap = 0;
@@ -57,6 +59,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void MoveGroupKeepsSpacingIdsAndSelectionWithOneUndo()
         {
             editing.Select(session, chartId);
@@ -81,6 +84,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void MoveGroupRejectsCollisionAndOutOfBoundsWithoutPartialChanges()
         {
             var ids = session.GetNotes(chartId).Select(note => note.Id).ToArray();
@@ -96,6 +100,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void MoveGroupIgnoresOriginalPositionsOfOtherMovingNotes()
         {
             long id = 0;
@@ -107,6 +112,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void MovePreservesNoteIdAndHoldDurationWithOneUndo()
         {
             var note = session.GetNotes(chartId)[1];
@@ -126,6 +132,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void MoveRejectsOverlapsAndDoesNotCreateUndoForUnchangedNotes()
         {
             var note = session.GetNotes(chartId)[0];
@@ -136,6 +143,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void PastePreservesSpacingHoldDurationAndUndoBoundary()
         {
             editing.Select(session, chartId);
@@ -153,6 +161,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void MirrorOnlyChangesSelectedNotesAndCanBeUndone()
         {
             editing.Select(session, chartId, NoteKind.Hold);
@@ -166,6 +175,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void DeleteIgnoresStaleSelectionAfterUndoAndSlotChanges()
         {
             editing.Select(session, chartId);
@@ -180,6 +190,7 @@ namespace RhythmDojo.Tests
         [TestCase(90)]
         [TestCase(120)]
         [TestCase(180)]
+        [Category("Fast")]
         public void BpmEstimatorFindsRegularPulsesAcrossStereoChannels(int bpm)
         {
             const int rate = 8000;
@@ -194,9 +205,19 @@ namespace RhythmDojo.Tests
                 }
             }
             Assert.That(AudioBpmEstimator.Estimate(samples, rate, 2, bpm), Is.EqualTo(bpm).Within(2));
+            Assert.That(AudioBpmEstimator.Estimate(samples, rate, 2, bpm + 17), Is.EqualTo(bpm).Within(2));
+            double defaultEstimate = bpm;
+            if (bpm == 180)
+            {
+                // With ambiguous regular pulses the default 120 hint prefers the 90 BPM octave.
+                defaultEstimate = 90;
+            }
+
+            Assert.That(AudioBpmEstimator.Estimate(samples, rate, 2), Is.EqualTo(defaultEstimate).Within(2));
         }
 
         [Test]
+        [Category("Fast")]
         public void BpmEstimatorRejectsSilenceAndShortClips()
         {
             Assert.Throws<InvalidOperationException>(() => AudioBpmEstimator.Estimate(new float[8000 * 5], 8000, 1));

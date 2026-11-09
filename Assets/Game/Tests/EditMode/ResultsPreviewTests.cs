@@ -5,9 +5,11 @@ using RhythmDojo.Gameplay;
 
 namespace RhythmDojo.Tests
 {
+    [Category("UI")]
     public sealed class ResultsPreviewTests
     {
         [Test]
+        [Category("Fast")]
         public void ClearPreviewHasMixedJudgmentsAndMaintenanceMisses()
         {
             var result = ResultsPreview.CreateResult(false);
@@ -22,6 +24,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void GameOverPreviewHasEarlyReleaseMissAndUnreachedNotes()
         {
             var result = ResultsPreview.CreateResult(true);

@@ -8,6 +8,9 @@ using NUnit.Framework;
 using RhythmDojo.Application;
 using RhythmDojo.Audio;
 using RhythmDojo.Core;
+using RhythmDojo.Content;
+using System.Threading;
+using System.Threading.Tasks;
 using RhythmDojo.Gameplay;
 using RhythmDojo.UI;
 using UnityEngine;
@@ -33,6 +36,41 @@ namespace RhythmDojo.Tests
         private readonly List<string> evidence = new List<string>();
         private int nextEvent;
         private string evidencePath;
+        private double chartScale;
+
+        private sealed class ShortHealthProvider : ISongProvider
+        {
+            private readonly SongDocument document;
+            private readonly SongDefinition source;
+
+            public ShortHealthProvider(SongDefinition source)
+            {
+                this.source = source;
+                document = SongAssetAdapter.ToDocument(source);
+                document.SongId = "short-health-verification";
+                document.CompletionTime /= 4;
+                document.Notes = document.Notes.Select(note =>
+                {
+                    if (note.Kind == NoteKind.Hold)
+                    {
+                        return NoteData.Hold(note.Lane, note.StartTime / 4, note.EndTime / 4);
+                    }
+
+                    return NoteData.Tap(note.Lane, note.StartTime / 4);
+                }).ToArray();
+                document.TempoPoints = document.TempoPoints.Select(point =>
+                    new TempoPoint(point.StartTimeSeconds / 4, point.Bpm * 4)).ToArray();
+            }
+
+            public IReadOnlyList<SongEntry> GetEntries() => new[]
+            {
+                new SongEntry(document.SongId, document.Title, document.Artist,
+                    document.CompletionTime, document.Notes.Length, 4, 400, 400),
+            };
+
+            public Task<PlayableSong> LoadAsync(string songId, CancellationToken cancellationToken) =>
+                Task.FromResult(new PlayableSong(document, source.AudioClip, source.Mode));
+        }
 
         private IEnumerator LoadGameplay(
             string name,
@@ -86,8 +124,17 @@ namespace RhythmDojo.Tests
                 flow.HardMode.SetRule(Judgment.Miss, HealthRuleAction.Damage, 3);
             }
 
+            string songId = "test-pulse";
+            chartScale = 1;
+            if (name != "normal-clear")
+            {
+                flow.Library.Register(new ShortHealthProvider(flow.Settings.catalog[0]));
+                songId = "short-health-verification";
+                chartScale = .25;
+            }
+
             flow.Selection.UpdateSelection(
-                "test-pulse",
+                songId,
                 flow.Settings.defaultDifficulty,
                 ScrollMode.Constant,
                 1
@@ -258,6 +305,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Endurance")]
         public IEnumerator NormalMissesDamagePerfectAndGoodRecoverThenClear()
         {
             yield return LoadGameplay("normal-clear");
@@ -289,6 +337,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator NormalTenMissesGameOverThenSpaceRestoresHealth()
         {
             yield return LoadGameplay("normal-game-over");
@@ -309,6 +358,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator HardDefaultMissImmediatelyShowsGameOver()
         {
             yield return LoadGameplay("hard-miss", true);
@@ -319,6 +369,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator HardPerfectPreservesHealthAndGoodImmediatelyShowsGameOver()
         {
             yield return LoadGameplay("hard-good", true);
@@ -334,6 +385,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator HardConfiguredThreeMissesDrainFractionalHealthThenGameOver()
         {
             yield return LoadGameplay("hard-three-misses", true, true);
@@ -374,6 +426,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator GaugeFailureContinuesAndLatchesOnceUntilRestart()
         {
             yield return LoadGameplay("failed-completion", continues: true);
@@ -395,6 +448,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator HoldReleaseAndRegrabUsesOnlyMissedChecksAsPenalties()
         {
             yield return LoadGameplay("hold-regrab", continues: true);
@@ -405,8 +459,8 @@ namespace RhythmDojo.Tests
                 .First(i => game.Chart[i].Kind == NoteKind.Hold);
             var note = game.Chart[index];
             var key = new[] { Key.D, Key.F, Key.J, Key.K }[note.Lane];
-            events.Add((note.StartTime + .3, key, false));
-            events.Add((note.EndTime - .3, key, true));
+            events.Add((note.StartTime + .3 * chartScale, key, false));
+            events.Add((note.EndTime - .3 * chartScale, key, true));
             events.Sort((a, b) => a.time.CompareTo(b.time));
             yield return Press(Key.Space);
             yield return Await(() => session.Miss > 0);

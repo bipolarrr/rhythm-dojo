@@ -17,6 +17,7 @@ using UnityEngine.UI;
 namespace RhythmDojo.Tests
 {
     [Category("Results")]
+    [Category("Gameplay")]
     public sealed class ResultsFlowTests : GameplayTestContext
     {
         private IEnumerator LoadGameplay()
@@ -65,6 +66,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator ConsistentTimingRecommendationIsSavedOnlyOnApplyAndUsedForRetry(
             [Values(false, true)] bool olderScene
         )
@@ -108,6 +110,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator ResultsWithoutRecommendationCanOpenTimingTestAndRetryWithAppliedOffset()
         {
             var flow = Object.FindFirstObjectByType<AppFlowController>();
@@ -157,6 +160,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator CompletionDisplaysThisPlayAndNextPlayReplacesIt()
         {
             var flow = Object.FindFirstObjectByType<AppFlowController>();
@@ -227,6 +231,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator GameOverDisplaysFailureAndEscapeDuringPlaySkipsResults()
         {
             var flow = Object.FindFirstObjectByType<AppFlowController>();
@@ -262,6 +267,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator RestartDuringOutcomeDelayCancelsPendingResults()
         {
             yield return LoadGameplay();
@@ -300,6 +306,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator DirectResultsSceneHasEmptyStateAndBackWorks()
         {
             yield return SceneManager.LoadSceneAsync(AppFlowController.ResultsPath);
@@ -314,6 +321,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Endurance")]
         public IEnumerator RealClockCompletionTransitionsWithoutUserInput()
         {
             yield return LoadGameplay();
@@ -331,6 +339,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator RestartResetsStatisticsAndGoodJudgmentsReachResults()
         {
             yield return LoadGameplay();
@@ -362,6 +371,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator MoreShowsPlayedChartAndPerNoteJudgmentsThenReturnsToSameResult()
         {
             yield return LoadGameplay();
@@ -459,6 +469,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator EarlyFailureKeepsFutureNotesUnjudgedInWholeChartReview()
         {
             var flow = Object.FindFirstObjectByType<AppFlowController>();

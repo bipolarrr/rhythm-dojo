@@ -15,9 +15,11 @@ using Object = UnityEngine.Object;
 
 namespace RhythmDojo.Tests
 {
+    [Category("Authoring")]
     public sealed class ProjectLibraryFlowTests : GameplayTestContext
     {
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator RestoredAudioLoadsAfterStructuredFailureAndRefresh()
         {
             string root = Path.Combine(UnityEngine.Application.temporaryCachePath, "Recovery-" + Guid.NewGuid());
@@ -37,10 +39,10 @@ namespace RhythmDojo.Tests
             try
             {
                 var import = store.ImportAsync(project.Id, Path.GetFullPath("Assets/Game/Audio/TestPulse.wav"), default);
-                yield return new WaitUntil(() => import.IsCompleted);
+                yield return Await(() => import.IsCompleted, "Project operation did not complete: import");
                 project.Audio = import.GetAwaiter().GetResult();
                 var save = store.SaveAsync(project, default);
-                yield return new WaitUntil(() => save.IsCompleted);
+                yield return Await(() => save.IsCompleted, "Project operation did not complete: save");
                 save.GetAwaiter().GetResult();
                 var library = new SongLibrary();
                 library.Register(new ProjectSongProvider(store, mode));
@@ -49,14 +51,14 @@ namespace RhythmDojo.Tests
                 byte[] bytes = File.ReadAllBytes(path);
                 File.Delete(path);
                 var missing = library.LoadChartAsync(id, ChartSlot.Standard, default);
-                yield return new WaitUntil(() => missing.IsCompleted);
+                yield return Await(() => missing.IsCompleted, "Project operation did not complete: missing");
                 Assert.That(missing.Exception.InnerException, Is.TypeOf<SongLoadException>());
                 Assert.That(((SongLoadException)missing.Exception.InnerException).Failure.Kind,
                     Is.EqualTo(SongLoadFailureKind.MissingAudio));
                 File.WriteAllBytes(path, bytes);
                 library.Refresh();
                 var retry = library.LoadChartAsync(id, ChartSlot.Standard, default);
-                yield return new WaitUntil(() => retry.IsCompleted);
+                yield return Await(() => retry.IsCompleted, "Project operation did not complete: retry");
                 loaded = retry.GetAwaiter().GetResult();
                 Assert.That(loaded.AudioClip.samples, Is.GreaterThan(0));
                 Assert.That(loaded.ChartId, Is.EqualTo(project.Charts[0].Id.ToString("D")));
@@ -72,6 +74,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator SavedThreeChartProjectSelectsLoadsAndRefreshesEachSlot()
         {
             string root = Path.Combine(
@@ -114,11 +117,11 @@ namespace RhythmDojo.Tests
                     Path.GetFullPath("Assets/Game/Audio/TestPulse.wav"),
                     default
                 );
-                yield return new WaitUntil(() => imported.IsCompleted);
+                yield return Await(() => imported.IsCompleted, "Project operation did not complete: imported");
                 project.Audio = imported.GetAwaiter().GetResult();
 
                 var saved = store.SaveAsync(project, default);
-                yield return new WaitUntil(() => saved.IsCompleted);
+                yield return Await(() => saved.IsCompleted, "Project operation did not complete: saved");
                 saved.GetAwaiter().GetResult();
                 string path = Path.Combine(store.GetSongFolder(project.Id), FileSongProjectStore.FileName);
                 string original = File.ReadAllText(path);
@@ -157,7 +160,7 @@ namespace RhythmDojo.Tests
 
                 project.Charts[2].Notes = Array.Empty<NoteData>();
                 saved = store.SaveAsync(project, default);
-                yield return new WaitUntil(() => saved.IsCompleted);
+                yield return Await(() => saved.IsCompleted, "Project operation did not complete: saved");
                 saved.GetAwaiter().GetResult();
                 flow.Library.Refresh();
                 Object
@@ -170,7 +173,7 @@ namespace RhythmDojo.Tests
                 Assert.That(invalid.details.text, Does.Contain("재생 불가"));
                 project.Charts = project.Charts.Take(2).ToArray();
                 saved = store.SaveAsync(project, default);
-                yield return new WaitUntil(() => saved.IsCompleted);
+                yield return Await(() => saved.IsCompleted, "Project operation did not complete: saved");
                 saved.GetAwaiter().GetResult();
                 flow.Library.Refresh();
                 Assert.That(invalid.difficultyButtons[2].interactable, Is.False);
@@ -187,6 +190,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator NestedModalScopesKeepInputBlockedUntilTheLastOwnerCloses()
         {
             var screen = Object.FindFirstObjectByType<SongSelectionScreen>();
@@ -213,6 +217,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator ModalScopeRestoresInputAndFocusAfterOpeningFailureAndDispose()
         {
             var screen = Object.FindFirstObjectByType<SongSelectionScreen>();

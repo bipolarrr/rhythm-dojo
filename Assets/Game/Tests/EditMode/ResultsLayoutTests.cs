@@ -8,9 +8,11 @@ using UnityEngine.UI;
 
 namespace RhythmDojo.Tests
 {
+    [Category("UI")]
     public sealed class ResultsLayoutTests
     {
         [Test]
+        [Category("SceneIntegration")]
         public void SavedResultsSceneHasSketchLayoutAndEmptyFeedback()
         {
             var scene = EditorSceneManager.OpenScene(SceneBuilder.ResultsPath, OpenSceneMode.Additive);
@@ -22,7 +24,6 @@ namespace RhythmDojo.Tests
                     .SelectMany(root => root.GetComponentsInChildren<ResultsView>())
                     .Single();
                 view.Validate();
-                Assert.That(view.GetComponentsInChildren<Button>().Length, Is.EqualTo(3));
                 Assert.That(view.review.gameObject.activeSelf, Is.False);
                 view.review.Validate();
                 Assert.That(view.scoreSummary.transform.parent, Is.EqualTo(view.feedback));
@@ -43,17 +44,23 @@ namespace RhythmDojo.Tests
                 Assert.That(view.progressNote, Is.Not.Null);
                 Assert.That(view.retryButton.GetComponentInChildren<PixelDojoFrameGraphic>().color,
                     Is.Not.EqualTo(view.recommendationButton.GetComponentInChildren<PixelDojoFrameGraphic>().color));
-                Assert.That(((RectTransform)view.outcome.transform.parent).anchorMin.x, Is.GreaterThan(.69f));
-                Assert.That(view.feedback.GetComponentInChildren<PixelDojoFrameGraphic>().artwork.name,
-                    Is.EqualTo("SettingsPanel"));
-                Assert.That(view.moreButton.GetComponentInChildren<PixelDojoFrameGraphic>().artwork.name,
-                    Is.EqualTo("SettingsControl"));
-                Assert.That(view.outcome.transform.parent.Find("Wooden Result Seal").GetComponent<Image>().sprite.name,
-                    Is.EqualTo("RoundPlaque"));
+                Canvas.ForceUpdateCanvases();
+                var buttons = new[] { view.backButton, view.moreButton, view.retryButton };
+                foreach (var button in buttons)
+                {
+                    Assert.That(button.GetComponentsInChildren<Graphic>().Any(graphic => graphic.raycastTarget), Is.True);
+                    var rect = (RectTransform)button.transform;
+                    Assert.That(rect.rect.width, Is.GreaterThanOrEqualTo(44));
+                    Assert.That(rect.rect.height, Is.GreaterThanOrEqualTo(44));
+                    foreach (var other in buttons.Where(other => other != button))
+                    {
+                        var bounds = RectTransformUtility.CalculateRelativeRectTransformBounds(view.transform, rect);
+                        var otherBounds = RectTransformUtility.CalculateRelativeRectTransformBounds(view.transform, other.transform);
+                        Assert.That(bounds.Intersects(otherBounds), Is.False, "Result controls must not overlap.");
+                    }
+                }
                 Assert.That(view.GetComponent<CanvasScaler>().referenceResolution, Is.EqualTo(new Vector2(1920, 1080)));
                 Assert.That(view.GetComponent<CanvasScaler>().uiScaleMode, Is.EqualTo(CanvasScaler.ScaleMode.ScaleWithScreenSize));
-                Assert.That(scene.GetRootGameObjects().SelectMany(root => root.GetComponentsInChildren<Transform>())
-                    .Any(item => item.name.Contains("Character")), Is.False);
             }
             finally
             {

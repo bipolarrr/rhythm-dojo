@@ -8,9 +8,11 @@ using Object = UnityEngine.Object;
 
 namespace RhythmDojo.Tests
 {
+    [Category("UI")]
     public sealed class UiArtworkAssetsTests
     {
         [Test]
+        [Category("AssetGeneration")]
         public void ExplicitCropAndBorderRefreshKeepSpriteIdentityAndMeta()
         {
             string folder = "Assets/Game/Tests/Artwork-" + Guid.NewGuid().ToString("N");
@@ -63,6 +65,7 @@ namespace RhythmDojo.Tests
 
         [TestCase("EntranceFrame", UiArtworkCrop.Full)]
         [TestCase("RoundPlaque", UiArtworkCrop.Alpha)]
+        [Category("AssetGeneration")]
         public void ExistingEntranceAssetsKeepTheirGuidAndSpriteReference(string name, UiArtworkCrop crop)
         {
             string path = DojoEntranceAssets.Root + name + ".asset";

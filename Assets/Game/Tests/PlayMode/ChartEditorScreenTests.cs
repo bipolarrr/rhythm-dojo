@@ -14,9 +14,11 @@ namespace RhythmDojo.Tests
 {
     [PrebuildSetup(typeof(TestRunStartup))]
     [PostBuildCleanup(typeof(TestRunStartup))]
+    [Category("Authoring")]
     public sealed class ChartEditorScreenTests
     {
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator MouseClicksAddUniqueBeatNotesAndRightClickRemovesThem()
         {
             var inputSettings = InputSystem.settings;
@@ -168,6 +170,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator PlainWheelScrollsTimelineWithoutChangingZoomAndCanPlaceLaterNotes()
         {
             var inputSettings = InputSystem.settings;
@@ -269,6 +272,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator DraggingUpCreatesHoldAndRightClickOnItsBodyRemovesIt()
         {
             var inputSettings = InputSystem.settings;
@@ -361,6 +365,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator LayoutFillsSixteenNineAndSixteenTen()
         {
             yield return SceneManager.LoadSceneAsync("Assets/Game/Scenes/ChartEditor.unity");

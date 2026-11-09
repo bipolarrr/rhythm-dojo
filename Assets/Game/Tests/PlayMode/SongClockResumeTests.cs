@@ -16,6 +16,7 @@ using Object = UnityEngine.Object;
 
 namespace RhythmDojo.Tests
 {
+    [Category("Gameplay")]
     public sealed class SongClockResumeTests : GameplayTestContext
     {
         private SongClock CreateClock(double offset, int timingOffsetMs = 0)
@@ -31,6 +32,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Hardware")]
         public IEnumerator EditorStartPositionKeepsAudioAnchorAndDoesNotReplayPastEnd()
         {
             var clock = CreateClock(-.25, 200);
@@ -58,6 +60,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Hardware")]
         public IEnumerator ResumeWaitsForScheduledAnchorWithoutAdvancingLogicalTime()
         {
             var clock = CreateClock(.25, 200);
@@ -82,6 +85,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Hardware")]
         public IEnumerator ResumeSeeksFromFrozenLogicalTimeInsteadOfPausedSourceCursor()
         {
             var clock = CreateClock(-.25, -200);
@@ -105,6 +109,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Hardware")]
         public IEnumerator TwentyResumesKeepSourceSamplesAlignedAcrossBuffersAndOffsets()
         {
             var report = new StringBuilder("requested,actual,buffers,rate,clipRate,offset,cycle,frame,dsp,realtime,anchor,frozen,seekSample,sourceSample,logical,audio,error,uncertainty,drift,dspElapsed,realtimeElapsed,dspRatio,rawDspAudioError\n");
@@ -215,6 +220,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Hardware")]
         public IEnumerator BeforeAudioResumeWaitsForItsRemainingLeadAndPendingPauseCancels()
         {
             var clock = CreateClock(.25);
@@ -246,6 +252,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Hardware")]
         public IEnumerator ResumeAfterAudioEndDoesNotReplayTheFinalSample()
         {
             var clock = CreateClock(-.25);
@@ -273,6 +280,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Hardware")]
         public IEnumerator ResetDuringScheduledResumeKeepsTimeFrozenUntilNewResume()
         {
             var clock = CreateClock(.25);
@@ -299,6 +307,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Hardware")]
         public IEnumerator EscapeDuringResumeLeadKeepsSessionAndSourcePaused()
         {
             yield return Click(Object.FindFirstObjectByType<SongSelectionView>().play);
@@ -322,6 +331,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Hardware")]
         public IEnumerator ResetDuringMenuResumeLeadReopensPauseWithoutAdvancingSession()
         {
             yield return Click(Object.FindFirstObjectByType<SongSelectionView>().play);

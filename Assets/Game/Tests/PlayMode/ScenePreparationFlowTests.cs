@@ -12,6 +12,7 @@ using UnityEngine.TestTools;
 
 namespace RhythmDojo.Tests
 {
+    [Category("Gameplay")]
     public sealed class InputStateTestParticipant : MonoBehaviour, IModalInputParticipant
     {
         public int resumed;
@@ -62,6 +63,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator InvalidatedLoadNeverInitializesAfterEditorExit()
         {
             yield return PrepareTitle();
@@ -78,6 +80,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator SingleSelectionLoadDoesNotBecomePreparationOwned()
         {
             yield return PrepareTitle();
@@ -98,6 +101,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator ReplacingReadyPreparationWithSingleSelectionReleasesItsOwnership()
         {
             yield return PrepareTitle();
@@ -119,6 +123,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator CancellationAfterPriorSceneUnloadsKeepsLastSelectionUsable()
         {
             yield return PrepareTitle();
@@ -151,6 +156,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator PopupKeepsFocusWhilePreparationFinishesThenEntranceRestoresSelectionFocus()
         {
             yield return PrepareTitle();
@@ -184,6 +190,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator DelayedPreparationPreservesAnEmptyTitleFocus()
         {
             yield return PrepareTitle();
@@ -196,6 +203,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("SceneIntegration")]
         public void ClosingModalRestoresAnEmptyFocusAfterSelectionResume()
         {
             var screen = UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>();
@@ -209,6 +217,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator DisposingOwnerDrainsOutstandingLoadWithoutInitializingIt()
         {
             yield return PrepareTitle();
@@ -225,6 +234,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator ReentryQueuesNewGenerationUntilInvalidatedLoadIsDrained()
         {
             yield return PrepareTitle();
@@ -242,6 +252,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator TimeoutDiscardsUninitializedSceneAndAllowsRetry()
         {
             yield return PrepareTitle(.25);
@@ -258,6 +269,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator LoadFailureAllowsColdEntranceRetry()
         {
             yield return PrepareTitle();
@@ -280,6 +292,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("SceneIntegration")]
         public void FinalOwnerRestoresOriginalStatesAndNotifiesOnceEvenAfterAnotherParticipantThrows()
         {
             var go = new GameObject("Scope test");

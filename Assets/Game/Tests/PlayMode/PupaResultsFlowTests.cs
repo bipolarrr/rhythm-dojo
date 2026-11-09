@@ -16,6 +16,7 @@ using UnityEngine.TestTools;
 
 namespace RhythmDojo.Tests
 {
+    [Category("Gameplay")]
     public sealed class PupaResultsFlowTests : GameplayTestContext
     {
         [System.Serializable]
@@ -89,6 +90,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator SongSelectionPupaCompletesAndKeepsTheWholeChart()
         {
             var flow = Object.FindFirstObjectByType<AppFlowController>();
@@ -121,6 +123,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator EditorPupaShowsResultsBeforeReturningTheUnsavedSession()
         {
             var flow = Object.FindFirstObjectByType<AppFlowController>();
@@ -161,6 +164,7 @@ namespace RhythmDojo.Tests
 
         [UnityTest]
         [Category("LocalAudio")]
+        [Category("Endurance")]
         public IEnumerator RealPupaAudioFinishesAndAutomaticallyLoadsResults()
         {
             // Legacy test names retain the bundled chart; audio is an independent external fixture.
@@ -286,6 +290,7 @@ namespace RhythmDojo.Tests
 
         [UnityTest]
         [Category("LocalAudio")]
+        [Category("Hardware")]
         public IEnumerator CorrectedPupaClockKeepsAudioNotesAndTimestampedInputTogether()
         {
             // Legacy test names retain the bundled chart; audio is an independent external fixture.
@@ -346,6 +351,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator ShortenedOutroStillPreservesTheFinalHoldReleaseWindow()
         {
             var flow = Object.FindFirstObjectByType<AppFlowController>();
@@ -379,6 +385,7 @@ namespace RhythmDojo.Tests
 
         [UnityTest]
         [Category("LocalAudio")]
+        [Category("Hardware")]
         public IEnumerator PupaAudioTailTransitionsPromptlyWithEveryJudgmentPreserved()
         {
             // Legacy test names retain the bundled chart; audio is an independent external fixture.

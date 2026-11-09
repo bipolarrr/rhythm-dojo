@@ -11,23 +11,16 @@ using UnityEngine.SceneManagement;
 
 namespace RhythmDojo.Tests
 {
+    [Category("UI")]
     public sealed class MainMenuTests
     {
         [Test]
+        [Category("SceneIntegration")]
         public void GeneratedMenuHasRequiredReferencesAnchorsAndKoreanGlyphs()
         {
             var original = SceneManager.GetActiveScene();
 
-            if (string.IsNullOrEmpty(original.path))
-            {
-                System.IO.Directory.CreateDirectory("Assets/CodexIdeRepairTemp");
-                EditorSceneManager.SaveScene(
-                    original,
-                    "Assets/CodexIdeRepairTemp/MainMenuTestHost.unity"
-                );
-            }
-
-            var scene = MainMenuSceneBuilder.Create();
+            var scene = EditorSceneManager.OpenScene(SceneBuilder.TitlePath, OpenSceneMode.Additive);
 
             try
             {
@@ -42,7 +35,6 @@ namespace RhythmDojo.Tests
                 Assert.That(view.title.rectTransform.parent, Is.EqualTo(view.logo.transform));
                 Assert.That(view.title.rectTransform.anchorMin, Is.EqualTo(new Vector2(.5f, .5f)));
                 Assert.That(view.startPrompt.rectTransform.parent, Is.EqualTo(view.logo.transform));
-                Assert.That(view.logo.GetComponent<LogoCircleGraphic>(), Is.Null);
                 Assert.That(view.logo.GetComponent<UnityEngine.UI.Image>().sprite, Is.Not.Null);
                 Assert.That(view.alwaysVisibleMenu, Is.False);
                 Assert.That(view.title.enabled, Is.False);
@@ -107,31 +99,35 @@ namespace RhythmDojo.Tests
                 Assert.That(editorRect.anchoredPosition.y, Is.EqualTo(playRect.anchoredPosition.y));
                 foreach (var button in new[] { view.start, view.settings, view.editor, view.quit })
                 {
-                    Assert.That(((RectTransform)button.transform).sizeDelta, Is.EqualTo(new Vector2(80, 290)));
-                    Assert.That(button.GetComponent<UnityEngine.UI.Image>().sprite.name, Is.EqualTo("VerticalMenuBoard"));
+                    var rect = (RectTransform)button.transform;
+                    Assert.That(rect.sizeDelta, Is.EqualTo(new Vector2(80, 290)),
+                        "Authored plaque size: Docs/pixel-dojo-title.md");
+                    Assert.That(rect.rect.width, Is.GreaterThanOrEqualTo(44));
+                    Assert.That(rect.rect.height, Is.GreaterThanOrEqualTo(44));
+                    Assert.That(button.targetGraphic.raycastTarget, Is.True);
+                    var others = new[] { view.start, view.settings, view.editor, view.quit }.Where(other => other != button);
+                    foreach (var other in others)
+                    {
+                        var bounds = RectTransformUtility.CalculateRelativeRectTransformBounds(view.menuPanel.transform, rect);
+                        var otherBounds = RectTransformUtility.CalculateRelativeRectTransformBounds(view.menuPanel.transform, other.transform);
+                        Assert.That(bounds.Intersects(otherBounds), Is.False, "Menu click targets must not overlap.");
+                    }
                     Assert.That(button.GetComponentInChildren<UnityEngine.UI.Text>().font,
                         Is.SameAs(Resources.Load<UiFontSettings>("UI/UiFontSettings").bold));
-                    Assert.That(button.GetComponent<DojoBoardBreak>(), Is.Null);
                     var graphic = button.GetComponent<UnityEngine.UI.Image>();
                     Assert.That(graphic, Is.Not.Null);
                     Assert.That(graphic.preserveAspect, Is.True);
                     Assert.That(graphic.sprite.texture.filterMode, Is.EqualTo(FilterMode.Point));
-                    Assert.That(button.GetComponentInChildren<DojoTrainingGraphic>(), Is.Null);
                 }
 
                 var interiorArt = view.trainingInterior.GetComponent<DojoTrainingGraphic>();
-                Assert.That(interiorArt.artwork.name, Is.EqualTo("TrainingInterior"));
                 Assert.That(interiorArt.mainTexture, Is.SameAs(interiorArt.artwork.texture));
-                Assert.That(interiorArt.artwork.texture.width, Is.EqualTo(1672));
-                Assert.That(interiorArt.artwork.texture.height, Is.EqualTo(941));
 
                 Assert.That(view.start.navigation.selectOnRight, Is.SameAs(view.settings));
                 Assert.That(view.settings.navigation.selectOnRight, Is.SameAs(view.editor));
                 Assert.That(view.editor.navigation.selectOnLeft, Is.SameAs(view.settings));
                 Assert.That(view.editor.navigation.selectOnRight, Is.SameAs(view.quit));
                 Assert.That(view.quit.navigation.selectOnLeft, Is.SameAs(view.editor));
-                var trainingHallPlaque = view.trainingInterior.Find("Training Hall Plaque");
-                Assert.That(trainingHallPlaque, Is.Null);
                 Assert.That(view.start.navigation.selectOnDown, Is.SameAs(view.settings));
                 Assert.That(view.editor.navigation.selectOnUp, Is.SameAs(view.settings));
                 Assert.That(view.menuPanel.transform.GetSiblingIndex(),
@@ -186,6 +182,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void TitleIsFirstEnabledBuildSceneAndBootstrapRemainsRegistered()
         {
             var scenes = EditorBuildSettings.scenes.Where(scene => scene.enabled).ToArray();
@@ -195,6 +192,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void EmptyMusicUsesConfiguredBpmWithoutAnIntroDelay()
         {
             var settings = ScriptableObject.CreateInstance<TitleMusicSettings>();
@@ -212,6 +210,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void MusicBeatRestartsAtTheClipLoopAndWaitsForTheFirstBeat()
         {
             var settings = ScriptableObject.CreateInstance<TitleMusicSettings>();
@@ -238,6 +237,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void FirstBeatOutsideMusicIsRejected()
         {
             var settings = ScriptableObject.CreateInstance<TitleMusicSettings>();

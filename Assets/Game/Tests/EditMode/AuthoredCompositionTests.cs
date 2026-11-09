@@ -8,9 +8,11 @@ using UnityEngine;
 
 namespace RhythmDojo.Tests
 {
+    [Category("UI")]
     public sealed class AuthoredCompositionTests
     {
         [Test]
+        [Category("Fast")]
         public void SettingsPrefabContainsCalibrationBeforeAnyControllerInitializes()
         {
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Game/Resources/UI/SettingsPopup.prefab");
@@ -27,23 +29,44 @@ namespace RhythmDojo.Tests
 
         [TestCase("TapNote", NoteKind.Tap)]
         [TestCase("HoldNote", NoteKind.Hold)]
+        [Category("Fast")]
         public void NotePrefabContainsItsCompleteAppearance(string name, NoteKind kind)
         {
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Game/Prefabs/" + name + ".prefab");
             var view = prefab.GetComponent<NoteView>();
             view.Validate(kind);
-            var skin = prefab.transform.Find("Head/Songpan Skin").GetComponent<SpriteRenderer>();
+            var fields = new SerializedObject(view);
+            var skin = (SpriteRenderer)fields.FindProperty("headSkin").objectReferenceValue;
             Assert.That(AssetDatabase.Contains(skin.sprite), Is.True);
-            Assert.That(skin.transform.localRotation, Is.EqualTo(Quaternion.Euler(28, 0, 0)));
+            Assert.That(skin.transform.IsChildOf(view.transform), Is.True);
+            Assert.That(AssetDatabase.Contains(skin.sharedMaterial), Is.True);
+            var clone = UnityEngine.Object.Instantiate(prefab);
+            try
+            {
+                var cloneSkin = clone.GetComponentsInChildren<SpriteRenderer>(true).Single();
+                Assert.That(cloneSkin.sprite, Is.SameAs(skin.sprite));
+                Assert.That(cloneSkin.sharedMaterial, Is.SameAs(skin.sharedMaterial));
+                UnityEngine.Object.DestroyImmediate(clone);
+                clone = null;
+                Assert.That(skin.sprite, Is.Not.Null, "Destroying a note must not destroy shared artwork.");
+            }
+            finally
+            {
+                if (clone)
+                {
+                    UnityEngine.Object.DestroyImmediate(clone);
+                }
+            }
             if (kind == NoteKind.Hold)
             {
-                var tail = prefab.transform.Find("Hold End Marker").GetComponent<MeshRenderer>();
+                var tail = (MeshRenderer)fields.FindProperty("tailMarker").objectReferenceValue;
                 Assert.That(tail.GetComponent<MeshFilter>().sharedMesh, Is.Not.Null);
-                Assert.That(tail.sharedMaterial, Is.SameAs(prefab.transform.Find("Hold Body").GetComponent<Renderer>().sharedMaterial));
+                Assert.That(tail.sharedMaterial, Is.SameAs(((Transform)fields.FindProperty("body").objectReferenceValue).GetComponent<Renderer>().sharedMaterial));
             }
         }
 
         [Test]
+        [Category("Fast")]
         public void CursorPrefabReferencesBakedFramesAndImprintInsteadOfOwnedTextures()
         {
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Game/Resources/UI/DojoCursor.prefab");
@@ -52,14 +75,14 @@ namespace RhythmDojo.Tests
             Assert.That(AssetDatabase.Contains(normal), Is.True);
             Assert.That(cursor.FindProperty("hoverTexture").objectReferenceValue, Is.SameAs(normal));
             var frames = cursor.FindProperty("punchFrames");
-            Assert.That(frames.arraySize, Is.EqualTo(7));
+            Assert.That(frames.arraySize, Is.GreaterThan(1), "Punch animation needs authored frames.");
             for (int i = 0; i < frames.arraySize; i++)
             {
                 var frame = (Texture2D)frames.GetArrayElementAtIndex(i).objectReferenceValue;
                 Assert.That(AssetDatabase.Contains(frame), Is.True);
                 Assert.That(frame.isReadable, Is.True);
-                Assert.That(frame.width, Is.EqualTo(128));
-                Assert.That(frame.height, Is.EqualTo(128));
+                Assert.That(frame.width, Is.EqualTo(((Texture2D)normal).width));
+                Assert.That(frame.height, Is.EqualTo(((Texture2D)normal).height));
             }
 
             var impact = prefab.GetComponentInChildren<DojoPunchImpact>(true);

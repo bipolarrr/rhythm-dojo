@@ -9,6 +9,7 @@ using UnityEngine.InputSystem;
 
 namespace RhythmDojo.Tests
 {
+    [Category("Gameplay")]
     public sealed class PlayKeyBindingsTests
     {
         private string previous;
@@ -21,6 +22,7 @@ namespace RhythmDojo.Tests
 
         [TestCase("<Keyboard>/a", "Left")]
         [TestCase("<Gamepad>/buttonSouth", "Pad South")]
+        [Category("Fast")]
         public void FourLaneModeKeepsItsOwnDefaultBindingAndLabel(string binding, string label)
         {
             var mode = ScriptableObject.CreateInstance<GameModeDefinition>();
@@ -92,6 +94,7 @@ namespace RhythmDojo.Tests
         [TestCase("invalid json")]
         [TestCase("{\"keys\":[0,0,0,0]}")]
         [TestCase("{\"keys\":[15]}")]
+        [Category("Fast")]
         public void InvalidSavedKeysFallBackToDefaults(string saved)
         {
             PlayerPrefs.SetString(PlayKeyBindings.StorageKey, saved);
@@ -103,6 +106,7 @@ namespace RhythmDojo.Tests
         [TestCase(Key.Escape)]
         [TestCase(Key.Space)]
         [TestCase(Key.F)]
+        [Category("Fast")]
         public void InvalidReservedAndDuplicateKeysLeaveSavedBindingsUnchanged(Key key)
         {
             Assert.That(PlayKeyBindings.TrySetKey(0, key, out var message), Is.False);
@@ -111,6 +115,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void LegacyImeDummyKeyLeavesSavedBindingsUnchanged()
         {
             var key = (Key)System.Enum.Parse(typeof(Key), "IMESelected");
@@ -137,6 +142,7 @@ namespace RhythmDojo.Tests
             "<Keyboard>/d", "<Keyboard>/f", "<Keyboard>/j", "<Keyboard>/k");
 
         [Test]
+        [Category("Fast")]
         public void EqualLaneCountsKeepOverridesAndResetIsolatedByOriginalModeId()
         {
             var first = DefaultMode();
@@ -156,6 +162,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void SixLaneOverridesUseDefinitionDefaultsAndPreserveGamepadLane()
         {
             var mode = Mode("SixKeys", "<Keyboard>/a", "<Keyboard>/s", "<Keyboard>/d",
@@ -174,6 +181,7 @@ namespace RhythmDojo.Tests
         [TestCase("<Keyboard>/anyKey", Key.Q)]
         [TestCase("<Keyboard>/{Submit}", Key.Enter)]
         [TestCase("<Keyboard>/leftWindows", Key.LeftMeta)]
+        [Category("Fast")]
         public void ModeCommandBindingsReserveTheirPhysicalKeys(string binding, Key key)
         {
             var mode = DefaultMode();
@@ -186,6 +194,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void SpaceIsAvailableWhenThisModeUsesDifferentCommands()
         {
             var mode = DefaultMode();
@@ -197,6 +206,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void LegacyKeysMigrateOnlyToOriginalDefaultOnceAndRemainStored()
         {
             string saved = "{\"keys\":[" + (int)Key.A + "," + (int)Key.S + "," +
@@ -217,6 +227,7 @@ namespace RhythmDojo.Tests
         [TestCase("invalid json")]
         [TestCase("")]
         [TestCase("{\"version\":2,\"migrated\":true,\"modes\":[{\"modeId\":\"FourLaneMode\",\"overrides\":[{\"lane\":99,\"key\":15}]}]}")]
+        [Category("Fast")]
         public void CorruptNewStorageDoesNotResurrectLegacyKeys(string saved)
         {
             PlayerPrefs.SetString(PlayKeyBindings.StorageKey, "{\"keys\":[" + (int)Key.A + "," +
@@ -227,6 +238,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void ExistingModeRecordWinsOverLegacyEvenBeforeMigrationMarker()
         {
             PlayerPrefs.SetString(PlayKeyBindings.StorageKey, "{\"keys\":[" + (int)Key.A + "," +
@@ -239,6 +251,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void SettingsBuilderUsesAssetDefaultsWithoutBakingSavedOverrides()
         {
             var settings = AssetDatabase.LoadAssetAtPath<GameSettings>(TestContentBuilder.SettingsPath);

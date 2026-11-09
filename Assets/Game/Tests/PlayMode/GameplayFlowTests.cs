@@ -24,6 +24,7 @@ namespace RhythmDojo.Tests
     public sealed class GameplayFlowTests : GameplayTestContext
     {
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator ControlledFocusKeepsPlaybackRunningUntilNativeFocusOwnsTheSession()
         {
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
@@ -61,6 +62,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator DirectGameplaySceneUsesCopiedPlayRules()
         {
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
@@ -79,6 +81,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator SixLaneDefinitionDrivesAllUnityAdapters()
         {
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
@@ -167,6 +170,7 @@ namespace RhythmDojo.Tests
 
         [UnityTest]
         [Category("Smoke")]
+        [Category("SceneIntegration")]
         public IEnumerator KeyboardNavigationAndStartRestartFocusLossUseActualActions()
         {
             var view = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();

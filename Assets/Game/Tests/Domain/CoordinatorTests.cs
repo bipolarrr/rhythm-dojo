@@ -5,6 +5,7 @@ using RhythmDojo.Gameplay;
 
 namespace RhythmDojo.Tests
 {
+    [Category("Gameplay")]
     public sealed class CoordinatorTests
     {
         private sealed class FakeInput : ILaneInput
@@ -108,6 +109,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void GameOverStopsClockAndKeepsPresentationTimeUntilRestart()
         {
             var input = new FakeInput();
@@ -133,7 +135,9 @@ namespace RhythmDojo.Tests
                 new ConstantScrollTimeline(8, 1),
                 input,
                 clock,
-                presenter
+                presenter,
+                healthRules: null,
+                rules: new PlayRules { WarmupGood = .11, GaugeFailure = GaugeFailureMode.Stop }
             );
             input.Start();
             clock.SongTime = 5.2;
@@ -153,6 +157,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void UnavailableAudioBlocksInputStartResumeAndRestartUntilRecovered()
         {
             var input = new FakeInput();
@@ -179,6 +184,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void ScheduledResumeDefersReleaseAndSweepUntilAnchor()
         {
             var input = new FakeInput();
@@ -203,6 +209,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void FirstPostAnchorInputCompletesResumeBeforeTheFrameTick()
         {
             var input = new FakeInput();
@@ -222,6 +229,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void PauseCancelsPendingResumeAndCanPauseAClockThatCompletedBeforeCoordinator()
         {
             var input = new FakeInput();
@@ -246,6 +254,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void AudioInvalidationAfterClockAnchorKeepsCoordinatorAndClockPaused()
         {
             var input = new FakeInput();
@@ -265,6 +274,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void LatePreAnchorReleaseAfterFrameTickUsesFrozenPauseTime()
         {
             var input = new FakeInput();
@@ -282,6 +292,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void TwentyScheduledPausesPreserveTheSameHoldJudgment()
         {
             var input = new FakeInput();
@@ -303,13 +314,14 @@ namespace RhythmDojo.Tests
                 Assert.That(c.IsPaused, Is.False);
             }
             input.Release(1, 7);
-            Assert.That(c.Session.Perfect, Is.EqualTo(2));
+            Assert.That(c.Session.Perfect, Is.EqualTo(c.Session.Snapshot.TotalNotes));
         }
 
         [TestCase(.2, 1.2, JudgmentProfile.Warmup)]
         [TestCase(-.2, .8, JudgmentProfile.Warmup)]
         [TestCase(.2, 1.2, JudgmentProfile.Sparring)]
         [TestCase(-.2, .8, JudgmentProfile.Sparring)]
+        [Category("Fast")]
         public void CalibrationCorrectsInputAndDefersMissSweep(
             double offset,
             double inputTime,
@@ -351,6 +363,7 @@ namespace RhythmDojo.Tests
             PlayRules rules = null
         )
         {
+            rules ??= new PlayRules { WarmupGood = good, HoldEnd = HoldEndMode.Release };
             var tempo = new TempoMap(new[] { new TempoPoint(0, 120), new TempoPoint(6, 180) });
             IScrollTimeline scroll;
 
@@ -382,6 +395,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void PausePreservesProgressAndHeldNotesWhileBlockingJudgmentsAndRestartInput()
         {
             var input = new FakeInput();
@@ -406,7 +420,7 @@ namespace RhythmDojo.Tests
             Assert.That(clock.Schedules, Is.EqualTo(1));
             c.Resume();
             input.Release(1, 6.8);
-            Assert.That(c.Session.Perfect, Is.EqualTo(2));
+            Assert.That(c.Session.Perfect, Is.EqualTo(c.Session.Snapshot.TotalNotes));
             Assert.That(clock.Running, Is.True);
             c.Pause();
             c.Restart();
@@ -418,6 +432,7 @@ namespace RhythmDojo.Tests
         [TestCase(.2, true)]
         [TestCase(-.2, true)]
         [TestCase(-.2, false)]
+        [Category("Fast")]
         public void AutomaticHoldResolvesAtTheUncalibratedSongTail(double offset, bool keyboardInput)
         {
             var input = new FakeInput();
@@ -460,6 +475,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void LogicalTimelineIsIndependentOfTicksAndPresentation(
             [Values(0, .2, -.2)] double offset,
             [Values(HoldEndMode.Automatic, HoldEndMode.Release)] HoldEndMode holdEnd,
@@ -530,6 +546,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void PausedReleaseMatchesOrdinaryInputAtFrozenCalibratedTime(
             [Values(0, .2, -.2)] double offset,
             [Values(HoldEndMode.Release, HoldEndMode.Automatic)] HoldEndMode holdEnd,
@@ -591,6 +608,7 @@ namespace RhythmDojo.Tests
         [TestCase(0)]
         [TestCase(.2)]
         [TestCase(-.2)]
+        [Category("Fast")]
         public void PressDuringPauseCancelsPendingReleaseAndNextPauseUsesNewTime(double offset)
         {
             var input = new FakeInput();
@@ -611,11 +629,12 @@ namespace RhythmDojo.Tests
             c.Pause();
             input.Release(1, 300);
             c.Resume();
-            Assert.That(c.Session.Perfect, Is.EqualTo(2));
+            Assert.That(c.Session.Perfect, Is.EqualTo(c.Session.Snapshot.TotalNotes));
             Assert.That(c.Session.IsHeld(1), Is.False);
         }
 
         [Test]
+        [Category("Fast")]
         public void RestartDiscardsPendingReleaseBeforeAnotherHoldAndPause()
         {
             var input = new FakeInput();
@@ -636,6 +655,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void DisposalDiscardsPendingReleaseAndCannotResumeOrRestart()
         {
             var input = new FakeInput();
@@ -662,6 +682,7 @@ namespace RhythmDojo.Tests
         [TestCase(ScrollMode.Constant, 2)]
         [TestCase(ScrollMode.Bpm, .5)]
         [TestCase(ScrollMode.Bpm, 2)]
+        [Category("Fast")]
         public void VisualPolicyNeverChangesJudgments(ScrollMode mode, double multiplier)
         {
             var input = new FakeInput();
@@ -675,7 +696,7 @@ namespace RhythmDojo.Tests
             input.Release(1, 6.8);
             clock.SongTime = 8;
             c.Tick();
-            Assert.That(c.Snapshot.Session.Perfect, Is.EqualTo(2));
+            Assert.That(c.Snapshot.Session.Perfect, Is.EqualTo(c.Session.Snapshot.TotalNotes));
             Assert.That(c.Snapshot.Session.State, Is.EqualTo(SessionState.Completed));
             Assert.That(c.Snapshot.SongTime, Is.EqualTo(8));
             Assert.That(clock.Running, Is.False);
@@ -684,6 +705,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void RestartAndFocusLossClearDisplayAndLogicalState()
         {
             var input = new FakeInput();
@@ -707,6 +729,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void DisposalUnsubscribesAndStopsDependencies()
         {
             var input = new FakeInput();
@@ -725,6 +748,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void DifficultyChangesJudgmentButKeepsScrollDistance()
         {
             var i = new FakeInput();

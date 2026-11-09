@@ -18,6 +18,7 @@ using UnityEngine.UI;
 
 namespace RhythmDojo.Tests
 {
+    [Category("UI")]
     public sealed class KeySettingsFlowTests : GameplayTestContext
     {
         private sealed class ModeProvider : ISongProvider
@@ -71,6 +72,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator KeyTabCapturesPersistsCancelsRejectsDuplicatesAndResets()
         {
             yield return Click(Object.FindFirstObjectByType<SongSelectionView>().settingsButton);
@@ -110,6 +112,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator CustomKeysDriveGameplayAndPausedChangesRefreshHudImmediately()
         {
             var keys = new[] { Key.A, Key.S, Key.L, Key.Semicolon };
@@ -165,6 +168,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator SelectedSixLaneModeBuildsScrollableRowsAndTitleKeepsCatalogDefault()
         {
             var flow = Object.FindFirstObjectByType<AppFlowController>();
@@ -206,6 +210,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator PausedSettingsUseOriginalPlayModeWhenSelectionChangesAndResultsKeepLabels()
         {
             var flow = Object.FindFirstObjectByType<AppFlowController>();
@@ -253,6 +258,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator ChangingAnotherModeDoesNotReleaseCurrentHeldInput()
         {
             yield return Click(Object.FindFirstObjectByType<SongSelectionView>().play);

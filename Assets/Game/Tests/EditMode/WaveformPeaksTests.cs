@@ -5,9 +5,11 @@ using UnityEngine;
 
 namespace RhythmDojo.Tests
 {
+    [Category("Authoring")]
     public sealed class WaveformPeaksTests
     {
         [Test]
+        [Category("Fast")]
         public void RangeExcludesAdjacentTransientsAtCoarseAndSampleResolution()
         {
             const int frequency = 48000;
@@ -44,6 +46,7 @@ namespace RhythmDojo.Tests
 
         [TestCase(44100)]
         [TestCase(48000)]
+        [Category("Fast")]
         public void EveryZoomRangeMatchesPcmSamplesOnTheSameHalfOpenTimeAxis(int frequency)
         {
             var clip = AudioClip.Create("Sample axis", 17001, 2, frequency, false);
@@ -57,14 +60,19 @@ namespace RhythmDojo.Tests
                     samples[i + 1] = -samples[i];
                 }
 
-                clip.SetData(samples, 0);
+                samples[1025] = -1;
+                samples[34000] = 1;
+                Assert.That(clip.SetData(samples, 0), Is.True);
                 var peaks = new WaveformPeaks();
                 var build = peaks.Build(clip);
                 while (build.MoveNext())
                 {
                 }
 
-                foreach (int start in new[] { 0, 1, 63, 64, 127, 16383, 16999 })
+                Assert.That(peaks.Ready, Is.True);
+                Assert.That(peaks.Range(-2, -1), Is.EqualTo(Vector2.zero));
+                Assert.That(peaks.Range(1, 2), Is.EqualTo(Vector2.zero));
+                foreach (int start in new[] { 0, 1, 63, 64, 127, 512, 16383, 16960, 16999, 17000 })
                 {
                     foreach (int width in new[] { 1, 2, 63, 64, 127, 128, 129, 513, 17001 })
                     {
@@ -96,6 +104,7 @@ namespace RhythmDojo.Tests
         [TestCase(100, 0)]
         [TestCase(1000, 1)]
         [TestCase(10000, 2)]
+        [Category("Fast")]
         public void FrequencyBandsUseRedGreenAndBlueWithoutCancellingStereo(int tone, int band)
         {
             const int frequency = 48000;
@@ -136,6 +145,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void ColorCacheFollowsLocalFrequencyChangesAndHandlesSilence()
         {
             const int frequency = 44100;
@@ -188,36 +198,5 @@ namespace RhythmDojo.Tests
             }
         }
 
-        [Test]
-        public void PeakPyramidPreservesStereoTransientsAndPartialFinalBlock()
-        {
-            var clip = AudioClip.Create("Transient verification", 17001, 2, 48000, false);
-            try
-            {
-                var samples = new float[34002];
-                samples[1025] = -0.85f;
-                samples[34000] = 0.97f;
-                Assert.That(clip.SetData(samples, 0), Is.True);
-                var peaks = new WaveformPeaks();
-                var build = peaks.Build(clip);
-                while (build.MoveNext())
-                {
-                    // Complete the incremental generator without depending on frame timing.
-                }
-
-                Assert.That(peaks.Ready, Is.True);
-                double duration = (double)clip.samples / clip.frequency;
-                Vector2 full = peaks.Range(0, duration);
-                Assert.That(full.x, Is.EqualTo(-0.85f).Within(0.0001));
-                Assert.That(full.y, Is.EqualTo(0.97f).Within(0.0001));
-                Assert.That(peaks.Range(16960.0 / 48000, duration).y, Is.EqualTo(0.97f).Within(0.0001));
-                Assert.That(peaks.Range(-2, -1), Is.EqualTo(Vector2.zero));
-                Assert.That(peaks.Range(1, 2), Is.EqualTo(Vector2.zero));
-            }
-            finally
-            {
-                UnityEngine.Object.DestroyImmediate(clip);
-            }
-        }
     }
 }

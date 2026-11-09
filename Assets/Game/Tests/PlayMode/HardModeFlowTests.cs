@@ -33,6 +33,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator ExpandedRuleDropdownsRenderAllKoreanLabelsAndAllowSelection()
         {
             yield return OpenGameplaySettings();
@@ -79,6 +80,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator HardRuleRowsSaveValidateCountsAndNormalModeIgnoresThem()
         {
             yield return OpenGameplaySettings();
@@ -112,6 +114,7 @@ namespace RhythmDojo.Tests
 
         [UnityTest]
         [Category("Results")]
+        [Category("SceneIntegration")]
         public IEnumerator ConfiguredHardModeDoesNotRecoverAndPausesExactlyAtTheDamageLimit()
         {
             yield return OpenGameplaySettings();
@@ -242,6 +245,7 @@ namespace RhythmDojo.Tests
 
         [UnityTest]
         [Category("Results")]
+        [Category("SceneIntegration")]
         public IEnumerator StrictHardDefaultsFailOnTheFirstGoodJudgment()
         {
             var configured = Object.FindFirstObjectByType<AppFlowController>().Rules.Snapshot;

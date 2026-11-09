@@ -14,9 +14,11 @@ namespace RhythmDojo.Tests
 {
     [PrebuildSetup(typeof(TestRunStartup))]
     [PostBuildCleanup(typeof(TestRunStartup))]
+    [Category("Gameplay")]
     public sealed class ChartProjectionRenderingTests
     {
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator RenderAtSmallAndLargeResolutionsAcrossZoomScrollAndTempoBoundary()
         {
             yield return SceneManager.LoadSceneAsync(ChartEditorMenu.ScenePath);
@@ -132,6 +134,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator DeletionUsesClippedVisibleBoundsWithoutBeatSnappingAndPreviewSurvivesZoom()
         {
             yield return SceneManager.LoadSceneAsync(ChartEditorMenu.ScenePath);
@@ -195,6 +198,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator MaximumOverviewIncludesEveryBeatAndManyNotesWithoutExceedingMeshCapacity()
         {
             yield return SceneManager.LoadSceneAsync(ChartEditorMenu.ScenePath);

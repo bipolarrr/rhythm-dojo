@@ -12,10 +12,12 @@ using RhythmDojo.Gameplay;
 using RhythmDojo.Services;
 using RhythmDojo.UI;
 using UnityEditor;
+using UnityEngine.SceneManagement;
 using UnityEngine;
 
 namespace RhythmDojo.Tests
 {
+    [Category("Gameplay")]
     public sealed class TeamBoundaryTests
     {
         private GameSettings Settings =>
@@ -24,6 +26,7 @@ namespace RhythmDojo.Tests
         private SongDocument Document => SongAssetAdapter.ToDocument(Settings.catalog[0]);
 
         [Test]
+        [Category("Fast")]
         public void AssetAndDocumentPlaybackHaveEquivalentImmutableData()
         {
             var source = Settings.catalog[0];
@@ -48,6 +51,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public async Task DraftStoreCopiesAndAllowsIncompleteDocuments()
         {
             var store = new MemorySongDocumentStore();
@@ -66,6 +70,7 @@ namespace RhythmDojo.Tests
         [TestCase("tempo")]
         [TestCase("overlap")]
         [TestCase("lane")]
+        [Category("Fast")]
         public void InvalidDocumentsReportFieldOrNote(string kind)
         {
             var document = Document;
@@ -97,6 +102,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public async Task CancellationAfterAudioLoadReleasesExactlyOnce()
         {
             using var cancellation = new CancellationTokenSource();
@@ -123,6 +129,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public async Task LoaderSnapshotsBeforeAwaitAndReleasesOnDispose()
         {
             int releases = 0;
@@ -146,6 +153,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public async Task MissingAudioAndUnknownModeFailWithoutLeaking()
         {
             int releases = 0;
@@ -192,6 +200,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void SelectionSurvivesReorderAndDuplicateIdsCannotLoad()
         {
             var a = new SongEntry("a", "A", "", 1, 1, 4, 120, 120);
@@ -222,13 +231,24 @@ namespace RhythmDojo.Tests
         [TestCase(4)]
         [TestCase(5)]
         [TestCase(6)]
+        [Category("SceneIntegration")]
         public void HudLayoutSupportsLaneCountsWithoutController(int lanes)
         {
-            var view = GameplayHudLayoutBuilder.Build();
+            var original = SceneManager.GetActiveScene();
+            var cameras = Camera.allCameras.ToDictionary(camera => camera, camera => camera.enabled);
+            var originalObjects = new HashSet<int>(original.GetRootGameObjects().Select(obj => obj.GetInstanceID()));
             var mode = ScriptableObject.CreateInstance<GameModeDefinition>();
 
             try
             {
+                foreach (var camera in cameras.Keys)
+                {
+                    camera.enabled = false;
+                }
+
+                var cameraObject = new GameObject("HUD test camera", typeof(Camera));
+                cameraObject.tag = "MainCamera";
+                var view = GameplayHudLayoutBuilder.Build();
                 mode.SetGeneratedDefaults(
                     Enumerable
                         .Range(0, lanes)
@@ -247,8 +267,26 @@ namespace RhythmDojo.Tests
             }
             finally
             {
-                UnityEngine.Object.DestroyImmediate(view.gameObject);
                 UnityEngine.Object.DestroyImmediate(mode);
+                foreach (var obj in original.GetRootGameObjects())
+                {
+                    if (!originalObjects.Contains(obj.GetInstanceID()))
+                    {
+                        UnityEngine.Object.DestroyImmediate(obj);
+                    }
+                }
+                foreach (var camera in cameras)
+                {
+                    if (camera.Key)
+                    {
+                        camera.Key.enabled = camera.Value;
+                    }
+                }
+
+                if (original.IsValid() && original.isLoaded)
+                {
+                    SceneManager.SetActiveScene(original);
+                }
             }
         }
     }

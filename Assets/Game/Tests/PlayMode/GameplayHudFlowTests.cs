@@ -28,6 +28,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator GameplayKeepsDisplayCameraWhileWorldRendersIntoWindow()
         {
             yield return LoadGameplay();
@@ -49,6 +50,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator PauseMenuFocusHudKeepsPlayIndicatorsAndSavesChoice()
         {
             yield return LoadGameplay();
@@ -82,6 +84,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator RailOpacityAndMeasureLinesKeepJudgmentLineVisible()
         {
             yield return LoadGameplay();
@@ -129,6 +132,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator GameplayWindowRendersJudgmentLineBelowCenter()
         {
             yield return LoadGameplay();
@@ -234,6 +238,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator GameplayWindowPreservesProjectionAndReleasesCameraOnDisable()
         {
             yield return LoadGameplay();
@@ -337,6 +342,7 @@ namespace RhythmDojo.Tests
 
         [UnityTest]
         [Category("Results")]
+        [Category("SceneIntegration")]
         public IEnumerator HealthDepletionShowsGameOverFreezesNotesAndSpaceRestarts()
         {
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
@@ -377,6 +383,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator TrainingFeedbackTracksHoldMissPeakComboAndFocusReset()
         {
             yield return LoadGameplay();
@@ -471,6 +478,7 @@ namespace RhythmDojo.Tests
 
         [UnityTest]
         [Category("Smoke")]
+        [Category("SceneIntegration")]
         public IEnumerator ReturnButtonInReadyStateLoadsSongSelectionAndReleasesSong()
         {
             yield return LoadGameplay();
@@ -489,6 +497,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator ReturnButtonIsHiddenWhilePlayingAndEscapeReturnsToSelection()
         {
             yield return LoadGameplay();
@@ -518,6 +527,7 @@ namespace RhythmDojo.Tests
 
         [UnityTest]
         [Category("Results")]
+        [Category("SceneIntegration")]
         public IEnumerator ReturnButtonReappearsAfterCompletionAndLoadsSongSelection()
         {
             yield return LoadGameplay();

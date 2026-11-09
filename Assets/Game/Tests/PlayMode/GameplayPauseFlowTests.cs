@@ -12,6 +12,7 @@ using UnityEngine.TestTools;
 
 namespace RhythmDojo.Tests
 {
+    [Category("Gameplay")]
     public sealed class GameplayPauseFlowTests : GameplayTestContext
     {
         private IEnumerator LoadPlayingSong()
@@ -24,6 +25,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator PauseSettingsCountdownRestartAndExitPreserveTheSongUntilRequested()
         {
             yield return LoadPlayingSong();
@@ -95,6 +97,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator PauseSettingsChangesCurrentNoteAndMeasureSpeedWithoutResettingTheSong()
         {
             var flow = Object.FindFirstObjectByType<AppFlowController>();
@@ -150,6 +153,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator EscapeDuringCountdownReopensPauseWithoutResumingTheClock()
         {
             yield return LoadPlayingSong();

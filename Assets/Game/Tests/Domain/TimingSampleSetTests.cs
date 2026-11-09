@@ -5,10 +5,12 @@ using RhythmDojo.Application;
 
 namespace RhythmDojo.Tests
 {
+    [Category("Gameplay")]
     public sealed class TimingSampleSetTests
     {
         [TestCase(false)]
         [TestCase(true)]
+        [Category("Fast")]
         public void OppositeChordErrorsNeverRecommendAGlobalOffset(bool reverse)
         {
             var samples = new TimingSampleSet();
@@ -28,6 +30,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void OrderAndIdenticalChordMultiplicityDoNotWeightTheRecommendation(
             [Values(false, true)] bool reverse, [Values(1, 2, 4)] int chordSize)
         {
@@ -58,6 +61,7 @@ namespace RhythmDojo.Tests
         [TestCase(12, 0, -.04, -160, -200)]
         [TestCase(12, 0, double.NaN, 0, null)]
         [TestCase(12, 0, double.PositiveInfinity, 0, null)]
+        [Category("Fast")]
         public void RecommendationHonorsCoverageCountChangeAndFiniteLimits(
             int successes, int misses, double error, int offset, int? expected)
         {
@@ -76,6 +80,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void ChordsUseTheirMedianAndRejectWideInternalSpread()
         {
             var samples = new TimingSampleSet();
@@ -92,6 +97,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void SettingsCalculatorRejectsNonFiniteOutliersAndRequiresEightSamples()
         {
             var errors = new List<double>();

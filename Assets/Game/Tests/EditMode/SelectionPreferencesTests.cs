@@ -11,6 +11,7 @@ using SessionState = RhythmDojo.Gameplay.SessionState;
 
 namespace RhythmDojo.Tests
 {
+    [Category("UI")]
     public sealed class SelectionPreferencesTests
     {
         private string key;
@@ -26,6 +27,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void OptionsFavoritesAndRecordsSurviveReload()
         {
             var preferences = new SelectionPreferences(key);
@@ -55,6 +57,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void IncompleteAndWorseRunsDoNotReplaceBest()
         {
             var preferences = new SelectionPreferences(key);
@@ -86,10 +89,12 @@ namespace RhythmDojo.Tests
         [TestCase(80, "B")]
         [TestCase(70, "C")]
         [TestCase(69, "D")]
+        [Category("Fast")]
         public void RankBoundaries(double rate, string rank) =>
             Assert.That(new SongRecord { rate = rate }.Rank, Is.EqualTo(rank));
 
         [Test]
+        [Category("Fast")]
         public void CorruptPreferencesFallBackAndOffsetsAreClamped()
         {
             PlayerPrefs.SetString(key, "not json");
@@ -103,6 +108,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void DemoPreparationIsIdempotentAndPreservesExistingCharts()
         {
             var settings = AssetDatabase.LoadAssetAtPath<GameSettings>(
@@ -123,6 +129,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void InformationPanelReservesHeaderAndFooterAndAlbumFillsFrame()
         {
             var view = SongSelectionLayoutBuilder.Build();

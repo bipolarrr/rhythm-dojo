@@ -8,9 +8,11 @@ using UnityEngine.UI;
 
 namespace RhythmDojo.Tests
 {
+    [Category("UI")]
     public sealed class PixelDojoFrameTests
     {
         [Test]
+        [Category("Fast")]
         public void ArtworkAtNormalAndSmallSizesPreservesTintMaskAndClickTargets()
         {
             var root = new GameObject("Frame capture", typeof(RectTransform), typeof(Canvas));
@@ -99,6 +101,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void ArtworkLayersFollowDisableReenableClearAndDestroy()
         {
             var root = new GameObject("Frame lifecycle", typeof(RectTransform), typeof(Canvas));
@@ -133,6 +136,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void InspectorUpdatesDeferHierarchyChangesAndReuseTheBorderLayer()
         {
             var root = new GameObject("Inspector frame", typeof(RectTransform), typeof(Canvas));
@@ -166,6 +170,7 @@ namespace RhythmDojo.Tests
 
         [TestCase(0, 0, 0, 0)]
         [TestCase(2, 4, 8, 6)]
+        [Category("Fast")]
         public void NativeBorderPolicySupportsZeroAndAsymmetricSourceBorders(float left, float bottom,
             float right, float top)
         {

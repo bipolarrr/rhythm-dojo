@@ -46,19 +46,7 @@ namespace RhythmDojo.EditorTools
 
             if (newStandard)
             {
-                if (legacy)
-                {
-                    standard.SetGeneratedDefaults(
-                        "standard",
-                        "Standard",
-                        legacy.PerfectWindow,
-                        legacy.GoodWindow
-                    );
-                }
-                else
-                {
-                    standard.SetGeneratedDefaults("standard", "Standard", .05, .11);
-                }
+                InitializeStandard(standard, legacy);
 
                 Dirty(standard);
             }
@@ -71,10 +59,7 @@ namespace RhythmDojo.EditorTools
 
             if (newScroll)
             {
-                if (legacy)
-                {
-                    scroll.MigrateBaseSpeed(legacy.ScrollSpeed);
-                }
+                InitializeScroll(scroll, legacy);
 
                 Dirty(scroll);
             }
@@ -86,10 +71,7 @@ namespace RhythmDojo.EditorTools
 
             if (newAudio)
             {
-                if (legacy)
-                {
-                    audio.MigrateLeadTime(legacy.ScheduleLeadTime);
-                }
+                InitializeAudio(audio, legacy);
 
                 Dirty(audio);
             }
@@ -109,6 +91,60 @@ namespace RhythmDojo.EditorTools
                 Audio = audio,
                 Presentation = presentation,
             };
+        }
+
+        internal static RhythmGameConfig MigrationSource(bool needed, bool exists, System.Func<RhythmGameConfig> load)
+        {
+            if (!needed || !exists)
+            {
+                return null;
+            }
+
+            var legacy = load();
+            if (!legacy)
+            {
+                throw new System.InvalidOperationException(
+                    "Cannot load legacy configuration. Repair its script reference.");
+            }
+
+            legacy.Validate();
+            return legacy;
+        }
+
+        internal static void InitializeStandard(DifficultyProfile standard, RhythmGameConfig legacy)
+        {
+            if (legacy)
+            {
+                standard.SetGeneratedDefaults("standard", "Standard", legacy.PerfectWindow, legacy.GoodWindow);
+            }
+            else
+            {
+                standard.SetGeneratedDefaults("standard", "Standard", .05, .11);
+            }
+        }
+
+        internal static void InitializeScroll(ScrollSettings scroll, RhythmGameConfig legacy)
+        {
+            if (legacy)
+            {
+                scroll.MigrateBaseSpeed(legacy.ScrollSpeed);
+            }
+        }
+
+        internal static void InitializeAudio(AudioPlaybackSettings audio, RhythmGameConfig legacy)
+        {
+            if (legacy)
+            {
+                audio.MigrateLeadTime(legacy.ScheduleLeadTime);
+            }
+        }
+
+        internal static void InitializeTiming(SongTiming fixedTiming, RhythmGameConfig legacy)
+        {
+            if (legacy)
+            {
+                fixedTiming.chartAudioOffsetSeconds = legacy.AudioOffset;
+            }
         }
 
         private static DifficultyProfile Difficulty(string name, double perfect, double good)

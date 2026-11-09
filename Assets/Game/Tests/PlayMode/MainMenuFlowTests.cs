@@ -161,6 +161,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator SlidingDoorsRevealDummiesAndReverseWithoutStartingEarly()
         {
             var actions = new Actions();
@@ -202,6 +203,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator PlayOpensDoorsWithLogoHalvesAttachedUntilFullyOutsideTheDoorway()
         {
             var actions = new Actions();
@@ -321,6 +323,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator EditorStaysBehindDoorsAndOpensFromInsideTheDojo()
         {
             Assert.That(view.editor.gameObject.activeInHierarchy, Is.False);
@@ -353,6 +356,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator SettingsRequestsSettingsWithoutStartingTheGame()
         {
             var actions = new Actions();
@@ -368,6 +372,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator QuitPopupBlocksBackgroundAndNoRestoresMenu()
         {
             var actions = new Actions();
@@ -396,6 +401,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator YesRequestsQuitExactlyOnceWithoutStarting()
         {
             var actions = new Actions();
@@ -415,6 +421,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator LogoExpandsMenuAndPlayStartsOnceWithoutDuplicateListeners()
         {
             var oldActions = new Actions();
@@ -435,6 +442,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator PlayDismissesMenuImmediatelyWithoutWaitingForBoardDelay()
         {
             var actions = new Actions();
@@ -451,6 +459,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator TitlePreparesSelectionWithoutShowingItOrStealingInput()
         {
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
@@ -478,6 +487,7 @@ namespace RhythmDojo.Tests
 
         [UnityTest]
         [Category("Smoke")]
+        [Category("SceneIntegration")]
         public IEnumerator StartLoadsBootstrapThenExistingSongSelection()
         {
             view.entrance.SetApproach(1f);
@@ -567,6 +577,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator BootstrapFallbackStillStartsWithoutATitleView()
         {
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
@@ -606,6 +617,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator CaptureMenuAndKoreanQuitPopup()
         {
             Capture("Logs/main-menu.png");
@@ -643,6 +655,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator LogoCanCollapseMenuAndHiddenButtonsCannotStart()
         {
             var actions = new Actions();
@@ -658,6 +671,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator TitleSettingsBackReturnsToTitle()
         {
             yield return OpenMenu();
@@ -735,6 +749,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator BreakingBoardDefersActionAndBlocksOtherButtons()
         {
             var actions = new Actions();
@@ -763,6 +778,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator EntranceWaitsForReadyAndRestoresSelectionInput()
         {
             var transition = DojoEntranceTransition.Begin(
@@ -809,6 +825,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator PlaqueRejectsCornersAndKeyboardCanExpandAndStart()
         {
             var actions = new Actions();
@@ -847,6 +864,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator EntranceTimeoutOffersRecoveryAndCleansUp()
         {
             bool recovered = false;

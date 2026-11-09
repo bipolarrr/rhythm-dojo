@@ -5,6 +5,7 @@ using RhythmDojo.Gameplay;
 
 namespace RhythmDojo.Tests
 {
+    [Category("Gameplay")]
     public sealed class PlayRulesTests
     {
         private static RhythmSession Create(PlayRules rules, params NoteData[] notes) =>
@@ -17,60 +18,91 @@ namespace RhythmDojo.Tests
 
         [TestCase(HoldEndMode.Automatic)]
         [TestCase(HoldEndMode.Release)]
+        [Category("Fast")]
         public void RegrabPreservesEndpointsAndMatchesFrameSweeps(HoldEndMode end)
         {
-            var a = Create(new PlayRules { HoldEnd = end }, NoteData.Hold(0, 1, 3), NoteData.Tap(1, 2));
-            var b = Create(new PlayRules { HoldEnd = end }, NoteData.Hold(0, 1, 3), NoteData.Tap(1, 2));
-            foreach (var session in new[] { a, b })
+            foreach (double regrab in new[] { 1.6, 2.0 })
             {
-                session.Start();
-                session.PressLane(0, 1);
-                session.ReleaseLane(0, 1.5);
+                var a = Create(new PlayRules { HoldEnd = end }, NoteData.Hold(0, 1, 3), NoteData.Tap(1, 2));
+                var b = Create(new PlayRules { HoldEnd = end }, NoteData.Hold(0, 1, 3), NoteData.Tap(1, 2));
+                foreach (var session in new[] { a, b })
+                {
+                    session.Start();
+                    session.PressLane(0, 1);
+                    if (session == a)
+                    {
+                        for (double time = 1.01; time < 1.5; time += .01)
+                        {
+                            session.Advance(time);
+                        }
+                    }
+
+                    session.ReleaseLane(0, 1.5);
+                    Assert.That(session.Combo, Is.Zero);
+                    if (end == HoldEndMode.Release)
+                    {
+                        Assert.That(session.GetNoteJudgments(0).End.Value.Grade, Is.EqualTo(Judgment.Miss));
+                        Assert.That(session.Miss, Is.EqualTo(1));
+                    }
+
+                    if (session == a)
+                    {
+                        for (double time = 1.51; time < regrab; time += .01)
+                        {
+                            session.Advance(time);
+                        }
+                    }
+
+                    session.PressLane(0, regrab);
+                    if (session == a)
+                    {
+                        for (double time = regrab + .01; time < 2; time += .01)
+                        {
+                            session.Advance(time);
+                        }
+                    }
+
+                    session.PressLane(1, 2);
+                    session.ReleaseLane(0, 3);
+                    session.Advance(5);
+                    Assert.That(session.GetNoteJudgments(1).Start.Value.Grade, Is.EqualTo(Judgment.Perfect));
+                    Assert.That(session.Resolved, Is.EqualTo(session.Snapshot.TotalNotes));
+                }
+
+                Assert.That(a.Perfect, Is.EqualTo(b.Perfect));
+                Assert.That(a.Miss, Is.EqualTo(b.Miss));
+                if (regrab == 2 || end == HoldEndMode.Release)
+                {
+                    Assert.That(a.Miss, Is.GreaterThan(0));
+                }
+                else
+                {
+                    Assert.That(a.Miss, Is.Zero, "Regrab before the next hold check must not miss.");
+                }
+
+                Assert.That(a.Health, Is.EqualTo(b.Health));
+                Assert.That(a.Combo, Is.EqualTo(b.Combo));
+                var record = a.GetNoteJudgments(0);
+                Assert.That(record.Start.Value.Grade, Is.EqualTo(Judgment.Perfect));
                 if (end == HoldEndMode.Release)
                 {
-                    Assert.That(session.GetNoteJudgments(0).End.Value.Grade, Is.EqualTo(Judgment.Miss));
-                    Assert.That(session.Miss, Is.EqualTo(1));
+                    Assert.That(record.End.Value.ErrorSeconds, Is.EqualTo(-1.5));
+                    Assert.That(a.Miss, Is.EqualTo(20));
                 }
-
-                session.PressLane(0, 1.6);
-                if (session == a)
+                else
                 {
-                    for (double time = 1.61; time < 2; time += .01)
-                    {
-                        session.Advance(time);
-                    }
+                    Assert.That(record.End.Value.Grade, Is.EqualTo(Judgment.Perfect));
                 }
 
-                session.PressLane(1, 2);
-                session.ReleaseLane(0, 3);
-                session.Advance(5);
-                Assert.That(session.GetNoteJudgments(1).Start.Value.Grade, Is.EqualTo(Judgment.Perfect));
-                Assert.That(session.Resolved, Is.EqualTo(session.Snapshot.TotalNotes));
+                a.Start();
+                Assert.That(a.GetNoteJudgments(0).Start, Is.Null);
+                Assert.That(a.GetNoteJudgments(0).End, Is.Null);
             }
-
-            Assert.That(a.Perfect, Is.EqualTo(b.Perfect));
-            Assert.That(a.Miss, Is.EqualTo(b.Miss));
-            Assert.That(a.Health, Is.EqualTo(b.Health));
-            Assert.That(a.Combo, Is.EqualTo(b.Combo));
-            var record = a.GetNoteJudgments(0);
-            Assert.That(record.Start.Value.Grade, Is.EqualTo(Judgment.Perfect));
-            if (end == HoldEndMode.Release)
-            {
-                Assert.That(record.End.Value.ErrorSeconds, Is.EqualTo(-1.5));
-                Assert.That(a.Miss, Is.EqualTo(20));
-            }
-            else
-            {
-                Assert.That(record.End.Value.Grade, Is.EqualTo(Judgment.Perfect));
-            }
-
-            a.Start();
-            Assert.That(a.GetNoteJudgments(0).Start, Is.Null);
-            Assert.That(a.GetNoteJudgments(0).End, Is.Null);
         }
 
         [TestCase(HoldEndMode.Automatic)]
         [TestCase(HoldEndMode.Release)]
+        [Category("Fast")]
         public void MissedHeadRecoveryDependsOnEndMode(HoldEndMode end)
         {
             var session = Create(new PlayRules { HoldEnd = end }, NoteData.Hold(0, 1, 3));
@@ -94,6 +126,7 @@ namespace RhythmDojo.Tests
         [TestCase(0, Judgment.Perfect)]
         [TestCase(.1, Judgment.Good)]
         [TestCase(.101, Judgment.Miss)]
+        [Category("Fast")]
         public void ReleaseWindowKeepsInclusiveBoundariesAndDoesNotOverwrite(double error, Judgment grade)
         {
             var session = Create(new PlayRules { HoldEnd = HoldEndMode.Release }, NoteData.Hold(0, 1, 2));
@@ -110,6 +143,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void EarlyReleaseFailureStopsBeforeFutureRecordsAndTicks()
         {
             var session = Create(new PlayRules
@@ -131,6 +165,7 @@ namespace RhythmDojo.Tests
 
         [TestCase(JudgmentProfile.Warmup, .05, .1)]
         [TestCase(JudgmentProfile.Sparring, .016, .05)]
+        [Category("Fast")]
         public void TimingBoundariesAreInclusive(
             JudgmentProfile profile,
             double perfect,
@@ -161,6 +196,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void RecoveryStartsAtTenGoodKeepsComboWithoutRecoveryAndMissResets()
         {
             var rules = new PlayRules();
@@ -174,6 +210,7 @@ namespace RhythmDojo.Tests
 
         [TestCase(GaugeFailureMode.Continue)]
         [TestCase(GaugeFailureMode.Stop)]
+        [Category("Fast")]
         public void FailureIsLatchedOnceAndRestartClearsIt(GaugeFailureMode mode)
         {
             var rules = new PlayRules { StartingHealth = 10, GaugeFailure = mode };
@@ -216,6 +253,7 @@ namespace RhythmDojo.Tests
         [TestCase(1, 1)]
         [TestCase(2, 0)]
         [TestCase(3, 0)]
+        [Category("Fast")]
         public void ChallengeAllowsLimitThenStops(int preset, int allowed)
         {
             var rules = new PlayRules { Mode = PlayMode.Challenge };
@@ -231,6 +269,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void HoldScheduleCrossesTempoChangeAndHasFixedDenominator()
         {
             var session = Create(new PlayRules(), NoteData.Hold(0, 1, 3));
@@ -247,50 +286,9 @@ namespace RhythmDojo.Tests
             Assert.That(session.Resolved, Is.EqualTo(25));
         }
 
-        [Test]
-        public void ReleaseAndRegrabResultsDoNotDependOnFrameSweeps()
-        {
-            var a = Create(new PlayRules(), NoteData.Hold(0, 1, 3));
-            var b = Create(new PlayRules(), NoteData.Hold(0, 1, 3));
-            void Run(RhythmSession session, bool frames)
-            {
-                session.Start();
-                session.PressLane(0, 1);
-
-                if (frames)
-                {
-                    for (double t = 1.01; t < 1.5; t += .01)
-                    {
-                        session.Advance(t);
-                    }
-                }
-
-                session.ReleaseLane(0, 1.5);
-                Assert.That(session.Combo, Is.Zero);
-
-                if (frames)
-                {
-                    for (double t = 1.51; t < 2; t += .01)
-                    {
-                        session.Advance(t);
-                    }
-                }
-
-                session.PressLane(0, 2);
-                session.ReleaseLane(0, 3);
-                session.Advance(4);
-            }
-
-            Run(a, true);
-            Run(b, false);
-            Assert.That(a.Perfect, Is.EqualTo(b.Perfect));
-            Assert.That(a.Miss, Is.EqualTo(b.Miss));
-            Assert.That(a.Miss, Is.GreaterThan(0));
-            Assert.That(a.Resolved, Is.EqualTo(a.Snapshot.TotalNotes));
-        }
-
         [TestCase(HoldEndMode.Automatic, 0)]
         [TestCase(HoldEndMode.Release, 1)]
+        [Category("Fast")]
         public void EndIsCountedOnce(HoldEndMode end, int good)
         {
             var session = Create(new PlayRules { HoldEnd = end }, NoteData.Hold(0, 1, 2));
@@ -303,6 +301,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void ShortAutomaticTailAtHeadDeadlineResolvesBeforeRelease()
         {
             var session = Create(new PlayRules(), NoteData.Hold(0, 1, 1.1));

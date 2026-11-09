@@ -42,6 +42,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator KeyboardSelectionKeepsRowsVisibleWithDifferentHeightsAndSpacing()
         {
             var view = Object.FindFirstObjectByType<SongSelectionView>();
@@ -112,6 +113,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator DemoCoverAndRowsRenderAtBothResolutions()
         {
             var screen = Object.FindFirstObjectByType<SongSelectionScreen>();
@@ -135,6 +137,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator FavoritesEmptyStateAndSortingUseSongIds()
         {
             var view = Object.FindFirstObjectByType<SongSelectionView>();
@@ -204,6 +207,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator TimingAndOptionsSurviveSettingsAndSceneReturn()
         {
             var view = Object.FindFirstObjectByType<SongSelectionView>();
@@ -239,6 +243,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator CompletedRunSavesBestAndAbortedRunDoesNotCreateRecord()
         {
             var screen = Object.FindFirstObjectByType<SongSelectionScreen>();
@@ -354,6 +359,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator EscapePopupBlocksPlaybackAndReturnsToTitle()
         {
             var view = Object.FindFirstObjectByType<SongSelectionView>();

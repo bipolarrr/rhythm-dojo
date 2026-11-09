@@ -26,6 +26,9 @@ namespace RhythmDojo.Tests
     public sealed class WorkspaceEditorTests
     {
         private WorkspaceEditor workspace;
+        private NativeInputScope nativeInput;
+        private int[] originalObjects;
+        private Scene[] originalScenes;
         private string root;
         private Mouse mouse;
         private Keyboard keyboard;
@@ -36,6 +39,10 @@ namespace RhythmDojo.Tests
         [UnitySetUp]
         public IEnumerator SetUp()
         {
+            originalScenes = Enumerable.Range(0, SceneManager.sceneCount).Select(SceneManager.GetSceneAt).ToArray();
+            originalObjects = UnityEngine.Object.FindObjectsByType<GameObject>(
+                FindObjectsInactive.Include, FindObjectsSortMode.None).Select(obj => obj.GetInstanceID()).ToArray();
+            nativeInput = new NativeInputScope();
             input = InputSystem.settings;
             editorBehavior = input.editorInputBehaviorInPlayMode;
             backgroundBehavior = input.backgroundBehavior;
@@ -48,7 +55,14 @@ namespace RhythmDojo.Tests
             yield return SceneManager.LoadSceneAsync(WorkspaceEditor.ScenePath);
             yield return null;
             workspace = UnityEngine.Object.FindFirstObjectByType<WorkspaceEditor>();
-            yield return new WaitUntil(() => workspace.menu.IsInitialized);
+            Assert.That(workspace, Is.Not.Null, "ChartEditor scene did not create WorkspaceEditor.");
+            double deadline = Time.realtimeSinceStartupAsDouble + 10;
+            while (!workspace.menu.IsInitialized)
+            {
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline),
+                    "ChartEditor menu initialization did not complete within 10 seconds.");
+                yield return null;
+            }
             yield return null;
             root = Path.Combine(UnityEngine.Application.temporaryCachePath, "WorkspaceTests", Guid.NewGuid().ToString("N"));
             workspace.menu.Initialize(new FileSongProjectStore(root), null, null);
@@ -69,10 +83,41 @@ namespace RhythmDojo.Tests
 
             input.editorInputBehaviorInPlayMode = editorBehavior;
             input.backgroundBehavior = backgroundBehavior;
-            yield return SceneManager.LoadSceneAsync(AppFlowController.SelectionPath);
+            nativeInput?.Dispose();
+            nativeInput = null;
+            var cleanup = SceneManager.CreateScene("Workspace test cleanup");
+            SceneManager.SetActiveScene(cleanup);
+            var scenes = Enumerable.Range(0, SceneManager.sceneCount)
+                .Select(SceneManager.GetSceneAt).Where(scene => scene != cleanup && !originalScenes.Contains(scene)).ToArray();
+            foreach (var scene in scenes)
+            {
+                yield return SceneManager.UnloadSceneAsync(scene);
+            }
+
+            // Include persistent objects created by this test, never pre-existing editor objects.
+            foreach (var obj in UnityEngine.Object.FindObjectsByType<GameObject>(
+                FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                if (obj && !originalObjects.Contains(obj.GetInstanceID()))
+                {
+                    UnityEngine.Object.Destroy(obj);
+                }
+            }
+
+            yield return null;
             if (Directory.Exists(root))
             {
                 Directory.Delete(root, true);
+            }
+        }
+
+        private static IEnumerator WaitFor(Func<bool> condition, string message)
+        {
+            double deadline = Time.realtimeSinceStartupAsDouble + 10;
+            while (!condition())
+            {
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline), message);
+                yield return null;
             }
         }
 
@@ -81,7 +126,7 @@ namespace RhythmDojo.Tests
             double deadline = Time.realtimeSinceStartupAsDouble + 10;
             while (workspace.IsWorking)
             {
-                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline), "Workspace operation did not finish before its deadline.");
                 yield return null;
             }
             yield return null;
@@ -153,6 +198,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator WorkspaceMenusKeepLegacyImportsChartDurationAndViewResetAccessible()
         {
             var original = workspace.screen.Session;
@@ -188,6 +234,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator ProjectIdFieldOpensSavedChartAndPreservesCurrentDraft()
         {
             var saved = workspace.screen.Session;
@@ -224,6 +271,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator OpeningARecentFileOnlySavesWhenTheCurrentProjectHasChanges()
         {
             Assert.That(workspace.HasUnsavedChanges, Is.False);
@@ -254,6 +302,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator AllFilesCanHideARecentProjectAndStillOpenItWithADoubleClick()
         {
             var saved = workspace.screen.Session;
@@ -323,6 +372,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator SaikiAt128BpmCanDragAndWheelBeforeFirstMeasure()
         {
             string path = WriteTempoWave();
@@ -333,7 +383,7 @@ namespace RhythmDojo.Tests
             double deadline = Time.realtimeSinceStartupAsDouble + 60;
             while (workspace.timeline.Peaks == null || !workspace.timeline.Peaks.Ready)
             {
-                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline), "Workspace operation did not finish before its deadline.");
                 yield return null;
             }
 
@@ -412,6 +462,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator Saiki128To256To64KeepsScrollSpeedAndPlacesNotesOnResizedBeatSpacing()
         {
             string path = WriteTempoWave();
@@ -422,7 +473,7 @@ namespace RhythmDojo.Tests
             double deadline = Time.realtimeSinceStartupAsDouble + 60;
             while (workspace.timeline.Peaks == null || !workspace.timeline.Peaks.Ready)
             {
-                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline), "Workspace operation did not finish before its deadline.");
                 yield return null;
             }
 
@@ -498,6 +549,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator TempoButtonEditsCursorBpmAndSettingsKeepsDetailedGridControls()
         {
             string path = WriteTempoWave();
@@ -508,7 +560,7 @@ namespace RhythmDojo.Tests
             double deadline = Time.realtimeSinceStartupAsDouble + 60;
             while (workspace.timeline.Peaks == null || !workspace.timeline.Peaks.Ready)
             {
-                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline), "Workspace operation did not finish before its deadline.");
                 yield return null;
             }
 
@@ -584,6 +636,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator TempoDialogRejectsInvalidBpmAndCancelsWithoutChangingTiming()
         {
             var timelineView = workspace.timeline.GetComponent<ChartAudioTimelineView>();
@@ -643,6 +696,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator QuantizationButtonStartsAtQuarterCyclesAndSynchronizesAllControls()
         {
             var view = workspace.view;
@@ -688,6 +742,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator ShortcutKeyEventsResolveEveryCommandWithExactModifiers()
         {
             workspace.enabled = false;
@@ -744,6 +799,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator ShortcutLabelsAndToolDifficultyEditingCommandsStayInSync()
         {
             foreach (var binding in workspace.view.actions)
@@ -814,6 +870,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator FileShortcutsAndEscapeRespectMenusDialogsAndTyping()
         {
             workspace.view.OpenMenu(workspace.view.menus[0]);
@@ -855,6 +912,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator EditorUsesDefaultPresentationAndRestoresThemedPointerOnTitle()
         {
             var cursor = UnityEngine.Object.FindFirstObjectByType<DojoCursor>();
@@ -904,6 +962,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator EscapeReturnsToTitleWhenSavedAndNoMenuIsOpen()
         {
             yield return PressKeys(Key.S, Key.LeftCtrl);
@@ -913,12 +972,13 @@ namespace RhythmDojo.Tests
             double deadline = Time.realtimeSinceStartupAsDouble + 10;
             while (!SceneManager.GetActiveScene().path.EndsWith("/Title.unity"))
             {
-                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline), "Workspace operation did not finish before its deadline.");
                 yield return null;
             }
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator ControlEnterAppliesSettingsWithoutSubmittingSelectedToolButton()
         {
             long id = 0;
@@ -942,6 +1002,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator EraserButtonDeletesSelectionAndUndoRestoresWholeGroup()
         {
             long tap = 0;
@@ -977,6 +1038,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator EraserMenuAndClickDeleteSelectedGroup()
         {
             workspace.screen.Session.Edit(edit =>
@@ -1002,6 +1064,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator GrabSelectedNoteMovesWholeSelectionAndLeavesOthersAlone()
         {
             long tap = 0;
@@ -1044,6 +1107,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator GrabSelectionClampsAsAGroupAtFirstLaneAndTimeZero()
         {
             workspace.screen.Session.Edit(edit =>
@@ -1065,6 +1129,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator LeftToolIconsSelectDrawEraseAndGrabWithVisibleSelection()
         {
             var bindings = workspace.view.toolActions;
@@ -1111,6 +1176,7 @@ namespace RhythmDojo.Tests
 
         [UnityTest]
         [Category("BpmSuggestion")]
+        [Category("SceneIntegration")]
         public IEnumerator ImportAudioAutomaticallyEstimatesBpmWithoutChangingSavedTiming()
         {
             string path = Path.GetFullPath("LocalAudio/Saiki.wav");
@@ -1165,6 +1231,7 @@ namespace RhythmDojo.Tests
 
         [UnityTest]
         [Category("BpmSuggestion")]
+        [Category("SceneIntegration")]
         public IEnumerator BpmAnalysisIgnoresReplacedAudioAndProject()
         {
             workspace.view.audioPath.text = WriteTempoWave();
@@ -1190,6 +1257,7 @@ namespace RhythmDojo.Tests
 
         [UnityTest]
         [Category("BpmSuggestion")]
+        [Category("SceneIntegration")]
         public IEnumerator SpaceTogglesPlaybackButNotWhileTypingOrConfirming()
         {
             Directory.CreateDirectory(root);
@@ -1221,7 +1289,7 @@ namespace RhythmDojo.Tests
             double deadline = Time.realtimeSinceStartupAsDouble + 10;
             while (!workspace.timeline.PreviewClip || workspace.timeline.IsBusy)
             {
-                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline), "Workspace operation did not finish before its deadline.");
                 yield return null;
             }
 
@@ -1268,6 +1336,7 @@ namespace RhythmDojo.Tests
 
         [UnityTest]
         [Category("PreviewLoop")]
+        [Category("SceneIntegration")]
         public IEnumerator ControlSpaceReturnsToPreviewStartAndOrdinarySpaceStillPauses()
         {
             string path = Path.GetFullPath("LocalAudio/Saiki.wav");
@@ -1282,7 +1351,7 @@ namespace RhythmDojo.Tests
             double deadline = Time.realtimeSinceStartupAsDouble + 60;
             while (workspace.timeline.Peaks == null || !workspace.timeline.Peaks.Ready)
             {
-                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline), "Workspace operation did not finish before its deadline.");
                 yield return null;
             }
 
@@ -1319,6 +1388,7 @@ namespace RhythmDojo.Tests
 
         [UnityTest]
         [Category("PreviewLoop")]
+        [Category("SceneIntegration")]
         public IEnumerator PreviewLoopPreservesReturnPositionAcrossBoundariesAndSpeedChanges()
         {
             workspace.view.audioPath.text = WriteTempoWave();
@@ -1346,7 +1416,7 @@ namespace RhythmDojo.Tests
                 {
                     previous = workspace.timeline.MusicTime;
                     yield return null;
-                    Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                    Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline), "Workspace operation did not finish before its deadline.");
                 }
                 while (workspace.timeline.MusicTime >= previous);
                 Assert.That(workspace.timeline.IsPlaying, Is.True);
@@ -1389,6 +1459,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator GrabMovesTapAndHoldWithPointerDragAndUndo()
         {
             long tap = 0;
@@ -1425,6 +1496,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator GrabCancelsOutsideGridAndDoesNotDrawOnEmptySpace()
         {
             long id = 0;
@@ -1451,6 +1523,7 @@ namespace RhythmDojo.Tests
 
         [UnityTest]
         [Category("PlaybackSeek")]
+        [Category("SceneIntegration")]
         public IEnumerator ControlClickSeeksNearestVisibleBeatLineWithoutEditingNotes()
         {
             workspace.view.audioPath.text = WriteTempoWave();
@@ -1491,6 +1564,7 @@ namespace RhythmDojo.Tests
 
         [UnityTest]
         [Category("PlaybackSeek")]
+        [Category("SceneIntegration")]
         public IEnumerator ControlClickSeeksNearestVisibleWaveformLine()
         {
             workspace.view.audioPath.text = WriteTempoWave();
@@ -1529,6 +1603,7 @@ namespace RhythmDojo.Tests
 
         [UnityTest]
         [Category("PlaybackSeek")]
+        [Category("SceneIntegration")]
         public IEnumerator PlaybackPositionToolSeeksClickedGridLineWithoutEditingNotes()
         {
             string path = Path.GetFullPath("LocalAudio/Saiki.wav");
@@ -1542,7 +1617,7 @@ namespace RhythmDojo.Tests
             double deadline = Time.realtimeSinceStartupAsDouble + 60;
             while (workspace.timeline.Peaks == null || !workspace.timeline.Peaks.Ready)
             {
-                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline), "Workspace operation did not finish before its deadline.");
                 yield return null;
             }
             workspace.screen.Session.Edit(edit => edit.SetTiming(.25,
@@ -1616,6 +1691,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator GameplayPreviewFollowsAudioEditsAndChartSelectionAndReleasesTexture()
         {
             string path = Path.GetFullPath("LocalAudio/Saiki.wav");
@@ -1697,6 +1773,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator GameplayPreviewNoteSpeedAcceptsDecimalsAndRejectsOutOfRangeValues()
         {
             workspace.screen.Session.Edit(edit =>
@@ -1744,6 +1821,7 @@ namespace RhythmDojo.Tests
 
         [UnityTest]
         [Category("PlaybackSeek")]
+        [Category("SceneIntegration")]
         public IEnumerator PlaybackPositionDragFreezesViewportAndRestoresOnlyEnabledFollow()
         {
             workspace.view.audioPath.text = WriteTempoWave();
@@ -1812,6 +1890,7 @@ namespace RhythmDojo.Tests
 
         [UnityTest]
         [Category("PlaybackSeek")]
+        [Category("SceneIntegration")]
         public IEnumerator PlaybackPositionDragSuspendsLoopsAndCleansUpCancellationPaths()
         {
             workspace.view.audioPath.text = WriteTempoWave();
@@ -1898,6 +1977,7 @@ namespace RhythmDojo.Tests
 
         [UnityTest]
         [Category("BpmSuggestion")]
+        [Category("SceneIntegration")]
         public IEnumerator BpmFieldsSynchronizeAndCommitBothWays()
         {
             var timelineView = workspace.timeline.GetComponent<ChartAudioTimelineView>();
@@ -1920,6 +2000,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator VolumeDragUpdatesPercentFillAndSavedValue()
         {
             workspace.view.OpenMenu(workspace.view.menus[1]);
@@ -1954,6 +2035,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator SettingsTitleAndArtistCommitWhenFocusMoves()
         {
             yield return ClickAt(Center(workspace.view.menus[1].trigger.GetComponent<RectTransform>()));
@@ -1972,6 +2054,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator SettingsPathsImportOnEndEditAndKeepSettingsOpen()
         {
             Directory.CreateDirectory(root);
@@ -2013,6 +2096,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator NewFilesStartWithEasySelected()
         {
             var chart = workspace.screen.Session.Snapshot.Charts.Single();
@@ -2033,6 +2117,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator OnAirPreventsNoteDeletionDuringCountdownAndRecording()
         {
             workspace.view.audioPath.text = WriteTempoWave();
@@ -2056,7 +2141,7 @@ namespace RhythmDojo.Tests
             double deadline = Time.realtimeSinceStartupAsDouble + 5;
             while (!workspace.timeline.IsPlaying)
             {
-                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline), "Workspace operation did not finish before its deadline.");
                 yield return null;
             }
 
@@ -2072,6 +2157,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator OnAirBlocksTimingEditsAndSeekingAndStillQuantizesOnExit()
         {
             workspace.view.audioPath.text = WriteTempoWave();
@@ -2100,7 +2186,7 @@ namespace RhythmDojo.Tests
             double deadline = Time.realtimeSinceStartupAsDouble + 5;
             while (!timeline.IsPlaying)
             {
-                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline), "Workspace operation did not finish before its deadline.");
                 yield return null;
             }
 
@@ -2126,6 +2212,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator OnAirRecordsConfiguredLaneKeysAndReturnsToStart()
         {
             workspace.view.audioPath.text = WriteTempoWave();
@@ -2235,6 +2322,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator OnAirQuantizesRecordedNotesAndBlocksActionsUntilDone()
         {
             workspace.view.audioPath.text = WriteTempoWave();
@@ -2256,7 +2344,7 @@ namespace RhythmDojo.Tests
             double deadline = Time.realtimeSinceStartupAsDouble + 5;
             while (!workspace.timeline.IsPlaying)
             {
-                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline), "Workspace operation did not finish before its deadline.");
                 yield return null;
             }
 
@@ -2281,6 +2369,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator OnAirTurnsGridPageAtLastVisibleMeasure()
         {
             workspace.view.audioPath.text = WriteTempoWave();
@@ -2313,7 +2402,7 @@ namespace RhythmDojo.Tests
             double deadline = Time.realtimeSinceStartupAsDouble + 2;
             while (timeline.MusicTime < 2.01)
             {
-                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline), "Workspace operation did not finish before its deadline.");
                 yield return null;
             }
 
@@ -2322,7 +2411,7 @@ namespace RhythmDojo.Tests
             Assert.That(followLabel.text, Does.Contain("켜짐"));
             while (screen.ScrollBeatOffset == originalOffset)
             {
-                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline), "Workspace operation did not finish before its deadline.");
                 yield return null;
             }
 
@@ -2344,6 +2433,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator DifficultyButtonsLiveInSettingsAndSelectAllSlots()
         {
             var settings = workspace.view.menus[1];
@@ -2370,6 +2460,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator MenusOpenOnClickSwitchOnHoverAndCloseAfterAnAction()
         {
             var menu = workspace.view.menus[0];
@@ -2394,6 +2485,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator OutsideClickAndEscapeDismissMenusWithoutEditingTheChart()
         {
             var menu = workspace.view.menus[0];
@@ -2420,6 +2512,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator NewWithUnsavedChangesWaitsForNoAndDoesNotSave()
         {
             var original = workspace.screen.Session;
@@ -2444,6 +2537,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator NewWithYesSavesCurrentNotesAndResourcesBeforeReplacing()
         {
             workspace.screen.Session.Edit(edit => edit.AddNote(workspace.screen.ChartId, NoteData.Tap(0, 1)));
@@ -2466,6 +2560,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator NewAfterSavingDoesNotAskUntilResourcesChange()
         {
             workspace.Run(WorkspaceAction.Save);
@@ -2488,6 +2583,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator NewSaveFailureKeepsCurrentWorkAndAllowsNo()
         {
             var original = workspace.screen.Session;
@@ -2518,6 +2614,7 @@ namespace RhythmDojo.Tests
 
         [UnityTest]
         [Category("BpmSuggestion")]
+        [Category("SceneIntegration")]
         public IEnumerator SaveAsCreatesIndependentSongAndKeepsOriginal()
         {
             workspace.view.audioPath.text = WriteTempoWave();
@@ -2554,6 +2651,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator SaveAsRequiresANameAndCancelKeepsCurrentWork()
         {
             var original = workspace.screen.Session;
@@ -2587,6 +2685,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator SaveAsFailureKeepsCurrentSessionAndNameForRetry()
         {
             var original = workspace.screen.Session;
@@ -2616,6 +2715,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator MenusPreviewOnHoverPinOnClickAndExitCanBeCancelled()
         {
             var menu = workspace.view.menus[0];
@@ -2637,6 +2737,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator KindSelectionMirrorAndQuantizationUseTheExistingSession()
         {
             workspace.screen.Session.Edit(edit =>
@@ -2659,6 +2760,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator JacketAndVolumeSurviveSavingAndReloadingWithoutOptionalSound()
         {
             workspace.view.OpenMenu(workspace.view.menus[1]);
@@ -2698,6 +2800,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator CurrentPositionAutoTestUsesTemporaryNotesAndReturnsToExtendedEditor()
         {
             Directory.CreateDirectory(root);
@@ -2730,7 +2833,7 @@ namespace RhythmDojo.Tests
             workspace.view.audioPath.text = path;
             workspace.Run(WorkspaceAction.ImportAudio);
             yield return Idle();
-            yield return new WaitUntil(() => workspace.timeline.PreviewClip && !workspace.timeline.IsBusy);
+            yield return WaitFor(() => workspace.timeline.PreviewClip && !workspace.timeline.IsBusy, "Workspace transition: workspace.timeline.PreviewClip && !workspace.timeline.IsBusy");
             workspace.screen.Session.Edit(edit =>
             {
                 edit.SetMetadata("Preview", "Test");
@@ -2741,20 +2844,27 @@ namespace RhythmDojo.Tests
             var original = workspace.screen.Session;
             workspace.timeline.Seek(1);
             workspace.Run(WorkspaceAction.AutoTestHere);
-            yield return new WaitUntil(() => SceneManager.GetActiveScene().path.EndsWith("/Gameplay.unity"));
+            yield return WaitFor(() => SceneManager.GetActiveScene().path.EndsWith("/Gameplay.unity"), "Gameplay scene did not load.");
             yield return null;
             var controller = UnityEngine.Object.FindFirstObjectByType<RhythmGameController>();
-            yield return new WaitUntil(() => controller.Clock != null && controller.Clock.Running);
+            yield return WaitFor(() => controller.Clock != null && controller.Clock.Running, "Workspace transition: controller.Clock != null && controller.Clock.Running");
             Assert.That(controller.Chart.Count, Is.EqualTo(2));
             Assert.That(controller.Clock.SongTime, Is.GreaterThan(.5));
             yield return new WaitForSecondsRealtime(2.5f);
             Assert.That(controller.Session.Snapshot.Miss, Is.Zero);
             Assert.That(controller.Session.Snapshot.Combo, Is.GreaterThanOrEqualTo(2));
             UnityEngine.Object.FindFirstObjectByType<GameplayCompositionRoot>().ReturnToSelection();
-            yield return new WaitUntil(() => SceneManager.GetActiveScene().path == WorkspaceEditor.ScenePath);
+            yield return WaitFor(() => SceneManager.GetActiveScene().path == WorkspaceEditor.ScenePath, "Workspace transition: SceneManager.GetActiveScene().path == WorkspaceEditor.ScenePath");
             yield return null;
             workspace = UnityEngine.Object.FindFirstObjectByType<WorkspaceEditor>();
-            yield return new WaitUntil(() => workspace.menu.IsInitialized);
+            Assert.That(workspace, Is.Not.Null, "ChartEditor scene did not create WorkspaceEditor.");
+            double deadline = Time.realtimeSinceStartupAsDouble + 10;
+            while (!workspace.menu.IsInitialized)
+            {
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline),
+                    "ChartEditor menu initialization did not complete within 10 seconds.");
+                yield return null;
+            }
             Assert.That(workspace.screen.Session, Is.SameAs(original));
             Assert.That(original.GetNotes(workspace.screen.ChartId).Length, Is.EqualTo(3));
             Assert.That(original.CanUndo, Is.True);

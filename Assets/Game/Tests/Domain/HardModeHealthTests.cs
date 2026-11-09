@@ -4,6 +4,8 @@ using RhythmDojo.Gameplay;
 
 namespace RhythmDojo.Tests
 {
+    [Category("Gameplay")]
+    [Category("Compatibility")]
     public sealed class HardModeHealthTests
     {
         private static HardModeHealthRule Rule(HealthRuleAction action, int count = 10) =>
@@ -26,6 +28,7 @@ namespace RhythmDojo.Tests
         [TestCase(Judgment.Perfect, HealthRuleAction.GameOver)]
         [TestCase(Judgment.Good, HealthRuleAction.GameOver)]
         [TestCase(Judgment.Miss, HealthRuleAction.GameOver)]
+        [Category("Fast")]
         public void EveryGradeCanPreserveDamageOrFail(Judgment grade, HealthRuleAction action)
         {
             var rule = Rule(action, 4);
@@ -89,6 +92,7 @@ namespace RhythmDojo.Tests
         [TestCase(10)]
         [TestCase(100)]
         [TestCase(1000)]
+        [Category("Fast")]
         public void FractionalDamageFailsExactlyAtConfiguredCount(int count)
         {
             var notes = new NoteData[count + 1];
@@ -130,6 +134,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void PreservedGradesNeverRecoverHealthAndResetRestoresTheBudget()
         {
             var s = Session(
@@ -158,6 +163,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void MixedGradesAddTheirIndividualDamageFractions()
         {
             var s = Session(
@@ -181,6 +187,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void HoldsApplyTheWorseGradeOnlyOnceAtResolution()
         {
             var s = Session(
@@ -210,10 +217,12 @@ namespace RhythmDojo.Tests
         [TestCase(0)]
         [TestCase(-1)]
         [TestCase(1001)]
+        [Category("Fast")]
         public void InvalidCountsAreRejectedAtTheDomainBoundary(int count) =>
             Assert.Throws<ArgumentOutOfRangeException>(() => Rule(HealthRuleAction.Damage, count));
 
         [Test]
+        [Category("Fast")]
         public void InvalidActionsAndGradesAreRejected()
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => Rule((HealthRuleAction)99));

@@ -6,6 +6,8 @@ using UnityEngine;
 
 namespace RhythmDojo.Tests
 {
+    [Category("Gameplay")]
+    [Category("Compatibility")]
     public sealed class HardModePreferencesTests
     {
         private string key;
@@ -21,6 +23,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void NewPlayersStartInNormalModeWithStrictHardDefaults()
         {
             var preferences = new HardModePreferences(key);
@@ -40,6 +43,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void ModeAndRulesSurviveReloadAndSnapshotsDoNotChange()
         {
             var preferences = new HardModePreferences(key) { Enabled = true };
@@ -61,6 +65,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void InvalidStoredValuesAreClampedAndUnknownActionsUseSafeDefaults()
         {
             PlayerPrefs.SetString(

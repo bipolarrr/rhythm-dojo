@@ -7,6 +7,7 @@ using UnityEngine;
 
 namespace RhythmDojo.Tests
 {
+    [Category("Gameplay")]
     public sealed class AudioSettingsServiceTests
     {
         private sealed class FakeBackend : IAudioConfigurationBackend
@@ -108,6 +109,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void TwoIndependentIntervalsMustContainTheEntireUncertaintyRange()
         {
             var backend = new FakeBackend();
@@ -132,6 +134,7 @@ namespace RhythmDojo.Tests
         [TestCase(5, 5, DspClockRateState.Healthy)]
         [TestCase(5, 4.9, DspClockRateState.Unhealthy)]
         [TestCase(5, 5.1, DspClockRateState.Unhealthy)]
+        [Category("Fast")]
         public void MeasurementIncludesBothEndpointBlockUncertainty(double real, double dsp, DspClockRateState expected)
         {
             var measurement = new DspClockRateMeasurement(real, dsp, 1024, 48000);
@@ -142,6 +145,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void RejectedLargerBufferReportsFailureAndRestoresPreviousConfiguration()
         {
             var backend = new FakeBackend { SlowAllBuffers = true };
@@ -156,6 +160,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void PauseInvalidatesCompletedFirstInterval()
         {
             var backend = new FakeBackend();
@@ -175,6 +180,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void QuantizedClockAndDelayedFramesStillRequireContainedIntervals()
         {
             var backend = new FakeBackend { QuantizeDsp = true };
@@ -190,6 +196,7 @@ namespace RhythmDojo.Tests
 
         [TestCase(true)]
         [TestCase(false)]
+        [Category("Fast")]
         public void PauseOrRepeatedConfigurationChangesCannotRestartOverallDeadline(bool paused)
         {
             var backend = new FakeBackend { Paused = paused };
@@ -211,6 +218,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void ClockResetDiscardsPriorSuccessfulObservation()
         {
             var backend = new FakeBackend();
@@ -229,6 +237,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void DeviceRefusingLargerAppliedBufferCannotReportRecovery()
         {
             var backend = new FakeBackend { ForcedBuffer = 32, SlowAllBuffers = true };
@@ -243,6 +252,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void UnresolvedUncertaintyTimesOutWithoutClaimingHealthy()
         {
             var backend = new FakeBackend();
@@ -256,6 +266,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void ExternalResetInvalidatesVerifiedStatus()
         {
             var backend = new FakeBackend();
@@ -271,6 +282,7 @@ namespace RhythmDojo.Tests
 
         [TestCase(.98)]
         [TestCase(1.02)]
+        [Category("Fast")]
         public void TwoPercentClockErrorCannotPassAsHealthy(double rate)
         {
             var backend = new FakeBackend { Rate = rate };
@@ -289,6 +301,7 @@ namespace RhythmDojo.Tests
         [TestCase(1, 32)]
         [TestCase(2, 64)]
         [TestCase(3, 128)]
+        [Category("Fast")]
         public void SlowAcceptedConfigurationRecoversBeforeReportingSuccess(int option, int requested)
         {
             var backend = new FakeBackend { SlowSmallBuffers = true };
@@ -308,6 +321,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void HealthyLowBufferRemainsAvailableWithoutForcedMinimum()
         {
             var backend = new FakeBackend();
@@ -325,6 +339,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void FailedRecoveryStopsRetryingAndReportsFailureInsteadOfSuccess()
         {
             var backend = new FakeBackend { SlowAllBuffers = true };
@@ -340,6 +355,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void RejectedResetRestoresPreviousConfigurationAndPublishesResult()
         {
             var backend = new FakeBackend();
@@ -354,6 +370,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void ForcedNavigationCanCancelValidationAndRestoreBeforeGameplay()
         {
             bool allowed = true;
@@ -371,6 +388,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void PausedAudioDoesNotGetMisdiagnosedAsSlowHardware()
         {
             var backend = new FakeBackend();
@@ -390,6 +408,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void DriverClampingIsReflectedInTheSelectedAndActualBuffer()
         {
             var backend = new FakeBackend { ClampSmallBuffers = true };

@@ -65,23 +65,14 @@ Follow existing C# style: four-space indentation, brace-delimited namespaces, Pa
 
 ## Testing Guidelines
 
-Use Unity Test Framework 1.6.0 with NUnit. Name fixtures `*Tests` and methods after expected behavior. Cover pure rules in Domain tests, asset/editor behavior in EditMode, and lifecycle/input/UI integration in PlayMode. No coverage percentage is specified.
+Use Unity Test Framework 1.6.0 with NUnit. Keep pure rules in Domain, editor/asset behavior in EditMode, and lifecycle/input/UI integration in PlayMode. Follow [Docs/verification.md](Docs/verification.md) for profiles, commands, cleanup, and evidence.
 
-Choose the smallest meaningful verification scope after a coherent set of changes, not after every file edit. Full PlayMode and Foundation runs are not the default:
-
-| Change | Default verification |
-| --- | --- |
-| Documentation or comments only | Review the diff; no Unity tests |
-| Domain/Application rules | Related Domain/EditMode fixtures |
-| UI color, text, or layout | Related layout checks and visual inspection; add affected PlayMode tests when click targets or references change |
-| One screen or gameplay feature | Affected fixture or test methods |
-| Scene composition or shared navigation | Related tests plus **Verify Smoke Actions** |
-| Contracts affecting several features, verification runner, packages, or unexplained regressions | **Verify All Tests (No Build)** |
-| Build settings/platform changes or requested full delivery verification | **Verify Foundation (Play Mode and Player Build)** |
-
-Use the CLI `--filter` or Test Runner selection for affected fixtures/methods. Smoke runs four existing navigation/input/cleanup tests without full-song scenarios or a player build; it does not replace feature-specific tests. See `Docs/verification.md` for the exact selection.
-
-Do not repeat a passing run unless subsequent changes affect its coverage or new evidence warrants it. After failures, rerun the failing tests and affected scope first; expand only when the cause or impact remains unclear. Run Windows builds only for build-related changes or an explicit request. Report the executed scope, results, and reasons for omitted checks; never describe partial verification as a full pass. Keep the refresh, sequential execution, and Test Runner cleanup requirements above.
+- Add tests only for new user behavior, a real regression, or a boundary existing tests miss. Extend or replace an existing case first. Do not grow tests that merely assign values, check names/structure, or repeat the implementation.
+- Give every case exactly one cost category: `Fast`, `SceneIntegration`, `AssetGeneration`, `Hardware`, or `Endurance`. Keep feature categories independent; use `Compatibility` for supported legacy contracts.
+- Start with the relevant cases after a coherent change. Add Smoke for scene composition or shared navigation. File count alone never justifies a full run. Do not repeat passing coverage without a relevant change or new failure evidence.
+- Run all tests without a build when cross-layer impact is unclear or verification-runner/package contracts change. Add relevant Hardware for audio configuration/recovery and relevant Endurance for scheduled playback, song completion, or accumulated timing. Ordinary UI changes do not trigger those slow profiles. Build only for build/platform changes or an explicit request.
+- Restore input devices, preferences, subscriptions, owned objects, files, GUIDs, and Editor state even on failure. Use observable completion with a deadline; retain waits that measure audio or animation duration. Do not share mutable scenes between cases.
+- Lead reports with the change and user impact. Normally summarize verification in one paragraph with scope, result, and necessary limitations. Link detailed results/timings; do not list successful method names or long pass counts. Detailed lists belong to failures, unresolved items, or a requested audit. Never present partial verification as a full pass; zero cases, skips, and inconclusive results are not success.
 
 ## Commit & Pull Request Guidelines
 

@@ -10,6 +10,7 @@ namespace RhythmDojo.Tests
     public sealed class DojoClickFeedbackTests : GameplayTestContext
     {
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator ClickEffectDoesNotBlockSettingsAndSurvivesSceneTransition()
         {
             var feedback = Object.FindFirstObjectByType<DojoClickFeedback>();
@@ -37,6 +38,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator ClickSoundReachesOutputAfterTitlePlaySettingsAndGameplayTransitions()
         {
             yield return UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(
@@ -113,6 +115,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator BurstUsesBoundedObjectsAndRipplesExpireWhilePaused()
         {
             var feedback = Object.FindFirstObjectByType<DojoClickFeedback>();

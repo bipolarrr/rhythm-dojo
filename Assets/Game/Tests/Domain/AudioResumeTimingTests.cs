@@ -4,9 +4,11 @@ using RhythmDojo.Application;
 
 namespace RhythmDojo.Tests
 {
+    [Category("Gameplay")]
     public sealed class AudioResumeTimingTests
     {
         [Test]
+        [Category("Fast")]
         public void ConversionRoundsToWithinOneSample(
             [Values(44100, 48000, 96000)] int frequency,
             [Values(-.25, 0, .25)] double chartOffset,
@@ -19,6 +21,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void BeforeAudioClampsToZeroAndEndUsesEndSentinel()
         {
             Assert.That(AudioResumeTiming.SamplePosition(-1, .25, 48000, 48000), Is.Zero);

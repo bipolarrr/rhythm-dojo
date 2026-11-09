@@ -21,9 +21,11 @@ namespace RhythmDojo.Tests
 {
     [PrebuildSetup(typeof(TestRunStartup))]
     [PostBuildCleanup(typeof(TestRunStartup))]
+    [Category("Authoring")]
     public sealed class AudioTimelineTests
     {
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator GridScrollsAndPansToNegativeTenMeasureWithMeterAndOriginChanges()
         {
             yield return SceneManager.LoadSceneAsync(ChartEditorMenu.ScenePath);
@@ -91,6 +93,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator GridCorrectionAppliesEnteredBpmAndPlaytestKeepsTheSameTiming()
         {
             yield return SceneManager.LoadSceneAsync(ChartEditorMenu.ScenePath);
@@ -142,6 +145,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator ImportedWaveformSeekingZoomPlaybackAndGridEditsShareMusicTime()
         {
             yield return SceneManager.LoadSceneAsync(ChartEditorMenu.ScenePath);

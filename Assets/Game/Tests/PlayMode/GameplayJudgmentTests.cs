@@ -175,6 +175,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Endurance")]
         public IEnumerator TimestampedLaneActionsJudgeMixedRunDespiteFrameHitch()
         {
             yield return LoadSong();
@@ -210,6 +211,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Endurance")]
         public IEnumerator SpaceRestartClearsHeldLaneAndScoresThenAllowsPerfectRun()
         {
             yield return LoadSong();
@@ -241,19 +243,16 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator UnplayedTapsAndHoldStartsAllBecomeMisses()
         {
             yield return LoadSong();
             yield return Press(Key.Space);
             completedSession = game.Session;
 
-            double deadline = Time.realtimeSinceStartupAsDouble + game.Chart.CompletionTime + 10;
-
-            while (completedSession.State != SessionState.Completed)
-            {
-                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
-                yield return null;
-            }
+            // This case checks rule resolution; the representative timestamped run above
+            // retains real DSP/input/completion integration.
+            completedSession.Advance(game.Chart.CompletionTime + 1);
 
             Assert.That(completedSession.Health, Is.Zero);
             Assert.That(completedSession.Miss, Is.EqualTo(completedSession.Snapshot.TotalNotes));
@@ -261,12 +260,14 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Endurance")]
         public IEnumerator TempoBoundaryHoldIsPerfectWithConstantScroll()
         {
             yield return TempoRun(ScrollMode.Constant);
         }
 
         [UnityTest]
+        [Category("Endurance")]
         public IEnumerator TempoBoundaryHoldIsPerfectWithBpmScroll()
         {
             yield return TempoRun(ScrollMode.Bpm);

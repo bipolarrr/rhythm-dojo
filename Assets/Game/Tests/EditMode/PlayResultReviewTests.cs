@@ -10,9 +10,11 @@ using UnityEngine;
 
 namespace RhythmDojo.Tests
 {
+    [Category("UI")]
     public sealed class PlayResultReviewTests
     {
         [UnityEngine.TestTools.UnityTest]
+        [Category("SceneIntegration")]
         public System.Collections.IEnumerator ReinitializedResultsIgnoreLateRetryFailures()
         {
             var scene = EditorSceneManager.OpenScene(EditorTools.SceneBuilder.ResultsPath, OpenSceneMode.Additive);
@@ -43,6 +45,7 @@ namespace RhythmDojo.Tests
         [TestCase(SongLoadFailureKind.MissingAudio, false, "음원 파일")]
         [TestCase(SongLoadFailureKind.AudioLoadFailed, true, "다시 시도")]
         [TestCase(SongLoadFailureKind.Other, true, "다시 시도")]
+        [Category("SceneIntegration")]
         public void RetryUsesSharedRecoveryPolicyAfterClosingReview(
             SongLoadFailureKind kind, bool canRetry, string message)
         {
@@ -74,6 +77,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void FixedSnapshotSurvivesResetAndKeepsAggregateMaintenanceMisses()
         {
             var chart = new ChartData(new[] { NoteData.Hold(0, 1, 10), NoteData.Tap(1, 12) }, 13);
@@ -96,6 +100,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("SceneIntegration")]
         public void ReinitializeBindsOnceAndDisplayControlsTheReview()
         {
             var scene = EditorSceneManager.OpenScene(EditorTools.SceneBuilder.ResultsPath, OpenSceneMode.Additive);
@@ -127,6 +132,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void SnapshotKeepsEveryNoteAndEveryHoldJudgmentWithoutBorrowingLists()
         {
             var chart = new ChartData(new[] { NoteData.Tap(0, 1), NoteData.Hold(1, 2, 4), NoteData.Tap(0, 8) }, 10);
@@ -157,6 +163,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("SceneIntegration")]
         public void ReviewCanInspectEveryLongNoteJudgmentAndNavigateWholeChart()
         {
             var scene = EditorSceneManager.OpenScene(EditorTools.SceneBuilder.ResultsPath, OpenSceneMode.Additive);

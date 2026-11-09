@@ -41,6 +41,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator SongPreviewStopsOnSelectionChangeAndGameplayEntry()
         {
             var view = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
@@ -65,6 +66,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator LoadingLocksEntryAndRestoresNavigationWithActionableErrors()
         {
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
@@ -120,6 +122,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator LatePreviewCompletionIsReleasedAndRefreshClearsTheFailure()
         {
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
@@ -153,6 +156,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator ModePopupSelectsNormalAndHardWithoutChangingGameplayOptions()
         {
             var view = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
@@ -207,6 +211,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator SongRowsKeyboardSelectionUpdatesSelectedSong()
         {
             var view = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
@@ -234,6 +239,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator HorizontalDifficultyButtonsKeepSelectionJudgmentAndOptionsInSync()
         {
             var view = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
@@ -285,6 +291,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator LeftAndRightChangeDifficultyAndRespectPopupAndSliderFocus()
         {
             var view = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
@@ -318,6 +325,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator SpeedSliderSupportsTenthsAndSavedSpeedIsAppliedToGameplay()
         {
             var view = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
@@ -386,6 +394,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator RenamedLayoutStillLoadsSongThroughExplicitViewReferences()
         {
             var view = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
@@ -404,6 +413,7 @@ namespace RhythmDojo.Tests
 
         [UnityTest]
         [Category("Smoke")]
+        [Category("SceneIntegration")]
         public IEnumerator MouseClickUsesUiInputModuleToLoadSong()
         {
             var button = UnityEngine
@@ -436,6 +446,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator SelectionKeepsSpeedIndependentAndBothSongsLoad()
         {
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();

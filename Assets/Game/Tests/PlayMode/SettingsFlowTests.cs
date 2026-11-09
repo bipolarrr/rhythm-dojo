@@ -24,6 +24,7 @@ namespace RhythmDojo.Tests
     public sealed class SettingsFlowTests : GameplayTestContext
     {
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator ReopeningSettingsReusesCalibrationObjectsAndSwitchesBothLayouts()
         {
             var selection = Object.FindFirstObjectByType<SongSelectionView>();
@@ -59,6 +60,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator SpeedTestUsesOneLaneAndReportsCalibratedJudgment()
         {
             var flow = Object.FindFirstObjectByType<AppFlowController>();
@@ -137,6 +139,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator CalibrationMeasuresSpaceTapsAndWaitsForApply()
         {
             var flow = Object.FindFirstObjectByType<AppFlowController>();
@@ -196,6 +199,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator SettingsPopupOpensImmediatelyAndReusesInstanceWithoutLoadingScene()
         {
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
@@ -235,6 +239,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator GameplayTabPreservesAudioAndGraphicsAndSavesTimingLimits()
         {
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
@@ -334,6 +339,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Hardware")]
         public IEnumerator FrameRateOptionsApplySavedLimitsAndMeasureActualFrames()
         {
             UnityEngine
@@ -422,6 +428,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Hardware")]
         public IEnumerator DisplayOptionsReportActualScreenSizeForAllCombinations()
         {
             UnityEngine
@@ -533,6 +540,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Hardware")]
         public IEnumerator SettingsPopupTabsSaveAudioAndApplySeparateGraphicsControls()
         {
             var selection = UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>();
@@ -628,6 +636,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator SettingsButtonOpensSettingsAndBackPreservesSongOptions()
         {
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
@@ -655,6 +664,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Hardware")]
         public IEnumerator BufferValidationBlocksEarlyCloseAndShowsTheAppliedConfiguration()
         {
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
@@ -679,6 +689,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Hardware")]
         public IEnumerator SettingsMouseAndKeyboardApplyActualBufferAndKeepSelection()
         {
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();

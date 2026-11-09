@@ -24,6 +24,7 @@ namespace RhythmDojo.Tests
     public sealed class AudioFlowTests : GameplayTestContext
     {
         [UnityTest]
+        [Category("Hardware")]
         public IEnumerator TitleStartupRestoresSavedMasterAndBackgroundVolume()
         {
             var presentation = RhythmDojo.Services.PresentationPreferences.Current;
@@ -51,6 +52,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Hardware")]
         public IEnumerator SoundSlidersChangeMixedOutputMuteAndRestoreSavedValues()
         {
             yield return SceneManager.LoadSceneAsync("Assets/Game/Scenes/Title.unity");
@@ -178,6 +180,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Hardware")]
         public IEnumerator GameplayMusicUsesSelectedVolumeAndRespondsToLiveChanges()
         {
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
@@ -260,6 +263,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Hardware")]
         public IEnumerator AllBufferRequestsReportActualConfigurationAndChangedAudioPlaysAndRestarts()
         {
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
@@ -376,6 +380,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Hardware")]
         public IEnumerator TitleMusicReloadsMissingPreferencesAndRestartsAfterAudioReset()
         {
             var preferences = RhythmDojo.Services.PresentationPreferences.Current;

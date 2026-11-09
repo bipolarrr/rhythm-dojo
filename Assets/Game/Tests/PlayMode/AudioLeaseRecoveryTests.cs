@@ -11,9 +11,11 @@ using Object = UnityEngine.Object;
 
 namespace RhythmDojo.Tests
 {
+    [Category("Gameplay")]
     public sealed class AudioLeaseRecoveryTests : GameplayTestContext
     {
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator OnlyLatestResetPublishesAndEveryLeaseReleasesOnce()
         {
             var source = Object.FindFirstObjectByType<AppFlowController>().Settings.catalog[0];
@@ -60,6 +62,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator CancelledRecoveryDisposesLateResultAndCanRetry()
         {
             var source = Object.FindFirstObjectByType<AppFlowController>().Settings.catalog[0];
@@ -96,6 +99,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator DisposalDuringRecoveryRejectsAndReleasesLateAudio()
         {
             var source = Object.FindFirstObjectByType<AppFlowController>().Settings.catalog[0];
@@ -113,6 +117,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator BorrowedAudioNeedsNoReloadAndIsNotDestroyed()
         {
             var source = Object.FindFirstObjectByType<AppFlowController>().Settings.catalog[0];
@@ -130,6 +135,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator LoaderCancellationWithoutNewResetDoesNotRetryForever()
         {
             var source = Object.FindFirstObjectByType<AppFlowController>().Settings.catalog[0];

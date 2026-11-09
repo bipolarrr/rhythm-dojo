@@ -18,6 +18,7 @@ namespace RhythmDojo.Tests
 {
     [PrebuildSetup(typeof(TestRunStartup))]
     [PostBuildCleanup(typeof(TestRunStartup))]
+    [Category("Authoring")]
     public sealed class ChartEditorMenuTests
     {
         private ChartEditorScreen screen;
@@ -31,7 +32,14 @@ namespace RhythmDojo.Tests
             yield return null;
             screen = Object.FindFirstObjectByType<ChartEditorScreen>();
             menu = Object.FindFirstObjectByType<ChartEditorMenu>();
-            yield return new WaitUntil(() => menu.IsInitialized);
+            Assert.That(menu, Is.Not.Null, "ChartEditor scene did not create its menu.");
+            double deadline = Time.realtimeSinceStartupAsDouble + 10;
+            while (!menu.IsInitialized)
+            {
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline),
+                    "ChartEditor menu initialization did not complete within 10 seconds.");
+                yield return null;
+            }
             root = Path.Combine(
                 UnityEngine.Application.temporaryCachePath,
                 "ChartMenuTests",
@@ -72,6 +80,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator PupaButtonPreservesDraftAndImportsBundledChartWithLocalAudio()
         {
             var store = new FileSongProjectStore(root);
@@ -134,6 +143,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator GeneratedMenuAppliesTimingAndUndoRedoRestoresNotes()
         {
             var listeners = screen
@@ -174,6 +184,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator FileActionsSaveLoadAndPreserveCurrentDraftOnFailure()
         {
             var store = new FileSongProjectStore(root);
@@ -246,6 +257,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator FileMenuImportsShowcaseGridAndSavesVersionThree()
         {
             var store = new FileSongProjectStore(root);
@@ -280,6 +292,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator ImportedAudioPlaysAndReturnsWithUnsavedSessionAndUndoHistory()
         {
             // Use the actual composed file store and decoder, and clean only this test's song folder.

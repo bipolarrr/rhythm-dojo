@@ -42,6 +42,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator NativeCursorUsesPressedArtworkOnlyWhileLeftButtonIsHeld()
         {
             var cursor = Object.FindFirstObjectByType<DojoCursor>();
@@ -96,6 +97,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator PunchFinishesAfterQuickReleaseWhilePaused()
         {
             var cursor = Object.FindFirstObjectByType<DojoCursor>();
@@ -123,6 +125,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator FistReachesForwardAndReturnsWithNoRandomImpactLayer()
         {
             var cursor = Object.FindFirstObjectByType<DojoCursor>();
@@ -158,6 +161,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator RepeatedClicksReuseFramesAndFocusLossRestoresTheNativePointer()
         {
             var cursor = Object.FindFirstObjectByType<DojoCursor>();
@@ -211,6 +215,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator FistMarkWaitsForContactStaysAtTheExtendedPoseAndFadesWhilePaused()
         {
             var cursor = Object.FindFirstObjectByType<DojoCursor>();

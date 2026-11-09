@@ -11,6 +11,7 @@ using UnityEditor;
 
 namespace RhythmDojo.Tests
 {
+    [Category("Authoring")]
     public sealed class SongProjectTests
     {
         private string root;
@@ -73,6 +74,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void RoundTripPreservesDoublesOrderAndMultipleCharts()
         {
             var p = Example();
@@ -103,6 +105,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void NewSavesAlwaysIncludeV3GridAndImportsKeepGrid()
         {
             var p = Example();
@@ -128,6 +131,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public async Task LegacyReadsPreserveFileBytesAndDefaultGridUntilExplicitSave()
         {
             var p = Example();
@@ -167,6 +171,7 @@ namespace RhythmDojo.Tests
         [TestCase("denominator", "timing.grid.meters[0].denominator")]
         [TestCase("order", "timing.grid.meters[1].timeSeconds")]
         [TestCase("meterUnknown", "timing.grid.meters[0].extra")]
+        [Category("Fast")]
         public void GridErrorsReportExactPaths(string failure, string path)
         {
             var saved = Newtonsoft.Json.Linq.JObject.Parse(json.Serialize(Example()));
@@ -210,6 +215,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public async Task EmptyDraftSavesButCannotPlay()
         {
             var p = new SongProject { Charts = new[] { new ChartDocument() } };
@@ -229,6 +235,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void EditorIdsSnapshotsBatchesAndHistory()
         {
             var p = Example();
@@ -288,6 +295,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void ChartLifecycleAndEqualTimeOrder()
         {
             var session = new EditorSession(new SongProject());
@@ -329,6 +337,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public async Task SaveTracksCapturedContentAndFailurePreservesSession()
         {
             var session = new EditorSession(Example());
@@ -374,6 +383,7 @@ namespace RhythmDojo.Tests
         [TestCase("nan")]
         [TestCase("type")]
         [TestCase("tapEnd")]
+        [Category("Fast")]
         public void MalformedFilesFail(string failure)
         {
             var p = Example();
@@ -426,6 +436,7 @@ namespace RhythmDojo.Tests
         [TestCase("audio/../file.ogg")]
         [TestCase("audio/CON.ogg")]
         [TestCase("audio/")]
+        [Category("Fast")]
         public void InvalidAudioPathsFail(string path)
         {
             var p = Example();
@@ -434,6 +445,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void DraftLayoutsAndTempoEditsPreserveSeconds()
         {
             var p = Example();
@@ -452,6 +464,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void PublishedExamplesLoad()
         {
             foreach (var path in Directory.GetFiles("Docs/examples", "*.rdchart.json"))
@@ -466,6 +479,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public async Task CancellationFailureAndConcurrentStoresPreserveCommittedFiles()
         {
             var p = Example();
@@ -510,6 +524,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public async Task ImportedAudioIsPortableAndOldAudioSurvives()
         {
             Directory.CreateDirectory(root);
@@ -549,6 +564,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void PlaybackErrorsMapToEditorIdsAndModesMustMatch()
         {
             var p = Example();
@@ -575,6 +591,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void AssetCopyIsIndependentAndUsesNewUuids()
         {
             var source = AssetDatabase.LoadAssetAtPath<SongDefinition>(

@@ -1,65 +1,42 @@
 # 동작별 검증 가이드
 
-최신 #15–#21 통합 범위와 실행 결과는 [통합 검증 기록](integration-pr-15-21.md)을 참조한다. 아래 날짜별 과거 실행 기록은 해당 시점의 결과이다.
+## 실행 프로필
 
-## 2026-11-03 Unity error follow-up
+Unity **6000.3.23f1**, Unity Test Framework **1.6.0**을 사용한다. `FoundationVerification`은 메뉴와 CLI에서 같은 선택기를 사용한다. 기능 태그와 비용 태그의 조건은 교집합이며, 모든 검사에는 비용 태그 하나를 지정한다. `Compatibility`는 비용과 별개인 구형 API·저장 형식 호환성 태그다.
 
-The remaining scene-ownership, input/focus-isolation and rendering verification issues were corrected. Final Domain/EditMode: 399/399 passed. Latest PlayMode results by unique test: 202/202 passed, with no skips. The PlayMode total combines the full 202-test run (197 passed, 5 failed) with passing affected-fixture reruns (resume 9/9, chart editor 4/4, timeline 3/3, title 19/19); it is not a single clean final full run. Continuous 929-note playback and automatic Results passed. Native focus behavior remains the default and is regression-tested separately from controlled test focus. Builds were omitted because build/platform settings were unchanged.
-
-See `Logs/unity-errors-verification.md` and `Logs/unity-errors-playmode-consolidated.json` for exact scope, measurements and source results. The historical PR integration results below describe the earlier state.
-
-## 2026-11-03 PR 기능 통합 검증
-
-로컬 `12218cf`의 PR #5~#7 품질 수정을 기준으로 #8 곡 선택, #9 결과 화면, #10 에디터 기능을 `integrate/pr-features`에 선택 통합했다. 원래 `RhythmDojo` 작업 폴더의 Results 씬과 임시 씬은 보존했다. 씬은 PR 스냅샷 대신 로컬 빌더로 재생성했다.
-
-중복 타이틀 진입 코드와 사용되지 않는 판정 이력 슬라이더를 제외했다. 기존 오디오 복구·DSP 재개·키 설정·씬 수명과 v3 저장 계약을 유지했다. 에디터의 이전 형식 가져오기·종료 시간 설정·보기 초기화·스냅 OFF 접근을 복원했고, 패널 재열기·비동기 종료 처리·매 프레임 노트 복사·음수 위치 게임 테스트를 보완했다. 테스트용 개인 Saiki 음원 의존은 임시 WAV로 대체했다.
-
-- 전체 EditMode 최초 398개: 397 통과, 글꼴 1 실패. 빌더 수정 후 글꼴 9/9, 최종 씬 재생성 2/2 통과.
-- 전체 PlayMode 최초 197개: 192 통과, 2 실패, 개인 음원 부재로 3 skip. 수정 후 파형 3/3, 에디터 39/39(skip 0), 기존 메뉴 5/5 통과. 후속 스냅 OFF 변경 뒤 에디터 39개 중 38 통과·BPM 입력 포커스 1 실패였으며 해당 항목 단독 재실행은 1/1 통과했다.
-- 장시간 자동 종료 검사는 단독 재실행에서도 약 61.76초에 FocusLost로 중단됐다. 이 실패를 숨기거나 제품의 포커스 처리 규칙을 변경하지 않았다. 전체 검증 통과가 아니다.
-- 전체 실행과 후속 실행을 테스트 이름별 최신 결과로 합치면 596개 중 595 통과, 1 실패, skip 0이다. 최종 상태에서 전체를 다시 실행한 단일 실행 결과가 아니며 반복 검사를 별도 고유 테스트로 합산하지 않았다.
-- Unity 6000.3.23f1 컴파일 성공, 소스/문서 diff 공백 검사와 meta 412개 검사 통과. 각 실행은 순차 진행하고 Play Mode 종료 및 Editor ready를 확인했다. Windows 빌드는 빌드/플랫폼 변경 요청이 없어 생략했다.
-
-원본 결과와 선택 통합 내역은 `Logs/pr-features-*.json`, 현재 곡 선택·에디터·변속 화면의 Unity 렌더 캡처는 `Logs/pr-features/`에 있다. 결과 화면은 동작 테스트로 확인했으며 이번 결과 화면 캡처는 없다. 기존 품질 개선 증거를 테스트가 다시 쓴 내용은 `Logs/pr-features/retest-artifacts/`에 보관하고 이전 기록은 복원했다. 원격 push 및 기존 PR 병합/종료는 수행하지 않았다.
-
-
-테스트는 **준비 → 입력/동작 → 관찰 가능한 결과**로 작성합니다. 실패한 테스트 이름만 읽어도 어떤 약속이 깨졌는지 알 수 있어야 합니다. 하나의 긴 플레이 순서에 여러 기능의 성공 여부를 묶지 않습니다.
-
-## 실행
-
-Unity **6000.3.23f1**의 **Game Tools > Verification** 메뉴를 사용합니다.
-
-| 메뉴 | 범위 | 빌드 |
+| 프로필 | 메뉴 | 선택 범위 |
 | --- | --- | --- |
-| Verify Smoke Actions | 타이틀 진입, 곡 로드, 시작/재시작/포커스, Ready 복귀의 4개 테스트 | 없음 |
-| Verify All Tests (No Build) | Domain/EditMode 전체 → PlayMode 전체 | 없음 |
-| Verify UI Actions | 타이틀, 곡 선택, 설정, 게임 HUD의 버튼/선택/화면 전환 | 없음 |
-| Verify Gameplay Actions | 입력, 판정, 재시작, 포커스, 모드 어댑터, 실제 오디오 | 없음 |
-| Verify Authoring Actions | 문서 플레이테스트, 취소, 데이터 캡처, 음원 해제 | 없음 |
-| Verify Foundation (Play Mode and Player Build) | Domain/EditMode 전체 → PlayMode 전체 → Windows 빌드 | 테스트 전체 성공 시 |
-| Build Player Only | 현재 씬으로 Windows 빌드 | 테스트 생략 |
+| All | Verify All Tests (No Build) | Domain/EditMode와 PlayMode 전체, 모든 비용 분류 |
+| Fast | Verify Fast Tests | 시간 경과·장치 변경·에셋 생성을 요구하지 않는 검사 |
+| UI / Gameplay / Authoring | Verify UI / Gameplay / Authoring Actions | 해당 기능 ∩ (Fast ∪ SceneIntegration) |
+| Smoke | Verify Smoke Actions | 기존 화면 이동·입력·정리 4개 검사 |
+| SceneIntegration | CLI 프로필 | 씬 구성·입력·수명 통합 검사 |
+| AssetGeneration | Verify Asset Generation | 실제 씬·프리팹·이미지·설정 에셋 생성 및 복원 |
+| Hardware | Verify Hardware | 실제 버퍼·복구·반복 재개·FPS·해상도·오디오 관측 |
+| Endurance | Verify Endurance | 전체 곡 재생과 장시간 누적 시각 |
+| HealthPlaytest | Playtest Health and Results | 체력·결과 기능 ∩ (Fast ∪ SceneIntegration) |
 
-**Window > General > Test Runner**에서 개별 fixture나 테스트 하나만 선택해도 같은 검증입니다. 메뉴 전용 판정 로직은 없습니다. PlayMode의 `Smoke`, `UI`, `Gameplay`, `Authoring` 카테고리로 범위를 선택할 수 있습니다.
+Foundation의 기존 `RunAll()`은 All 이후 Windows 플레이어를 빌드한다. `RunTestsOnly()`는 빌드 없이 All을 실행한다. 기존 메뉴 메서드 이름은 유지한다. `Build Player Only`는 검사를 생략하고 현재 씬을 빌드한다.
 
-## 변경 범위에 맞춘 실행
+프로필 선택기는 실제 Test Runner 목록의 leaf를 검사하여 미분류·복수 비용·중복 이름을 거부한다. 기능 카테고리를 CLI `-testCategory UI`에 직접 전달하면 비용 교집합을 적용하지 못하므로, 일반 기능 실행에는 아래 공통 프로필 명령을 사용한다.
 
-파일을 수정할 때마다 전체 테스트를 실행하지 않습니다. 논리적으로 묶인 변경을 마친 뒤 다음 최소 범위를 선택합니다.
+## 변경별 실행 범위
 
 | 변경 | 기본 검증 |
 | --- | --- |
-| 문서·주석 | diff 확인, Unity 테스트 생략 |
-| Domain/Application 규칙 | 관련 Domain/EditMode fixture |
-| UI 색상·문구·배치 | 관련 레이아웃 검사와 화면 확인. 클릭 영역·참조 변경 시 해당 PlayMode 테스트 추가 |
-| 특정 화면·게임 기능 | 해당 fixture 또는 관련 테스트 메서드 |
-| 씬 조립·공통 화면 전환 | 관련 테스트 + Smoke |
-| 여러 기능의 공통 계약·검증 실행기·패키지 변경, 원인 불명 회귀 | Verify All Tests (No Build) |
-| 빌드 설정·플랫폼 변경, 전체 배포 검증 요청 | Foundation 및 Windows 빌드 |
+| 문서·주석 | diff 확인 |
+| Domain/Application 규칙 | 관련 Domain/EditMode fixture·사례 |
+| UI 색상·문구·배치 | 관련 레이아웃 검사와 화면 확인; 클릭 영역·필수 참조 변경 시 해당 PlayMode |
+| 특정 화면·기능 | 해당 fixture·사례 |
+| 씬 구성·공통 화면 이동 | 관련 검사 + Smoke |
+| 오디오 설정·복구 | 관련 검사 + 해당 Hardware |
+| 예약 재생·곡 종료·장시간 시각 누적 | 관련 검사 + 해당 Endurance |
+| 여러 계층의 영향이 불명확한 변경·검증 실행기·패키지 계약 | All, 빌드 없음 |
+| 빌드 설정·플랫폼 또는 명시적 빌드 요청 | 관련 검사 + Windows 빌드 |
 
-성공 후 관련 코드가 바뀌지 않았으면 동일 검증을 반복하지 않습니다. 실패 시 실패 테스트와 영향을 받는 범위를 먼저 재검증하고, 원인이나 영향이 불명확할 때 확대합니다. 실행 범위·결과·생략 이유를 보고하며 부분 검증을 전체 성공으로 표현하지 않습니다. 빌드는 빌드 관련 변경 또는 명시적 요청 시에만 실행합니다.
+파일 수만으로 전체 실행을 결정하지 않는다. 통과 범위는 관련 변경이나 새로운 실패 근거가 없으면 반복하지 않는다. 실패 후에는 실패 사례와 영향 범위를 먼저 재검증한다. 단순 UI 변경에는 Hardware·Endurance를 자동 추가하지 않는다.
 
-개별 fixture는 `unity command run_tests --mode playmode --filter GameplayHudFlowTests --async_tests true --json`처럼 선택합니다. Domain/EditMode는 `--mode editor`를 사용합니다. 소스 변경 후 재컴파일, 순차 실행, `test_status` 결과 확인과 Play Mode 종료 및 Editor ready 대기는 부분 검증에도 적용합니다.
-
-Smoke는 다음 기존 메서드에 추가된 카테고리입니다. 기존 UI/Gameplay 분류와 전체 검증에도 계속 포함됩니다.
+Smoke는 다음 기존 사례를 선택하며, 기능별 검증을 대체하지 않는다.
 
 | fixture | 메서드 |
 | --- | --- |
@@ -68,71 +45,55 @@ Smoke는 다음 기존 메서드에 추가된 카테고리입니다. 기존 UI/G
 | GameplayFlowTests | KeyboardNavigationAndStartRestartFocusLossUseActualActions |
 | GameplayHudFlowTests | ReturnButtonInReadyStateLoadsSongSelectionAndReleasesSong |
 
-Smoke는 곡 전체 재생·판정 시나리오를 포함하지 않으며 기능별 검증을 대체하지 않습니다. 판정·오디오 변경에는 해당 fixture를 별도로 선택합니다. 메뉴는 `FoundationVerification.RunSmoke()`를 실행하고, 빌드 없는 전체 검증은 기존 `RunTestsOnly()`를 실행합니다. 결과는 각각 `Logs/verification-smoke.xml`과 기존 전체 검증 XML에 저장합니다.
+## 명령과 실행 순서
 
-## 실행 결과와 정리
+실행 중인 Editor에서는 Pipeline을 사용한다. 소스 변경 후 재컴파일을 완료하고 검사를 순차 실행한다.
 
-검증 시작 시 기존 Play Mode 시작 씬을 보관하고, 검증 중에는 Title 강제 시작을 중단합니다. 테스트가 직접 필요한 씬을 로드하며, 완료/실패 후 이전 시작 씬을 복원합니다. 에디터 자체가 강제 종료되면 정상 종료 시의 복원 절차를 실행할 수 없습니다.
+```powershell
+unity status --json
+unity command run_tests --mode playmode --filter SelectionBrowserTests --async_tests true --json
+unity command test_status --json
+```
 
-Test Framework 1.6.0의 결과 콜백은 임시 씬/프로젝트 설정 정리보다 먼저 호출됩니다. 실행기는 정리 작업 종료까지 기다린 뒤 다음 테스트, 빌드, 에디터 종료로 진행합니다. 이 버전에 공개된 작업 완료 API가 없어 `FoundationVerification`의 작은 어댑터에서 내부 작업 상태를 읽습니다. Test Framework를 업그레이드할 때 이 어댑터와 임시 씬 정리/시작 씬 복원을 함께 확인하세요.
+Domain/EditMode의 mode는 `editor`다. `test_status` 결과를 확인한 뒤 Play Mode 종료와 `unity status --json`의 ready를 확인하고 다음 실행을 시작한다. 공통 프로필은 Editor 메뉴 또는 Pipeline의 `run_script`에서 `FoundationVerification.RunUi()` 등의 기존 메서드를 호출한다. 이 실행의 완료 근거는 `Logs/verification.txt`와 XML이다.
 
-전체 검증의 XML은 `Logs/verification-editmode.xml`, `Logs/verification-playmode.xml`에 저장됩니다. 부분 검증은 `Logs/verification-ui.xml`, `Logs/verification-gameplay.xml`, `Logs/verification-authoring.xml`을 사용합니다. `Logs/verification.txt`는 마지막 메뉴 실행의 동작별 결과입니다. 실패, 취소, 미실행 또는 0개 실행을 성공으로 간주하지 않습니다.
-
-## 버튼과 동작의 기대 결과
-
-| 구역 | 입력/동작 | 기대 결과 | 테스트 |
-| --- | --- | --- | --- |
-| Title | 배경 클릭 | Bootstrap을 거쳐 곡 선택, 중복 시작 방지 | MainMenuFlowTests |
-| Title | 설정 아이콘 | 현재 사양은 placeholder: 화면 전환/게임 시작 없음 | MainMenuFlowTests |
-| Title | 종료 아이콘 | 확인 팝업 표시, 배경 메뉴 잠금 | MainMenuFlowTests |
-| Title | 아니요 | 팝업 닫기, 메뉴 다시 활성화 | MainMenuFlowTests |
-| Title | 예 | 종료 요청 1회, 게임 시작 없음 | MainMenuFlowTests |
-| 곡 선택 | 곡/난이도/스크롤/배속 변경 | 해당 선택 반영, 독립 옵션 유지 | SongSelectionFlowTests |
-| 곡 선택 | Play | 선택한 곡과 옵션으로 Gameplay 로드 | SongSelectionFlowTests |
-| 곡 선택/설정 | Settings / Back | 설정 진입/복귀, 기존 곡 선택 유지 | SettingsFlowTests |
-| 설정 | 버퍼 선택 | 요청값만 변경, 실제 오디오는 그대로 | SettingsFlowTests |
-| 설정 | Apply | 실제 DSP 설정과 결과 표시, Default 복원 | SettingsFlowTests |
-| Gameplay HUD | Ready/Completed의 Return | 곡 선택으로 복귀, 세션/음원 정리 | GameplayHudFlowTests |
-| Gameplay HUD | 플레이 중 | Return 숨김, Escape로 복귀 가능 | GameplayHudFlowTests |
-| Gameplay | Space / 재시작 / 포커스 상실 | 재생 시작, 상태 초기화, 눌린 키 재입력 차단, Ready 복귀 | GameplayFlowTests, GameplayJudgmentTests |
-| Gameplay | 타임스탬프가 있는 D/F/J/K | 탭/홀드/동시 입력과 180ms 지연에도 13 Perfect / 2 Good / 3 Miss | GameplayJudgmentTests |
-| Gameplay | 재시작 후 정확한 입력 / 무입력 | 18 Perfect / 18 Miss 각각 독립 검증 | GameplayJudgmentTests |
-| Gameplay | 템포 경계의 홀드 | Constant와 BPM 각각 8 Perfect, 완료 HUD 시간 유지 | GameplayJudgmentTests |
-| 오디오 | 각 버퍼 적용 / 재생 / 재시작 | 실제 설정 보고, DSP 진행, 게임 중 변경 거부 | AudioFlowTests |
-| 문서 | 플레이테스트/취소/복귀 | 스냅샷과 세션 ID 유지, 음원 해제, 재시도 | AuthoringFlowTests |
-| 씬 생성 | 5개 씬 재생성/반복 생성 | Title 포함 참조 유효, GUID 및 콘텐츠 보존 | SceneRegenerationTests, ContentTests |
-
-종료 테스트는 가짜 `IMainMenuActions`를 사용해 종료 요청까지 검증합니다. 실제 프로세스를 종료하면 Test Runner도 중단되므로 OS 프로세스 종료 자체를 자동 검증했다고 해석하지 않습니다. 타이틀 설정 버튼에 기능이 추가되면 placeholder 테스트의 기대 결과도 함께 바꿉니다.
-
-버튼 경로는 가능한 한 가상 마우스 입력으로 uGUI/Input System을 통과시킵니다. 공통 클릭 도우미는 버튼이 활성화되어 있고 다른 UI에 가려지지 않았는지도 확인합니다. 드롭다운 값 변경 테스트는 선택 콜백과 결과를 확인하며, 별도 키보드 테스트가 실제 선택 UI 경로를 확인합니다. 서비스 메서드를 직접 호출한 테스트만으로 버튼 연결까지 검증했다고 하지 않습니다.
-
-## 팀원이 기능을 추가할 때
-
-1. 버튼/키/상태 변화의 기대 결과를 먼저 한 문장으로 정합니다.
-2. UI는 해당 화면 fixture에, 판정/입력은 Gameplay에, 문서 기능은 Authoring에 독립 테스트를 추가합니다.
-3. 입력 전 상태를 만들고 실제 동작을 수행한 뒤 화면, 서비스 상태, 해제된 리소스 등 결과를 검사합니다.
-4. 비동기 대기에는 시간 제한을 두고, 실패해도 입력 장치/오디오/이벤트 구독을 정리합니다.
-5. 관련 fixture를 먼저 실행합니다. 공통 흐름이나 씬 조립 변경에는 Smoke를 추가하고, 위 표의 위험도에 따라 전체 테스트나 빌드로 확대합니다.
-
-레이아웃은 빌더에 반영합니다. 테스트도 UI 객체 이름보다 View의 명시적 참조를 우선합니다. 기존 판정 수치는 검증용 차트의 계약이므로 검증용 차트를 의도적으로 바꾸면 함께 검토해야 합니다.
-
-## 배치 실행
-
-해당 프로젝트를 연 Unity를 닫고 저장소 루트 PowerShell에서 실행합니다. 각 프로세스가 종료될 때까지 기다리고 `-quit`는 붙이지 않습니다.
+배치에서는 해당 프로젝트의 Editor를 닫고 저장소 루트 PowerShell에서 실행한다. 프로세스 종료를 기다리고 비동기 검사에 `-quit`를 붙이지 않는다.
 
 ```powershell
 $unity = 'C:/Program Files/Unity/Hub/Editor/6000.3.23f1/Editor/Unity.exe'
-& $unity -batchmode -projectPath "$PWD" -runTests -testPlatform PlayMode -testCategory UI -testResults "$PWD/Logs/ui.xml" -logFile "$PWD/Logs/ui.log"
-# Gameplay 또는 Authoring도 같은 방법으로 선택합니다.
-& $unity -batchmode -projectPath "$PWD" -executeMethod RhythmDojo.EditorTools.FoundationVerification.RunAll -logFile "$PWD/Logs/foundation.log"
+& $unity -batchmode -projectPath "$PWD" -executeMethod RhythmDojo.EditorTools.FoundationVerification.RunProfile -verificationProfile UI -logFile "$PWD/Logs/ui.log"
+& $unity -batchmode -projectPath "$PWD" -executeMethod RhythmDojo.EditorTools.FoundationVerification.RunTestsOnly -logFile "$PWD/Logs/all.log"
+# 관련 사례만 실행하는 경우
+& $unity -batchmode -projectPath "$PWD" -runTests -testPlatform EditMode -testFilter RhythmDojo.Tests.CoordinatorTests -testResults "$PWD/Logs/coordinator.xml" -logFile "$PWD/Logs/coordinator.log"
 ```
 
-오디오 테스트는 출력 장치에 의존합니다. 실제 DSP 설정/시간 진행을 검사하며 사람이 느끼는 입력 지연이나 잡음이 없음을 보증하지 않습니다. 스크린샷은 `Logs/`에 남는 보조 자료이고 자동 시각 비교는 아닙니다.
+실제 장치 검사는 출력 장치가 사용 가능한 Windows 세션에서 실행한다. 배치 세션에 장치가 없으면 실패 원인을 기록하고 연결된 데스크톱 Editor에서 해당 범위를 재검증한다. 장치 실패를 무시하거나 skip으로 바꾸지 않는다.
 
-버퍼 적용 후 검사는 DSP **시계 진행률**을 확인한다. 실시간 관측 길이 `T`, DSP 증가량 `D`, 실제 블록 크기 `B`, 샘플레이트 `F`에 대해 두 끝점의 블록 관측 오차를 합한 `E = 2B/F`를 사용한다. 진행률 구간 `[max(0, (D-E)/T), (D+E)/T]` 전체가 `[0.99, 1.01]` 안에 있는 서로 겹치지 않는 관측 두 번만 정상으로 인정한다. 구간이 경계와 겹치면 같은 관측을 연장하며, 완전히 벗어나면 기존 선택 목록의 다음 큰 버퍼를 요청하고 실제 적용값을 확인한다. 48 kHz / 1024 샘플의 정확한 1배속은 관측당 최소 약 4.27초가 필요하다. 2048은 두 관측에 약 17.07초가 필요하며 실제 양자화나 프레임 지연 때문에 완료하지 못할 수도 있다.
+## 준비·복원과 결과
 
-전체 적용 검사는 준비·복구·일시정지·장치 변경을 포함해 최대 20초이다. 일시정지와 설정 변경은 관측을 폐기하되 제한 시간을 다시 시작하지 않는다. 제한 시간 만료와 복원 요청 수락은 정상 판정이 아니다. `ClockRateVerified`, `ConsecutiveClockRateMeasurements`, `ClockRateMeasurements`, `ValidationElapsedSeconds`가 판정 근거를 제공하며 `AudioFlowTests`는 실제 요청/적용 버퍼와 구간을 `Logs/audio-buffers.txt`에 기록한다. 이는 출력 품질이나 체감 지연을 보증하지 않는다.
+공통 PlayMode 정리는 초기 오디오 설정과 설정 변경 이벤트를 추적한다. 설정과 이벤트에 변화가 없으면 `AudioSettings.Reset`을 생략한다. 설정값이 같아도 장치 재설정 이벤트가 발생한 검사는 원래 설정으로 복구한다. 입력 장치·PlayerPrefs·이벤트 구독·소유 객체 복원은 유지한다. Workspace 종료는 별도의 빈 씬을 사용한다.
 
+씬 전체 생성은 한 시나리오에서 두 번 실행한다. 첫 번째는 씬 파일 삭제 후 GUID 보존과 복구, 두 번째는 반복 생성 안정성을 확인한다. 7개 씬의 필수 참조·직렬화된 구성, 생성 프리팹·이미지, 설정·음원·재질 불변 및 Build Settings를 검사한다. 파일·meta·Editor 상태의 스냅샷은 성공과 예외 모두에서 복원하며 새로 생성한 파일을 정리한다. 참조 누락은 독립 View·프리팹 복제본에서, 마이그레이션 분기는 메모리 객체에서 검사한다. 실제 생성·보존 경로는 AssetGeneration에 남긴다.
+
+Test Framework 1.6.0의 결과 callback은 씬·설정 정리보다 먼저 발생한다. 실행기는 내부 작업 상태를 확인하여 정리 종료 후 다음 mode·빌드·Editor 종료로 진행한다. 패키지 버전 변경 시 이 어댑터와 시작 씬 복원도 검증한다.
+
+`Logs/verification.txt`에는 프로필·고유 사례 수·결과·소요 시간과 실패 상세만 기록한다. All XML은 `verification-editmode.xml`, `verification-playmode.xml`이며, 부분 프로필은 `verification-ui-editmode.xml`과 같이 프로필·mode를 포함한다. 각 XML에 개별 결과와 시간이 남는다. 특정 mode에 해당 사례가 없으면 실행하지 않고 기록하며, 프로필 전체 0개·skip·inconclusive·실패는 성공이 아니다.
+
+보고는 변경 결과와 사용자 영향을 먼저 설명하고, 검증은 기본 한 문단으로 범위·결과·필요한 제한을 요약한다. 성공한 메서드명과 숫자의 장황한 나열은 생략한다. 실패·미해결 사항·요청된 감사만 상세 목록으로 제공한다. 부분 실행과 후속 재검증을 합친 결과는 단일 전체 통과로 표현하지 않는다.
+
+시간 비교에서는 같은 검증 범위의 준비·실행 비용 변화와 느린 검사를 제외한 기본 프로필의 감소를 구분한다. 실행 환경과 범위가 다르면 비교 한계를 함께 기록한다. 기존 감사의 판정 이관·호환성·통합 대응은 [검사 개편 대응표](test-verification-migration.csv)에서 확인한다.
+
+## 테스트 추가와 검증 기준
+
+테스트는 준비 → 입력·동작 → 관찰 가능한 결과의 순서로 작성한다. 각 사례는 확인할 계약을 명확히 하고 서로 무관한 성공 조건을 하나의 긴 플레이 순서로 묶지 않는다. 새로운 사용자 동작, 실제 회귀, 기존 검사가 놓치는 경계를 검증할 때만 추가한다. 먼저 기존 사례의 확장·대체를 검토한다. 단순 값 대입·이름·구조 확인이나 구현을 반복하는 검사는 늘리지 않는다. 빠른 판정 경계와 오프셋 조합은 유지한다.
+
+UI는 View의 필수 참조, 공유 자원 소유권, 클릭 영역·겹침·텍스트 넘침을 확인한다. 명시된 디자인 계약의 크기·순서는 유지한다. 버튼 검사는 가상 입력과 raycast를 통과시키며, 서비스 직접 호출을 실제 클릭 검증으로 보고하지 않는다. 비동기 준비는 완료 조건과 제한시간·실패 원인을 갖추고, 오디오 관측 구간과 연출 지속시간의 검증 대기는 유지한다.
+
+## 현재 동작 계약
+
+타이틀 현판을 누르면 메뉴가 열리고, 플레이는 곡 선택으로 이동한다. 설정은 재사용 팝업을 열며, 종료는 확인 팝업에서 요청을 한 번 전달한다. 실제 프로세스 종료 자체는 자동 검사 범위가 아니다. Gameplay의 Escape는 일시정지와 재개 경로이며, 종료·결과 이동은 AppFlow가 세션과 음원 소유권을 정리한다. 상세 UI 계약은 [타이틀 안내](pixel-dojo-title.md), [팀 경계](team-ownership.md)를 따른다.
+
+버퍼 적용은 DSP 시계 진행률을 검사한다. 실시간 관측 길이 T, DSP 증가량 D, 실제 블록 크기 B, 샘플레이트 F에 대해 E = 2B/F로 두 끝점의 오차를 반영한다. 진행률 구간 전체가 [0.99, 1.01]에 포함되는 독립 관측 두 번만 정상으로 인정한다. 관측·복구의 전체 제한시간은 20초이며, 시간 만료나 복원 요청 수락은 정상 판정이 아니다. `ClockRateMeasurements`와 `Logs/audio-buffers.txt`가 근거다. 이는 체감 지연이나 출력 품질 측정과는 범위가 다르다.
 
 ## 결과 기록과 롱노트 규칙 v4
 
@@ -147,33 +108,6 @@ $unity = 'C:/Program Files/Unity/Hub/Editor/6000.3.23f1/Editor/Unity.exe'
 Results는 `ScreenCompositionRoot`가 결과와 복귀 Action을 주입한다. 직접 Results를 실행하면 빈 결과를 표시하고 곡 선택으로 돌아간다. 에디터 테스트 플레이는 기존 AppFlow의 반환 경로를 사용한다. 레이아웃은 Build Results와 Build Settings로 재생성하며 SettingsPopup도 함께 갱신한다.
 
 검증 fixture: `PlayRulesTests`, `RhythmSessionTests`, `PlayResultReviewTests`, `ResultsLayoutTests`, `ResultsFlowTests`, `PupaResultsFlowTests`, `SettingsFlowTests`. 실제 판정의 시작·끝 기록과 세션 초기화 후 결과 스냅샷 보존을 검증한다. 고정 결과 슬롯 대입만 반복하는 할당 측정은 검증 범위에서 제외한다.
-
-### 2026-10-29 실행 결과
-
-Unity 6000.3.23f1에서 갱신·컴파일 후 순차 실행했다. 선택 검증은 PlayRulesTests 23/23, RhythmSessionTests 23/23, PlayResultReviewTests 4/4 통과했다. ResultsFlowTests 필터는 PupaResultsFlowTests도 포함하여 14개 중 13개 통과, 실제 PUPA 재생 1개는 FocusLost로 실패했다. 해당 1개 단독 재실행도 FocusLost와 FMOD 출력 장치 초기화 오류로 실패했다.
-
-최종 **Verify All Tests (No Build)**는 EditMode 219 통과·0 실패, PlayMode 102 통과·8 실패, 건너뜀 0개다. 전체 통과가 아니다. ResultsFlowTests 8개와 시작·끝 고정 기록/스냅샷 테스트는 통과했다. 슬롯 20만 회 갱신의 managed allocation은 0바이트였다. 실제 종료 생성자의 소스 검토에서도 노트별 임시 리스트·판정 배열·래퍼가 없는 것을 확인했다. Windows 빌드는 요청 범위에 따라 생략했다.
-
-전체 PlayMode 실패 목록:
-
-- `RhythmDojo.Tests.AudioFlowTests.AllBufferRequestsReportActualConfigurationAndChangedAudioPlaysAndRestarts`: Apply during transition must be rejected.   Expected: False   But was:  True
-- `RhythmDojo.Tests.ChartEditorMenuTests.PupaButtonPreservesDraftAndImportsBundledChartWithLocalAudio`: Expected: 0   But was:  -0.02d
-- `RhythmDojo.Tests.DojoClickFeedbackTests.BurstUsesBoundedObjectsAndRipplesExpireWhilePaused`: TearDown : Unhandled log message: '[Error] FMOD failed to initialize the output device.: "Error initializing output device. " (60)'. Use UnityEngine.TestTools.LogAssert.Expect
-- `RhythmDojo.Tests.GameplayHudFlowTests.GameplayKeepsDisplayCameraWhileWorldRendersIntoWindow`: TearDown : Unhandled log message: '[Error] FMOD failed to initialize the output device.: "Error initializing output device. " (60)'. Use UnityEngine.TestTools.LogAssert.Expect
-- `RhythmDojo.Tests.PixelDojoCursorTests.NativeCursorUsesPressedArtworkOnlyWhileLeftButtonIsHeld`: TearDown : Unhandled log message: '[Error] FMOD failed to initialize the output device.: "Error initializing output device. " (60)'. Use UnityEngine.TestTools.LogAssert.Expect
-- `RhythmDojo.Tests.PupaResultsFlowTests.RealPupaAudioFinishesAndAutomaticallyLoadsResults`: PUPA playback was reset before completion: FocusLost TearDown : Unhandled log message: '[Error] FMOD failed to get driver capabilities ... : "Error initializing output device. " (60)'. Use UnityEngine.TestTools.LogAssert.Expect
-- `RhythmDojo.Tests.SettingsFlowTests.SettingsPopupTabsSaveAudioAndApplySeparateGraphicsControls`: TearDown : Unhandled log message: '[Error] FMOD failed to initialize the output device.: "Error initializing output device. " (60)'. Use UnityEngine.TestTools.LogAssert.Expect
-- `RhythmDojo.Tests.SongSelectionFlowTests.SongRowsKeyboardSelectionUpdatesSelectedSong`: Expected string length 11 but was 36. Strings differ at index 0.   Expected: "tempo-pulse"   But was:  "0349e961-3846-4eb0-bf80-63209e44e6e4"   -----------^
-
-`SettingsPopupTabsSaveAudioAndApplySeparateGraphicsControls`는 전체 실행 후 단독 재실행에서 1/1 통과했다. 전체 실행의 실패 집계는 그대로 보존한다.
-
-위 실패를 숨기거나 오디오 오류를 무시하도록 테스트/런타임을 변경하지 않았다. 전체 XML과 상세 실행 기록은 로컬 `Logs/verification-editmode.xml`, `Logs/verification-playmode.xml`, `Logs/verification.txt`에 있다. 결과 상세와 설정 화면은 1920×1080 렌더링을 직접 확인했다.
-
-![롱노트 시작·끝 상세](verification-images/results-hold-endpoints.png)
-
-![일반 노트 상세](verification-images/results-tap-endpoint.png)
-
-![Automatic/Release 설정 설명](verification-images/settings-hold-rules-v3.png)
 
 ## 플레이 없이 결과 UI 미리보기
 
@@ -192,8 +126,8 @@ Edit Mode에서 **Game Tools > Preview > Results**를 누르면 샘플 결과가
 Run the phases sequentially, waiting for each process to exit. Use the same absolute evidence directory for both launches:
 
 ```powershell
-$probe = 'C:/Users/song/RhythmDojo-pr-quality/Builds/RemediationProbe/RemediationProbe.exe'
-$evidence = 'C:/Users/song/RhythmDojo-pr-quality/Logs/pr-quality-remediation/player'
+$probe = (Join-Path $PWD 'Builds/RemediationProbe/RemediationProbe.exe')
+$evidence = (Join-Path $PWD 'Logs/pr-quality-remediation/player')
 Start-Process -FilePath $probe -WindowStyle Hidden -Wait -ArgumentList @('-remediationPhase', 'exercise', '-remediationOutput', $evidence, '-logFile', "$evidence/exercise-player.log")
 Start-Process -FilePath $probe -WindowStyle Hidden -Wait -ArgumentList @('-remediationPhase', 'persistence', '-remediationOutput', $evidence, '-logFile', "$evidence/persistence-player.log")
 ```
@@ -203,3 +137,58 @@ Check each process exit code and the corresponding JSON `success`; a completed p
 The probe uses queued keyboard/mouse input and verifies pointer raycasts before clicking buttons. Buffer selection uses the Dropdown's normal value-change route, followed by an actual Apply click in the graphics tab. It covers title/settings/editor/selection navigation, actual editor Back autosave of a newly generated GUID project, mode isolation and HUD/Results labels, external WAV loading, pause/buffer validation/recovery/resume/restart/exit, and the built Results scene. It removes only the probe's new editor JSON file and empty GUID directory, after checking containment, absence before creation, and lack of links or unexpected contents; it never removes existing projects. The owned GUID is saved in the backup for crash cleanup.
 
 `exercise.json` records requested/applied buffers, DSP rate intervals, decoded and mixer sample peaks, and audio/song alignment with DSP block plus observed-frame uncertainty. A `loopback-ready` step holds the recovered external 440 Hz tone for 20 seconds so a separate OS loopback recorder can verify output beyond Unity's mixer. PNGs are offscreen renders using the active pipeline StandardRequest, preserving original display-camera world visibility and the existing gameplay texture. They are not framebuffer captures. Blank frames fail the diagnostic and saved images still require visual review. The Results navigation check explicitly advances the session; it does not substitute for the full real-time external WAV test. Synthetic input, screenshots, and mixer sampling do not by themselves establish physical audio latency or subjective output quality.
+
+## 과거 실행 기록
+
+아래 결과는 해당 시점의 소스와 환경에 대한 기록이다. 현행 실행 범위와 절차는 위 지침을 따른다.
+
+### 2026-11-03 Unity error follow-up
+
+The remaining scene-ownership, input/focus-isolation and rendering verification issues were corrected. Final Domain/EditMode: 399/399 passed. Latest PlayMode results by unique test: 202/202 passed, with no skips. The PlayMode total combines the full 202-test run (197 passed, 5 failed) with passing affected-fixture reruns (resume 9/9, chart editor 4/4, timeline 3/3, title 19/19); it is not a single clean final full run. Continuous 929-note playback and automatic Results passed. Native focus behavior remains the default and is regression-tested separately from controlled test focus. Builds were omitted because build/platform settings were unchanged.
+
+See `Logs/unity-errors-verification.md` and `Logs/unity-errors-playmode-consolidated.json` for exact scope, measurements and source results. The historical PR integration results below describe the earlier state.
+
+### 2026-11-03 PR 기능 통합 검증
+
+로컬 `12218cf`의 PR #5~#7 품질 수정을 기준으로 #8 곡 선택, #9 결과 화면, #10 에디터 기능을 `integrate/pr-features`에 선택 통합하였다. 원래 `RhythmDojo` 작업 폴더의 Results 씬과 임시 씬은 보존하였다. 씬은 PR 스냅샷 대신 로컬 빌더로 재생성하였다.
+
+중복 타이틀 진입 코드와 사용되지 않는 판정 이력 슬라이더를 제외하였다. 기존 오디오 복구·DSP 재개·키 설정·씬 수명과 v3 저장 계약을 유지하였다. 에디터의 이전 형식 가져오기·종료 시간 설정·보기 초기화·스냅 OFF 접근을 복원하였고, 패널 재열기·비동기 종료 처리·매 프레임 노트 복사·음수 위치 게임 테스트를 보완하였다. 테스트용 개인 Saiki 음원 의존은 임시 WAV로 대체하였다.
+
+- 전체 EditMode 최초 398개: 397 통과, 글꼴 1 실패. 빌더 수정 후 글꼴 9/9, 최종 씬 재생성 2/2 통과.
+- 전체 PlayMode 최초 197개: 192 통과, 2 실패, 개인 음원 부재로 3 skip. 수정 후 파형 3/3, 에디터 39/39(skip 0), 기존 메뉴 5/5 통과. 후속 스냅 OFF 변경 뒤 에디터 39개 중 38 통과·BPM 입력 포커스 1 실패였으며 해당 항목 단독 재실행은 1/1 통과하였다.
+- 장시간 자동 종료 검사는 단독 재실행에서도 약 61.76초에 FocusLost로 중단되었다. 이 실패를 숨기거나 제품의 포커스 처리 규칙을 변경하지 않았다. 전체 검증 통과가 아니다.
+- 전체 실행과 후속 실행을 테스트 이름별 최신 결과로 합치면 596개 중 595 통과, 1 실패, skip 0이다. 최종 상태에서 전체를 다시 실행한 단일 실행 결과가 아니며 반복 검사를 별도 고유 테스트로 합산하지 않았다.
+- Unity 6000.3.23f1 컴파일 성공, 소스/문서 diff 공백 검사와 meta 412개 검사 통과. 각 실행은 순차 진행하고 Play Mode 종료 및 Editor ready를 확인하였다. Windows 빌드는 빌드/플랫폼 변경 요청이 없어 생략하였다.
+
+원본 결과와 선택 통합 내역은 `Logs/pr-features-*.json`, 현재 곡 선택·에디터·변속 화면의 Unity 렌더 캡처는 `Logs/pr-features/`에 있다. 결과 화면은 동작 테스트로 확인하였으며 이번 결과 화면 캡처는 없다. 기존 품질 개선 증거를 테스트가 다시 쓴 내용은 `Logs/pr-features/retest-artifacts/`에 보관하고 이전 기록은 복원하였다. 원격 push 및 기존 PR 병합/종료는 수행하지 않았다.
+
+
+### 2026-10-29 실행 결과
+
+Unity 6000.3.23f1에서 갱신·컴파일 후 순차 실행하였다. 선택 검증은 PlayRulesTests 23/23, RhythmSessionTests 23/23, PlayResultReviewTests 4/4 통과하였다. ResultsFlowTests 필터는 PupaResultsFlowTests도 포함하여 14개 중 13개 통과, 실제 PUPA 재생 1개는 FocusLost로 실패하였다. 해당 1개 단독 재실행도 FocusLost와 FMOD 출력 장치 초기화 오류로 실패하였다.
+
+최종 **Verify All Tests (No Build)**는 EditMode 219 통과·0 실패, PlayMode 102 통과·8 실패, 건너뜀 0개다. 전체 통과가 아니다. ResultsFlowTests 8개와 시작·끝 고정 기록/스냅샷 테스트는 통과하였다. 슬롯 20만 회 갱신의 managed allocation은 0바이트였다. 실제 종료 생성자의 소스 검토에서도 노트별 임시 리스트·판정 배열·래퍼가 없는 것을 확인하였다. Windows 빌드는 요청 범위에 따라 생략하였다.
+
+전체 PlayMode 실패 목록:
+
+- `RhythmDojo.Tests.AudioFlowTests.AllBufferRequestsReportActualConfigurationAndChangedAudioPlaysAndRestarts`: Apply during transition must be rejected.   Expected: False   But was:  True
+- `RhythmDojo.Tests.ChartEditorMenuTests.PupaButtonPreservesDraftAndImportsBundledChartWithLocalAudio`: Expected: 0   But was:  -0.02d
+- `RhythmDojo.Tests.DojoClickFeedbackTests.BurstUsesBoundedObjectsAndRipplesExpireWhilePaused`: TearDown : Unhandled log message: '[Error] FMOD failed to initialize the output device.: "Error initializing output device. " (60)'. Use UnityEngine.TestTools.LogAssert.Expect
+- `RhythmDojo.Tests.GameplayHudFlowTests.GameplayKeepsDisplayCameraWhileWorldRendersIntoWindow`: TearDown : Unhandled log message: '[Error] FMOD failed to initialize the output device.: "Error initializing output device. " (60)'. Use UnityEngine.TestTools.LogAssert.Expect
+- `RhythmDojo.Tests.PixelDojoCursorTests.NativeCursorUsesPressedArtworkOnlyWhileLeftButtonIsHeld`: TearDown : Unhandled log message: '[Error] FMOD failed to initialize the output device.: "Error initializing output device. " (60)'. Use UnityEngine.TestTools.LogAssert.Expect
+- `RhythmDojo.Tests.PupaResultsFlowTests.RealPupaAudioFinishesAndAutomaticallyLoadsResults`: PUPA playback was reset before completion: FocusLost TearDown : Unhandled log message: '[Error] FMOD failed to get driver capabilities ... : "Error initializing output device. " (60)'. Use UnityEngine.TestTools.LogAssert.Expect
+- `RhythmDojo.Tests.SettingsFlowTests.SettingsPopupTabsSaveAudioAndApplySeparateGraphicsControls`: TearDown : Unhandled log message: '[Error] FMOD failed to initialize the output device.: "Error initializing output device. " (60)'. Use UnityEngine.TestTools.LogAssert.Expect
+- `RhythmDojo.Tests.SongSelectionFlowTests.SongRowsKeyboardSelectionUpdatesSelectedSong`: Expected string length 11 but was 36. Strings differ at index 0.   Expected: "tempo-pulse"   But was:  "0349e961-3846-4eb0-bf80-63209e44e6e4"   -----------^
+
+`SettingsPopupTabsSaveAudioAndApplySeparateGraphicsControls`는 전체 실행 후 단독 재실행에서 1/1 통과하였다. 전체 실행의 실패 집계는 그대로 보존한다.
+
+위 실패를 숨기거나 오디오 오류를 무시하도록 테스트/런타임을 변경하지 않았다. 전체 XML과 상세 실행 기록은 로컬 `Logs/verification-editmode.xml`, `Logs/verification-playmode.xml`, `Logs/verification.txt`에 있다. 결과 상세와 설정 화면은 1920×1080 렌더링을 직접 확인하였다.
+
+![롱노트 시작·끝 상세](verification-images/results-hold-endpoints.png)
+
+![일반 노트 상세](verification-images/results-tap-endpoint.png)
+
+![Automatic/Release 설정 설명](verification-images/settings-hold-rules-v3.png)
+
+
+EOD

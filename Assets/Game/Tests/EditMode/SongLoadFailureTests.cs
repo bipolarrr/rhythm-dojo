@@ -13,9 +13,11 @@ using UnityEditor;
 
 namespace RhythmDojo.Tests
 {
+    [Category("Gameplay")]
     public sealed class SongLoadFailureTests
     {
         [Test]
+        [Category("Fast")]
         public async Task DeletedJsonAndDeletedAudioKeepTheirOriginThroughLibraryAndRefresh()
         {
             string root = Path.Combine(Path.GetTempPath(), "SongLoad-" + Guid.NewGuid());
@@ -98,6 +100,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void AudioBoundaryPreservesDecodeFailureAndCancellation()
         {
             var settings = AssetDatabase.LoadAssetAtPath<GameSettings>("Assets/Game/Settings/GameSettings.asset");
@@ -118,6 +121,7 @@ namespace RhythmDojo.Tests
         }
 
         [Test]
+        [Category("Fast")]
         public void UnattributedFileExceptionsRemainOtherFailures()
         {
             var failure = SongLoadFailure.FromException(new FileNotFoundException("song.audio: missing"));

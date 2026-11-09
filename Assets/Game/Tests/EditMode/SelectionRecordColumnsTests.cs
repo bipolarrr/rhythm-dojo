@@ -10,11 +10,13 @@ using UnityEngine.UI;
 
 namespace RhythmDojo.Tests
 {
+    [Category("UI")]
     public sealed class SelectionRecordColumnsTests
     {
         [TestCase(1920)]
         [TestCase(1728)]
         [TestCase(1440)]
+        [Category("SceneIntegration")]
         public void ScoreAndComboColumnsKeepLargeTextInsideSeparateBounds(int width)
         {
             var scene = SceneManager.GetSceneByPath(SceneBuilder.SelectionPath);
@@ -58,7 +60,11 @@ namespace RhythmDojo.Tests
                 ancestors.Push(rect);
             }
 
-            var size = new Vector2(width, 1080);
+            var scaler = canvas.GetComponent<CanvasScaler>();
+            Assert.That(scaler.uiScaleMode, Is.EqualTo(CanvasScaler.ScaleMode.ScaleWithScreenSize));
+            float scale = Mathf.Pow(width / scaler.referenceResolution.x, 1 - scaler.matchWidthOrHeight)
+                * Mathf.Pow(1080 / scaler.referenceResolution.y, scaler.matchWidthOrHeight);
+            var size = new Vector2(width, 1080) / scale;
             foreach (var rect in ancestors)
             {
                 size = Vector2.Scale(rect.anchorMax - rect.anchorMin, size) + rect.sizeDelta;
@@ -70,6 +76,9 @@ namespace RhythmDojo.Tests
             settings.verticalOverflow = VerticalWrapMode.Overflow;
             using var generator = new TextGenerator();
             float height = generator.GetPreferredHeight(text, settings) / label.pixelsPerUnit;
+            settings.horizontalOverflow = HorizontalWrapMode.Overflow;
+            float textWidth = generator.GetPreferredWidth(text, settings) / label.pixelsPerUnit;
+            Assert.That(textWidth, Is.LessThanOrEqualTo(size.x + 1), label.name + " horizontal overflow at " + width);
             Assert.That(height, Is.LessThanOrEqualTo(size.y + 1), label.name + " at width " + width);
         }
     }

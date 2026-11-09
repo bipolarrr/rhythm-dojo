@@ -115,6 +115,7 @@ namespace RhythmDojo.Tests
                 .Count(g => g.name.StartsWith("Hold Glow"));
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator RebindingFeedbackReusesBurstAndSameModeHoldObjects()
         {
             yield return LoadGameplay();
@@ -138,6 +139,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator HitsReachAudioOutputWhileMissesStayQuietAndPoolsRemainBounded()
         {
             yield return LoadGameplay();
@@ -207,6 +209,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator HoldGlowSurvivesBurstFadeAndResetRestoresCameraEvenWhenPaused()
         {
             yield return LoadGameplay();
@@ -260,6 +263,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator RebindingDetachesOldEventsAndReturningToSelectionRemovesEffects()
         {
             yield return LoadGameplay();

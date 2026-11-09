@@ -17,6 +17,7 @@ using Object = UnityEngine.Object;
 
 namespace RhythmDojo.Tests
 {
+    [Category("Gameplay")]
     public sealed class AudioRecoveryFlowTests : GameplayTestContext
     {
         private sealed class InvalidatingLoader : ISongDocumentLoader
@@ -37,6 +38,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Hardware")]
         public IEnumerator ExternalWaveReloadsAfterResetAndReturnsEditorSession()
         {
             string path = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".wav");
@@ -108,6 +110,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Hardware")]
         public IEnumerator MissingExternalWaveKeepsPauseAndRetryRestoresPlayback()
         {
             string path = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".wav");
@@ -151,6 +154,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Hardware")]
         public IEnumerator ExitRemainsClickableDuringRecoveryAndLateClipIsReleased()
         {
             string path = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".wav");
@@ -209,6 +213,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Hardware")]
         public IEnumerator BuiltInAudioSurvivesResetWithoutReplacingBorrowedClip()
         {
             var flow = Object.FindFirstObjectByType<AppFlowController>();
@@ -245,6 +250,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Hardware")]
         public IEnumerator ResetBeforeStartBlocksQueuedSpaceUntilAudioIsRecovered()
         {
             string path = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".wav");
@@ -298,6 +304,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Hardware")]
         public IEnumerator InvalidatedBeforeGameplayInitializationExposesRecoveryWithoutAnotherReset()
         {
             string path = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".wav");

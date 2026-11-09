@@ -64,21 +64,9 @@ namespace RhythmDojo.EditorTools
                 || !File.Exists("Assets/Game/Settings/ScrollSettings.asset")
                 || !File.Exists("Assets/Game/Settings/AudioPlaybackSettings.asset")
                 || !File.Exists("Assets/Game/Settings/TestSong.asset");
-            RhythmGameConfig legacy = null;
-
-            if (needsMigration && File.Exists(SceneBuilder.ConfigPath))
-            {
-                legacy = AssetDatabase.LoadAssetAtPath<RhythmGameConfig>(SceneBuilder.ConfigPath);
-
-                if (!legacy)
-                {
-                    throw new InvalidOperationException(
-                        "Cannot load legacy configuration. Repair its script reference."
-                    );
-                }
-
-                legacy.Validate();
-            }
+            var legacy = DefaultSettingsBuilder.MigrationSource(needsMigration,
+                File.Exists(SceneBuilder.ConfigPath),
+                () => AssetDatabase.LoadAssetAtPath<RhythmGameConfig>(SceneBuilder.ConfigPath));
 
             var defaults = DefaultSettingsBuilder.Prepare(legacy);
             var mode = defaults.Mode;
@@ -150,10 +138,7 @@ namespace RhythmDojo.EditorTools
 
             if (newSong)
             {
-                if (legacy)
-                {
-                    fixedTiming.chartAudioOffsetSeconds = legacy.AudioOffset;
-                }
+                DefaultSettingsBuilder.InitializeTiming(fixedTiming, legacy);
 
                 song.SetGeneratedDefaults(
                     "test-pulse",
