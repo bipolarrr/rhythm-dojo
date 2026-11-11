@@ -44,6 +44,7 @@ namespace RhythmDojo.Core
         private Func<CancellationToken, Task> retryPlay;
 
         public bool IsSelectionPrepared => selectionPreparation != null && selectionPreparation.IsSelectionPrepared;
+        public Exception SelectionPreparationError => selectionPreparation?.LastError;
 
         public GameSettings Settings => settings;
 
@@ -788,10 +789,14 @@ namespace RhythmDojo.Core
 
             try
             {
-                if (path == SelectionPath && DojoEntranceTransition.Active)
+                if (path == SelectionPath)
                 {
-                    LoadEntranceSelection(path);
-                    return;
+                    bool fromTitle = SceneManager.GetActiveScene().path == "Assets/Game/Scenes/Title.unity";
+                    if (DojoEntranceTransition.Active || fromTitle)
+                    {
+                        LoadEntranceSelection(path);
+                        return;
+                    }
                 }
                 CancelSelectionPreparation();
                 Transitioning = true;

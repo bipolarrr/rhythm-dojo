@@ -176,7 +176,9 @@ namespace RhythmDojo.Tests
             Assert.That(EventSystem.current.currentSelectedGameObject, Is.SameAs(titleFocus));
             new MainMenuActions(flow.Settings, view).StartGame();
             flow.ShowSelection();
-            yield return Wait(() => !DojoEntranceTransition.Active);
+            yield return Wait(() => SceneManager.GetActiveScene().path == AppFlowController.SelectionPath);
+            yield return Wait(() => !flow.Transitioning);
+            yield return null;
             Assert.That(SceneManager.GetActiveScene().path, Is.EqualTo(AppFlowController.SelectionPath));
             Assert.That(UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>().enabled, Is.True);
             Assert.That(EventSystem.current.currentSelectedGameObject, Is.Not.Null);
@@ -285,7 +287,9 @@ namespace RhythmDojo.Tests
             preparationField.SetValue(flow, preparation);
             var view = UnityEngine.Object.FindFirstObjectByType<MainMenuView>();
             new MainMenuActions(flow.Settings, view).StartGame();
-            yield return Wait(() => !DojoEntranceTransition.Active);
+            yield return Wait(() => SceneManager.GetActiveScene().path == AppFlowController.SelectionPath);
+            yield return Wait(() => !flow.Transitioning);
+            yield return null;
             Assert.That(SceneManager.GetActiveScene().path, Is.EqualTo(AppFlowController.SelectionPath));
             Assert.That(flow.Transitioning, Is.False);
             Assert.That(SceneManager.sceneCount, Is.EqualTo(1));

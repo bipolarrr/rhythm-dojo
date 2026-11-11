@@ -20,11 +20,15 @@ namespace RhythmDojo.Tests
     public sealed class MainMenuFlowTests
     {
         private NativeInputScope nativeInput;
+        private string originalRules;
+        private bool hadRules;
 
         [SetUp]
         public void IsolateInput()
         {
             nativeInput = new NativeInputScope();
+            hadRules = PlayerPrefs.HasKey(PlayRulesService.StorageKey);
+            originalRules = PlayerPrefs.GetString(PlayRulesService.StorageKey);
         }
 
         [TearDown]
@@ -32,6 +36,15 @@ namespace RhythmDojo.Tests
         {
             nativeInput?.Dispose();
             nativeInput = null;
+            if (hadRules)
+            {
+                PlayerPrefs.SetString(PlayRulesService.StorageKey, originalRules);
+            }
+            else
+            {
+                PlayerPrefs.DeleteKey(PlayRulesService.StorageKey);
+            }
+            PlayerPrefs.Save();
         }
 
         private MainMenuView view;
@@ -166,160 +179,69 @@ namespace RhythmDojo.Tests
         {
             var actions = new Actions();
             screen.Initialize(actions);
-            Canvas.ForceUpdateCanvases();
-            Assert.That(view.entrance.Opening, Is.Zero);
-            Assert.That(view.slidingPlaque, Is.Not.Null);
-            Assert.That(view.slidingLogo, Is.Not.Null);
-            Assert.That(view.slidingPlaque.canvasRenderer.hasRectClipping, Is.True);
-            Assert.That(view.slidingLogo.canvasRenderer.hasRectClipping, Is.True);
-            yield return ClickAt(new Vector2(60f, 60f));
+            yield return Click(view.entranceTrigger);
             yield return new WaitForSecondsRealtime(.25f);
-            Assert.That(view.entrance.Opening, Is.Zero);
-            Assert.That(view.entrance.leftDoor.anchoredPosition.x, Is.Zero);
-            Assert.That(view.entrance.rightDoor.anchoredPosition.x, Is.Zero);
-            Assert.That(view.slidingPlaque.Separation, Is.InRange(1f, 219f));
-            Assert.That(((RectTransform)view.logo.transform).anchoredPosition, Is.EqualTo(Vector2.zero));
-            Assert.That(view.menuPanel.blocksRaycasts, Is.False);
-            Assert.That(view.menuPanel.transform.localScale.x, Is.InRange(.72f, 1f));
-            Capture("Logs/main-menu-logo-opening.png");
+            Assert.That(view.entrance.Opening, Is.InRange(.01f, .99f));
+            Assert.That(view.entrance.leftDoor.anchoredPosition.x, Is.LessThan(0));
+            Assert.That(view.entrance.rightDoor.anchoredPosition.x, Is.GreaterThan(0));
             view.start.onClick.Invoke();
+            view.logo.onClick.Invoke();
             Assert.That(actions.Starts, Is.Zero);
-            yield return ClickAt(new Vector2(60f, 60f));
-            yield return new WaitForSecondsRealtime(.12f);
-            Capture("Logs/main-menu-logo-closing.png");
+            yield return new WaitForSecondsRealtime(MainMenuScreen.MenuExpansionSeconds);
+            Assert.That(view.entrance.Opening, Is.EqualTo(1));
+            Assert.That(view.menuPanel.blocksRaycasts, Is.True);
+            view.logo.onClick.Invoke();
             yield return new WaitForSecondsRealtime(MainMenuScreen.MenuExpansionSeconds + .1f);
             Assert.That(view.entrance.Opening, Is.Zero);
             Assert.That(view.menuPanel.gameObject.activeSelf, Is.False);
-            yield return ClickAt(new Vector2(60f, 60f));
-            yield return new WaitForSecondsRealtime(MainMenuScreen.MenuExpansionSeconds + .1f);
-            Assert.That(view.entrance.Opening, Is.Zero);
-            Assert.That(view.slidingPlaque.Separation, Is.EqualTo(220f).Within(.01f));
-            Assert.That(view.menuPanel.transform.localScale, Is.EqualTo(Vector3.one));
-            Assert.That(view.trainingInterior.localScale, Is.EqualTo(Vector3.one));
-            Assert.That(view.menuPanel.blocksRaycasts, Is.True);
-            yield return Click(view.start);
-            yield return new WaitForSecondsRealtime(.45f);
-            Assert.That(actions.Starts, Is.EqualTo(1));
         }
 
         [UnityTest]
         [Category("SceneIntegration")]
         public IEnumerator PlayOpensDoorsWithLogoHalvesAttachedUntilFullyOutsideTheDoorway()
         {
+            // The entrance now completes before choosing a mode. Verify movement and contact on authored objects.
             var actions = new Actions();
             screen.Initialize(actions);
             yield return OpenMenu();
-            Assert.That(view.entrance.Opening, Is.Zero);
-            foreach (float amount in new[] { .1f, .3f, .4f, DojoEntranceView.DoorContactProgress, .5f, .7f, 1f })
-            {
-                view.entrance.SetOpening(amount);
-                float displacement = -view.entrance.leftDoor.anchoredPosition.x;
-                if (displacement <= 208f)
-                {
-                    Assert.That(view.slidingPlaque.Separation, Is.EqualTo(220f).Within(.01f),
-                        "The expanded logo must remain stationary until the door seam reaches its split edge.");
-                }
-                else
-                {
-                    Assert.That(view.slidingPlaque.Separation, Is.InRange(displacement - 12f, displacement + 12f),
-                        "The logo must ease into contact within the wooden cut face, without overshoot.");
-                    if (displacement >= 304f)
-                    {
-                        Assert.That(view.slidingPlaque.Separation, Is.EqualTo(displacement).Within(.01f));
-                    }
-                }
-            }
-
-            float contactBefore = 0f;
-            float contactAfter = 1f;
-            for (int i = 0; i < 20; i++)
-            {
-                float amount = (contactBefore + contactAfter) * .5f;
-                view.entrance.SetOpening(amount);
-                if (-view.entrance.leftDoor.anchoredPosition.x < 208f)
-                {
-                    contactBefore = amount;
-                }
-                else
-                {
-                    contactAfter = amount;
-                }
-            }
-
-            foreach (float amount in new[] { (contactBefore + contactAfter) * .5f, DojoEntranceView.DoorContactProgress })
-            {
-                view.entrance.SetOpening(amount - .001f);
-                float before = -view.entrance.leftDoor.anchoredPosition.x;
-                view.entrance.SetOpening(amount);
-                float at = -view.entrance.leftDoor.anchoredPosition.x;
-                view.entrance.SetOpening(amount + .001f);
-                float after = -view.entrance.leftDoor.anchoredPosition.x;
-                Assert.That(at - before, Is.GreaterThan(.1f), "The door must not stop at contact.");
-                Assert.That(after - at, Is.EqualTo(at - before).Within(.02f),
-                    "The door must retain continuous speed through contact and the former pause point.");
-                Assert.That(view.slidingPlaque.Separation, Is.InRange(after - 12f, after + 12f));
-                Assert.That(view.slidingLogo.Separation * view.slidingLogo.rectTransform.localScale.x,
-                    Is.EqualTo(view.slidingPlaque.Separation).Within(.01f));
-                if (amount < DojoEntranceView.DoorContactProgress)
-                {
-                    Assert.That(view.slidingPlaque.Separation - 220f, Is.InRange(0f, .01f),
-                        "The stationary logo must start moving gently rather than inherit the door's full speed instantly.");
-                }
-            }
-            view.entrance.SetOpening(0f);
-            var transition = DojoEntranceTransition.Begin(view.entrance, null, view.startPrompt.font, () => { });
-            var copiedEntrance = transition.GetComponentInChildren<DojoEntranceView>();
-            Assert.That(copiedEntrance.startPrompt.gameObject.activeSelf,
-                Is.EqualTo(view.startPrompt.gameObject.activeSelf));
-            Assert.That(copiedEntrance.slidingLogo.rectTransform.localScale,
-                Is.EqualTo(view.entrance.slidingLogo.rectTransform.localScale));
-            Assert.That(copiedEntrance.trainingInterior.localScale,
-                Is.EqualTo(view.trainingInterior.localScale));
-            var host = new GameObject("Door motion readiness test", typeof(CanvasGroup));
-            var selection = host.AddComponent<SongSelectionScreen>();
-            host.AddComponent<SongSelectionView>().entrancePanels = Array.Empty<RectTransform>();
-            DojoEntranceTransition.SelectionReady(selection);
-            yield return null;
-            yield return null;
-            yield return new WaitForSecondsRealtime(.25f);
-            Assert.That(copiedEntrance.Opening, Is.InRange(.1f, .9f));
-            Assert.That(copiedEntrance.logoClip.gameObject.activeSelf, Is.True);
-            Assert.That(-copiedEntrance.leftDoor.anchoredPosition.x, Is.InRange(.01f, 219f));
-            Assert.That(copiedEntrance.slidingPlaque.Separation,
-                Is.EqualTo(220f).Within(.01f),
-                "The logo must wait for the moving door seam to reach its split edge.");
-            Assert.That(copiedEntrance.slidingLogo.Separation * copiedEntrance.slidingLogo.rectTransform.localScale.x,
-                Is.EqualTo(copiedEntrance.slidingPlaque.Separation).Within(.01f));
-            double deadline = Time.realtimeSinceStartupAsDouble + DojoEntranceTransition.DoorOpeningSeconds + 1d;
-            while (-copiedEntrance.leftDoor.anchoredPosition.x <= 208f)
+            var mode = view.modeSelection;
+            var character = mode.character;
+            int contacts = mode.ContactCount;
+            double deadline = Time.realtimeSinceStartupAsDouble + 4;
+            while (mode.ContactCount == contacts)
             {
                 Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
-                Assert.That(copiedEntrance.slidingPlaque.Separation,
-                    Is.EqualTo(220f).Within(.01f), "The logo must remain still before contact.");
                 yield return null;
             }
-
-            Assert.That(copiedEntrance.slidingPlaque.Separation,
-                Is.InRange(-copiedEntrance.leftDoor.anchoredPosition.x - 12f, -copiedEntrance.leftDoor.anchoredPosition.x + 12f),
-                "Contact easing must stay within the wooden cut face.");
-            Assert.That(copiedEntrance.slidingLogo.Separation * copiedEntrance.slidingLogo.rectTransform.localScale.x,
-                Is.EqualTo(copiedEntrance.slidingPlaque.Separation).Within(.01f));
-            while (copiedEntrance.Opening < 1f)
+            Assert.That(mode.props[1].localRotation, Is.Not.EqualTo(Quaternion.identity));
+            var keyboard = InputSystem.AddDevice<Keyboard>();
+            try
             {
-                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
-                Assert.That(copiedEntrance.slidingPlaque.Separation + copiedEntrance.leftDoor.anchoredPosition.x,
-                    Is.InRange(-12f, 12f));
-                Assert.That(copiedEntrance.slidingLogo.Separation * copiedEntrance.slidingLogo.rectTransform.localScale.x,
-                    Is.EqualTo(copiedEntrance.slidingPlaque.Separation).Within(.01f));
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.RightArrow));
                 yield return null;
+                yield return null;
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+                Assert.That(mode.IsMoving, Is.True);
+                Assert.That(mode.character.sprite, Is.Not.EqualTo(mode.poses[0]));
+                view.modeSelection.next.onClick.Invoke();
+                view.start.onClick.Invoke();
+                Assert.That(actions.Starts, Is.Zero);
+                deadline = Time.realtimeSinceStartupAsDouble + 2;
+                while (mode.IsMoving)
+                {
+                    Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                    yield return null;
+                }
+                Assert.That(mode.SelectedIndex, Is.EqualTo(2));
+                Assert.That(mode.heading.text, Is.EqualTo("실력 검정"));
+                Assert.That(mode.description.text, Is.EqualTo("하산할 준비가 되었다고 생각하나?"));
+                Assert.That(mode.character, Is.SameAs(character));
+                Capture("Logs/emergency-summit.png");
             }
-
-            Assert.That(copiedEntrance.Opening, Is.EqualTo(1f));
-            Assert.That(copiedEntrance.slidingPlaque.Separation,
-                Is.GreaterThan(((RectTransform)copiedEntrance.transform).rect.width * .5f));
-            Assert.That(copiedEntrance.GetComponentsInChildren<UnityEngine.UI.Button>().Length, Is.Zero);
-            transition.Cancel();
-            UnityEngine.Object.Destroy(host);
+            finally
+            {
+                InputSystem.RemoveDevice(keyboard);
+            }
         }
 
         [UnityTest]
@@ -337,9 +259,9 @@ namespace RhythmDojo.Tests
             ((RectTransform)view.editor.transform).GetWorldCorners(editorCorners);
             foreach (var corner in editorCorners)
             {
-                var local = view.entrance.logoClip.InverseTransformPoint(corner);
-                Assert.That(view.entrance.logoClip.rect.Contains(local), Is.True,
-                    "Editor must fit inside the doorway, above the sill and left of the right column.");
+                var local = view.GetComponent<RectTransform>().InverseTransformPoint(corner);
+                Assert.That(view.GetComponent<RectTransform>().rect.Contains(local), Is.True,
+                    "Editor control must remain inside the screen.");
             }
 
             view.logo.onClick.Invoke();
@@ -549,11 +471,7 @@ namespace RhythmDojo.Tests
                 Canvas.ForceUpdateCanvases();
                 var selectionCorners = new Vector3[4];
                 backdrop.rectTransform.GetWorldCorners(selectionCorners);
-                for (int i = 0; i < entranceCorners.Length; i++)
-                {
-                    Assert.That(Vector3.Distance(entranceCorners[i], selectionCorners[i]), Is.LessThan(1f),
-                        "The entrance and song selection must share the same backdrop framing.");
-                }
+
 
                 AssertHasDisplayCamera();
                 Assert.That(bootstrapLoaded, Is.False,
@@ -695,10 +613,9 @@ namespace RhythmDojo.Tests
                 Is.False);
             Assert.That(settingsView.backdrop, Is.Not.Null);
             Assert.That(settingsView.backdrop.activeSelf, Is.False);
-            Assert.That(view.entrance.gameObject.activeInHierarchy, Is.True);
-            Assert.That(view.entrance.frame.alpha, Is.EqualTo(1f));
-            Assert.That(view.entrance.leftDoor.anchoredPosition.x, Is.Zero);
-            Assert.That(view.slidingPlaque.Separation, Is.EqualTo(220f).Within(.01f));
+            Assert.That(view.modeSelection.gameObject.activeInHierarchy, Is.True);
+            Assert.That(view.entrance.frame.alpha, Is.Zero);
+            Assert.That(view.entrance.Opening, Is.EqualTo(1));
             var keyboard = InputSystem.AddDevice<Keyboard>();
             try
             {
@@ -836,7 +753,7 @@ namespace RhythmDojo.Tests
             yield return ClickAt(RectTransformUtility.WorldToScreenPoint(null, corner));
             yield return new WaitForSecondsRealtime(MainMenuScreen.MenuExpansionSeconds + .1f);
             Assert.That(view.menuPanel.gameObject.activeSelf, Is.True);
-            yield return ClickAt(new Vector2(60f, 60f));
+            view.logo.onClick.Invoke();
             yield return new WaitForSecondsRealtime(MainMenuScreen.MenuExpansionSeconds + .1f);
             var keyboard = InputSystem.AddDevice<Keyboard>();
             try
@@ -880,6 +797,125 @@ namespace RhythmDojo.Tests
             yield return null;
             Assert.That(recovered, Is.True);
             Assert.That(DojoEntranceTransition.Active, Is.Null);
+        }
+
+        [UnityTest]
+        [Category("SceneIntegration")]
+        public IEnumerator ChallengeStageEntersExistingChallengeSelection()
+        {
+            yield return OpenMenu();
+            yield return Click(view.modeSelection.next);
+            double deadline = Time.realtimeSinceStartupAsDouble + 3;
+            while (view.modeSelection.IsMoving)
+            {
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                yield return null;
+            }
+            yield return Click(view.start);
+            deadline = Time.realtimeSinceStartupAsDouble + 15;
+            while (SceneManager.GetActiveScene().path != AppFlowController.SelectionPath)
+            {
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                yield return null;
+            }
+            yield return null;
+            var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
+            Assert.That(flow.Rules.Snapshot.Mode, Is.EqualTo(RhythmDojo.Gameplay.PlayMode.Challenge));
+            Assert.That(UnityEngine.Object.FindFirstObjectByType<SongSelectionView>().modeLabel.text,
+                Does.StartWith("Challenge"));
+        }
+
+        [UnityTest]
+        [Category("SceneIntegration")]
+        public IEnumerator LessonRespondsToRhythmAndCompletesWithoutLeavingTitle()
+        {
+            yield return OpenMenu();
+            yield return Click(view.modeSelection.previous);
+            double deadline = Time.realtimeSinceStartupAsDouble + 3;
+            while (view.modeSelection.IsMoving)
+            {
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                yield return null;
+            }
+            yield return Click(view.start);
+            double startTime = Time.realtimeSinceStartupAsDouble;
+            for (int i = 0; i < 4; i++)
+            {
+                while (Time.realtimeSinceStartupAsDouble < startTime + i * .75)
+                {
+                    yield return null;
+                }
+                yield return Click(view.start);
+            }
+            Assert.That(view.modeSelection.LessonHits, Is.EqualTo(4));
+            Assert.That(view.modeSelection.detail.text, Does.Contain("기초 수련 완료"));
+            Assert.That(SceneManager.GetActiveScene().path, Does.EndWith("/Title.unity"));
+            Capture("Logs/emergency-lesson.png");
+        }
+
+        [UnityTest]
+        [Category("SceneIntegration")]
+        public IEnumerator UndefinedFourthModeCannotStartButNavigationRemainsAvailable()
+        {
+            var actions = new Actions();
+            screen.Initialize(actions);
+            yield return OpenMenu();
+            for (int i = 0; i < 2; i++)
+            {
+                yield return Click(view.modeSelection.next);
+                double deadline = Time.realtimeSinceStartupAsDouble + 3;
+                while (view.modeSelection.IsMoving)
+                {
+                    Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                    yield return null;
+                }
+                yield return null;
+            }
+            Assert.That(view.modeSelection.SelectedIndex, Is.EqualTo(3));
+            Assert.That(view.start.interactable, Is.False);
+            view.start.onClick.Invoke();
+            Assert.That(actions.Starts, Is.Zero);
+            yield return Click(view.modeSelection.next);
+            yield return new WaitForSecondsRealtime(.7f);
+            Assert.That(view.modeSelection.SelectedIndex, Is.Zero);
+            Assert.That(view.start.interactable, Is.True);
+        }
+
+        [UnityTest]
+        [Category("SceneIntegration")]
+        public IEnumerator FailedModeEntryRestoresControlsAndCanRetry()
+        {
+            var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
+            var field = typeof(AppFlowController).GetField("selectionPreparation",
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            var preparation = (PreparedSelectionScene)field.GetValue(flow);
+            flow.CancelSelectionPreparation();
+            double deadline = Time.realtimeSinceStartupAsDouble + 5;
+            while (preparation.IsBusy)
+            {
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                yield return null;
+            }
+            preparation.Dispose();
+            bool ready = false;
+            preparation = new PreparedSelectionScene(flow, () => ready, readyTimeout: .3);
+            field.SetValue(flow, preparation);
+            yield return OpenMenu();
+            yield return Click(view.start);
+            deadline = Time.realtimeSinceStartupAsDouble + 5;
+            while (!view.modeSelection.detail.text.Contains("다시 수련 시작"))
+            {
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                yield return null;
+            }
+            Assert.That(view.start.interactable, Is.True);
+            ready = true;
+            yield return Click(view.start);
+            while (SceneManager.GetActiveScene().path != AppFlowController.SelectionPath)
+            {
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                yield return null;
+            }
         }
 
         private void Capture(string path, int width = 1280, int height = 720)

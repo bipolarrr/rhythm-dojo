@@ -15,6 +15,22 @@ namespace RhythmDojo.Core
 
         private readonly GameSettings settings;
         private readonly MainMenuView view;
+        private AppFlowController selectionFlow;
+
+        public bool RecoverSelectionFailure()
+        {
+            if (!Transitioning || !selectionFlow)
+            {
+                return false;
+            }
+            if (selectionFlow.SelectionPreparationError == null)
+            {
+                return false;
+            }
+            Transitioning = false;
+            selectionFlow = null;
+            return true;
+        }
 
         public MainMenuActions(GameSettings gameSettings, MainMenuView view = null)
         {
@@ -62,6 +78,20 @@ namespace RhythmDojo.Core
 
             try
             {
+                if (view && view.modeSelection)
+                {
+                    var flow = AppFlowController.Create(settings);
+                    selectionFlow = flow;
+                    var rules = flow.Rules.Snapshot;
+                    rules.Mode = RhythmDojo.Gameplay.PlayMode.Gauge;
+                    if (view.modeSelection.SelectedIndex == 2)
+                    {
+                        rules.Mode = RhythmDojo.Gameplay.PlayMode.Challenge;
+                    }
+                    flow.Rules.Update(rules);
+                    flow.ShowSelection();
+                    return;
+                }
                 if (view && view.entrance)
                 {
                     DojoEntranceTransition.Begin(

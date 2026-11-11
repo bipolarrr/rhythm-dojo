@@ -31,12 +31,25 @@ namespace RhythmDojo.EditorTools
 
             var view = MainMenuLayoutBuilder.Build();
             SceneManager.MoveGameObjectToScene(view.gameObject, scene);
-            DojoTransitionAssetBuilder.Build(view.entrance);
+            if (!view.modeSelection)
+            {
+                DojoTransitionAssetBuilder.Build(view.entrance);
+            }
 
+            if (view.modeSelection)
+            {
+                view.entrance.transitionTemplate = AssetDatabase.LoadAssetAtPath<DojoEntranceTransition>(
+                    "Assets/Game/Prefabs/DojoEntranceTransition.prefab");
+            }
             var screen = view.gameObject.AddComponent<MainMenuScreen>();
             SceneDependencyAssembler.Wire(screen, "view", view);
             var effects = view.gameObject.AddComponent<AudioSource>();
             effects.playOnAwake = false;
+            if (view.modeSelection)
+            {
+                view.modeSelection.effects = effects;
+                view.modeSelection.contact = view.knock;
+            }
             SceneDependencyAssembler.Wire(screen, "effects", effects);
 
             var root = view.gameObject.AddComponent<MainMenuCompositionRoot>();

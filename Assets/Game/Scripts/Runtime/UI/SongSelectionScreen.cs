@@ -855,6 +855,11 @@ namespace RhythmDojo.UI
             FocusSelected();
         }
 
+        public void RestoreEntryFocus()
+        {
+            FocusSelected();
+        }
+
         private void FocusSelected()
         {
             if (!EventSystem.current)

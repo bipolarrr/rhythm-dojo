@@ -180,6 +180,7 @@ namespace RhythmDojo.EditorTools
             PixelOptionsStyle.ApplyQuit(view);
             UiFontSettings.ApplyTo(view.transform);
             ApplyMenuTextStyle(view);
+            AlphaDojoLayoutBuilder.Apply(view);
             view.Validate();
 
             return view;

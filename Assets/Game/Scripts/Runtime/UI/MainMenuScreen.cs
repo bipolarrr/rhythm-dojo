@@ -59,6 +59,12 @@ namespace RhythmDojo.UI
             Unbind();
             Validate();
             view.RestoreBoards();
+            if (view.modeSelection)
+            {
+                view.modeSelection.ResetPresentation();
+                view.modeSelection.previous.onClick.AddListener(PreviousMode);
+                view.modeSelection.next.onClick.AddListener(NextMode);
+            }
             view.logoArtwork.localRotation = Quaternion.identity;
             titleScale = view.logoArtwork.localScale;
             promptScale = view.startPrompt.rectTransform.localScale;
@@ -105,7 +111,21 @@ namespace RhythmDojo.UI
             }
         }
 
-        private bool Busy => actions == null || starting || quitting || actions.Transitioning;
+        private bool Busy
+        {
+            get
+            {
+                if (actions == null || starting || quitting)
+                {
+                    return true;
+                }
+                if (view.modeSelection && view.modeSelection.IsMoving)
+                {
+                    return true;
+                }
+                return actions.Transitioning;
+            }
+        }
 
         private void Update()
         {
@@ -115,6 +135,49 @@ namespace RhythmDojo.UI
             }
 
             var keyboard = UnityEngine.InputSystem.Keyboard.current;
+            if (starting && actions is RhythmDojo.Core.MainMenuActions mainMenuActions)
+            {
+                if (mainMenuActions.RecoverSelectionFailure())
+                {
+                    starting = false;
+                    view.SetMenuInteractable(true);
+                    view.modeSelection.detail.text = "곡 목록을 열지 못했습니다. 다시 수련 시작을 눌러 주세요.";
+                }
+            }
+            if (!menuExpanded && view.ambientLights != null)
+            {
+                float glow = .045f + Mathf.Sin(Time.unscaledTime * 2.3f) * .012f;
+                foreach (var light in view.ambientLights)
+                {
+                    light.color = new Color(1, .68f, .23f, glow);
+                }
+            }
+            if (view.modeSelection)
+            {
+                bool available = !Busy && !view.quitPopup.activeSelf;
+                available = available && menuExpanded && expansion >= .99f;
+                view.modeSelection.InputEnabled = available;
+                if (available)
+                {
+                    view.start.interactable = view.modeSelection.CanEnter;
+                }
+                if (available && !view.modeSelection.IsMoving)
+                {
+                    var gamepad = UnityEngine.InputSystem.Gamepad.current;
+                    if (keyboard?.leftArrowKey.wasPressedThisFrame == true || gamepad?.dpad.left.wasPressedThisFrame == true)
+                    {
+                        PreviousMode();
+                    }
+                    else if (keyboard?.rightArrowKey.wasPressedThisFrame == true || gamepad?.dpad.right.wasPressedThisFrame == true)
+                    {
+                        NextMode();
+                    }
+                    if (keyboard?.spaceKey.wasPressedThisFrame == true && view.modeSelection.SelectedIndex == 0)
+                    {
+                        view.modeSelection.Practice();
+                    }
+                }
+            }
             if (!Busy && Time.frameCount != modalClosedFrame && keyboard?.escapeKey.wasPressedThisFrame == true)
             {
                 if (view.quitPopup.activeSelf)
@@ -231,6 +294,22 @@ namespace RhythmDojo.UI
                 return;
             }
 
+            if (view.modeSelection)
+            {
+                if (view.modeSelection.IsMoving)
+                {
+                    return;
+                }
+                if (view.modeSelection.SelectedIndex == 0)
+                {
+                    view.modeSelection.Practice();
+                    return;
+                }
+                if (!view.modeSelection.CanEnter)
+                {
+                    return;
+                }
+            }
             starting = true;
             view.SetMenuInteractable(false);
             StartCoroutine(BreakAndInvoke(view.start, actions.StartGame, true));
@@ -323,6 +402,17 @@ namespace RhythmDojo.UI
                 return;
             }
 
+            if (view.modeSelection)
+            {
+                if (view.modeSelection.IsMoving || (expansion > 0 && expansion < 1))
+                {
+                    return;
+                }
+                if (view.doorSlide)
+                {
+                    effects.PlayOneShot(view.doorSlide, .5f);
+                }
+            }
             menuExpanded = !menuExpanded;
             knockTime = .18f;
             if (view.knock)
@@ -447,6 +537,29 @@ namespace RhythmDojo.UI
             actions.QuitGame();
         }
 
+        private void PreviousMode()
+        {
+            ChangeMode(-1);
+        }
+
+        private void NextMode()
+        {
+            ChangeMode(1);
+        }
+
+        private void ChangeMode(int direction)
+        {
+            if (Busy || view.quitPopup.activeSelf || expansion < .99f)
+            {
+                return;
+            }
+            view.modeSelection.Move(direction);
+            if (EventSystem.current)
+            {
+                EventSystem.current.SetSelectedGameObject(view.start.gameObject);
+            }
+        }
+
         private void Unbind()
         {
             RestoreScale();
@@ -456,6 +569,12 @@ namespace RhythmDojo.UI
                 return;
             }
 
+            if (view.modeSelection)
+            {
+                view.modeSelection.previous.onClick.RemoveListener(PreviousMode);
+                view.modeSelection.next.onClick.RemoveListener(NextMode);
+                view.modeSelection.InputEnabled = false;
+            }
             if (view.editor)
             {
                 view.editor.onClick.RemoveListener(OpenEditor);

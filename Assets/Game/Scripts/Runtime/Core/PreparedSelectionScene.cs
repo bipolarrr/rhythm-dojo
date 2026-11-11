@@ -403,6 +403,12 @@ namespace RhythmDojo.Core
             priorScope = null;
             RestoreCanvasOrders();
             ScreenCompositionRoot.EnableInput(preparedSelectionScene);
+            if (!DojoEntranceTransition.Active)
+            {
+                // Mode selection has already opened the doors. Restore focus after the
+                // prepared EventSystem is enabled, without waiting for the legacy overlay.
+                preparedSelectionScreen.RestoreEntryFocus();
+            }
 
             var scene = preparedSelectionScene;
             ownedScenes.Remove(scene.handle);

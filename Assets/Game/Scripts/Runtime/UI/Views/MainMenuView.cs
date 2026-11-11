@@ -15,6 +15,8 @@ namespace RhythmDojo.UI
             quit,
             confirmQuit,
             cancelQuit;
+        public DojoModeView modeSelection;
+        public Image[] ambientLights;
         public Button editor;
         public Button entranceTrigger;
         public bool alwaysVisibleMenu;
@@ -47,6 +49,10 @@ namespace RhythmDojo.UI
 
         public void Validate()
         {
+            if (modeSelection)
+            {
+                modeSelection.Validate();
+            }
             if ((!title || !startPrompt) || !quitQuestion)
             {
                 throw new InvalidOperationException("Main menu view references missing.");
@@ -99,6 +105,20 @@ namespace RhythmDojo.UI
 
         public void SetExpansion(float amount)
         {
+            if (modeSelection)
+            {
+                amount = Mathf.Clamp01(amount);
+                entrance.gameObject.SetActive(amount < 1f);
+                entrance.SetOpening(amount);
+                entrance.frame.alpha = 1f - Mathf.InverseLerp(.65f, 1f, amount);
+                logoGroup.alpha = 1f - amount;
+                logoGroup.blocksRaycasts = amount < .01f;
+                menuPanel.alpha = Mathf.SmoothStep(0, 1, amount);
+                menuPanel.interactable = menuPanel.blocksRaycasts = amount >= .99f;
+                startPrompt.gameObject.SetActive(amount < .01f);
+                return;
+            }
+
             if (alwaysVisibleMenu)
             {
                 menuPanel.alpha = 1f;
