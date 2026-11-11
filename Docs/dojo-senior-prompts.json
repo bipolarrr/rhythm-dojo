@@ -1,0 +1,15 @@
+{
+  "tool": "built-in image_gen",
+  "reference": "Assets/Game/Art/AlphaDojo/Actors.png",
+  "output": "Assets/Game/Art/AlphaDojo/SeniorStudent.png",
+  "prompt": "Use case: stylized-concept. Asset type: transparent production sprite sheet for a Korean martial arts rhythm game. Input image is STYLE REFERENCE ONLY: retain its detailed small-scale hand painted pixel-edged 2D character aesthetic, warm ivory, dark teal and red dojo palette, crisp dark outlines and compact athletic proportions. Create a NEW young adult FEMALE senior trainee / assistant instructor, a capable slightly older peer of the red-headband trainee, not an elderly master, not a supernatural sage. Black high ponytail tied with red ribbon (not topknot), ivory wrapped training jacket with fitted dark teal short sleeveless over-vest, red waist sash, loose dark teal trousers, wrapped shins, flat martial arts shoes. Friendly firm focused face, youthful clearly female, practical modest outfit. She faces LEFT toward the player in ALL poses. Distinct upright relaxed silhouette with one hand often at waist. Make ONE 3 columns by 2 rows sprite sheet, SIX aligned FULL BODY frames of the SAME woman, exact consistent head size, clothes, feet level, stance size and orientation. Each cell equal size, generous clear margins, no overlap. Row 1 left: base idle, attentive upright, left-facing, one hand on hip, other relaxed. Row 1 middle: explaining, open palm held forward toward left. Row 1 right: pointing down-left at training target, off hand on hip. Row 2 left: approving small nod, encouraging raised fist near chest. Row 2 middle: arms folded patiently watching trainee. Row 2 right: controlled short martial-arts demonstration, left-directed palm strike, balanced grounded feet. Minimal leg displacement across frames so sprite swap is stable. No rods, beard, grey hair, long master robe, hats, weapons, scrolls, background scene, labels or text. True transparent alpha background throughout between all figures, no painted background, no ground shadows. Do not reproduce the original player or sage. Output high quality sprite sheet landscape 1536x1024.",
+  "frames": [
+    "Idle",
+    "Explain",
+    "Point",
+    "Approve",
+    "Observe",
+    "Demonstrate"
+  ],
+  "layout": "3 columns × 2 rows, left-to-right, top-to-bottom; original alpha preserved"
+}

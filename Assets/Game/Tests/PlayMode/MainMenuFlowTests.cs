@@ -994,7 +994,7 @@ namespace RhythmDojo.Tests
             AssertGroundedMotion(view.modeSelection.teacherMotion, teacherVertices);
             Assert.That(view.modeSelection.teacherGesture.localRotation, Is.EqualTo(Quaternion.identity));
             Assert.That(view.modeSelection.props[0].localRotation, Is.EqualTo(Quaternion.identity),
-                "The target must wait for the player's answer to the master.");
+                "The target must wait for the player's answer to the senior.");
             while (view.modeSelection.IsArriving)
             {
                 Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
@@ -1013,6 +1013,8 @@ namespace RhythmDojo.Tests
                 yield return Click(view.start);
             }
             Assert.That(view.modeSelection.LessonHits, Is.EqualTo(4));
+            Assert.That(view.modeSelection.traineeIdle.IsPlaying, Is.False);
+            Assert.That(view.modeSelection.teacherIdle.IsPlaying, Is.False);
             Assert.That(view.modeSelection.detail.text, Does.Contain("기초 수련 완료"));
             Assert.That(view.modeSelection.lessonCue.text, Does.Contain("잘했다"));
             foreach (var mark in view.modeSelection.lessonMarks)
@@ -1100,6 +1102,9 @@ namespace RhythmDojo.Tests
         {
             yield return OpenMenu();
             var mode = view.modeSelection;
+            mode.traineeIdle.enabled = false;
+            mode.teacherIdle.enabled = false;
+            mode.sageIdle.enabled = false;
             var character = mode.character;
             for (int i = 0; i < 3; i++)
             {
@@ -1128,7 +1133,10 @@ namespace RhythmDojo.Tests
                     Assert.That(mode.companions[mode.SelectedIndex].anchoredPosition, Is.EqualTo(companionPosition));
                     Assert.That(mode.companions[mode.SelectedIndex].localRotation, Is.EqualTo(Quaternion.identity));
                     Assert.That(mode.props[mode.SelectedIndex].localRotation, Is.EqualTo(Quaternion.identity));
-                    Assert.That(mode.banners[mode.SelectedIndex].localRotation, Is.EqualTo(Quaternion.identity));
+                    if (mode.banners[mode.SelectedIndex])
+                    {
+                        Assert.That(mode.banners[mode.SelectedIndex].localRotation, Is.EqualTo(Quaternion.identity));
+                    }
                     Assert.That(mode.ContactCount, Is.EqualTo(contacts), "Idle must never fabricate a strike.");
                     yield return null;
                 }
@@ -1164,12 +1172,152 @@ namespace RhythmDojo.Tests
             yield return new WaitForSecondsRealtime(.9f);
             Assert.That(mode.ContactCount, Is.EqualTo(contacts + 1), "Repeated input must not restart a pending blow.");
             Assert.That(mode.props[1].localRotation, Is.EqualTo(Quaternion.identity));
-            Assert.That(mode.character.sprite, Is.SameAs(mode.poses[0]));
+            Assert.That(mode.traineeAnimation.Current, Is.EqualTo(DojoIdleVariation.Motion.None));
             yield return Click(mode.practiceTarget);
             mode.CancelMotion();
             yield return new WaitForSecondsRealtime(.8f);
             Assert.That(mode.ContactCount, Is.EqualTo(contacts + 1), "Cancelled contact must never replay later.");
             Assert.That(mode.props[1].localRotation, Is.EqualTo(Quaternion.identity));
+        }
+
+        [UnityTest]
+        [Category("SceneIntegration")]
+        public IEnumerator IdleVariationsTakeTurnsRespondAndYieldToInputAndTravel()
+        {
+            yield return OpenMenu();
+            var mode = view.modeSelection;
+            yield return WaitForModeMotion(mode);
+            yield return Click(mode.previous);
+            yield return WaitForModeMotion(mode);
+            var teacher = mode.teacherMotion;
+            var teacherSprite = mode.teacherPoses[0];
+            var originalCooldown = mode.teacherIdle.cooldown;
+            var originalPlayerCooldown = mode.traineeIdle.cooldown;
+            var originalWeights = Array.ConvertAll(mode.teacherIdle.variations, item => item.weight);
+            try
+            {
+                // Shorten only waits; keep authored gesture durations and actual frame updates.
+                mode.teacherIdle.cooldown = new Vector2(.2f, .3f);
+                mode.traineeIdle.cooldown = new Vector2(.3f, .4f);
+                mode.teacherIdle.Cancel();
+                mode.traineeIdle.Cancel();
+                var seen = new System.Collections.Generic.HashSet<DojoIdleVariation.Motion>();
+                bool responding = false;
+                bool sawSprite = false;
+                int contacts = mode.ContactCount;
+                double deadline = Time.realtimeSinceStartupAsDouble + 22;
+                foreach (var motion in new[] { DojoIdleVariation.Motion.Ready,
+                    DojoIdleVariation.Motion.Kick, DojoIdleVariation.Motion.Punch })
+                {
+                    foreach (var variation in mode.teacherIdle.variations)
+                    {
+                        variation.weight = 0;
+                        if (variation.motion == motion)
+                        {
+                            variation.weight = 1;
+                        }
+                    }
+                    int completed = mode.lessonSequence.CompletedSets;
+                    var previousPhase = DojoLessonSequence.Step.Waiting;
+                    double delayStarted = 0;
+                    while (mode.lessonSequence.CompletedSets == completed)
+                    {
+                        Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                        Assert.That(mode.traineeIdle.IsPlaying, Is.False,
+                            "A shared lesson owns both actors; no independent player lottery runs.");
+                        var phase = mode.lessonSequence.Phase;
+                        Assert.That(phase, Is.Not.EqualTo(DojoLessonSequence.Step.Signal),
+                            "Each demonstration starts directly from idle, without a shared opening gesture.");
+                        Assert.That(mode.teacherAnimation.Current,
+                            Is.EqualTo(DojoIdleVariation.Motion.None).Or.EqualTo(motion).Or.EqualTo(DojoIdleVariation.Motion.Approve),
+                            "The senior must only demonstrate the selected motion.");
+                        Assert.That(mode.traineeAnimation.Current, Is.EqualTo(DojoIdleVariation.Motion.None).Or.EqualTo(motion),
+                            "The trainee must imitate only the selected motion, including its first frame.");
+                        if (phase != previousPhase)
+                        {
+                            if (previousPhase == DojoLessonSequence.Step.Waiting)
+                            {
+                                Assert.That(phase, Is.EqualTo(DojoLessonSequence.Step.Demonstration));
+                            }
+                            else
+                            {
+                                Assert.That((int)phase, Is.EqualTo(((int)previousPhase + 1) % 6));
+                            }
+                            if (phase == DojoLessonSequence.Step.Delay)
+                            {
+                                delayStarted = Time.realtimeSinceStartupAsDouble;
+                            }
+                            if (phase == DojoLessonSequence.Step.Imitation)
+                            {
+                                Assert.That(Time.realtimeSinceStartupAsDouble - delayStarted,
+                                    Is.InRange(.32, .55));
+                            }
+                            previousPhase = phase;
+                        }
+                        if (phase == DojoLessonSequence.Step.Demonstration)
+                        {
+                            Assert.That(mode.teacherAnimation.Current, Is.EqualTo(motion));
+                            Assert.That(mode.traineeAnimation.Current, Is.EqualTo(DojoIdleVariation.Motion.None));
+                            seen.Add(motion);
+                            sawSprite |= teacher.sprite != teacherSprite;
+                        }
+                        if (phase == DojoLessonSequence.Step.Imitation)
+                        {
+                            Assert.That(mode.traineeAnimation.Current, Is.EqualTo(motion));
+                            Assert.That(mode.teacherAnimation.Current, Is.EqualTo(DojoIdleVariation.Motion.None));
+                            responding = true;
+                        }
+                        yield return null;
+                    }
+                }
+                Assert.That(seen.Count, Is.EqualTo(3));
+                Assert.That(responding && sawSprite, Is.True);
+                Assert.That(mode.ContactCount, Is.EqualTo(contacts), "Idle gestures never hit the target.");
+                for (int i = 0; i < originalWeights.Length; i++)
+                {
+                    mode.teacherIdle.variations[i].weight = originalWeights[i];
+                }
+                deadline = Time.realtimeSinceStartupAsDouble + 6;
+                while (mode.lessonSequence.Phase != DojoLessonSequence.Step.Imitation)
+                {
+                    Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                    yield return null;
+                }
+                mode.Practice();
+                Assert.That(mode.lessonSequence.Phase, Is.EqualTo(DojoLessonSequence.Step.Waiting));
+                Assert.That(mode.teacherIdle.IsPlaying, Is.False);
+                Assert.That(mode.traineeIdle.IsPlaying, Is.False);
+                yield return new WaitForSecondsRealtime(1.1f);
+                Assert.That(mode.teacherIdle.IsPlaying, Is.False, "The entire guided lesson owns the actors.");
+                Assert.That(mode.traineeIdle.IsPlaying, Is.False);
+                mode.Move(1);
+                Assert.That(teacher.sprite, Is.SameAs(teacherSprite));
+                Assert.That(mode.teacherIdle.IsPlaying, Is.False);
+                yield return WaitForModeMotion(mode);
+                deadline = Time.realtimeSinceStartupAsDouble + 8;
+                while (!mode.traineeIdle.IsPlaying)
+                {
+                    Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                    yield return null;
+                }
+                mode.PracticeTarget();
+                Assert.That(mode.traineeIdle.IsPlaying, Is.False, "Input cancels the random pose immediately.");
+                mode.InputEnabled = false;
+                Assert.That(mode.teacherIdle.IsPlaying, Is.False);
+                mode.CancelMotion();
+                Assert.That(mode.character.sprite, Is.SameAs(mode.poses[0]));
+                Assert.That(mode.teacherMotion, Is.SameAs(teacher));
+            }
+            finally
+            {
+                mode.teacherIdle.cooldown = originalCooldown;
+                mode.traineeIdle.cooldown = originalPlayerCooldown;
+                for (int i = 0; i < originalWeights.Length; i++)
+                {
+                    mode.teacherIdle.variations[i].weight = originalWeights[i];
+                }
+                mode.CancelMotion();
+            }
         }
 
         private static IEnumerator WaitForModeMotion(DojoModeView mode)
@@ -1209,7 +1357,15 @@ namespace RhythmDojo.Tests
                 movement = Mathf.Max(movement, Vector3.Distance(vertices[i], current[i]));
             }
             Assert.That(planted, Is.GreaterThan(0));
-            Assert.That(movement, Is.GreaterThan(.03f), "Grounding must retain visible upper-body or cloth motion.");
+            var figure = graphic as DojoFigureGraphic;
+            if (figure && figure.spriteAnimation)
+            {
+                Assert.That(movement, Is.LessThan(.0001f), "Breathing is drawn in sprite frames, not mesh distortion.");
+            }
+            else
+            {
+                Assert.That(movement, Is.GreaterThan(.03f), "Preserve the sage and cloth's existing motion.");
+            }
         }
 
         private void Capture(string path, int width = 1280, int height = 720)

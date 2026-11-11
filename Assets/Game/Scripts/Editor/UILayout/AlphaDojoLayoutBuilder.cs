@@ -79,6 +79,8 @@ namespace RhythmDojo.EditorTools
             mode.nearLayers = new RectTransform[4];
             mode.roomRoot = Group("Training Spaces", stage.transform);
             mode.poses = new[] { Actor(0), Actor(1), Actor(2), Actor(3) };
+            mode.teacherPoses = new[] { Senior(0), Senior(1), Senior(2), Senior(3), Senior(4), Senior(5) };
+            BuildIdleVariations(mode);
             var backgrounds = new[] { DojoRenewalLayoutBuilder.Load("LessonRoom"),
                 DojoRenewalLayoutBuilder.Load("PracticeHall"), Summit(), DojoEntranceAssets.Load("TrainingInterior") };
             for (int i = 0; i < 4; i++)
@@ -106,6 +108,10 @@ namespace RhythmDojo.EditorTools
                 Place(mode.characterMarks[i], new Vector2(.5f, .5f), new Vector2(-30, -122), Vector2.zero);
                 var prop = Actor(6);
                 var companion = Actor(4);
+                if (i == 0)
+                {
+                    companion = mode.teacherPoses[0];
+                }
                 Vector2 companionPosition = new Vector2(340, -115);
                 if (i == 2)
                 {
@@ -122,6 +128,10 @@ namespace RhythmDojo.EditorTools
                 mode.props[i].pivot = new Vector2(.5f, .05f);
                 mode.props[i].anchoredPosition += new Vector2(0, -99);
                 var figure = DojoFigureGraphic.Figure.Master;
+                if (i == 0)
+                {
+                    figure = DojoFigureGraphic.Figure.Senior;
+                }
                 if (i == 2)
                 {
                     figure = DojoFigureGraphic.Figure.Sage;
@@ -139,25 +149,21 @@ namespace RhythmDojo.EditorTools
                     mode.sageMotion = masterArtwork;
                     mode.sageGesture = masterArtwork.rectTransform;
                 }
-                var board = Figure("Instruction Scroll", group.transform, Actor(7),
-                    new Vector2(-350, -80), new Vector2(170, 225), DojoFigureGraphic.Figure.Scroll);
-                mode.scrollMotion[i] = board;
-                mode.banners[i] = board.rectTransform;
-                var inscription = Label("Scroll Inscription", board.transform, "心\n技\n體", 27, Ink);
-                Place(inscription.rectTransform, new Vector2(.5f, .58f), Vector2.zero, new Vector2(80, 110));
+                BuildInstructionScroll(mode, i);
                 if (i == 0)
                 {
-                    // A side-on lesson: explanation to the left, teacher on the raised right platform.
-                    mode.characterMarks[i].anchoredPosition = new Vector2(-150, -88);
-                    mode.props[i].anchoredPosition = new Vector2(-20, -200);
+                    // Both trainees share the front floor, with the target between them.
+                    mode.characterMarks[i].anchoredPosition = new Vector2(-150, -112);
+                    mode.props[i].anchoredPosition = new Vector2(-20, -224);
                     mode.props[i].sizeDelta = new Vector2(145, 193);
-                    mode.companions[i].anchoredPosition = new Vector2(230, -56);
-                    mode.companions[i].sizeDelta = new Vector2(175, 233);
-                    Place(board.rectTransform, new Vector2(.5f, .5f), new Vector2(-320, -2), new Vector2(165, 220));
-                    inscription.text = "하나\n둘\n셋 · 넷";
-                    inscription.fontSize = 20;
-                    mode.lessonCue = Label("Teacher Cue", group.transform, "듣고, 따라 두드려 보거라", 20, Ink);
-                    Place(mode.lessonCue.rectTransform, new Vector2(.5f, .5f), new Vector2(375, 108), new Vector2(340, 36));
+                    // The new sheet has less transparent space below the soles than Actor0.
+                    mode.companions[i].anchoredPosition = new Vector2(170, -94);
+                    mode.companions[i].sizeDelta = new Vector2(253, 253);
+                    mode.lessonCue = Label("Teacher Cue", group.transform, "내 손을 보고, 천천히 따라 해 봐.", 20, Ink);
+                    Place(mode.lessonCue.rectTransform, new Vector2(.5f, .5f), new Vector2(270, 66), new Vector2(360, 36));
+                    var seniorLabel = Label("Senior Role", group.transform, "선배 사형 · 기초 수련 담당", 17, Ink);
+                    Place(seniorLabel.rectTransform, new Vector2(.5f, .5f), new Vector2(270, 103), new Vector2(310, 30));
+                    seniorLabel.transform.SetParent(mode.middleLayers[i], false);
                     for (int beat = 0; beat < 4; beat++)
                     {
                         var stamp = Art("Lesson Beat " + (beat + 1), group.transform,
@@ -170,16 +176,16 @@ namespace RhythmDojo.EditorTools
                 }
                 if (i == 2)
                 {
-                    inscription.text = "風\n林\n山";
-                    board.color = new Color(.85f, .93f, 1);
                     mode.props[i].anchoredPosition = new Vector2(155, -220);
                     mode.props[i].gameObject.SetActive(false);
-                    board.rectTransform.anchoredPosition = new Vector2(-395, -86);
                 }
                 DojoRenewalLayoutBuilder.AddRoomAtmosphere(group.transform, i);
                 mode.props[i].SetParent(mode.middleLayers[i], false);
                 mode.companions[i].SetParent(mode.middleLayers[i], false);
-                board.transform.SetParent(mode.middleLayers[i], false);
+                if (mode.banners[i])
+                {
+                    mode.banners[i].SetAsLastSibling();
+                }
                 if (i == 0)
                 {
                     mode.lessonCue.transform.SetParent(mode.middleLayers[i], false);
@@ -197,7 +203,6 @@ namespace RhythmDojo.EditorTools
                     mode.practiceTarget.transition = Selectable.Transition.None;
                     mode.practiceTarget.navigation = new Navigation { mode = Navigation.Mode.None };
                     mode.companions[i].gameObject.SetActive(false);
-                    board.rectTransform.anchoredPosition = new Vector2(420, -100);
                 }
                 mode.nearLayers[i] = Group("Foreground", group.transform);
                 var foreground = Art("Near Timber", mode.nearLayers[i],
@@ -220,6 +225,7 @@ namespace RhythmDojo.EditorTools
             mode.traineeMotion = Figure("Trainee", mode.roomRoot, mode.poses[0],
                 new Vector2(-30, -122), new Vector2(190, 253), DojoFigureGraphic.Figure.Trainee);
             mode.character = mode.traineeMotion;
+            DojoAnimationAssetBuilder.Configure(mode);
             mode.travelCover = Art("Passing Timber", mode.roomRoot,
                 DojoRenewalLayoutBuilder.Slice("TimberPost", DojoRenewalLayoutBuilder.Load("HanokEntrance"),
                     new Rect(.215f, .19f, .027f, .48f)), new Vector2(1100, 0), new Vector2(190, 940)).rectTransform;
@@ -235,9 +241,163 @@ namespace RhythmDojo.EditorTools
             view.quitPopup.transform.SetAsLastSibling();
         }
 
+        private static void BuildInstructionScroll(DojoModeView mode, int i)
+        {
+            // The lesson floor and summit intentionally have no teaching easel.
+            if (i == 0 || i == 2)
+            {
+                return;
+            }
+
+            var board = Figure("Instruction Scroll", mode.middleLayers[i], Actor(7),
+                new Vector2(-350, -80), new Vector2(170, 225), DojoFigureGraphic.Figure.Scroll);
+            mode.scrollMotion[i] = board;
+            mode.banners[i] = board.rectTransform;
+            if (i == 1)
+            {
+                board.rectTransform.anchoredPosition = new Vector2(420, -100);
+                BuildPracticeDiagram(board.transform);
+                return;
+            }
+
+            var inscription = Label("Scroll Inscription", board.transform, "心\n技\n體", 27, Ink);
+            Place(inscription.rectTransform, new Vector2(.5f, .58f), Vector2.zero, new Vector2(80, 110));
+        }
+
+        private static void BuildPracticeDiagram(Transform parent)
+        {
+            var diagram = Group("Practice Diagram", parent);
+            Place(diagram, new Vector2(.5f, .5f), new Vector2(-14, 25), new Vector2(72, 86));
+            var laneInk = new Color(Ink.r, Ink.g, Ink.b, .55f);
+            var judgmentInk = new Color(.56f, .22f, .10f, .9f);
+            for (int lane = 0; lane <= 4; lane++)
+            {
+                float x = -32 + lane * 16;
+                DiagramStroke("Lane Boundary " + lane, diagram,
+                    new Vector2(x, -35), new Vector2(x, 39), 1.2f, laneInk);
+            }
+
+            var notes = new[] { new Vector2(-24, 28), new Vector2(-8, 9),
+                new Vector2(8, 23), new Vector2(24, -7), new Vector2(-24, -17), new Vector2(8, -17) };
+            for (int note = 0; note < notes.Length; note++)
+            {
+                DiagramStroke("Falling Note " + note, diagram,
+                    notes[note] - new Vector2(5.5f, 0), notes[note] + new Vector2(5.5f, 0), 4, Ink);
+            }
+
+            DiagramStroke("Descent", diagram, new Vector2(24, 34), new Vector2(24, 15), 1.5f, Ink);
+            DiagramStroke("Descent Left", diagram, new Vector2(20, 20), new Vector2(24, 15), 1.5f, Ink);
+            DiagramStroke("Descent Right", diagram, new Vector2(28, 20), new Vector2(24, 15), 1.5f, Ink);
+            DiagramStroke("Judgment Line", diagram, new Vector2(-35, -27), new Vector2(35, -27), 2.5f, judgmentInk);
+            for (int lane = 0; lane < 4; lane++)
+            {
+                float x = -24 + lane * 16;
+                DiagramStroke("Key " + lane, diagram,
+                    new Vector2(x - 5, -34), new Vector2(x + 5, -34), 4.5f, Ink);
+            }
+        }
+
+        private static void DiagramStroke(string name, Transform parent, Vector2 start, Vector2 end,
+            float width, Color color)
+        {
+            var go = new GameObject(name, typeof(RectTransform), typeof(DojoInkGraphic));
+            go.transform.SetParent(parent, false);
+            var graphic = go.GetComponent<DojoInkGraphic>();
+            graphic.color = color;
+            graphic.raycastTarget = false;
+            var direction = end - start;
+            Place(graphic.rectTransform, new Vector2(.5f, .5f), (start + end) * .5f,
+                new Vector2(direction.magnitude, width));
+            graphic.rectTransform.localRotation = Quaternion.Euler(0, 0, Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg);
+        }
+
         private static Sprite Summit()
         {
             return UiArtworkAssets.Load(Root + "Summit.png", Root + "Summit.asset", "Summit", UiArtworkCrop.Full, Vector4.zero);
+        }
+
+        private static Sprite Senior(int index)
+        {
+            string path = Root + "SeniorStudent" + index + ".asset";
+            var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
+            UiArtworkAssets.Load(Root + "SeniorStudent.png", Root + "SeniorStudent.asset",
+                "SeniorStudent", UiArtworkCrop.Full, Vector4.zero);
+            var texture = AssetDatabase.LoadAssetAtPath<Texture2D>(Root + "SeniorStudent.png");
+            int width = texture.width / 3;
+            int height = texture.height / 2;
+            var rect = new Rect(index % 3 * width, (1 - index / 3) * height, width, height);
+            // Bake frame registration into the sprite rect. The planted rear shoe stays in place
+            // despite unequal sheet margins; the demonstration may move the leading foot.
+            var home = SeniorFootAnchor(texture, new Rect(0, height, width, height));
+            rect.position += SeniorFootAnchor(texture, rect) - home;
+            if (sprite && sprite.rect == rect)
+            {
+                return sprite;
+            }
+            var generated = Sprite.Create(texture, rect, new Vector2(.5f, .5f), 100, 0, SpriteMeshType.FullRect);
+            generated.name = "SeniorStudent" + index;
+            if (sprite)
+            {
+                EditorUtility.CopySerialized(generated, sprite);
+                Object.DestroyImmediate(generated);
+                EditorUtility.SetDirty(sprite);
+                AssetDatabase.SaveAssetIfDirty(sprite);
+                return sprite;
+            }
+            sprite = generated;
+            AssetDatabase.CreateAsset(sprite, path);
+            return sprite;
+        }
+
+        private static Vector2 SeniorFootAnchor(Texture2D texture, Rect rect)
+        {
+            int width = (int)rect.width;
+            int height = Mathf.CeilToInt(rect.height * .22f);
+            var pixels = texture.GetPixels((int)rect.x, (int)rect.y, width, height);
+            int right = -1;
+            int bottom = height;
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    if (pixels[y * width + x].a < .5f)
+                    {
+                        continue;
+                    }
+                    right = Mathf.Max(right, x);
+                    bottom = Mathf.Min(bottom, y);
+                }
+            }
+            if (right < 0)
+            {
+                throw new System.InvalidOperationException("Senior sprite has no grounded foot.");
+            }
+            return new Vector2(right, bottom);
+        }
+
+        private static void BuildIdleVariations(DojoModeView mode)
+        {
+            // Trainee and senior use the authored clips configured after their views exist.
+            mode.sageIdle.cooldown = new Vector2(7, 12);
+            mode.sageIdle.variations = new[]
+            {
+                Variation(DojoIdleVariation.Motion.Look, 1.8f, 3, 4),
+                Variation(DojoIdleVariation.Motion.Sleeve, 1.9f, 2, 4),
+                Variation(DojoIdleVariation.Motion.Wind, 2.3f, 1, 4)
+            };
+        }
+
+        private static DojoIdleVariation.Variation Variation(DojoIdleVariation.Motion motion,
+            float duration, float weight, int modeMask, Sprite sprite = null)
+        {
+            return new DojoIdleVariation.Variation
+            {
+                motion = motion,
+                duration = duration,
+                weight = weight,
+                modeMask = modeMask,
+                sprite = sprite
+            };
         }
 
         private static RectTransform Group(string name, Transform parent)

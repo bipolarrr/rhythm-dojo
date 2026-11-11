@@ -17,6 +17,13 @@ namespace RhythmDojo.UI
         public Text lessonCue;
         public Image character;
         public DojoFigureGraphic traineeMotion, teacherMotion, sageMotion;
+        public DojoActorAnimation traineeAnimation, teacherAnimation;
+        public DojoLessonSequence lessonSequence = new DojoLessonSequence();
+        public Sprite[] teacherPoses;
+        public DojoIdleVariation traineeIdle = new DojoIdleVariation();
+        public DojoIdleVariation teacherIdle = new DojoIdleVariation();
+        public DojoIdleVariation sageIdle = new DojoIdleVariation();
+        [Min(0)] public float idleSeparation = .45f;
         public DojoFigureGraphic[] scrollMotion;
         public Sprite[] poses;
         public Text heading, description, detail, counter, actionLabel;
@@ -39,7 +46,22 @@ namespace RhythmDojo.UI
         public const float TravelSeconds = .82f;
         public int SelectedIndex { get; private set; } = 1;
         public bool IsMoving { get; private set; }
-        public bool InputEnabled { get; set; }
+        public bool InputEnabled
+        {
+            get => inputEnabled;
+            set
+            {
+                if (inputEnabled == value)
+                {
+                    return;
+                }
+                inputEnabled = value;
+                if (!value)
+                {
+                    CancelIdleVariations();
+                }
+            }
+        }
         public bool CanEnter => SelectedIndex != 3;
         public int LessonHits { get; private set; }
         public int ContactCount { get; private set; }
@@ -63,18 +85,45 @@ namespace RhythmDojo.UI
         private float arrivalAge;
         private bool entranceArrived;
         private bool arrivalRun;
+        private bool inputEnabled;
+        private bool idleLocked;
+        private float idleGap;
+        private bool awaitingResponse;
+        private bool practiceContactMade;
+        private float feedbackAge = -1;
+        private bool lessonCorrect;
         private readonly string[] titles = { "비급 전수", "자유 연습", "실력 검정", "새로운 수련" };
         private readonly string[] descriptions = {
-            "리듬게임이 처음인가? 들어오도록!", "자유롭게 연습하자!",
+            "처음이지? 내가 옆에서 박자를 짚어 줄게.", "자유롭게 연습하자!",
             "하산할 준비가 되었다고 생각하나?", "다음 수련은 아직 준비 중입니다." };
         private readonly string[] details = {
-            "사부의 박자에 맞춰 네 번 두드려 보세요.",
+            "선배 사형의 손짓에 맞춰 네 번 두드려 보세요.",
             "목인 클릭 · Space로 가볍게 몸을 풀고, 곡을 골라 수련하세요.",
             "흔들림 없는 박자로, 수련의 깊이를 증명하세요.",
             "다른 수련을 먼저 둘러보세요.  ← →" };
 
         public void Validate()
         {
+            if (!traineeAnimation || !teacherAnimation)
+            {
+                throw new InvalidOperationException("Dojo frame animations missing.");
+            }
+            traineeAnimation.Validate();
+            teacherAnimation.Validate();
+            traineeIdle.Validate();
+            teacherIdle.Validate();
+            sageIdle.Validate();
+            if (teacherPoses == null || teacherPoses.Length != 6)
+            {
+                throw new InvalidOperationException("Dojo senior teaching poses missing.");
+            }
+            foreach (var pose in teacherPoses)
+            {
+                if (!pose)
+                {
+                    throw new InvalidOperationException("Dojo senior teaching pose missing.");
+                }
+            }
             if (!traineeMotion || !teacherMotion || !sageMotion)
             {
                 throw new InvalidOperationException("Dojo articulated figures missing.");
@@ -83,9 +132,9 @@ namespace RhythmDojo.UI
             {
                 throw new InvalidOperationException("Dojo paper motion composition missing.");
             }
-            foreach (var scroll in scrollMotion)
+            for (int i = 1; i < scrollMotion.Length; i += 2)
             {
-                if (!scroll)
+                if (!scrollMotion[i])
                 {
                     throw new InvalidOperationException("Dojo paper motion reference missing.");
                 }
@@ -167,9 +216,16 @@ namespace RhythmDojo.UI
                 {
                     throw new InvalidOperationException("Dojo stage reference missing.");
                 }
-                if (!characterMarks[i] || !banners[i] || !lessonMarks[i])
+                if (!characterMarks[i] || !lessonMarks[i])
                 {
                     throw new InvalidOperationException("Dojo authored motion reference missing.");
+                }
+                if (i == 1 || i == 3)
+                {
+                    if (!banners[i])
+                    {
+                        throw new InvalidOperationException("Dojo authored motion reference missing.");
+                    }
                 }
                 if (!poses[i])
                 {
@@ -421,13 +477,16 @@ namespace RhythmDojo.UI
                 props[i].anchoredPosition = propHomes[i];
                 companions[i].anchoredPosition = companionHomes[i];
                 companions[i].localRotation = Quaternion.identity;
-                banners[i].localRotation = Quaternion.identity;
+                if (banners[i])
+                {
+                    banners[i].localRotation = Quaternion.identity;
+                }
                 typography[i].SetRest(i == SelectedIndex);
             }
             character.sprite = poses[0];
             readyMark.localScale = Vector3.one;
             UpdateLabels();
-            lessonCue.text = "듣고, 따라 두드려 보거라";
+            lessonCue.text = "내 손을 보고, 천천히 따라 해 봐.";
         }
 
         private void UpdateLabels()
@@ -472,6 +531,7 @@ namespace RhythmDojo.UI
                 return;
             }
             IsArriving = false;
+            CancelIdleVariations();
             if (!lesson)
             {
                 strikeAge = -1f;
@@ -488,7 +548,7 @@ namespace RhythmDojo.UI
                 lessonBeat = -1;
                 cueBeat = -1;
                 actionLabel.text = "두드리기";
-                detail.text = "사부가 움직이는 박자에 Space 또는 버튼!  0 / 4";
+                detail.text = "사형의 손짓에 Space 또는 버튼!  0 / 4";
                 return;
             }
             int beat = Mathf.FloorToInt(age / .75f);
@@ -503,22 +563,24 @@ namespace RhythmDojo.UI
             }
             lessonBeat = beat;
             Strike();
-            if (phase < .19f || phase > .56f)
+            feedbackAge = 0;
+            lessonCorrect = phase < .19f || phase > .56f;
+            if (lessonCorrect)
             {
                 LessonHits++;
                 UpdateLessonMarks();
-                detail.text = $"좋다! 박자를 느껴 보거라.  {LessonHits} / 4";
+                detail.text = $"좋아, 그 박자야. 자세도 잊지 마!  {LessonHits} / 4";
             }
             else
             {
-                detail.text = "조금 천천히! 사부가 손짓할 때 두드려 보거라.";
+                detail.text = "어깨에 힘 빼고, 내 손짓에 맞춰 다시 해 봐.";
             }
             if (LessonHits >= 4)
             {
                 lesson = false;
                 detail.text = "기초 수련 완료! → 자유 연습에서 곡을 골라 보세요.";
                 actionLabel.text = "다시 배우기";
-                lessonCue.text = "잘했다! 이제 자유롭게 수련하거라";
+                lessonCue.text = "잘했다! 이제 혼자서도 해볼 수 있겠네.";
             }
         }
 
@@ -537,6 +599,8 @@ namespace RhythmDojo.UI
 
         private void ResetFigureMotion()
         {
+            CancelIdleVariations();
+            feedbackAge = -1;
             reaction = 0f;
             strikeAge = -1f;
             contactMade = false;
@@ -546,7 +610,10 @@ namespace RhythmDojo.UI
             sageMotion.Rest();
             foreach (var scroll in scrollMotion)
             {
-                scroll.Rest();
+                if (scroll)
+                {
+                    scroll.Rest();
+                }
             }
         }
 
@@ -557,6 +624,7 @@ namespace RhythmDojo.UI
                 return;
             }
             strikeAge = 0f;
+            CancelIdleVariations();
             contactMade = false;
         }
 
@@ -588,6 +656,7 @@ namespace RhythmDojo.UI
             character.rectTransform.anchoredPosition = characterHome;
             character.rectTransform.localScale = Vector3.one;
             UpdateStandingPose();
+            UpdateIdleVariations();
             if (lesson)
             {
                 UpdateLesson();
@@ -599,13 +668,14 @@ namespace RhythmDojo.UI
             UpdateStrike();
             UpdatePropReaction();
             UpdateInstruction();
+            UpdateLessonFeedback();
         }
 
         private void UpdateStandingPose()
         {
             float breath = Mathf.Sin(age * 1.65f) * .75f;
             float weight = Mathf.Sin(age * .72f) * .65f;
-            float focus = Gesture(age % 9.7f - 5.5f, 1.4f);
+            float focus = 0;
             float breeze = .12f * Mathf.Sin(age * 1.1f - .4f);
             float windStrength = DojoAmbientMotion.Wind(Time.unscaledTime);
             switch (SelectedIndex)
@@ -620,7 +690,7 @@ namespace RhythmDojo.UI
                     weight = Mathf.Sin(age * .52f) * .10f;
                     focus = .55f;
                     breeze = windStrength;
-                    sageMotion.SetPose(breath, 0, Gesture(age % 13.1f - 8, 1.6f), breeze, 0);
+                    sageMotion.SetPose(breath, 0, 0, breeze, 0);
                     summitFlag.Animate(Time.unscaledTime, windStrength);
                     break;
                 case 3:
@@ -629,10 +699,200 @@ namespace RhythmDojo.UI
                     break;
             }
             traineeMotion.SetPose(breath, weight, focus, breeze, 0);
-            scrollMotion[SelectedIndex].SetPose(0, 0, 0, breeze, 0);
+            if (scrollMotion[SelectedIndex])
+            {
+                scrollMotion[SelectedIndex].SetPose(0, 0, 0, breeze, 0);
+            }
             if (SelectedIndex == 0)
             {
-                teacherMotion.SetPose(breath * .4f, 0, Gesture(age % 12.3f - 7, 1.3f), breeze, 0);
+                teacherMotion.SetPose(breath * .4f, 0, 0, breeze, 0);
+                teacherAnimation.Sample(DojoIdleVariation.Motion.None, age + .37f);
+            }
+            traineeAnimation.Sample(DojoIdleVariation.Motion.None, age);
+        }
+
+        private void CancelIdleVariations()
+        {
+            lessonSequence.Cancel();
+            if (traineeAnimation)
+            {
+                traineeAnimation.Stop();
+            }
+            if (teacherAnimation)
+            {
+                teacherAnimation.Stop();
+            }
+            traineeIdle.Cancel();
+            teacherIdle.Cancel();
+            sageIdle.Cancel();
+            idleGap = idleSeparation;
+            awaitingResponse = false;
+            practiceContactMade = false;
+            if (traineeMotion)
+            {
+                traineeMotion.SetVariation(DojoIdleVariation.Motion.None, 0, 0, SelectedIndex);
+            }
+            if (teacherMotion)
+            {
+                teacherMotion.SetVariation(DojoIdleVariation.Motion.None, 0, 0, SelectedIndex);
+                if (teacherPoses != null && teacherPoses.Length > 0)
+                {
+                    teacherMotion.sprite = teacherPoses[0];
+                }
+            }
+            if (sageMotion)
+            {
+                sageMotion.SetVariation(DojoIdleVariation.Motion.None, 0, 0, SelectedIndex);
+            }
+        }
+
+        private void UpdateIdleVariations()
+        {
+            bool locked = IsArriving || lesson;
+            locked |= strikeAge >= 0;
+            locked |= instructionAge >= 0 || feedbackAge >= 0;
+            if (locked)
+            {
+                if (!idleLocked)
+                {
+                    CancelIdleVariations();
+                }
+                idleLocked = true;
+                return;
+            }
+            idleLocked = false;
+            float seconds = Time.unscaledDeltaTime;
+            if (SelectedIndex == 0)
+            {
+                lessonSequence.Advance(seconds, age, teacherIdle, teacherAnimation, traineeAnimation);
+                awaitingResponse = lessonSequence.Phase == DojoLessonSequence.Step.Delay;
+                return;
+            }
+            teacherAnimation.Stop();
+            if (SelectedIndex == 3)
+            {
+                traineeAnimation.Sample(DojoIdleVariation.Motion.None, age);
+                return;
+            }
+            idleGap = Mathf.Max(0, idleGap - seconds);
+            DojoIdleVariation companion = null;
+            DojoFigureGraphic graphic = null;
+            if (SelectedIndex == 2)
+            {
+                companion = sageIdle;
+                graphic = sageMotion;
+            }
+            bool wasPlaying = traineeIdle.IsPlaying;
+            if (companion != null)
+            {
+                wasPlaying |= companion.IsPlaying;
+                bool wasTeaching = companion.IsPlaying;
+                bool canBegin = !traineeIdle.IsPlaying && idleGap <= 0;
+                companion.Advance(seconds, SelectedIndex, canBegin && !awaitingResponse);
+                ApplyIdle(companion, graphic);
+                if (wasTeaching && !companion.IsPlaying)
+                {
+                    idleGap = idleSeparation;
+                }
+                if (companion.IsPlaying)
+                {
+                    traineeIdle.Advance(seconds, SelectedIndex, false);
+                    ApplyIdle(traineeIdle, traineeMotion);
+                    return;
+                }
+            }
+            traineeIdle.Advance(seconds, SelectedIndex, idleGap <= 0 && !wasPlaying);
+            ApplyIdle(traineeIdle, traineeMotion);
+            UpdatePracticeContact();
+            if (wasPlaying && !traineeIdle.IsPlaying)
+            {
+                idleGap = idleSeparation;
+            }
+        }
+
+        private void ApplyIdle(DojoIdleVariation idle, DojoFigureGraphic graphic)
+        {
+            if (graphic == traineeMotion)
+            {
+                if (idle.IsPlaying)
+                {
+                    traineeAnimation.Sample(idle.Current.motion, idle.Progress * idle.Current.Duration);
+                }
+                else
+                {
+                    traineeAnimation.Sample(DojoIdleVariation.Motion.None, age);
+                }
+                return;
+            }
+            graphic.SetVariation(DojoIdleVariation.Motion.None, 0, 0, SelectedIndex);
+            if (graphic == teacherMotion)
+            {
+                graphic.sprite = teacherPoses[0];
+            }
+            if (!idle.IsPlaying)
+            {
+                return;
+            }
+            graphic.SetVariation(idle.Current.motion, idle.Strength, idle.Progress, SelectedIndex);
+            if (idle.Current.sprite && idle.Strength > .15f)
+            {
+                graphic.sprite = idle.Current.sprite;
+            }
+        }
+
+        private void UpdatePracticeContact()
+        {
+            if (!traineeIdle.IsPlaying)
+            {
+                practiceContactMade = false;
+                return;
+            }
+            if (SelectedIndex != 1 || practiceContactMade)
+            {
+                return;
+            }
+            var motion = traineeIdle.Current.motion;
+            if (motion != DojoIdleVariation.Motion.Punch && motion != DojoIdleVariation.Motion.Kick)
+            {
+                return;
+            }
+            if (traineeIdle.Progress < .36f)
+            {
+                return;
+            }
+            // The authored practice mark is beside the wooden target. Recoil starts on the
+            // extension frame; it must not cancel the remainder of the training clip.
+            practiceContactMade = true;
+            ContactCount++;
+            reaction = ReactionSeconds;
+            PlayEffect(contact, .14f);
+        }
+
+        private void UpdateLessonFeedback()
+        {
+            if (feedbackAge < 0)
+            {
+                return;
+            }
+            feedbackAge += Time.unscaledDeltaTime;
+            if (feedbackAge < .24f)
+            {
+                return;
+            }
+            teacherMotion.sprite = teacherPoses[4];
+            if (lessonCorrect)
+            {
+                teacherMotion.sprite = teacherPoses[3];
+            }
+            teacherMotion.SetPose(0, 0, 0, .1f, Gesture(feedbackAge - .24f, .55f));
+            if (lessonCorrect)
+            {
+                teacherAnimation.Sample(DojoIdleVariation.Motion.Approve, feedbackAge - .24f);
+            }
+            if (feedbackAge >= .8f)
+            {
+                feedbackAge = -1;
+                teacherMotion.sprite = teacherPoses[0];
             }
         }
 
@@ -665,10 +925,14 @@ namespace RhythmDojo.UI
                 return;
             }
             instructionAge += Time.unscaledDeltaTime;
+            teacherMotion.sprite = teacherPoses[2];
             teacherMotion.SetPose(0, 0, 0, .1f, Gesture(instructionAge, .46f));
+            teacherAnimation.Sample(DojoIdleVariation.Motion.Point,
+                instructionAge / .46f * teacherAnimation.Duration(DojoIdleVariation.Motion.Point));
             if (instructionAge >= .46f)
             {
                 instructionAge = -1f;
+                teacherMotion.sprite = teacherPoses[0];
             }
         }
 
@@ -708,6 +972,8 @@ namespace RhythmDojo.UI
                 }
             }
             traineeMotion.SetPose(0, weight, 0, -weight * .08f, 0);
+            traineeAnimation.Sample(DojoIdleVariation.Motion.Punch,
+                t / StrikeSeconds * traineeAnimation.Duration(DojoIdleVariation.Motion.Punch));
             if (t >= StrikeSeconds)
             {
                 strikeAge = -1f;
@@ -724,6 +990,11 @@ namespace RhythmDojo.UI
                 float sinceContact = Mathf.Max(0, ReactionSeconds - reaction - .025f);
                 float settle = 1 - Mathf.SmoothStep(0, 1, Mathf.InverseLerp(.55f, .80f, sinceContact));
                 recoil = Mathf.Sin(sinceContact * 20f) * Mathf.Exp(-sinceContact * 6f) * 7f * settle;
+                if (ContactCount % 2 == 0)
+                {
+                    // A firmer contact has a slower, deeper recoil; both settle at the same deadline.
+                    recoil = Mathf.Sin(sinceContact * 17f) * Mathf.Exp(-sinceContact * 5f) * 9f * settle;
+                }
             }
             props[SelectedIndex].localRotation = Quaternion.Euler(0, 0, -recoil);
         }
@@ -753,7 +1024,8 @@ namespace RhythmDojo.UI
             switch (SelectedIndex)
             {
                 case 0:
-                    // Master points first, then the trainee answers; the board reacts at contact.
+                    // The senior points first, then the trainee answers; the target reacts at contact.
+                    teacherMotion.sprite = teacherPoses[2];
                     float gesture = Gesture(t, .48f);
                     teacherMotion.SetPose(0, 0, 0, .1f, gesture);
                     lessonCue.text = "자, 한 박자에 한 동작!";
@@ -802,7 +1074,8 @@ namespace RhythmDojo.UI
                 character.rectTransform.localRotation = Quaternion.identity;
                 if (SelectedIndex == 0)
                 {
-                    lessonCue.text = "듣고, 따라 두드려 보거라";
+                    teacherMotion.sprite = teacherPoses[0];
+                    lessonCue.text = "내 손을 보고, 천천히 따라 해 봐.";
                 }
             }
         }

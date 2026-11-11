@@ -82,8 +82,8 @@ namespace RhythmDojo.EditorTools
             composition.titleGroup.blocksRaycasts = composition.copyGroup.blocksRaycasts = false;
             string caption = "비급 전수";
             string eyebrow = "01    첫 박자를 새기다";
-            string description = "리듬게임이 처음인가? 들어오도록!";
-            string detail = "사부의 박자에 맞춰 네 번 두드려 보세요.";
+            string description = "처음이지? 내가 옆에서 박자를 짚어 줄게.";
+            string detail = "선배 사형의 손짓에 맞춰 네 번 두드려 보세요.";
             var position = new Vector2(380, 87);
             var size = new Vector2(540, 140);
             var copyPosition = new Vector2(395, 229);

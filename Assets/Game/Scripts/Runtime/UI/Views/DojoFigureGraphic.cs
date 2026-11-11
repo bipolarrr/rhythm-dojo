@@ -12,15 +12,30 @@ namespace RhythmDojo.UI
             Trainee,
             Master,
             Sage,
-            Scroll
+            Scroll,
+            Senior
         }
 
         public Figure figure;
+        public bool spriteAnimation;
         private float breath;
         private float weight;
         private float attention;
         private float wind;
         private float gesture;
+        private DojoIdleVariation.Motion motion;
+        private float variation;
+        private float progress;
+        private int context;
+
+        public void SetVariation(DojoIdleVariation.Motion motion, float strength, float progress, int context)
+        {
+            this.motion = motion;
+            variation = strength;
+            this.progress = progress;
+            this.context = context;
+            SetVerticesDirty();
+        }
 
         public void SetPose(float breathing, float weightShift, float focus, float breeze, float instruction)
         {
@@ -34,6 +49,7 @@ namespace RhythmDojo.UI
 
         public void Rest()
         {
+            SetVariation(DojoIdleVariation.Motion.None, 0, 0, 0);
             SetPose(0, 0, 0, 0, 0);
         }
 
@@ -74,6 +90,11 @@ namespace RhythmDojo.UI
 
         private Vector2 Offset(Vector2 point)
         {
+            if (spriteAnimation)
+            {
+                return Vector2.zero;
+            }
+
             float upper = Mathf.SmoothStep(0, 1, Mathf.InverseLerp(.25f, .64f, point.y));
             float chest = Region(point, new Vector2(.53f, .61f), new Vector2(.34f, .23f));
             float head = Region(point, new Vector2(.54f, .83f), new Vector2(.27f, .20f));
@@ -90,6 +111,7 @@ namespace RhythmDojo.UI
                     offset.x += Region(point, new Vector2(.45f, .41f), new Vector2(.12f, .19f)) * wind * .005f;
                     break;
                 case Figure.Master:
+                case Figure.Senior:
                     // The pointing sleeve and rod move together; the torso and feet stay steady.
                     float arm = Region(point, new Vector2(.22f, .60f), new Vector2(.38f, .22f));
                     offset.y = arm * gesture * .028f + chest * breath * .0015f;
@@ -111,9 +133,55 @@ namespace RhythmDojo.UI
                     break;
             }
 
+            offset += VariationOffset(point, upper, chest, head) * variation;
+
             // Keep soles, scroll supports and the lowest hem vertices at their authored positions.
             offset *= Mathf.SmoothStep(0, 1, Mathf.InverseLerp(.22f, .34f, point.y));
             return offset;
+        }
+
+        private Vector2 VariationOffset(Vector2 point, float upper, float chest, float head)
+        {
+            float hands = Region(point, new Vector2(.64f, .62f), new Vector2(.27f, .18f));
+            float sleeve = Region(point, new Vector2(.36f, .57f), new Vector2(.26f, .22f));
+            float hem = Region(point, new Vector2(.55f, .32f), new Vector2(.40f, .22f));
+            float beat = Mathf.Sin(progress * Mathf.PI * 4);
+            switch (motion)
+            {
+                case DojoIdleVariation.Motion.Settle:
+                    return new Vector2(-upper * .016f, -chest * .012f + hands * .006f);
+                case DojoIdleVariation.Motion.Hands:
+                    return new Vector2(hands * beat * .010f, hands * -.018f + chest * -.003f);
+                case DojoIdleVariation.Motion.Look:
+                    float direction = -1;
+                    if (context == 2)
+                    {
+                        direction = 1;
+                    }
+                    return new Vector2(head * .018f * direction, head * .006f);
+                case DojoIdleVariation.Motion.Nod:
+                case DojoIdleVariation.Motion.Approve:
+                    return new Vector2(head * .005f, -head * .018f);
+                case DojoIdleVariation.Motion.Demonstrate:
+                    if (figure == Figure.Senior)
+                    {
+                        return new Vector2(-upper * .012f - sleeve * .012f, sleeve * .006f);
+                    }
+                    return new Vector2(upper * .022f + hands * .028f, hands * .010f);
+                case DojoIdleVariation.Motion.Focus:
+                    return new Vector2(-upper * .012f, -chest * .014f + hands * .012f);
+                case DojoIdleVariation.Motion.Explain:
+                case DojoIdleVariation.Motion.Point:
+                    return new Vector2(-sleeve * .010f, sleeve * .015f);
+                case DojoIdleVariation.Motion.Observe:
+                    return new Vector2(upper * .006f, chest * .003f);
+                case DojoIdleVariation.Motion.Sleeve:
+                    return new Vector2(sleeve * .014f, sleeve * .018f + head * -.003f);
+                case DojoIdleVariation.Motion.Wind:
+                    return new Vector2(hem * .022f + sleeve * .009f, hem * .004f);
+                default:
+                    return Vector2.zero;
+            }
         }
 
         private static float Region(Vector2 point, Vector2 center, Vector2 radius)
