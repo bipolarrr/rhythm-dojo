@@ -50,7 +50,7 @@ namespace RhythmDojo.Tests
                 Assert.That(view.menuPanel.blocksRaycasts, Is.True);
                 Assert.That(view.modeSelection, Is.Not.Null);
                 view.modeSelection.Validate();
-                foreach (char glyph in "비급 전수자유 연습실력 검정채보 공방리듬 도장")
+                foreach (char glyph in "비급 전수자유 연습실력 검정율보 편찬리듬 도장")
                 {
                     Assert.That(view.modeSelection.heading.font.HasCharacter(glyph), Is.True, "Missing glyph: " + glyph);
                 }

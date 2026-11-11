@@ -91,7 +91,7 @@ namespace RhythmDojo.EditorTools
             mode.teacherPoses = new[] { Senior(0), Senior(1), Senior(2), Senior(3), Senior(4), Senior(5) };
             BuildIdleVariations(mode);
             var backgrounds = new[] { DojoRenewalLayoutBuilder.Load("LessonRoom"),
-                DojoRenewalLayoutBuilder.Load("PracticeHall"), Summit(), DojoEntranceAssets.Load("TrainingInterior") };
+                DojoRenewalLayoutBuilder.Load("PracticeHall"), Summit(), DojoRenewalLayoutBuilder.Load("ScribingRoom") };
             for (int i = 0; i < 4; i++)
             {
                 var group = new GameObject("Stage " + (i + 1), typeof(RectTransform), typeof(CanvasGroup));
@@ -115,6 +115,25 @@ namespace RhythmDojo.EditorTools
                 mark.transform.SetParent(group.transform, false);
                 mode.characterMarks[i] = (RectTransform)mark.transform;
                 Place(mode.characterMarks[i], new Vector2(.5f, .5f), new Vector2(-30, -122), Vector2.zero);
+                if (i == 3)
+                {
+                    // The editor is a close view of the manuscript desk. Its sage and tools
+                    // belong to the painting, not the standing figures of the training floor.
+                    mode.nearLayers[i] = Group("Foreground", group.transform);
+                    var light = new GameObject("Manuscript Lamplight", typeof(RectTransform),
+                        typeof(DojoInkGraphic), typeof(CanvasGroup));
+                    light.transform.SetParent(backdrop.transform, false);
+                    var glow = light.GetComponent<DojoInkGraphic>();
+                    glow.wash = true;
+                    glow.raycastTarget = false;
+                    glow.color = new Color(1f, .63f, .22f, .15f);
+                    Place(glow.rectTransform, new Vector2(.5f, .5f),
+                        new Vector2(-160, -60), new Vector2(190, 205));
+                    mode.scribingLight = light.GetComponent<CanvasGroup>();
+                    mode.scribingLight.blocksRaycasts = false;
+                    continue;
+                }
+
                 var prop = Actor(6);
                 var companion = Actor(4);
                 if (i == 0)
@@ -128,10 +147,6 @@ namespace RhythmDojo.EditorTools
                     companion = Actor(5);
                     companionPosition = new Vector2(420, 145);
                     mode.characterMarks[i].anchoredPosition = new Vector2(-135, -112);
-                }
-                if (i == 3)
-                {
-                    prop = Actor(7);
                 }
                 mode.props[i] = Art("Interactive Prop", group.transform, prop, new Vector2(125, -125), new Vector2(165, 220)).rectTransform;
                 mode.props[i].pivot = new Vector2(.5f, .05f);
@@ -252,8 +267,8 @@ namespace RhythmDojo.EditorTools
 
         private static void BuildInstructionScroll(DojoModeView mode, int i)
         {
-            // The lesson floor and summit intentionally have no teaching easel.
-            if (i == 0 || i == 2)
+            // Only free practice uses a teaching easel; the editor has its own manuscript desk.
+            if (i != 1)
             {
                 return;
             }
@@ -262,15 +277,8 @@ namespace RhythmDojo.EditorTools
                 new Vector2(-350, -80), new Vector2(170, 225), DojoFigureGraphic.Figure.Scroll);
             mode.scrollMotion[i] = board;
             mode.banners[i] = board.rectTransform;
-            if (i == 1)
-            {
-                board.rectTransform.anchoredPosition = new Vector2(420, -100);
-                BuildPracticeDiagram(board.transform);
-                return;
-            }
-
-            var inscription = Label("Scroll Inscription", board.transform, "心\n技\n體", 27, Ink);
-            Place(inscription.rectTransform, new Vector2(.5f, .58f), Vector2.zero, new Vector2(80, 110));
+            board.rectTransform.anchoredPosition = new Vector2(420, -100);
+            BuildPracticeDiagram(board.transform);
         }
 
         private static void BuildPracticeDiagram(Transform parent)

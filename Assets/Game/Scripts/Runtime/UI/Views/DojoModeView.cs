@@ -35,6 +35,9 @@ namespace RhythmDojo.UI
         public RectTransform[] farLayers, middleLayers, nearLayers;
         public DojoWindFlag summitFlag;
         public CanvasGroup[] interfaceGroups;
+        public CanvasGroup scribingLight;
+        public Image canvasBackdrop;
+        public Sprite trainingBackdrop;
         public DojoModeTypography[] typography;
         public Image[] selectionMarks;
         public RectTransform readyMark;
@@ -62,7 +65,7 @@ namespace RhythmDojo.UI
                 }
             }
         }
-        public bool CanEnter => SelectedIndex != 3;
+        public bool CanEnter => SelectedIndex >= 0 && SelectedIndex < stages.Length;
         public int LessonHits { get; private set; }
         public int ContactCount { get; private set; }
         private float age;
@@ -78,6 +81,7 @@ namespace RhythmDojo.UI
         private int lessonBeat = -1;
         private int cueBeat = -1;
         private Vector2 characterHome;
+        private Color backdropColor;
         private Vector2[] propHomes;
         private Vector2[] companionHomes;
         private int previousIndex;
@@ -92,15 +96,15 @@ namespace RhythmDojo.UI
         private bool practiceContactMade;
         private float feedbackAge = -1;
         private bool lessonCorrect;
-        private readonly string[] titles = { "비급 전수", "자유 연습", "실력 검정", "새로운 수련" };
+        private readonly string[] titles = { "비급 전수", "자유 연습", "실력 검정", "율보 편찬" };
         private readonly string[] descriptions = {
             "처음이지? 내가 옆에서 박자를 짚어 줄게.", "자유롭게 연습하자!",
-            "하산할 준비가 되었다고 생각하나?", "다음 수련은 아직 준비 중입니다." };
+            "하산할 준비가 되었다고 생각하나?", "속세에서는 그것을 에디터라 부른다더라" };
         private readonly string[] details = {
             "선배 사형의 손짓에 맞춰 네 번 두드려 보세요.",
             "목인 클릭 · Space로 가볍게 몸을 풀고, 곡을 골라 수련하세요.",
             "흔들림 없는 박자로, 수련의 깊이를 증명하세요.",
-            "다른 수련을 먼저 둘러보세요.  ← →" };
+            "곡을 불러오고, 네 줄 위에 나만의 채보를 새기세요." };
 
         public void Validate()
         {
@@ -132,12 +136,9 @@ namespace RhythmDojo.UI
             {
                 throw new InvalidOperationException("Dojo paper motion composition missing.");
             }
-            for (int i = 1; i < scrollMotion.Length; i += 2)
+            if (!scrollMotion[1])
             {
-                if (!scrollMotion[i])
-                {
-                    throw new InvalidOperationException("Dojo paper motion reference missing.");
-                }
+                throw new InvalidOperationException("Dojo paper motion reference missing.");
             }
             if (typography == null || selectionMarks == null || !readyMark)
             {
@@ -146,6 +147,14 @@ namespace RhythmDojo.UI
             if (typography.Length != 4 || selectionMarks.Length != 4)
             {
                 throw new InvalidOperationException("Dojo arcade mode count invalid.");
+            }
+            if (!scribingLight)
+            {
+                throw new InvalidOperationException("Dojo manuscript lamplight missing.");
+            }
+            if (!canvasBackdrop || !trainingBackdrop)
+            {
+                throw new InvalidOperationException("Dojo viewport backdrop missing.");
             }
             for (int i = 0; i < typography.Length; i++)
             {
@@ -212,15 +221,19 @@ namespace RhythmDojo.UI
                 {
                     throw new InvalidOperationException("Dojo depth layer reference missing.");
                 }
-                if (!stages[i] || !props[i] || !companions[i])
+                if (!stages[i])
                 {
                     throw new InvalidOperationException("Dojo stage reference missing.");
+                }
+                if (i != 3 && (!props[i] || !companions[i]))
+                {
+                    throw new InvalidOperationException("Dojo training figure reference missing.");
                 }
                 if (!characterMarks[i] || !lessonMarks[i])
                 {
                     throw new InvalidOperationException("Dojo authored motion reference missing.");
                 }
-                if (i == 1 || i == 3)
+                if (i == 1)
                 {
                     if (!banners[i])
                     {
@@ -256,12 +269,19 @@ namespace RhythmDojo.UI
             StopAllCoroutines();
             if (propHomes == null)
             {
+                backdropColor = canvasBackdrop.color;
                 propHomes = new Vector2[4];
                 companionHomes = new Vector2[4];
                 for (int i = 0; i < 4; i++)
                 {
-                    propHomes[i] = props[i].anchoredPosition;
-                    companionHomes[i] = companions[i].anchoredPosition;
+                    if (props[i])
+                    {
+                        propHomes[i] = props[i].anchoredPosition;
+                    }
+                    if (companions[i])
+                    {
+                        companionHomes[i] = companions[i].anchoredPosition;
+                    }
                 }
             }
             IsMoving = false;
@@ -298,6 +318,7 @@ namespace RhythmDojo.UI
             float elapsed = 0f;
             previousIndex = SelectedIndex;
             SelectedIndex = (SelectedIndex + direction + 4) % 4;
+            character.enabled = previousIndex != 3 && SelectedIndex != 3;
             var destination = characterMarks[SelectedIndex].anchoredPosition;
             character.rectTransform.localScale = new Vector3(direction, 1, 1);
             character.rectTransform.localRotation = Quaternion.identity;
@@ -344,7 +365,10 @@ namespace RhythmDojo.UI
                 if (step != footfall && run > 0f && run < 1f)
                 {
                     footfall = step;
-                    PlayEffect(footstep, .10f);
+                    if (character.enabled)
+                    {
+                        PlayEffect(footstep, .10f);
+                    }
                 }
                 typography[previousIndex].Exit(t / titleExit, direction);
                 if (t >= titleArrival)
@@ -473,10 +497,16 @@ namespace RhythmDojo.UI
                 ((RectTransform)stages[i].transform).anchoredPosition = Vector2.zero;
                 SetTravelLayers(i, 0f);
                 stages[i].blocksRaycasts = i == SelectedIndex;
-                props[i].localRotation = Quaternion.identity;
-                props[i].anchoredPosition = propHomes[i];
-                companions[i].anchoredPosition = companionHomes[i];
-                companions[i].localRotation = Quaternion.identity;
+                if (props[i])
+                {
+                    props[i].localRotation = Quaternion.identity;
+                    props[i].anchoredPosition = propHomes[i];
+                }
+                if (companions[i])
+                {
+                    companions[i].anchoredPosition = companionHomes[i];
+                    companions[i].localRotation = Quaternion.identity;
+                }
                 if (banners[i])
                 {
                     banners[i].localRotation = Quaternion.identity;
@@ -484,6 +514,7 @@ namespace RhythmDojo.UI
                 typography[i].SetRest(i == SelectedIndex);
             }
             character.sprite = poses[0];
+            character.enabled = SelectedIndex != 3;
             readyMark.localScale = Vector3.one;
             UpdateLabels();
             lessonCue.text = "내 손을 보고, 천천히 따라 해 봐.";
@@ -491,11 +522,20 @@ namespace RhythmDojo.UI
 
         private void UpdateLabels()
         {
+            canvasBackdrop.sprite = trainingBackdrop;
+            canvasBackdrop.color = backdropColor;
+            if (SelectedIndex == 3)
+            {
+                // Frame the close-up with ink-dark margins on non-widescreen displays.
+                // Enlarging a second copy behind it would duplicate the sage and desk.
+                canvasBackdrop.sprite = null;
+                canvasBackdrop.color = new Color(.035f, .055f, .065f);
+            }
             heading = typography[SelectedIndex].heading;
             description = typography[SelectedIndex].description;
             detail = typography[SelectedIndex].detail;
             heading.text = titles[SelectedIndex];
-            if (SelectedIndex == 1 || SelectedIndex == 3)
+            if (SelectedIndex == 1)
             {
                 heading.text = heading.text.Replace(" ", "\n");
             }
@@ -509,7 +549,7 @@ namespace RhythmDojo.UI
             }
             else if (SelectedIndex == 3)
             {
-                actionLabel.text = "준비 중";
+                actionLabel.text = "편찬 시작";
             }
             for (int i = 0; i < selectionMarks.Length; i++)
             {
@@ -696,6 +736,8 @@ namespace RhythmDojo.UI
                 case 3:
                     breath *= .5f;
                     weight = 0;
+                    scribingLight.alpha = .78f + Mathf.Sin(age * 2.7f) * .12f
+                        + Mathf.Sin(age * 6.1f) * .07f;
                     break;
             }
             traineeMotion.SetPose(breath, weight, focus, breeze, 0);
@@ -983,6 +1025,11 @@ namespace RhythmDojo.UI
 
         private void UpdatePropReaction()
         {
+            if (!props[SelectedIndex])
+            {
+                return;
+            }
+
             float recoil = 0f;
             if (reaction > 0f)
             {

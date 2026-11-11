@@ -58,7 +58,7 @@ namespace RhythmDojo.EditorTools
             enter.alignment = TextAnchor.MiddleCenter;
             StyleButton(view.settings, parent, "설정", new Vector2(1050, 14), new Vector2(82, 44), 18);
             StyleButton(view.quit, parent, "종료", new Vector2(1150, 14), new Vector2(66, 44), 18);
-            StyleButton(view.editor, parent, "채보 공방", new Vector2(68, 14), new Vector2(130, 44), 18);
+            StyleButton(view.editor, parent, "율보 편찬", new Vector2(68, 14), new Vector2(130, 44), 18);
             mode.previous = Control("Previous Mode", parent, "〈", new Vector2(28, 316));
             mode.next = Control("Next Mode", parent, "〉", new Vector2(1188, 316));
             mode.interfaceGroups = new CanvasGroup[8];
@@ -129,20 +129,22 @@ namespace RhythmDojo.EditorTools
                         new Vector2(840, 330), new Color(1, .95f, .84f, .55f), true);
                     break;
                 case 3:
-                    caption = "새로운\n수련";
-                    eyebrow = "04    다음 이야기는";
-                    description = "다음 수련은 아직 준비 중입니다.";
-                    detail = "다른 수련을 먼저 둘러보세요.  ← →";
-                    position = new Vector2(165, 108);
-                    size = new Vector2(490, 245);
-                    copyPosition = new Vector2(186, 379);
-                    brushPosition = new Vector2(178, 354);
-                    brushSize = new Vector2(305, 10);
-                    fontSize = 114;
+                    caption = "율보 편찬";
+                    eyebrow = "04    한 곡의 비급을 쓰다";
+                    description = "속세에서는 그것을 에디터라 부른다더라";
+                    detail = "곡을 불러오고, 네 줄 위에 나만의 채보를 새기세요.";
+                    position = new Vector2(100, 174);
+                    size = new Vector2(550, 140);
+                    copyPosition = new Vector2(114, 326);
+                    brushPosition = new Vector2(109, 307);
+                    brushSize = new Vector2(350, 10);
+                    fontSize = 118;
                     color = Paper;
-                    accent = new Color(.80f, .68f, .49f);
-                    Accent("Local Ink Wash", title, new Vector2(360, 260),
-                        new Vector2(760, 640), new Color(.035f, .055f, .065f, .95f), true);
+                    accent = new Color(.88f, .35f, .20f);
+                    composition.entryDistance = 48;
+                    composition.enterSeconds = .30f;
+                    composition.copyDelay = .14f;
+                    composition.overshoot = .25f;
                     break;
             }
 
@@ -164,6 +166,19 @@ namespace RhythmDojo.EditorTools
             composition.brush.pivot = new Vector2(0, .5f);
             composition.description = Label("Mode Description", copy, description, 23, color);
             Place(composition.description.rectTransform, copyPosition, new Vector2(560, 38));
+            if (index == 3)
+            {
+                composition.heading.rectTransform.localRotation = Quaternion.Euler(0, 0, 3);
+                composition.description.fontSize = 21;
+                var seal = Label("Compilation Seal", title, "편\n찬", 24, accent);
+                Place(seal.rectTransform, new Vector2(114, 396), new Vector2(34, 70));
+                seal.alignment = TextAnchor.MiddleCenter;
+                Accent("Seal Left", title, new Vector2(109, 398), new Vector2(3, 66), accent);
+                Accent("Seal Right", title, new Vector2(152, 398), new Vector2(3, 66), accent);
+                var colophon = Label("Manuscript Colophon", copy, "네 줄에 새기는, 나만의 한 수", 16,
+                    new Color(.76f, .79f, .70f));
+                Place(colophon.rectTransform, new Vector2(178, 414), new Vector2(360, 32));
+            }
             composition.detail = Label("Mode Detail", copy, detail, 18, Paper);
             Place(composition.detail.rectTransform, new Vector2(90, 614), new Vector2(720, 58));
             Shadow(composition.detail, new Color(.03f, .04f, .05f, .95f));

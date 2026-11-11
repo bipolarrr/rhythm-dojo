@@ -208,6 +208,11 @@ namespace RhythmDojo.UI
                 {
                     return;
                 }
+                if (view.modeSelection.SelectedIndex == 3)
+                {
+                    OpenEditor();
+                    return;
+                }
             }
             starting = true;
             view.SetMenuInteractable(false);
@@ -273,16 +278,7 @@ namespace RhythmDojo.UI
             starting = true;
             view.SetMenuInteractable(false);
 
-            try
-            {
-                mainMenuActions.ShowEditor();
-            }
-            catch (Exception error)
-            {
-                starting = false;
-                view.SetMenuInteractable(true);
-                Debug.LogException(error, this);
-            }
+            StartCoroutine(BreakAndInvoke(view.start, mainMenuActions.ShowEditor, true));
         }
 
         public void ResumeFromSettings()

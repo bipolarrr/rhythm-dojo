@@ -422,6 +422,23 @@ namespace RhythmDojo.Tests
                 Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
                 yield return null;
             }
+
+            yield return SceneManager.LoadSceneAsync(MainMenuActions.ModeSelectionScenePath);
+            yield return null;
+            view = UnityEngine.Object.FindFirstObjectByType<MainMenuView>();
+            for (int i = 0; i < 2; i++)
+            {
+                yield return Click(view.modeSelection.next);
+                yield return WaitForModeMotion(view.modeSelection);
+            }
+            Assert.That(view.modeSelection.SelectedIndex, Is.EqualTo(3));
+            yield return Click(view.start);
+            deadline = Time.realtimeSinceStartupAsDouble + 20;
+            while (SceneManager.GetActiveScene().path != ChartEditorMenu.ScenePath)
+            {
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                yield return null;
+            }
         }
 
         [UnityTest]
@@ -1017,9 +1034,10 @@ namespace RhythmDojo.Tests
         [Category("SceneIntegration")]
         public IEnumerator UndefinedFourthModeCannotStartButNavigationRemainsAvailable()
         {
-            var actions = new Actions();
-            screen.Initialize(actions);
+            // Retain the historical case name: the formerly undefined slot now opens the editor.
             yield return OpenMenu();
+            var character = view.modeSelection.character;
+            var backdrop = view.modeSelection.farLayers[3].GetComponent<Image>().sprite;
             for (int i = 0; i < 2; i++)
             {
                 yield return Click(view.modeSelection.next);
@@ -1032,9 +1050,14 @@ namespace RhythmDojo.Tests
                 yield return null;
             }
             Assert.That(view.modeSelection.SelectedIndex, Is.EqualTo(3));
-            Assert.That(view.start.interactable, Is.False);
-            view.start.onClick.Invoke();
-            Assert.That(actions.Starts, Is.Zero);
+            Assert.That(view.start.interactable, Is.True);
+            Assert.That(view.modeSelection.heading.text, Is.EqualTo("율보 편찬"));
+            Assert.That(view.modeSelection.description.text, Is.EqualTo("속세에서는 그것을 에디터라 부른다더라"));
+            Assert.That(view.modeSelection.actionLabel.text, Is.EqualTo("편찬 시작"));
+            Assert.That(character.enabled, Is.False, "The manuscript close-up must not have a fighting figure over it.");
+            Capture("Logs/scribing-menu-1920.png", 1920, 1080);
+            Capture("Logs/scribing-menu-4x3.png", 1024, 768);
+            Capture("Logs/scribing-menu-ultrawide.png", 2560, 1080);
             yield return Click(view.modeSelection.next);
             double navigationDeadline = Time.realtimeSinceStartupAsDouble + 3;
             while (view.modeSelection.IsMoving)
@@ -1045,6 +1068,32 @@ namespace RhythmDojo.Tests
             yield return null;
             Assert.That(view.modeSelection.SelectedIndex, Is.Zero);
             Assert.That(view.start.interactable, Is.True);
+            Assert.That(character.enabled, Is.True);
+            yield return Click(view.modeSelection.previous);
+            yield return WaitForModeMotion(view.modeSelection);
+            Assert.That(view.modeSelection.character, Is.SameAs(character));
+            Assert.That(view.modeSelection.farLayers[3].GetComponent<Image>().sprite, Is.SameAs(backdrop));
+            Assert.That(character.enabled, Is.False);
+
+            var keyboard = InputSystem.AddDevice<Keyboard>();
+            try
+            {
+                UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(view.start.gameObject);
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.Enter));
+                yield return null;
+                yield return null;
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+                double deadline = Time.realtimeSinceStartupAsDouble + 20;
+                while (SceneManager.GetActiveScene().path != ChartEditorMenu.ScenePath)
+                {
+                    Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                    yield return null;
+                }
+            }
+            finally
+            {
+                InputSystem.RemoveDevice(keyboard);
+            }
         }
 
         [UnityTest]
