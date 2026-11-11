@@ -14,6 +14,8 @@ namespace RhythmDojo.UI
         public RectTransform leftDoor;
         public RectTransform rightDoor;
         public CanvasGroup frame;
+        public CanvasGroup interiorBackdrop;
+        public RectTransform doorwayApproach;
         public CanvasGroup trainingMenu;
         public RectTransform logoClip;
         public DojoSlidingImage slidingPlaque;
@@ -68,7 +70,7 @@ namespace RhythmDojo.UI
         {
             Opening = Mathf.Clamp01(amount);
             float eased = SmootherStep(Opening);
-            float width = ((RectTransform)transform).rect.width;
+            float width = ((RectTransform)leftDoor.parent).rect.width;
             // One uninterrupted opening curve. The logo joins at geometric contact
             // without changing the door's speed or restarting its animation.
             leftDoor.anchoredPosition = new Vector2(-width * .55f * eased, 0f);
@@ -105,6 +107,31 @@ namespace RhythmDojo.UI
             float backgroundScale = Mathf.Lerp(1f, InteriorScale, eased);
             transform.localScale = Vector3.one * backgroundScale;
             frame.transform.localScale = Vector3.one * (frameScale / backgroundScale);
+        }
+
+        public void SetEntrySequence(float amount)
+        {
+            if (!doorwayApproach)
+            {
+                throw new System.InvalidOperationException("Authored doorway approach missing.");
+            }
+
+            SetOpening(Mathf.InverseLerp(.14f, .62f, amount));
+            float approach = SmootherStep(Mathf.InverseLerp(.43f, 1f, amount));
+            float scale = Mathf.Lerp(1f, 3.65f, approach);
+            doorwayApproach.localScale = Vector3.one * scale;
+            doorwayApproach.anchoredPosition = Vector2.up * (65f * (scale - 1f));
+
+            // The physical frame stays opaque until its aperture surrounds the viewport.
+            frame.alpha = 1f;
+            if (amount >= 1f)
+            {
+                frame.alpha = 0f;
+            }
+            float knock = Mathf.InverseLerp(0f, .14f, amount);
+            float recoil = Mathf.Sin(knock * Mathf.PI * 4f) * (1f - knock) * 2.5f;
+            leftDoor.anchoredPosition += Vector2.right * recoil;
+            rightDoor.anchoredPosition -= Vector2.right * recoil;
         }
     }
 }

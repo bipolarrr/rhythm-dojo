@@ -105,11 +105,11 @@ namespace RhythmDojo.Tests
             original = InputSystem.settings;
             priorEditorBehavior = original.editorInputBehaviorInPlayMode;
             priorBackgroundBehavior = original.backgroundBehavior;
+            nativeInput = new NativeInputScope();
             original.editorInputBehaviorInPlayMode = InputSettings
                 .EditorInputBehaviorInPlayMode
                 .AllDeviceInputAlwaysGoesToGameView;
             original.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
-            nativeInput = new NativeInputScope();
             keyboard = InputSystem.AddDevice<Keyboard>();
             keyboard.MakeCurrent();
             mouse = InputSystem.AddDevice<Mouse>();

@@ -1,0 +1,27 @@
+{
+  "date": "2026-11-11",
+  "baseline": "Local main, preserving the pre-existing uncommitted renewal and unrelated scene/editor changes",
+  "composition": {
+    "builder": "MainMenuLayoutBuilder -> AlphaDojoLayoutBuilder -> DojoRenewalLayoutBuilder",
+    "regenerate": "Game Tools > Scenes > Build Title",
+    "scene": "Assets/Game/Scenes/Title.unity",
+    "entrance": "HanokEntrance foreground with an alpha doorway, two independently masked HanokDoors panels, the actual selected training space behind the opening",
+    "spaces": ["LessonRoom: side veranda, master and teaching board", "PracticeHall: asymmetrical changho wall and open courtyard", "Existing Summit: high cliff with sage, stone training court and wind flag"],
+    "preserved": ["AlphaDojo/Actors.png and Actor0-Actor7", "AlphaDojo/Summit", "AlphaDojo/SageUpper and SageHem", "Existing music, rhythm judgment and gameplay contracts"],
+    "new_art_and_prompts": "Docs/hanok-art-prompts.json"
+  },
+  "motion": {
+    "entry_seconds": 1.35,
+    "entry_phases_normalized": {"knock": [0, 0.14], "doors": [0.14, 0.62], "approach": [0.43, 1], "interface": [0.78, 1]},
+    "entry_depth": "Opaque foreground doorway grows to 3.65x and passes beyond the viewport; real interior remains visible, with independent slower framing",
+    "travel_seconds": 0.82,
+    "travel": "Turn, anticipation, eased run with distance-driven sprite cadence and footsteps, three depth speeds and a passing timber, braking, then a cancellable arrival interaction",
+    "arrival_seconds": 1.05,
+    "lesson": "Master upper-body gesture precedes trainee windup and strike; target recoil and beat markers follow contact",
+    "practice": "Short entry run, windup, strike, damped wooden-target recoil, recovery to idle",
+    "summit": "Gust bends a continuous cloth mesh and sage robe; trainee resolves and sage responds without a target strike",
+    "inputs": "Additional move/enter commands are rejected during travel. Esc/gamepad cancel reverses entry or cancels travel to its source stage before returning to the entrance. Arrival gestures do not delay further navigation.",
+    "audio": "Authored presentation AudioSource uses existing wood sounds plus editor-baked TrainingFootstep and SummitGust. Title music source and gameplay DSP scheduling are untouched."
+  },
+  "verification_evidence": "Logs/hanok-verification.json"
+}

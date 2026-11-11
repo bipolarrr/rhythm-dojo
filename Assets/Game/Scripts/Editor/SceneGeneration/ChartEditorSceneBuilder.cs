@@ -64,6 +64,8 @@ namespace RhythmDojo.EditorTools
             var fontScope = canvas.gameObject.AddComponent<UiFontScope>();
             fontScope.font = SceneResources.Require<Font>("Assets/Game/Fonts/NotoSansKR-Regular.otf");
             fontScope.style = FontStyle.Normal;
+            // Authoring text uses the standard UI material, including hidden control templates.
+            fontScope.useSmoothRendering = true;
             var scaler = canvas.GetComponent<CanvasScaler>();
             scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
             scaler.matchWidthOrHeight = 0;

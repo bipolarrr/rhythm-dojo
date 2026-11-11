@@ -179,14 +179,25 @@ namespace RhythmDojo.Tests
         {
             var actions = new Actions();
             screen.Initialize(actions);
+            var leftDoor = view.entrance.leftDoor;
+            var rightDoor = view.entrance.rightDoor;
+            var doorwayApproach = view.entrance.doorwayApproach;
             yield return Click(view.entranceTrigger);
             yield return new WaitForSecondsRealtime(.25f);
             Assert.That(view.entrance.Opening, Is.InRange(.01f, .99f));
             Assert.That(view.entrance.leftDoor.anchoredPosition.x, Is.LessThan(0));
             Assert.That(view.entrance.rightDoor.anchoredPosition.x, Is.GreaterThan(0));
+            Assert.That(view.entrance.interiorBackdrop.alpha, Is.Zero);
+            Assert.That(view.menuPanel.alpha, Is.EqualTo(1), "The actual room remains opaque behind the doors.");
+            Assert.That(view.entrance.frame.alpha, Is.EqualTo(1), "The doorway must not dissolve.");
+            Capture("Logs/renewal-door-opening.png");
             view.start.onClick.Invoke();
             view.logo.onClick.Invoke();
             Assert.That(actions.Starts, Is.Zero);
+            yield return new WaitForSecondsRealtime(.5f);
+            Assert.That(doorwayApproach.localScale.x, Is.GreaterThan(1.2f));
+            Assert.That(view.entrance.frame.alpha, Is.EqualTo(1));
+            Capture("Logs/hanok-door-approach-test.png");
             yield return new WaitForSecondsRealtime(MainMenuScreen.MenuExpansionSeconds);
             Assert.That(view.entrance.Opening, Is.EqualTo(1));
             Assert.That(view.menuPanel.blocksRaycasts, Is.True);
@@ -194,6 +205,93 @@ namespace RhythmDojo.Tests
             yield return new WaitForSecondsRealtime(MainMenuScreen.MenuExpansionSeconds + .1f);
             Assert.That(view.entrance.Opening, Is.Zero);
             Assert.That(view.menuPanel.gameObject.activeSelf, Is.False);
+            Assert.That(view.entrance.leftDoor, Is.SameAs(leftDoor));
+            Assert.That(view.entrance.rightDoor, Is.SameAs(rightDoor));
+            Assert.That(view.entrance.doorwayApproach, Is.SameAs(doorwayApproach));
+            Assert.That(doorwayApproach.localScale, Is.EqualTo(Vector3.one));
+        }
+
+        [UnityTest]
+        [Category("SceneIntegration")]
+        public IEnumerator EscapeCancelsEntryAndTravelWithoutReplacingTheStage()
+        {
+            var actions = new Actions();
+            screen.Initialize(actions);
+            var character = view.modeSelection.character;
+            var doorwayApproach = view.entrance.doorwayApproach;
+            var typography = view.modeSelection.typography[1];
+            var titlePosition = ((RectTransform)typography.titleGroup.transform).anchoredPosition;
+            var keyboard = InputSystem.AddDevice<Keyboard>();
+            try
+            {
+                yield return Click(view.entranceTrigger);
+                yield return new WaitForSecondsRealtime(.35f);
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.Escape));
+                yield return null;
+                yield return null;
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+                double deadline = Time.realtimeSinceStartupAsDouble + 3;
+                while (view.menuPanel.gameObject.activeSelf)
+                {
+                    Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                    yield return null;
+                }
+                Assert.That(view.entrance.Opening, Is.Zero);
+                yield return OpenMenu();
+                yield return Click(view.modeSelection.next);
+                yield return new WaitForSecondsRealtime(.20f);
+                Assert.That(view.modeSelection.IsMoving, Is.True);
+                view.modeSelection.next.onClick.Invoke();
+                view.start.onClick.Invoke();
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.Escape));
+                yield return null;
+                yield return null;
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+                Assert.That(view.modeSelection.IsMoving, Is.False);
+                Assert.That(view.modeSelection.SelectedIndex, Is.EqualTo(1));
+                deadline = Time.realtimeSinceStartupAsDouble + 3;
+                while (view.menuPanel.gameObject.activeSelf)
+                {
+                    Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                    yield return null;
+                }
+                yield return OpenMenu();
+                Assert.That(view.modeSelection.character, Is.SameAs(character));
+                Assert.That(view.entrance.doorwayApproach, Is.SameAs(doorwayApproach));
+                Assert.That(view.modeSelection.travelCover.gameObject.activeSelf, Is.False);
+                Assert.That(view.modeSelection.typography[1], Is.SameAs(typography));
+                yield return new WaitForSecondsRealtime(typography.enterSeconds + typography.copyDelay);
+                Assert.That(typography.titleGroup.alpha, Is.EqualTo(1f));
+                Assert.That(typography.copyGroup.alpha, Is.EqualTo(1f));
+                Assert.That(((RectTransform)typography.titleGroup.transform).anchoredPosition,
+                    Is.EqualTo(titlePosition), "Reopening must restore the authored typography pose.");
+                Assert.That(actions.Starts, Is.Zero);
+                yield return Click(view.modeSelection.previous);
+                deadline = Time.realtimeSinceStartupAsDouble + 3;
+                while (view.modeSelection.IsMoving)
+                {
+                    Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                    yield return null;
+                }
+                Assert.That(view.modeSelection.SelectedIndex, Is.Zero);
+                view.logo.onClick.Invoke();
+                deadline = Time.realtimeSinceStartupAsDouble + 3;
+                while (view.menuPanel.gameObject.activeSelf)
+                {
+                    Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                    yield return null;
+                }
+                yield return OpenMenu();
+                yield return Click(view.start);
+                Assert.That(view.modeSelection.actionLabel.text, Is.EqualTo("두드리기"));
+                Assert.That(view.modeSelection.typography[0].titleGroup.alpha, Is.EqualTo(1f));
+                Assert.That(view.modeSelection.typography[0].copyGroup.alpha, Is.EqualTo(1f),
+                    "Starting a lesson during its entrance must finish revealing the instructions.");
+            }
+            finally
+            {
+                InputSystem.RemoveDevice(keyboard);
+            }
         }
 
         [UnityTest]
@@ -206,6 +304,7 @@ namespace RhythmDojo.Tests
             yield return OpenMenu();
             var mode = view.modeSelection;
             var character = mode.character;
+            var heading = mode.heading;
             int contacts = mode.ContactCount;
             double deadline = Time.realtimeSinceStartupAsDouble + 4;
             while (mode.ContactCount == contacts)
@@ -213,6 +312,9 @@ namespace RhythmDojo.Tests
                 Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
                 yield return null;
             }
+            Assert.That(mode.props[1].localRotation, Is.EqualTo(Quaternion.identity),
+                "The target must not react before the contact has propagated.");
+            yield return new WaitForSecondsRealtime(.065f);
             Assert.That(mode.props[1].localRotation, Is.Not.EqualTo(Quaternion.identity));
             var keyboard = InputSystem.AddDevice<Keyboard>();
             try
@@ -222,10 +324,35 @@ namespace RhythmDojo.Tests
                 yield return null;
                 InputSystem.QueueStateEvent(keyboard, new KeyboardState());
                 Assert.That(mode.IsMoving, Is.True);
+                yield return new WaitForSecondsRealtime(.13f);
                 Assert.That(mode.character.sprite, Is.Not.EqualTo(mode.poses[0]));
                 view.modeSelection.next.onClick.Invoke();
                 view.start.onClick.Invoke();
                 Assert.That(actions.Starts, Is.Zero);
+                while (mode.TravelProgress < .35f)
+                {
+                    Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                    yield return null;
+                }
+                Assert.That(Mathf.Abs(mode.middleLayers[2].anchoredPosition.x),
+                    Is.GreaterThan(Mathf.Abs(mode.farLayers[2].anchoredPosition.x)));
+                Assert.That(Mathf.Abs(mode.nearLayers[2].anchoredPosition.x),
+                    Is.GreaterThan(Mathf.Abs(mode.middleLayers[2].anchoredPosition.x)));
+                Assert.That(mode.stages[1].alpha, Is.EqualTo(1));
+                Assert.That(mode.stages[2].alpha, Is.EqualTo(1));
+                Assert.That(mode.typography[1].titleGroup.alpha, Is.Zero,
+                    "The departing title must leave before the new space arrives.");
+                Assert.That(mode.typography[2].titleGroup.alpha, Is.Zero);
+                Assert.That(mode.heading, Is.SameAs(heading), "Do not replace visible copy during departure.");
+                Capture("Logs/hanok-mode-travel-test.png");
+                while (mode.TravelProgress < .71f)
+                {
+                    Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                    yield return null;
+                }
+                Assert.That(mode.typography[2].titleGroup.alpha, Is.GreaterThan(.5f));
+                Assert.That(mode.typography[2].copyGroup.alpha,
+                    Is.LessThan(mode.typography[2].titleGroup.alpha), "Description follows the title on a later beat.");
                 deadline = Time.realtimeSinceStartupAsDouble + 2;
                 while (mode.IsMoving)
                 {
@@ -236,6 +363,14 @@ namespace RhythmDojo.Tests
                 Assert.That(mode.heading.text, Is.EqualTo("실력 검정"));
                 Assert.That(mode.description.text, Is.EqualTo("하산할 준비가 되었다고 생각하나?"));
                 Assert.That(mode.character, Is.SameAs(character));
+                Assert.That(mode.typography[2].copyGroup.alpha, Is.EqualTo(1));
+                Assert.That(mode.typography[2].titleGroup.transform.localScale, Is.EqualTo(Vector3.one));
+                contacts = mode.ContactCount;
+                var sageVertices = ReadVertices(mode.sageMotion);
+                yield return new WaitForSecondsRealtime(.45f);
+                AssertGroundedMotion(mode.sageMotion, sageVertices);
+                Assert.That(mode.sageGesture.localRotation, Is.EqualTo(Quaternion.identity));
+                Assert.That(mode.ContactCount, Is.EqualTo(contacts), "Summit greeting must not punch a prop.");
                 Capture("Logs/emergency-summit.png");
             }
             finally
@@ -253,7 +388,8 @@ namespace RhythmDojo.Tests
             yield return null;
             Assert.That(SceneManager.GetActiveScene().path, Is.EqualTo("Assets/Game/Scenes/Title.unity"));
             yield return OpenMenu();
-            Assert.That(view.editor.transform.parent, Is.SameAs(view.menuPanel.transform));
+            Assert.That(view.editor.transform.IsChildOf(view.menuPanel.transform), Is.True,
+                "The authored composition must stay under the door-controlled menu.");
             Assert.That(view.editor.gameObject.activeInHierarchy, Is.True);
             var editorCorners = new Vector3[4];
             ((RectTransform)view.editor.transform).GetWorldCorners(editorCorners);
@@ -547,25 +683,36 @@ namespace RhythmDojo.Tests
             Capture("Logs/main-menu-expanded.png");
             Capture("Logs/main-menu-expanded-4x3.png", 1024, 768);
             Capture("Logs/main-menu-expanded-ultrawide.png", 2560, 1080);
-            view.menuPanel.alpha = 0f;
-            view.entrance.SetOpening(.5f);
-            Capture("Logs/main-menu-door-opening.png");
-            view.entrance.SetOpening(1f);
-            Capture("Logs/main-menu-door-open.png");
-            Assert.That(view.entrance.frame.alpha, Is.EqualTo(1f));
-            view.entrance.SetApproach(.5f);
-            Capture("Logs/main-menu-door-approach.png");
-            view.entrance.SetApproach(1f);
-            Assert.That(view.entrance.transform.localScale.x,
-                Is.EqualTo(DojoEntranceView.InteriorScale).Within(.0001f),
-                "The landscape must finish at the song selection backdrop scale.");
-            Assert.That(view.entrance.frame.transform.localScale.x, Is.GreaterThan(1.7f));
-            Capture("Logs/main-menu-door-entered.png");
-            view.entrance.SetApproach(0f);
-            Assert.That(view.entrance.frame.transform.localScale, Is.EqualTo(Vector3.one));
-            view.entrance.SetOpening(0f);
-            view.logoGroup.alpha = 1f;
-            view.menuPanel.alpha = 1f;
+            for (int i = 0; i < 4; i++)
+            {
+                yield return Click(view.modeSelection.next);
+                double deadline = Time.realtimeSinceStartupAsDouble + 3;
+                while (view.modeSelection.IsMoving)
+                {
+                    Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                    yield return null;
+                }
+                Capture("Logs/arcade-mode-" + view.modeSelection.SelectedIndex + ".png");
+                Capture("Logs/arcade-mode-" + view.modeSelection.SelectedIndex + "-4x3.png", 1024, 768);
+            }
+            screen.enabled = false;
+            try
+            {
+                view.SetExpansion(.36f);
+                Capture("Logs/main-menu-door-opening.png");
+                view.SetExpansion(.62f);
+                Capture("Logs/main-menu-door-approach.png");
+                Assert.That(view.entrance.frame.alpha, Is.EqualTo(1f));
+                Assert.That(view.menuPanel.alpha, Is.EqualTo(1f));
+                Assert.That(view.entrance.doorwayApproach.localScale.x, Is.GreaterThan(1.2f));
+                view.SetExpansion(1f);
+                Capture("Logs/main-menu-door-entered.png");
+            }
+            finally
+            {
+                view.SetExpansion(1f);
+                screen.enabled = true;
+            }
             yield return Click(view.quit);
             yield return new WaitForSecondsRealtime(.45f);
             Assert.That(view.quitPopup.activeSelf, Is.True);
@@ -830,6 +977,8 @@ namespace RhythmDojo.Tests
         public IEnumerator LessonRespondsToRhythmAndCompletesWithoutLeavingTitle()
         {
             yield return OpenMenu();
+            var character = view.modeSelection.character;
+            var freePosition = view.modeSelection.characterMarks[1].anchoredPosition;
             yield return Click(view.modeSelection.previous);
             double deadline = Time.realtimeSinceStartupAsDouble + 3;
             while (view.modeSelection.IsMoving)
@@ -837,6 +986,22 @@ namespace RhythmDojo.Tests
                 Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
                 yield return null;
             }
+            Assert.That(view.modeSelection.character, Is.SameAs(character));
+            Assert.That(Vector2.Distance(character.rectTransform.anchoredPosition, freePosition), Is.GreaterThan(80));
+            int contacts = view.modeSelection.ContactCount;
+            var teacherVertices = ReadVertices(view.modeSelection.teacherMotion);
+            yield return new WaitForSecondsRealtime(.16f);
+            AssertGroundedMotion(view.modeSelection.teacherMotion, teacherVertices);
+            Assert.That(view.modeSelection.teacherGesture.localRotation, Is.EqualTo(Quaternion.identity));
+            Assert.That(view.modeSelection.props[0].localRotation, Is.EqualTo(Quaternion.identity),
+                "The target must wait for the player's answer to the master.");
+            while (view.modeSelection.IsArriving)
+            {
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                yield return null;
+            }
+            Assert.That(view.modeSelection.ContactCount, Is.EqualTo(contacts + 1));
+            Capture("Logs/renewal-lesson.png");
             yield return Click(view.start);
             double startTime = Time.realtimeSinceStartupAsDouble;
             for (int i = 0; i < 4; i++)
@@ -849,6 +1014,11 @@ namespace RhythmDojo.Tests
             }
             Assert.That(view.modeSelection.LessonHits, Is.EqualTo(4));
             Assert.That(view.modeSelection.detail.text, Does.Contain("기초 수련 완료"));
+            Assert.That(view.modeSelection.lessonCue.text, Does.Contain("잘했다"));
+            foreach (var mark in view.modeSelection.lessonMarks)
+            {
+                Assert.That(mark.color.r, Is.EqualTo(1));
+            }
             Assert.That(SceneManager.GetActiveScene().path, Does.EndWith("/Title.unity"));
             Capture("Logs/emergency-lesson.png");
         }
@@ -876,7 +1046,13 @@ namespace RhythmDojo.Tests
             view.start.onClick.Invoke();
             Assert.That(actions.Starts, Is.Zero);
             yield return Click(view.modeSelection.next);
-            yield return new WaitForSecondsRealtime(.7f);
+            double navigationDeadline = Time.realtimeSinceStartupAsDouble + 3;
+            while (view.modeSelection.IsMoving)
+            {
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(navigationDeadline));
+                yield return null;
+            }
+            yield return null;
             Assert.That(view.modeSelection.SelectedIndex, Is.Zero);
             Assert.That(view.start.interactable, Is.True);
         }
@@ -918,6 +1094,124 @@ namespace RhythmDojo.Tests
             }
         }
 
+        [UnityTest]
+        [Category("SceneIntegration")]
+        public IEnumerator StandingFiguresStayGroundedAndUnusedTargetsStayAtRest()
+        {
+            yield return OpenMenu();
+            var mode = view.modeSelection;
+            var character = mode.character;
+            for (int i = 0; i < 3; i++)
+            {
+                if (i == 1)
+                {
+                    yield return Click(mode.previous);
+                }
+                else if (i == 2)
+                {
+                    yield return Click(mode.next);
+                    yield return WaitForModeMotion(mode);
+                    yield return Click(mode.next);
+                }
+                yield return WaitForModeMotion(mode);
+                // Let the physical target finish settling after the one arrival demonstration.
+                yield return new WaitForSecondsRealtime(.9f);
+                var vertices = ReadVertices(mode.traineeMotion);
+                var position = character.rectTransform.anchoredPosition;
+                var companionPosition = mode.companions[mode.SelectedIndex].anchoredPosition;
+                int contacts = mode.ContactCount;
+                double until = Time.realtimeSinceStartupAsDouble + 1.2;
+                while (Time.realtimeSinceStartupAsDouble < until)
+                {
+                    Assert.That(character.rectTransform.anchoredPosition, Is.EqualTo(position));
+                    Assert.That(character.rectTransform.localScale, Is.EqualTo(Vector3.one));
+                    Assert.That(mode.companions[mode.SelectedIndex].anchoredPosition, Is.EqualTo(companionPosition));
+                    Assert.That(mode.companions[mode.SelectedIndex].localRotation, Is.EqualTo(Quaternion.identity));
+                    Assert.That(mode.props[mode.SelectedIndex].localRotation, Is.EqualTo(Quaternion.identity));
+                    Assert.That(mode.banners[mode.SelectedIndex].localRotation, Is.EqualTo(Quaternion.identity));
+                    Assert.That(mode.ContactCount, Is.EqualTo(contacts), "Idle must never fabricate a strike.");
+                    yield return null;
+                }
+                AssertGroundedMotion(mode.traineeMotion, vertices);
+                Assert.That(mode.character, Is.SameAs(character));
+            }
+        }
+
+        [UnityTest]
+        [Category("SceneIntegration")]
+        public IEnumerator PracticeTargetWaitsForContactSettlesAndCancelsPendingStrike()
+        {
+            yield return OpenMenu();
+            var mode = view.modeSelection;
+            yield return WaitForModeMotion(mode);
+            yield return new WaitForSecondsRealtime(.9f);
+            int contacts = mode.ContactCount;
+            yield return Click(mode.practiceTarget);
+            Assert.That(mode.ContactCount, Is.EqualTo(contacts), "Input begins anticipation, not contact.");
+            Assert.That(mode.props[1].localRotation, Is.EqualTo(Quaternion.identity));
+            yield return Click(mode.practiceTarget);
+            double deadline = Time.realtimeSinceStartupAsDouble + 2;
+            while (mode.ContactCount == contacts)
+            {
+                Assert.That(mode.props[1].localRotation, Is.EqualTo(Quaternion.identity));
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                yield return null;
+            }
+            Assert.That(mode.character.sprite, Is.SameAs(mode.poses[3]));
+            Assert.That(mode.props[1].localRotation, Is.EqualTo(Quaternion.identity));
+            yield return new WaitForSecondsRealtime(.065f);
+            Assert.That(mode.props[1].localRotation, Is.Not.EqualTo(Quaternion.identity));
+            yield return new WaitForSecondsRealtime(.9f);
+            Assert.That(mode.ContactCount, Is.EqualTo(contacts + 1), "Repeated input must not restart a pending blow.");
+            Assert.That(mode.props[1].localRotation, Is.EqualTo(Quaternion.identity));
+            Assert.That(mode.character.sprite, Is.SameAs(mode.poses[0]));
+            yield return Click(mode.practiceTarget);
+            mode.CancelMotion();
+            yield return new WaitForSecondsRealtime(.8f);
+            Assert.That(mode.ContactCount, Is.EqualTo(contacts + 1), "Cancelled contact must never replay later.");
+            Assert.That(mode.props[1].localRotation, Is.EqualTo(Quaternion.identity));
+        }
+
+        private static IEnumerator WaitForModeMotion(DojoModeView mode)
+        {
+            double deadline = Time.realtimeSinceStartupAsDouble + 4;
+            while (mode.IsMoving || mode.IsArriving)
+            {
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                yield return null;
+            }
+        }
+
+        private static Vector3[] ReadVertices(Graphic graphic)
+        {
+            Canvas.ForceUpdateCanvases();
+            var mesh = graphic.canvasRenderer.GetMesh();
+            Assert.That(mesh, Is.Not.Null);
+            return mesh.vertices;
+        }
+
+        private static void AssertGroundedMotion(Graphic graphic, Vector3[] vertices)
+        {
+            var current = ReadVertices(graphic);
+            Assert.That(current.Length, Is.EqualTo(vertices.Length));
+            Assert.That(current.Length, Is.GreaterThan(4));
+            var rect = graphic.rectTransform.rect;
+            float movement = 0f;
+            int planted = 0;
+            for (int i = 0; i < current.Length; i++)
+            {
+                if (vertices[i].y <= rect.yMin + rect.height * .22f)
+                {
+                    Assert.That(Vector3.Distance(vertices[i], current[i]), Is.LessThan(.0001f),
+                        "Standing motion must preserve the rendered soles, not just the root transform.");
+                    planted++;
+                }
+                movement = Mathf.Max(movement, Vector3.Distance(vertices[i], current[i]));
+            }
+            Assert.That(planted, Is.GreaterThan(0));
+            Assert.That(movement, Is.GreaterThan(.03f), "Grounding must retain visible upper-body or cloth motion.");
+        }
+
         private void Capture(string path, int width = 1280, int height = 720)
         {
             if (System.Environment.GetEnvironmentVariable("RHYTHM_DOJO_SKIP_CAPTURE") == "1")
@@ -943,6 +1237,22 @@ namespace RhythmDojo.Tests
                 canvas.worldCamera = camera;
                 canvas.planeDistance = 1;
                 Canvas.ForceUpdateCanvases();
+                if (view.startPrompt.gameObject.activeInHierarchy && view.entrance.Opening < .01f)
+                {
+                    AssertVisibleInCamera(view.logoArtwork, camera);
+                    AssertVisibleInCamera(view.startPrompt.rectTransform, camera);
+                }
+                if (!view.entrance.gameObject.activeSelf && !view.modeSelection.IsMoving)
+                {
+                    AssertVisibleInCamera(view.modeSelection.heading.rectTransform, camera);
+                    foreach (var text in new[] { view.modeSelection.description, view.modeSelection.detail })
+                    {
+                        AssertVisibleInCamera(text.rectTransform, camera);
+                        Assert.That(text.preferredHeight, Is.LessThanOrEqualTo(text.rectTransform.rect.height + 1f),
+                            text.name + " must remain readable without truncation.");
+                    }
+                    AssertVisibleInCamera((RectTransform)view.start.transform, camera);
+                }
                 camera.Render();
                 RenderTexture.active = target;
                 texture.ReadPixels(new Rect(0, 0, width, height), 0, 0);
@@ -962,6 +1272,18 @@ namespace RhythmDojo.Tests
                 UnityEngine.Object.Destroy(target);
                 UnityEngine.Object.Destroy(texture);
                 Canvas.ForceUpdateCanvases();
+            }
+        }
+
+        private static void AssertVisibleInCamera(RectTransform rect, Camera camera)
+        {
+            var corners = new Vector3[4];
+            rect.GetWorldCorners(corners);
+            foreach (var corner in corners)
+            {
+                var point = camera.WorldToViewportPoint(corner);
+                Assert.That(point.x, Is.InRange(-.001f, 1.001f), rect.name + " clipped horizontally");
+                Assert.That(point.y, Is.InRange(-.001f, 1.001f), rect.name + " clipped vertically");
             }
         }
     }

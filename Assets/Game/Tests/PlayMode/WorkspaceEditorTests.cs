@@ -942,6 +942,7 @@ namespace RhythmDojo.Tests
             {
                 Assert.That(text.font, Is.SameAs(scope.font), text.name);
                 Assert.That(text.fontStyle, Is.EqualTo(FontStyle.Normal), text.name);
+                Assert.That(text.material, Is.SameAs(text.defaultMaterial), text.name);
             }
 
             yield return SceneManager.LoadSceneAsync("Assets/Game/Scenes/Title.unity");

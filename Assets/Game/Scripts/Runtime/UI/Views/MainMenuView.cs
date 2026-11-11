@@ -17,6 +17,7 @@ namespace RhythmDojo.UI
             cancelQuit;
         public DojoModeView modeSelection;
         public Image[] ambientLights;
+        public GameObject entranceInvitation;
         public Button editor;
         public Button entranceTrigger;
         public bool alwaysVisibleMenu;
@@ -109,13 +110,21 @@ namespace RhythmDojo.UI
             {
                 amount = Mathf.Clamp01(amount);
                 entrance.gameObject.SetActive(amount < 1f);
-                entrance.SetOpening(amount);
-                entrance.frame.alpha = 1f - Mathf.InverseLerp(.65f, 1f, amount);
-                logoGroup.alpha = 1f - amount;
+                entrance.SetEntrySequence(amount);
+                if (entrance.interiorBackdrop)
+                {
+                    entrance.interiorBackdrop.alpha = 0f;
+                }
+                logoGroup.alpha = 1f;
                 logoGroup.blocksRaycasts = amount < .01f;
-                menuPanel.alpha = Mathf.SmoothStep(0, 1, amount);
+                menuPanel.alpha = 1f;
+                modeSelection.SetEntranceProgress(amount);
                 menuPanel.interactable = menuPanel.blocksRaycasts = amount >= .99f;
                 startPrompt.gameObject.SetActive(amount < .01f);
+                if (entranceInvitation)
+                {
+                    entranceInvitation.SetActive(amount < .01f);
+                }
                 return;
             }
 

@@ -49,6 +49,8 @@ namespace RhythmDojo.EditorTools
             {
                 view.modeSelection.effects = effects;
                 view.modeSelection.contact = view.knock;
+                view.modeSelection.footstep = DojoPresentationAudio.Load(false);
+                view.modeSelection.wind = DojoPresentationAudio.Load(true);
             }
             SceneDependencyAssembler.Wire(screen, "effects", effects);
 

@@ -33,6 +33,7 @@ namespace RhythmDojo.EditorTools
             entranceFit.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
             view.entrance = entrance.AddComponent<DojoEntranceView>();
             var wall = Panel("Dojo Wall", entrance.transform, Color.white);
+            view.entrance.interiorBackdrop = wall.gameObject.AddComponent<CanvasGroup>();
             Stretch(wall.rectTransform);
             wall.sprite = DojoEntranceAssets.Load("SelectionBackground");
             entranceFit.aspectRatio = wall.sprite.rect.width / wall.sprite.rect.height;

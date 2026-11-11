@@ -144,6 +144,8 @@ namespace RhythmDojo.Tests
                         {
                             Assert.That(text.font, Is.SameAs(AssetDatabase.LoadAssetAtPath<Font>(
                                 "Assets/Game/Fonts/NotoSansKR-Regular.otf")), text.name);
+                            Assert.That(text.material, Is.SameAs(text.defaultMaterial),
+                                name + "/" + text.name + " must not inherit the game text effect.");
                         }
                         else
                         {
@@ -179,6 +181,17 @@ namespace RhythmDojo.Tests
                 case UiTextRole.Help:
                     expected = settings.regular;
                     break;
+            }
+
+            var composition = text.GetComponentInParent<DojoModeTypography>(true);
+            var menu = text.GetComponentInParent<MainMenuView>(true);
+            if (composition && text == composition.heading)
+            {
+                expected = AssetDatabase.LoadAssetAtPath<Font>("Assets/Game/Fonts/Dokdo-Regular.ttf");
+            }
+            if (menu && text == menu.title)
+            {
+                expected = AssetDatabase.LoadAssetAtPath<Font>("Assets/Game/Fonts/Dokdo-Regular.ttf");
             }
 
             Assert.That(text.font, Is.SameAs(expected), text.name);

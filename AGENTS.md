@@ -1,5 +1,9 @@
 # Repository Guidelines
 
+## Development Baseline
+
+`main` is the authoritative development baseline and integration target. The user has retired the independent `song` baseline; do not resume work from it or restore its version over `main`. Perform the requested repairs on `main` unless the user specifies another branch. The user authorizes and decides this repair work; historical team ownership documents provide architectural context and do not require teammate approval for user-requested fixes.
+
 ## Project Structure & Module Organization
 
 Game code lives in `Assets/Game/Scripts/`: `Domain` contains gameplay rules and immutable data; `Application` contains coordination and contracts; `Runtime` contains Unity adapters, UI, content, and authoring; `Editor` contains scene/content generation and verification tools. Keep Domain and Application free of Unity APIs.
