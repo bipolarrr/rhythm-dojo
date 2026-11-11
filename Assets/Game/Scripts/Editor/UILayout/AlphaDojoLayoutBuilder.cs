@@ -11,7 +11,9 @@ namespace RhythmDojo.EditorTools
         private static readonly Color Ink = new Color(.12f, .065f, .04f);
         private static readonly Color Paper = new Color(1, .89f, .68f);
 
-        public static void Apply(MainMenuView view)
+        public static void Apply(MainMenuView view) => Apply(view, true);
+
+        public static void Apply(MainMenuView view, bool modeSelection)
         {
             var canvas = view.transform;
             // Keep the established view/actions and door objects; replace their authored presentation.
@@ -54,6 +56,13 @@ namespace RhythmDojo.EditorTools
             trigger.anchorMin = new Vector2(.24f, .17f);
             trigger.anchorMax = new Vector2(.76f, .70f);
             trigger.offsetMin = trigger.offsetMax = Vector2.zero;
+
+            if (!modeSelection)
+            {
+                view.entrance.trainingMenu = null;
+                DojoRenewalLayoutBuilder.BuildEntrance(view);
+                return;
+            }
 
             var menu = (RectTransform)view.menuPanel.transform;
             menu.SetParent(canvas, false);

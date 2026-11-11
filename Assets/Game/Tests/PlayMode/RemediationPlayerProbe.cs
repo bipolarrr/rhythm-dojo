@@ -386,10 +386,12 @@ namespace RhythmDojo.Tests
             yield return Wait(() => Object.FindFirstObjectByType<MainMenuView>(), "Title view");
             yield return null;
             var view = Object.FindFirstObjectByType<MainMenuView>();
-            if (view.menuPanel.alpha < .99f)
+            if (!view.modeSelection)
             {
                 yield return Click(view.logo);
-                yield return Delay(MainMenuScreen.MenuExpansionSeconds + .1);
+                yield return Wait(() => SceneManager.GetActiveScene().path == MainMenuActions.ModeSelectionScenePath,
+                    "Mode selection entry");
+                view = Object.FindFirstObjectByType<MainMenuScreen>().GetComponent<MainMenuView>();
             }
             Require(view.menuPanel.blocksRaycasts, "Expanded title menu receives pointer input.");
         }

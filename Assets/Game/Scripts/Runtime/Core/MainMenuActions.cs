@@ -10,6 +10,8 @@ namespace RhythmDojo.Core
     public sealed class MainMenuActions : IMainMenuActions
     {
         public const string BootstrapScenePath = "Assets/Game/Scenes/Bootstrap.unity";
+        public const string TitleScenePath = "Assets/Game/Scenes/Title.unity";
+        public const string ModeSelectionScenePath = "Assets/Game/Scenes/ModeSelection.unity";
 
         public bool Transitioning { get; private set; }
 
@@ -120,11 +122,33 @@ namespace RhythmDojo.Core
             }
         }
 
-        private void ReturnToTitle()
+        public void ReturnToTitle()
         {
+            if (!view || !view.modeSelection)
+            {
+                AppFlowController.Create(settings).CancelSelectionPreparation();
+                Transitioning = false;
+                SceneManager.LoadSceneAsync(TitleScenePath, LoadSceneMode.Single);
+                return;
+            }
+            if (Transitioning)
+            {
+                return;
+            }
             AppFlowController.Create(settings).CancelSelectionPreparation();
-            Transitioning = false;
-            SceneManager.LoadSceneAsync("Assets/Game/Scenes/Title.unity", LoadSceneMode.Single);
+            Transitioning = true;
+            try
+            {
+                if (SceneManager.LoadSceneAsync(TitleScenePath, LoadSceneMode.Additive) == null)
+                {
+                    throw new InvalidOperationException("Cannot load Title.");
+                }
+            }
+            catch
+            {
+                Transitioning = false;
+                throw;
+            }
         }
 
         public void ShowEditor()

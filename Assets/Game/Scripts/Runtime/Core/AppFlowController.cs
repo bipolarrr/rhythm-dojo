@@ -535,7 +535,7 @@ namespace RhythmDojo.Core
         public void PrepareSelection()
         {
             var scene = SceneManager.GetActiveScene();
-            if (scene.path == "Assets/Game/Scenes/Title.unity")
+            if (scene.path == MainMenuActions.ModeSelectionScenePath)
             {
                 selectionPreparation.PrepareSelection(scene);
             }
@@ -634,15 +634,20 @@ namespace RhythmDojo.Core
 
         public void ShowTitleSettings()
         {
-            if (
-                Transitioning
-                || !SceneManager.GetSceneByPath("Assets/Game/Scenes/Title.unity").isLoaded
-            )
+            if (Transitioning)
             {
                 return;
             }
 
-            settingsReturnPath = "Assets/Game/Scenes/Title.unity";
+            settingsReturnPath = MainMenuActions.ModeSelectionScenePath;
+            if (!SceneManager.GetSceneByPath(settingsReturnPath).isLoaded)
+            {
+                settingsReturnPath = MainMenuActions.TitleScenePath;
+                if (!SceneManager.GetSceneByPath(settingsReturnPath).isLoaded)
+                {
+                    return;
+                }
+            }
             settingsKeyMode = settings.catalog[0].Mode;
             settingsKeyModeId = settingsKeyMode.name;
             OpenSettingsPopup();
@@ -792,6 +797,7 @@ namespace RhythmDojo.Core
                 if (path == SelectionPath)
                 {
                     bool fromTitle = SceneManager.GetActiveScene().path == "Assets/Game/Scenes/Title.unity";
+                    fromTitle = fromTitle || SceneManager.GetActiveScene().path == MainMenuActions.ModeSelectionScenePath;
                     if (DojoEntranceTransition.Active || fromTitle)
                     {
                         LoadEntranceSelection(path);

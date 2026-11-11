@@ -381,6 +381,7 @@ namespace RhythmDojo.EditorTools
                     scenes = new[]
                     {
                         SceneBuilder.TitlePath,
+                        SceneBuilder.ModeSelectionPath,
                         SceneBuilder.BootstrapPath,
                         SceneBuilder.SelectionPath,
                         SceneBuilder.GameplayPath,

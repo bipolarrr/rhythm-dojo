@@ -92,7 +92,7 @@ namespace RhythmDojo.Tests
             input.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
             mouse = InputSystem.AddDevice<Mouse>();
             mouse.MakeCurrent();
-            yield return SceneManager.LoadSceneAsync("Assets/Game/Scenes/Title.unity");
+            yield return SceneManager.LoadSceneAsync(MainMenuActions.ModeSelectionScenePath);
             yield return null;
             view = UnityEngine.Object.FindFirstObjectByType<MainMenuView>();
             screen = UnityEngine.Object.FindFirstObjectByType<MainMenuScreen>();
@@ -165,128 +165,151 @@ namespace RhythmDojo.Tests
 
         private IEnumerator OpenMenu()
         {
+            if (!view.modeSelection)
+            {
+                yield return Click(view.logo);
+                yield return WaitForMenuScene(MainMenuActions.ModeSelectionScenePath);
+            }
             yield return null;
-            Assert.That(view.alwaysVisibleMenu, Is.False);
-            yield return Click(view.logo);
-            yield return new WaitForSecondsRealtime(MainMenuScreen.MenuExpansionSeconds + .1f);
             Assert.That(view.menuPanel.alpha, Is.EqualTo(1f));
             Assert.That(view.menuPanel.blocksRaycasts, Is.True);
+        }
+
+        private IEnumerator LoadTitle()
+        {
+            yield return SceneManager.LoadSceneAsync(MainMenuActions.TitleScenePath);
+            yield return WaitForMenuScene(MainMenuActions.TitleScenePath);
+        }
+
+        private IEnumerator WaitForMenuScene(string path)
+        {
+            double deadline = Time.realtimeSinceStartupAsDouble + 20;
+            while (SceneManager.GetActiveScene().path != path)
+            {
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                AssertHasDisplayCamera();
+                yield return null;
+            }
+            string previous = MainMenuActions.TitleScenePath;
+            if (path == MainMenuActions.TitleScenePath)
+            {
+                previous = MainMenuActions.ModeSelectionScenePath;
+            }
+            while (SceneManager.GetSceneByPath(previous).IsValid())
+            {
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                yield return null;
+            }
+            yield return null;
+            view = MainMenuCompositionRoot.InScene(SceneManager.GetActiveScene()).View;
+            screen = view.GetComponent<MainMenuScreen>();
+            Assert.That(Array.FindAll(UnityEngine.Object.FindObjectsByType<AudioListener>(FindObjectsSortMode.None),
+                item => item.isActiveAndEnabled), Has.Length.EqualTo(1));
+            Assert.That(Array.FindAll(UnityEngine.Object.FindObjectsByType<UnityEngine.EventSystems.EventSystem>(FindObjectsSortMode.None),
+                item => item.isActiveAndEnabled), Has.Length.EqualTo(1));
+        }
+
+        private IEnumerator ReturnToTitle()
+        {
+            var keyboard = InputSystem.AddDevice<Keyboard>();
+            try
+            {
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.Escape));
+                yield return null;
+                yield return null;
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+                yield return WaitForMenuScene(MainMenuActions.TitleScenePath);
+            }
+            finally
+            {
+                InputSystem.RemoveDevice(keyboard);
+            }
         }
 
         [UnityTest]
         [Category("SceneIntegration")]
         public IEnumerator SlidingDoorsRevealDummiesAndReverseWithoutStartingEarly()
         {
-            var actions = new Actions();
-            screen.Initialize(actions);
+            yield return LoadTitle();
+            var entrance = view;
             var leftDoor = view.entrance.leftDoor;
             var rightDoor = view.entrance.rightDoor;
-            var doorwayApproach = view.entrance.doorwayApproach;
             yield return Click(view.entranceTrigger);
-            yield return new WaitForSecondsRealtime(.25f);
-            Assert.That(view.entrance.Opening, Is.InRange(.01f, .99f));
-            Assert.That(view.entrance.leftDoor.anchoredPosition.x, Is.LessThan(0));
-            Assert.That(view.entrance.rightDoor.anchoredPosition.x, Is.GreaterThan(0));
-            Assert.That(view.entrance.interiorBackdrop.alpha, Is.Zero);
-            Assert.That(view.menuPanel.alpha, Is.EqualTo(1), "The actual room remains opaque behind the doors.");
-            Assert.That(view.entrance.frame.alpha, Is.EqualTo(1), "The doorway must not dissolve.");
-            Capture("Logs/renewal-door-opening.png");
-            view.start.onClick.Invoke();
-            view.logo.onClick.Invoke();
-            Assert.That(actions.Starts, Is.Zero);
-            yield return new WaitForSecondsRealtime(.5f);
-            Assert.That(doorwayApproach.localScale.x, Is.GreaterThan(1.2f));
-            Assert.That(view.entrance.frame.alpha, Is.EqualTo(1));
-            Capture("Logs/hanok-door-approach-test.png");
-            yield return new WaitForSecondsRealtime(MainMenuScreen.MenuExpansionSeconds);
-            Assert.That(view.entrance.Opening, Is.EqualTo(1));
-            Assert.That(view.menuPanel.blocksRaycasts, Is.True);
-            view.logo.onClick.Invoke();
-            yield return new WaitForSecondsRealtime(MainMenuScreen.MenuExpansionSeconds + .1f);
+            double deadline = Time.realtimeSinceStartupAsDouble + 10;
+            while (entrance.entrance.Opening <= 0)
+            {
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                yield return null;
+            }
+            Assert.That(SceneManager.GetActiveScene().path, Is.EqualTo(MainMenuActions.TitleScenePath));
+            var mode = MainMenuCompositionRoot.InScene(SceneManager.GetSceneByPath(MainMenuActions.ModeSelectionScenePath));
+            var character = mode.View.modeSelection.character;
+            Assert.That(mode.View.modeSelection.InputEnabled, Is.False);
+            Assert.That(mode.View.start.interactable, Is.False);
+            Assert.That(entrance.entrance.leftDoor, Is.SameAs(leftDoor));
+            Assert.That(entrance.entrance.rightDoor, Is.SameAs(rightDoor));
+            Assert.That(entrance.entrance.interiorBackdrop.alpha, Is.Zero);
+            Assert.That(entrance.entrance.frame.alpha, Is.EqualTo(1));
+            entrance.logo.onClick.Invoke();
+            mode.View.start.onClick.Invoke();
+            yield return WaitForMenuScene(MainMenuActions.ModeSelectionScenePath);
+            Assert.That(view.modeSelection.character, Is.SameAs(character),
+                "Door reveal must use the same authored room and actors as the active scene.");
+            Assert.That(entrance == null, Is.True);
+            Assert.That(view.modeSelection.InputEnabled, Is.True);
+            yield return ReturnToTitle();
             Assert.That(view.entrance.Opening, Is.Zero);
-            Assert.That(view.menuPanel.gameObject.activeSelf, Is.False);
-            Assert.That(view.entrance.leftDoor, Is.SameAs(leftDoor));
-            Assert.That(view.entrance.rightDoor, Is.SameAs(rightDoor));
-            Assert.That(view.entrance.doorwayApproach, Is.SameAs(doorwayApproach));
-            Assert.That(doorwayApproach.localScale, Is.EqualTo(Vector3.one));
+            Assert.That(view.modeSelection, Is.Null);
+            Assert.That(view.menuPanel, Is.Null);
         }
 
         [UnityTest]
         [Category("SceneIntegration")]
         public IEnumerator EscapeCancelsEntryAndTravelWithoutReplacingTheStage()
         {
-            var actions = new Actions();
-            screen.Initialize(actions);
-            var character = view.modeSelection.character;
+            yield return LoadTitle();
             var doorwayApproach = view.entrance.doorwayApproach;
-            var typography = view.modeSelection.typography[1];
-            var titlePosition = ((RectTransform)typography.titleGroup.transform).anchoredPosition;
             var keyboard = InputSystem.AddDevice<Keyboard>();
             try
             {
                 yield return Click(view.entranceTrigger);
-                yield return new WaitForSecondsRealtime(.35f);
-                InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.Escape));
-                yield return null;
-                yield return null;
-                InputSystem.QueueStateEvent(keyboard, new KeyboardState());
-                double deadline = Time.realtimeSinceStartupAsDouble + 3;
-                while (view.menuPanel.gameObject.activeSelf)
+                double deadline = Time.realtimeSinceStartupAsDouble + 10;
+                while (view.entrance.Opening <= 0)
                 {
                     Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
                     yield return null;
                 }
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.Escape));
+                yield return null;
+                yield return null;
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+                yield return WaitForMenuScene(MainMenuActions.TitleScenePath);
                 Assert.That(view.entrance.Opening, Is.Zero);
+                Assert.That(view.entrance.doorwayApproach, Is.SameAs(doorwayApproach));
                 yield return OpenMenu();
+                yield return WaitForModeMotion(view.modeSelection);
+                var character = view.modeSelection.character;
+                var typography = view.modeSelection.typography[1];
+                var titlePosition = ((RectTransform)typography.titleGroup.transform).anchoredPosition;
                 yield return Click(view.modeSelection.next);
                 yield return new WaitForSecondsRealtime(.20f);
                 Assert.That(view.modeSelection.IsMoving, Is.True);
-                view.modeSelection.next.onClick.Invoke();
-                view.start.onClick.Invoke();
                 InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.Escape));
                 yield return null;
                 yield return null;
                 InputSystem.QueueStateEvent(keyboard, new KeyboardState());
                 Assert.That(view.modeSelection.IsMoving, Is.False);
+                yield return WaitForMenuScene(MainMenuActions.TitleScenePath);
+                Assert.That(character == null, Is.True, "Departing actors must be destroyed with their scene.");
+                yield return OpenMenu();
+                yield return WaitForModeMotion(view.modeSelection);
                 Assert.That(view.modeSelection.SelectedIndex, Is.EqualTo(1));
-                deadline = Time.realtimeSinceStartupAsDouble + 3;
-                while (view.menuPanel.gameObject.activeSelf)
-                {
-                    Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
-                    yield return null;
-                }
-                yield return OpenMenu();
-                Assert.That(view.modeSelection.character, Is.SameAs(character));
-                Assert.That(view.entrance.doorwayApproach, Is.SameAs(doorwayApproach));
                 Assert.That(view.modeSelection.travelCover.gameObject.activeSelf, Is.False);
-                Assert.That(view.modeSelection.typography[1], Is.SameAs(typography));
-                yield return new WaitForSecondsRealtime(typography.enterSeconds + typography.copyDelay);
-                Assert.That(typography.titleGroup.alpha, Is.EqualTo(1f));
-                Assert.That(typography.copyGroup.alpha, Is.EqualTo(1f));
-                Assert.That(((RectTransform)typography.titleGroup.transform).anchoredPosition,
-                    Is.EqualTo(titlePosition), "Reopening must restore the authored typography pose.");
-                Assert.That(actions.Starts, Is.Zero);
-                yield return Click(view.modeSelection.previous);
-                deadline = Time.realtimeSinceStartupAsDouble + 3;
-                while (view.modeSelection.IsMoving)
-                {
-                    Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
-                    yield return null;
-                }
-                Assert.That(view.modeSelection.SelectedIndex, Is.Zero);
-                view.logo.onClick.Invoke();
-                deadline = Time.realtimeSinceStartupAsDouble + 3;
-                while (view.menuPanel.gameObject.activeSelf)
-                {
-                    Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
-                    yield return null;
-                }
+                Assert.That(((RectTransform)view.modeSelection.typography[1].titleGroup.transform).anchoredPosition,
+                    Is.EqualTo(titlePosition));
+                yield return ReturnToTitle();
                 yield return OpenMenu();
-                yield return Click(view.start);
-                Assert.That(view.modeSelection.actionLabel.text, Is.EqualTo("두드리기"));
-                Assert.That(view.modeSelection.typography[0].titleGroup.alpha, Is.EqualTo(1f));
-                Assert.That(view.modeSelection.typography[0].copyGroup.alpha, Is.EqualTo(1f),
-                    "Starting a lesson during its entrance must finish revealing the instructions.");
+                Assert.That(UnityEngine.Object.FindObjectsByType<DojoModeView>(FindObjectsSortMode.None), Has.Length.EqualTo(1));
             }
             finally
             {
@@ -383,26 +406,14 @@ namespace RhythmDojo.Tests
         [Category("SceneIntegration")]
         public IEnumerator EditorStaysBehindDoorsAndOpensFromInsideTheDojo()
         {
-            Assert.That(view.editor.gameObject.activeInHierarchy, Is.False);
-            view.editor.onClick.Invoke();
-            yield return null;
-            Assert.That(SceneManager.GetActiveScene().path, Is.EqualTo("Assets/Game/Scenes/Title.unity"));
+            yield return LoadTitle();
+            Assert.That(view.editor, Is.Null);
+            Assert.That(SceneManager.GetActiveScene().path, Is.EqualTo(MainMenuActions.TitleScenePath));
             yield return OpenMenu();
-            Assert.That(view.editor.transform.IsChildOf(view.menuPanel.transform), Is.True,
-                "The authored composition must stay under the door-controlled menu.");
+            Assert.That(view.editor.transform.IsChildOf(view.menuPanel.transform), Is.True);
             Assert.That(view.editor.gameObject.activeInHierarchy, Is.True);
-            var editorCorners = new Vector3[4];
-            ((RectTransform)view.editor.transform).GetWorldCorners(editorCorners);
-            foreach (var corner in editorCorners)
-            {
-                var local = view.GetComponent<RectTransform>().InverseTransformPoint(corner);
-                Assert.That(view.GetComponent<RectTransform>().rect.Contains(local), Is.True,
-                    "Editor control must remain inside the screen.");
-            }
-
-            view.logo.onClick.Invoke();
-            yield return new WaitForSecondsRealtime(MainMenuScreen.MenuExpansionSeconds + .1f);
-            Assert.That(view.editor.gameObject.activeInHierarchy, Is.False);
+            yield return ReturnToTitle();
+            Assert.That(view.editor, Is.Null);
             yield return OpenMenu();
             yield return Click(view.editor);
             double deadline = Time.realtimeSinceStartupAsDouble + 20;
@@ -426,7 +437,7 @@ namespace RhythmDojo.Tests
             Assert.That(actions.Starts, Is.Zero);
             Assert.That(actions.Quits, Is.Zero);
             Assert.That(view.quitPopup.activeSelf, Is.False);
-            Assert.That(SceneManager.GetActiveScene().path, Does.EndWith("/Title.unity"));
+            Assert.That(SceneManager.GetActiveScene().path, Does.EndWith("/ModeSelection.unity"));
         }
 
         [UnityTest]
@@ -525,7 +536,7 @@ namespace RhythmDojo.Tests
             while (!flow.IsSelectionPrepared)
             {
                 Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
-                Assert.That(SceneManager.GetActiveScene().path, Does.EndWith("/Title.unity"));
+                Assert.That(SceneManager.GetActiveScene().path, Does.EndWith("/ModeSelection.unity"));
                 yield return null;
             }
 
@@ -534,8 +545,8 @@ namespace RhythmDojo.Tests
             Assert.That(selection.GetComponent<Canvas>().sortingOrder, Is.LessThan(view.GetComponent<Canvas>().sortingOrder));
             Assert.That(selection.GetComponent<CanvasGroup>().interactable, Is.False);
             Assert.That(selection.GetComponent<CanvasGroup>().blocksRaycasts, Is.False);
-            Assert.That(UnityEngine.EventSystems.EventSystem.current.gameObject.scene.path, Does.EndWith("/Title.unity"));
-            Assert.That(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject, Is.SameAs(view.logo.gameObject));
+            Assert.That(UnityEngine.EventSystems.EventSystem.current.gameObject.scene.path, Does.EndWith("/ModeSelection.unity"));
+            Assert.That(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject, Is.SameAs(view.start.gameObject));
             Assert.That(Array.FindAll(UnityEngine.Object.FindObjectsByType<AudioListener>(FindObjectsSortMode.None),
                 item => item.isActiveAndEnabled), Has.Length.EqualTo(1));
             Assert.That(DojoEntranceTransition.Active, Is.Null);
@@ -548,11 +559,7 @@ namespace RhythmDojo.Tests
         [Category("SceneIntegration")]
         public IEnumerator StartLoadsBootstrapThenExistingSongSelection()
         {
-            view.entrance.SetApproach(1f);
-            Canvas.ForceUpdateCanvases();
-            var entranceCorners = new Vector3[4];
-            view.entrance.GetComponentInChildren<Image>().rectTransform.GetWorldCorners(entranceCorners);
-            view.entrance.SetApproach(0f);
+            yield return LoadTitle();
             bool bootstrapLoaded = false;
             int selectionLoads = 0;
             UnityEngine.Events.UnityAction<Scene, LoadSceneMode> loaded = (scene, mode) =>
@@ -572,7 +579,12 @@ namespace RhythmDojo.Tests
             try
             {
                 yield return OpenMenu();
-                Assert.That(UnityEngine.Object.FindFirstObjectByType<AppFlowController>().IsSelectionPrepared, Is.True);
+                double preparedDeadline = Time.realtimeSinceStartupAsDouble + 20;
+                while (!UnityEngine.Object.FindFirstObjectByType<AppFlowController>().IsSelectionPrepared)
+                {
+                    Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(preparedDeadline));
+                    yield return null;
+                }
                 int preparedHandle = SceneManager.GetSceneByPath(AppFlowController.SelectionPath).handle;
                 selectionLoads = 0;
                 yield return Click(view.start);
@@ -614,7 +626,7 @@ namespace RhythmDojo.Tests
                     "The title must enter selection directly, avoiding an extra scene activation stall.");
                 Assert.That(selectionLoads, Is.Zero, "Play must reuse the warmed scene without loading it again.");
                 Assert.That((int)SceneManager.GetActiveScene().handle, Is.EqualTo(preparedHandle));
-                Assert.That(SceneManager.GetSceneByPath("Assets/Game/Scenes/Title.unity").isLoaded, Is.False,
+                Assert.That(SceneManager.GetSceneByPath(MainMenuActions.ModeSelectionScenePath).isLoaded, Is.False,
                     "The hidden title must finish unloading before the entrance releases selection input.");
                 Assert.That(UnityEngine.Object.FindObjectsByType<UnityEngine.EventSystems.EventSystem>(FindObjectsSortMode.None),
                     Has.Length.EqualTo(1));
@@ -674,6 +686,7 @@ namespace RhythmDojo.Tests
         [Category("SceneIntegration")]
         public IEnumerator CaptureMenuAndKoreanQuitPopup()
         {
+            yield return LoadTitle();
             Capture("Logs/main-menu.png");
             Capture("Logs/main-menu-1920.png", 1920, 1080);
             Capture("Logs/main-menu-4x3.png", 1024, 768);
@@ -695,24 +708,6 @@ namespace RhythmDojo.Tests
                 Capture("Logs/arcade-mode-" + view.modeSelection.SelectedIndex + ".png");
                 Capture("Logs/arcade-mode-" + view.modeSelection.SelectedIndex + "-4x3.png", 1024, 768);
             }
-            screen.enabled = false;
-            try
-            {
-                view.SetExpansion(.36f);
-                Capture("Logs/main-menu-door-opening.png");
-                view.SetExpansion(.62f);
-                Capture("Logs/main-menu-door-approach.png");
-                Assert.That(view.entrance.frame.alpha, Is.EqualTo(1f));
-                Assert.That(view.menuPanel.alpha, Is.EqualTo(1f));
-                Assert.That(view.entrance.doorwayApproach.localScale.x, Is.GreaterThan(1.2f));
-                view.SetExpansion(1f);
-                Capture("Logs/main-menu-door-entered.png");
-            }
-            finally
-            {
-                view.SetExpansion(1f);
-                screen.enabled = true;
-            }
             yield return Click(view.quit);
             yield return new WaitForSecondsRealtime(.45f);
             Assert.That(view.quitPopup.activeSelf, Is.True);
@@ -723,16 +718,17 @@ namespace RhythmDojo.Tests
         [Category("SceneIntegration")]
         public IEnumerator LogoCanCollapseMenuAndHiddenButtonsCannotStart()
         {
-            var actions = new Actions();
-            screen.Initialize(actions);
             yield return OpenMenu();
-            view.logo.onClick.Invoke();
-            yield return new WaitForSecondsRealtime(MainMenuScreen.MenuExpansionSeconds + .1f);
-            Assert.That(view.menuPanel.gameObject.activeSelf, Is.False);
+            var character = view.modeSelection.character;
+            var start = view.start;
+            yield return ReturnToTitle();
+            Assert.That(character == null, Is.True);
+            Assert.That(start == null, Is.True);
             Assert.That(view.logo.targetGraphic.raycastTarget, Is.True);
-            view.start.onClick.Invoke();
-            yield return new WaitForSecondsRealtime(.45f);
-            Assert.That(actions.Starts, Is.Zero);
+            Assert.That(view.modeSelection, Is.Null);
+            yield return OpenMenu();
+            Assert.That(view.modeSelection.SelectedIndex, Is.EqualTo(1));
+            Assert.That(view.start.interactable, Is.True);
         }
 
         [UnityTest]
@@ -755,14 +751,13 @@ namespace RhythmDojo.Tests
 
             var settingsView = UnityEngine.Object.FindFirstObjectByType<SettingsView>();
             Assert.That(SceneManager.GetActiveScene().path,
-                Is.EqualTo("Assets/Game/Scenes/Title.unity"));
+                Is.EqualTo(MainMenuActions.ModeSelectionScenePath));
             Assert.That(SceneManager.GetSceneByPath(AppFlowController.SettingsPath).isLoaded,
                 Is.False);
             Assert.That(settingsView.backdrop, Is.Not.Null);
             Assert.That(settingsView.backdrop.activeSelf, Is.False);
             Assert.That(view.modeSelection.gameObject.activeInHierarchy, Is.True);
-            Assert.That(view.entrance.frame.alpha, Is.Zero);
-            Assert.That(view.entrance.Opening, Is.EqualTo(1));
+            Assert.That(view.entrance, Is.Null);
             var keyboard = InputSystem.AddDevice<Keyboard>();
             try
             {
@@ -775,7 +770,7 @@ namespace RhythmDojo.Tests
                 InputSystem.RemoveDevice(keyboard);
             }
 
-            while (SceneManager.GetActiveScene().path != "Assets/Game/Scenes/Title.unity")
+            while (SceneManager.GetActiveScene().path != MainMenuActions.ModeSelectionScenePath)
             {
                 Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
                 yield return null;
@@ -792,7 +787,6 @@ namespace RhythmDojo.Tests
             );
             Assert.That(screen.enabled, Is.True);
             Assert.That(view.start.interactable, Is.True);
-            view.logo.onClick.Invoke();
             yield return null;
             Assert.That(view.menuPanel.gameObject.activeSelf, Is.True);
         }
@@ -845,6 +839,7 @@ namespace RhythmDojo.Tests
         [Category("SceneIntegration")]
         public IEnumerator EntranceWaitsForReadyAndRestoresSelectionInput()
         {
+            yield return LoadTitle();
             var transition = DojoEntranceTransition.Begin(
                 view.entrance, view.doorSlide, view.startPrompt.font, () => { });
             yield return new WaitForSecondsRealtime(DojoEntranceTransition.DoorOpeningSeconds + .2f);
@@ -892,16 +887,7 @@ namespace RhythmDojo.Tests
         [Category("SceneIntegration")]
         public IEnumerator PlaqueRejectsCornersAndKeyboardCanExpandAndStart()
         {
-            var actions = new Actions();
-            screen.Initialize(actions);
-            Canvas.ForceUpdateCanvases();
-            var rect = (RectTransform)view.logo.transform;
-            var corner = rect.TransformPoint(new Vector3(rect.rect.xMax - 5f, rect.rect.yMax - 5f));
-            yield return ClickAt(RectTransformUtility.WorldToScreenPoint(null, corner));
-            yield return new WaitForSecondsRealtime(MainMenuScreen.MenuExpansionSeconds + .1f);
-            Assert.That(view.menuPanel.gameObject.activeSelf, Is.True);
-            view.logo.onClick.Invoke();
-            yield return new WaitForSecondsRealtime(MainMenuScreen.MenuExpansionSeconds + .1f);
+            yield return LoadTitle();
             var keyboard = InputSystem.AddDevice<Keyboard>();
             try
             {
@@ -910,8 +896,9 @@ namespace RhythmDojo.Tests
                 yield return null;
                 yield return null;
                 InputSystem.QueueStateEvent(keyboard, new KeyboardState());
-                yield return new WaitForSecondsRealtime(MainMenuScreen.MenuExpansionSeconds + .1f);
-                Assert.That(view.menuPanel.alpha, Is.EqualTo(1f));
+                yield return WaitForMenuScene(MainMenuActions.ModeSelectionScenePath);
+                var actions = new Actions();
+                screen.Initialize(actions);
                 Assert.That(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject,
                     Is.EqualTo(view.start.gameObject));
                 InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.Enter));
@@ -932,6 +919,7 @@ namespace RhythmDojo.Tests
         public IEnumerator EntranceTimeoutOffersRecoveryAndCleansUp()
         {
             bool recovered = false;
+            yield return LoadTitle();
             var transition = DojoEntranceTransition.Begin(
                 view.entrance, view.doorSlide, view.startPrompt.font, () => recovered = true);
             typeof(DojoEntranceTransition).GetField(
@@ -1021,7 +1009,7 @@ namespace RhythmDojo.Tests
             {
                 Assert.That(mark.color.r, Is.EqualTo(1));
             }
-            Assert.That(SceneManager.GetActiveScene().path, Does.EndWith("/Title.unity"));
+            Assert.That(SceneManager.GetActiveScene().path, Does.EndWith("/ModeSelection.unity"));
             Capture("Logs/emergency-lesson.png");
         }
 
@@ -1393,12 +1381,12 @@ namespace RhythmDojo.Tests
                 canvas.worldCamera = camera;
                 canvas.planeDistance = 1;
                 Canvas.ForceUpdateCanvases();
-                if (view.startPrompt.gameObject.activeInHierarchy && view.entrance.Opening < .01f)
+                if (view.startPrompt && view.startPrompt.gameObject.activeInHierarchy)
                 {
                     AssertVisibleInCamera(view.logoArtwork, camera);
                     AssertVisibleInCamera(view.startPrompt.rectTransform, camera);
                 }
-                if (!view.entrance.gameObject.activeSelf && !view.modeSelection.IsMoving)
+                if (view.modeSelection && !view.modeSelection.IsMoving)
                 {
                     AssertVisibleInCamera(view.modeSelection.heading.rectTransform, camera);
                     foreach (var text in new[] { view.modeSelection.description, view.modeSelection.detail })

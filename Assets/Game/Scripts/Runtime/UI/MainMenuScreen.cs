@@ -11,42 +11,19 @@ namespace RhythmDojo.UI
         [SerializeField]
         private MainMenuView view;
 
-        [Header("Title Beat Bounce")]
-        [SerializeField, Min(1f)]
-        private float beatsPerMinute = 120f;
-
-        [SerializeField, Range(0f, .3f)]
-        private float titleBounceAmount = .08f;
-
-        [SerializeField, Range(0f, .3f)]
-        private float promptBounceAmount = 0f;
-
-        [Tooltip("Fraction of each beat used to return to the original size.")]
-        [SerializeField, Range(.1f, 1f)]
-        private float bounceDurationInBeats = .65f;
         private IMainMenuActions actions;
-        private IMainMenuBeatClock beatClock;
         private bool starting,
             quitting;
-        private Vector3 titleScale,
-            promptScale;
-        private double beatStartTime;
-        private bool bounceInitialized;
-        private bool menuExpanded;
-        private float expansion;
         [SerializeField]
         private AudioSource effects;
-        private float knockTime;
         private int modalClosedFrame = -1;
-        private bool doorSoundPlayed;
-        private Coroutine focusRoutine;
         public const float MenuExpansionSeconds = 1.35f;
 
         public void Validate()
         {
-            if (!view)
+            if (!view || !view.modeSelection)
             {
-                throw new InvalidOperationException("Main menu view missing.");
+                throw new InvalidOperationException("Mode selection view missing.");
             }
 
             view.Validate();
@@ -68,24 +45,11 @@ namespace RhythmDojo.UI
                 view.modeSelection.next.onClick.AddListener(NextMode);
                 view.modeSelection.practiceTarget.onClick.AddListener(view.modeSelection.PracticeTarget);
             }
-            view.logoArtwork.localRotation = Quaternion.identity;
-            titleScale = view.logoArtwork.localScale;
-            promptScale = view.startPrompt.rectTransform.localScale;
-            beatStartTime = AudioSettings.dspTime;
-            bounceInitialized = true;
             actions = menuActions ?? throw new ArgumentNullException(nameof(menuActions));
-            beatClock = menuBeatClock;
             starting = quitting = false;
             modalClosedFrame = -1;
-            menuExpanded = view.alwaysVisibleMenu;
-            expansion = 0f;
-            doorSoundPlayed = false;
-            if (view.alwaysVisibleMenu)
-            {
-                expansion = 1f;
-            }
-            view.SetExpansion(0f);
-            view.menuPanel.gameObject.SetActive(view.alwaysVisibleMenu);
+            view.SetExpansion(1f);
+            view.menuPanel.gameObject.SetActive(true);
             view.quitPopup.SetActive(false);
             view.SetMenuInteractable(true);
             view.confirmQuit.interactable = view.cancelQuit.interactable = true;
@@ -95,11 +59,6 @@ namespace RhythmDojo.UI
             }
 
             view.start.onClick.AddListener(StartGame);
-            view.logo.onClick.AddListener(ToggleMenu);
-            if (view.entranceTrigger)
-            {
-                view.entranceTrigger.onClick.AddListener(ToggleMenu);
-            }
             view.settings.onClick.AddListener(OpenSettings);
             view.quit.onClick.AddListener(ShowQuit);
             view.confirmQuit.onClick.AddListener(ConfirmQuit);
@@ -111,7 +70,7 @@ namespace RhythmDojo.UI
 
             if (EventSystem.current)
             {
-                EventSystem.current.SetSelectedGameObject(view.logo.gameObject);
+                EventSystem.current.SetSelectedGameObject(view.start.gameObject);
             }
         }
 
@@ -119,6 +78,10 @@ namespace RhythmDojo.UI
         {
             get
             {
+                if (!isActiveAndEnabled)
+                {
+                    return true;
+                }
                 if (actions == null || starting || quitting)
                 {
                     return true;
@@ -133,11 +96,6 @@ namespace RhythmDojo.UI
 
         private void Update()
         {
-            if (!bounceInitialized)
-            {
-                return;
-            }
-
             var keyboard = UnityEngine.InputSystem.Keyboard.current;
             var gamepad = UnityEngine.InputSystem.Gamepad.current;
             bool cancel = keyboard?.escapeKey.wasPressedThisFrame == true;
@@ -154,22 +112,14 @@ namespace RhythmDojo.UI
                 if (mainMenuActions.RecoverSelectionFailure())
                 {
                     starting = false;
+                    view.menuPanel.alpha = 1f;
                     view.SetMenuInteractable(true);
                     view.modeSelection.detail.text = "곡 목록을 열지 못했습니다. 다시 수련 시작을 눌러 주세요.";
-                }
-            }
-            if (!menuExpanded && view.ambientLights != null)
-            {
-                float glow = .045f + Mathf.Sin(Time.unscaledTime * 2.3f) * .012f;
-                foreach (var light in view.ambientLights)
-                {
-                    light.color = new Color(1, .68f, .23f, glow);
                 }
             }
             if (view.modeSelection)
             {
                 bool available = !Busy && !view.quitPopup.activeSelf;
-                available = available && menuExpanded && expansion >= .99f;
                 view.modeSelection.InputEnabled = available;
                 view.modeSelection.practiceTarget.interactable = available && !view.modeSelection.IsArriving;
                 if (available)
@@ -199,119 +149,17 @@ namespace RhythmDojo.UI
                     }
                 }
             }
-            if (!Busy && Time.frameCount != modalClosedFrame && cancel)
+            if (cancel && Time.frameCount != modalClosedFrame && !Busy)
             {
                 if (view.quitPopup.activeSelf)
                 {
                     CancelQuit();
                 }
-                else if (menuExpanded)
-                {
-                    ToggleMenu();
-                }
-
-                return;
-            }
-
-            if (starting)
-            {
-                RestoreScale();
-                return;
-            }
-
-            if (menuExpanded)
-            {
-                expansion = Mathf.MoveTowards(expansion, 1f, Time.unscaledDeltaTime / MenuExpansionSeconds);
-                if (!doorSoundPlayed && expansion >= .14f)
-                {
-                    doorSoundPlayed = true;
-                    if (view.doorSlide)
-                    {
-                        effects.PlayOneShot(view.doorSlide, .42f);
-                    }
-                }
-            }
-            else
-            {
-                expansion = Mathf.MoveTowards(expansion, 0f, Time.unscaledDeltaTime / MenuExpansionSeconds);
-            }
-
-            view.SetExpansion(expansion);
-            view.menuPanel.gameObject.SetActive(expansion > 0f || menuExpanded);
-            if (knockTime > 0f)
-            {
-                knockTime = Mathf.Max(0f, knockTime - Time.unscaledDeltaTime);
-                float angle = Mathf.Sin(knockTime * 65f) * knockTime * 10f;
-                view.logoArtwork.localRotation = Quaternion.Euler(0f, 0f, angle);
-            }
-
-            if (Busy || view.quitPopup.activeSelf)
-            {
-                RestoreScale();
-
-                return;
-            }
-
-            // Absolute audio time keeps both labels on the same beat without frame drift.
-            double beats;
-
-            if (beatClock != null)
-            {
-                beats = beatClock.BeatPosition;
-            }
-            else
-            {
-                beats =
-                    Math.Max(0, AudioSettings.dspTime - beatStartTime)
-                    * Math.Max(1f, beatsPerMinute)
-                    / 60d;
-            }
-
-            if (beats < 0)
-            {
-                RestoreScale();
-
-                return;
-            }
-
-            float phase = (float)(beats - Math.Floor(beats));
-            float progress = Mathf.Clamp01(phase / Mathf.Clamp(bounceDurationInBeats, .1f, 1f));
-            float bounce = 1f - Mathf.SmoothStep(0f, 1f, progress);
-            view.logoArtwork.localScale =
-                titleScale * (1f + bounce * Mathf.Clamp(titleBounceAmount, 0f, .3f));
-            view.startPrompt.rectTransform.localScale =
-                promptScale * (1f + bounce * Mathf.Clamp(promptBounceAmount, 0f, .3f));
-            view.entrance.SetLogoSeparation(view.entrance.MenuLogoSeparation);
-        }
-
-        private void RestoreScale()
-        {
-            if (!bounceInitialized || !view)
-            {
-                return;
-            }
-
-            if (view.logoArtwork)
-            {
-                view.logoArtwork.localScale = titleScale;
-            }
-
-            if (view.startPrompt)
-            {
-                view.startPrompt.rectTransform.localScale = promptScale;
-            }
-
-            if (view.entrance)
-            {
-                view.entrance.SetLogoSeparation(view.entrance.MenuLogoSeparation);
             }
         }
-
-        private void OnEnable() => beatStartTime = AudioSettings.dspTime;
 
         private void OnDisable()
         {
-            RestoreScale();
             if (view && view.modeSelection)
             {
                 view.modeSelection.InputEnabled = false;
@@ -328,26 +176,19 @@ namespace RhythmDojo.UI
             {
                 return false;
             }
-            if (!view.modeSelection || !menuExpanded)
+            if (!(actions is RhythmDojo.Core.MainMenuActions mainMenuActions))
             {
                 return false;
             }
-
             view.modeSelection.CancelMotion();
             view.modeSelection.InputEnabled = false;
-            menuExpanded = false;
-            RestartFocusRoutine();
+            mainMenuActions.ReturnToTitle();
             return true;
         }
 
         private void StartGame()
         {
-            if (Busy || !menuExpanded || view.quitPopup.activeSelf)
-            {
-                return;
-            }
-
-            if (expansion < .99f)
+            if (Busy || view.quitPopup.activeSelf)
             {
                 return;
             }
@@ -411,6 +252,7 @@ namespace RhythmDojo.UI
             {
                 starting = false;
                 view.RestoreBoards();
+                view.menuPanel.alpha = 1f;
                 view.SetMenuInteractable(true);
                 Debug.LogException(error, this);
             }
@@ -418,12 +260,7 @@ namespace RhythmDojo.UI
 
         private void OpenEditor()
         {
-            if (Busy || !menuExpanded || view.quitPopup.activeSelf)
-            {
-                return;
-            }
-
-            if (expansion < .99f)
+            if (Busy || view.quitPopup.activeSelf)
             {
                 return;
             }
@@ -448,71 +285,6 @@ namespace RhythmDojo.UI
             }
         }
 
-        private void ToggleMenu()
-        {
-            if (Busy || view.quitPopup.activeSelf)
-            {
-                return;
-            }
-
-            if (view.alwaysVisibleMenu)
-            {
-                return;
-            }
-
-            if (view.modeSelection)
-            {
-                if (view.modeSelection.IsMoving || (expansion > 0 && expansion < 1))
-                {
-                    return;
-                }
-            }
-            menuExpanded = !menuExpanded;
-            doorSoundPlayed = false;
-            if (!menuExpanded && view.modeSelection)
-            {
-                view.modeSelection.CancelMotion();
-            }
-            knockTime = .18f;
-            if (view.knock)
-            {
-                effects.PlayOneShot(view.knock, .6f);
-            }
-
-            RestartFocusRoutine();
-        }
-
-        private void RestartFocusRoutine()
-        {
-            if (focusRoutine != null)
-            {
-                StopCoroutine(focusRoutine);
-            }
-            focusRoutine = StartCoroutine(FocusMenuAfterExpansion());
-        }
-
-        private IEnumerator FocusMenuAfterExpansion()
-        {
-            // Reversing the doors must also cancel the previous focus destination.
-            while ((menuExpanded && expansion < 1f) || (!menuExpanded && expansion > 0f))
-            {
-                yield return null;
-            }
-            if (Busy || view.quitPopup.activeSelf || !EventSystem.current)
-            {
-                yield break;
-            }
-
-            if (menuExpanded)
-            {
-                EventSystem.current.SetSelectedGameObject(view.start.gameObject);
-            }
-            else
-            {
-                EventSystem.current.SetSelectedGameObject(view.logo.gameObject);
-            }
-        }
-
         public void ResumeFromSettings()
         {
             if (actions is RhythmDojo.Core.MainMenuActions mainMenuActions)
@@ -533,12 +305,7 @@ namespace RhythmDojo.UI
 
         private void OpenSettings()
         {
-            if (Busy || !menuExpanded || view.quitPopup.activeSelf)
-            {
-                return;
-            }
-
-            if (expansion < .99f)
+            if (Busy || view.quitPopup.activeSelf)
             {
                 return;
             }
@@ -550,12 +317,7 @@ namespace RhythmDojo.UI
 
         private void ShowQuit()
         {
-            if (Busy || !menuExpanded)
-            {
-                return;
-            }
-
-            if (expansion < .99f)
+            if (Busy)
             {
                 return;
             }
@@ -617,7 +379,7 @@ namespace RhythmDojo.UI
 
         private void ChangeMode(int direction)
         {
-            if (Busy || view.quitPopup.activeSelf || expansion < .99f)
+            if (Busy || view.quitPopup.activeSelf)
             {
                 return;
             }
@@ -630,8 +392,6 @@ namespace RhythmDojo.UI
 
         private void Unbind()
         {
-            RestoreScale();
-
             if (!view)
             {
                 return;
@@ -653,11 +413,6 @@ namespace RhythmDojo.UI
             }
 
             view.start.onClick.RemoveListener(StartGame);
-            view.logo.onClick.RemoveListener(ToggleMenu);
-            if (view.entranceTrigger)
-            {
-                view.entranceTrigger.onClick.RemoveListener(ToggleMenu);
-            }
             view.settings.onClick.RemoveListener(OpenSettings);
             view.quit.onClick.RemoveListener(ShowQuit);
             view.confirmQuit.onClick.RemoveListener(ConfirmQuit);

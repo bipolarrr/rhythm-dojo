@@ -370,7 +370,7 @@ namespace RhythmDojo.Tests
             Assert.That(view.backPopup.activeSelf, Is.False);
             yield return Click(view.back);
             yield return Click(view.confirmBack);
-            yield return Await(() => Object.FindFirstObjectByType<MainMenuScreen>());
+            yield return Await(() => Object.FindFirstObjectByType<MainMenuEntranceScreen>());
         }
     }
 }

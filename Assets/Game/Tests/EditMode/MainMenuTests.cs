@@ -14,13 +14,19 @@ namespace RhythmDojo.Tests
     [Category("UI")]
     public sealed class MainMenuTests
     {
-        [Test]
+        [TestCase(false)]
+        [TestCase(true)]
         [Category("SceneIntegration")]
-        public void GeneratedMenuHasRequiredReferencesAnchorsAndKoreanGlyphs()
+        public void GeneratedMenuHasRequiredReferencesAnchorsAndKoreanGlyphs(bool modeSelection)
         {
             var original = SceneManager.GetActiveScene();
 
-            var scene = EditorSceneManager.OpenScene(SceneBuilder.TitlePath, OpenSceneMode.Additive);
+            string path = SceneBuilder.TitlePath;
+            if (modeSelection)
+            {
+                path = SceneBuilder.ModeSelectionPath;
+            }
+            var scene = EditorSceneManager.OpenScene(path, OpenSceneMode.Additive);
 
             try
             {
@@ -30,15 +36,23 @@ namespace RhythmDojo.Tests
                     .GetRootGameObjects()
                     .SelectMany(root => root.GetComponentsInChildren<MainMenuView>())
                     .Single();
-                Assert.That(view.title.text, Is.EqualTo("리듬 도장"));
-                Assert.That(view.title.enabled, Is.True);
-                Assert.That(view.menuPanel.gameObject.activeSelf, Is.False);
-                Assert.That(view.menuPanel.blocksRaycasts, Is.False);
+                if (!modeSelection)
+                {
+                    Assert.That(view.title.text, Is.EqualTo("리듬 도장"));
+                    Assert.That(view.title.enabled, Is.True);
+                    Assert.That(view.modeSelection, Is.Null);
+                    Assert.That(view.menuPanel, Is.Null);
+                    Assert.That(view.entrance.Opening, Is.Zero);
+                    return;
+                }
+                Assert.That(view.entrance, Is.Null);
+                Assert.That(view.menuPanel.gameObject.activeSelf, Is.True);
+                Assert.That(view.menuPanel.blocksRaycasts, Is.True);
                 Assert.That(view.modeSelection, Is.Not.Null);
                 view.modeSelection.Validate();
                 foreach (char glyph in "비급 전수자유 연습실력 검정채보 공방리듬 도장")
                 {
-                    Assert.That(view.title.font.HasCharacter(glyph), Is.True, "Missing glyph: " + glyph);
+                    Assert.That(view.modeSelection.heading.font.HasCharacter(glyph), Is.True, "Missing glyph: " + glyph);
                 }
                 foreach (var button in new[] { view.start, view.settings, view.editor, view.quit })
                 {
@@ -107,6 +121,7 @@ namespace RhythmDojo.Tests
             var scenes = EditorBuildSettings.scenes.Where(scene => scene.enabled).ToArray();
             Assert.That(scenes[0].path, Is.EqualTo(SceneBuilder.TitlePath));
             Assert.That(scenes.Count(scene => scene.path == SceneBuilder.TitlePath), Is.EqualTo(1));
+            Assert.That(scenes.Count(scene => scene.path == SceneBuilder.ModeSelectionPath), Is.EqualTo(1));
             Assert.That(scenes.Any(scene => scene.path == SceneBuilder.BootstrapPath), Is.True);
         }
 

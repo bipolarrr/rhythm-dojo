@@ -43,6 +43,7 @@ namespace RhythmDojo.EditorTools
                 {
                     scenePath,
                     SceneBuilder.TitlePath,
+                    SceneBuilder.ModeSelectionPath,
                     SceneBuilder.BootstrapPath,
                     SceneBuilder.SelectionPath,
                     SceneBuilder.GameplayPath,

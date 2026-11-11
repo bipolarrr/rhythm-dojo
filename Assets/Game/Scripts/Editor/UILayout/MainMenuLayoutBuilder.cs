@@ -10,7 +10,9 @@ namespace RhythmDojo.EditorTools
     {
         public const string FontPath = "Assets/Game/Fonts/MaruBuri-SemiBold.otf";
 
-        public static MainMenuView Build()
+        public static MainMenuView Build() => Build(false);
+
+        public static MainMenuView Build(bool modeSelection)
         {
             var font = AssetDatabase.LoadAssetAtPath<Font>(FontPath);
 
@@ -181,7 +183,23 @@ namespace RhythmDojo.EditorTools
             PixelOptionsStyle.ApplyQuit(view);
             UiFontSettings.ApplyTo(view.transform);
             ApplyMenuTextStyle(view);
-            AlphaDojoLayoutBuilder.Apply(view);
+            AlphaDojoLayoutBuilder.Apply(view, modeSelection);
+            // Reuse the established builders and assets, then serialize only the
+            // composition owned by this scene. No presentation is rebuilt at runtime.
+            if (modeSelection)
+            {
+                UnityEngine.Object.DestroyImmediate(view.entrance.gameObject);
+                view.alwaysVisibleMenu = true;
+                view.menuPanel.gameObject.SetActive(true);
+                view.SetExpansion(1f);
+            }
+            else
+            {
+                UnityEngine.Object.DestroyImmediate(view.menuPanel.gameObject);
+                UnityEngine.Object.DestroyImmediate(view.quitPopup);
+                canvas.sortingOrder = 10;
+                view.SetExpansion(0f);
+            }
             view.Validate();
 
             return view;

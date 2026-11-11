@@ -13,6 +13,8 @@ namespace RhythmDojo.Audio
         private double startDspTime;
         private bool initialized;
         private bool restartRequested;
+        private bool resumeRequested;
+        private int resumeSample;
 
         public double BeatPosition => settings.BeatPositionAt(AudioSettings.dspTime - startDspTime);
 
@@ -22,6 +24,17 @@ namespace RhythmDojo.Audio
             {
                 source.mute = muted;
             }
+        }
+
+        public void CopyPlaybackFrom(TitleMusicPlayer previous)
+        {
+            if (!previous || !previous.initialized || previous.source.clip != source.clip)
+            {
+                return;
+            }
+            startDspTime = previous.startDspTime;
+            resumeSample = previous.source.timeSamples;
+            resumeRequested = true;
         }
 
         public void Initialize(TitleMusicSettings musicSettings)
@@ -93,7 +106,19 @@ namespace RhythmDojo.Audio
             if (initialized)
             {
                 RefreshVolume();
-                Restart();
+                if (resumeRequested)
+                {
+                    resumeRequested = false;
+                    if (source.clip)
+                    {
+                        source.timeSamples = resumeSample;
+                        source.Play();
+                    }
+                }
+                else
+                {
+                    Restart();
+                }
             }
         }
 

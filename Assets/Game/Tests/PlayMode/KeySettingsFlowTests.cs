@@ -193,7 +193,7 @@ namespace RhythmDojo.Tests
                 yield return Click(view.back);
 
                 flow.ShowTitle();
-                yield return Await(() => Object.FindFirstObjectByType<MainMenuScreen>() && !flow.Transitioning);
+                yield return Await(() => Object.FindFirstObjectByType<MainMenuEntranceScreen>() && !flow.Transitioning);
                 flow.ShowTitleSettings();
                 yield return null;
                 view = Object.FindFirstObjectByType<SettingsView>();

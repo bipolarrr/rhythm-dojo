@@ -39,8 +39,7 @@ namespace RhythmDojo.Tests
         private IEnumerator PrepareTitle(double timeout = 20)
         {
             flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
-            flow.ShowTitle();
-            yield return Await(() => SceneManager.GetActiveScene().path == "Assets/Game/Scenes/Title.unity");
+            yield return SceneManager.LoadSceneAsync(MainMenuActions.ModeSelectionScenePath);
             yield return null;
             var previous = (PreparedSelectionScene)preparationField.GetValue(flow);
             flow.CancelSelectionPreparation();
@@ -161,7 +160,7 @@ namespace RhythmDojo.Tests
         {
             yield return PrepareTitle();
             var view = UnityEngine.Object.FindFirstObjectByType<MainMenuView>();
-            var titleFocus = view.logo.gameObject;
+            var titleFocus = view.start.gameObject;
             EventSystem.current.SetSelectedGameObject(titleFocus);
             flow.ShowTitleSettings();
             yield return null;
@@ -229,7 +228,7 @@ namespace RhythmDojo.Tests
             yield return Wait(() => !preparation.IsBusy);
             Assert.That(preparation.IsSelectionPrepared, Is.False);
             Assert.That(SceneManager.GetSceneByPath(AppFlowController.SelectionPath).isLoaded, Is.False);
-            Assert.That(SceneManager.GetActiveScene().path, Is.EqualTo("Assets/Game/Scenes/Title.unity"));
+            Assert.That(SceneManager.GetActiveScene().path, Is.EqualTo(MainMenuActions.ModeSelectionScenePath));
             Assert.That(flow.CurrentRequest, Is.Null);
             Assert.That(UnityEngine.Object.FindObjectsByType<EventSystem>(FindObjectsSortMode.None)
                 .Count(value => value.isActiveAndEnabled), Is.EqualTo(1));

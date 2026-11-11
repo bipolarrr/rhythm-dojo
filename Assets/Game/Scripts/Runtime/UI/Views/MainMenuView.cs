@@ -17,6 +17,7 @@ namespace RhythmDojo.UI
             cancelQuit;
         public DojoModeView modeSelection;
         public Image[] ambientLights;
+        public Image backdrop;
         public GameObject entranceInvitation;
         public Button editor;
         public Button entranceTrigger;
@@ -50,26 +51,33 @@ namespace RhythmDojo.UI
 
         public void Validate()
         {
+            if (!backdrop)
+            {
+                throw new InvalidOperationException("Main menu backdrop missing.");
+            }
             if (modeSelection)
             {
                 modeSelection.Validate();
+                if (!menuPanel || !start || !settings)
+                {
+                    throw new InvalidOperationException("Mode selection controls missing.");
+                }
+                if (!quit || !editor || !quitPopup)
+                {
+                    throw new InvalidOperationException("Mode selection menu missing.");
+                }
+                if (!confirmQuit || !cancelQuit || !quitQuestion)
+                {
+                    throw new InvalidOperationException("Mode selection quit dialog missing.");
+                }
+                return;
             }
-            if ((!title || !startPrompt) || !quitQuestion)
+            if (!title || !startPrompt || !logo)
             {
                 throw new InvalidOperationException("Main menu view references missing.");
             }
 
-            if ((!logo || !menuPanel) || !start)
-            {
-                throw new InvalidOperationException("Main menu view references missing.");
-            }
-
-            if ((!settings || !quit) || !confirmQuit)
-            {
-                throw new InvalidOperationException("Main menu view references missing.");
-            }
-
-            if (!cancelQuit || !quitPopup)
+            if (!entranceTrigger || !entranceInvitation)
             {
                 throw new InvalidOperationException("Main menu view references missing.");
             }
@@ -92,11 +100,14 @@ namespace RhythmDojo.UI
                 entranceTrigger.interactable = value;
             }
 
-            logo.interactable =
-                start.interactable =
-                settings.interactable =
-                quit.interactable =
-                    value;
+            if (logo)
+            {
+                logo.interactable = value;
+            }
+            if (modeSelection)
+            {
+                start.interactable = settings.interactable = quit.interactable = value;
+            }
 
             if (editor)
             {
@@ -109,22 +120,20 @@ namespace RhythmDojo.UI
             if (modeSelection)
             {
                 amount = Mathf.Clamp01(amount);
-                entrance.gameObject.SetActive(amount < 1f);
-                entrance.SetEntrySequence(amount);
-                if (entrance.interiorBackdrop)
-                {
-                    entrance.interiorBackdrop.alpha = 0f;
-                }
-                logoGroup.alpha = 1f;
-                logoGroup.blocksRaycasts = amount < .01f;
                 menuPanel.alpha = 1f;
                 modeSelection.SetEntranceProgress(amount);
-                menuPanel.interactable = menuPanel.blocksRaycasts = amount >= .99f;
+                menuPanel.interactable = menuPanel.blocksRaycasts = amount >= 1f;
+                return;
+            }
+
+            if (!menuPanel)
+            {
+                amount = Mathf.Clamp01(amount);
+                entrance.SetEntrySequence(amount);
+                entrance.interiorBackdrop.alpha = 0f;
+                logoGroup.blocksRaycasts = amount < .01f;
                 startPrompt.gameObject.SetActive(amount < .01f);
-                if (entranceInvitation)
-                {
-                    entranceInvitation.SetActive(amount < .01f);
-                }
+                entranceInvitation.SetActive(amount < .01f);
                 return;
             }
 

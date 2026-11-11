@@ -21,6 +21,7 @@ namespace RhythmDojo.EditorTools
             Object.DestroyImmediate(entrance.GetComponent<AspectRatioFitter>());
             entrance.gameObject.AddComponent<DojoCompositionFit>().Fit();
             var matte = Image("Dojo Canvas Matte", view.transform, Load("PracticeHall"));
+            view.backdrop = matte;
             matte.transform.SetAsFirstSibling();
             matte.color = new Color(.35f, .40f, .38f);
             matte.rectTransform.anchorMin = Vector2.zero;

@@ -13,7 +13,9 @@ namespace RhythmDojo.EditorTools
     {
         public const string TitleMusicPath = "Assets/Game/Settings/TitleMusic.asset";
 
-        public static Scene Create()
+        public static Scene Create() => Create(false);
+
+        public static Scene Create(bool modeSelection)
         {
             // Additive creation preserves other open scenes and their unsaved changes.
             var scene = EditorSceneManager.NewScene(
@@ -29,20 +31,13 @@ namespace RhythmDojo.EditorTools
             camera.backgroundColor = Color.black;
             camera.gameObject.AddComponent<AudioListener>();
 
-            var view = MainMenuLayoutBuilder.Build();
+            var view = MainMenuLayoutBuilder.Build(modeSelection);
             SceneManager.MoveGameObjectToScene(view.gameObject, scene);
-            if (!view.modeSelection)
-            {
-                DojoTransitionAssetBuilder.Build(view.entrance);
-            }
-
-            if (view.modeSelection)
+            if (view.entrance)
             {
                 view.entrance.transitionTemplate = AssetDatabase.LoadAssetAtPath<DojoEntranceTransition>(
                     "Assets/Game/Prefabs/DojoEntranceTransition.prefab");
             }
-            var screen = view.gameObject.AddComponent<MainMenuScreen>();
-            SceneDependencyAssembler.Wire(screen, "view", view);
             var effects = view.gameObject.AddComponent<AudioSource>();
             effects.playOnAwake = false;
             if (view.modeSelection)
@@ -52,10 +47,23 @@ namespace RhythmDojo.EditorTools
                 view.modeSelection.footstep = DojoPresentationAudio.Load(false);
                 view.modeSelection.wind = DojoPresentationAudio.Load(true);
             }
-            SceneDependencyAssembler.Wire(screen, "effects", effects);
-
             var root = view.gameObject.AddComponent<MainMenuCompositionRoot>();
-            SceneDependencyAssembler.Wire(root, "screen", screen);
+            SceneDependencyAssembler.Wire(root, "view", view);
+            SceneDependencyAssembler.Wire(root, "sceneCamera", camera);
+            if (modeSelection)
+            {
+                var screen = view.gameObject.AddComponent<MainMenuScreen>();
+                SceneDependencyAssembler.Wire(screen, "view", view);
+                SceneDependencyAssembler.Wire(screen, "effects", effects);
+                SceneDependencyAssembler.Wire(root, "screen", screen);
+            }
+            else
+            {
+                var entranceScreen = view.gameObject.AddComponent<MainMenuEntranceScreen>();
+                SceneDependencyAssembler.Wire(entranceScreen, "view", view);
+                SceneDependencyAssembler.Wire(entranceScreen, "effects", effects);
+                SceneDependencyAssembler.Wire(root, "entranceScreen", entranceScreen);
+            }
             var musicObject = new GameObject("Title Music", typeof(AudioSource), typeof(TitleMusicPlayer));
             musicObject.transform.SetParent(root.transform, false);
             var music = musicObject.GetComponent<TitleMusicPlayer>();
@@ -86,6 +94,14 @@ namespace RhythmDojo.EditorTools
                     "Assets/InputSystem_Actions.inputactions"
                 )
             );
+            foreach (var gameObject in scene.GetRootGameObjects())
+            {
+                var events = gameObject.GetComponent<UnityEngine.EventSystems.EventSystem>();
+                if (events)
+                {
+                    SceneDependencyAssembler.Wire(root, "events", events);
+                }
+            }
 
             // UiElements creates the EventSystem in the new active scene.
             root.Validate();

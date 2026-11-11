@@ -17,7 +17,7 @@ namespace RhythmDojo.Tests
         };
         internal static readonly string[] Paths =
         {
-            SceneBuilder.TitlePath, SceneBuilder.BootstrapPath, SceneBuilder.SelectionPath,
+            SceneBuilder.TitlePath, SceneBuilder.ModeSelectionPath, SceneBuilder.BootstrapPath, SceneBuilder.SelectionPath,
             SceneBuilder.GameplayPath, SceneBuilder.SettingsPath, SceneBuilder.ResultsPath,
             ChartEditorSceneBuilder.ScenePath,
         };
