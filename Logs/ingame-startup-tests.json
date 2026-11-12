@@ -1,0 +1,27 @@
+{
+  "status": "completed",
+  "duration": 14.67,
+  "summary": {
+    "total": 2,
+    "passed": 2,
+    "failed": 0,
+    "skipped": 0,
+    "inconclusive": 0
+  },
+  "results": [
+    {
+      "FullName": "RhythmDojo.Tests.IngamePresentationTests.IntroductionBlocksEarlyStartThenSchedulesMusicAndNotesTogether",
+      "Status": "Passed",
+      "Duration": 9.90766,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.IngamePresentationTests.LaneInputPlaysWhooshWithoutAHitAndPauseSuppressesIt",
+      "Status": "Passed",
+      "Duration": 3.5871574,
+      "Message": null,
+      "StackTrace": null
+    }
+  ]
+}

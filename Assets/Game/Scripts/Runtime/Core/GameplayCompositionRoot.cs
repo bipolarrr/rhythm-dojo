@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Threading;
 using System.Threading.Tasks;
 using RhythmDojo.Application;
@@ -62,6 +63,9 @@ namespace RhythmDojo.Core
         private GameplayPresentationSettings runtimePresentation;
         private GameplayPauseMenu pauseMenu;
         private CancellationTokenSource playbackLifetime;
+        private bool introductionPending = true;
+
+        public bool IntroductionPending => introductionPending;
 
         public bool NeedsAudioRecovery => playRequest?.Song.NeedsAudioRecovery ?? false;
 
@@ -177,7 +181,7 @@ namespace RhythmDojo.Core
                 settings.audio,
                 request.TimingOffsetMs
             );
-            clock.SetPlaybackReadiness(() => !song.NeedsAudioRecovery);
+            clock.SetPlaybackReadiness(() => !introductionPending && !song.NeedsAudioRecovery);
             song.AudioChanged += ReplaceAudio;
             AudioSettings.OnAudioConfigurationChanged += AudioConfigurationChanged;
             input.Initialize(runtimeMode, song.ModeId);
@@ -238,12 +242,14 @@ namespace RhythmDojo.Core
                 request.Rules
             );
             hud.Initialize(controller.ReadModel, runtimeMode, runtimePresentation, song.ModeId);
+            hud.SetSongInformation(song.Title, request.Difficulty.DisplayName, flow.Library.Find(song.SongId)?.Cover);
             hits.Initialize(
                 controller.ReadModel,
                 runtimeMode,
                 gameplayCamera,
                 hud.GetComponent<Canvas>()
             );
+            hits.BindInput(input, controller);
             controller.ReadModel.Judged += TrackCombo;
             controller.ReadModel.ResetOccurred += ResetRecord;
             pauseMenu = hud.GetComponent<GameplayPauseMenu>();
@@ -267,6 +273,49 @@ namespace RhythmDojo.Core
             {
                 AudioConfigurationChanged(false);
             }
+            StartCoroutine(BeginGameplay());
+        }
+
+        private IEnumerator BeginGameplay()
+        {
+            hud.SetIntroductionVisible(false);
+            var preparation = PreparePlaybackAsync(playbackLifetime.Token);
+            while (!preparation.IsCompleted)
+            {
+                yield return null;
+            }
+            if (preparation.IsFaulted || preparation.IsCanceled)
+            {
+                Debug.LogError("Gameplay audio preparation failed: " + preparation.Exception);
+                yield break;
+            }
+            while (flow.Transitioning)
+            {
+                yield return null;
+            }
+
+            hud.SetIntroductionVisible(true);
+            // Start the interval only after the initialized HUD has rendered once.
+            Canvas.ForceUpdateCanvases();
+            yield return null;
+            double shownAt = Time.realtimeSinceStartupAsDouble;
+            while (Time.realtimeSinceStartupAsDouble - shownAt < 2)
+            {
+                yield return null;
+            }
+            while (!ApplicationFocusState.IsFocused)
+            {
+                yield return null;
+            }
+            if (NeedsAudioRecovery)
+            {
+                yield return BeginGameplay();
+                yield break;
+            }
+            hud.SetIntroductionVisible(false);
+            introductionPending = false;
+            // Schedule music and chart together using the existing DSP preroll/offset.
+            controller.StartSession();
         }
 
         private void Update()
@@ -281,6 +330,11 @@ namespace RhythmDojo.Core
 
         private void AudioConfigurationChanged(bool deviceWasChanged)
         {
+            // Initial preparation owns recovery; the pause menu only resumes running sessions.
+            if (introductionPending)
+            {
+                return;
+            }
             if (!initialized || playRequest == null)
             {
                 return;
@@ -548,6 +602,7 @@ namespace RhythmDojo.Core
 
         private void ShutdownGameplay()
         {
+            StopAllCoroutines();
             ReleasePlaybackRecovery();
             UnbindRecord();
             hits.Unbind();

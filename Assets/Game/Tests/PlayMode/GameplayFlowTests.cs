@@ -31,6 +31,7 @@ namespace RhythmDojo.Tests
             flow.PlaySelected();
             yield return Await(() => UnityEngine.Object.FindFirstObjectByType<RhythmGameController>());
             var game = UnityEngine.Object.FindFirstObjectByType<RhythmGameController>();
+            yield return WaitForGameplayIntroduction();
             game.StartSession();
             game.SendMessage("OnApplicationFocus", false);
             Assert.That(game.Session.State, Is.EqualTo(SessionState.Playing));
@@ -74,6 +75,7 @@ namespace RhythmDojo.Tests
 
             var game = UnityEngine.Object.FindFirstObjectByType<RhythmGameController>();
             Assert.That(game.Session.Snapshot.TotalNotes, Is.GreaterThan(game.Chart.Count));
+            yield return WaitForGameplayIntroduction();
             game.StartSession();
             game.Session.Advance(9);
             Assert.That(game.Session.Failure.Failed, Is.True);
@@ -153,6 +155,7 @@ namespace RhythmDojo.Tests
                     hud.GetComponentsInChildren<Image>().Count(i => i.name.StartsWith("Lane ")),
                     Is.EqualTo(6)
                 );
+                yield return WaitForGameplayIntroduction();
                 game.StartSession();
                 InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.K));
                 yield return null;
@@ -203,12 +206,14 @@ namespace RhythmDojo.Tests
             yield return null;
 
             var game = UnityEngine.Object.FindFirstObjectByType<RhythmGameController>();
+            yield return WaitForGameplayIntroduction();
             InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.Space));
             yield return null;
             Assert.That(game.Session.State, Is.EqualTo(SessionState.Playing));
             Assert.That(game.Clock.Running, Is.True);
             InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.F));
             yield return null;
+            yield return WaitForGameplayIntroduction();
             game.StartSession();
             Assert.That(game.Session.IsHeld(1), Is.False);
             InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.F));

@@ -80,11 +80,10 @@ namespace RhythmDojo.UI
 
             var tint = color;
             tint.a = fade * strength;
-            Ring(helper, expanded, 2.3f, tint);
+            Ring(helper, expanded, 2, tint);
 
             var glow = tint;
             glow.a *= .24f;
-            Ring(helper, expanded, 8, glow);
 
             if (sustained)
             {
@@ -131,21 +130,15 @@ namespace RhythmDojo.UI
 
         private static void Ring(VertexHelper helper, float radius, float width, Color tint)
         {
-            const int segments = 48;
+            const int segments = 20;
 
             for (int i = 0; i < segments; i++)
             {
                 float a = i * Mathf.PI * 2 / segments,
                     b = (i + 1) * Mathf.PI * 2 / segments;
-                var start = new Vector2(Mathf.Cos(a), Mathf.Sin(a) * .32f);
-                var end = new Vector2(Mathf.Cos(b), Mathf.Sin(b) * .32f);
-                int index = helper.currentVertCount;
-                helper.AddVert(start * Mathf.Max(0, radius - width * .5f), tint, Vector2.zero);
-                helper.AddVert(end * Mathf.Max(0, radius - width * .5f), tint, Vector2.zero);
-                helper.AddVert(end * (radius + width * .5f), tint, Vector2.zero);
-                helper.AddVert(start * (radius + width * .5f), tint, Vector2.zero);
-                helper.AddTriangle(index, index + 1, index + 2);
-                helper.AddTriangle(index, index + 2, index + 3);
+                float x = Mathf.Round(Mathf.Cos(a) * radius / 2) * 2;
+                float y = Mathf.Round(Mathf.Sin(b) * radius * .32f / 2) * 2;
+                Quad(helper, x - width, y - width, x + width, y + width, tint);
             }
         }
     }

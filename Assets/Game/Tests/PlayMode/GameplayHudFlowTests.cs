@@ -58,29 +58,20 @@ namespace RhythmDojo.Tests
             var game = UnityEngine.Object.FindFirstObjectByType<RhythmGameController>();
             var pauseMenu = view.GetComponent<GameplayPauseMenu>();
             Assert.That(view.songInformationPanel.activeInHierarchy, Is.True);
-            Assert.That(view.judgmentRecordPanel.activeInHierarchy, Is.True);
-
+            Assert.That(view.judgmentRecordPanel.activeInHierarchy, Is.False);
             yield return Press(Key.Space);
             yield return Press(Key.Escape);
             yield return Await(() => pauseMenu.panel.activeSelf);
-            yield return Click(view.focusHudButton);
+            view.SetFocusHud(true);
             Assert.That(game.IsPaused, Is.True);
-            Assert.That(view.focusHudButton.GetComponentInChildren<Text>().text, Is.EqualTo("HUD · 집중"));
-            Assert.That(view.songInformationPanel.activeInHierarchy, Is.False);
-            Assert.That(view.judgmentRecordPanel.activeInHierarchy, Is.False);
-            Assert.That(view.combo.gameObject.activeInHierarchy, Is.True);
-            Assert.That(view.healthFill.gameObject.activeInHierarchy, Is.True);
-            Assert.That(view.progress.gameObject.activeInHierarchy, Is.True);
-            Assert.That(view.judgmentGroup.gameObject.activeInHierarchy, Is.True);
-            var saved = JsonUtility.FromJson<PresentationPreferences>(
-                PlayerPrefs.GetString(PresentationPreferences.StorageKey)
-            );
-            Assert.That(saved.focusHud, Is.True);
-
-            yield return Click(view.focusHudButton);
-            Assert.That(view.focusHudButton.GetComponentInChildren<Text>().text, Is.EqualTo("HUD · 기본"));
             Assert.That(view.songInformationPanel.activeInHierarchy, Is.True);
-            Assert.That(view.judgmentRecordPanel.activeInHierarchy, Is.True);
+            Assert.That(view.judgmentRecordPanel.activeInHierarchy, Is.False);
+            Assert.That(view.combo.gameObject.activeInHierarchy, Is.False);
+            Assert.That(view.healthFill.gameObject.activeInHierarchy, Is.True);
+            Assert.That(view.progress.gameObject.activeInHierarchy, Is.False);
+            view.SetFocusHud(false);
+            Assert.That(view.judgmentRecordPanel.activeInHierarchy, Is.False);
+            Assert.That(view.focusHudButton.gameObject.activeSelf, Is.False);
         }
 
         [UnityTest]
@@ -170,7 +161,7 @@ namespace RhythmDojo.Tests
             }
         }
 
-        private static Texture2D CaptureGameplayDisplay(GameplayViewport viewport)
+        internal static Texture2D CaptureGameplayDisplay(GameplayViewport viewport)
         {
             Canvas.ForceUpdateCanvases();
             viewport.gameplayCamera.Render();
@@ -452,11 +443,11 @@ namespace RhythmDojo.Tests
             model.Reset();
             yield return new WaitForSecondsRealtime(.07f);
             Assert.That(view.bestCombo.text, Is.EqualTo("BEST  0"));
-            Assert.That(view.judgment.text, Is.EqualTo("SPACE로 수련 시작"));
+            Assert.That(view.judgment.text, Is.Empty);
             Assert.That(judgmentRect.anchorMin, Is.EqualTo(middle));
             Assert.That(view.judgmentGroup.transform.parent, Is.EqualTo(view.transform));
             StringAssert.Contains("창 전환", view.timing.text);
-            Assert.That(view.judgmentGroup.alpha, Is.EqualTo(1));
+            Assert.That(view.judgmentGroup.alpha, Is.Zero);
             Assert.That(view.judgment.fontSize, Is.EqualTo(36));
             Assert.That(view.timing.fontSize, Is.EqualTo(18));
             Assert.That(view.progressFill.rectTransform.anchorMax.x, Is.Zero);

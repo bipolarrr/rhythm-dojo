@@ -187,6 +187,7 @@ namespace RhythmDojo.Tests
                 }
             }
 
+            yield return WaitForGameplayIntroduction();
             game.StartSession();
 
             foreach (var input in inputs.OrderBy(item => item.time).ThenBy(item => item.press))
@@ -261,6 +262,7 @@ namespace RhythmDojo.Tests
             var windows = flow.CurrentRequest.Rules.Timing;
             var first = game.Chart[0];
             Assert.That(first.Kind, Is.EqualTo(NoteKind.Tap));
+            yield return WaitForGameplayIntroduction();
             game.StartSession();
             game.Session.PressLane(
                 first.Lane,

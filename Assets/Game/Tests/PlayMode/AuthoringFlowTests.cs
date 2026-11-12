@@ -72,6 +72,7 @@ namespace RhythmDojo.Tests
             Assert.That(game.ReadModel.Snapshot.SongTitle, Is.EqualTo("Unsaved song"));
             Assert.That(flow.CurrentRequest.Song.Chart[0].Lane, Is.Zero);
             Assert.That(releases, Is.Zero);
+            yield return WaitForGameplayIntroduction();
             game.StartSession();
             game.Session.Advance(game.Chart.CompletionTime + 1);
             yield return Await(() => UnityEngine.Object.FindFirstObjectByType<ResultsScreen>());

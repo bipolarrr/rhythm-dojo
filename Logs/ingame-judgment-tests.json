@@ -1,0 +1,48 @@
+{
+  "status": "completed",
+  "duration": 71.24,
+  "summary": {
+    "total": 5,
+    "passed": 5,
+    "failed": 0,
+    "skipped": 0,
+    "inconclusive": 0
+  },
+  "results": [
+    {
+      "FullName": "RhythmDojo.Tests.GameplayJudgmentTests.SpaceRestartClearsHeldLaneAndScoresThenAllowsPerfectRun",
+      "Status": "Passed",
+      "Duration": 23.9383568,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.GameplayJudgmentTests.TempoBoundaryHoldIsPerfectWithBpmScroll",
+      "Status": "Passed",
+      "Duration": 13.5950794,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.GameplayJudgmentTests.TempoBoundaryHoldIsPerfectWithConstantScroll",
+      "Status": "Passed",
+      "Duration": 13.6167529,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.GameplayJudgmentTests.TimestampedLaneActionsJudgeMixedRunDespiteFrameHitch",
+      "Status": "Passed",
+      "Duration": 15.4939063,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.GameplayJudgmentTests.UnplayedTapsAndHoldStartsAllBecomeMisses",
+      "Status": "Passed",
+      "Duration": 3.3579328,
+      "Message": null,
+      "StackTrace": null
+    }
+  ]
+}

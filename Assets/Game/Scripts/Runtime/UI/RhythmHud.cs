@@ -29,6 +29,27 @@ namespace RhythmDojo.UI
         private int displayedCombo = -1;
         private int maximumCombo;
         private bool showingJudgment;
+        private string difficulty;
+        private float previousHealth = 1;
+        private double damagedAt = -10;
+
+        public void SetSongInformation(string title, string difficulty, Sprite cover)
+        {
+            this.difficulty = difficulty;
+            view.songTitle.text = title;
+            view.songDetails.text = difficulty;
+            view.album.sprite = cover;
+            if (!cover)
+            {
+                view.album.sprite = view.fallbackCover;
+            }
+        }
+
+        public void SetIntroductionVisible(bool visible)
+        {
+            view.introduction.SetActive(visible);
+            view.lanes.laneRoot.gameObject.SetActive(visible);
+        }
         private RectTransform judgmentRect;
         private Vector2 judgmentAnchorMin;
         private Vector2 judgmentAnchorMax;
@@ -217,6 +238,8 @@ namespace RhythmDojo.UI
 
         private void ResetDisplay()
         {
+            previousHealth = (float)model.Snapshot.Session.HealthRatio;
+            damagedAt = -10;
             Array.Clear(flashUntil, 0, flashUntil.Length);
             recent = "Get ready";
             nextTextRefresh = 0;
@@ -227,10 +250,10 @@ namespace RhythmDojo.UI
             view.combo.color = Cream;
             view.combo.rectTransform.localScale = Vector3.one;
             SetJudgmentPosition(JudgmentPosition.Middle);
-            view.judgmentGroup.alpha = 1;
+            view.judgmentGroup.alpha = 0;
             view.judgmentGroup.transform.localScale = Vector3.one;
             view.judgment.fontSize = 36;
-            view.judgment.text = "SPACE로 수련 시작";
+            view.judgment.text = "";
             view.judgment.color = Cyan;
             view.timing.fontSize = 18;
             view.timing.text = "";
@@ -245,6 +268,19 @@ namespace RhythmDojo.UI
             }
 
             double now = Time.unscaledTimeAsDouble;
+            // Lane count and display aspect are runtime data. Keep the authored gauge
+            // adjacent to the widest visible part of the field without changing projection.
+            float right = view.gameplayCamera.WorldToViewportPoint(new Vector3(
+                bindingMode.LaneCount * bindingMode.LaneSpacing * .5f,
+                0,
+                settings.highwayCenter - settings.highwayLength * .5f)).x;
+            var minimum = view.healthGauge.anchorMin;
+            var maximum = view.healthGauge.anchorMax;
+            float width = maximum.x - minimum.x;
+            minimum.x = right + .012f;
+            maximum.x = minimum.x + width;
+            view.healthGauge.anchorMin = minimum;
+            view.healthGauge.anchorMax = maximum;
 
             for (int i = 0; i < indicators.Length; i++)
             {
@@ -293,7 +329,16 @@ namespace RhythmDojo.UI
         private void RefreshHealth(SessionSnapshot snapshot)
         {
             float fraction = Mathf.Clamp01((float)snapshot.HealthRatio);
-            view.healthFill.rectTransform.anchorMax = new Vector2(fraction, 1);
+            if (fraction < previousHealth)
+            {
+                damagedAt = Time.unscaledTimeAsDouble;
+                view.healthDamage.rectTransform.anchorMax = new Vector2(1, previousHealth);
+            }
+            previousHealth = fraction;
+            var damage = view.healthDamage.color;
+            damage.a = Mathf.Clamp01(1 - (float)(Time.unscaledTimeAsDouble - damagedAt) / .24f);
+            view.healthDamage.color = damage;
+            view.healthFill.rectTransform.anchorMax = new Vector2(1, fraction);
 
             if (fraction <= .25f)
             {
@@ -387,8 +432,7 @@ namespace RhythmDojo.UI
         {
             var s = snapshot.Session;
             view.songTitle.text = snapshot.SongTitle;
-            view.songDetails.text =
-                $"{snapshot.DifficultyName}  /  {model.LaneCount} KEY\nBPM {snapshot.CurrentBpm:0.##}  ·  {(snapshot.ScrollMode switch { ScrollMode.Bpm => "BPM", _ => "고정" })} {snapshot.ScrollMultiplier:0.##}x";
+            view.songDetails.text = difficulty ?? snapshot.DifficultyName;
 
             if (s.State == SessionState.Ready)
             {
@@ -463,7 +507,7 @@ namespace RhythmDojo.UI
             {
                 if (s.State == SessionState.Ready)
                 {
-                    view.judgment.text = "SPACE로 수련 시작";
+                    view.judgment.text = "";
                 }
                 else
                 {

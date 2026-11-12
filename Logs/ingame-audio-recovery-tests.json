@@ -1,0 +1,55 @@
+{
+  "status": "completed",
+  "duration": 48.46,
+  "summary": {
+    "total": 6,
+    "passed": 6,
+    "failed": 0,
+    "skipped": 0,
+    "inconclusive": 0
+  },
+  "results": [
+    {
+      "FullName": "RhythmDojo.Tests.AudioRecoveryFlowTests.BuiltInAudioSurvivesResetWithoutReplacingBorrowedClip",
+      "Status": "Passed",
+      "Duration": 17.1818691,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.AudioRecoveryFlowTests.ExitRemainsClickableDuringRecoveryAndLateClipIsReleased",
+      "Status": "Passed",
+      "Duration": 5.105133,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.AudioRecoveryFlowTests.ExternalWaveReloadsAfterResetAndReturnsEditorSession",
+      "Status": "Passed",
+      "Duration": 8.0947571,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.AudioRecoveryFlowTests.InvalidatedBeforeGameplayInitializationExposesRecoveryWithoutAnotherReset",
+      "Status": "Passed",
+      "Duration": 3.5347182,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.AudioRecoveryFlowTests.MissingExternalWaveKeepsPauseAndRetryRestoresPlayback",
+      "Status": "Passed",
+      "Duration": 7.7083548,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.AudioRecoveryFlowTests.ResetBeforeStartBlocksQueuedSpaceUntilAudioIsRecovered",
+      "Status": "Passed",
+      "Duration": 5.5844921,
+      "Message": null,
+      "StackTrace": null
+    }
+  ]
+}

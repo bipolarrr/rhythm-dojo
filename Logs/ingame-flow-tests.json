@@ -1,0 +1,41 @@
+{
+  "status": "completed",
+  "duration": 25.06,
+  "summary": {
+    "total": 4,
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0,
+    "inconclusive": 0
+  },
+  "results": [
+    {
+      "FullName": "RhythmDojo.Tests.GameplayFlowTests.ControlledFocusKeepsPlaybackRunningUntilNativeFocusOwnsTheSession",
+      "Status": "Passed",
+      "Duration": 12.6484166,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.GameplayFlowTests.DirectGameplaySceneUsesCopiedPlayRules",
+      "Status": "Passed",
+      "Duration": 3.3303915,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.GameplayFlowTests.KeyboardNavigationAndStartRestartFocusLossUseActualActions",
+      "Status": "Passed",
+      "Duration": 4.4604536,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.GameplayFlowTests.SixLaneDefinitionDrivesAllUnityAdapters",
+      "Status": "Passed",
+      "Duration": 3.4201753,
+      "Message": null,
+      "StackTrace": null
+    }
+  ]
+}

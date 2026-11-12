@@ -25,6 +25,7 @@ namespace RhythmDojo.Tests
             yield return Click(Object.FindFirstObjectByType<SongSelectionView>().play);
             yield return Await(() => Object.FindFirstObjectByType<RhythmGameController>());
             yield return null;
+            yield return WaitForGameplayIntroduction();
         }
 
         private static void Complete(RhythmGameController game, bool perfect, double inputErrorSeconds = 0)
@@ -75,6 +76,7 @@ namespace RhythmDojo.Tests
             flow.Preferences.TimingOffsetMs = 10;
             yield return LoadGameplay();
             var game = Object.FindFirstObjectByType<RhythmGameController>();
+            yield return WaitForGameplayIntroduction();
             Complete(game, true, .020);
             yield return Await(() => Object.FindFirstObjectByType<ResultsScreen>());
             yield return null;
@@ -116,6 +118,7 @@ namespace RhythmDojo.Tests
             var flow = Object.FindFirstObjectByType<AppFlowController>();
             flow.Preferences.TimingOffsetMs = 0;
             yield return LoadGameplay();
+            yield return WaitForGameplayIntroduction();
             Complete(Object.FindFirstObjectByType<RhythmGameController>(), true);
             yield return Await(() => Object.FindFirstObjectByType<ResultsScreen>());
 
@@ -174,6 +177,7 @@ namespace RhythmDojo.Tests
             string recordKey = RecordIdentity.Rules(request.Song.ChartId, request.Song.Revision, request.Rules);
             var previous = new SessionSnapshot(SessionState.Completed, 1, 0, 1, 1, 2);
             flow.Preferences.SaveCompleted(request.Song.SongId, recordKey, previous, 1);
+            yield return WaitForGameplayIntroduction();
             Complete(game, true);
             var expected = game.Session.Snapshot;
             yield return AssertOutcomeRemainsVisible("Full Combo", 2);
@@ -217,6 +221,7 @@ namespace RhythmDojo.Tests
                 flow.CurrentRequest.Rules), Is.EqualTo(recordKey));
             Assert.That(flow.LastResult, Is.Null);
             game = Object.FindFirstObjectByType<RhythmGameController>();
+            yield return WaitForGameplayIntroduction();
             Complete(game, false);
             expected = game.Session.Snapshot;
             yield return Await(() => Object.FindFirstObjectByType<ResultsScreen>());
@@ -240,6 +245,7 @@ namespace RhythmDojo.Tests
             flow.Rules.Update(rules);
             yield return LoadGameplay();
             var game = Object.FindFirstObjectByType<RhythmGameController>();
+            yield return WaitForGameplayIntroduction();
             Complete(game, false);
             Assert.That(game.Session.State, Is.EqualTo(SessionState.GameOver));
             yield return AssertOutcomeRemainsVisible("GAME OVER");
@@ -272,6 +278,7 @@ namespace RhythmDojo.Tests
         {
             yield return LoadGameplay();
             var game = Object.FindFirstObjectByType<RhythmGameController>();
+            yield return WaitForGameplayIntroduction();
             Complete(game, true);
             yield return null;
             yield return new WaitForSecondsRealtime(.4f);
@@ -280,6 +287,7 @@ namespace RhythmDojo.Tests
             Assert.That(Object.FindFirstObjectByType<ResultsScreen>(), Is.Null);
             Assert.That(game.Session.State, Is.EqualTo(SessionState.Playing));
             Assert.That(Object.FindFirstObjectByType<GameplayHudView>().gameOverPanel.activeSelf, Is.False);
+            yield return WaitForGameplayIntroduction();
             Complete(game, true);
             yield return AssertOutcomeRemainsVisible("Full Combo", 2);
             yield return Await(() => Object.FindFirstObjectByType<ResultsScreen>());
@@ -479,6 +487,7 @@ namespace RhythmDojo.Tests
             yield return LoadGameplay();
             var game = Object.FindFirstObjectByType<RhythmGameController>();
             int count = game.Chart.Count;
+            yield return WaitForGameplayIntroduction();
             Complete(game, false);
             yield return Await(() => Object.FindFirstObjectByType<ResultsScreen>());
             yield return null;

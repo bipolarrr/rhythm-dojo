@@ -205,6 +205,7 @@ namespace RhythmDojo.Tests
                 .Object.FindFirstObjectByType<SongClock>()
                 .GetComponent<AudioSource>();
             Assert.That(source.volume, Is.EqualTo(flow.Settings.audio.Volume * .35f).Within(.001f));
+            yield return WaitForGameplayIntroduction();
             game.StartSession();
             yield return new WaitForSecondsRealtime(.5f);
             Assert.That(source.isPlaying, Is.True);
@@ -228,6 +229,7 @@ namespace RhythmDojo.Tests
             presentation.gameplayVolume = 1;
             presentation.SaveAudio();
             Assert.That(source.volume, Is.EqualTo(flow.Settings.audio.Volume).Within(.001f));
+            yield return WaitForGameplayIntroduction();
             game.StartSession();
             yield return new WaitForSecondsRealtime(.5f);
             Assert.That(source.isPlaying, Is.True);
@@ -346,6 +348,7 @@ namespace RhythmDojo.Tests
                 AudioSettings.GetConfiguration().dspBufferSize,
                 Is.EqualTo(playingConfiguration.dspBufferSize)
             );
+            yield return WaitForGameplayIntroduction();
             double realStarted = Time.realtimeSinceStartupAsDouble;
             game.StartSession();
             yield return new WaitForSecondsRealtime(2);
@@ -362,6 +365,7 @@ namespace RhythmDojo.Tests
                     .isPlaying,
                 Is.True
             );
+            yield return WaitForGameplayIntroduction();
             game.StartSession();
             Assert.That(game.Session.Resolved, Is.Zero);
             yield return new WaitForSecondsRealtime(2);

@@ -1,0 +1,75 @@
+2026-11-12 — emergency — Unity 6000.3.23f1
+
+Result
+Implemented the two-second introduction before the existing DSP-scheduled start;
+actual song title/difficulty/cover; central unchanged world projection; a vertical
+health gauge following the mode's projected near edge; hidden legacy statistics;
+temporary judgment feedback; new matching hanok backdrop and pixel impact geometry;
+separate authored whoosh/impact audio playback.
+
+Modified production scene: Assets/Game/Scenes/Gameplay.unity (regenerated and validated).
+No additional gameplay scene or HUD prefab was introduced. HoldGlow prefab is reused.
+Builders: GameplayHudLayoutBuilder, PixelGameplayStyle, GameplayFeedbackBuilder,
+and new IngamePresentationAssets.
+Runtime: GameplayCompositionRoot, RhythmHud, GameplayHudView, GameplayHitFeedback,
+GameplayImpactGraphic. Existing timing, domain rules and judgment definitions unchanged.
+
+Assets and source
+Assets/Game/Art/DojoGameplay/TrainingHall.png (+ meta)
+Assets/Game/Audio/Gameplay/StrikeWhoosh.wav (+ meta): 200 ms, 48 kHz mono PCM
+Assets/Game/Audio/Gameplay/StrikeImpact.wav (+ meta): 135 ms, 48 kHz mono PCM
+Tools/generate_strike_audio.py: original deterministic synthesis, standard library only
+Docs/ingame-presentation.md: composition, routes, synthesis and built-in imagegen prompt
+Logs/ingame-introduction.png and Logs/ingame-playing.png: actual gameplay camera composition
+
+Verification (latest recorded result per selected suite)
+IngamePresentationTests: 2 passed, 0 failed/skipped/inconclusive, 14.67 s
+GameplayHudFlowTests: 10 passed, 0 failed/skipped/inconclusive, 39.91 s
+GameplayHitFeedbackTests: 4 passed, 0 failed/skipped/inconclusive, 14.26 s
+GameplayPauseFlowTests: 3 passed, 0 failed/skipped/inconclusive, 32.31 s
+GameplayFlowTests: 4 passed, 0 failed/skipped/inconclusive, 25.06 s
+GameplayJudgmentTests: 5 passed, 0 failed/skipped/inconclusive, 71.24 s
+AudioRecoveryFlowTests: 6 passed, 0 failed/skipped/inconclusive, 48.46 s
+Smoke category: 4 passed, 0 failed/skipped/inconclusive, 18.71 s
+38 selected executions / 36 distinct cases (Smoke overlaps two existing cases).
+Detailed results: ingame-{startup,hud,hit,pause,flow,judgment,audio-recovery,smoke}-tests.json.
+
+Coverage includes early Space/lane input blocking, frozen ready timeline, guide expiry,
+DSP scheduling, guide lifetime across restart/re-entry, actual song bindings, gauge
+adjacency, real input whoosh without a hit, silence while paused, successful impact
+reaching the audio listener, silent misses, bounded visual pools, health depletion,
+pause/settings/restart/exit, 6-lane adapters, timestamped input despite a frame hitch,
+BPM boundary holds, chart completion, external/built-in audio recovery, and menu entry.
+Integration tests with direct/manual starts now await the introduction. Early-start
+regression cases intentionally bypass that test helper. Not every adapted fixture
+was executed; this is not a full-suite report.
+
+Scene audit
+Build Settings: Title, ModeSelection, Bootstrap, SongSelection, Gameplay, Settings,
+Results, ChartEditor. No additional build-profile scene override was found in project
+assets/settings. AppFlowController and full editor playtests use the same Gameplay path.
+Gameplay loads Single; previous menu canvases unload. Re-entry test finds no surviving
+GameplayHudView after returning. Practice uses the current wooden-dummy view; the list
+browser remains a current Challenge/Practice-song-list feature and is selected explicitly
+by browser test fixtures. It was not incorrectly removed as a legacy scene.
+
+Source compilation completed without errors. Existing unrelated authoring/obsolete-API
+warnings remain. Source diff whitespace check passed; generated Unity YAML contains its
+usual empty-value whitespace and pre-existing changes were not reformatted.
+Final Editor inspection: Play Mode exited, Title.unity active, current keyboard and
+mouse enabled; Pipeline status ready.
+Pipeline domain reloads temporarily disconnected the CLI. Editor focus was required for
+some commands; timed-out generation responses were checked against the generation marker
+and saved references, not counted as success by themselves. An initial multi-name filter
+selected zero tests and was replaced by individual suites; zero cases are not counted.
+
+Limits
+No full test suite, standalone player build or subjective audio listening performed.
+The 1920x1080 composition was captured and inspected. Camera projection/viewport lifecycle
+tests passed, but a manual sweep of 4:3, ultrawide, window resizing, and every custom
+lane-count layout remains advisable. Hardware output assertions do not establish the
+subjective sound quality or music/SFX balance on the user's listening setup.
+
+Existing dirty work was preserved; initial tracked diff/status backup:
+C:/Users/song/.codex/backups/ingame-20261112/
+No branch creation, reset, history rewrite, commit or remote push was performed.

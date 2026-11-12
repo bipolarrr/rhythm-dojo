@@ -32,6 +32,43 @@ namespace RhythmDojo.Presentation
         private AudioClip perfectSound;
         [SerializeField]
         private AudioClip goodSound;
+        [SerializeField]
+        private AudioClip inputSound;
+        [SerializeField]
+        private AudioSource inputSource;
+        private ILaneInput input;
+        private RhythmGameController controller;
+        private int lastInputFrame = -1;
+
+        public void BindInput(ILaneInput input, RhythmGameController controller)
+        {
+            if (this.input != null)
+            {
+                this.input.Pressed -= OnInput;
+            }
+            this.input = input;
+            this.controller = controller;
+            input.Pressed += OnInput;
+        }
+
+        private void OnInput(int lane, double timestamp)
+        {
+            if (!controller || controller.IsPaused)
+            {
+                return;
+            }
+            if (controller.Session.State != SessionState.Playing || !controller.Clock.Running)
+            {
+                return;
+            }
+            if (lastInputFrame == Time.frameCount)
+            {
+                return;
+            }
+            lastInputFrame = Time.frameCount;
+            // One attack per chord, short preloaded clips; no per-input allocations.
+            inputSource.PlayOneShot(inputSound, .24f);
+        }
         private double kickAt = -10;
         private float kickStrength;
         [SerializeField]
@@ -74,6 +111,10 @@ namespace RhythmDojo.Presentation
             if (!perfectSound || !goodSound)
             {
                 throw new InvalidOperationException("Dojo hit sounds missing.");
+            }
+            if (!inputSound || !inputSource)
+            {
+                throw new InvalidOperationException("Authored strike input audio missing.");
             }
 
             if (!effectsRoot || !holdTemplate)
@@ -295,6 +336,11 @@ namespace RhythmDojo.Presentation
         {
             nextBurst = 0;
             lastSoundFrame = -1;
+            lastInputFrame = -1;
+            if (inputSource)
+            {
+                inputSource.Stop();
+            }
             kickAt = -10;
             kickStrength = 0;
 
@@ -335,6 +381,11 @@ namespace RhythmDojo.Presentation
 
         public void Unbind()
         {
+            if (input != null)
+            {
+                input.Pressed -= OnInput;
+                input = null;
+            }
             if (model != null)
             {
                 model.Judged -= OnJudged;

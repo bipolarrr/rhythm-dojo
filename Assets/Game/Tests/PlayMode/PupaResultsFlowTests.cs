@@ -105,6 +105,7 @@ namespace RhythmDojo.Tests
             Assert.That(game.Chart.Count, Is.EqualTo(929));
             Assert.That(game.Chart.CompletionTime, Is.LessThan(document.CompletionTime - 7),
                 "PUPA must not wait through the long audio tail after its last judgment.");
+            yield return WaitForGameplayIntroduction();
             game.StartSession();
             double lastEnd = document.Notes.Max(note => note.EndTime);
             game.Session.Advance(lastEnd - .001);
@@ -140,6 +141,7 @@ namespace RhythmDojo.Tests
             yield return Await(() => Object.FindFirstObjectByType<RhythmGameController>());
             yield return null;
             var game = Object.FindFirstObjectByType<RhythmGameController>();
+            yield return WaitForGameplayIntroduction();
             game.StartSession();
             game.Session.Advance(game.Chart.CompletionTime + 1);
             yield return Await(() => Object.FindFirstObjectByType<ResultsScreen>(),
@@ -203,6 +205,7 @@ namespace RhythmDojo.Tests
 #endif
             var clock = Object.FindFirstObjectByType<SongClock>();
             AudioSettings.GetDSPBufferSize(out int bufferLength, out int bufferCount);
+            yield return WaitForGameplayIntroduction();
             double started = Time.realtimeSinceStartupAsDouble;
             double deadline = started + game.Chart.CompletionTime + 15;
             var measurement = new PlaybackTimingMeasurement
@@ -220,6 +223,7 @@ namespace RhythmDojo.Tests
                 lastPlayingRealtime = started,
             };
             double previousFrame = started;
+            yield return WaitForGameplayIntroduction();
             game.StartSession();
             measurement.scheduledStartDsp = clock.ScheduledStartDspTime;
 
@@ -323,6 +327,7 @@ namespace RhythmDojo.Tests
             double attackTime = (double)(attack / lease.Clip.channels) / lease.Clip.frequency;
             Assert.That(attackTime, Is.EqualTo(firstAudioTime).Within(.008));
 
+            yield return WaitForGameplayIntroduction();
             game.StartSession();
             yield return Await(() => clock.SongTime > first.StartTime + .03);
             double timestamp = Time.realtimeSinceStartupAsDouble - (clock.SongTime - first.StartTime);
@@ -371,6 +376,7 @@ namespace RhythmDojo.Tests
             yield return null;
             var game = Object.FindFirstObjectByType<RhythmGameController>();
             Assert.That(game.Chart.CompletionTime, Is.InRange(131, 131.2));
+            yield return WaitForGameplayIntroduction();
             game.StartSession();
             game.Session.Advance(130 + rules.Timing.GoodWindow);
             Assert.That(game.Session.State, Is.EqualTo(SessionState.Playing));
@@ -410,6 +416,7 @@ namespace RhythmDojo.Tests
             var game = Object.FindFirstObjectByType<RhythmGameController>();
             var clock = Object.FindFirstObjectByType<SongClock>();
             var audio = clock.GetComponent<AudioSource>();
+            yield return WaitForGameplayIntroduction();
             game.StartSession();
             yield return Await(() => clock.SongTime > .01 && audio.isPlaying);
 
@@ -420,6 +427,7 @@ namespace RhythmDojo.Tests
             typeof(SongClock).GetProperty(nameof(SongClock.ScheduledStartDspTime))
                 .SetValue(clock, AudioSettings.dspTime - seekTime);
             game.Session.Advance(clock.SongTime);
+            yield return WaitForGameplayIntroduction();
             double started = Time.realtimeSinceStartupAsDouble;
 
             while (!Object.FindFirstObjectByType<ResultsScreen>())

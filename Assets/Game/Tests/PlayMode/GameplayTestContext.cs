@@ -335,10 +335,27 @@ namespace RhythmDojo.Tests
 
         protected IEnumerator Press(Key key)
         {
+            if (key == Key.Space)
+            {
+                var root = UnityEngine.Object.FindFirstObjectByType<GameplayCompositionRoot>();
+                if (root && root.IntroductionPending)
+                {
+                    yield return Await(() => !root.IntroductionPending, "Gameplay introduction did not finish.");
+                }
+            }
             InputSystem.QueueStateEvent(keyboard, new KeyboardState(key));
             yield return null;
             InputSystem.QueueStateEvent(keyboard, new KeyboardState());
             yield return null;
+        }
+
+        protected static IEnumerator WaitForGameplayIntroduction()
+        {
+            var root = UnityEngine.Object.FindFirstObjectByType<GameplayCompositionRoot>();
+            if (root)
+            {
+                yield return Await(() => !root.IntroductionPending, "Gameplay introduction did not finish.");
+            }
         }
 
         protected static void CaptureSelection(

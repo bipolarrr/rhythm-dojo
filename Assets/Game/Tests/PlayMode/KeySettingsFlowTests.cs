@@ -224,6 +224,7 @@ namespace RhythmDojo.Tests
                 var game = Object.FindFirstObjectByType<RhythmGameController>();
                 Assert.That(flow.CurrentRequest.Song.ModeId, Is.EqualTo(mode.name));
                 Assert.That(flow.CurrentRequest.Song.Mode.name, Is.Not.EqualTo(mode.name));
+                yield return WaitForGameplayIntroduction();
                 game.StartSession();
                 yield return Press(Key.Escape);
                 flow.Selection.UpdateSelection("test-pulse", flow.Settings.defaultDifficulty, ScrollMode.Constant, 1);

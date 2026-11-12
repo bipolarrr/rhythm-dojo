@@ -1,0 +1,41 @@
+{
+  "status": "completed",
+  "duration": 14.26,
+  "summary": {
+    "total": 4,
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0,
+    "inconclusive": 0
+  },
+  "results": [
+    {
+      "FullName": "RhythmDojo.Tests.GameplayHitFeedbackTests.HitsReachAudioOutputWhileMissesStayQuietAndPoolsRemainBounded",
+      "Status": "Passed",
+      "Duration": 7.4683495,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.GameplayHitFeedbackTests.HoldGlowSurvivesBurstFadeAndResetRestoresCameraEvenWhenPaused",
+      "Status": "Passed",
+      "Duration": 1.8498614,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.GameplayHitFeedbackTests.RebindingDetachesOldEventsAndReturningToSelectionRemovesEffects",
+      "Status": "Passed",
+      "Duration": 2.3639075,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.GameplayHitFeedbackTests.RebindingFeedbackReusesBurstAndSameModeHoldObjects",
+      "Status": "Passed",
+      "Duration": 1.4556276,
+      "Message": null,
+      "StackTrace": null
+    }
+  ]
+}

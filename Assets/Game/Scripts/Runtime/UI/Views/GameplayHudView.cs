@@ -7,6 +7,12 @@ namespace RhythmDojo.UI
     public sealed class GameplayHudView : MonoBehaviour
     {
         public bool pixelTheme;
+        public Image album;
+        public Sprite fallbackCover;
+        public GameObject introduction;
+        public Image healthDamage;
+        public RectTransform healthGauge;
+        public Camera gameplayCamera;
         public Text status;
         public HudLaneLayout lanes;
         public Button returnButton;
@@ -35,6 +41,18 @@ namespace RhythmDojo.UI
 
         public void Validate()
         {
+            if (!album || !fallbackCover || !introduction)
+            {
+                throw new InvalidOperationException("Gameplay song/introduction references missing.");
+            }
+            if (!healthDamage)
+            {
+                throw new InvalidOperationException("Gameplay health feedback missing.");
+            }
+            if (!healthGauge || !gameplayCamera)
+            {
+                throw new InvalidOperationException("Gameplay gauge positioning references missing.");
+            }
             if (!status || !lanes || !returnButton)
             {
                 throw new InvalidOperationException("HUD view references missing.");
@@ -80,8 +98,8 @@ namespace RhythmDojo.UI
 
         public void SetFocusHud(bool enabled)
         {
-            songInformationPanel.SetActive(!enabled);
-            judgmentRecordPanel.SetActive(!enabled);
+            songInformationPanel.SetActive(true);
+            judgmentRecordPanel.SetActive(false);
             var caption = focusHudButton.GetComponentInChildren<Text>(true);
             if (enabled)
             {

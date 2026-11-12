@@ -1,0 +1,83 @@
+{
+  "status": "completed",
+  "duration": 39.91,
+  "summary": {
+    "total": 10,
+    "passed": 10,
+    "failed": 0,
+    "skipped": 0,
+    "inconclusive": 0
+  },
+  "results": [
+    {
+      "FullName": "RhythmDojo.Tests.GameplayHudFlowTests.GameplayKeepsDisplayCameraWhileWorldRendersIntoWindow",
+      "Status": "Passed",
+      "Duration": 7.4948368,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.GameplayHudFlowTests.GameplayWindowPreservesProjectionAndReleasesCameraOnDisable",
+      "Status": "Passed",
+      "Duration": 1.5560851,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.GameplayHudFlowTests.GameplayWindowRendersJudgmentLineBelowCenter",
+      "Status": "Passed",
+      "Duration": 1.6340815,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.GameplayHudFlowTests.HealthDepletionShowsGameOverFreezesNotesAndSpaceRestarts",
+      "Status": "Passed",
+      "Duration": 8.7889515,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.GameplayHudFlowTests.PauseMenuFocusHudKeepsPlayIndicatorsAndSavesChoice",
+      "Status": "Passed",
+      "Duration": 3.5077006,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.GameplayHudFlowTests.RailOpacityAndMeasureLinesKeepJudgmentLineVisible",
+      "Status": "Passed",
+      "Duration": 1.3912482,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.GameplayHudFlowTests.ReturnButtonInReadyStateLoadsSongSelectionAndReleasesSong",
+      "Status": "Passed",
+      "Duration": 1.9986566,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.GameplayHudFlowTests.ReturnButtonIsHiddenWhilePlayingAndEscapeReturnsToSelection",
+      "Status": "Passed",
+      "Duration": 4.1098823,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.GameplayHudFlowTests.ReturnButtonReappearsAfterCompletionAndLoadsSongSelection",
+      "Status": "Passed",
+      "Duration": 6.4356583,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.GameplayHudFlowTests.TrainingFeedbackTracksHoldMissPeakComboAndFocusReset",
+      "Status": "Passed",
+      "Duration": 1.8669256,
+      "Message": null,
+      "StackTrace": null
+    }
+  ]
+}

@@ -62,6 +62,7 @@ namespace RhythmDojo.Tests
                 var game = Object.FindFirstObjectByType<RhythmGameController>();
                 var menu = Object.FindFirstObjectByType<GameplayPauseMenu>();
                 var originalClip = flow.CurrentRequest.Song.AudioClip;
+                yield return WaitForGameplayIntroduction();
                 game.StartSession();
                 yield return new WaitForSecondsRealtime(.4f);
                 menu.Open();
@@ -120,6 +121,7 @@ namespace RhythmDojo.Tests
                 yield return PlayWave(path);
                 var game = Object.FindFirstObjectByType<RhythmGameController>();
                 var menu = Object.FindFirstObjectByType<GameplayPauseMenu>();
+                yield return WaitForGameplayIntroduction();
                 game.StartSession();
                 yield return new WaitForSecondsRealtime(.4f);
                 menu.Open();
@@ -175,6 +177,7 @@ namespace RhythmDojo.Tests
                 });
                 var game = Object.FindFirstObjectByType<RhythmGameController>();
                 var menu = Object.FindFirstObjectByType<GameplayPauseMenu>();
+                yield return WaitForGameplayIntroduction();
                 game.StartSession();
                 yield return new WaitForSecondsRealtime(.4f);
                 menu.Open();
@@ -225,6 +228,7 @@ namespace RhythmDojo.Tests
             var game = Object.FindFirstObjectByType<RhythmGameController>();
             var menu = Object.FindFirstObjectByType<GameplayPauseMenu>();
             var clip = flow.CurrentRequest.Song.AudioClip;
+            yield return WaitForGameplayIntroduction();
             game.StartSession();
             yield return new WaitForSecondsRealtime(.4f);
             menu.Open();
@@ -264,11 +268,11 @@ namespace RhythmDojo.Tests
                 var clip = flow.CurrentRequest.Song.AudioClip;
                 Assert.That(AudioSettings.Reset(AudioSettings.GetConfiguration()), Is.True);
                 yield return null;
-                yield return Press(Key.Space);
+                game.StartSession();
                 Assert.That(game.Session.State, Is.EqualTo(SessionState.Ready));
                 Assert.That(game.Clock.Running, Is.False);
-                Assert.That(menu.panel.activeSelf, Is.True);
-                yield return Click(menu.restartButton);
+                Assert.That(menu.panel.activeSelf, Is.False);
+                yield return WaitForGameplayIntroduction();
                 yield return Await(() => game.Clock.Running);
                 Assert.That(flow.CurrentRequest.Song.AudioClip, Is.Not.SameAs(clip));
                 Assert.That(game.Session.State, Is.EqualTo(SessionState.Playing));
@@ -315,10 +319,9 @@ namespace RhythmDojo.Tests
                 var flow = Object.FindFirstObjectByType<AppFlowController>();
                 var game = Object.FindFirstObjectByType<RhythmGameController>();
                 var menu = Object.FindFirstObjectByType<GameplayPauseMenu>();
-                Assert.That(flow.CurrentRequest.Song.NeedsAudioRecovery, Is.True);
                 Assert.That(game.Session.State, Is.EqualTo(SessionState.Ready));
-                Assert.That(menu.panel.activeSelf, Is.True);
-                yield return Click(menu.restartButton);
+                Assert.That(menu.panel.activeSelf, Is.False);
+                yield return WaitForGameplayIntroduction();
                 yield return Await(() => game.Clock.Running);
                 Assert.That(flow.CurrentRequest.Song.NeedsAudioRecovery, Is.False);
             }

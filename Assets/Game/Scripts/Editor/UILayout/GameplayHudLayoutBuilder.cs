@@ -37,31 +37,7 @@ namespace RhythmDojo.EditorTools
             view.status = status;
             status.enabled = false;
 
-            var header = Panel(
-                "Training Header",
-                canvas.transform,
-                new Color(.025f, .035f, .045f, .96f),
-                0,
-                .925f,
-                1,
-                1
-            );
-            Label("Dojo Brand", header, "RHYTHM DOJO  /  리듬 도장", .03f, 0, .55f, 1, 18, role: UiTextRole.Title);
-            Label(
-                "Training Caption",
-                header,
-                "집중  ·  반복  ·  완주",
-                .72f,
-                0,
-                .97f,
-                1,
-                15
-            , role: UiTextRole.Help).alignment = TextAnchor.MiddleRight;
-            Panel("Header Red Line", header, Red, .03f, 0, .25f, .035f);
-
             var song = Card("Training Information", canvas.transform, .035f, .65f, .24f, .88f, Cyan);
-            Label("Song Caption", song, "지금 수련 중인 곡", .07f, .82f, .93f, .97f, 14, role: UiTextRole.Help).color =
-                Muted;
             view.songTitle = Label("Song Title", song, "", .07f, .48f, .93f, .80f, 25, role: UiTextRole.Title);
             view.songTitle.horizontalOverflow = HorizontalWrapMode.Wrap;
             view.songDetails = Label("Song Details", song, "", .07f, .24f, .93f, .47f, 14);
@@ -70,28 +46,16 @@ namespace RhythmDojo.EditorTools
             view.sessionState.color = Cyan;
 
             var record = Card("Judgment Record", canvas.transform, .035f, .40f, .24f, .62f, Muted);
-            Label("Record Caption", record, "판정 기록", .07f, .78f, .93f, .96f, 14, role: UiTextRole.Help).color = Muted;
             view.counts = Label("Judgment Counts", record, "", .07f, .30f, .93f, .76f, 18);
             view.accuracy = Label("Accuracy", record, "", .07f, .04f, .93f, .28f, 17);
             view.accuracy.color = Cyan;
 
             var feedback = Card("Rhythm Feedback", canvas.transform, .74f, .22f, .97f, .88f, Red);
-            Label("Combo Caption", feedback, "C O M B O", .06f, .85f, .94f, .97f, 16).alignment =
-                TextAnchor.MiddleCenter;
             view.combo = Label("Combo Value", feedback, "0", .04f, .56f, .96f, .87f, 76, role: UiTextRole.Title);
             view.combo.alignment = TextAnchor.MiddleCenter;
             view.bestCombo = Label("Best Combo", feedback, "BEST  0", .06f, .49f, .94f, .57f, 13);
             view.bestCombo.alignment = TextAnchor.MiddleCenter;
             view.bestCombo.color = Muted;
-            Panel(
-                "Feedback Divider",
-                feedback,
-                new Color(.20f, .27f, .29f),
-                .12f,
-                .44f,
-                .88f,
-                .444f
-            );
             view.healthLabel = Label(
                 "Health Value",
                 feedback,
@@ -213,7 +177,7 @@ namespace RhythmDojo.EditorTools
             view.returnButton = UiElements.Button(
                 "Song List",
                 canvas.transform,
-                "곡 선택으로  /  ESC",
+                "곡 선택으로",
                 Vector2.zero,
                 Vector2.zero
             );
@@ -283,8 +247,67 @@ namespace RhythmDojo.EditorTools
             view.gameOverFrame.SetActive(false);
             view.gameOverText.rectTransform.anchorMin = new Vector2(.15f, .42f);
             view.gameOverText.rectTransform.anchorMax = new Vector2(.85f, .58f);
+            var help = Label("Navigation Help", view.transform,
+                "타격 키   ·   Esc  일시정지", .30f, .09f, .70f, .13f, 15,
+                role: UiTextRole.Help);
+            help.alignment = TextAnchor.MiddleCenter;
+            UiFontSettings.Apply(help);
+            view.introduction = help.gameObject;
+            ApplyIngameLayout(view);
 
             return view;
+        }
+
+        private static void ApplyIngameLayout(GameplayHudView view)
+        {
+            var song = (RectTransform)view.songInformationPanel.transform;
+            Bounds(song, .035f, .27f, .245f, .77f);
+            var frame = Panel("Song Wood Frame", song, Color.white, 0, 0, 1, 1).GetComponent<Image>();
+            frame.sprite = DojoGameplayAssets.Wood;
+            frame.type = Image.Type.Sliced;
+            frame.pixelsPerUnitMultiplier = 12;
+            frame.transform.SetAsFirstSibling();
+            view.album = Panel("Album Jacket", song, Color.white, .10f, .32f, .90f, .92f).GetComponent<Image>();
+            view.fallbackCover = DojoEntranceAssets.Load("SelectionBackground");
+            view.album.sprite = view.fallbackCover;
+            view.album.preserveAspect = true;
+            Bounds(view.songTitle.rectTransform, .10f, .13f, .90f, .30f);
+            Bounds(view.songDetails.rectTransform, .10f, .035f, .90f, .13f);
+            view.songTitle.alignment = TextAnchor.MiddleCenter;
+            view.songDetails.alignment = TextAnchor.MiddleCenter;
+            view.songDetails.color = Cream;
+
+            var feedback = (RectTransform)view.combo.transform.parent;
+            Bounds(feedback, .722f, .18f, .758f, .76f);
+            view.healthGauge = feedback;
+            view.gameplayCamera = Camera.main;
+            var healthTrack = (RectTransform)view.healthFill.transform.parent;
+            Bounds(healthTrack, .18f, .02f, .82f, .98f);
+            var gaugeFrame = Panel("Gauge Wood Frame", feedback, Color.white, 0, 0, 1, 1).GetComponent<Image>();
+            gaugeFrame.sprite = DojoGameplayAssets.Wood;
+            gaugeFrame.type = Image.Type.Sliced;
+            gaugeFrame.pixelsPerUnitMultiplier = 16;
+            gaugeFrame.transform.SetAsFirstSibling();
+            view.healthDamage = Panel("Health Damage", healthTrack, new Color(1, .66f, .40f, 0), 0, 0, 1, 1).GetComponent<Image>();
+            view.healthDamage.transform.SetAsFirstSibling();
+            for (int i = 1; i < 20; i++)
+            {
+                var mark = Panel("Gauge Segment " + i, healthTrack, new Color(.16f, .10f, .07f, .65f),
+                    0, i / 20f, 1, i / 20f);
+                mark.sizeDelta = new Vector2(0, 2);
+            }
+            view.sessionState.gameObject.SetActive(false);
+            view.judgmentRecordPanel.SetActive(false);
+            view.combo.gameObject.SetActive(false);
+            view.bestCombo.gameObject.SetActive(false);
+            view.healthLabel.gameObject.SetActive(false);
+            view.progress.gameObject.SetActive(false);
+            view.progressFill.transform.parent.gameObject.SetActive(false);
+            view.focusHudButton.gameObject.SetActive(false);
+            view.introduction.SetActive(false);
+            view.lanes.laneRoot.gameObject.SetActive(false);
+            view.judgment.text = "";
+            view.judgmentGroup.alpha = 0;
         }
 
         public static void PositionJudgmentFeedback(GameplayHudView view)
@@ -402,8 +425,8 @@ namespace RhythmDojo.EditorTools
             Color accent
         )
         {
-            var rect = Panel(name, parent, new Color(.035f, .05f, .065f, .92f), x0, y0, x1, y1);
-            Panel(name + " Accent", rect, accent, 0, .992f, 1, 1);
+            var rect = Panel(name, parent, Color.clear, x0, y0, x1, y1);
+
 
             return rect;
         }

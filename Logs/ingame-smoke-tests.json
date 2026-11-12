@@ -1,0 +1,41 @@
+{
+  "status": "completed",
+  "duration": 18.71,
+  "summary": {
+    "total": 4,
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0,
+    "inconclusive": 0
+  },
+  "results": [
+    {
+      "FullName": "RhythmDojo.Tests.GameplayFlowTests.KeyboardNavigationAndStartRestartFocusLossUseActualActions",
+      "Status": "Passed",
+      "Duration": 10.6841008,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.GameplayHudFlowTests.ReturnButtonInReadyStateLoadsSongSelectionAndReleasesSong",
+      "Status": "Passed",
+      "Duration": 1.9798875,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.MainMenuFlowTests.StartLoadsBootstrapThenExistingSongSelection",
+      "Status": "Passed",
+      "Duration": 3.3975563,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.SongSelectionFlowTests.MouseClickUsesUiInputModuleToLoadSong",
+      "Status": "Passed",
+      "Duration": 1.348627,
+      "Message": null,
+      "StackTrace": null
+    }
+  ]
+}

@@ -314,6 +314,7 @@ namespace RhythmDojo.Tests
             yield return Await(() => Object.FindFirstObjectByType<RhythmGameController>());
             yield return null;
             var game = Object.FindFirstObjectByType<RhythmGameController>();
+            yield return WaitForGameplayIntroduction();
             game.StartSession();
             yield return new WaitForSecondsRealtime(.4f);
             game.PauseSession();
@@ -339,6 +340,7 @@ namespace RhythmDojo.Tests
             yield return null;
             var game = Object.FindFirstObjectByType<RhythmGameController>();
             var menu = Object.FindFirstObjectByType<GameplayPauseMenu>();
+            yield return WaitForGameplayIntroduction();
             game.StartSession();
             yield return new WaitForSecondsRealtime(.4f);
             menu.Open();
