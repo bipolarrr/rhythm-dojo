@@ -46,6 +46,7 @@ namespace RhythmDojo.Tests
         public IEnumerator KeyboardSelectionKeepsRowsVisibleWithDifferentHeightsAndSpacing()
         {
             var view = Object.FindFirstObjectByType<SongSelectionView>();
+            yield return Click(view.practice.library);
             var flow = Object.FindFirstObjectByType<AppFlowController>();
             var provider = new LongSongListProvider();
             flow.Library.Register(provider);
@@ -127,6 +128,15 @@ namespace RhythmDojo.Tests
             CaptureSelection("demo-selection-1280");
             CaptureSelection("demo-selection-4x3", 1024, 768);
             CaptureSelection("demo-selection-ultrawide", 2560, 1080);
+            yield return Click(view.practice.library);
+            CaptureSelection("selection-library-1920", 1920, 1080);
+            CaptureSelection("selection-library-1280");
+            CaptureSelection("selection-library-4x3", 1024, 768);
+            CaptureSelection("selection-library-ultrawide", 2560, 1080);
+            yield return Click(view.modeButton);
+            CaptureSelection("selection-mode-popup-1920", 1920, 1080);
+            yield return Click(view.cancelMode);
+            yield return Click(view.closeLibrary);
             yield return Click(view.play);
             yield return Await(() => Object.FindFirstObjectByType<RhythmGameController>());
             yield return null;
@@ -141,6 +151,7 @@ namespace RhythmDojo.Tests
         public IEnumerator FavoritesEmptyStateAndSortingUseSongIds()
         {
             var view = Object.FindFirstObjectByType<SongSelectionView>();
+            yield return Click(view.practice.library);
             var flow = Object.FindFirstObjectByType<AppFlowController>();
             yield return Click(view.favoritesTab);
             Assert.That(view.Rows.Count, Is.Zero);
@@ -158,7 +169,7 @@ namespace RhythmDojo.Tests
             Assert.That(view.play.interactable, Is.False);
             yield return Click(view.allTab);
             Object.FindFirstObjectByType<SongSelectionScreen>().SelectSong("tempo-pulse");
-            view.sortList.value = 2;
+            yield return Choose(view.sortList, 2);
             yield return null;
             Assert.That(flow.Selection.SelectedSongId, Is.EqualTo("tempo-pulse"));
             Assert.That(
@@ -174,7 +185,7 @@ namespace RhythmDojo.Tests
                 Is.EqualTo(flow.Library.Entries.Select(s => s.MinBpm).Distinct().Count())
             );
             Assert.That(view.Rows.All(r => r.bpm && !string.IsNullOrEmpty(r.bpm.text)), Is.True);
-            view.sortList.value = 1;
+            yield return Choose(view.sortList, 1);
             yield return null;
             Assert.That(
                 view.Rows.Select(r => r.Entry.Id),
@@ -192,7 +203,7 @@ namespace RhythmDojo.Tests
                 Is.EqualTo(flow.Library.Entries.Select(s => s.Artist).Distinct().Count())
             );
             Assert.That(flow.Selection.SelectedSongId, Is.EqualTo("tempo-pulse"));
-            view.sortList.value = 0;
+            yield return Choose(view.sortList, 0);
             yield return null;
             Assert.That(
                 view.Rows.Select(r => r.Entry.Id),
@@ -204,6 +215,19 @@ namespace RhythmDojo.Tests
                         .Select(s => s.Id)
                 )
             );
+            yield return Choose(view.sortList, 2);
+            string selected = flow.Selection.SelectedSongId;
+            yield return Click(view.closeLibrary);
+            yield return Click(view.play);
+            yield return Await(() => Object.FindFirstObjectByType<RhythmGameController>());
+            flow.ReturnFromGameplay();
+            yield return Await(() => Object.FindFirstObjectByType<SongSelectionView>());
+            view = Object.FindFirstObjectByType<SongSelectionView>();
+            Assert.That(view.libraryPanel.activeSelf, Is.False);
+            yield return Click(view.practice.library);
+            Assert.That(view.sortList.value, Is.EqualTo(2));
+            Assert.That(flow.Selection.SelectedSongId, Is.EqualTo(selected));
+            Assert.That(view.Rows.Select(row => row.Entry.Id), Is.EqualTo(flow.Selection.List.Entries.Select(song => song.Id)));
         }
 
         [UnityTest]
@@ -363,13 +387,19 @@ namespace RhythmDojo.Tests
         public IEnumerator EscapePopupBlocksPlaybackAndReturnsToTitle()
         {
             var view = Object.FindFirstObjectByType<SongSelectionView>();
+            yield return Click(view.practice.library);
+            yield return Click(view.modeButton);
             yield return Press(Key.Escape);
-            Assert.That(view.backPopup.activeSelf, Is.True);
+            Assert.That(view.modePopup.activeSelf, Is.False);
+            Assert.That(view.libraryPanel.activeSelf, Is.True);
             Assert.That(view.play.interactable, Is.False);
             yield return Press(Key.Escape);
-            Assert.That(view.backPopup.activeSelf, Is.False);
-            yield return Click(view.back);
-            yield return Click(view.confirmBack);
+            Assert.That(view.libraryPanel.activeSelf, Is.False);
+            Assert.That(EventSystem.current.currentSelectedGameObject, Is.EqualTo(view.practice.library.gameObject));
+            yield return Press(Key.Escape);
+            yield return Await(() => UnityEngine.SceneManagement.SceneManager.GetActiveScene().path
+                == MainMenuActions.ModeSelectionScenePath);
+            yield return Press(Key.Escape);
             yield return Await(() => Object.FindFirstObjectByType<MainMenuEntranceScreen>());
         }
     }

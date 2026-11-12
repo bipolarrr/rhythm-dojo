@@ -28,8 +28,10 @@ namespace RhythmDojo.Tests
         private IEnumerator SelectHardMode()
         {
             var view = Object.FindFirstObjectByType<SongSelectionView>();
+            yield return Click(view.practice.library);
             yield return Click(view.modeButton);
             yield return Click(view.hardModeButton);
+            yield return Click(view.closeLibrary);
         }
 
         [UnityTest]

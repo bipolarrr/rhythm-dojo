@@ -17,12 +17,12 @@ namespace RhythmDojo.UI
         public static readonly Vector2 BackgroundDestination = new Vector2(-95, 50);
         public static readonly Vector2 DummyPosition = new Vector2(100, -135);
 
-        public GameObject browser;
         public RectTransform room, dummy;
         public WoodenDummyRig rig;
         public RectTransform leftFist, rightFist, information;
         public CanvasGroup interfaceGroup, hands, impact;
         public Text title, artist, chart, record, counter, status;
+        public Text heading, comboRecord;
         public Button previous, next, play, back, library, preview, settings;
         public Button[] difficulties;
         public AudioSource effects;
@@ -63,6 +63,24 @@ namespace RhythmDojo.UI
         private bool pendingDetails;
         private string pendingTitle, pendingArtist, pendingChart, pendingRecord, pendingCounter;
 
+        public void Render(SongSelectionPresentation presentation)
+        {
+            heading.text = presentation.Heading;
+            rig.SetSong(presentation.Cover, presentation.Title, presentation.Artist);
+            SetSongInformation(presentation.Title, presentation.Metadata, presentation.Details,
+                presentation.Record, $"수련곡  {presentation.Index + 1:00} / {presentation.Count:00}");
+            comboRecord.text = presentation.ComboRecord;
+            for (int i = 0; i < difficulties.Length; i++)
+            {
+                var color = new Color(1f, .91f, .72f);
+                if (presentation.SelectedDifficulty == i)
+                {
+                    color = new Color(1f, .55f, .25f);
+                }
+                difficulties[i].GetComponentInChildren<Text>().color = color;
+            }
+        }
+
         public void SetSongInformation(string songTitle, string songArtist, string songChart,
             string songRecord, string songCounter)
         {
@@ -97,7 +115,7 @@ namespace RhythmDojo.UI
 
         public void Validate()
         {
-            if (!browser || !room || !dummy)
+            if (!room || !dummy)
             {
                 throw new InvalidOperationException("Practice selection stage missing.");
             }
@@ -117,11 +135,11 @@ namespace RhythmDojo.UI
             {
                 throw new InvalidOperationException("Practice selection song labels missing.");
             }
-            if (!chart)
+            if (!chart || !heading)
             {
                 throw new InvalidOperationException("Practice selection chart labels missing.");
             }
-            if (!status)
+            if (!status || !record || !counter || !comboRecord)
             {
                 throw new InvalidOperationException("Practice selection feedback missing.");
             }

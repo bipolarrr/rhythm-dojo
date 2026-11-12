@@ -61,9 +61,6 @@ namespace RhythmDojo.Core
         public PlayResult LastResult { get; private set; }
         public bool CanRetryResult => retryPlay != null && SceneManager.GetSceneByPath(ResultsPath).isLoaded;
         public bool Transitioning { get; private set; }
-        // Direct scene entry uses the same selection surface as the default dojo mode.
-        // Challenge entry explicitly selects the shared song browser in MainMenuActions.
-        public bool PracticeSelection { get; set; } = true;
 
         // Compatibility facade for existing integration callers. Screens use injected services.
         public int SelectedSongIndex
@@ -141,6 +138,10 @@ namespace RhythmDojo.Core
             flow.Preferences = new SelectionPreferences();
             flow.HardMode = HardModePreferences.Load();
             flow.Rules = new PlayRulesService();
+            // A new application session starts in free practice; existing flows keep their rules.
+            var rules = flow.Rules.Snapshot;
+            rules.Mode = RhythmDojo.Gameplay.PlayMode.Gauge;
+            flow.Rules.Update(rules);
 
             var presentation = PresentationPreferences.Load();
             bool hasPresentation = PlayerPrefs.HasKey(PresentationPreferences.StorageKey);
@@ -583,7 +584,6 @@ namespace RhythmDojo.Core
             }
 
             ClearEditorReturn();
-            PracticeSelection = true;
             Load("Assets/Game/Scenes/Title.unity");
         }
 
@@ -594,7 +594,6 @@ namespace RhythmDojo.Core
                 return;
             }
             ClearEditorReturn();
-            PracticeSelection = true;
             Load(MainMenuActions.ModeSelectionScenePath);
         }
 

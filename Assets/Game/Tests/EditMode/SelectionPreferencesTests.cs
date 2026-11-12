@@ -1,4 +1,6 @@
 using System;
+using System.Linq;
+using RhythmDojo.Content;
 using NUnit.Framework;
 using RhythmDojo.Application;
 using RhythmDojo.EditorTools;
@@ -130,31 +132,80 @@ namespace RhythmDojo.Tests
 
         [Test]
         [Category("Fast")]
+        public void ListRetainsIdsAcrossSortAndClearsSelectionForEmptyFavorites()
+        {
+            var settings = AssetDatabase.LoadAssetAtPath<GameSettings>(TestContentBuilder.SettingsPath);
+            var library = new SongLibrary();
+            library.Register(new BuiltInSongProvider(settings.catalog));
+            var preferences = new SelectionPreferences(key);
+            var selection = new SongSelectionService(settings, library, preferences);
+            var list = selection.List;
+            string selected = list.Refresh(library, preferences, "tempo-pulse");
+            Assert.That(selected, Is.EqualTo("tempo-pulse"));
+            list.Sort = 2;
+            Assert.That(list.Refresh(library, preferences, selected), Is.EqualTo(selected));
+            Assert.That(list.Entries.Select(song => song.MinBpm), Is.Ordered);
+            Assert.That(list.Move(list.Entries.Last().Id, 1), Is.EqualTo(list.Entries[0].Id));
+            preferences.ToggleFavorite("test-pulse");
+            list.FavoritesOnly = true;
+            selected = list.Refresh(library, preferences, selected);
+            Assert.That(selected, Is.EqualTo("test-pulse"));
+            preferences.ToggleFavorite(selected);
+            selected = list.Refresh(library, preferences, selected);
+            selection.UpdateSelection(selected, selection.SelectedDifficulty, ScrollMode.Bpm, 1.5);
+            Assert.That(selection.SelectedSongId, Is.Null);
+            Assert.That(list.Move(selected, 1), Is.Null);
+            var presentation = SongSelectionPresentation.Create(selection, list, settings.difficulties,
+                preferences, null, false, null);
+            Assert.That(presentation.CanPlay, Is.False);
+            Assert.That(presentation.Message, Does.Contain("즐겨찾기"));
+            Assert.That(selection.SelectedScrollMode, Is.EqualTo(ScrollMode.Bpm));
+            Assert.That(selection.SelectedMultiplier, Is.EqualTo(1.5));
+            list.FavoritesOnly = false;
+            Assert.That(list.Refresh(library, preferences, selected), Is.EqualTo(list.Entries[0].Id));
+        }
+
+        [Test]
+        [Category("Fast")]
+        public void DisplayUsesSelectedChartAndRulesWithoutViewControls()
+        {
+            var settings = AssetDatabase.LoadAssetAtPath<GameSettings>(TestContentBuilder.SettingsPath);
+            var library = new SongLibrary();
+            library.Register(new BuiltInSongProvider(settings.catalog));
+            var preferences = new SelectionPreferences(key);
+            var selection = new SongSelectionService(settings, library, preferences);
+            selection.List.Refresh(library, preferences, "test-pulse");
+            selection.UpdateSelection("test-pulse", settings.difficulties[1], ScrollMode.Constant, 1);
+            var presentation = SongSelectionPresentation.Create(selection, selection.List,
+                settings.difficulties, preferences, null, false, null);
+            Assert.That(presentation.CanPlay, Is.True);
+            Assert.That(presentation.Difficulties[1], Is.True);
+            Assert.That(presentation.Title, Is.EqualTo(library.Find("test-pulse").Title));
+            selection.UpdateSelection("test-pulse", settings.difficulties[0], ScrollMode.Constant, 1);
+            presentation = SongSelectionPresentation.Create(selection, selection.List,
+                settings.difficulties, preferences, null, true, null);
+            Assert.That(presentation.CanPlay, Is.False);
+            Assert.That(presentation.Message, Does.Contain("채보가 없습니다"));
+            Assert.That(presentation.Heading, Is.EqualTo("실력 검정"));
+        }
+
+        [Test]
+        [Category("Fast")]
         public void InformationPanelReservesHeaderAndFooterAndAlbumFillsFrame()
         {
             var view = SongSelectionLayoutBuilder.Build();
 
             try
             {
-                var left = (RectTransform)view.songTitle.transform.parent;
-                var header = (RectTransform)view.transform.Find("Background/Header");
-                var footer = (RectTransform)view.play.transform.parent;
-                Assert.That(left.anchorMin.y, Is.GreaterThan(footer.anchorMax.y),
-                    "The information panel must leave room for the footer.");
-                Assert.That(left.anchorMax.y, Is.LessThan(header.anchorMin.y),
-                    "The information panel must leave room for the heading.");
-                Assert.That(left.anchorMax.x - left.anchorMin.x, Is.GreaterThan(.4f),
-                    "The information panel must retain enough width for album and metadata.");
-                Assert.That(view.pixelTheme, Is.True);
-                var browser = (RectTransform)view.scroll.transform.parent;
-                Assert.That(browser.anchorMax.x, Is.LessThan(left.anchorMin.x), "The song list must stay left of the information panel.");
-                foreach (var frame in view.GetComponentsInChildren<RhythmDojo.UI.PixelDojoFrameGraphic>(true))
-                {
-                    Assert.That(frame.GetComponent<CanvasRenderer>(), Is.Not.Null);
-                    Assert.That(frame.raycastTarget, Is.False, "Decorative frames must not block UI input.");
-                }
-                Assert.That(left.offsetMin, Is.EqualTo(Vector2.zero));
-                Assert.That(left.offsetMax, Is.EqualTo(Vector2.zero));
+                view.Validate();
+                Assert.That(view.practice.gameObject.activeSelf, Is.True);
+                Assert.That(view.libraryPanel.activeSelf, Is.False);
+                Assert.That(view.play, Is.SameAs(view.practice.play));
+                Assert.That(view.difficultyButtons, Is.SameAs(view.practice.difficulties));
+                Assert.That(view.libraryPanel.transform.GetSiblingIndex(),
+                    Is.GreaterThan(view.practice.transform.GetSiblingIndex()));
+                Assert.That(view.modePopup.transform.GetSiblingIndex(),
+                    Is.GreaterThan(view.libraryPanel.transform.GetSiblingIndex()));
                 Assert.That(
                     view.album.GetComponent<UnityEngine.UI.AspectRatioFitter>().aspectMode,
                     Is.EqualTo(UnityEngine.UI.AspectRatioFitter.AspectMode.EnvelopeParent)

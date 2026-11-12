@@ -177,6 +177,7 @@ namespace RhythmDojo.Tests
         public IEnumerator KeyboardNavigationAndStartRestartFocusLossUseActualActions()
         {
             var view = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
+            yield return Click(view.practice.library);
             var visibleRows = view.Rows
                 .Where(row => row.gameObject.activeInHierarchy)
                 .OrderBy(row => row.transform.GetSiblingIndex())
@@ -198,8 +199,11 @@ namespace RhythmDojo.Tests
             );
 
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
-            flow.UpdateSelection(0, flow.Settings.defaultDifficulty, ScrollMode.Constant, 1);
-            flow.PlaySelected();
+            var row = view.Rows.First(item => item.Entry.Id == "test-pulse");
+            EventSystem.current.SetSelectedGameObject(row.select.gameObject);
+            yield return Click(row.select);
+            yield return Click(view.closeLibrary);
+            yield return Click(view.play);
             yield return Await(() =>
                 UnityEngine.Object.FindFirstObjectByType<RhythmGameController>()
             );

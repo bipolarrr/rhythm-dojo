@@ -17,14 +17,11 @@ namespace RhythmDojo.Tests
     [Category("UI")]
     public sealed class PracticeSelectionTests : GameplayTestContext
     {
-        protected override bool UsePracticeSelection => true;
 
         private PracticeSelectionView OpenPractice()
         {
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
             var screen = UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>();
-            Assert.That(flow.PracticeSelection, Is.True,
-                "Practice must be selected by the production entry path before the test starts.");
             screen.RestoreEntryFocus();
             return UnityEngine.Object.FindFirstObjectByType<PracticeSelectionView>();
         }
@@ -486,7 +483,6 @@ namespace RhythmDojo.Tests
             Assert.That(UnityEngine.Object.FindFirstObjectByType<RhythmGameController>(), Is.Null);
             yield return Await(() => UnityEngine.Object.FindFirstObjectByType<RhythmGameController>());
             Assert.That(flow.CurrentRequest.Song.SongId, Is.EqualTo(selected));
-            Assert.That(flow.PracticeSelection, Is.True);
             flow.ReturnFromGameplay();
             yield return Await(() => UnityEngine.Object.FindFirstObjectByType<PracticeSelectionView>());
             var returned = UnityEngine.Object.FindFirstObjectByType<PracticeSelectionView>();
@@ -528,7 +524,7 @@ namespace RhythmDojo.Tests
             var practice = OpenPractice();
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
             var view = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
-            int difficulty = view.difficultyList.value;
+            int difficulty = Array.IndexOf(flow.Settings.difficulties, flow.SelectedDifficulty);
             yield return Press(Key.DownArrow);
             int expected = difficulty + 1;
             if (expected < view.difficultyButtons.Length && view.difficultyButtons[expected].interactable)
@@ -545,7 +541,8 @@ namespace RhythmDojo.Tests
             Assert.That(practice.next.interactable, Is.False);
             yield return Press(Key.RightArrow);
             Assert.That(practice.IsStriking, Is.False);
-            Assert.That(practice.chart.text, Is.EqualTo("전체 탭에서 곡을 선택하세요."));
+            Assert.That(practice.status.text, Does.Contain("즐겨찾기"));
+            Assert.That(flow.Selection.SelectedSongId, Is.Null);
         }
     }
 }

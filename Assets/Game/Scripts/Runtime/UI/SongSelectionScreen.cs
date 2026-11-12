@@ -15,9 +15,7 @@ namespace RhythmDojo.UI
 {
     public sealed partial class SongSelectionScreen : MonoBehaviour, IModalInputParticipant
     {
-        [SerializeField]
-        private SongSelectionView view;
-        private GameSettings settings;
+        [SerializeField] private SongSelectionView view;
         private DifficultyProfile[] difficultyOptions;
         private double[] speedOptions;
         private ISongSelectionService selection;
@@ -25,24 +23,47 @@ namespace RhythmDojo.UI
         private ISelectionPreferences preferences;
         private CancellationTokenSource lifetime;
         private CancellationTokenSource previewCancellation;
+        private CancellationTokenSource playCancellation;
         private PlayableSong previewSong;
         private double previewEnd;
-        private bool favoritesOnly,
-            loading;
         private double loadingStartedAt;
         private bool libraryRefreshPending;
         private (string SongId, DifficultyProfile Difficulty, string Message, bool CanRetry)? playbackFailure;
-
+        private string previewCaption = "▶ 미리듣기";
+        private string previewFailure;
+        private SongSelectionList list;
+        private SongSelectionPresentation presentation;
+        private SongSelectionState state;
         private static readonly string[] LoadingCaptions = { "불러오는 중.", "불러오는 중..", "불러오는 중..." };
-
         public bool HardModeSelected { get; private set; }
-
+        public SongSelectionState State => state;
         private HardModePreferences hardMode;
         private IPlayRulesService rules;
-
-        private bool ModalOpen => view.backPopup.activeSelf || view.modePopup.activeSelf;
-
+        private bool ModalOpen => state == SongSelectionState.ModePopup;
         private UnityEngine.Events.UnityAction[] difficultyActions;
+        private bool Busy
+        {
+            get
+            {
+                if (state == SongSelectionState.Loading || state == SongSelectionState.Leaving)
+                {
+                    return true;
+                }
+                return navigation == null || navigation.Transitioning;
+            }
+        }
+
+        private bool CanPlay
+        {
+            get
+            {
+                if (presentation == null || !presentation.CanPlay)
+                {
+                    return false;
+                }
+                return !playbackFailure.HasValue || playbackFailure.Value.CanRetry;
+            }
+        }
 
         public void Validate()
         {
@@ -50,267 +71,135 @@ namespace RhythmDojo.UI
             {
                 throw new InvalidOperationException("Song selection view missing.");
             }
-
             view.Validate();
         }
 
-        public void Initialize(
-            GameSettings gameSettings,
-            ISongSelectionService songs,
-            IAppNavigation appNavigation,
-            ISelectionPreferences savedPreferences = null,
-            HardModePreferences hardMode = null,
-            IPlayRulesService rules = null
-        )
+        public void Initialize(GameSettings gameSettings, ISongSelectionService songs,
+            IAppNavigation appNavigation, ISelectionPreferences savedPreferences = null,
+            HardModePreferences hardMode = null, IPlayRulesService rules = null)
         {
             Unbind();
             Validate();
-            settings = gameSettings;
+            if (selection != songs || list == null)
+            {
+                list = new SongSelectionList();
+                if (songs is SongSelectionService service)
+                {
+                    list = service.List;
+                }
+            }
             selection = songs;
             navigation = appNavigation;
-
+            difficultyOptions = gameSettings.difficulties.ToArray();
+            speedOptions = Enumerable.Range(0, gameSettings.scroll.MultiplierCount)
+                .Select(gameSettings.scroll.GetMultiplier).ToArray();
             if (songs is ISelectionOptions options)
             {
                 difficultyOptions = options.DifficultyOptions.ToArray();
+                speedOptions = options.SpeedOptions.ToArray();
             }
-            else
+            if (view.difficultyButtons.Length != difficultyOptions.Length)
             {
-                difficultyOptions = gameSettings.difficulties.ToArray();
+                throw new InvalidOperationException("Authored difficulty controls do not match selection options.");
             }
-
-            if (songs is ISelectionOptions speeds)
-            {
-                speedOptions = speeds.SpeedOptions.ToArray();
-            }
-            else
-            {
-                speedOptions = Enumerable
-                    .Range(0, gameSettings.scroll.MultiplierCount)
-                    .Select(gameSettings.scroll.GetMultiplier)
-                    .ToArray();
-            }
-
             preferences = savedPreferences ?? new SelectionPreferences(null);
             this.hardMode = hardMode ?? new HardModePreferences(null);
-            hardMode = this.hardMode;
             this.rules = rules;
-            HardModeSelected = hardMode.Enabled;
+            HardModeSelected = this.hardMode.Enabled;
             lifetime = new CancellationTokenSource();
-            loading = false;
+            state = SongSelectionState.Main;
             playbackFailure = null;
-            view.SetPlaybackStatus();
-            favoritesOnly = false;
-            view.backPopup.SetActive(false);
-            view.modePopup.SetActive(false);
-            view.SetInteractable(true);
-            RefreshMode();
+            view.scrollModeList.ClearOptions();
+            view.scrollModeList.AddOptions(new List<string> { "고정 속도", "BPM 연동" });
+            view.multiplierList.ClearOptions();
+            view.multiplierList.AddOptions(speedOptions.Select(value => $"{value:0.##}x").ToList());
+            view.sortList.ClearOptions();
+            view.sortList.AddOptions(new List<string> { "정렬 : 제목", "정렬 : 작곡가", "정렬 : BPM" });
+            view.sortList.SetValueWithoutNotify(list.Sort);
+            difficultyActions = new UnityEngine.Events.UnityAction[difficultyOptions.Length];
+            for (int i = 0; i < difficultyActions.Length; i++)
+            {
+                int index = i;
+                difficultyActions[i] = () => SelectDifficulty(index);
+                view.difficultyButtons[i].GetComponentInChildren<Text>().text = difficultyOptions[i].DisplayName;
+                view.difficultyButtons[i].onClick.AddListener(difficultyActions[i]);
+            }
+            view.scrollModeList.onValueChanged.AddListener(ScrollChanged);
+            view.multiplierList.onValueChanged.AddListener(MultiplierChanged);
+            view.sortList.onValueChanged.AddListener(SortChanged);
+            view.speedSlider.onValueChanged.AddListener(SpeedChanged);
+            view.timingOffset.onValueChanged.AddListener(TimingChanged);
             view.modeButton.onClick.AddListener(ShowMode);
             view.normalModeButton.onClick.AddListener(SelectNormalMode);
             view.hardModeButton.onClick.AddListener(SelectHardMode);
             view.cancelMode.onClick.AddListener(CloseMode);
-            view.difficultyList.ClearOptions();
-            view.difficultyList.AddOptions(difficultyOptions.Select(p => p.DisplayName).ToList());
-            view.scrollModeList.ClearOptions();
-            view.scrollModeList.AddOptions(new List<string> { "고정 속도", "BPM 연동" });
-            view.multiplierList.ClearOptions();
-            view.multiplierList.AddOptions(
-                Enumerable
-                    .Range(0, speedOptions.Length)
-                    .Select(i => $"{speedOptions[i]:0.##}x")
-                    .ToList()
-            );
-            view.sortList.ClearOptions();
-            view.sortList.AddOptions(
-                new List<string> { "정렬 : 제목", "정렬 : 작곡가", "정렬 : BPM" }
-            );
-            view.sortList.SetValueWithoutNotify(0);
-            view.difficultyList.SetValueWithoutNotify(
-                Array.IndexOf(difficultyOptions, selection.SelectedDifficulty)
-            );
-            view.scrollModeList.SetValueWithoutNotify((int)ScrollMode.Constant);
-
-            for (int i = 0; i < speedOptions.Length; i++)
-            {
-                if (speedOptions[i] == selection.SelectedMultiplier)
-                {
-                    view.multiplierList.SetValueWithoutNotify(i);
-                }
-            }
-
-            RefreshSpeed();
-            view.speedSlider.onValueChanged.AddListener(SpeedChanged);
-            view.timingOffset.SetValueWithoutNotify(preferences.TimingOffsetMs);
-            RefreshTiming();
-            view.RefreshDifficultyButtons();
-            difficultyActions = new UnityEngine.Events.UnityAction[view.difficultyButtons.Length];
-
-            for (int i = 0; i < view.difficultyButtons.Length; i++)
-            {
-                int index = i;
-                difficultyActions[i] = () => SelectDifficulty(index);
-                view.difficultyButtons[i].onClick.AddListener(difficultyActions[i]);
-
-                var nav = view.difficultyButtons[i].navigation;
-                nav.mode = Navigation.Mode.Explicit;
-                nav.selectOnLeft = null;
-                nav.selectOnRight = null;
-                nav.selectOnDown = view.settingsButton;
-                nav.selectOnUp = view.allTab;
-                view.difficultyButtons[i].navigation = nav;
-            }
-
-            view.difficultyList.onValueChanged.AddListener(Changed);
-            view.scrollModeList.onValueChanged.AddListener(Changed);
-            view.multiplierList.onValueChanged.AddListener(Changed);
-            view.sortList.onValueChanged.AddListener(SortChanged);
-            view.timingOffset.onValueChanged.AddListener(TimingChanged);
             view.play.onClick.AddListener(Play);
-            view.previewButton.onClick.AddListener(TogglePreview);
-            view.settingsButton.onClick.AddListener(ShowSettings);
+            view.previewButton.onClick.AddListener(PreviewPractice);
+            view.settingsButton.onClick.AddListener(PracticeSettings);
             view.back.onClick.AddListener(ShowBack);
-            view.confirmBack.onClick.AddListener(ConfirmBack);
-            view.cancelBack.onClick.AddListener(CancelBack);
+            view.closeLibrary.onClick.AddListener(ClosePracticeLibrary);
             view.allTab.onClick.AddListener(ShowAll);
             view.favoritesTab.onClick.AddListener(ShowFavorites);
             selection.Library.Changed += OnLibraryChanged;
             BindPractice();
-            ConfigurePractice();
-            RefreshLibrary();
+            PrepareEntryPresentation();
             FocusSelected();
         }
 
-        private static bool Expanded(Dropdown dropdown) =>
-            dropdown.GetComponentInChildren<Canvas>() != null;
-
-        private bool Busy => loading || navigation == null || navigation.Transitioning;
+        private static bool Expanded(Dropdown dropdown) => dropdown.GetComponentInChildren<Canvas>() != null;
 
         private void Update()
         {
+            if (lifetime == null)
+            {
+                return;
+            }
             if (libraryRefreshPending && !Busy && !ModalOpen)
             {
                 RefreshLibrary();
                 FocusSelected();
             }
-            RefreshPracticeFeedback();
             if (previewSong != null)
             {
-                if (AudioSettings.dspTime >= previewEnd || !view.previewSource.isPlaying || previewSong.NeedsAudioRecovery)
+                bool finished = AudioSettings.dspTime >= previewEnd || !view.previewSource.isPlaying;
+                if (finished || previewSong.NeedsAudioRecovery)
                 {
                     StopPreview();
                 }
             }
-
-            if (loading)
-            {
-                int frame = (int)((Time.unscaledTimeAsDouble - loadingStartedAt) / .35) % LoadingCaptions.Length;
-                view.playStatusLabel.text = LoadingCaptions[frame];
-                return;
-            }
-
-            if (PracticeActive)
-            {
-                UpdatePracticeInput();
-                return;
-            }
-
-            if (Busy || Keyboard.current == null || Expanded(view.difficultyList))
+            RefreshPracticeFeedback();
+            if (Busy)
             {
                 return;
             }
-
-            if (
-                Expanded(view.multiplierList)
-                || Expanded(view.scrollModeList)
-                || Expanded(view.sortList)
-            )
+            // UGUI owns the topmost dropdown, including Escape and selection restoration.
+            if (Expanded(view.multiplierList) || Expanded(view.scrollModeList) || Expanded(view.sortList))
             {
                 return;
             }
-
-            if (Keyboard.current.escapeKey.wasPressedThisFrame)
+            bool cancel = Keyboard.current?.escapeKey.wasPressedThisFrame == true;
+            cancel |= Gamepad.current?.buttonEast.wasPressedThisFrame == true;
+            if (cancel)
             {
-                if (view.modePopup.activeSelf)
+                if (ModalOpen)
                 {
                     CloseMode();
                 }
-                else if (view.backPopup.activeSelf)
+                else if (state == SongSelectionState.Library)
                 {
-                    CancelBack();
+                    ClosePracticeLibrary();
                 }
                 else
                 {
                     ShowBack();
                 }
-
                 return;
             }
-
-            if (ModalOpen)
+            if (ModalOpen || state == SongSelectionState.Library)
             {
                 return;
             }
-
-            GameObject focused;
-
-            if (EventSystem.current)
-            {
-                focused = EventSystem.current.currentSelectedGameObject;
-            }
-            else
-            {
-                focused = null;
-            }
-
-            if (focused != view.speedSlider.gameObject)
-            {
-                if (focused != view.timingOffset.gameObject && focused != view.sortList.gameObject)
-                {
-                    int direction;
-
-                    if (Keyboard.current.rightArrowKey.wasPressedThisFrame)
-                    {
-                        direction = 1;
-                    }
-                    else if (Keyboard.current.leftArrowKey.wasPressedThisFrame)
-                    {
-                        direction = -1;
-                    }
-                    else
-                    {
-                        direction = 0;
-                    }
-
-                    if (direction != 0)
-                    {
-                        SelectDifficulty(
-                            Mathf.Clamp(
-                                Array.IndexOf(difficultyOptions, selection.SelectedDifficulty)
-                                    + direction,
-                                0,
-                                view.difficultyButtons.Length - 1
-                            )
-                        );
-
-                        if (
-                            EventSystem.current
-                            && view.difficultyButtons.Any(button => button.gameObject == focused)
-                        )
-                        {
-                            EventSystem.current.SetSelectedGameObject(
-                                view.difficultyButtons[view.difficultyList.value].gameObject
-                            );
-                        }
-                    }
-                }
-            }
-
-            if (
-                Keyboard.current.enterKey.wasPressedThisFrame
-                && view.Rows.Any(r => r.select.gameObject == focused)
-            )
-            {
-                Play();
-            }
+            UpdatePracticeInput();
         }
 
         private void OnLibraryChanged()
@@ -320,405 +209,145 @@ namespace RhythmDojo.UI
             RefreshLibrary();
         }
 
-        private void RefreshLibrary()
+        private void RefreshLibrary(bool preparing = false)
         {
-            if (Busy || ModalOpen)
+            if (!preparing && (Busy || ModalOpen))
             {
-                // Cold entry may initialize while the previous scene is still unloading.
-                // Replay the library notification once navigation releases input.
                 libraryRefreshPending = true;
                 return;
             }
             libraryRefreshPending = false;
-
-            IEnumerable<SongEntry> entries = selection.Library.Entries;
-
-            if (favoritesOnly)
+            string selected = list.Refresh(selection.Library, preferences, selection.SelectedSongId);
+            UpdateSelectedSong(selected);
+            // Reuse the authored row instances by position; release any surplus after library changes.
+            while (view.Rows.Count > list.Entries.Count)
             {
-                entries = entries.Where(s => preferences.IsFavorite(s.Id));
+                var row = view.Rows[view.Rows.Count - 1];
+                view.Rows.RemoveAt(view.Rows.Count - 1);
+                row.gameObject.SetActive(false);
+                Destroy(row.gameObject);
             }
-
-            if (view.sortList.value == 1)
+            for (int i = 0; i < list.Entries.Count; i++)
             {
-                entries = entries
-                    .OrderBy(s => s.Artist, StringComparer.OrdinalIgnoreCase)
-                    .ThenBy(s => s.Title);
-            }
-            else if (view.sortList.value == 2)
-            {
-                entries = entries.OrderBy(s => s.MinBpm).ThenBy(s => s.Title);
-            }
-            else
-            {
-                entries = entries.OrderBy(s => s.Title, StringComparer.OrdinalIgnoreCase);
-            }
-
-            var visible = entries.ToList();
-            view.ClearRows();
-
-            foreach (var entry in visible)
-            {
-                var row = Instantiate(view.rowTemplate, view.rowContent);
-                row.name = "Song Row " + entry.Id;
-                row.Bind(
-                    entry,
-                    view.fallbackCover,
-                    selection.SelectedDifficulty.DisplayName,
-                    preferences.IsFavorite(entry.Id),
-                    SelectSong,
-                    ToggleFavorite
-                );
-                row.gameObject.SetActive(true);
-                view.Rows.Add(row);
-                if (row.indexLabel)
+                if (i == view.Rows.Count)
                 {
-                    row.indexLabel.text = view.Rows.Count.ToString("00");
+                    view.Rows.Add(Instantiate(view.rowTemplate, view.rowContent));
                 }
-            }
-
-            for (int i = 0; i < view.Rows.Count; i++)
-            {
-                var nav = view.Rows[i].select.navigation;
+                var row = view.Rows[i];
+                row.Bind(list.Entries[i], view.fallbackCover, selection.SelectedDifficulty.DisplayName,
+                    preferences.IsFavorite(list.Entries[i].Id), SelectSong, ToggleFavorite);
+                row.gameObject.SetActive(true);
+                var nav = row.select.navigation;
                 nav.mode = Navigation.Mode.Explicit;
-
+                nav.selectOnUp = view.allTab;
                 if (i > 0)
                 {
                     nav.selectOnUp = view.Rows[i - 1].select;
                 }
-                else
-                {
-                    nav.selectOnUp = view.allTab;
-                }
-
-                if (i + 1 < view.Rows.Count)
-                {
-                    nav.selectOnDown = view.Rows[i + 1].select;
-                }
-                else
-                {
-                    nav.selectOnDown = view.play;
-                }
-
+                nav.selectOnDown = view.closeLibrary;
                 nav.selectOnLeft = null;
-                nav.selectOnRight = null;
-                view.Rows[i].select.navigation = nav;
-            }
-
-            if (favoritesOnly)
-            {
-                view.allTab.GetComponent<Image>().color = new Color(.09f, .115f, .13f);
-            }
-            else
-            {
-                view.allTab.GetComponent<Image>().color = new Color(.42f, .09f, .12f);
-            }
-
-            if (favoritesOnly)
-            {
-                view.favoritesTab.GetComponent<Image>().color = new Color(.42f, .09f, .12f);
-            }
-            else
-            {
-                view.favoritesTab.GetComponent<Image>().color = new Color(.09f, .115f, .13f);
-            }
-
-            if (view.pixelTheme)
-            {
-                var allFrame = view.allTab.GetComponentInChildren<PixelDojoFrameGraphic>();
-                var favoriteFrame = view.favoritesTab.GetComponentInChildren<PixelDojoFrameGraphic>();
-                var selectedFill = new Color(.98f, .85f, .62f);
-                var normalFill = new Color(.78f, .62f, .42f);
-                allFrame.color = selectedFill;
-                favoriteFrame.color = normalFill;
-                if (favoritesOnly)
+                nav.selectOnRight = row.favorite;
+                row.select.navigation = nav;
+                if (i > 0)
                 {
-                    allFrame.color = normalFill;
-                    favoriteFrame.color = selectedFill;
+                    nav = view.Rows[i - 1].select.navigation;
+                    nav.selectOnDown = row.select;
+                    view.Rows[i - 1].select.navigation = nav;
+                }
+                if (row.indexLabel)
+                {
+                    row.indexLabel.text = (i + 1).ToString("00");
                 }
             }
-            view.emptyMessage.gameObject.SetActive(visible.Count == 0);
+            RefreshDetails();
+        }
 
-            if (favoritesOnly)
+        private void UpdateSelectedSong(string songId)
+        {
+            var song = selection.Library.Find(songId);
+            var difficulty = selection.SelectedDifficulty;
+            int slot = Array.IndexOf(difficultyOptions, difficulty);
+            if (song != null && !song.Charts.Any(chart => (int)chart.Slot == slot))
             {
-                view.emptyMessage.text = "즐겨찾기한 곡이 없습니다.";
-            }
-            else
-            {
-                view.emptyMessage.text = "등록된 곡이 없습니다.";
-            }
-
-            if (visible.Count == 0)
-            {
-                view.songTitle.text = "곡을 선택하세요";
-                view.artistBpm.text = "";
-                view.album.sprite = view.fallbackCover;
-                view.record.text = "기록 없음";
-                if (view.comboRecord)
+                var available = song.Charts.FirstOrDefault(chart => (int)chart.Slot < difficultyOptions.Length);
+                if (available != null)
                 {
-                    view.record.text = "스코어  —\n랭크  —\n레이트  —";
-                    view.comboRecord.text = "최대 콤보  —\n<size=30>기록</size>\n<size=28>기록 없음</size>";
+                    difficulty = difficultyOptions[(int)available.Slot];
                 }
-                view.details.text = "전체 탭에서 곡을 선택하세요.";
-                view.play.interactable = false;
-                view.previewButton.interactable = false;
+            }
+            if (selection.SelectedSongId != songId || selection.SelectedDifficulty != difficulty)
+            {
                 StopPreview();
                 playbackFailure = null;
-                view.SetPlaybackStatus();
-                RefreshPracticeDetails();
-
-                return;
             }
-
-            var selected =
-                visible.FirstOrDefault(s => s.Id == selection.SelectedSongId) ?? visible[0];
-            SelectSong(selected.Id);
+            selection.UpdateSelection(songId, difficulty, selection.SelectedScrollMode, selection.SelectedMultiplier);
         }
 
         public void SelectSong(string songId)
         {
-            if (Busy || ModalOpen)
+            if (Busy || ModalOpen || list.IndexOf(songId) < 0)
             {
                 return;
             }
-
-            var song = selection.Library.Find(songId);
-
-            if (song == null)
-            {
-                return;
-            }
-
-            var difficulty = selection.SelectedDifficulty;
-            int slot = Array.IndexOf(difficultyOptions, difficulty);
-
-            if (!song.Charts.Any(c => (int)c.Slot == slot) && song.Charts.Count > 0)
-            {
-                difficulty = difficultyOptions[(int)song.Charts[0].Slot];
-            }
-
-            if (selection.SelectedSongId != songId || selection.SelectedDifficulty != difficulty)
-            {
-                StopPreview();
-            }
-
-            selection.UpdateSelection(
-                songId,
-                difficulty,
-                ScrollMode.Constant,
-                selection.SelectedMultiplier
-            );
-            view.difficultyList.SetValueWithoutNotify(Array.IndexOf(difficultyOptions, difficulty));
-            view.RefreshDifficultyButtons();
-            RefreshDetails(song);
-
-            int index = view.Rows.FindIndex(r => r.Entry.Id == songId);
-
-            foreach (var row in view.Rows)
-            {
-                row.SetSelected(row.Entry.Id == songId);
-            }
-
-            if (index >= 0)
-            {
-                if (
-                    EventSystem.current
-                    && EventSystem.current.currentSelectedGameObject == view.Rows[index].gameObject
-                )
-                {
-                    Canvas.ForceUpdateCanvases();
-
-                    float contentHeight = view.rowContent.rect.height,
-                        viewportHeight = view.scroll.viewport.rect.height;
-                    var rowRect = (RectTransform)view.Rows[index].transform;
-                    float top =
-                        view.rowContent.rect.yMax
-                        - view.rowContent.InverseTransformPoint(
-                            rowRect.TransformPoint(new Vector3(0, rowRect.rect.yMax, 0))
-                        ).y;
-                    float bottom =
-                        view.rowContent.rect.yMax
-                        - view.rowContent.InverseTransformPoint(
-                            rowRect.TransformPoint(new Vector3(0, rowRect.rect.yMin, 0))
-                        ).y;
-                    float current = view.rowContent.anchoredPosition.y;
-
-                    if (top < current)
-                    {
-                        current = top;
-                    }
-                    else if (bottom > current + viewportHeight)
-                    {
-                        current = bottom - viewportHeight;
-                    }
-
-                    var position = view.rowContent.anchoredPosition;
-                    position.y = Mathf.Clamp(
-                        current,
-                        0,
-                        Mathf.Max(0, contentHeight - viewportHeight)
-                    );
-                    view.scroll.StopMovement();
-                    view.rowContent.anchoredPosition = position;
-                }
-            }
+            UpdateSelectedSong(songId);
+            RefreshDetails();
+            EnsureSelectedVisible();
         }
 
-        private void RefreshDetails(SongEntry song)
+        private void EnsureSelectedVisible()
         {
-            var chart = song.Charts.FirstOrDefault(c =>
-                (int)c.Slot == Array.IndexOf(difficultyOptions, selection.SelectedDifficulty)
-            );
-            view.songTitle.text = song.Title;
-
-            string bpm;
-
-            if (song.MinBpm == song.MaxBpm)
+            if (state != SongSelectionState.Library)
             {
-                bpm = $"{song.MinBpm:0.##}";
+                return;
             }
-            else
+            int index = list.IndexOf(selection.SelectedSongId);
+            if (index < 0 || index >= view.Rows.Count)
             {
-                bpm = $"{song.MinBpm:0.##}–{song.MaxBpm:0.##}";
+                return;
             }
-
-            view.artistBpm.text = $"{song.Artist}  /  BPM {bpm}";
-            if (view.pixelTheme)
+            Canvas.ForceUpdateCanvases();
+            float contentHeight = view.rowContent.rect.height;
+            float viewportHeight = view.scroll.viewport.rect.height;
+            var rowRect = (RectTransform)view.Rows[index].transform;
+            float top = view.rowContent.rect.yMax - view.rowContent.InverseTransformPoint(
+                rowRect.TransformPoint(new Vector3(0, rowRect.rect.yMax, 0))).y;
+            float bottom = view.rowContent.rect.yMax - view.rowContent.InverseTransformPoint(
+                rowRect.TransformPoint(new Vector3(0, rowRect.rect.yMin, 0))).y;
+            float current = view.rowContent.anchoredPosition.y;
+            if (top < current)
             {
-                double duration = song.Duration;
-                if (chart != null && chart.Duration.HasValue)
+                current = top;
+            }
+            else if (bottom > current + viewportHeight)
+            {
+                current = bottom - viewportHeight;
+            }
+            var position = view.rowContent.anchoredPosition;
+            position.y = Mathf.Clamp(current, 0, Mathf.Max(0, contentHeight - viewportHeight));
+            view.scroll.StopMovement();
+            view.rowContent.anchoredPosition = position;
+        }
+
+        private void RefreshDetails()
+        {
+            if (playbackFailure is { } failure)
+            {
+                bool sameSelection = failure.SongId == selection.SelectedSongId
+                    && failure.Difficulty == selection.SelectedDifficulty;
+                if (!sameSelection)
                 {
-                    duration = chart.Duration.Value;
-                }
-                var time = TimeSpan.FromSeconds(Math.Max(0, duration));
-                view.artistBpm.text = $"아티스트  {song.Artist}\nBPM  {bpm}\nPLAY TIME  {(int)time.TotalMinutes}:{time.Seconds:00}";
-            }
-
-            if (song.Cover && song.Cover != view.legacyFallbackCover)
-            {
-                view.album.sprite = song.Cover;
-            }
-            else
-            {
-                view.album.sprite = view.fallbackCover;
-            }
-
-            if (view.album.sprite)
-            {
-                view.album.GetComponent<AspectRatioFitter>().aspectRatio =
-                    view.album.sprite.rect.width / view.album.sprite.rect.height;
-            }
-
-            string recordKey;
-
-            if (chart != null && rules != null)
-            {
-                recordKey = RecordIdentity.Rules(chart.Id, chart.Revision, rules.Snapshot);
-            }
-            else
-            {
-                recordKey = selection.SelectedDifficulty.name;
-            }
-
-            var best = preferences.FindRecord(song.Id, recordKey);
-
-            if (best == null)
-            {
-                view.record.text =
-                    "스코어  —\n랭크  —\n레이트  —\n최대 콤보  —\n기록 없음";
-            }
-            else
-            {
-                view.record.text =
-                    $"스코어  {best.score:N0}\n랭크  {best.Rank}\n레이트  {best.rate:0.00}%\n최대 콤보  {best.maxCombo}";
-            }
-
-            var recordDetails = view.record;
-            if (view.comboRecord)
-            {
-                recordDetails = view.comboRecord;
-                if (best == null)
-                {
-                    view.record.text = "스코어  —\n랭크  —\n레이트  —";
-                    recordDetails.text = "최대 콤보  —\n<size=30>기록</size>\n<size=28>기록 없음</size>";
-                }
-                else
-                {
-                    view.record.text = $"스코어  {best.score:N0}\n랭크  {best.Rank}\n레이트  {best.rate:0.00}%";
-                    recordDetails.text = $"최대 콤보  {best.maxCombo:N0}\n<size=30>기록</size>";
+                    playbackFailure = null;
                 }
             }
-
-            if (preferences is SelectionPreferences records)
-            {
-                if (best != null)
-                {
-                    string clearLabel = "Gauge —";
-                    if (best.gaugeClear)
-                    {
-                        clearLabel = "Gauge CLEAR";
-                    }
-
-                    recordDetails.text +=
-                        $"\n<size=26>{clearLabel}\nChallenge "
-                        + string.Join(
-                            " / ",
-                            Enumerable
-                                .Range(1, 3)
-                                .Select(i =>
-                                {
-                                    if ((best.challengeAchievements & (1 << (i - 1))) != 0)
-                                    {
-                                        return i.ToString();
-                                    }
-
-                                    return "—";
-                                })
-                        )
-                        + "</size>";
-                }
-
-                var failed = records.FindFailedRecord(song.Id, recordKey);
-
-                if (failed != null)
-                {
-                    recordDetails.text +=
-                        $"\n<size=26><color=#D6A873>실패 완주\n{failed.score:N0} · {failed.rate:0.00}%</color></size>";
-                }
-            }
-
-            if (song.Error == null)
-            {
-                view.details.text =
-                    $"{chart?.Duration ?? song.Duration:0}s · {chart?.NoteCount ?? song.NoteCount} 노트 · {song.LaneCount} 레인";
-            }
-            else
-            {
-                view.details.text = "재생 불가: " + song.Error;
-            }
-
-            view.play.interactable = song.Error == null && !Busy && !ModalOpen;
-            view.play.interactable &= chart != null && chart.Error == null;
-
-            if (chart?.Error != null)
-            {
-                view.details.text = "재생 불가: " + chart.Error;
-            }
-
-            RefreshPlaybackStatus(song, chart);
-            view.previewButton.interactable = view.play.interactable && selection.Library is ISongChartLoader;
-
-            for (int i = 0; i < view.difficultyButtons.Length; i++)
-            {
-                view.difficultyButtons[i].interactable =
-                    !Busy && !ModalOpen && song.Charts.Any(c => (int)c.Slot == i);
-            }
-
+            RefreshMode();
+            presentation = SongSelectionPresentation.Create(selection, list, difficultyOptions,
+                preferences, rules, HardModeSelected, view.fallbackCover);
+            view.Render(presentation);
             foreach (var row in view.Rows)
             {
-                var available = row.Entry.Charts.FirstOrDefault(c =>
-                    (int)c.Slot == Array.IndexOf(difficultyOptions, selection.SelectedDifficulty)
-                );
-
+                row.SetSelected(row.Entry.Id == selection.SelectedSongId);
+                var available = row.Entry.Charts.FirstOrDefault(chart => (int)chart.Slot == presentation.SelectedDifficulty);
+                row.difficulty.text = selection.SelectedDifficulty.DisplayName;
                 if (row.Entry.Error != null || available?.Error != null)
                 {
                     row.difficulty.text = "재생 불가";
@@ -727,154 +356,150 @@ namespace RhythmDojo.UI
                 {
                     row.difficulty.text = "채보 없음";
                 }
-                else
-                {
-                    row.difficulty.text = selection.SelectedDifficulty.DisplayName;
-                }
             }
-            RefreshPracticeDetails();
+            RefreshSpeed();
+            RefreshTiming();
+            RefreshPracticeFeedback();
         }
 
         private void SelectDifficulty(int value)
         {
-            if (PracticeActive && view.practice.IsStriking)
+            if (Busy || ModalOpen || view.practice.IsStriking)
             {
                 return;
             }
-            if (Busy || ModalOpen)
+            if (presentation == null || !presentation.Difficulties[value])
             {
                 return;
             }
-
-            var song = selection.Library.Find(selection.SelectedSongId);
-
-            if (song == null || !song.Charts.Any(c => (int)c.Slot == value))
-            {
-                return;
-            }
-
             if (selection.SelectedDifficulty != difficultyOptions[value])
             {
                 StopPreview();
+                playbackFailure = null;
             }
+            selection.UpdateSelection(selection.SelectedSongId, difficultyOptions[value],
+                selection.SelectedScrollMode, selection.SelectedMultiplier);
+            RefreshDetails();
+        }
 
-            selection.UpdateSelection(
-                song.Id,
-                difficultyOptions[value],
-                selection.SelectedScrollMode,
-                selection.SelectedMultiplier
-            );
-            view.difficultyList.SetValueWithoutNotify(value);
-            view.RefreshDifficultyButtons();
-            RefreshDetails(song);
+        private void ScrollChanged(int value)
+        {
+            if (Busy || state != SongSelectionState.Library)
+            {
+                return;
+            }
+            selection.UpdateSelection(selection.SelectedSongId, selection.SelectedDifficulty,
+                (ScrollMode)value, selection.SelectedMultiplier);
+            Changed(value);
+        }
+
+        private void MultiplierChanged(int value)
+        {
+            if (Busy || state != SongSelectionState.Library)
+            {
+                return;
+            }
+            selection.UpdateSelection(selection.SelectedSongId, selection.SelectedDifficulty,
+                selection.SelectedScrollMode, speedOptions[value]);
+            Changed(value);
         }
 
         private void Changed(int value)
         {
-            if (Busy || ModalOpen)
-            {
-                return;
-            }
-
-            RefreshSpeed();
-            view.scrollModeList.SetValueWithoutNotify((int)ScrollMode.Constant);
-            view.RefreshDifficultyButtons();
             preferences.Difficulty = selection.SelectedDifficulty.name;
-            preferences.ScrollMode = ScrollMode.Constant;
+            preferences.ScrollMode = selection.SelectedScrollMode;
             preferences.Multiplier = selection.SelectedMultiplier;
             preferences.Save();
-
-            if (view.Rows.Count != 0)
-            {
-                SelectSong(selection.SelectedSongId);
-            }
+            RefreshSpeed();
         }
 
         private void RefreshSpeed()
         {
-            double value = selection.SelectedMultiplier;
-
+            view.scrollModeList.SetValueWithoutNotify((int)selection.SelectedScrollMode);
             for (int i = 0; i < speedOptions.Length; i++)
             {
-                if (Math.Abs(speedOptions[i] - value) < .0001)
+                if (Math.Abs(speedOptions[i] - selection.SelectedMultiplier) < .0001)
                 {
                     view.multiplierList.SetValueWithoutNotify(i);
                 }
             }
-
-            view.speedSlider.SetValueWithoutNotify((float)value);
-            view.speedLabel.text = $"속도  {value:0.0}x";
+            view.speedSlider.SetValueWithoutNotify((float)selection.SelectedMultiplier);
+            view.speedLabel.text = $"속도  {selection.SelectedMultiplier:0.0}x";
         }
 
         private void SpeedChanged(float value)
         {
-            if (Busy || ModalOpen)
+            if (Busy || state != SongSelectionState.Library)
             {
                 return;
             }
-
-            double rounded = Math.Round(
-                Math.Clamp((double)value, 1, 10),
-                1,
-                MidpointRounding.AwayFromZero
-            );
-            view.speedSlider.SetValueWithoutNotify((float)rounded);
-
-            for (int i = 0; i < speedOptions.Length; i++)
+            double rounded = Math.Round(Math.Clamp((double)value, 1, 10), 1, MidpointRounding.AwayFromZero);
+            int index = Array.FindIndex(speedOptions, speed => Math.Abs(speed - rounded) < .0001);
+            if (index >= 0)
             {
-                if (Math.Abs(speedOptions[i] - rounded) < .0001)
-                {
-                    view.multiplierList.SetValueWithoutNotify(i);
-                    selection.UpdateSelection(
-                        selection.SelectedSongId,
-                        selection.SelectedDifficulty,
-                        ScrollMode.Constant,
-                        rounded
-                    );
-                    Changed(i);
-
-                    return;
-                }
+                MultiplierChanged(index);
             }
         }
 
         private void TimingChanged(float value)
         {
+            if (Busy || state != SongSelectionState.Library)
+            {
+                return;
+            }
             preferences.TimingOffsetMs = Mathf.RoundToInt(value);
             preferences.Save();
             RefreshTiming();
         }
 
-        private void RefreshTiming() =>
+        private void RefreshTiming()
+        {
+            view.timingOffset.SetValueWithoutNotify(preferences.TimingOffsetMs);
             view.timingLabel.text = $"입력 타이밍 보정  {preferences.TimingOffsetMs:+0;-0;0} ms";
+        }
 
         private void SortChanged(int value)
         {
+            if (Busy || state != SongSelectionState.Library)
+            {
+                return;
+            }
+
+            list.Sort = value;
             RefreshLibrary();
             FocusSelected();
         }
 
         private void ShowAll()
         {
-            favoritesOnly = false;
+            if (Busy || state != SongSelectionState.Library)
+            {
+                return;
+            }
+
+            list.FavoritesOnly = false;
             RefreshLibrary();
             FocusSelected();
         }
 
         private void ShowFavorites()
         {
-            favoritesOnly = true;
+            if (Busy || state != SongSelectionState.Library)
+            {
+                return;
+            }
+
+            list.FavoritesOnly = true;
             RefreshLibrary();
             FocusSelected();
         }
 
         private void ToggleFavorite(string id)
         {
-            if (Busy || ModalOpen)
+            if (Busy || state != SongSelectionState.Library)
             {
                 return;
             }
-
             preferences.ToggleFavorite(id);
             RefreshLibrary();
             FocusSelected();
@@ -882,7 +507,7 @@ namespace RhythmDojo.UI
 
         public void RestoreEntryFocus()
         {
-            ConfigurePractice();
+            PrepareEntryPresentation();
             FocusSelected();
         }
 
@@ -892,56 +517,52 @@ namespace RhythmDojo.UI
             {
                 return;
             }
-
-            if (PracticeActive)
+            GameObject target = view.practice.library.gameObject;
+            if (state == SongSelectionState.Library)
             {
-                EventSystem.current.SetSelectedGameObject(view.practice.play.gameObject);
-                return;
+                target = view.allTab.gameObject;
+                int index = list.IndexOf(selection.SelectedSongId);
+                if (index >= 0 && index < view.Rows.Count)
+                {
+                    target = view.Rows[index].select.gameObject;
+                }
             }
-
-            var row = view.Rows.Find(r => r.Entry.Id == selection.SelectedSongId);
-
-            if (row)
+            else if (CanPlay)
             {
-                EventSystem.current.SetSelectedGameObject(row.select.gameObject);
+                target = view.play.gameObject;
             }
-            else
-            {
-                EventSystem.current.SetSelectedGameObject(view.allTab.gameObject);
-            }
+            EventSystem.current.SetSelectedGameObject(target);
+            EnsureSelectedVisible();
         }
 
         private async void TogglePreview()
         {
-            if (Busy || ModalOpen || !view.previewButton.interactable)
+            if (Busy || ModalOpen || !CanPlay)
             {
                 return;
             }
-
             if (selection.Library is not ISongChartLoader loader)
             {
                 return;
             }
-
             if (previewCancellation != null)
             {
                 StopPreview();
                 return;
             }
-
-            var request = new CancellationTokenSource();
+            var request = CancellationTokenSource.CreateLinkedTokenSource(lifetime.Token);
             previewCancellation = request;
-            view.previewButton.GetComponentInChildren<Text>().text = "불러오는 중…";
+            previewFailure = null;
+            previewCaption = "불러오는 중…";
             PlayableSong song = null;
             try
             {
-                var slot = (ChartSlot)Array.IndexOf(settings.difficulties, selection.SelectedDifficulty);
+                var slot = (ChartSlot)Array.IndexOf(difficultyOptions, selection.SelectedDifficulty);
                 song = await loader.LoadChartAsync(selection.SelectedSongId, slot, request.Token);
-                if (previewCancellation != request)
+                if (previewCancellation != request || !this || !isActiveAndEnabled)
                 {
                     return;
                 }
-
                 const float previewDuration = 12;
                 var source = view.previewSource;
                 var clip = song.AudioClip;
@@ -953,7 +574,7 @@ namespace RhythmDojo.UI
                 previewEnd = AudioSettings.dspTime + Math.Min(previewDuration, clip.length - start);
                 previewSong = song;
                 song = null;
-                view.previewButton.GetComponentInChildren<Text>().text = "■ 멈추기";
+                previewCaption = "■ 멈추기";
             }
             catch (OperationCanceledException)
             {
@@ -968,12 +589,12 @@ namespace RhythmDojo.UI
                 {
                     StopPreview();
                     var display = SongLoadErrorDisplay.FromException(e);
-                    view.SetPlaybackStatus(message: display.Message);
-                    view.previewButton.interactable = display.CanRetry;
-                    view.play.interactable &= display.CanRetry;
-                    if (display.CanRetry)
+                    previewFailure = display.Message;
+                    previewCaption = "미리듣기 실패 · 재시도";
+                    if (!display.CanRetry)
                     {
-                        view.previewButton.GetComponentInChildren<Text>().text = "미리듣기 실패 · 재시도";
+                        playbackFailure = (selection.SelectedSongId, selection.SelectedDifficulty,
+                            display.Message, false);
                     }
                 }
             }
@@ -989,253 +610,138 @@ namespace RhythmDojo.UI
             previewCancellation = null;
             request?.Cancel();
             request?.Dispose();
-
             if (view && view.previewSource)
             {
                 view.previewSource.Stop();
                 view.previewSource.clip = null;
             }
-
-            if (view && view.previewButton)
-            {
-                view.previewButton.GetComponentInChildren<Text>(true).text = "▶ 미리듣기";
-            }
-
+            previewCaption = "▶ 미리듣기";
+            previewFailure = null;
             previewSong?.Dispose();
             previewSong = null;
         }
 
         private async void Play()
         {
-            if (PracticeActive && view.practice.IsStriking)
+            if (Busy || !CanPlay || state != SongSelectionState.Main)
             {
-                practicePlayQueued = true;
+                return;
+            }
+            if (view.practice.IsStriking)
+            {
+                state = SongSelectionState.StartPending;
                 view.practice.StopBarrage();
                 return;
             }
-            if (PracticeActive && view.practice.IsLeaving)
-            {
-                return;
-            }
-            if (Busy || !view.play.interactable || ModalOpen)
-            {
-                return;
-            }
-
-            var currentLifetime = lifetime;
             StopPreview();
             var songId = selection.SelectedSongId;
             var difficulty = selection.SelectedDifficulty;
             playbackFailure = null;
-            SetLoading(true);
-
+            state = SongSelectionState.Loading;
+            loadingStartedAt = Time.unscaledTimeAsDouble;
+            RefreshPracticeFeedback();
+            var request = CancellationTokenSource.CreateLinkedTokenSource(lifetime.Token);
+            playCancellation = request;
             try
             {
-                await navigation.PlaySelectedAsync(currentLifetime.Token);
+                await navigation.PlaySelectedAsync(request.Token);
             }
             catch (OperationCanceledException)
             {
-                if (this && lifetime == currentLifetime)
+                if (this && playCancellation == request)
                 {
-                    SetLoading(false);
+                    state = SongSelectionState.Main;
                     RefreshLibrary();
                     FocusSelected();
                 }
             }
             catch (Exception e)
             {
-                if (!this || lifetime != currentLifetime)
+                if (!this || playCancellation != request)
                 {
                     return;
                 }
-
                 var display = SongLoadErrorDisplay.FromException(e);
                 playbackFailure = (songId, difficulty, display.Message, display.CanRetry);
-                SetLoading(false);
+                state = SongSelectionState.Main;
                 RefreshLibrary();
-                if (view.play.interactable && EventSystem.current)
-                {
-                    EventSystem.current.SetSelectedGameObject(view.play.gameObject);
-                }
-                else
-                {
-                    FocusSelected();
-                }
+                FocusSelected();
             }
-        }
-
-        private void SetLoading(bool value)
-        {
-            loading = value;
-            view.SetInteractable(!value);
-            view.play.interactable = !value;
-            if (value)
+            finally
             {
-                loadingStartedAt = Time.unscaledTimeAsDouble;
-                view.SetPlaybackStatus(LoadingCaptions[0]);
-            }
-        }
-
-        private void RefreshPlaybackStatus(SongEntry song, ChartEntry chart)
-        {
-            if (playbackFailure is { } failure)
-            {
-                if (failure.SongId == song.Id && failure.Difficulty == selection.SelectedDifficulty)
+                if (playCancellation == request)
                 {
-                    view.play.interactable &= failure.CanRetry;
-                    string caption = null;
-                    if (view.play.interactable)
-                    {
-                        caption = "다시 시도";
-                    }
-
-                    view.SetPlaybackStatus(caption, failure.Message);
-                    return;
+                    playCancellation = null;
                 }
-
-                playbackFailure = null;
+                request.Dispose();
             }
-
-            string error = chart?.Error ?? song.Error;
-            if (error != null)
-            {
-                var display = new SongLoadErrorDisplay(chart?.Failure ?? song.Failure);
-                view.SetPlaybackStatus(message: display.Message);
-                return;
-            }
-
-            view.SetPlaybackStatus();
         }
 
         private void ShowMode()
         {
-            if (Busy || ModalOpen)
+            if (Busy || state != SongSelectionState.Library)
             {
                 return;
             }
-
-            StopPreview();
-            view.SetInteractable(false);
-            view.play.interactable = false;
-            RefreshMode();
-            view.modePopup.SetActive(true);
-
+            state = SongSelectionState.ModePopup;
+            RefreshPracticeFeedback();
             if (EventSystem.current)
             {
+                var button = view.normalModeButton;
                 if (HardModeSelected)
                 {
-                    EventSystem.current.SetSelectedGameObject(view.hardModeButton.gameObject);
+                    button = view.hardModeButton;
                 }
-                else
-                {
-                    EventSystem.current.SetSelectedGameObject(view.normalModeButton.gameObject);
-                }
+                EventSystem.current.SetSelectedGameObject(button.gameObject);
             }
         }
 
         private void SelectNormalMode() => SelectMode(false);
-
         private void SelectHardMode() => SelectMode(true);
 
         private void SelectMode(bool hard)
         {
-            if (Busy || !view.modePopup.activeSelf)
+            if (Busy || !ModalOpen)
             {
                 return;
             }
-
             HardModeSelected = hard;
             hardMode.Enabled = hard;
             hardMode.Save();
-            RefreshMode();
-            CloseMode();
-
             if (rules != null)
             {
                 var snapshot = rules.Snapshot;
-
+                snapshot.Mode = RhythmDojo.Gameplay.PlayMode.Gauge;
                 if (hard)
                 {
                     snapshot.Mode = RhythmDojo.Gameplay.PlayMode.Challenge;
                 }
-                else
-                {
-                    snapshot.Mode = RhythmDojo.Gameplay.PlayMode.Gauge;
-                }
-
                 rules.Update(snapshot);
-                RefreshMode();
             }
+            CloseMode();
         }
 
         private void RefreshMode()
         {
-            if (HardModeSelected)
-            {
-                view.modeLabel.text = "모드: 하드";
-            }
-            else
-            {
-                view.modeLabel.text = "모드: 노말";
-            }
-
             if (rules != null)
             {
-                var snapshot = rules.Snapshot;
-                HardModeSelected = snapshot.Mode == RhythmDojo.Gameplay.PlayMode.Challenge;
-
-                if (HardModeSelected)
-                {
-                    view.modeLabel.text = "Challenge " + snapshot.ChallengePreset;
-                }
-                else
-                {
-                    view.modeLabel.text = "Gauge";
-                }
-
-                view.normalModeButton.GetComponentInChildren<Text>().text = "Gauge";
-                view.hardModeButton.GetComponentInChildren<Text>().text = "Challenge";
+                HardModeSelected = rules.Snapshot.Mode == RhythmDojo.Gameplay.PlayMode.Challenge;
             }
-
-            if (!HardModeSelected)
-            {
-                view.normalModeButton.GetComponent<Image>().color = new Color(.48f, .32f, .18f);
-            }
-            else
-            {
-                view.normalModeButton.GetComponent<Image>().color = new Color(.27f, .15f, .10f);
-            }
-
+            view.modeLabel.text = "일반 · Gauge";
             if (HardModeSelected)
             {
-                view.hardModeButton.GetComponent<Image>().color = new Color(.53f, .15f, .10f);
-            }
-            else
-            {
-                view.hardModeButton.GetComponent<Image>().color = new Color(.27f, .15f, .10f);
-            }
-            if (view.pixelTheme)
-            {
-                foreach (var button in new[] { view.normalModeButton, view.hardModeButton })
-                {
-                    var frame = button.GetComponentInChildren<PixelDojoFrameGraphic>();
-                    frame.color = button.GetComponent<Image>().color;
-                    button.GetComponent<Image>().color = Color.clear;
-                }
+                view.modeLabel.text = "하드 · Challenge";
             }
         }
 
         private void CloseMode()
         {
-            if (Busy || !view.modePopup.activeSelf)
+            if (Busy || !ModalOpen)
             {
                 return;
             }
-
-            view.modePopup.SetActive(false);
-            view.SetInteractable(true);
-            RefreshLibrary();
-
+            state = SongSelectionState.Library;
+            RefreshDetails();
             if (EventSystem.current)
             {
                 EventSystem.current.SetSelectedGameObject(view.modeButton.gameObject);
@@ -1244,81 +750,34 @@ namespace RhythmDojo.UI
 
         private void ShowSettings()
         {
-            if (!Busy && !ModalOpen)
-            {
-                StopPreview();
-                navigation.ShowSettings();
-            }
-        }
-
-        private void ShowBack()
-        {
-            if (practiceSelected)
-            {
-                ReturnFromPractice();
-                return;
-            }
-            if (Busy || ModalOpen)
+            if (Busy || state != SongSelectionState.Main)
             {
                 return;
             }
-
             StopPreview();
-            view.SetInteractable(false);
-            view.play.interactable = false;
-            view.backPopup.SetActive(true);
-
-            if (EventSystem.current)
-            {
-                EventSystem.current.SetSelectedGameObject(view.cancelBack.gameObject);
-            }
+            navigation.ShowSettings();
         }
 
-        private void CancelBack()
-        {
-            if (Busy)
-            {
-                return;
-            }
-
-            view.backPopup.SetActive(false);
-            view.SetInteractable(true);
-            RefreshLibrary();
-            FocusSelected();
-        }
-
-        private void ConfirmBack()
-        {
-            if (Busy)
-            {
-                return;
-            }
-
-            if (navigation is ITitleNavigation titleNavigation)
-            {
-                titleNavigation.ShowTitle();
-            }
-        }
+        private void ShowBack() => ReturnFromPractice();
 
         private void Unbind()
         {
             libraryRefreshPending = false;
             UnbindPractice();
             StopPreview();
+            playCancellation?.Cancel();
+            playCancellation = null;
             lifetime?.Cancel();
             lifetime?.Dispose();
             lifetime = null;
-
             if (selection != null)
             {
                 selection.Library.Changed -= OnLibraryChanged;
             }
-
             if (!view)
             {
                 return;
             }
-
             if (difficultyActions != null)
             {
                 for (int i = 0; i < difficultyActions.Length; i++)
@@ -1326,11 +785,9 @@ namespace RhythmDojo.UI
                     view.difficultyButtons[i].onClick.RemoveListener(difficultyActions[i]);
                 }
             }
-
             difficultyActions = null;
-            view.difficultyList.onValueChanged.RemoveListener(Changed);
-            view.scrollModeList.onValueChanged.RemoveListener(Changed);
-            view.multiplierList.onValueChanged.RemoveListener(Changed);
+            view.scrollModeList.onValueChanged.RemoveListener(ScrollChanged);
+            view.multiplierList.onValueChanged.RemoveListener(MultiplierChanged);
             view.sortList.onValueChanged.RemoveListener(SortChanged);
             view.speedSlider.onValueChanged.RemoveListener(SpeedChanged);
             view.timingOffset.onValueChanged.RemoveListener(TimingChanged);
@@ -1339,11 +796,10 @@ namespace RhythmDojo.UI
             view.hardModeButton.onClick.RemoveListener(SelectHardMode);
             view.cancelMode.onClick.RemoveListener(CloseMode);
             view.play.onClick.RemoveListener(Play);
-            view.previewButton.onClick.RemoveListener(TogglePreview);
-            view.settingsButton.onClick.RemoveListener(ShowSettings);
+            view.previewButton.onClick.RemoveListener(PreviewPractice);
+            view.settingsButton.onClick.RemoveListener(PracticeSettings);
             view.back.onClick.RemoveListener(ShowBack);
-            view.confirmBack.onClick.RemoveListener(ConfirmBack);
-            view.cancelBack.onClick.RemoveListener(CancelBack);
+            view.closeLibrary.onClick.RemoveListener(ClosePracticeLibrary);
             view.allTab.onClick.RemoveListener(ShowAll);
             view.favoritesTab.onClick.RemoveListener(ShowFavorites);
             view.ClearRows();
@@ -1351,28 +807,18 @@ namespace RhythmDojo.UI
 
         private void OnEnable()
         {
-            if (selection == null || settings == null || preferences == null)
+            if (lifetime != null)
             {
-                return;
+                PrepareEntryPresentation();
             }
-
-            for (int i = 0; i < speedOptions.Length; i++)
-            {
-                if (Math.Abs(speedOptions[i] - selection.SelectedMultiplier) < .0001)
-                {
-                    view.multiplierList.SetValueWithoutNotify(i);
-                }
-            }
-
-            view.timingOffset.SetValueWithoutNotify(preferences.TimingOffsetMs);
-            RefreshSpeed();
-            RefreshTiming();
-            RefreshMode();
         }
 
         private void OnDisable()
         {
             StopPreview();
+            var request = playCancellation;
+            playCancellation = null;
+            request?.Cancel();
             if (view && view.practice)
             {
                 view.practice.StopBarrage();
@@ -1384,21 +830,12 @@ namespace RhythmDojo.UI
 
         public void ResumeAfterModal()
         {
-            // Presentation can lease an unbound screen before composition initializes it.
             if (lifetime == null)
             {
                 return;
             }
-
-            RefreshMode();
+            PrepareEntryPresentation();
             FocusSelected();
-
-            var song = selection.Library.Find(selection.SelectedSongId);
-
-            if (song != null)
-            {
-                RefreshDetails(song);
-            }
         }
     }
 }

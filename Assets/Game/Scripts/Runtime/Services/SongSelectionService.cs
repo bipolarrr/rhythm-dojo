@@ -11,6 +11,7 @@ namespace RhythmDojo.Services
         private readonly ISelectionPreferences preferences;
 
         public ISongLibrary Library { get; }
+        public SongSelectionList List { get; } = new SongSelectionList();
         public string SelectedSongId { get; private set; }
         public DifficultyProfile SelectedDifficulty { get; private set; }
         public ScrollMode SelectedScrollMode { get; private set; }
@@ -86,7 +87,7 @@ namespace RhythmDojo.Services
             double multiplier
         )
         {
-            if (Library.Find(songId) == null)
+            if (songId != null && Library.Find(songId) == null)
             {
                 throw new ArgumentException("Song not registered.");
             }

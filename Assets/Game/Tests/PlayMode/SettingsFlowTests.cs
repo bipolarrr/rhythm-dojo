@@ -690,7 +690,7 @@ namespace RhythmDojo.Tests
                 AudioSettings.GetConfiguration().dspBufferSize,
                 Is.EqualTo(before.dspBufferSize)
             );
-            yield return Click(ButtonNamed("Settings"));
+            yield return Click(UnityEngine.Object.FindFirstObjectByType<SongSelectionView>().settingsButton);
             yield return Await(() => UnityEngine.Object.FindFirstObjectByType<SettingsScreen>());
             yield return null;
             yield return Click(
@@ -741,7 +741,7 @@ namespace RhythmDojo.Tests
                 UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>()
             );
             yield return null;
-            EventSystem.current.SetSelectedGameObject(ButtonNamed("Settings").gameObject);
+            EventSystem.current.SetSelectedGameObject(UnityEngine.Object.FindFirstObjectByType<SongSelectionView>().settingsButton.gameObject);
             yield return Press(Key.Enter);
             yield return Await(() => UnityEngine.Object.FindFirstObjectByType<SettingsScreen>());
             yield return null;

@@ -14,7 +14,6 @@ namespace RhythmDojo.Tests
 {
     public sealed class IngamePresentationTests : GameplayTestContext
     {
-        protected override bool UsePracticeSelection => true;
 
         [UnityTest]
         [Category("SceneIntegration")]

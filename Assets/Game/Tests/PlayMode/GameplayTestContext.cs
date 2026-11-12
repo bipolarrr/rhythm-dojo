@@ -48,7 +48,6 @@ namespace RhythmDojo.Tests
 
         private NativeInputScope nativeInput;
         private bool audioConfigurationChanged;
-        protected virtual bool UsePracticeSelection => false;
 
         private void AudioConfigurationChanged(bool deviceWasChanged)
         {
@@ -120,13 +119,6 @@ namespace RhythmDojo.Tests
                 UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>()
             );
             yield return null;
-            // Browser fixtures deliberately exercise the shared library used by Challenge.
-            // Practice fixtures keep the production default instead of injecting it later.
-            var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
-            if (!UsePracticeSelection)
-            {
-                flow.PracticeSelection = false;
-            }
             UnityEngine
                 .Object.FindFirstObjectByType<SongSelectionScreen>()
                 .SelectSong("test-pulse");
@@ -331,6 +323,26 @@ namespace RhythmDojo.Tests
             InputSystem.QueueStateEvent(mouse, new MouseState { position = point });
             yield return null;
             yield return null;
+        }
+
+        protected IEnumerator Choose(Dropdown dropdown, int value)
+        {
+            int previous = dropdown.value;
+            EventSystem.current.SetSelectedGameObject(dropdown.gameObject);
+            yield return Press(Key.Enter);
+            yield return new WaitForSecondsRealtime(.18f);
+            Key direction = Key.DownArrow;
+            if (value < previous)
+            {
+                direction = Key.UpArrow;
+            }
+            for (int i = 0; i < System.Math.Abs(value - previous); i++)
+            {
+                yield return Press(direction);
+            }
+            yield return Press(Key.Enter);
+            yield return new WaitForSecondsRealtime(.18f);
+            Assert.That(dropdown.value, Is.EqualTo(value));
         }
 
         protected IEnumerator Press(Key key)

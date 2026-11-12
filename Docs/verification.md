@@ -93,13 +93,13 @@ Build Settings의 순서는 `Title`, `ModeSelection`, `Bootstrap`, `SongSelectio
 | ModeSelection | `MainMenuScreen`/`DojoModeView`가 네 방을 소유한다. `AlphaDojoLayoutBuilder`가 최신 배경·인물·타이포그래피를 조립한다. |
 | 비급 전수 | 별도 씬이 아닌 첫 번째 방의 사형·수련생 튜토리얼. 시작 버튼이 `DojoModeView.Practice()`를 호출한다. |
 | 자유 연습 | 두 번째 방 → SongSelection의 `PracticeSelectionView`/목인. 준비 중인 씬도 활성화 직전에 최종 선택 상태를 다시 적용한다. |
-| 실력 검정 | 세 번째 방 → 같은 SongSelection의 목록형 라이브러리, Challenge 규칙. 이 목록은 자유 연습의 ‘곡 목록’에서도 사용하는 현행 기능이다. |
+| 실력 검정 | 세 번째 방 → 같은 SongSelection의 목인 화면, Challenge 규칙. 제목과 기록은 규칙에서 결정하며 ‘곡 목록’은 두 모드의 공통 보조 패널이다. |
 | 율보 편찬 | 네 번째 방 → ChartEditor. `ChartEditorSceneBuilder.Build()`는 `WorkspaceSceneBuilder.Build()`로 연결되어 확장 편집 UI를 생성한다. |
 | Bootstrap / SongSelection 직접 실행 | 새 AppFlow의 기본 진입은 자유 연습 목인 화면. 기존 AppFlow가 있으면 선택한 모드와 규칙을 보존한다. Bootstrap은 단축 초기화 경로이며 전체 메뉴 확인은 Title에서 시작한다. |
-| Gameplay | AppFlow의 선택 곡을 사용하며 직접 실행 시 기본 카탈로그 곡을 준비한다. 종료/결과 복귀 시 진입 모드의 선곡 UI로 돌아간다. |
+| Gameplay | AppFlow의 선택 곡을 사용하며 직접 실행 시 기본 카탈로그 곡을 준비한다. 종료/결과 복귀 시 규칙·곡·난이도를 유지한 목인 화면으로 돌아가며 목록 패널은 닫는다. |
 | Settings / Results | 직접 실행 가능한 현행 씬. 일반 설정은 같은 빌더가 생성한 `Resources/UI/SettingsPopup.prefab`을 재사용한다. 결과 없는 Results 직접 실행은 빈 결과 표시이며 실제 결과/재시도는 플레이 경로에서 확인한다. |
 
-`SongSelectionView.Validate()`는 목인 구성을 필수로 검사한다. 오래된 씬에서 참조가 없을 때 목록으로 조용히 대체하지 않는다. `GameplayTestContext`의 목록 중심 fixture는 검정/공유 라이브러리 대상을 명시적으로 선택하고, `PracticeSelectionTests`는 제품 기본 진입을 그대로 사용한다. `MainMenuFlowTests`는 Title 입장, 네 방의 기능, 직접 진입, 사전 준비/해제와 중복 입력 소유권을 검증한다. Bootstrap의 view 없는 API 진입은 `Compatibility`로 식별한다.
+`SongSelectionView.Validate()`는 목인 구성을 필수로 검사한다. 오래된 씬에서 참조가 없을 때 목록으로 조용히 대체하지 않는다. `GameplayTestContext`와 모든 fixture는 제품 기본 목인 화면을 그대로 사용한다. 목록 검사는 실제 곡 목록 버튼으로 패널을 연다. 정렬·필터·빈 결과와 표시 상태는 `SelectionPreferencesTests`에서 화면 없이도 검증한다. `MainMenuFlowTests`는 Title 입장, 네 방의 기능, 직접 진입, 사전 준비/해제와 중복 입력 소유권을 검증한다. Bootstrap의 view 없는 API 진입은 `Compatibility`로 식별한다.
 
 `Assets/Scenes/SampleScene.unity`와 로컬 무시 폴더의 `Assets/CodexIdeRepairTemp/MainMenuTestHost.unity`는 제품 빌드 및 현행 테스트의 진입 대상이 아니다. `Logs` 아래의 과거 씬·프로젝트 복사본과 기존 EXE는 현재 실행 증거로 사용하지 않는다. 삭제하거나 최신 제품 씬 위에 복사하지 않는다.
 

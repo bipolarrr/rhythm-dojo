@@ -11,7 +11,7 @@ namespace RhythmDojo.EditorTools
         private const string Root = "Assets/Game/Art/PracticeSelection/";
         private static readonly Color Paper = new Color(1f, .91f, .72f);
 
-        public static void Build(SongSelectionView view, GameObject browser)
+        public static void Build(SongSelectionView view)
         {
             var stage = Group("Wooden Dummy Selection", view.transform);
             stage.gameObject.AddComponent<DojoCompositionFit>().Fit();
@@ -20,7 +20,6 @@ namespace RhythmDojo.EditorTools
             scope.useSmoothRendering = true;
             var practice = stage.gameObject.AddComponent<PracticeSelectionView>();
             view.practice = practice;
-            practice.browser = browser;
             practice.room = Group("Practice Room Camera", stage);
             var backdrop = Art("Practice Hall", practice.room, DojoRenewalLayoutBuilder.Load("PracticeHall"),
                 Vector2.zero, new Vector2(1280, 720));
@@ -32,6 +31,7 @@ namespace RhythmDojo.EditorTools
             var interfaceRoot = Group("Ink and Hanging Song Labels", stage);
             practice.interfaceGroup = interfaceRoot.gameObject.AddComponent<CanvasGroup>();
             var heading = Label("Practice Heading", interfaceRoot, "자유 연습", new Vector2(-410, 276), new Vector2(360, 65), 58);
+            practice.heading = heading;
             heading.font = AssetDatabase.LoadAssetAtPath<Font>("Assets/Game/Fonts/Dokdo-Regular.ttf");
             var headingScope = heading.gameObject.AddComponent<UiFontScope>();
             headingScope.font = heading.font;
@@ -47,13 +47,26 @@ namespace RhythmDojo.EditorTools
             practice.artist = Label("Selected Artist and Tempo", practice.information, "", new Vector2(0, -33), new Vector2(350, 86), 19);
             practice.chart = Label("Selected Chart", interfaceRoot, "", new Vector2(-415, -106), new Vector2(360, 50), 19);
 
-            practice.difficulties = new Button[view.difficultyButtons.Length];
+            var profiles = SceneResources.Require<RhythmDojo.Gameplay.GameSettings>(TestContentBuilder.SettingsPath).difficulties;
+            practice.difficulties = new Button[profiles.Length];
             for (int i = 0; i < practice.difficulties.Length; i++)
             {
                 practice.difficulties[i] = Button("Practice Difficulty " + i, interfaceRoot,
-                    view.difficultyButtons[i].GetComponentInChildren<Text>(true).text,
+                    profiles[i].DisplayName,
                     new Vector2(-533 + i * 118, -162), new Vector2(112, 45), 17);
             }
+            practice.record = Label("Best Record", interfaceRoot, "기록 없음",
+                new Vector2(435, 157), new Vector2(310, 95), 23);
+            practice.comboRecord = Label("Clear Record", interfaceRoot, "",
+                new Vector2(435, 45), new Vector2(310, 115), 19);
+            practice.record.resizeTextForBestFit = true;
+            practice.record.resizeTextMinSize = 18;
+            practice.record.resizeTextMaxSize = 23;
+            practice.comboRecord.resizeTextForBestFit = true;
+            practice.comboRecord.resizeTextMinSize = 18;
+            practice.comboRecord.resizeTextMaxSize = 19;
+            practice.counter = Label("Song Count", interfaceRoot, "",
+                new Vector2(-415, -213), new Vector2(360, 35), 17);
             practice.previous = Button("Strike Left", interfaceRoot, "◀\n이전 곡", new Vector2(-205, 118), new Vector2(115, 85), 22);
             practice.next = Button("Strike Right", interfaceRoot, "▶\n다음 곡", new Vector2(205, 118), new Vector2(115, 85), 22);
             practice.play = Button("Begin Practice", interfaceRoot, "수련 시작", new Vector2(0, -260), new Vector2(270, 68), 27);
@@ -61,7 +74,7 @@ namespace RhythmDojo.EditorTools
             practice.settings = Button("Practice Settings", interfaceRoot, "설정", new Vector2(548, 324), new Vector2(105, 40), 17);
             practice.library = Button("Browse Song Library", interfaceRoot, "곡 목록 · 정렬 / 속도", new Vector2(430, -155), new Vector2(270, 46), 18);
             practice.preview = Button("Preview Selected Song", interfaceRoot, "미리듣기", new Vector2(430, -103), new Vector2(270, 46), 18);
-            practice.status = Label("Practice Playback Status", interfaceRoot, "", new Vector2(0, -202), new Vector2(460, 50), 18);
+            practice.status = Label("Practice Playback Status", interfaceRoot, "", new Vector2(0, -196), new Vector2(600, 56), 18);
             practice.status.alignment = TextAnchor.MiddleCenter;
 
             var hint = Label("Strike Instructions", interfaceRoot, "← →  곡 선택 / 길게 눌러 연타   ·   ↑ ↓  난이도   ·   Enter  시작   ·   Esc  도장으로", new Vector2(190, -328), new Vector2(820, 36), 16);
@@ -130,7 +143,6 @@ namespace RhythmDojo.EditorTools
             practice.effects.spatialBlend = 0;
             practice.contact = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Game/Audio/DojoKnock.wav");
             practice.ResetPresentation();
-            stage.gameObject.SetActive(false);
         }
 
         public static WoodenDummyRig BuildRig(Transform parent)

@@ -84,7 +84,6 @@ namespace RhythmDojo.Core
                 {
                     var flow = AppFlowController.Create(settings);
                     selectionFlow = flow;
-                    flow.PracticeSelection = view.modeSelection.SelectedIndex == 1;
                     var rules = flow.Rules.Snapshot;
                     rules.Mode = RhythmDojo.Gameplay.PlayMode.Gauge;
                     if (view.modeSelection.SelectedIndex == 2)

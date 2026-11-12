@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using RhythmDojo.Services;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,49 +8,25 @@ namespace RhythmDojo.UI
 {
     public sealed class SongSelectionView : MonoBehaviour
     {
-        public Dropdown difficultyList,
-            scrollModeList,
-            multiplierList,
-            sortList;
-        public Text details,
-            songTitle,
-            artistBpm,
-            record,
-            timingLabel,
-            emptyMessage;
-        public bool pixelTheme;
         public PracticeSelectionView practice;
-        public Text comboRecord;
+        public CanvasGroup inputGroup;
+        public GameObject libraryPanel;
+        public Button closeLibrary;
+        public CanvasGroup libraryGroup;
+        public Dropdown scrollModeList, multiplierList, sortList;
+        public Text details, songTitle, artistBpm, record, comboRecord, timingLabel, emptyMessage;
         public RectTransform[] entrancePanels;
         public Image album;
         public Button previewButton;
         public AudioSource previewSource;
         public Sprite fallbackCover;
-        public Sprite legacyFallbackCover;
-        public Slider timingOffset;
-        public Slider speedSlider;
+        public Slider timingOffset, speedSlider;
         public Text speedLabel;
-        public Button play,
-            settingsButton,
-            back,
-            allTab,
-            favoritesTab,
-            confirmBack,
-            cancelBack;
-        public Button modeButton,
-            normalModeButton,
-            hardModeButton,
-            cancelMode;
+        public Button play, settingsButton, back, allTab, favoritesTab;
+        public Button modeButton, normalModeButton, hardModeButton, cancelMode;
         public Text modeLabel;
-        public Text playCaption;
-        public Text playStatusLabel;
-        public Text playErrorLabel;
-        public GameObject playErrorPanel;
-        public MainMenuIcon playArrow;
         public GameObject modePopup;
         public Button[] difficultyButtons;
-        public GameObject[] difficultyIndicators;
-        public GameObject backPopup;
         public RectTransform rowContent;
         public SongRowView rowTemplate;
         public ScrollRect scroll;
@@ -57,193 +34,43 @@ namespace RhythmDojo.UI
 
         public void Validate()
         {
-            if (!practice)
+            if (!practice || !libraryPanel || !libraryGroup)
             {
-                throw new InvalidOperationException("Practice selection composition missing. Rebuild Song Selection.");
+                throw new InvalidOperationException("Song selection composition missing. Rebuild Song Selection.");
             }
-
             practice.Validate();
-            if ((!difficultyList || !scrollModeList) || !multiplierList)
+            UnityEngine.Object[] required = { inputGroup, closeLibrary, scrollModeList, multiplierList, sortList,
+                details, songTitle, artistBpm, record, comboRecord, timingLabel, emptyMessage,
+                album, previewButton, previewSource, fallbackCover, timingOffset, speedSlider, speedLabel,
+                play, settingsButton, back, allTab, favoritesTab, modeButton, normalModeButton,
+                hardModeButton, cancelMode, modeLabel, modePopup, rowContent, rowTemplate, scroll };
+            if (Array.Exists(required, item => !item))
             {
                 throw new InvalidOperationException("Song selection view references missing.");
             }
-
-            if ((!sortList || !details) || !play)
+            if (difficultyButtons == null || difficultyButtons.Length == 0)
             {
-                throw new InvalidOperationException("Song selection view references missing.");
+                throw new InvalidOperationException("Song selection difficulties missing.");
             }
-
-            if (!playCaption || !playStatusLabel)
+            if (Array.Exists(difficultyButtons, button => !button))
             {
-                throw new InvalidOperationException("Song selection playback labels missing.");
-            }
-
-            if (!playErrorPanel || !playErrorLabel)
-            {
-                throw new InvalidOperationException("Song selection playback error panel missing.");
-            }
-
-            if ((!settingsButton || !album) || !songTitle)
-            {
-                throw new InvalidOperationException("Song selection view references missing.");
-            }
-
-            if (!previewButton || !previewSource)
-            {
-                throw new InvalidOperationException("Song selection preview references missing.");
-            }
-
-            if ((!artistBpm || !record) || !timingOffset)
-            {
-                throw new InvalidOperationException("Song selection view references missing.");
-            }
-
-            if (pixelTheme && !comboRecord)
-            {
-                throw new InvalidOperationException("Song selection combo record reference missing.");
-            }
-
-            if ((!timingLabel || !speedSlider) || !speedLabel)
-            {
-                throw new InvalidOperationException("Song selection view references missing.");
-            }
-
-            if ((!rowContent || !rowTemplate) || !back)
-            {
-                throw new InvalidOperationException("Song selection view references missing.");
-            }
-
-            if ((!allTab || !favoritesTab) || !backPopup)
-            {
-                throw new InvalidOperationException("Song selection view references missing.");
-            }
-
-            if ((!confirmBack || !cancelBack) || !emptyMessage)
-            {
-                throw new InvalidOperationException("Song selection view references missing.");
-            }
-
-            if ((!scroll || !modeButton) || !normalModeButton)
-            {
-                throw new InvalidOperationException("Song selection view references missing.");
-            }
-
-            if ((!hardModeButton || !cancelMode) || !modeLabel)
-            {
-                throw new InvalidOperationException("Song selection view references missing.");
-            }
-
-            if ((!modePopup || difficultyButtons == null) || difficultyButtons.Length == 0)
-            {
-                throw new InvalidOperationException("Song selection view references missing.");
-            }
-
-            if (Array.Exists(difficultyButtons, button => !button) || difficultyIndicators == null)
-            {
-                throw new InvalidOperationException("Song selection view references missing.");
-            }
-
-            if (difficultyIndicators.Length != difficultyButtons.Length)
-            {
-                throw new InvalidOperationException("Song selection view references missing.");
-            }
-
-            if (Array.Exists(difficultyIndicators, indicator => !indicator))
-            {
-                throw new InvalidOperationException("Song selection view references missing.");
+                throw new InvalidOperationException("Song selection difficulty references missing.");
             }
         }
 
-        public static Color DifficultyColor(int index)
+        public void Render(SongSelectionPresentation presentation)
         {
-            if (index == 0)
-            {
-                return new Color(.86f, .87f, .80f);
-            }
-            else if (index == 1)
-            {
-                return new Color(.95f, .29f, .28f);
-            }
-            else
-            {
-                return new Color(.46f, .78f, .76f);
-            }
-        }
-
-        public void RefreshDifficultyButtons()
-        {
-            for (int i = 0; i < difficultyButtons.Length; i++)
-            {
-                var button = difficultyButtons[i];
-                bool selected = i == difficultyList.value;
-                var color = DifficultyColor(i);
-
-                if (selected)
-                {
-                    button.GetComponent<Image>().color = Color.Lerp(
-                        new Color(.04f, .055f, .065f),
-                        color,
-                        .55f
-                    );
-                }
-                else
-                {
-                    button.GetComponent<Image>().color = new Color(.075f, .09f, .105f);
-                }
-
-                button.GetComponent<Outline>().enabled = selected;
-
-                if (i < difficultyList.options.Count)
-                {
-                    button.GetComponentInChildren<Text>().text = difficultyList.options[i].text;
-                }
-                else
-                {
-                    button.GetComponentInChildren<Text>().text = "";
-                }
-
-                difficultyIndicators[i].SetActive(selected);
-                if (pixelTheme)
-                {
-                    var frame = button.GetComponentInChildren<PixelDojoFrameGraphic>();
-                    button.GetComponent<Image>().color = Color.clear;
-                    if (selected)
-                    {
-                        frame.color = new Color(.60f, .20f, .13f);
-                        frame.borderColor = new Color(.88f, .37f, .15f);
-                        button.GetComponentInChildren<Text>().color = new Color(.96f, .79f, .56f);
-                    }
-                    else
-                    {
-                        frame.color = new Color(.84f, .69f, .47f);
-                        frame.borderColor = new Color(.29f, .13f, .09f);
-                        button.GetComponentInChildren<Text>().color = new Color(.29f, .15f, .09f);
-                    }
-                    var caption = button.GetComponentInChildren<Text>();
-                    switch (caption.text)
-                    {
-                        case "Easy":
-                            caption.text = "쉬움";
-                            break;
-                        case "Standard":
-                        case "Normal":
-                            caption.text = "보통";
-                            break;
-                        case "Hard":
-                            caption.text = "어려움";
-                            break;
-                    }
-                    frame.SetVerticesDirty();
-                }
-            }
+            practice.Render(presentation);
+            emptyMessage.text = presentation.Message;
+            emptyMessage.gameObject.SetActive(presentation.Count == 0);
         }
 
         public void ClearRows()
         {
+            // Only row count is dynamic. This view owns every instantiated row.
             foreach (var row in Rows)
             {
                 row.gameObject.SetActive(false);
-
                 if (UnityEngine.Application.isPlaying)
                 {
                     Destroy(row.gameObject);
@@ -253,50 +80,7 @@ namespace RhythmDojo.UI
                     DestroyImmediate(row.gameObject);
                 }
             }
-
             Rows.Clear();
-        }
-
-        public void SetInteractable(bool value)
-        {
-            difficultyList.interactable =
-                scrollModeList.interactable =
-                multiplierList.interactable =
-                sortList.interactable =
-                speedSlider.interactable =
-                timingOffset.interactable =
-                previewButton.interactable =
-                settingsButton.interactable =
-                modeButton.interactable =
-                back.interactable =
-                allTab.interactable =
-                favoritesTab.interactable =
-                    value;
-
-            foreach (var button in difficultyButtons)
-            {
-                button.interactable = value;
-            }
-
-            foreach (var row in Rows)
-            {
-                row.select.interactable = row.favorite.interactable = value;
-            }
-        }
-
-        public void SetPlaybackStatus(string caption = null, string message = null)
-        {
-            bool hasCaption = !string.IsNullOrEmpty(caption);
-            playCaption.gameObject.SetActive(!hasCaption);
-            if (playArrow)
-            {
-                playArrow.gameObject.SetActive(!hasCaption);
-            }
-
-            playStatusLabel.text = caption;
-            playStatusLabel.gameObject.SetActive(hasCaption);
-            playErrorLabel.text = message;
-            playErrorPanel.SetActive(!string.IsNullOrEmpty(message));
         }
     }
 }

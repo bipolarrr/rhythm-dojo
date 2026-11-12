@@ -1,5 +1,7 @@
 using System.Collections;
+using RhythmDojo.Application;
 using RhythmDojo.Core;
+using RhythmDojo.Content;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -9,89 +11,51 @@ namespace RhythmDojo.UI
 {
     public sealed partial class SongSelectionScreen
     {
-        private bool practiceSelected, practicePlayQueued;
         private int practiceHeldDirection;
         private double practiceRepeatAt;
-        private bool PracticeActive => practiceSelected && view.practice.gameObject.activeSelf;
 
         public void PrepareEntryPresentation()
         {
-            ConfigurePractice();
+            if (lifetime == null)
+            {
+                return;
+            }
+            state = SongSelectionState.Main;
+            practiceHeldDirection = 0;
+            view.practice.ResetPresentation();
+            // Preparation can precede the user's mode choice. Read services again at activation.
+            RefreshLibrary(true);
         }
 
         private void BindPractice()
         {
-            if (!view.practice)
-            {
-                return;
-            }
             var practice = view.practice;
             practice.Turned += TurnPracticeSong;
             practice.Settled += PracticeSettled;
             practice.previous.onClick.AddListener(StrikePrevious);
             practice.next.onClick.AddListener(StrikeNext);
-            practice.play.onClick.AddListener(Play);
-            practice.back.onClick.AddListener(ShowBack);
             practice.library.onClick.AddListener(OpenPracticeLibrary);
-            practice.preview.onClick.AddListener(PreviewPractice);
-            practice.settings.onClick.AddListener(PracticeSettings);
-            for (int i = 0; i < difficultyActions.Length; i++)
-            {
-                practice.difficulties[i].onClick.AddListener(difficultyActions[i]);
-            }
-        }
-
-        private void ConfigurePractice()
-        {
-            if (!view.practice)
-            {
-                return;
-            }
-            bool selected = false;
-            if (navigation is AppFlowController flow)
-            {
-                selected = flow.PracticeSelection;
-            }
-            if (practiceSelected == selected)
-            {
-                return;
-            }
-            practiceSelected = selected;
-            practicePlayQueued = false;
-            view.practice.gameObject.SetActive(selected);
-            view.practice.browser.SetActive(!selected);
-            if (selected)
-            {
-                view.practice.ResetPresentation();
-                RefreshPracticeDetails();
-            }
         }
 
         private void UpdatePracticeInput()
         {
-            if (Busy || ModalOpen || view.practice.IsLeaving)
-            {
-                practiceHeldDirection = 0;
-                view.practice.StopBarrage();
-                return;
-            }
             var keyboard = Keyboard.current;
             var gamepad = Gamepad.current;
-            bool cancel = keyboard?.escapeKey.wasPressedThisFrame == true;
-            cancel |= gamepad?.buttonEast.wasPressedThisFrame == true;
-            if (cancel)
-            {
-                ShowBack();
-                return;
-            }
             bool confirm = keyboard?.enterKey.wasPressedThisFrame == true;
             confirm |= gamepad?.buttonSouth.wasPressedThisFrame == true;
             if (confirm)
             {
-                Play();
+                // The focused utility button owns Submit; normal selection and striking own Start.
+                var focused = EventSystem.current?.currentSelectedGameObject;
+                bool utility = focused == view.settingsButton.gameObject || focused == view.practice.library.gameObject;
+                utility |= focused == view.previewButton.gameObject || focused == view.back.gameObject;
+                if (!utility)
+                {
+                    Play();
+                }
                 return;
             }
-            if (practicePlayQueued)
+            if (state == SongSelectionState.StartPending)
             {
                 view.practice.StopBarrage();
                 return;
@@ -119,13 +83,12 @@ namespace RhythmDojo.UI
             }
             else if (direction != 0 && now >= practiceRepeatAt)
             {
-                if (view.Rows.Count > 0)
+                if (list.Entries.Count > 0)
                 {
                     view.practice.BeginBarrage(direction);
                 }
             }
             practiceHeldDirection = direction;
-
             bool up = keyboard?.upArrowKey.wasPressedThisFrame == true || gamepad?.dpad.up.wasPressedThisFrame == true;
             bool down = keyboard?.downArrowKey.wasPressedThisFrame == true || gamepad?.dpad.down.wasPressedThisFrame == true;
             if (up || down)
@@ -135,10 +98,10 @@ namespace RhythmDojo.UI
                 {
                     step = -1;
                 }
-                int index = view.difficultyList.value + step;
-                while (index >= 0 && index < view.difficultyButtons.Length)
+                int index = presentation.SelectedDifficulty + step;
+                while (index >= 0 && index < difficultyOptions.Length)
                 {
-                    if (view.difficultyButtons[index].interactable)
+                    if (presentation.Difficulties[index])
                     {
                         SelectDifficulty(index);
                         break;
@@ -149,16 +112,11 @@ namespace RhythmDojo.UI
         }
 
         private void StrikePrevious() => StrikePractice(-1);
-
         private void StrikeNext() => StrikePractice(1);
 
         private void StrikePractice(int direction)
         {
-            if (Busy || ModalOpen || practicePlayQueued)
-            {
-                return;
-            }
-            if (view.Rows.Count == 0 || view.practice.IsLeaving)
+            if (Busy || state != SongSelectionState.Main || list.Entries.Count == 0)
             {
                 return;
             }
@@ -168,128 +126,121 @@ namespace RhythmDojo.UI
 
         private void TurnPracticeSong(int direction)
         {
-            if (view.Rows.Count == 0)
+            if (state != SongSelectionState.Main && state != SongSelectionState.StartPending)
             {
                 return;
             }
-            int index = -1;
-            for (int i = 0; i < view.Rows.Count; i++)
+            string songId = list.Move(selection.SelectedSongId, direction);
+            if (songId != null)
             {
-                if (view.Rows[i].Entry.Id == selection.SelectedSongId)
-                {
-                    index = i;
-                    break;
-                }
+                SelectSong(songId);
             }
-            index = (index + direction + view.Rows.Count) % view.Rows.Count;
-            SelectSong(view.Rows[index].Entry.Id);
         }
 
         private void PracticeSettled()
         {
-            RefreshPracticeDetails();
-            if (practicePlayQueued)
+            if (state == SongSelectionState.StartPending)
             {
-                practicePlayQueued = false;
+                state = SongSelectionState.Main;
                 Play();
-            }
-        }
-
-        private void RefreshPracticeDetails()
-        {
-            if (!view.practice || !practiceSelected)
-            {
-                return;
-            }
-            var practice = view.practice;
-            string details = view.details.text;
-            int lineEnd = details.IndexOf('\n');
-            if (lineEnd >= 0)
-            {
-                details = details.Substring(0, lineEnd);
-            }
-            string songArtist = view.artistBpm.text;
-            int artistLineEnd = songArtist.IndexOf('\n');
-            if (artistLineEnd >= 0)
-            {
-                songArtist = songArtist.Substring(0, artistLineEnd);
-            }
-            practice.rig.SetSong(view.album.sprite, view.songTitle.text, songArtist);
-            int index = -1;
-            for (int i = 0; i < view.Rows.Count; i++)
-            {
-                if (view.Rows[i].Entry.Id == selection.SelectedSongId)
-                {
-                    index = i;
-                    break;
-                }
-            }
-            practice.SetSongInformation(view.songTitle.text, view.artistBpm.text, details,
-                view.record.text, $"수련곡  {index + 1:00} / {view.Rows.Count:00}");
-            for (int i = 0; i < practice.difficulties.Length; i++)
-            {
-                var button = practice.difficulties[i];
-                button.GetComponentInChildren<Text>().text = view.difficultyList.options[i].text;
-                Color color = new Color(1f, .91f, .72f);
-                if (view.difficultyList.value == i)
-                {
-                    color = new Color(1f, .55f, .25f);
-                }
-                button.GetComponentInChildren<Text>().color = color;
             }
             RefreshPracticeFeedback();
         }
 
         private void RefreshPracticeFeedback()
         {
-            if (!PracticeActive)
+            if (presentation == null)
             {
                 return;
             }
             var practice = view.practice;
-            bool available = !Busy && !ModalOpen && !practice.IsLeaving;
-            practice.play.interactable = available && view.play.interactable;
-            practice.previous.interactable = practice.next.interactable = available && view.Rows.Count > 0;
-            practice.back.interactable = available;
+            bool available = !Busy && state == SongSelectionState.Main;
             bool settled = available && !practice.IsStriking;
+            practice.interfaceGroup.interactable = available;
+            practice.interfaceGroup.blocksRaycasts = available;
+            practice.play.interactable = available && CanPlay;
+            practice.previous.interactable = practice.next.interactable = available && list.Entries.Count > 0;
+            practice.back.interactable = available;
             practice.library.interactable = practice.settings.interactable = settled;
-            practice.preview.interactable = settled && view.previewButton.interactable;
+            practice.preview.interactable = settled && CanPlay && selection.Library is ISongChartLoader;
             for (int i = 0; i < practice.difficulties.Length; i++)
             {
-                practice.difficulties[i].interactable = settled && view.difficultyButtons[i].interactable;
+                practice.difficulties[i].interactable = settled && presentation.Difficulties[i];
             }
-            practice.status.text = "";
-            if (view.playErrorPanel.activeSelf)
+            bool panel = state == SongSelectionState.Library || state == SongSelectionState.ModePopup;
+            view.libraryPanel.SetActive(panel);
+            view.libraryGroup.interactable = !Busy && state == SongSelectionState.Library;
+            view.libraryGroup.blocksRaycasts = state == SongSelectionState.Library;
+            view.modePopup.SetActive(ModalOpen);
+            view.allTab.GetComponent<Image>().color = new Color(.35f, .25f, .18f);
+            view.favoritesTab.GetComponent<Image>().color = new Color(.15f, .12f, .10f);
+            if (list.FavoritesOnly)
             {
-                practice.status.text = view.playErrorLabel.text;
+                view.allTab.GetComponent<Image>().color = new Color(.15f, .12f, .10f);
+                view.favoritesTab.GetComponent<Image>().color = new Color(.35f, .25f, .18f);
             }
-            else if (loading)
+            string message = presentation.Message;
+            if (previewFailure != null)
             {
-                practice.status.text = view.playStatusLabel.text;
+                message = previewFailure;
             }
-            else if (practicePlayQueued)
+            if (playbackFailure.HasValue)
             {
-                practice.status.text = "마지막 타격 후 수련 시작";
+                message = playbackFailure.Value.Message;
             }
-            practice.preview.GetComponentInChildren<Text>().text =
-                view.previewButton.GetComponentInChildren<Text>(true).text;
+            if (state == SongSelectionState.Loading)
+            {
+                int frame = (int)((Time.unscaledTimeAsDouble - loadingStartedAt) / .35) % LoadingCaptions.Length;
+                message = LoadingCaptions[frame];
+            }
+            else if (state == SongSelectionState.StartPending)
+            {
+                message = "마지막 타격 후 수련 시작";
+            }
+            practice.status.text = message;
+            practice.preview.GetComponentInChildren<Text>().text = previewCaption;
+            string caption = "수련 시작";
+            if (HardModeSelected)
+            {
+                caption = "검정 시작";
+            }
+            if (playbackFailure.HasValue && playbackFailure.Value.CanRetry)
+            {
+                caption = "다시 시도";
+            }
+            practice.play.GetComponentInChildren<Text>().text = caption;
         }
 
         private void OpenPracticeLibrary()
         {
-            if (Busy || view.practice.IsStriking || view.practice.IsLeaving)
+            if (Busy || state != SongSelectionState.Main || view.practice.IsStriking)
             {
                 return;
             }
             practiceHeldDirection = 0;
-            view.practice.gameObject.SetActive(false);
-            view.practice.browser.SetActive(true);
+            view.practice.StopBarrage();
+            state = SongSelectionState.Library;
+            RefreshPracticeFeedback();
             FocusSelected();
+        }
+
+        private void ClosePracticeLibrary()
+        {
+            if (Busy || state != SongSelectionState.Library)
+            {
+                return;
+            }
+            state = SongSelectionState.Main;
+            RefreshPracticeFeedback();
+            if (EventSystem.current)
+            {
+                EventSystem.current.SetSelectedGameObject(view.practice.library.gameObject);
+            }
         }
 
         private void PreviewPractice()
         {
-            if (!view.practice.IsStriking)
+            if (state == SongSelectionState.Main && !view.practice.IsStriking)
             {
                 TogglePreview();
             }
@@ -305,22 +256,19 @@ namespace RhythmDojo.UI
 
         private void ReturnFromPractice()
         {
-            if (Busy || ModalOpen || view.practice.IsLeaving)
+            if (Busy || ModalOpen)
             {
+                return;
+            }
+            if (state == SongSelectionState.Library)
+            {
+                ClosePracticeLibrary();
                 return;
             }
             StopPreview();
-            practicePlayQueued = false;
             practiceHeldDirection = 0;
-            if (!PracticeActive)
-            {
-                view.practice.browser.SetActive(false);
-                view.practice.gameObject.SetActive(true);
-                view.practice.ResetPresentation();
-                RefreshPracticeDetails();
-                FocusSelected();
-                return;
-            }
+            state = SongSelectionState.Leaving;
+            RefreshPracticeFeedback();
             StartCoroutine(LeavePractice());
         }
 
@@ -344,31 +292,17 @@ namespace RhythmDojo.UI
 
         private void UnbindPractice()
         {
-            practicePlayQueued = practiceSelected = false;
             practiceHeldDirection = 0;
             if (!view || !view.practice)
             {
                 return;
             }
             var practice = view.practice;
-            practice.gameObject.SetActive(false);
-            practice.browser.SetActive(true);
             practice.Turned -= TurnPracticeSong;
             practice.Settled -= PracticeSettled;
             practice.previous.onClick.RemoveListener(StrikePrevious);
             practice.next.onClick.RemoveListener(StrikeNext);
-            practice.play.onClick.RemoveListener(Play);
-            practice.back.onClick.RemoveListener(ShowBack);
             practice.library.onClick.RemoveListener(OpenPracticeLibrary);
-            practice.preview.onClick.RemoveListener(PreviewPractice);
-            practice.settings.onClick.RemoveListener(PracticeSettings);
-            if (difficultyActions != null)
-            {
-                for (int i = 0; i < difficultyActions.Length; i++)
-                {
-                    practice.difficulties[i].onClick.RemoveListener(difficultyActions[i]);
-                }
-            }
         }
     }
 }

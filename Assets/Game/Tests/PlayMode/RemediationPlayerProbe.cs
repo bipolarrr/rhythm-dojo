@@ -219,9 +219,12 @@ namespace RhythmDojo.Tests
         private IEnumerator SelectWave()
         {
             yield return OpenSelectionLibrary();
-            Object.FindFirstObjectByType<SongSelectionScreen>().SelectSong(SongId);
-            yield return null;
+            var view = Object.FindFirstObjectByType<SongSelectionView>();
+            var row = view.Rows.Single(item => item.Entry.Id == SongId);
+            EventSystem.current.SetSelectedGameObject(row.select.gameObject);
+            yield return Click(row.select);
             Require(flow.Selection.SelectedSongId == SongId, "Generated external WAV selected.");
+            yield return Click(Object.FindFirstObjectByType<SongSelectionView>().closeLibrary);
         }
 
         private IEnumerator ExercisePlayback()
@@ -425,7 +428,7 @@ namespace RhythmDojo.Tests
             CheckSelectionCleanup();
             var view = Object.FindFirstObjectByType<SongSelectionView>();
             Require(view.practice.gameObject.activeInHierarchy, "Free practice opens the authored wooden dummy.");
-            Require(!view.practice.browser.activeSelf, "The library opens only when requested.");
+            Require(!view.libraryPanel.activeSelf, "The library opens only when requested.");
             yield return Capture("practice-selection");
             yield return OpenSelectionLibrary();
             Step("selection-ready", "Title unloaded, door complete, one input system and listener.");
@@ -434,11 +437,11 @@ namespace RhythmDojo.Tests
         private IEnumerator OpenSelectionLibrary()
         {
             var view = Object.FindFirstObjectByType<SongSelectionView>();
-            if (view.practice.gameObject.activeInHierarchy)
+            if (!view.libraryPanel.activeSelf)
             {
                 yield return Click(view.practice.library);
             }
-            Require(view.practice.browser.activeInHierarchy, "The shared song library is visible.");
+            Require(view.libraryPanel.activeInHierarchy, "The shared song library is visible.");
         }
 
         private IEnumerator VerifyTrainingModes()
@@ -461,7 +464,7 @@ namespace RhythmDojo.Tests
             yield return Wait(() => !flow.Transitioning, "Challenge activation cleanup");
             Require(flow.Rules.Snapshot.Mode == RhythmDojo.Gameplay.PlayMode.Challenge,
                 "Challenge selection preserves the requested rules.");
-            Require(!flow.PracticeSelection, "Challenge uses the shared library.");
+            Require(Object.FindFirstObjectByType<SongSelectionView>().practice.gameObject.activeInHierarchy, "Challenge uses the wooden dummy selection.");
             CheckSelectionCleanup();
             yield return Capture("challenge-selection");
             yield return ReturnToTitle();
@@ -471,23 +474,15 @@ namespace RhythmDojo.Tests
         private IEnumerator ReturnToTitle()
         {
             var view = Object.FindFirstObjectByType<SongSelectionView>();
-            if (flow.PracticeSelection)
+            if (view.libraryPanel.activeSelf)
             {
-                if (view.practice.browser.activeSelf)
-                {
-                    yield return Click(view.back);
-                }
-                yield return Click(view.practice.back);
-                yield return Wait(() => SceneManager.GetActiveScene().path == MainMenuActions.ModeSelectionScenePath,
-                    "Practice return to modes");
-                yield return Wait(() => !flow.Transitioning, "Mode return cleanup");
-                yield return Press(Key.Escape);
+                yield return Click(view.closeLibrary);
             }
-            else
-            {
-                yield return Click(view.back);
-                yield return Click(view.confirmBack);
-            }
+            yield return Click(view.back);
+            yield return Wait(() => SceneManager.GetActiveScene().path == MainMenuActions.ModeSelectionScenePath,
+                "Selection return to modes");
+            yield return Wait(() => !flow.Transitioning, "Mode return cleanup");
+            yield return Press(Key.Escape);
             yield return Wait(() => SceneManager.GetActiveScene().path == TitlePath, "Selection Back to Title");
             yield return OpenTitleMenu();
             yield return Click(MainMenuCompositionRoot.InScene(SceneManager.GetActiveScene()).View.settings);

@@ -631,11 +631,11 @@ namespace RhythmDojo.Tests
                 Assert.That(UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>().enabled, Is.True);
                 var selectionView = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
                 Assert.That(selectionView.practice.gameObject.activeInHierarchy, Is.True);
-                Assert.That(selectionView.practice.browser.activeSelf, Is.False);
+                Assert.That(selectionView.libraryPanel.activeSelf, Is.False);
                 Assert.That(selectionView.practice.rig.jacket.sprite, Is.SameAs(selectionView.album.sprite));
                 var backdrop = selectionView.practice.rig.jacket;
                 Assert.That(backdrop, Is.Not.Null);
-                Assert.That(selectionView.entrancePanels, Has.Length.EqualTo(6));
+                Assert.That(selectionView.entrancePanels, Is.EqualTo(new[] { (RectTransform)selectionView.practice.interfaceGroup.transform }));
                 Canvas.ForceUpdateCanvases();
                 var selectionCorners = new Vector3[4];
                 backdrop.rectTransform.GetWorldCorners(selectionCorners);
@@ -688,9 +688,8 @@ namespace RhythmDojo.Tests
                 }
 
                 var selectionView = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
-                Assert.That(flow.PracticeSelection, Is.True, path);
                 Assert.That(selectionView.practice.gameObject.activeInHierarchy, Is.True, path);
-                Assert.That(selectionView.practice.browser.activeSelf, Is.False, path);
+                Assert.That(selectionView.libraryPanel.activeSelf, Is.False, path);
                 Assert.That(SceneManager.sceneCount, Is.EqualTo(1));
                 string song = flow.Selection.SelectedSongId;
                 Assert.That(selectionView.Rows.Count, Is.GreaterThan(1), path);
@@ -1012,6 +1011,15 @@ namespace RhythmDojo.Tests
         public IEnumerator ChallengeStageEntersExistingChallengeSelection()
         {
             yield return OpenMenu();
+            var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
+            double preparedDeadline = Time.realtimeSinceStartupAsDouble + 20;
+            while (!flow.IsSelectionPrepared)
+            {
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(preparedDeadline));
+                yield return null;
+            }
+            int preparedHandle = SceneManager.GetSceneByPath(AppFlowController.SelectionPath).handle;
+
             yield return Click(view.modeSelection.next);
             double deadline = Time.realtimeSinceStartupAsDouble + 3;
             while (view.modeSelection.IsMoving)
@@ -1027,10 +1035,12 @@ namespace RhythmDojo.Tests
                 yield return null;
             }
             yield return null;
-            var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
             Assert.That(flow.Rules.Snapshot.Mode, Is.EqualTo(RhythmDojo.Gameplay.PlayMode.Challenge));
-            Assert.That(UnityEngine.Object.FindFirstObjectByType<SongSelectionView>().modeLabel.text,
-                Does.StartWith("Challenge"));
+            var selectionView = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
+            Assert.That(selectionView.modeLabel.text, Does.Contain("Challenge"));
+            Assert.That(selectionView.practice.heading.text, Is.EqualTo("실력 검정"));
+            Assert.That(selectionView.libraryPanel.activeSelf, Is.False);
+            Assert.That(SceneManager.GetActiveScene().handle, Is.EqualTo(preparedHandle));
         }
 
         [UnityTest]

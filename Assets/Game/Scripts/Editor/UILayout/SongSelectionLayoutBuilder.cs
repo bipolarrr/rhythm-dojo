@@ -10,279 +10,74 @@ namespace RhythmDojo.EditorTools
     public static class SongSelectionLayoutBuilder
     {
         public const string BrushFontPath = MainMenuLayoutBuilder.FontPath;
-        private static readonly Color Background = new Color(.025f, .035f, .045f);
-        private static readonly Color PanelColor = new Color(.055f, .068f, .08f, .98f);
-        private static readonly Color Line = new Color(.46f, .55f, .57f, .24f);
+        private static readonly Color PanelColor = new Color(.10f, .085f, .07f, .98f);
         private static Font font;
 
         public static SongSelectionView Build()
         {
             ConfigureBrushFont();
             font = AssetDatabase.LoadAssetAtPath<Font>(BrushFontPath);
-
             if (!font)
             {
                 throw new InvalidOperationException("Korean font missing.");
             }
-
             var canvas = UiElements.Canvas("Song Selection");
             canvas.gameObject.AddComponent<UiFontScope>().font = font;
             var scaler = canvas.GetComponent<CanvasScaler>();
             scaler.referenceResolution = new Vector2(1920, 1080);
             scaler.matchWidthOrHeight = .5f;
-
             var view = canvas.gameObject.AddComponent<SongSelectionView>();
-            var surface = GradientPanel(
-                "Background",
-                canvas.transform,
-                new Color(.025f, .035f, .045f),
-                new Color(.065f, .045f, .055f),
-                0,
-                0,
-                1,
-                1
-            );
-            var glow = GradientPanel(
-                "Ambient Light",
-                surface,
-                new Color(.94f, .22f, .24f, .035f),
-                new Color(.15f, .37f, .35f, 0),
-                .13f,
-                .075f,
-                .93f,
-                .9f
-            );
-            glow.localRotation = Quaternion.Euler(0, 0, -14);
+            view.inputGroup = canvas.gameObject.AddComponent<CanvasGroup>();
+            view.fallbackCover = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Game/Art/DemoCover.png");
+            PracticeSelectionLayoutBuilder.Build(view);
+            var practice = view.practice;
+            // These references point to the sole visible controls and labels on the authored stage.
+            view.play = practice.play;
+            view.back = practice.back;
+            view.settingsButton = practice.settings;
+            view.previewButton = practice.preview;
+            view.songTitle = practice.title;
+            view.artistBpm = practice.artist;
+            view.details = practice.chart;
+            view.record = practice.record;
+            view.comboRecord = practice.comboRecord;
+            view.album = practice.rig.jacket;
+            view.difficultyButtons = practice.difficulties;
+            view.entrancePanels = new[] { (RectTransform)practice.interfaceGroup.transform };
+            view.previewSource = view.gameObject.AddComponent<AudioSource>();
+            view.previewSource.playOnAwake = false;
+            view.previewSource.spatialBlend = 0;
 
-            var header = Panel(
-                "Header",
-                surface,
-                new Color(.035f, .045f, .055f, 1f),
-                0,
-                .92f,
-                1,
-                1
-            );
-
-            var footer = Panel(
-                "Footer",
-                surface,
-                new Color(.025f, .035f, .045f, 1f),
-                0,
-                0,
-                1,
-                .075f
-            );
-            var left = Panel("Song Information", surface, PanelColor, .025f, .095f, .325f, .89f);
-            var right = Panel(
-                "Song Browser",
-                surface,
-                new Color(.045f, .055f, .065f, .82f),
-                .355f,
-                .095f,
-                .975f,
-                .89f
-            );
-            view.songTitle = Label("Song Title", left, "곡을 선택하세요", 0, .925f, 1, 1, 32, role: UiTextRole.Title);
-            view.artistBpm = Label("Artist and BPM", left, "", 0, .865f, 1, .925f, 20);
-
-            var artwork = Panel("Album Frame", left, Color.black, 0, .48f, 1, .865f);
-            artwork.gameObject.AddComponent<RectMask2D>();
-
-            var album = Panel("Album", artwork, Color.white, 0, 0, 1, 1).GetComponent<Image>();
-            var fitter = album.gameObject.AddComponent<AspectRatioFitter>();
-            fitter.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
-            fitter.aspectRatio = 1;
-            album.raycastTarget = false;
-            view.album = album;
-            view.fallbackCover = AssetDatabase.LoadAssetAtPath<Sprite>(
-                "Assets/Game/Art/DemoCover.png"
-            );
-            view.album.sprite = view.fallbackCover;
-            Label(
-                "Difficulty Caption",
-                left,
-                "TRAINING LEVEL / 난이도",
-                0,
-                .445f,
-                1,
-                .48f,
-                16
-            ).verticalOverflow = VerticalWrapMode.Overflow;
-            view.difficultyList = Dropdown("Judgment difficulty", left, .04f, .36f, .96f, .442f);
-
-            // Preserve the existing Dropdown and its value/event contract as the selection source.
-            view.difficultyList.enabled = false;
-            view.difficultyList.GetComponent<Image>().enabled = false;
-
-            foreach (var text in view.difficultyList.GetComponentsInChildren<Text>())
-            {
-                text.enabled = false;
-            }
-
-            var profiles = SceneResources
-                .Require<GameSettings>(TestContentBuilder.SettingsPath)
-                .difficulties;
-            view.difficultyButtons = new Button[profiles.Length];
-            view.difficultyIndicators = new GameObject[profiles.Length];
-
-            for (int i = 0; i < profiles.Length; i++)
-            {
-                float width = .92f / profiles.Length;
-                var button = Button(
-                    "Difficulty " + profiles[i].name,
-                    left,
-                    profiles[i].DisplayName,
-                    .04f + i * width + .003f,
-                    .36f,
-                    .04f + (i + 1) * width - .003f,
-                    .442f
-                );
-                view.difficultyButtons[i] = button;
-
-                var caption = button.GetComponentInChildren<Text>();
-                caption.fontSize = 20;
-                Bounds(caption.rectTransform, 0, .15f, 1, .9f);
-                caption.rectTransform.offsetMin = new Vector2(3, 2);
-                caption.rectTransform.offsetMax = new Vector2(-3, -2);
-                Panel(
-                    "Difficulty Accent",
-                    button.transform,
-                    SongSelectionView.DifficultyColor(i),
-                    0,
-                    .93f,
-                    1,
-                    1
-                );
-
-                var outline = button.gameObject.AddComponent<Outline>();
-                outline.effectColor = SongSelectionView.DifficultyColor(i);
-                outline.effectDistance = new Vector2(2, -2);
-                outline.enabled = false;
-
-                var indicator = Panel(
-                    "Selection Indicator",
-                    button.transform,
-                    Color.white,
-                    .12f,
-                    .05f,
-                    .88f,
-                    .10f
-                );
-                view.difficultyIndicators[i] = indicator.gameObject;
-                indicator.gameObject.SetActive(false);
-            }
-
-            view.record = Label("Best Record", left, "기록 없음", 0, .03f, 1, .355f, 21);
-
-            // Retain existing field names and programmatic value contracts without exposing the old controls.
-            view.multiplierList = Dropdown("Scroll multiplier", left, .2f, .078f, .47f, .115f);
-            view.scrollModeList = Dropdown("Scroll mode", left, .5f, .078f, .96f, .115f);
-            view.multiplierList.gameObject.SetActive(false);
-            view.scrollModeList.gameObject.SetActive(false);
-            view.speedLabel = Label("Speed Caption", left, "속도  1.0x", 0, .108f, 1, .165f, 18);
-
-            var speedObject = DefaultControls.CreateSlider(new DefaultControls.Resources());
-            speedObject.name = "Note Speed";
-            speedObject.transform.SetParent(left, false);
-            Bounds((RectTransform)speedObject.transform, .04f, .083f, .96f, .105f);
-
-            var originalSlider = speedObject.GetComponent<Slider>();
-            var speedFill = originalSlider.fillRect;
-            var speedHandle = originalSlider.handleRect;
-            var speedGraphic = originalSlider.targetGraphic;
-            UnityEngine.Object.DestroyImmediate(originalSlider);
-            view.speedSlider = speedObject.AddComponent<SteppedSpeedSlider>();
-            view.speedSlider.fillRect = speedFill;
-            view.speedSlider.handleRect = speedHandle;
-            view.speedSlider.targetGraphic = speedGraphic;
-            view.speedSlider.minValue = 1;
-            view.speedSlider.maxValue = 10;
-
-            foreach (var image in speedObject.GetComponentsInChildren<Image>())
-            {
-                image.color = Line;
-            }
-
-            view.speedSlider.targetGraphic.color = new Color(.55f, .82f, .79f);
-            view.speedSlider.fillRect.GetComponent<Image>().color = new Color(.25f, .43f, .44f);
-            view.timingLabel = Label(
-                "Timing Caption",
-                left,
-                "입력 타이밍 보정  0 ms",
-                0,
-                .03f,
-                1,
-                .079f,
-                18
-            );
-
-            var sliderObject = DefaultControls.CreateSlider(new DefaultControls.Resources());
-            sliderObject.name = "Input Timing Offset";
-            sliderObject.transform.SetParent(left, false);
-            Bounds((RectTransform)sliderObject.transform, .04f, .008f, .96f, .029f);
-            view.timingOffset = sliderObject.GetComponent<Slider>();
-            view.timingOffset.minValue = -200;
-            view.timingOffset.maxValue = 200;
+            var overlay = Panel("Song Library Overlay", canvas.transform, new Color(0, 0, 0, .65f), 0, 0, 1, 1);
+            overlay.GetComponent<Image>().raycastTarget = true;
+            view.libraryPanel = overlay.gameObject;
+            view.libraryGroup = overlay.gameObject.AddComponent<CanvasGroup>();
+            var dialog = Panel("Song Library Panel", overlay, PanelColor, .07f, .12f, .93f, .91f);
+            dialog.GetComponent<Image>().raycastTarget = true;
+            Label("Library Heading", dialog, "곡 목록 · 연습 옵션", .025f, .9f, .8f, .99f, 34, UiTextRole.Title);
+            view.closeLibrary = Button("Close Song Library", dialog, "닫기", .87f, .91f, .98f, .98f);
+            var right = Panel("Song Browser", dialog, Color.clear, .02f, .04f, .68f, .9f);
+            view.allTab = Button("All Songs", right, "전체 곡", .015f, .87f, .22f, .98f);
+            view.favoritesTab = Button("Favorites", right, "★ 즐겨찾기", .23f, .87f, .46f, .98f);
+            view.sortList = Dropdown("Sort", right, .51f, .87f, .98f, .98f);
+            var left = Panel("Selection Options", dialog, new Color(.15f, .12f, .09f), .70f, .07f, .98f, .88f);
+            Label("Options Heading", left, "플레이 옵션", .04f, .87f, .96f, .98f, 27);
+            view.scrollModeList = Dropdown("Scroll mode", left, .06f, .73f, .94f, .82f);
+            view.multiplierList = Dropdown("Scroll multiplier", left, .06f, .59f, .94f, .68f);
+            view.speedLabel = Label("Speed Caption", left, "속도", .02f, .45f, .98f, .55f, 24);
+            view.speedSlider = BuildSlider("Note Speed", left, .08f, .40f, .92f, .44f, 1, 10, true);
+            view.timingLabel = Label("Timing Caption", left, "입력 타이밍 보정", .02f, .25f, .98f, .36f, 21);
+            view.timingOffset = BuildSlider("Input Timing Offset", left, .08f, .19f, .92f, .23f, -200, 200, false);
             view.timingOffset.wholeNumbers = true;
-
-            foreach (var image in sliderObject.GetComponentsInChildren<Image>())
-            {
-                image.color = Line;
-            }
-
-            view.timingOffset.targetGraphic.color = new Color(.55f, .82f, .79f);
-            view.timingOffset.fillRect.GetComponent<Image>().color = new Color(.25f, .43f, .44f);
-            view.speedLabel.gameObject.SetActive(false);
-            view.speedSlider.gameObject.SetActive(false);
-            view.timingLabel.gameObject.SetActive(false);
-            view.timingOffset.gameObject.SetActive(false);
-            view.sortList = Dropdown("Sort", right, .52f, .921f, .985f, .985f);
-            view.modeButton = Button("Mode Switch", footer, "모드: 노말", .59f, .16f, .71f, .84f);
+            view.modeButton = Button("Mode Switch", left, "일반 · Gauge", .06f, .04f, .94f, .14f);
             view.modeLabel = view.modeButton.GetComponentInChildren<Text>();
-            view.modeLabel.fontSize = 21;
-            view.settingsButton = Button("Settings", footer, "설정", .725f, .16f, .815f, .84f);
-
-            var iconObject = new GameObject("Settings Icon", typeof(RectTransform));
-            iconObject.transform.SetParent(view.settingsButton.transform, false);
-            Bounds((RectTransform)iconObject.transform, .06f, .15f, .32f, .85f);
-
-            var icon = iconObject.AddComponent<MainMenuIcon>();
-            icon.kind = MainMenuIcon.IconKind.Settings;
-            icon.color = Color.white;
-            icon.raycastTarget = false;
-            Bounds(view.settingsButton.GetComponentInChildren<Text>().rectTransform, .32f, 0, 1, 1);
-            view.allTab = Button("All Songs", right, "전체 곡", .213f, .921f, .405f, .985f);
-            view.favoritesTab = Button(
-                "Favorites",
-                right,
-                "★ 즐겨찾기",
-                .015f,
-                .921f,
-                .205f,
-                .985f
-            );
-
-            var columns = Panel(
-                "List Header",
-                right,
-                new Color(.025f, .035f, .045f, .9f),
-                .015f,
-                .858f,
-                .985f,
-                .909f
-            );
-            Label("Song Column", columns, "TITLE / COMPOSER", .075f, 0, .57f, 1, 16);
-            Label("Tempo Column", columns, "BPM", .59f, 0, .76f, 1, 16);
-            Label("Difficulty Column", columns, "난이도", .77f, 0, .93f, 1, 16);
-
             var scrollObject = new GameObject(
                 "Song List",
                 typeof(RectTransform),
                 typeof(ScrollRect)
             );
             scrollObject.transform.SetParent(right, false);
-            Bounds((RectTransform)scrollObject.transform, .015f, .025f, .975f, .849f);
+            Bounds((RectTransform)scrollObject.transform, .015f, .06f, .975f, .849f);
             view.scroll = scrollObject.GetComponent<ScrollRect>();
             view.scroll.horizontal = false;
 
@@ -324,7 +119,7 @@ namespace RhythmDojo.EditorTools
             var barObject = DefaultControls.CreateScrollbar(new DefaultControls.Resources());
             barObject.name = "Song Scrollbar";
             barObject.transform.SetParent(right, false);
-            Bounds((RectTransform)barObject.transform, .981f, .025f, .99f, .849f);
+            Bounds((RectTransform)barObject.transform, .981f, .06f, .99f, .849f);
 
             var bar = barObject.GetComponent<Scrollbar>();
             bar.direction = Scrollbar.Direction.BottomToTop;
@@ -373,169 +168,43 @@ namespace RhythmDojo.EditorTools
             row.favorite.navigation = noNavigation;
             view.rowTemplate = row;
             row.gameObject.SetActive(false);
-            view.back = Button("Back", footer, "← 뒤로", .025f, .16f, .13f, .84f);
-            view.play = Button("Play", footer, "입장  ▶", .835f, .16f, .975f, .84f, role: UiTextRole.Title);
-            view.details = Label(
-                "Details",
-                footer,
-                "",
-                .15f,
-                .04f,
-                .57f,
-                .96f,
-                17
-            );
-
-            foreach (float y in new[] { .925f, .865f, .48f, .355f, .20f })
-            {
-                Panel("Divider", left, Line, 0, y, 1, y).sizeDelta = new Vector2(0, 2);
-            }
-
-            var playGraphic = (SelectionGradientImage)view.play.targetGraphic;
-            playGraphic.useGradient = true;
-            playGraphic.color = Color.white;
-            playGraphic.leftColor = new Color(.82f, .15f, .19f);
-            playGraphic.rightColor = new Color(.55f, .075f, .12f);
-
-            var overlay = Panel(
-                "Back Popup",
-                canvas.transform,
-                new Color(0, 0, 0, .8f),
-                0,
-                0,
-                1,
-                1
-            );
-            overlay.GetComponent<Image>().raycastTarget = true;
-            view.backPopup = overlay.gameObject;
-
-            var dialog = Panel("Dialog", overlay, PanelColor, .32f, .34f, .68f, .66f);
-            Label("Question", dialog, "타이틀 화면으로 돌아갈까요?", .05f, .45f, .95f, .95f, 30, role: UiTextRole.Title);
-            view.confirmBack = Button("Confirm Back", dialog, "돌아가기", .07f, .13f, .47f, .36f);
-            view.cancelBack = Button("Cancel Back", dialog, "취소", .53f, .13f, .93f, .36f);
             overlay.gameObject.SetActive(false);
-
-            var modeOverlay = Panel(
-                "Mode Popup",
-                canvas.transform,
-                new Color(0, 0, 0, .8f),
-                0,
-                0,
-                1,
-                1
-            );
+            var modeOverlay = Panel("Mode Popup", canvas.transform, new Color(0, 0, 0, .8f), 0, 0, 1, 1);
             modeOverlay.GetComponent<Image>().raycastTarget = true;
             view.modePopup = modeOverlay.gameObject;
-
             var modeDialog = Panel("Mode Dialog", modeOverlay, PanelColor, .32f, .33f, .68f, .67f);
-            Panel("Mode Accent", modeDialog, new Color(.46f, .78f, .76f), 0, .99f, 1, 1);
-            Label("Mode Title", modeDialog, "모드 선택", .07f, .70f, .80f, .94f, 30, role: UiTextRole.Title);
-            view.normalModeButton = Button(
-                "Normal Mode",
-                modeDialog,
-                "노말",
-                .07f,
-                .27f,
-                .47f,
-                .61f
-            );
-            view.hardModeButton = Button("Hard Mode", modeDialog, "하드", .53f, .27f, .93f, .61f);
+            Label("Mode Title", modeDialog, "모드 선택", .07f, .70f, .80f, .94f, 30, UiTextRole.Title);
+            view.normalModeButton = Button("Normal Mode", modeDialog, "일반 · Gauge", .07f, .27f, .47f, .61f);
+            view.hardModeButton = Button("Hard Mode", modeDialog, "하드 · Challenge", .53f, .27f, .93f, .61f);
             view.cancelMode = Button("Close Mode", modeDialog, "닫기", .69f, .06f, .93f, .20f);
-            view.cancelMode.GetComponentInChildren<Text>().fontSize = 18;
-
-            var modeNav = view.normalModeButton.navigation;
-            modeNav.mode = Navigation.Mode.Explicit;
-            modeNav.selectOnRight = view.hardModeButton;
-            modeNav.selectOnDown = view.cancelMode;
-            view.normalModeButton.navigation = modeNav;
-            modeNav = view.hardModeButton.navigation;
-            modeNav.mode = Navigation.Mode.Explicit;
-            modeNav.selectOnLeft = view.normalModeButton;
-            modeNav.selectOnDown = view.cancelMode;
-            view.hardModeButton.navigation = modeNav;
-            modeNav = view.cancelMode.navigation;
-            modeNav.mode = Navigation.Mode.Explicit;
-            modeNav.selectOnUp = view.normalModeButton;
-            view.cancelMode.navigation = modeNav;
-            view.modePopup.SetActive(false);
-            PixelSongSelectionStyle.Apply(view);
-            PixelSongSelectionStyle.RefineHierarchy(view);
-            BuildPlaybackStatus(view);
-            BuildSongPreview(view);
-            var help = Label("Navigation Help", surface,
-                "↑ ↓  곡 선택   ·   ← →  난이도   ·   Enter  시작   ·   Esc  뒤로",
-                .48f, .01f, .955f, .04f, 18, role: UiTextRole.Help);
-            help.alignment = TextAnchor.MiddleRight;
-            help.color = new Color(1f, .95f, .82f);
-            help.rectTransform.offsetMin = help.rectTransform.offsetMax = Vector2.zero;
-            help.verticalOverflow = VerticalWrapMode.Overflow;
-            PracticeSelectionLayoutBuilder.Build(view, surface.gameObject);
+            modeOverlay.gameObject.SetActive(false);
             UiFontSettings.ApplyTo(view.transform);
             view.Validate();
-
             return view;
         }
 
-        internal static void BuildPlaybackStatus(SongSelectionView view)
+        private static Slider BuildSlider(string name, Transform parent, float x0, float y0,
+            float x1, float y1, float minimum, float maximum, bool speed)
         {
-            view.playCaption = view.play.GetComponentInChildren<Text>(true);
-            view.playArrow = view.play.GetComponentInChildren<MainMenuIcon>(true);
-            view.playStatusLabel = UiElements.Label(
-                "Playback Status",
-                view.play.transform,
-                "",
-                Vector2.zero,
-                Vector2.zero,
-                36
-            );
-            Bounds(view.playStatusLabel.rectTransform, .06f, .10f, .94f, .90f);
-            view.playStatusLabel.alignment = TextAnchor.MiddleCenter;
-            view.playStatusLabel.color = view.playCaption.color;
-            view.playStatusLabel.resizeTextForBestFit = true;
-            view.playStatusLabel.resizeTextMinSize = 24;
-            view.playStatusLabel.resizeTextMaxSize = 36;
-            view.playStatusLabel.gameObject.SetActive(false);
-
-            var panel = Panel("Playback Error", view.transform, Color.white, .655f, .14f, .955f, .24f);
-            panel.SetSiblingIndex(view.backPopup.transform.GetSiblingIndex());
-            var frame = PixelSongSelectionStyle.Frame(panel, Color.white, 12);
-            frame.artwork = SettingsArtAssets.Load("SettingsPanel");
-            frame.RefreshArtwork();
-            view.playErrorPanel = panel.gameObject;
-            view.playErrorLabel = UiElements.Label("Playback Error Message", panel, "", Vector2.zero, Vector2.zero, 24);
-            Bounds(view.playErrorLabel.rectTransform, .06f, .10f, .94f, .90f);
-            view.playErrorLabel.alignment = TextAnchor.MiddleLeft;
-            view.playErrorLabel.color = new Color(.29f, .15f, .09f);
-            view.playErrorLabel.resizeTextForBestFit = true;
-            view.playErrorLabel.resizeTextMinSize = 18;
-            view.playErrorLabel.resizeTextMaxSize = 24;
-            view.playErrorPanel.SetActive(false);
-        }
-
-        internal static void BuildSongPreview(SongSelectionView view)
-        {
-            view.previewButton = Button(
-                "Song Preview",
-                view.songTitle.transform.parent,
-                "▶ 미리듣기",
-                .445f,
-                .465f,
-                .76f,
-                .54f
-            );
-            var frame = PixelSongSelectionStyle.Frame((RectTransform)view.previewButton.transform, Color.white, 8);
-            frame.artwork = SettingsArtAssets.Load("SettingsControl");
-            frame.RefreshArtwork();
-            var label = view.previewButton.GetComponentInChildren<Text>();
-            UiFontSettings.Apply(label);
-            label.color = new Color(.24f, .12f, .085f);
-            label.fontSize = 28;
-            label.resizeTextForBestFit = true;
-            label.resizeTextMinSize = 18;
-            label.resizeTextMaxSize = 28;
-
-            view.previewSource = view.gameObject.AddComponent<AudioSource>();
-            view.previewSource.playOnAwake = false;
+            var sliderObject = DefaultControls.CreateSlider(new DefaultControls.Resources());
+            sliderObject.name = name;
+            sliderObject.transform.SetParent(parent, false);
+            Bounds((RectTransform)sliderObject.transform, x0, y0, x1, y1);
+            var slider = sliderObject.GetComponent<Slider>();
+            if (speed)
+            {
+                var fill = slider.fillRect;
+                var handle = slider.handleRect;
+                var graphic = slider.targetGraphic;
+                UnityEngine.Object.DestroyImmediate(slider);
+                slider = sliderObject.AddComponent<SteppedSpeedSlider>();
+                slider.fillRect = fill;
+                slider.handleRect = handle;
+                slider.targetGraphic = graphic;
+            }
+            slider.minValue = minimum;
+            slider.maxValue = maximum;
+            return slider;
         }
 
         private static void ConfigureBrushFont()
@@ -558,26 +227,6 @@ namespace RhythmDojo.EditorTools
             importer.fontReferences = new[] { fallback };
             EditorUtility.SetDirty(importer);
             importer.SaveAndReimport();
-        }
-
-        private static RectTransform GradientPanel(
-            string name,
-            Transform parent,
-            Color from,
-            Color to,
-            float x0,
-            float y0,
-            float x1,
-            float y1
-        )
-        {
-            var rect = Panel(name, parent, Color.white, x0, y0, x1, y1);
-            var image = rect.GetComponent<SelectionGradientImage>();
-            image.useGradient = true;
-            image.leftColor = from;
-            image.rightColor = to;
-
-            return rect;
         }
 
         private static void Bounds(RectTransform rect, float x0, float y0, float x1, float y1)
