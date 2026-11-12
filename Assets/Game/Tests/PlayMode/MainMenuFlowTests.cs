@@ -520,7 +520,7 @@ namespace RhythmDojo.Tests
             yield return new WaitForSecondsRealtime(MainMenuScreen.MenuExpansionSeconds + .1f);
             Assert.That(view.menuPanel.blocksRaycasts, Is.True);
             yield return Click(view.start);
-            yield return new WaitForSecondsRealtime(.45f);
+            yield return WaitForStart(actions);
             view.start.onClick.Invoke();
             Assert.That(actions.Starts, Is.EqualTo(1));
             Assert.That(oldActions.Starts, Is.Zero);
@@ -537,10 +537,11 @@ namespace RhythmDojo.Tests
             Assert.That(view.start.GetComponent<DojoBoardBreak>(), Is.Null);
             Assert.That(view.menuPanel.alpha, Is.EqualTo(1f));
             view.start.onClick.Invoke();
-            Assert.That(view.menuPanel.alpha, Is.LessThan(1f),
-                "Play must respond immediately instead of holding a static menu for a quarter second.");
+            Assert.That(view.modeSelection.roomRoot.localScale.x, Is.GreaterThan(1f),
+                "Play must begin the approach immediately.");
+            Assert.That(view.start.interactable, Is.False);
             Assert.That(actions.Starts, Is.Zero);
-            yield return new WaitForSecondsRealtime(.25f);
+            yield return WaitForStart(actions);
             Assert.That(actions.Starts, Is.EqualTo(1));
         }
 
@@ -605,11 +606,11 @@ namespace RhythmDojo.Tests
                 int preparedHandle = SceneManager.GetSceneByPath(AppFlowController.SelectionPath).handle;
                 selectionLoads = 0;
                 yield return Click(view.start);
-            yield return new WaitForSecondsRealtime(.45f);
 
                 double deadline = Time.realtimeSinceStartupAsDouble + 20;
 
-                while (!UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>())
+                while (SceneManager.GetActiveScene().path != AppFlowController.SelectionPath
+                    || UnityEngine.Object.FindFirstObjectByType<AppFlowController>().Transitioning)
                 {
                     AssertHasDisplayCamera();
                     Assert.That(
@@ -629,8 +630,10 @@ namespace RhythmDojo.Tests
 
                 Assert.That(UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>().enabled, Is.True);
                 var selectionView = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
-                var backdrop = Array.Find(selectionView.GetComponentsInChildren<Image>(),
-                    image => image.sprite == selectionView.fallbackCover && image.GetComponent<AspectRatioFitter>());
+                Assert.That(selectionView.practice.gameObject.activeInHierarchy, Is.True);
+                Assert.That(selectionView.practice.browser.activeSelf, Is.False);
+                Assert.That(selectionView.practice.rig.jacket.sprite, Is.SameAs(selectionView.album.sprite));
+                var backdrop = selectionView.practice.rig.jacket;
                 Assert.That(backdrop, Is.Not.Null);
                 Assert.That(selectionView.entrancePanels, Has.Length.EqualTo(6));
                 Canvas.ForceUpdateCanvases();
@@ -660,6 +663,57 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("SceneIntegration")]
+        public IEnumerator DirectSelectionEntryUsesPracticeWithoutAModeSelectionOverride()
+        {
+            foreach (string path in new[] { MainMenuActions.BootstrapScenePath, AppFlowController.SelectionPath })
+            {
+                var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
+                UnityEngine.Object.Destroy(flow.gameObject);
+                yield return null;
+                yield return SceneManager.LoadSceneAsync(path);
+
+                double deadline = Time.realtimeSinceStartupAsDouble + 20;
+                while (SceneManager.GetActiveScene().path != AppFlowController.SelectionPath)
+                {
+                    Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline), path);
+                    yield return null;
+                }
+                yield return null;
+                flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
+                while (flow.Transitioning)
+                {
+                    Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline), path);
+                    yield return null;
+                }
+
+                var selectionView = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
+                Assert.That(flow.PracticeSelection, Is.True, path);
+                Assert.That(selectionView.practice.gameObject.activeInHierarchy, Is.True, path);
+                Assert.That(selectionView.practice.browser.activeSelf, Is.False, path);
+                Assert.That(SceneManager.sceneCount, Is.EqualTo(1));
+                string song = flow.Selection.SelectedSongId;
+                Assert.That(selectionView.Rows.Count, Is.GreaterThan(1), path);
+                Assert.That(selectionView.practice.next.interactable, Is.True, path);
+                int contacts = selectionView.practice.SelectionContactCount;
+                // The second scene owns a new UI input module. Send a new pointer position
+                // before clicking the same screen coordinates used by the first scene.
+                InputSystem.QueueStateEvent(mouse, new MouseState { position = Vector2.zero });
+                yield return null;
+                yield return Click(selectionView.practice.next);
+                while (selectionView.practice.IsStriking)
+                {
+                    Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline), path);
+                    yield return null;
+                }
+                Assert.That(selectionView.practice.SelectionContactCount, Is.EqualTo(contacts + 1), path);
+                Assert.That(flow.Selection.SelectedSongId, Is.Not.EqualTo(song), path);
+                Assert.That(selectionView.practice.rig.title.text, Is.EqualTo(selectionView.songTitle.text));
+            }
+        }
+
+        [UnityTest]
+        [Category("Compatibility")]
         [Category("SceneIntegration")]
         public IEnumerator BootstrapFallbackStillStartsWithoutATitleView()
         {
@@ -853,6 +907,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Compatibility")]
         [Category("SceneIntegration")]
         public IEnumerator EntranceWaitsForReadyAndRestoresSelectionInput()
         {
@@ -922,7 +977,7 @@ namespace RhythmDojo.Tests
                 yield return null;
                 yield return null;
                 InputSystem.QueueStateEvent(keyboard, new KeyboardState());
-                yield return new WaitForSecondsRealtime(.5f);
+                yield return WaitForStart(actions);
                 Assert.That(actions.Starts, Is.EqualTo(1));
             }
             finally
@@ -932,6 +987,7 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
+        [Category("Compatibility")]
         [Category("SceneIntegration")]
         public IEnumerator EntranceTimeoutOffersRecoveryAndCleansUp()
         {
@@ -1006,8 +1062,12 @@ namespace RhythmDojo.Tests
                 yield return null;
             }
             Assert.That(view.modeSelection.ContactCount, Is.EqualTo(contacts + 1));
+            Assert.That(view.modeSelection.description.text, Is.EqualTo("처음이지? 내가 옆에서 박자를 짚어 줄게."));
+            Assert.That(view.modeSelection.lessonCue.gameObject.activeSelf, Is.False,
+                "The lesson cue should appear only after starting the lesson.");
             Capture("Logs/renewal-lesson.png");
             yield return Click(view.start);
+            Assert.That(view.modeSelection.lessonCue.gameObject.activeSelf, Is.True);
             double startTime = Time.realtimeSinceStartupAsDouble;
             for (int i = 0; i < 4; i++)
             {
@@ -1354,6 +1414,17 @@ namespace RhythmDojo.Tests
                     mode.teacherIdle.variations[i].weight = originalWeights[i];
                 }
                 mode.CancelMotion();
+            }
+        }
+
+        private static IEnumerator WaitForStart(Actions actions)
+        {
+            double deadline = Time.realtimeSinceStartupAsDouble + 3;
+            while (actions.Starts == 0)
+            {
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline),
+                    "The authored approach must finish and start selection.");
+                yield return null;
             }
         }
 

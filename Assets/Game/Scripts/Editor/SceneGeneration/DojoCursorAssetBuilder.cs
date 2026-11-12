@@ -90,7 +90,7 @@ namespace RhythmDojo.EditorTools
             importer.filterMode = FilterMode.Point;
             importer.wrapMode = TextureWrapMode.Clamp;
             importer.npotScale = TextureImporterNPOTScale.None;
-            importer.alphaIsTransparency = false;
+            importer.alphaIsTransparency = true;
             importer.SaveAndReimport();
             Object.DestroyImmediate(texture);
             return SceneResources.Require<Texture2D>(path);

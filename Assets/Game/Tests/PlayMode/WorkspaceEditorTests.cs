@@ -2764,14 +2764,6 @@ namespace RhythmDojo.Tests
         [Category("SceneIntegration")]
         public IEnumerator JacketAndVolumeSurviveSavingAndReloadingWithoutOptionalSound()
         {
-            workspace.view.OpenMenu(workspace.view.menus[1]);
-            Canvas.ForceUpdateCanvases();
-            var notice = workspace.view.menus[1].panel.GetComponentsInChildren<Text>()
-                .Single(label => label.text == "임시, 자켓 정보만 받고 표시하는 엔드포인트가 없음.");
-            Assert.That(notice.preferredWidth, Is.LessThanOrEqualTo(notice.rectTransform.rect.width));
-            Assert.That(notice.preferredHeight, Is.LessThanOrEqualTo(notice.rectTransform.rect.height));
-            workspace.view.CloseMenus();
-
             Directory.CreateDirectory(root);
             string path = Path.Combine(root, "Jacket.png");
             var image = new Texture2D(2, 2);
@@ -2783,7 +2775,9 @@ namespace RhythmDojo.Tests
             workspace.Run(WorkspaceAction.ImportJacket);
             yield return Idle();
             Assert.That(workspace.view.status.text,
-                Is.EqualTo("자켓 정보를 반영했습니다. 이미지 표시는 아직 지원하지 않습니다."));
+                Is.EqualTo("자켓 정보를 반영했습니다."));
+            Assert.That(workspace.view.jacket.enabled, Is.True);
+            Assert.That(workspace.view.jacket.texture, Is.Not.Null);
             workspace.view.volume.text = "35";
             workspace.Run(WorkspaceAction.ApplySettings);
             yield return Idle();

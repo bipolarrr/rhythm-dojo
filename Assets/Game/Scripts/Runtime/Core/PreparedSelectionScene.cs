@@ -351,6 +351,7 @@ namespace RhythmDojo.Core
         private void Activate()
         {
             int current = generation;
+            preparedSelectionScreen.PrepareEntryPresentation();
             priorScope = new InputStateScope();
             foreach (var root in entrancePriorScene.GetRootGameObjects())
             {

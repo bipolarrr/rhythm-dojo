@@ -74,16 +74,18 @@ namespace RhythmDojo.EditorTools
             view.logoArtwork = view.title.rectTransform;
             Place(view.logoArtwork, new Vector2(.5f, .5f), new Vector2(0, 2), new Vector2(370, 80));
             view.title.alignment = TextAnchor.MiddleCenter;
-            var prompt = Image("Entrance Invitation", entrance.frame.transform, DojoEntranceAssets.Load("SettingsPanel"));
+            var prompt = Image("Entrance Invitation", entrance.frame.transform, null);
+            prompt.color = Color.clear;
             view.entranceInvitation = prompt.gameObject;
-            Place(prompt.rectTransform, new Vector2(.5f, .065f), Vector2.zero, new Vector2(375, 50));
+            Place(prompt.rectTransform, new Vector2(1f, 0f), new Vector2(-290, 38), new Vector2(520, 40));
             view.startPrompt.transform.SetParent(prompt.transform, false);
-            Place(view.startPrompt.rectTransform, new Vector2(.5f, .5f), Vector2.zero, new Vector2(350, 40));
-            view.startPrompt.fontSize = 23;
-            view.startPrompt.color = new Color(.19f, .15f, .10f);
+            Place(view.startPrompt.rectTransform, new Vector2(.5f, .5f), Vector2.zero, new Vector2(520, 40));
+            view.startPrompt.fontSize = 18;
+            view.startPrompt.alignment = TextAnchor.MiddleRight;
+            view.startPrompt.color = new Color(1f, .94f, .78f);
             foreach (var shadow in view.startPrompt.GetComponents<Shadow>())
             {
-                shadow.enabled = false;
+                shadow.enabled = true;
             }
             AddRoomAtmosphere(entrance.frame.transform, -1);
         }

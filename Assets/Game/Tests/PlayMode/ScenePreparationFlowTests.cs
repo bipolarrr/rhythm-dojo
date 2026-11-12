@@ -292,6 +292,13 @@ namespace RhythmDojo.Tests
             Assert.That(SceneManager.GetActiveScene().path, Is.EqualTo(AppFlowController.SelectionPath));
             Assert.That(flow.Transitioning, Is.False);
             Assert.That(SceneManager.sceneCount, Is.EqualTo(1));
+            var selectionView = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
+            Assert.That(selectionView.Rows, Is.Not.Empty, "Cold entry must replay the deferred library refresh.");
+            Assert.That(selectionView.practice.title.text, Is.EqualTo(selectionView.songTitle.text));
+            string selected = flow.Selection.SelectedSongId;
+            yield return Press(UnityEngine.InputSystem.Key.RightArrow);
+            yield return Await(() => !selectionView.practice.IsStriking);
+            Assert.That(flow.Selection.SelectedSongId, Is.Not.EqualTo(selected));
         }
 
         [Test]

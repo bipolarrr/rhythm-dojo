@@ -102,7 +102,6 @@ namespace RhythmDojo.EditorTools
             view.artist = Field(settings, "작곡가", "작곡가 이름");
             view.jacketPath = Field(settings, "자켓 이미지 전체 경로", "PNG / JPG 경로 입력 후 Enter");
             Action(settings, "자켓 이미지 적용", WorkspaceAction.ImportJacket, bindings);
-            Heading(settings, "임시, 자켓 정보만 받고 표시하는 엔드포인트가 없음.");
             Heading(settings, "난이도");
             var slots = new GameObject("Difficulty", typeof(RectTransform)).GetComponent<RectTransform>();
             slots.SetParent(settings, false);
@@ -210,7 +209,7 @@ namespace RhythmDojo.EditorTools
             Action(play, "현재 위치에서 테스트 플레이 (오토)", WorkspaceAction.AutoTestHere, bindings);
 
             view.status = canvas.GetComponentsInChildren<Text>(true).Single(text => text.name == "Progress Label");
-            view.status.text = "채보 에디터 · 클릭으로 메뉴 열기 / 열린 상태에서 마우스로 전환 / Esc로 닫기";
+            view.status.text = "";
             view.selection = UiElements.Label("Workspace Selection", canvas.transform,
                 "선택 0", new Vector2(820, -265), new Vector2(400, 45), 18);
             var jacket = new GameObject("Workspace Jacket", typeof(RectTransform), typeof(RawImage));
@@ -220,9 +219,14 @@ namespace RhythmDojo.EditorTools
             view.jacket.enabled = false;
             UiElements.Position(view.jacket.rectTransform, new Vector2(820, -70), new Vector2(150, 150));
             var help = canvas.GetComponentsInChildren<Text>(true).Single(text => text.name == "Help");
-            help.text = "채보 에디터\n\n메뉴: 클릭 열기 / 마우스로 전환\n바깥 클릭 / Esc: 메뉴 닫기\n선택: 클릭 토글 / 드래그 범위\n붙여넣기: 현재 파형 커서\n\n설정: 자켓 / 음원 / BPM\nSpace: 재생 / 일시정지\n게임 Esc: 편집 화면 복귀";
-            help.fontSize = 14;
-            UiElements.Position(help.rectTransform, new Vector2(176, -18), new Vector2(230, 210));
+            help.text = "Space  재생 / 일시정지   ·   Ctrl+S  저장   ·   Esc  메뉴 닫기";
+            help.fontSize = 13;
+            help.alignment = TextAnchor.MiddleRight;
+            help.transform.SetParent(canvas.transform, false);
+            help.rectTransform.pivot = new Vector2(1, 0);
+            help.rectTransform.anchorMin = help.rectTransform.anchorMax = new Vector2(1, 0);
+            help.rectTransform.anchoredPosition = new Vector2(-20, 8);
+            help.rectTransform.sizeDelta = new Vector2(620, 24);
             AddGameplayPreview(canvas, view);
             AddNoteSpeedWarning(canvas.transform, view, bindings);
             AddOnAirDialog(canvas.transform, view, bindings);
@@ -374,7 +378,11 @@ namespace RhythmDojo.EditorTools
         public static void AddGameplayPreview(Canvas canvas, WorkspaceView view)
         {
             var panel = canvas.transform.Find("Editor Content/Chart And Preview/Preview Space");
-            panel.Find("Help").gameObject.SetActive(false);
+            var help = panel.Find("Help");
+            if (help)
+            {
+                help.gameObject.SetActive(false);
+            }
             panel.Find("Next Chart").gameObject.SetActive(false);
             view.jacket.gameObject.SetActive(false);
             var title = UiElements.Label("Preview Heading", panel, "인게임 미리보기",

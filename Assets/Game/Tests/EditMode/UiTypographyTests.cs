@@ -193,6 +193,11 @@ namespace RhythmDojo.Tests
             {
                 expected = AssetDatabase.LoadAssetAtPath<Font>("Assets/Game/Fonts/Dokdo-Regular.ttf");
             }
+            var practice = text.GetComponentInParent<PracticeSelectionView>(true);
+            if (practice && text.GetComponent<UiFontScope>())
+            {
+                expected = AssetDatabase.LoadAssetAtPath<Font>("Assets/Game/Fonts/Dokdo-Regular.ttf");
+            }
 
             Assert.That(text.font, Is.SameAs(expected), text.name);
         }

@@ -1694,7 +1694,7 @@ namespace RhythmDojo.Authoring
 
             resourcesDirty = true;
             await LoadResources();
-            view.status.text = "자켓 정보를 반영했습니다. 이미지 표시는 아직 지원하지 않습니다.";
+            view.status.text = "자켓 정보를 반영했습니다.";
         }
 
         private async Task LoadResources()

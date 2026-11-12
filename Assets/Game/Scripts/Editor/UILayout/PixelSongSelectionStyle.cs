@@ -62,31 +62,31 @@ namespace RhythmDojo.EditorTools
                 label.verticalOverflow = VerticalWrapMode.Truncate;
             }
             Bounds((RectTransform)header, .045f, .865f, .47f, .965f);
+            header.GetComponent<Image>().color = Color.clear;
             foreach (Transform child in header)
             {
-                child.gameObject.SetActive(false);
+                Object.DestroyImmediate(child.gameObject);
             }
-            Frame((RectTransform)header, Paper, 12);
             var heading = UiElements.Label("Pixel Heading", header, "곡 선택", Vector2.zero, Vector2.zero, 48, role: UiTextRole.Title);
             heading.font = AssetDatabase.LoadAssetAtPath<Font>(MainMenuLayoutBuilder.FontPath);
             heading.fontStyle = FontStyle.Bold;
-            heading.color = Ink;
-            heading.alignment = TextAnchor.MiddleCenter;
+            heading.color = new Color(1f, .95f, .82f);
+            heading.alignment = TextAnchor.MiddleLeft;
             EmbossText(heading);
             Bounds(heading.rectTransform, 0, 0, 1, 1);
 
             // Retain view contracts; song information moves to the right, browser to the left.
             Bounds((RectTransform)left, .49f, .145f, .955f, .85f);
-            Frame((RectTransform)left, Paper, 20);
+            left.GetComponent<Image>().color = Color.clear;
             foreach (Transform child in left)
             {
                 if (child.name == "Divider")
                 {
-                    child.gameObject.SetActive(false);
+                    Object.DestroyImmediate(child.gameObject);
                 }
             }
             Bounds((RectTransform)view.album.transform.parent, .055f, .51f, .41f, .935f);
-            Frame((RectTransform)view.album.transform.parent, new Color(.25f, .13f, .09f), 8);
+            view.album.transform.parent.GetComponent<Image>().color = Color.clear;
             var interior = new GameObject("Album Interior", typeof(RectTransform), typeof(RectMask2D));
             interior.transform.SetParent(view.album.transform.parent, false);
             Bounds((RectTransform)interior.transform, .035f, .035f, .965f, .965f);
@@ -107,8 +107,7 @@ namespace RhythmDojo.EditorTools
             caption.text = "수련 난이도";
             caption.fontSize = 26;
             caption.color = new Color(.48f, .22f, .10f);
-            EmbossText(caption);
-            Bounds(caption.rectTransform, .055f, .44f, .95f, .495f);
+            Object.DestroyImmediate(caption.gameObject);
             for (int i = 0; i < view.difficultyButtons.Length; i++)
             {
                 var button = view.difficultyButtons[i];
@@ -140,15 +139,9 @@ namespace RhythmDojo.EditorTools
             view.comboRecord.resizeTextMinSize = 32;
             view.comboRecord.resizeTextMaxSize = 36;
             view.comboRecord.lineSpacing = 1.08f;
-            var recordDivider = new GameObject("Record Column Divider", typeof(RectTransform), typeof(Image));
-            recordDivider.transform.SetParent(left, false);
-            Bounds((RectTransform)recordDivider.transform, .462f, .055f, .465f, .32f);
-            recordDivider.GetComponent<Image>().color = new Color(.46f, .25f, .12f, .45f);
-            recordDivider.GetComponent<Image>().raycastTarget = false;
-
             Bounds((RectTransform)right, .045f, .145f, .47f, .85f);
             right.GetComponent<Image>().color = Color.clear;
-            right.Find("List Header").gameObject.SetActive(false);
+            Object.DestroyImmediate(right.Find("List Header").gameObject);
             Bounds((RectTransform)view.scroll.transform, .015f, .005f, .965f, .88f);
             Bounds((RectTransform)view.scroll.verticalScrollbar.transform, .978f, .005f, .995f, .88f);
             Bounds((RectTransform)view.favoritesTab.transform, .015f, .905f, .295f, .99f);
@@ -203,11 +196,6 @@ namespace RhythmDojo.EditorTools
                 frame.artwork = SettingsArtAssets.Load("SettingsControl");
                 frame.borderWidth = 12;
             }
-            var informationFrame = left.GetComponentInChildren<PixelDojoFrameGraphic>();
-            informationFrame.artwork = SettingsArtAssets.Load("SettingsPanel");
-            informationFrame.color = Color.white;
-            informationFrame.borderWidth = 24;
-            header.GetComponentInChildren<PixelDojoFrameGraphic>().color = Color.white;
             foreach (var dialog in new[] { view.backPopup.transform.Find("Dialog"),
                 view.modePopup.transform.Find("Mode Dialog") })
             {
@@ -324,6 +312,16 @@ namespace RhythmDojo.EditorTools
             {
                 label.color = new Color(.28f, .16f, .105f);
                 ClearTextEffects(label);
+                if (label.transform.IsChildOf(view.songTitle.transform.parent))
+                {
+                    label.color = new Color(1f, .95f, .82f);
+                    var shadow = label.GetComponent<Shadow>();
+                    if (shadow)
+                    {
+                        shadow.enabled = true;
+                        shadow.effectColor = new Color(.03f, .02f, .01f, .9f);
+                    }
+                }
             }
 
             foreach (var button in view.difficultyButtons)

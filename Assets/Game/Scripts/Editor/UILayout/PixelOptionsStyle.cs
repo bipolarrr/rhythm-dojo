@@ -28,10 +28,7 @@ namespace RhythmDojo.EditorTools
             fit.aspectRatio = image.sprite.rect.width / image.sprite.rect.height;
             view.transform.Find("Modal Shade").GetComponent<Image>().color = new Color(.075f, .035f, .02f, .62f);
             var popup = view.transform.Find("Settings Popup");
-            var popupFrame = PixelSongSelectionStyle.Frame((RectTransform)popup, Color.white, 24);
-            popupFrame.artwork = SettingsArtAssets.Load("SettingsPanel", UiArtworkCrop.Full,
-                new Vector4(128, 128, 128, 128));
-            popupFrame.RefreshArtwork();
+            popup.GetComponent<Image>().color = new Color(.98f, .88f, .68f, .96f);
             foreach (var text in view.GetComponentsInChildren<Text>(true))
             {
                 text.font = AssetDatabase.LoadAssetAtPath<Font>(MainMenuLayoutBuilder.FontPath);
@@ -41,8 +38,6 @@ namespace RhythmDojo.EditorTools
             var title = popup.Find("Title").GetComponent<Text>();
             title.text = "도장 설정";
             title.fontStyle = FontStyle.Bold;
-            popup.Find("Header Line").GetComponent<Image>().color = new Color(.55f, .32f, .16f);
-            popup.Find("Tab Divider").GetComponent<Image>().color = new Color(.55f, .32f, .16f);
             foreach (var button in new[] { view.soundTab, view.graphicsTab, view.gameplayTab, view.back })
             {
                 Button(button, new Color(.79f, .63f, .42f), Ink);

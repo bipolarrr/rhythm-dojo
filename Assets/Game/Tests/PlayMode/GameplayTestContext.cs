@@ -48,6 +48,7 @@ namespace RhythmDojo.Tests
 
         private NativeInputScope nativeInput;
         private bool audioConfigurationChanged;
+        protected virtual bool UsePracticeSelection => false;
 
         private void AudioConfigurationChanged(bool deviceWasChanged)
         {
@@ -119,14 +120,19 @@ namespace RhythmDojo.Tests
                 UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>()
             );
             yield return null;
+            // Browser fixtures deliberately exercise the shared library used by Challenge.
+            // Practice fixtures keep the production default instead of injecting it later.
+            var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
+            if (!UsePracticeSelection)
+            {
+                flow.PracticeSelection = false;
+            }
             UnityEngine
                 .Object.FindFirstObjectByType<SongSelectionScreen>()
                 .SelectSong("test-pulse");
 
             var selectionView = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
-            EventSystem.current.SetSelectedGameObject(
-                selectionView.Rows.First(r => r.Entry.Id == "test-pulse").gameObject
-            );
+            selectionView.GetComponent<SongSelectionScreen>().RestoreEntryFocus();
         }
 
         [UnityTearDown]

@@ -116,7 +116,7 @@ namespace RhythmDojo.UI
             view.newRecordBadge.SetActive(false);
             if (view.progressNote)
             {
-                view.progressNote.text = "이번 수련의 결과";
+                view.progressNote.text = "";
             }
 
             RefreshTimingRecommendation();
@@ -126,7 +126,7 @@ namespace RhythmDojo.UI
                 view.title.text = "플레이 결과가 없습니다";
                 view.artist.text = "곡을 선택하고 플레이해 주세요";
                 view.difficulty.text = "";
-                view.outcome.text = "플레이 결과";
+                view.outcome.text = "";
                 view.perfect.text = "—";
                 view.good.text = "—";
                 view.miss.text = "—";

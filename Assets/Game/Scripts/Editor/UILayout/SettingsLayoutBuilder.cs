@@ -46,13 +46,6 @@ namespace RhythmDojo.EditorTools
                 32,
                 role: UiTextRole.Title
             );
-            Panel(
-                "Header Line",
-                popup.transform,
-                new Vector2(30, -84),
-                new Vector2(960, 2),
-                new Color(1, 1, 1, .14f)
-            );
             view.soundTab = Tab("Sound Tab", popup.transform, "사운드", new Vector2(28, -108));
             view.graphicsTab = Tab(
                 "Graphics Tab",
@@ -65,13 +58,6 @@ namespace RhythmDojo.EditorTools
                 popup.transform,
                 "게임플레이",
                 new Vector2(28, -242)
-            );
-            Panel(
-                "Tab Divider",
-                popup.transform,
-                new Vector2(202, -104),
-                new Vector2(2, 440),
-                new Color(1, 1, 1, .14f)
             );
             view.soundPanel = Panel(
                 "Sound Panel",
@@ -376,6 +362,12 @@ namespace RhythmDojo.EditorTools
             ApplyPlayRuleSizes(view);
             BuildJudgmentPosition(view);
             TimingCalibrationLayoutBuilder.Build(view);
+            var help = UiElements.Label("Navigation Help", canvas.transform, "Esc  닫기",
+                Vector2.zero, new Vector2(220, 28), 16, role: UiTextRole.Help);
+            help.alignment = TextAnchor.MiddleRight;
+            help.rectTransform.anchorMin = help.rectTransform.anchorMax = new Vector2(1, 0);
+            help.rectTransform.pivot = new Vector2(1, 0);
+            help.rectTransform.anchoredPosition = new Vector2(-28, 12);
 
             return view;
         }

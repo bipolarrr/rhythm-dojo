@@ -63,10 +63,6 @@ namespace RhythmDojo.EditorTools
                 1,
                 1
             );
-            Label("Brand", header, "RHYTHM DOJO  /  리듬 도장", .016f, 0, .34f, 1, 25, role: UiTextRole.Title);
-            Panel("Header Accent", header, new Color(.94f, .25f, .26f), .025f, 0, .325f, .035f);
-            Label("Section", header, "곡 선택  /  MUSIC SELECT", .355f, 0, .75f, 1, 23, role: UiTextRole.Title);
-            Label("Mode", header, "4 KEY  ·  FREE PLAY", .78f, 0, .985f, 1, 20);
 
             var footer = Panel(
                 "Footer",
@@ -382,7 +378,7 @@ namespace RhythmDojo.EditorTools
             view.details = Label(
                 "Details",
                 footer,
-                "곡 선택 · Enter 플레이 · Esc 뒤로가기",
+                "",
                 .15f,
                 .04f,
                 .57f,
@@ -466,6 +462,14 @@ namespace RhythmDojo.EditorTools
             PixelSongSelectionStyle.RefineHierarchy(view);
             BuildPlaybackStatus(view);
             BuildSongPreview(view);
+            var help = Label("Navigation Help", surface,
+                "↑ ↓  곡 선택   ·   ← →  난이도   ·   Enter  시작   ·   Esc  뒤로",
+                .48f, .01f, .955f, .04f, 18, role: UiTextRole.Help);
+            help.alignment = TextAnchor.MiddleRight;
+            help.color = new Color(1f, .95f, .82f);
+            help.rectTransform.offsetMin = help.rectTransform.offsetMax = Vector2.zero;
+            help.verticalOverflow = VerticalWrapMode.Overflow;
+            PracticeSelectionLayoutBuilder.Build(view, surface.gameObject);
             UiFontSettings.ApplyTo(view.transform);
             view.Validate();
 

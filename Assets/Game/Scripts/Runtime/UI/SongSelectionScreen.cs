@@ -13,7 +13,7 @@ using UnityEngine.UI;
 
 namespace RhythmDojo.UI
 {
-    public sealed class SongSelectionScreen : MonoBehaviour, IModalInputParticipant
+    public sealed partial class SongSelectionScreen : MonoBehaviour, IModalInputParticipant
     {
         [SerializeField]
         private SongSelectionView view;
@@ -30,6 +30,7 @@ namespace RhythmDojo.UI
         private bool favoritesOnly,
             loading;
         private double loadingStartedAt;
+        private bool libraryRefreshPending;
         private (string SongId, DifficultyProfile Difficulty, string Message, bool CanRetry)? playbackFailure;
 
         private static readonly string[] LoadingCaptions = { "불러오는 중.", "불러오는 중..", "불러오는 중..." };
@@ -172,6 +173,8 @@ namespace RhythmDojo.UI
             view.allTab.onClick.AddListener(ShowAll);
             view.favoritesTab.onClick.AddListener(ShowFavorites);
             selection.Library.Changed += OnLibraryChanged;
+            BindPractice();
+            ConfigurePractice();
             RefreshLibrary();
             FocusSelected();
         }
@@ -183,6 +186,12 @@ namespace RhythmDojo.UI
 
         private void Update()
         {
+            if (libraryRefreshPending && !Busy && !ModalOpen)
+            {
+                RefreshLibrary();
+                FocusSelected();
+            }
+            RefreshPracticeFeedback();
             if (previewSong != null)
             {
                 if (AudioSettings.dspTime >= previewEnd || !view.previewSource.isPlaying || previewSong.NeedsAudioRecovery)
@@ -195,6 +204,12 @@ namespace RhythmDojo.UI
             {
                 int frame = (int)((Time.unscaledTimeAsDouble - loadingStartedAt) / .35) % LoadingCaptions.Length;
                 view.playStatusLabel.text = LoadingCaptions[frame];
+                return;
+            }
+
+            if (PracticeActive)
+            {
+                UpdatePracticeInput();
                 return;
             }
 
@@ -309,8 +324,12 @@ namespace RhythmDojo.UI
         {
             if (Busy || ModalOpen)
             {
+                // Cold entry may initialize while the previous scene is still unloading.
+                // Replay the library notification once navigation releases input.
+                libraryRefreshPending = true;
                 return;
             }
+            libraryRefreshPending = false;
 
             IEnumerable<SongEntry> entries = selection.Library.Entries;
 
@@ -445,6 +464,7 @@ namespace RhythmDojo.UI
                 StopPreview();
                 playbackFailure = null;
                 view.SetPlaybackStatus();
+                RefreshPracticeDetails();
 
                 return;
             }
@@ -669,7 +689,7 @@ namespace RhythmDojo.UI
             if (song.Error == null)
             {
                 view.details.text =
-                    $"{chart?.Duration ?? song.Duration:0}s · {chart?.NoteCount ?? song.NoteCount} 노트 · {song.LaneCount} 레인\n↑↓ 곡 선택 · ←→ 난이도 · Enter 플레이 · Esc 뒤로가기";
+                    $"{chart?.Duration ?? song.Duration:0}s · {chart?.NoteCount ?? song.NoteCount} 노트 · {song.LaneCount} 레인";
             }
             else
             {
@@ -712,10 +732,15 @@ namespace RhythmDojo.UI
                     row.difficulty.text = selection.SelectedDifficulty.DisplayName;
                 }
             }
+            RefreshPracticeDetails();
         }
 
         private void SelectDifficulty(int value)
         {
+            if (PracticeActive && view.practice.IsStriking)
+            {
+                return;
+            }
             if (Busy || ModalOpen)
             {
                 return;
@@ -857,6 +882,7 @@ namespace RhythmDojo.UI
 
         public void RestoreEntryFocus()
         {
+            ConfigurePractice();
             FocusSelected();
         }
 
@@ -864,6 +890,12 @@ namespace RhythmDojo.UI
         {
             if (!EventSystem.current)
             {
+                return;
+            }
+
+            if (PracticeActive)
+            {
+                EventSystem.current.SetSelectedGameObject(view.practice.play.gameObject);
                 return;
             }
 
@@ -975,6 +1007,16 @@ namespace RhythmDojo.UI
 
         private async void Play()
         {
+            if (PracticeActive && view.practice.IsStriking)
+            {
+                practicePlayQueued = true;
+                view.practice.StopBarrage();
+                return;
+            }
+            if (PracticeActive && view.practice.IsLeaving)
+            {
+                return;
+            }
             if (Busy || !view.play.interactable || ModalOpen)
             {
                 return;
@@ -1211,6 +1253,11 @@ namespace RhythmDojo.UI
 
         private void ShowBack()
         {
+            if (practiceSelected)
+            {
+                ReturnFromPractice();
+                return;
+            }
             if (Busy || ModalOpen)
             {
                 return;
@@ -1255,6 +1302,8 @@ namespace RhythmDojo.UI
 
         private void Unbind()
         {
+            libraryRefreshPending = false;
+            UnbindPractice();
             StopPreview();
             lifetime?.Cancel();
             lifetime?.Dispose();
@@ -1321,7 +1370,15 @@ namespace RhythmDojo.UI
             RefreshMode();
         }
 
-        private void OnDisable() => StopPreview();
+        private void OnDisable()
+        {
+            StopPreview();
+            if (view && view.practice)
+            {
+                view.practice.StopBarrage();
+                practiceHeldDirection = 0;
+            }
+        }
 
         private void OnDestroy() => Unbind();
 

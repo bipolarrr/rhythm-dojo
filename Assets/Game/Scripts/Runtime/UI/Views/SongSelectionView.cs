@@ -18,6 +18,7 @@ namespace RhythmDojo.UI
             timingLabel,
             emptyMessage;
         public bool pixelTheme;
+        public PracticeSelectionView practice;
         public Text comboRecord;
         public RectTransform[] entrancePanels;
         public Image album;
@@ -56,6 +57,12 @@ namespace RhythmDojo.UI
 
         public void Validate()
         {
+            if (!practice)
+            {
+                throw new InvalidOperationException("Practice selection composition missing. Rebuild Song Selection.");
+            }
+
+            practice.Validate();
             if ((!difficultyList || !scrollModeList) || !multiplierList)
             {
                 throw new InvalidOperationException("Song selection view references missing.");

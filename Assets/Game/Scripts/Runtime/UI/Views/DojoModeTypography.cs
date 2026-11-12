@@ -20,7 +20,7 @@ namespace RhythmDojo.UI
 
         public void Validate()
         {
-            if (!titleGroup || !copyGroup || !brush)
+            if (!titleGroup || !copyGroup)
             {
                 throw new InvalidOperationException("Dojo typography motion references missing.");
             }
@@ -54,7 +54,10 @@ namespace RhythmDojo.UI
             ((RectTransform)titleGroup.transform).anchoredPosition = titleHome;
             ((RectTransform)copyGroup.transform).anchoredPosition = copyHome;
             titleGroup.transform.localScale = Vector3.one;
-            brush.localScale = Vector3.one;
+            if (brush)
+            {
+                brush.localScale = Vector3.one;
+            }
         }
 
         public void Exit(float progress, int direction)
@@ -80,7 +83,10 @@ namespace RhythmDojo.UI
             ((RectTransform)titleGroup.transform).anchoredPosition =
                 titleHome + Vector2.right * (-direction * entryDistance * (1f - settle));
             titleGroup.transform.localScale = Vector3.one * (1f + .035f * (1f - settle));
-            brush.localScale = new Vector3(Mathf.SmoothStep(0, 1, t), 1, 1);
+            if (brush)
+            {
+                brush.localScale = new Vector3(Mathf.SmoothStep(0, 1, t), 1, 1);
+            }
             float copy = Mathf.SmoothStep(0, 1, Mathf.Clamp01((seconds - copyDelay) / copySeconds));
             copyGroup.alpha = copy;
             ((RectTransform)copyGroup.transform).anchoredPosition = copyHome + Vector2.down * (9f * (1f - copy));

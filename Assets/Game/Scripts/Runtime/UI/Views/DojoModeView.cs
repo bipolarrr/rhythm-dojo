@@ -100,12 +100,6 @@ namespace RhythmDojo.UI
         private readonly string[] descriptions = {
             "처음이지? 내가 옆에서 박자를 짚어 줄게.", "자유롭게 연습하자!",
             "하산할 준비가 되었다고 생각하나?", "속세에서는 그것을 에디터라 부른다더라" };
-        private readonly string[] details = {
-            "선배 사형의 손짓에 맞춰 네 번 두드려 보세요.",
-            "목인 클릭 · Space로 가볍게 몸을 풀고, 곡을 골라 수련하세요.",
-            "흔들림 없는 박자로, 수련의 깊이를 증명하세요.",
-            "곡을 불러오고, 네 줄 위에 나만의 채보를 새기세요." };
-
         public void Validate()
         {
             if (!traineeAnimation || !teacherAnimation)
@@ -140,11 +134,11 @@ namespace RhythmDojo.UI
             {
                 throw new InvalidOperationException("Dojo paper motion reference missing.");
             }
-            if (typography == null || selectionMarks == null || !readyMark)
+            if (typography == null || selectionMarks == null)
             {
                 throw new InvalidOperationException("Dojo arcade interface composition missing.");
             }
-            if (typography.Length != 4 || selectionMarks.Length != 4)
+            if (typography.Length != 4)
             {
                 throw new InvalidOperationException("Dojo arcade mode count invalid.");
             }
@@ -158,7 +152,7 @@ namespace RhythmDojo.UI
             }
             for (int i = 0; i < typography.Length; i++)
             {
-                if (!typography[i] || !selectionMarks[i])
+                if (!typography[i])
                 {
                     throw new InvalidOperationException("Dojo arcade mode reference missing.");
                 }
@@ -245,7 +239,7 @@ namespace RhythmDojo.UI
                     throw new InvalidOperationException("Dojo trainee pose missing.");
                 }
             }
-            if (!lessonCue || !counter)
+            if (!lessonCue)
             {
                 throw new InvalidOperationException("Dojo lesson labels missing.");
             }
@@ -380,7 +374,10 @@ namespace RhythmDojo.UI
                     }
                     typography[SelectedIndex].Enter((t - titleArrival) * TravelSeconds, direction);
                 }
-                readyMark.localScale = new Vector3(Mathf.InverseLerp(titleArrival, 1f, t), 1, 1);
+                if (readyMark)
+                {
+                    readyMark.localScale = new Vector3(Mathf.InverseLerp(titleArrival, 1f, t), 1, 1);
+                }
                 yield return null;
             }
             character.rectTransform.localScale = Vector3.one;
@@ -453,6 +450,24 @@ namespace RhythmDojo.UI
             }
         }
 
+        public void SetPracticeApproach(float amount)
+        {
+            float scale = Mathf.Lerp(1, PracticeSelectionView.CameraScale, amount);
+            roomRoot.localScale = Vector3.one * scale;
+            roomRoot.anchoredPosition = PracticeSelectionView.CameraDestination * amount;
+            farLayers[1].localScale = Vector3.one * (1.04f
+                * Mathf.Lerp(1, PracticeSelectionView.BackgroundScale, amount) / scale);
+            farLayers[1].anchoredPosition = (PracticeSelectionView.BackgroundDestination
+                - PracticeSelectionView.CameraDestination) * (amount / scale);
+            float visible = 1f - Mathf.SmoothStep(0, 1, amount * 2f);
+            character.color = new Color(1, 1, 1, visible);
+            foreach (var group in interfaceGroups)
+            {
+                group.alpha = visible;
+                group.blocksRaycasts = amount <= 0;
+            }
+        }
+
         private void BeginArrival(bool runIn = false)
         {
             arrivalAge = 0f;
@@ -515,7 +530,10 @@ namespace RhythmDojo.UI
             }
             character.sprite = poses[0];
             character.enabled = SelectedIndex != 3;
-            readyMark.localScale = Vector3.one;
+            if (readyMark)
+            {
+                readyMark.localScale = Vector3.one;
+            }
             UpdateLabels();
             lessonCue.text = "내 손을 보고, 천천히 따라 해 봐.";
         }
@@ -540,8 +558,15 @@ namespace RhythmDojo.UI
                 heading.text = heading.text.Replace(" ", "\n");
             }
             description.text = descriptions[SelectedIndex];
-            detail.text = details[SelectedIndex];
-            counter.text = $"0{SelectedIndex + 1} / 04";
+            if (counter)
+            {
+                counter.text = $"0{SelectedIndex + 1} / 04";
+            }
+            lessonCue.gameObject.SetActive(false);
+            foreach (var mark in lessonMarks)
+            {
+                mark.gameObject.SetActive(false);
+            }
             actionLabel.text = "수련 시작";
             if (SelectedIndex == 0)
             {
@@ -561,7 +586,10 @@ namespace RhythmDojo.UI
                     selectionMarks[i].rectTransform.localScale = Vector3.one * 1.5f;
                 }
             }
-            readyMark.gameObject.SetActive(CanEnter);
+            if (readyMark)
+            {
+                readyMark.gameObject.SetActive(CanEnter);
+            }
         }
 
         public void Practice()
@@ -582,6 +610,11 @@ namespace RhythmDojo.UI
             if (!lesson)
             {
                 lesson = true;
+                lessonCue.gameObject.SetActive(true);
+                foreach (var mark in lessonMarks)
+                {
+                    mark.gameObject.SetActive(true);
+                }
                 age = 0;
                 LessonHits = 0;
                 UpdateLessonMarks();
@@ -690,7 +723,10 @@ namespace RhythmDojo.UI
             age += Time.unscaledDeltaTime;
             reaction = Mathf.Max(0, reaction - Time.unscaledDeltaTime);
             float readyPulse = Mathf.Sin(age * 24f) * Mathf.Exp(-age * 7f);
-            readyMark.localScale = new Vector3(1f + readyPulse * .08f, 1f + readyPulse * .3f, 1);
+            if (readyMark)
+            {
+                readyMark.localScale = new Vector3(1f + readyPulse * .08f, 1f + readyPulse * .3f, 1);
+            }
             character.sprite = poses[0];
             character.rectTransform.localRotation = Quaternion.identity;
             character.rectTransform.anchoredPosition = characterHome;

@@ -1,0 +1,18 @@
+Wooden dummy selection artwork
+
+Created with the built-in image_gen tool for RhythmDojo on 2026-11-12.
+Reference: Assets/Game/Art/AlphaDojo/Actors.png (existing project character and dummy design).
+Output: WoodenDummyAtlas.png, 1536 x 1024, RGBA, six cells.
+The original generated alpha is preserved. PracticeSelectionLayoutBuilder creates reusable
+sprite assets and crops the recessed face in the editor. No textures are built at runtime.
+
+Final prompt:
+Use case: stylized-concept. Create one production GAME SPRITE ATLAS with a genuinely transparent background, 1536 x 1024, SIX equally sized 512x512 cells in 3 columns and 2 rows. Input is a STYLE AND DESIGN REFERENCE ONLY, not the output to recolor. Match the reference Korean martial arts arcade pixel-painterly crisp dark outline, warm amber wood, golden straw rope, ivory tunic, dark teal cuff. Each cell isolated, ample transparent padding, no text, no guides, no floor shadow, no background. Top left cell: front-facing Wing Chun training dummy BODY ONLY, three protruding wooden arms, straw rope binding, sturdy wood post with braced feet, as reference bottom-row third object, but NO head; short central neck peg at top. Top middle cell: detached oversized CYLINDRICAL wooden dummy HEAD, front view at very slight elevated view, amber wood, broad nearly square flat front face with a simple shallow recessed square to attach an album jacket later; small rope binding around lower edge, thick dark pixel outline. This is a wooden log, no human facial features. Top right: EXACT SAME HEAD in right side profile, curved timber grain, no square recess visible, same height and scale. Bottom left: EXACT SAME HEAD rear view, same outline and size as front, wood knots and dark vertical seam, no recess, no face. Bottom middle: player's LEFT FIST and forearm in first person perspective, ivory martial-arts sleeve with dark teal cuff, clenched fist pointing diagonally up toward right (toward center of screen), fist at upper right and sleeve entering lower left, human skin, reference trainee's outfit. Bottom right: matching player's RIGHT FIST and forearm mirrored composition, clenched fist upper left pointing toward center, sleeve enters lower right. High quality clean game cutouts, no lettering. Keep all six sprites completely separate within their grid cells. The heads should fill approximately 340 x 340 pixels centered within their cells. Body should fill about 340 wide x 455 high centered in its cell. Fists should fill approximately 420x400 each.
+
+
+StrikePoses.png: generated with built-in image_gen on 2026-11-12 using WoodenDummyAtlas.png
+as the cream uniform / teal cuff / tan skin style reference. Original RGBA alpha preserved.
+4 columns x 3 rows: punch, knife-hand chop, side kick; chamber, extension, contact, recoil.
+PracticeSelectionLayoutBuilder slices alpha bounds and contact pivots into 12 reusable sprite
+assets. Three authored strike slots and four authored afterimages share this immutable atlas.
+No textures, sprites, materials or strike objects are created during playback.

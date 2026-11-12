@@ -242,6 +242,7 @@ namespace RhythmDojo.Tests
 
         [TestCase("Bootstrap", "settings")]
         [TestCase("SongSelection", "settingsButton")]
+        [TestCase("SongSelection", "practice")]
         [TestCase("Settings", "bufferList")]
         [TestCase("Settings", "actualState")]
         [TestCase("Settings", "status")]

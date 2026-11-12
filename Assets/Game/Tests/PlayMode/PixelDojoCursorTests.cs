@@ -56,6 +56,12 @@ namespace RhythmDojo.Tests
             Assert.That(normal.width, Is.EqualTo(128));
             Assert.That(normal.height, Is.EqualTo(128));
             Assert.That(normal.format, Is.EqualTo(TextureFormat.RGBA32));
+#if UNITY_EDITOR
+            var importer = (UnityEditor.TextureImporter)UnityEditor.AssetImporter.GetAtPath(
+                UnityEditor.AssetDatabase.GetAssetPath(normal));
+            Assert.That(importer.alphaIsTransparency, Is.True,
+                "Unity rejects cursor textures without alpha transparency enabled.");
+#endif
             Assert.That(normal.GetPixel(0, 0).a, Is.Zero);
             Assert.That(normal.GetPixel(64, 64).a, Is.GreaterThan(.9f));
             int redPixels = 0;

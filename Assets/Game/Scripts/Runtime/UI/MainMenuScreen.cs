@@ -113,6 +113,7 @@ namespace RhythmDojo.UI
                 {
                     starting = false;
                     view.menuPanel.alpha = 1f;
+                    view.modeSelection.SetPracticeApproach(0);
                     view.SetMenuInteractable(true);
                     view.modeSelection.detail.text = "곡 목록을 열지 못했습니다. 다시 수련 시작을 눌러 주세요.";
                 }
@@ -216,7 +217,38 @@ namespace RhythmDojo.UI
             }
             starting = true;
             view.SetMenuInteractable(false);
+            if (view.modeSelection.SelectedIndex == 1)
+            {
+                StartCoroutine(ApproachPractice());
+                return;
+            }
             StartCoroutine(BreakAndInvoke(view.start, actions.StartGame, true));
+        }
+
+        private IEnumerator ApproachPractice()
+        {
+            view.modeSelection.CancelMotion();
+            view.modeSelection.InputEnabled = false;
+            float elapsed = 0;
+            while (elapsed < PracticeSelectionView.ApproachSeconds)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                view.modeSelection.SetPracticeApproach(Mathf.SmoothStep(0, 1,
+                    elapsed / PracticeSelectionView.ApproachSeconds));
+                yield return null;
+            }
+            view.modeSelection.SetPracticeApproach(1);
+            try
+            {
+                actions.StartGame();
+            }
+            catch (Exception error)
+            {
+                starting = false;
+                view.modeSelection.SetPracticeApproach(0);
+                view.SetMenuInteractable(true);
+                Debug.LogException(error, this);
+            }
         }
 
         private IEnumerator BreakAndInvoke(

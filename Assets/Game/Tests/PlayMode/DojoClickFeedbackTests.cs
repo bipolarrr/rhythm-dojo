@@ -57,12 +57,12 @@ namespace RhythmDojo.Tests
                 == RhythmDojo.Core.AppFlowController.SelectionPath);
             yield return Await(() => !DojoEntranceTransition.Active);
             yield return CheckClickOutput();
-            yield return Click(Object.FindFirstObjectByType<SongSelectionView>().settingsButton);
+            yield return Click(Object.FindFirstObjectByType<PracticeSelectionView>().settings);
             yield return Await(() => Object.FindFirstObjectByType<SettingsScreen>());
             yield return CheckClickOutput();
             yield return Click(Object.FindFirstObjectByType<SettingsView>().back);
             yield return Await(() => Object.FindFirstObjectByType<SongSelectionScreen>());
-            yield return Click(Object.FindFirstObjectByType<SongSelectionView>().play);
+            yield return Click(Object.FindFirstObjectByType<PracticeSelectionView>().play);
             yield return Await(() =>
                 Object.FindFirstObjectByType<RhythmDojo.Gameplay.RhythmGameController>()
             );

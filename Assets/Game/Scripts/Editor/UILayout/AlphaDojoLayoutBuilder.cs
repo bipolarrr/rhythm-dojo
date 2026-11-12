@@ -185,9 +185,7 @@ namespace RhythmDojo.EditorTools
                     mode.companions[i].sizeDelta = new Vector2(253, 253);
                     mode.lessonCue = Label("Teacher Cue", group.transform, "내 손을 보고, 천천히 따라 해 봐.", 20, Ink);
                     Place(mode.lessonCue.rectTransform, new Vector2(.5f, .5f), new Vector2(270, 66), new Vector2(360, 36));
-                    var seniorLabel = Label("Senior Role", group.transform, "선배 사형 · 기초 수련 담당", 17, Ink);
-                    Place(seniorLabel.rectTransform, new Vector2(.5f, .5f), new Vector2(270, 103), new Vector2(310, 30));
-                    seniorLabel.transform.SetParent(mode.middleLayers[i], false);
+                    mode.lessonCue.gameObject.SetActive(false);
                     for (int beat = 0; beat < 4; beat++)
                     {
                         var stamp = Art("Lesson Beat " + (beat + 1), group.transform,
@@ -196,6 +194,7 @@ namespace RhythmDojo.EditorTools
                         mode.lessonMarks[beat] = stamp;
                         var number = Label("Beat Number", stamp.transform, (beat + 1).ToString(), 17, Paper);
                         Stretch(number.rectTransform);
+                        stamp.gameObject.SetActive(false);
                     }
                 }
                 if (i == 2)
@@ -221,6 +220,13 @@ namespace RhythmDojo.EditorTools
                 if (i == 1)
                 {
                     mode.props[i].anchoredPosition = new Vector2(100, -224);
+                    var rig = PracticeSelectionLayoutBuilder.BuildRig(mode.props[i]);
+                    var rigRect = (RectTransform)rig.transform;
+                    rigRect.anchorMin = rigRect.anchorMax = new Vector2(.5f, .05f);
+                    rigRect.anchoredPosition = new Vector2(0, 89);
+                    rigRect.localScale = Vector3.one * .3f;
+                    rig.jacketGroup.alpha = 0;
+                    mode.props[i].GetComponent<Image>().color = Color.clear;
                     mode.practiceTarget = mode.props[i].gameObject.AddComponent<Button>();
                     mode.practiceTarget.targetGraphic = mode.props[i].GetComponent<Image>();
                     mode.practiceTarget.targetGraphic.raycastTarget = true;
