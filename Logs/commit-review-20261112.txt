@@ -1,0 +1,57 @@
+Uncommitted-work review and commit packaging — 2026-11-12
+
+Branch: emergency, explicitly selected by the user. main was not moved.
+
+Commit groups
+1. Wooden dummy practice selection, authored strike/rotation presentation, shared
+   browser navigation, simplified dojo/settings/results/editor UI, generated assets
+   and scenes, and their regression coverage.
+2. Two-second gameplay introduction, song artwork/difficulty HUD, vertical health
+   gauge, dojo backdrop, authored strike audio/visual effects, and adapted tests.
+3. Current scene-route/player diagnostics, verification guidance, and evidence.
+
+Review corrections
+- The two original generated effect WAVs were excluded by the global local-audio
+  rule. Added exact-path exceptions and tracked both WAVs with their existing metas.
+  Regenerated both effects in a temporary directory with the checked-in synthesis
+  source; each output was byte-identical to its existing asset.
+- AudioFlowTests began measuring real playback time before waiting for the new
+  introduction. Moved the measurement start after that wait, preserving its name,
+  playback assertion, tolerance, and hardware coverage.
+- Empty generated Assets/Logs folder metadata had no asset to accompany it.
+  Preserved it locally as Logs/commit-review-Assets-Logs.meta.backup and removed
+  the empty import artifact. Line-ending-only status entries normalized without
+  introducing content changes.
+
+Verification performed for this review
+- Unity 6000.3.23f1 recompile_status: completed, no compilation errors.
+- UiTypographyTests: 12 passed, no failures/skips/inconclusive, 2.45 seconds.
+  Result: commit-review-typography.json.
+- AllBufferRequestsReportActualConfigurationAndChangedAudioPlaysAndRestarts:
+  1 passed, no failures/skips/inconclusive, 90.53 seconds.
+  Result: commit-review-audio.json.
+- Source/document/script diff whitespace checks passed.
+- Repository pre-commit hook checks staged asset/meta pairing and GUID validity.
+- Final Editor check: Play Mode exited, no compilation in progress, Title.unity
+  active without unsaved scene changes, and Pipeline status ready.
+
+Execution issues retained separately
+The initial EditMode attempt encountered an active Play Mode and produced no valid
+test result. After exiting Play Mode, the typography rerun above passed.
+The first hardware attempt failed on an unhandled Pipeline error from a concurrent
+Editor inspection request timing out after 30 seconds. This was not counted as a
+pass. The same hardware case passed when rerun without that concurrent request.
+Failure evidence: commit-review-audio-first.json.
+
+Existing evidence reviewed
+The ingame-*-tests.json files contain 38 passing executions / 36 distinct cases,
+including startup, HUD, feedback, pause, gameplay, judgment, audio recovery, and
+Smoke. They predate this packaging review and are not new executions in this turn.
+The earlier scene-route audit's initial full runs had failures; its later targeted
+regeneration, typography, and jacket tests passed. Those records were reviewed,
+not represented as a single clean full-suite run.
+
+Limits
+No full-suite rerun or new player build was performed for this commit request.
+Existing player build and diagnostic records precede the latest gameplay changes.
+No subjective audio listening evaluation or fresh aspect-ratio sweep was performed.

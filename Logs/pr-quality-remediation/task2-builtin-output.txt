@@ -1,1 +1,1 @@
-Borrowed clip mixer peak=0.060476057231426239; samples=529200; frequency=44100
+Borrowed clip mixer peak=0.061678152531385422; samples=529200; frequency=44100

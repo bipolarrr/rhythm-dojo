@@ -57,6 +57,8 @@ unity command test_status --json
 
 Domain/EditMode의 mode는 `editor`다. `test_status` 결과를 확인한 뒤 Play Mode 종료와 `unity status --json`의 ready를 확인하고 다음 실행을 시작한다. 공통 프로필은 Editor 메뉴 또는 Pipeline의 `run_script`에서 `FoundationVerification.RunUi()` 등의 기존 메서드를 호출한다. 이 실행의 완료 근거는 `Logs/verification.txt`와 XML이다.
 
+`ready`는 디스크의 최신 C#이 컴파일됐다는 보장이 아니다. 소스 변경 후 `unity command recompile --focus true --json`을 실행하고 `unity command recompile_status --json`의 완료·오류 없음 및 실제 대상 테스트 검색/실행 건수를 확인한다. 도메인 재로드 동안 연결이 잠시 끊기면 복구를 기다린다. 0건 결과는 통과가 아니다. `run_script`가 반환됐다는 사실만으로 예약한 `delayCall`의 실행이나 씬 생성 완료를 판정하지 않는다. 생성 완료 기록과 저장된 씬의 참조까지 확인한다.
+
 배치에서는 해당 프로젝트의 Editor를 닫고 저장소 루트 PowerShell에서 실행한다. 프로세스 종료를 기다리고 비동기 검사에 `-quit`를 붙이지 않는다.
 
 ```powershell
@@ -81,6 +83,26 @@ $unity = 'C:/Program Files/Unity/Hub/Editor/6000.3.23f1/Editor/Unity.exe'
 
 두 씬은 Project 창에서 각각 열 수 있다. `Build Title`, `Build Mode Selection`, `Build All Scenes`가 각 구성을 재생성하며 디자인 수정은 기존 레이아웃 빌더에 반영한다. `ModeSelection`에서 바로 Play Mode를 확인하려면 기존 **Start Play Mode From Title** 옵션을 끈다. 씬 분리 검증은 `MainMenuTests`, `MainMenuFlowTests`, `ScenePreparationFlowTests`와 Smoke를 사용한다.
 
+### 제품 씬과 직접 실행 경로
+
+Build Settings의 순서는 `Title`, `ModeSelection`, `Bootstrap`, `SongSelection`, `Gameplay`, `Settings`, `Results`, `ChartEditor`다. 별도 활성 Build Profile이 씬 목록을 덮어쓰는지도 확인한다. 이름만으로 판단하지 않고 `MainMenuActions`, `MainMenuEntranceScreen`, `AppFlowController`, `PreparedSelectionScene`의 실제 호출과 각 composition root의 참조를 추적한다.
+
+| 씬/화면 | 현재 소유 구성과 실행 경로 |
+| --- | --- |
+| Title | `MainMenuEntranceScreen`과 한옥 대문. 입장 시 ModeSelection을 additive로 로드하고 입력·카메라·음악 소유권을 넘긴 뒤 Title을 해제한다. |
+| ModeSelection | `MainMenuScreen`/`DojoModeView`가 네 방을 소유한다. `AlphaDojoLayoutBuilder`가 최신 배경·인물·타이포그래피를 조립한다. |
+| 비급 전수 | 별도 씬이 아닌 첫 번째 방의 사형·수련생 튜토리얼. 시작 버튼이 `DojoModeView.Practice()`를 호출한다. |
+| 자유 연습 | 두 번째 방 → SongSelection의 `PracticeSelectionView`/목인. 준비 중인 씬도 활성화 직전에 최종 선택 상태를 다시 적용한다. |
+| 실력 검정 | 세 번째 방 → 같은 SongSelection의 목록형 라이브러리, Challenge 규칙. 이 목록은 자유 연습의 ‘곡 목록’에서도 사용하는 현행 기능이다. |
+| 율보 편찬 | 네 번째 방 → ChartEditor. `ChartEditorSceneBuilder.Build()`는 `WorkspaceSceneBuilder.Build()`로 연결되어 확장 편집 UI를 생성한다. |
+| Bootstrap / SongSelection 직접 실행 | 새 AppFlow의 기본 진입은 자유 연습 목인 화면. 기존 AppFlow가 있으면 선택한 모드와 규칙을 보존한다. Bootstrap은 단축 초기화 경로이며 전체 메뉴 확인은 Title에서 시작한다. |
+| Gameplay | AppFlow의 선택 곡을 사용하며 직접 실행 시 기본 카탈로그 곡을 준비한다. 종료/결과 복귀 시 진입 모드의 선곡 UI로 돌아간다. |
+| Settings / Results | 직접 실행 가능한 현행 씬. 일반 설정은 같은 빌더가 생성한 `Resources/UI/SettingsPopup.prefab`을 재사용한다. 결과 없는 Results 직접 실행은 빈 결과 표시이며 실제 결과/재시도는 플레이 경로에서 확인한다. |
+
+`SongSelectionView.Validate()`는 목인 구성을 필수로 검사한다. 오래된 씬에서 참조가 없을 때 목록으로 조용히 대체하지 않는다. `GameplayTestContext`의 목록 중심 fixture는 검정/공유 라이브러리 대상을 명시적으로 선택하고, `PracticeSelectionTests`는 제품 기본 진입을 그대로 사용한다. `MainMenuFlowTests`는 Title 입장, 네 방의 기능, 직접 진입, 사전 준비/해제와 중복 입력 소유권을 검증한다. Bootstrap의 view 없는 API 진입은 `Compatibility`로 식별한다.
+
+`Assets/Scenes/SampleScene.unity`와 로컬 무시 폴더의 `Assets/CodexIdeRepairTemp/MainMenuTestHost.unity`는 제품 빌드 및 현행 테스트의 진입 대상이 아니다. `Logs` 아래의 과거 씬·프로젝트 복사본과 기존 EXE는 현재 실행 증거로 사용하지 않는다. 삭제하거나 최신 제품 씬 위에 복사하지 않는다.
+
 Test Framework 1.6.0의 결과 callback은 씬·설정 정리보다 먼저 발생한다. 실행기는 내부 작업 상태를 확인하여 정리 종료 후 다음 mode·빌드·Editor 종료로 진행한다. 패키지 버전 변경 시 이 어댑터와 시작 씬 복원도 검증한다.
 
 `Logs/verification.txt`에는 프로필·고유 사례 수·결과·소요 시간과 실패 상세만 기록한다. All XML은 `verification-editmode.xml`, `verification-playmode.xml`이며, 부분 프로필은 `verification-ui-editmode.xml`과 같이 프로필·mode를 포함한다. 각 XML에 개별 결과와 시간이 남는다. 특정 mode에 해당 사례가 없으면 실행하지 않고 기록하며, 프로필 전체 0개·skip·inconclusive·실패는 성공이 아니다.
@@ -97,7 +119,7 @@ UI는 View의 필수 참조, 공유 자원 소유권, 클릭 영역·겹침·텍
 
 ## 현재 동작 계약
 
-타이틀 현판을 누르면 메뉴가 열리고, 플레이는 곡 선택으로 이동한다. 설정은 재사용 팝업을 열며, 종료는 확인 팝업에서 요청을 한 번 전달한다. 실제 프로세스 종료 자체는 자동 검사 범위가 아니다. Gameplay의 Escape는 일시정지와 재개 경로이며, 종료·결과 이동은 AppFlow가 세션과 음원 소유권을 정리한다. 상세 UI 계약은 [타이틀 안내](pixel-dojo-title.md), [팀 경계](team-ownership.md)를 따른다.
+타이틀 진입 영역을 누르면 대문 연출을 거쳐 ModeSelection으로 이동한다. 각 방의 시작 버튼은 위 표의 비급 전수·자유 연습·실력 검정·율보 편찬 경로를 사용한다. 설정은 재사용 팝업을 열며, 종료는 확인 팝업에서 요청을 한 번 전달한다. 실제 프로세스 종료 자체는 자동 검사 범위가 아니다. Gameplay의 Escape는 일시정지와 재개 경로이며, 종료·결과 이동은 AppFlow가 세션과 음원 소유권을 정리한다. 상세 UI 계약은 [타이틀 안내](pixel-dojo-title.md), [팀 경계](team-ownership.md)를 따른다.
 
 버퍼 적용은 DSP 시계 진행률을 검사한다. 실시간 관측 길이 T, DSP 증가량 D, 실제 블록 크기 B, 샘플레이트 F에 대해 E = 2B/F로 두 끝점의 오차를 반영한다. 진행률 구간 전체가 [0.99, 1.01]에 포함되는 독립 관측 두 번만 정상으로 인정한다. 관측·복구의 전체 제한시간은 20초이며, 시간 만료나 복원 요청 수락은 정상 판정이 아니다. `ClockRateMeasurements`와 `Logs/audio-buffers.txt`가 근거다. 이는 체감 지연이나 출력 품질 측정과는 범위가 다르다.
 
@@ -127,7 +149,7 @@ Edit Mode에서 **Game Tools > Preview > Results**를 누르면 샘플 결과가
 
 ### Windows remediation diagnostic
 
-`RhythmDojo.EditorTools.RemediationPlayerVerification.BuildPlayer()` builds the separate development player at `Builds/RemediationProbe/RemediationProbe.exe`. After compilation, run `unity command run_script --file Logs/pr-quality-remediation/RemediationBuildDispatch.cs --entry RemediationBuildDispatch.Main --json` in the project root. This dispatches the build on the next Editor update so the CLI request finishes before the build; a synchronous eval can time out and inject an error into a strict build. The builder writes `Logs/pr-quality-remediation/player-probe-build.json` and restores the prior scene setup. It includes all product scenes and test assemblies only in this diagnostic build; Foundation still builds the ordinary player separately.
+`RhythmDojo.EditorTools.RemediationPlayerVerification.BuildPlayer()` builds the separate development player at `Builds/RemediationProbe/RemediationProbe.exe`. After compilation and Test Runner cleanup, call this method synchronously from a `run_script` entry point with a sufficient timeout (for example `--timeout_ms 600000 --timeout 610`). A short synchronous `eval` can time out and inject an error into a strict build; a callback registered by a temporary script is not proof that the build ran. Confirm the build report and output timestamp. The builder writes `Logs/pr-quality-remediation/player-probe-build.json` and restores the prior scene setup. It includes all product scenes and test assemblies only in this diagnostic build; Foundation still builds the ordinary player separately. The diagnostic visits all four rooms through their visible controls, opens the practice library explicitly, and returns through ModeSelection before Title.
 
 Run the phases sequentially, waiting for each process to exit. Use the same absolute evidence directory for both launches:
 
@@ -140,7 +162,7 @@ Start-Process -FilePath $probe -WindowStyle Hidden -Wait -ArgumentList @('-remed
 
 Check each process exit code and the corresponding JSON `success`; a completed process alone does not imply success. The first phase backs up the six known string preference keys, including their existence flags, before isolating them. Successful exercise leaves the two mode key overrides for the next process. Persistence verifies those overrides and their settings UI, then restores the exact original values. Failure also attempts restoration independently of other cleanup. If a process is killed, run the same command with `-remediationPhase restore`; do not remove `preferences-backup.json` before restoration. Backup writes replace the prior file atomically.
 
-The probe uses queued keyboard/mouse input and verifies pointer raycasts before clicking buttons. Buffer selection uses the Dropdown's normal value-change route, followed by an actual Apply click in the graphics tab. It covers title/settings/editor/selection navigation, actual editor Back autosave of a newly generated GUID project, mode isolation and HUD/Results labels, external WAV loading, pause/buffer validation/recovery/resume/restart/exit, and the built Results scene. It removes only the probe's new editor JSON file and empty GUID directory, after checking containment, absence before creation, and lack of links or unexpected contents; it never removes existing projects. The owned GUID is saved in the backup for crash cleanup.
+The probe uses queued keyboard/mouse input and verifies pointer raycasts before clicking buttons. Menu references come from the active scene's composition root, and reentry waits for the door return animation to finish. Buffer selection uses the Dropdown's normal value-change route, followed by an actual Apply click in the graphics tab. It covers title/settings/editor/selection navigation, editing a new GUID project's title before File > Exit > Save and Exit, mode isolation and HUD/Results labels, external WAV loading, pause/buffer validation/recovery/resume/restart/exit, and the built Results scene. It removes only the probe's new `project.rdchart.json`, `workspace.json` and empty GUID directory, after checking containment, absence before creation, and lack of links or unexpected contents; it never removes existing projects. The owned GUID is saved in the backup for crash cleanup.
 
 `exercise.json` records requested/applied buffers, DSP rate intervals, decoded and mixer sample peaks, and audio/song alignment with DSP block plus observed-frame uncertainty. A `loopback-ready` step holds the recovered external 440 Hz tone for 20 seconds so a separate OS loopback recorder can verify output beyond Unity's mixer. PNGs are offscreen renders using the active pipeline StandardRequest, preserving original display-camera world visibility and the existing gameplay texture. They are not framebuffer captures. Blank frames fail the diagnostic and saved images still require visual review. The Results navigation check explicitly advances the session; it does not substitute for the full real-time external WAV test. Synthetic input, screenshots, and mixer sampling do not by themselves establish physical audio latency or subjective output quality.
 

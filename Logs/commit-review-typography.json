@@ -1,0 +1,97 @@
+{
+  "status": "completed",
+  "duration": 2.45,
+  "summary": {
+    "total": 12,
+    "passed": 12,
+    "failed": 0,
+    "skipped": 0,
+    "inconclusive": 0
+  },
+  "results": [
+    {
+      "FullName": "RhythmDojo.Tests.UiTypographyTests.ExplicitRolesIgnoreNamesAndSurviveTreeReapplication",
+      "Status": "Passed",
+      "Duration": 0.4546094,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.UiTypographyTests.IndividualAndTreeFontApplicationUseTheSameInactiveScope",
+      "Status": "Passed",
+      "Duration": 0.4449249,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.UiTypographyTests.SavedSceneUsesMonaForAllTextIncludingHiddenControls(\"Title\")",
+      "Status": "Passed",
+      "Duration": 0.0750883,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.UiTypographyTests.SavedSceneUsesMonaForAllTextIncludingHiddenControls(\"SongSelection\")",
+      "Status": "Passed",
+      "Duration": 0.078118,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.UiTypographyTests.SavedSceneUsesMonaForAllTextIncludingHiddenControls(\"Settings\")",
+      "Status": "Passed",
+      "Duration": 0.0705903,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.UiTypographyTests.SavedSceneUsesMonaForAllTextIncludingHiddenControls(\"Gameplay\")",
+      "Status": "Passed",
+      "Duration": 0.0454313,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.UiTypographyTests.SavedSceneUsesMonaForAllTextIncludingHiddenControls(\"ChartEditor\")",
+      "Status": "Passed",
+      "Duration": 0.1525408,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.UiTypographyTests.SavedSceneUsesMonaForAllTextIncludingHiddenControls(\"Results\")",
+      "Status": "Passed",
+      "Duration": 0.0200609,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.UiTypographyTests.ScopedControlsKeepBrushFontWhenCreatedAtRuntime",
+      "Status": "Passed",
+      "Duration": 0.0735195,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.UiTypographyTests.ScopeOrderAndPixelSmoothRoundTripsPreserveCustomMaterials(False)",
+      "Status": "Passed",
+      "Duration": 0.0016348,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.UiTypographyTests.ScopeOrderAndPixelSmoothRoundTripsPreserveCustomMaterials(True)",
+      "Status": "Passed",
+      "Duration": 0.0005105,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "RhythmDojo.Tests.UiTypographyTests.SharedPopupAndRuntimeControlsMatchStartButtonTypography",
+      "Status": "Passed",
+      "Duration": 0.0555001,
+      "Message": null,
+      "StackTrace": null
+    }
+  ]
+}

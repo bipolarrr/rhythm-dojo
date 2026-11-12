@@ -203,7 +203,9 @@ namespace RhythmDojo.Tests
 
         private IEnumerator Click(Button button)
         {
-            Require(button && button.isActiveAndEnabled, "Click target is active.");
+            Require(button, "Click target exists.");
+            Step("click-" + button.name, button.gameObject.scene.path);
+            Require(button.isActiveAndEnabled, "Click target is active: " + button.name);
             Require(button.interactable, "Click target is interactable: " + button.name);
             yield return null;
             Canvas.ForceUpdateCanvases();
@@ -366,13 +368,19 @@ namespace RhythmDojo.Tests
                     continue;
                 }
                 string file = Path.Combine(folder, FileSongProjectStore.FileName);
+                var files = new[] { file, Path.Combine(folder, "workspace.json") };
                 Require(Directory.GetDirectories(folder).Length == 0, "Owned draft has no unexpected child directories.");
-                Require(Directory.GetFiles(folder).All(value => value == file), "Owned draft has only its expected JSON file.");
-                if (File.Exists(file))
+                Require(Directory.GetFiles(folder).All(value => files.Contains(value)),
+                    "Owned draft has only its project and workspace JSON files.");
+                foreach (string path in files)
                 {
-                    Require((File.GetAttributes(file) & FileAttributes.ReparsePoint) == 0,
+                    if (!File.Exists(path))
+                    {
+                        continue;
+                    }
+                    Require((File.GetAttributes(path) & FileAttributes.ReparsePoint) == 0,
                         "Owned draft cleanup refuses linked files.");
-                    File.Delete(file);
+                    File.Delete(path);
                 }
                 Directory.Delete(folder, false);
             }

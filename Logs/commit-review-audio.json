@@ -1,0 +1,20 @@
+{
+  "status": "completed",
+  "duration": 90.53,
+  "summary": {
+    "total": 1,
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "inconclusive": 0
+  },
+  "results": [
+    {
+      "FullName": "RhythmDojo.Tests.AudioFlowTests.AllBufferRequestsReportActualConfigurationAndChangedAudioPlaysAndRestarts",
+      "Status": "Passed",
+      "Duration": 89.1878841,
+      "Message": null,
+      "StackTrace": null
+    }
+  ]
+}

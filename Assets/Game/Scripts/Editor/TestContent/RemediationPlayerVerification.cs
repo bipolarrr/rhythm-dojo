@@ -47,8 +47,8 @@ namespace RhythmDojo.EditorTools
                     SceneBuilder.BootstrapPath,
                     SceneBuilder.SelectionPath,
                     SceneBuilder.GameplayPath,
-                    SceneBuilder.ResultsPath,
                     SceneBuilder.SettingsPath,
+                    SceneBuilder.ResultsPath,
                     ChartEditorSceneBuilder.ScenePath,
                 },
             };

@@ -153,7 +153,7 @@ namespace RhythmDojo.Tests
             Require(flow, "Title creates AppFlow.");
             yield return Capture("title");
             yield return OpenTitleMenu();
-            yield return Click(Object.FindFirstObjectByType<MainMenuView>().settings);
+            yield return Click(MainMenuCompositionRoot.InScene(SceneManager.GetActiveScene()).View.settings);
             yield return Wait(() => Object.FindFirstObjectByType<SettingsView>(), "Title settings");
             var view = Object.FindFirstObjectByType<SettingsView>();
             yield return Click(view.keySettingsTab);
@@ -182,6 +182,7 @@ namespace RhythmDojo.Tests
                 yield break;
             }
 
+            yield return VerifyTrainingModes();
             yield return EditorRoundTrip();
             yield return EnterSelection();
             RegisterWave();
@@ -217,6 +218,7 @@ namespace RhythmDojo.Tests
 
         private IEnumerator SelectWave()
         {
+            yield return OpenSelectionLibrary();
             Object.FindFirstObjectByType<SongSelectionScreen>().SelectSong(SongId);
             yield return null;
             Require(flow.Selection.SelectedSongId == SongId, "Generated external WAV selected.");
@@ -359,7 +361,14 @@ namespace RhythmDojo.Tests
 
         private IEnumerator EditorRoundTrip()
         {
-            yield return Click(Object.FindFirstObjectByType<MainMenuView>().editor);
+            var view = MainMenuCompositionRoot.InScene(SceneManager.GetActiveScene()).View;
+            yield return Click(view.modeSelection.next);
+            yield return Wait(() => !view.modeSelection.IsMoving, "Travel to Challenge");
+            yield return Click(view.modeSelection.next);
+            yield return Wait(() => !view.modeSelection.IsMoving, "Travel to scribing room");
+            Require(view.modeSelection.SelectedIndex == 3, "Fourth mode is the scribing room.");
+            yield return Capture("scribing-room");
+            yield return Click(view.start);
             yield return Wait(() => Object.FindFirstObjectByType<ChartEditorMenu>(), "Editor load");
             yield return Wait(() => Object.FindFirstObjectByType<ChartEditorMenu>().IsInitialized, "Editor initialize");
             var screen = Object.FindFirstObjectByType<ChartEditorScreen>();
@@ -369,6 +378,12 @@ namespace RhythmDojo.Tests
             backup.ownedProjectIds.Add(id);
             SaveBackup();
             var workspace = Object.FindFirstObjectByType<WorkspaceEditor>();
+            Require(workspace && workspace.view, "Scribing opens the current authored workspace.");
+            yield return Capture("chart-editor");
+            yield return Click(workspace.view.menus[1].trigger);
+            workspace.view.title.text = "Scene route verification";
+            yield return Click(workspace.view.actions.Single(binding => binding.action == WorkspaceAction.ApplySettings).button);
+            yield return Wait(() => workspace.HasUnsavedChanges, "Editor draft modification");
             yield return Click(workspace.view.menus[0].trigger);
             yield return Click(workspace.view.actions.Single(binding => binding.action == WorkspaceAction.Exit).button);
             yield return Wait(() => workspace.view.exitPopup.activeSelf, "Editor exit confirmation");
@@ -377,43 +392,105 @@ namespace RhythmDojo.Tests
             Require(File.Exists(Path.Combine(folder, FileSongProjectStore.FileName)),
                 "Editor Back saved its new draft through the real store.");
             CleanupProjects();
-            Step("editor-round-trip", "File menu save and exit verified; only the new probe-owned project file and empty folder removed.");
+            Step("editor-round-trip", "File menu save and exit verified; only the new probe-owned project/workspace files and empty folder removed.");
             yield return OpenTitleMenu();
         }
 
         private IEnumerator OpenTitleMenu()
         {
-            yield return Wait(() => Object.FindFirstObjectByType<MainMenuView>(), "Title view");
+            yield return Wait(() => MainMenuCompositionRoot.InScene(SceneManager.GetActiveScene()), "Title view");
             yield return null;
-            var view = Object.FindFirstObjectByType<MainMenuView>();
+            var view = MainMenuCompositionRoot.InScene(SceneManager.GetActiveScene()).View;
             if (!view.modeSelection)
             {
+                yield return Wait(() => view.logo.IsInteractable(), "Title return animation completion");
                 yield return Click(view.logo);
                 yield return Wait(() => SceneManager.GetActiveScene().path == MainMenuActions.ModeSelectionScenePath,
                     "Mode selection entry");
-                view = Object.FindFirstObjectByType<MainMenuScreen>().GetComponent<MainMenuView>();
+                yield return Wait(() => !SceneManager.GetSceneByPath(TitlePath).isLoaded, "Title cleanup");
+                yield return null;
+                view = MainMenuCompositionRoot.InScene(SceneManager.GetActiveScene()).View;
             }
             Require(view.menuPanel.blocksRaycasts, "Expanded title menu receives pointer input.");
         }
 
         private IEnumerator EnterSelection()
         {
-            yield return Click(Object.FindFirstObjectByType<MainMenuView>().start);
+            yield return Capture("practice-mode");
+            yield return Click(MainMenuCompositionRoot.InScene(SceneManager.GetActiveScene()).View.start);
             yield return Wait(() => SceneManager.GetActiveScene().path == AppFlowController.SelectionPath,
                 "Title entrance");
             yield return Wait(() => !DojoEntranceTransition.Active, "Door completion");
+            yield return Wait(() => !flow.Transitioning, "Selection activation cleanup");
             CheckSelectionCleanup();
+            var view = Object.FindFirstObjectByType<SongSelectionView>();
+            Require(view.practice.gameObject.activeInHierarchy, "Free practice opens the authored wooden dummy.");
+            Require(!view.practice.browser.activeSelf, "The library opens only when requested.");
+            yield return Capture("practice-selection");
+            yield return OpenSelectionLibrary();
             Step("selection-ready", "Title unloaded, door complete, one input system and listener.");
+        }
+
+        private IEnumerator OpenSelectionLibrary()
+        {
+            var view = Object.FindFirstObjectByType<SongSelectionView>();
+            if (view.practice.gameObject.activeInHierarchy)
+            {
+                yield return Click(view.practice.library);
+            }
+            Require(view.practice.browser.activeInHierarchy, "The shared song library is visible.");
+        }
+
+        private IEnumerator VerifyTrainingModes()
+        {
+            var view = MainMenuCompositionRoot.InScene(SceneManager.GetActiveScene()).View;
+            yield return Click(view.modeSelection.previous);
+            yield return Wait(() => !view.modeSelection.IsMoving, "Travel to lesson");
+            yield return Click(view.start);
+            Require(view.modeSelection.lessonCue.gameObject.activeInHierarchy, "Lesson begins inside ModeSelection.");
+            yield return Capture("lesson");
+            for (int i = 0; i < 2; i++)
+            {
+                yield return Click(view.modeSelection.next);
+                yield return Wait(() => !view.modeSelection.IsMoving, "Travel to Challenge");
+            }
+            yield return Capture("challenge-mode");
+            yield return Click(view.start);
+            yield return Wait(() => SceneManager.GetActiveScene().path == AppFlowController.SelectionPath,
+                "Challenge selection");
+            yield return Wait(() => !flow.Transitioning, "Challenge activation cleanup");
+            Require(flow.Rules.Snapshot.Mode == RhythmDojo.Gameplay.PlayMode.Challenge,
+                "Challenge selection preserves the requested rules.");
+            Require(!flow.PracticeSelection, "Challenge uses the shared library.");
+            CheckSelectionCleanup();
+            yield return Capture("challenge-selection");
+            yield return ReturnToTitle();
+            Step("training-modes", "Lesson, practice and Challenge use the authored mode rooms.");
         }
 
         private IEnumerator ReturnToTitle()
         {
             var view = Object.FindFirstObjectByType<SongSelectionView>();
-            yield return Click(view.back);
-            yield return Click(view.confirmBack);
+            if (flow.PracticeSelection)
+            {
+                if (view.practice.browser.activeSelf)
+                {
+                    yield return Click(view.back);
+                }
+                yield return Click(view.practice.back);
+                yield return Wait(() => SceneManager.GetActiveScene().path == MainMenuActions.ModeSelectionScenePath,
+                    "Practice return to modes");
+                yield return Wait(() => !flow.Transitioning, "Mode return cleanup");
+                yield return Press(Key.Escape);
+            }
+            else
+            {
+                yield return Click(view.back);
+                yield return Click(view.confirmBack);
+            }
             yield return Wait(() => SceneManager.GetActiveScene().path == TitlePath, "Selection Back to Title");
             yield return OpenTitleMenu();
-            yield return Click(Object.FindFirstObjectByType<MainMenuView>().settings);
+            yield return Click(MainMenuCompositionRoot.InScene(SceneManager.GetActiveScene()).View.settings);
             yield return Wait(() => Object.FindFirstObjectByType<SettingsView>(), "Reentered title settings");
             yield return Click(Object.FindFirstObjectByType<SettingsView>().back);
             Require(Object.FindFirstObjectByType<MainMenuScreen>().enabled, "Reentered title input restored.");

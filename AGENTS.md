@@ -12,7 +12,7 @@ Tests live in `Assets/Game/Tests/{Domain,EditMode,PlayMode}`. Scenes, settings, 
 
 ## Build, Test, and Development Commands
 
-Use Unity **6000.3.23f1**. Open `Assets/Game/Scenes/Bootstrap.unity` and enter Play Mode to run locally.
+Use Unity **6000.3.23f1**. Open `Assets/Game/Scenes/Title.unity` and enter Play Mode to run the complete menu flow locally. `ModeSelection` opens the four mode rooms directly; `Bootstrap` and `SongSelection` are direct free-practice entry points. Disable **Start Play Mode From Title** when checking a scene directly.
 
 - **Game Tools > Scenes > Build All Scenes** regenerates authoritative scenes. Make lasting layout changes in builders.
 - Do not add standalone Open scene commands to Game Tools or other custom editor menus. Open existing scenes through the Project window; scene builders may open the scenes they generate.
