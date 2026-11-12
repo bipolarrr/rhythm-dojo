@@ -14,7 +14,7 @@ namespace RhythmDojo.UI
         [SerializeField] private MainMenuView view;
         [SerializeField] private AudioSource effects;
         [SerializeField, Min(1f)] private float beatsPerMinute = 120f;
-        [SerializeField, Range(0f, .3f)] private float titleBounceAmount = .08f;
+        [SerializeField, Range(0f, .3f)] private float titleBounceAmount = 0f;
         [SerializeField, Range(0f, .3f)] private float promptBounceAmount = 0f;
         [SerializeField, Range(.1f, 1f)] private float bounceDurationInBeats = .65f;
         private MainMenuCompositionRoot composition;

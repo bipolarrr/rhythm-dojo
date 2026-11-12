@@ -232,7 +232,7 @@ MonoBehaviour:
   view: {fileID: 19111853}
   effects: {fileID: 19111852}
   beatsPerMinute: 120
-  titleBounceAmount: 0.08
+  titleBounceAmount: 0
   promptBounceAmount: 0
   bounceDurationInBeats: 0.65
 --- !u!114 &19111851
@@ -1231,7 +1231,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.746}
   m_AnchorMax: {x: 0.5, y: 0.746}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 410, y: 76}
+  m_SizeDelta: {x: 410, y: 70}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &422151043
 MonoBehaviour:
@@ -1483,7 +1483,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Text
   m_Material: {fileID: 2100000, guid: f141c7de8ef54517a7239664b841db91, type: 2}
-  m_Color: {r: 1, g: 0.94, b: 0.78, a: 1}
+  m_Color: {r: 0.035, g: 0.025, b: 0.015, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -1492,7 +1492,7 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 12800000, guid: 39bcbf68896a6bf43b8a98c73e10f749, type: 3}
-    m_FontSize: 76
+    m_FontSize: 64
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10

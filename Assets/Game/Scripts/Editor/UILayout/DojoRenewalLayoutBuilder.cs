@@ -66,13 +66,14 @@ namespace RhythmDojo.EditorTools
             entrance.rightDoor.offsetMin = entrance.rightDoor.offsetMax = Vector2.zero;
 
             view.ambientLights = System.Array.Empty<Image>();
-            Place((RectTransform)view.logo.transform, new Vector2(.5f, .746f), Vector2.zero, new Vector2(410, 76));
+            Place((RectTransform)view.logo.transform, new Vector2(.5f, .746f), Vector2.zero, new Vector2(410, 70));
             view.logoArtwork.gameObject.SetActive(false);
             view.title.enabled = true;
-            view.title.color = new Color(1f, .94f, .78f);
-            view.title.fontSize = 76;
+            view.title.color = new Color(.035f, .025f, .015f);
+            view.title.fontSize = 64;
             view.logoArtwork = view.title.rectTransform;
             Place(view.logoArtwork, new Vector2(.5f, .5f), new Vector2(0, 2), new Vector2(370, 80));
+            view.title.alignment = TextAnchor.MiddleCenter;
             var prompt = Image("Entrance Invitation", entrance.frame.transform, DojoEntranceAssets.Load("SettingsPanel"));
             view.entranceInvitation = prompt.gameObject;
             Place(prompt.rectTransform, new Vector2(.5f, .065f), Vector2.zero, new Vector2(375, 50));
