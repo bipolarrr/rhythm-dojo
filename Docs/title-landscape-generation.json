@@ -1,0 +1,48 @@
+{
+  "tool": "image_gen (built-in)",
+  "editTarget": "Logs/title-landscape/outpaint-input.png",
+  "inputAssets": [
+    "Assets/Game/Art/TitleSky/SkySource.png",
+    "Assets/Game/Art/DojoRenewal/HanokEntrance.png"
+  ],
+  "editCanvas": {
+    "width": 1672,
+    "height": 2040,
+    "facadeTop": 1099
+  },
+  "prompt": "Use case: precise-object-edit / localized environment outpainting.\nEdit the provided tall canvas IN PLACE. Maintain its exact 1672 x 2040 canvas and all existing object coordinates. This is one long continuous Korean dojo title background for a camera pan.\nRepair ONLY the horizontal discontinuity at y=1099 (54% of canvas height): the clipped tiled roof tips and cropped pine branches must be completed naturally upward into the blue sky. Generate small complete pine crowns at both side edges above the existing branches, and complete the roof ridge caps immediately above their cut ends. Join existing white clouds into the surrounding sky in a naturally painted way. No line, band, gradient overlay, blur, haze curtain or crossfade disguising a join. Match existing fine pixel-textured hand-painted game art and lighting exactly.\nPROTECTED REGIONS: keep all pixels below y=1250 unchanged, including the roof eaves, blank plaque, wooden facade, transparent central doorway, drums, weapons, paving. Keep all pixels above y=700 unchanged, retaining original open sky and wispy clouds. Changes belong only in the narrow irregular skyline transition between y=700 and y=1250, predominantly near y=1099.\nPreserve original facade SCALE and POSITION exactly, no crop, no new paving, no resizing, no architectural redesign, no added buildings or mountains, no text, no birds. Preserve original transparency only in the central doorway; the rest of the scene is opaque. Return the same full canvas with only this localized transition repair.",
+  "generatedSource": "Assets/Game/Art/TitleSky/LandscapeSource.png",
+  "generatedSize": {
+    "width": 1136,
+    "height": 1385
+  },
+  "productionMaster": "Assets/Game/Art/TitleSky/Sky.png",
+  "productionSize": {
+    "width": 1672,
+    "height": 2039
+  },
+  "preservedFacade": {
+    "source": "Assets/Game/Art/DojoRenewal/HanokEntrance.png",
+    "rowsFromTop": [
+      190,
+      940
+    ],
+    "policy": "Copy imported RGBA pixels; preserve doorway alpha. No edge color blend."
+  },
+  "slices": {
+    "SkyEntrance": {
+      "x": 0,
+      "y": 0,
+      "width": 1672,
+      "height": 941
+    },
+    "SkyUpper": {
+      "x": 0,
+      "y": 941,
+      "width": 1672,
+      "height": 1098
+    }
+  },
+  "sampling": "Point filtering, no mipmaps, uncompressed, clamp",
+  "authoring": "Game Tools > Scenes > Build Title"
+}

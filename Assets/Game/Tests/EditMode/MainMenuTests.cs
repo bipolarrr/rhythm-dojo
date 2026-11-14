@@ -43,6 +43,7 @@ namespace RhythmDojo.Tests
                     Assert.That(view.modeSelection, Is.Null);
                     Assert.That(view.menuPanel, Is.Null);
                     Assert.That(view.entrance.Opening, Is.Zero);
+                    AssertTitleLandscapeFits(view);
                     return;
                 }
                 Assert.That(view.entrance, Is.Null);
@@ -188,6 +189,66 @@ namespace RhythmDojo.Tests
             {
                 Object.DestroyImmediate(settings);
                 Object.DestroyImmediate(clip);
+            }
+        }
+
+        private static void AssertTitleLandscapeFits(MainMenuView view)
+        {
+            var sky = view.GetComponent<TitleSkyView>();
+            var canvas = view.GetComponent<Canvas>();
+            var scaler = canvas.GetComponent<UnityEngine.UI.CanvasScaler>();
+            var rect = (RectTransform)canvas.transform;
+            var originalMode = canvas.renderMode;
+            var originalSize = rect.sizeDelta;
+            bool originalScaler = scaler.enabled;
+            float originalDescent = sky.Descent;
+            var upper = (RectTransform)sky.clouds[0].parent;
+            var lower = (RectTransform)view.entrance.frame.transform;
+            var topCorners = new Vector3[4];
+            var bottomCorners = new Vector3[4];
+            var sizes = new[] { new Vector2(1280, 720), new Vector2(1920, 1080),
+                new Vector2(1024, 768), new Vector2(1920, 1200), new Vector2(2560, 1080),
+                new Vector2(720, 1280) };
+
+            try
+            {
+                scaler.enabled = false;
+                canvas.renderMode = RenderMode.WorldSpace;
+                foreach (var size in sizes)
+                {
+                    rect.sizeDelta = size;
+                    Canvas.ForceUpdateCanvases();
+                    view.entrance.GetComponent<DojoCompositionFit>().Fit();
+                    var entrance = (RectTransform)view.entrance.transform;
+                    entrance.GetWorldCorners(topCorners);
+                    var minimum = rect.InverseTransformPoint(topCorners[0]);
+                    var maximum = rect.InverseTransformPoint(topCorners[2]);
+                    Assert.That(minimum.x, Is.LessThanOrEqualTo(rect.rect.xMin + .01f), "Outdoor scene must cover the viewport.");
+                    Assert.That(minimum.y, Is.LessThanOrEqualTo(rect.rect.yMin + .01f));
+                    Assert.That(maximum.x, Is.GreaterThanOrEqualTo(rect.rect.xMax - .01f));
+                    Assert.That(maximum.y, Is.GreaterThanOrEqualTo(rect.rect.yMax - .01f));
+
+                    ((RectTransform)sky.logo.transform).GetWorldCorners(topCorners);
+                    Assert.That(rect.InverseTransformPoint(topCorners[0]).x, Is.GreaterThanOrEqualTo(rect.rect.xMin));
+                    Assert.That(rect.InverseTransformPoint(topCorners[2]).x, Is.LessThanOrEqualTo(rect.rect.xMax));
+                    foreach (float progress in new[] { 0f, .5f, 1f })
+                    {
+                        sky.SetDescent(progress);
+                        upper.GetWorldCorners(topCorners);
+                        lower.GetWorldCorners(bottomCorners);
+                        Assert.That(Vector3.Distance(topCorners[0], bottomCorners[1]), Is.LessThan(.01f),
+                            "Sky and roof must remain connected while moving or resizing.");
+                        Assert.That(Vector3.Distance(topCorners[3], bottomCorners[2]), Is.LessThan(.01f));
+                    }
+                }
+            }
+            finally
+            {
+                sky.SetDescent(originalDescent);
+                rect.sizeDelta = originalSize;
+                canvas.renderMode = originalMode;
+                scaler.enabled = originalScaler;
+                Canvas.ForceUpdateCanvases();
             }
         }
 

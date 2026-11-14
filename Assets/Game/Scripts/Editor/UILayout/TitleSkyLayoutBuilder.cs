@@ -13,9 +13,16 @@ namespace RhythmDojo.EditorTools
         public static TitleSkyView Build(MainMenuView view)
         {
             var sky = view.gameObject.AddComponent<TitleSkyView>();
-            var backdrop = Load("SkySource", UiArtworkCrop.Full);
+            var backdrop = Load("LandscapeSource", UiArtworkCrop.Full);
             var connected = BakeConnection(backdrop, view.entrance.frame.GetComponent<Image>().sprite);
-            var matte = Art("Sky Matte", view.transform, backdrop, Vector2.zero, Vector2.zero);
+            var doorway = view.entrance.frame.GetComponent<Image>();
+            float doorwayHeight = doorway.sprite.texture.height;
+            float skyHeight = connected.texture.height - doorwayHeight;
+            doorway.sprite = Slice("SkyEntrance", connected, new Rect(0, 0, connected.texture.width, doorwayHeight));
+            var upper = Slice("SkyUpper", connected,
+                new Rect(0, doorwayHeight, connected.texture.width, skyHeight));
+            sky.descentDistance = 720f * skyHeight / doorwayHeight;
+            var matte = Art("Sky Matte", view.transform, Load("SkySource", UiArtworkCrop.Full), Vector2.zero, Vector2.zero);
             Stretch(matte.rectTransform);
             matte.transform.SetSiblingIndex(view.backdrop.transform.GetSiblingIndex() + 1);
             sky.matte = matte.gameObject.AddComponent<CanvasGroup>();
@@ -25,6 +32,11 @@ namespace RhythmDojo.EditorTools
             fit.aspectRatio = 16f / 9f;
 
             var entrance = (RectTransform)view.entrance.transform;
+            // Crop the complete journey as one composition instead of exposing an unrelated
+            // room in aspect-ratio margins while the outdoor camera is still descending.
+            var composition = entrance.GetComponent<DojoCompositionFit>();
+            composition.coverViewport = true;
+            composition.Fit();
             entrance.gameObject.AddComponent<RectMask2D>();
             sky.travel = new GameObject("Sky To Dojo Travel", typeof(RectTransform)).GetComponent<RectTransform>();
             sky.travel.SetParent(entrance, false);
@@ -36,8 +48,9 @@ namespace RhythmDojo.EditorTools
                 child.SetParent(sky.travel, false);
                 child.SetAsFirstSibling();
             }
-            var background = Art("Sky Background", sky.travel, connected,
-                new Vector2(0, 780), new Vector2(1280, 840));
+            // Both regions share one baked landscape and exactly the same pixel scale.
+            var background = Art("Sky Background", sky.travel, upper,
+                new Vector2(0, 360f + sky.descentDistance * .5f), new Vector2(1280, sky.descentDistance));
             var cloudSprite = Load("Cloud", UiArtworkCrop.Alpha);
             sky.clouds = new RectTransform[3];
             for (int i = 0; i < sky.clouds.Length; i++)
@@ -65,7 +78,7 @@ namespace RhythmDojo.EditorTools
                     Vector2.zero, new Vector2(44 - i * 8, 44 - i * 8));
                 sky.birds[i].preserveAspect = true;
             }
-            var logo = Art("Sky Logo", entrance, DojoRenewalLayoutBuilder.Load("BrushTitle"),
+            var logo = Art("Sky Logo", view.transform, DojoRenewalLayoutBuilder.Load("BrushTitle"),
                 Vector2.zero, new Vector2(610, 205));
             logo.preserveAspect = true;
             sky.logo = logo.gameObject.AddComponent<CanvasGroup>();
@@ -89,27 +102,35 @@ namespace RhythmDojo.EditorTools
 
         private static Sprite BakeConnection(Sprite source, Sprite doorway)
         {
-            // Bake only the new sky's lower edge. Neither the doorway nor its texture is changed.
-            // Matching the exact top scanline avoids a horizontal color seam during the pan.
+            // The outpaint supplies sky, complete pines and the roof above the wooden facade.
+            // Restore the facade from the plaque's top edge down, including doorway alpha,
+            // byte for byte. This is a content boundary, with no color blending or seam overlay.
             var texture = source.texture;
-            var pixels = texture.GetPixels();
-            const int blendRows = 8;
-            for (int y = 0; y < blendRows; y++)
+            int width = doorway.texture.width;
+            int height = doorway.texture.height + Mathf.RoundToInt(doorway.texture.height * 840f / 720f);
+            var pixels = new Color32[width * height];
+            var sourcePixels = texture.GetPixels32();
+            var doorwayPixels = doorway.texture.GetPixels32();
+            for (int y = 0; y < height; y++)
             {
-                float amount = Mathf.SmoothStep(0f, 1f, (float)y / (blendRows - 1));
-                for (int x = 0; x < texture.width; x++)
+                int sourceY = Mathf.Min(texture.height - 1, Mathf.FloorToInt((y + .5f) * texture.height / height));
+                for (int x = 0; x < width; x++)
                 {
-                    int edgeX = Mathf.Min(doorway.texture.width - 1,
-                        Mathf.FloorToInt((float)x / texture.width * doorway.texture.width));
-                    var edge = doorway.texture.GetPixel(edgeX, doorway.texture.height - 1);
-                    edge.a = 1f;
-                    pixels[y * texture.width + x] = Color.Lerp(edge, pixels[y * texture.width + x], amount);
+                    int sourceX = Mathf.Min(texture.width - 1, Mathf.FloorToInt((x + .5f) * texture.width / width));
+                    var pixel = sourcePixels[sourceY * texture.width + sourceX];
+                    pixel.a = 255;
+                    if (y < doorway.texture.height - 190)
+                    {
+                        var original = doorwayPixels[y * width + x];
+                        pixel = original;
+                    }
+                    pixels[y * width + x] = pixel;
                 }
             }
-            var generated = new Texture2D(texture.width, texture.height, TextureFormat.RGBA32, false);
+            var generated = new Texture2D(width, height, TextureFormat.RGBA32, false);
             try
             {
-                generated.SetPixels(pixels);
+                generated.SetPixels32(pixels);
                 generated.Apply();
                 var path = Root + "Sky.png";
                 var bytes = generated.EncodeToPNG();
@@ -130,6 +151,31 @@ namespace RhythmDojo.EditorTools
             {
                 Object.DestroyImmediate(generated);
             }
+        }
+
+        private static Sprite Slice(string name, Sprite source, Rect region)
+        {
+            string path = Root + name + ".asset";
+            var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
+            if (sprite && sprite.texture == source.texture && sprite.rect == region)
+            {
+                return sprite;
+            }
+
+            var generated = Sprite.Create(source.texture, region, new Vector2(.5f, .5f),
+                100f, 0, SpriteMeshType.FullRect);
+            generated.name = name;
+            if (sprite)
+            {
+                EditorUtility.CopySerialized(generated, sprite);
+                Object.DestroyImmediate(generated);
+                EditorUtility.SetDirty(sprite);
+                AssetDatabase.SaveAssetIfDirty(sprite);
+                return sprite;
+            }
+
+            AssetDatabase.CreateAsset(generated, path);
+            return generated;
         }
 
         private static Sprite[] BirdFrames()

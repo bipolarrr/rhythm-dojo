@@ -8,6 +8,7 @@ namespace RhythmDojo.UI
     public sealed class TitleSkyView : MonoBehaviour
     {
         public RectTransform travel;
+        public float descentDistance = 840f;
         public CanvasGroup logo;
         public CanvasGroup matte;
         public Button start;
@@ -23,6 +24,10 @@ namespace RhythmDojo.UI
             if (!travel || !logo || !matte)
             {
                 throw new InvalidOperationException("Title sky presentation missing.");
+            }
+            if (descentDistance <= 0f)
+            {
+                throw new InvalidOperationException("Title sky travel distance missing.");
             }
             if (!start || clouds == null || birds == null)
             {
@@ -79,7 +84,7 @@ namespace RhythmDojo.UI
         public void SetDescent(float amount)
         {
             Descent = Mathf.Clamp01(amount);
-            travel.anchoredPosition = Vector2.down * (840f * (1f - Descent));
+            travel.anchoredPosition = Vector2.down * (descentDistance * (1f - Descent));
             // The matte fills only the existing aspect-ratio margins, behind the journey.
             matte.alpha = 1f - Descent;
         }

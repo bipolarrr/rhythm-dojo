@@ -9,6 +9,7 @@ namespace RhythmDojo.UI
     public sealed class DojoCompositionFit : MonoBehaviour
     {
         public Vector2 referenceSize = new Vector2(1280, 720);
+        public bool coverViewport;
 
         private void OnEnable()
         {
@@ -30,6 +31,10 @@ namespace RhythmDojo.UI
                 return;
             }
             float scale = Mathf.Min(parent.rect.width / referenceSize.x, parent.rect.height / referenceSize.y);
+            if (coverViewport)
+            {
+                scale = Mathf.Max(parent.rect.width / referenceSize.x, parent.rect.height / referenceSize.y);
+            }
             var center = new Vector2(.5f, .5f);
             if (rect.anchorMin != center || rect.anchorMax != center)
             {
