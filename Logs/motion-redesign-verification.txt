@@ -1,0 +1,69 @@
+Rhythm Dojo motion redesign — 2026-11-14
+Branch: emergency (no checkout, commit or push).
+
+Investigation
+- Inspected the emergency implementations and available local main counterparts before implementation. Several dojo views/builders exist only on emergency.
+- Captured the original live Title -> four mode rooms before edits (motion-before-tests.json and motion-before/).
+- Existing architecture already provided layered room travel, authored sprite animations, typography overshoot, practice strike/afterimage pools, and 24 gameplay burst slots. Those mechanisms were extended rather than replaced.
+- Existing gameplay impacts were rings, rectangular highlights and symmetric chips; practice contacts were nine equally spaced radial strokes; mode travel used a symmetric quintic curve over .82s; manuscript lamplight flickered continuously at two frequencies.
+
+Changes
+- Title: asymmetric descent, additional cloud depth offsets, a brief authored threshold brush at door opening, a late-accelerating push into the same doorway. Door/scene ownership, loading and framing endpoints remain intact.
+- Modes: .68s travel with short anticipation, fast acceleration and explicit landing; stronger middle/near parallax; two authored echoes and three dry-brush trails restricted to running speed. Heading starts at 72% of travel, description follows, both finish through arrival rather than snapping.
+- Room differences: preserve senior-led lesson and practice target contact; summit arrival briefly lifts the existing flag; manuscript arrival briefly lifts lamplight and then returns to a quieter steady light.
+- Menu contact: manually sampled punch silhouette is protected from automatic Animator evaluation at contact. Contact event timing is unchanged.
+- Practice: preserve hand/foot contact and queued selection semantics, accelerate the existing head turn, replace radial spokes with a directional split brush. Expansion .065s, disappearance by .18s; mirror the mark with the input direction. Album and song text placement is unchanged.
+- Gameplay: replace rings with lane-local dry strokes, a brief paper-colored core and three delayed fragments below the incoming-note region. Attack .065s, expiry .24s. Retire the previous burst in a lane on rapid repeats. Chords remain independent; holds use a quiet fixed contact mark with no per-frame mesh rebuild.
+- Results: authored title/score motion groups, quick directional reveal and a small settle; a short underline reveals from the left. No stat count-up or blocking of result actions.
+- DojoInkGraphic keeps its contrast/wash paths; its existing basic stroke path now uses irregular, pixel-quantized bristle tracks with independent gaps and lift-off.
+
+Preserved
+- Domain/Application, note timing, judgment, audio scheduling and gameplay rules have no changes.
+- Existing HUD layout, settings overlay, Esc pause policy and prohibition on in-play settings changes remain in place.
+- User's pre-existing free-practice typography adjustments in DojoArcadeLayoutBuilder were preserved.
+- No new physics components, packages, shaders, bloom, external artwork or runtime texture generation.
+- Fixed effects are authored by builders. All new frame-time values are structs/scalars and existing pool references; no per-frame object creation was introduced in product code.
+
+Generation
+- Unity 6000.3.23f1: Build All Scenes completed, logging “eight scenes generated and validated” (motion-generation.json).
+- Persisted changed composition in Title, ModeSelection, SongSelection and Results. Regenerated scenes/prefab with only file-ID churn were restored to avoid unrelated diffs.
+- An initial Results generation failed because scoreValue was referenced before RefineScoreHierarchy; corrected the order and regenerated all scenes successfully. No partial generation is counted as success.
+
+Verification notes
+- Initial combined CLI name pattern selected zero cases; it is NOT counted as verification. Subsequent suites were run individually.
+- Initial menu run: 27/28, failed contact silhouette; fixed and rerun.
+- Initial results run: 9/11. Existing tests expected the legacy DemoCover rather than the current fallback, and tested settings deactivation before its exit animation completed. Assertions were updated to preserve the current art/overlay contracts, then the failed cases were rerun.
+- Original results are retained in motion-*-tests.json; final reruns are separate motion-final-*-tests.json. This is targeted verification, not a single full-suite pass.
+- WebGL player/browser performance and low-end hardware profiling were not executed. Compatibility assessment is source-based: standard Unity UI meshes/CanvasGroup/Transform, no added shaders or platform APIs.
+- No player build requested or performed.
+
+Live review
+- Screenshots under motion-review/ cover live title entry, four room journeys, practice contact/turn/rest, gameplay and empty results.
+- gameplay-impact-preview is an explicitly triggered visual preview of four pooled effects, not evidence of music/input timing. GameplayHitFeedbackTests separately exercise judgment events and effect lifetimes.
+
+Final targeted results
+motion-menu-tests.json: {'total': 28, 'passed': 27, 'failed': 1, 'skipped': 0, 'inconclusive': 0}, 194.27s
+motion-PracticeSelectionTests-tests.json: {'total': 8, 'passed': 8, 'failed': 0, 'skipped': 0, 'inconclusive': 0}, 89.89s
+motion-GameplayHitFeedbackTests-tests.json: {'total': 4, 'passed': 4, 'failed': 0, 'skipped': 0, 'inconclusive': 0}, 8.34s
+motion-GameplayHudFlowTests-tests.json: {'total': 10, 'passed': 10, 'failed': 0, 'skipped': 0, 'inconclusive': 0}, 34.67s
+motion-RhythmDojo.Tests.ResultsFlowTests-tests.json: {'total': 11, 'passed': 9, 'failed': 2, 'skipped': 0, 'inconclusive': 0}, 86.84s
+motion-ScenePreparationFlowTests-tests.json: {'total': 12, 'passed': 12, 'failed': 0, 'skipped': 0, 'inconclusive': 0}, 20.91s
+motion-smoke-tests.json: {'total': 4, 'passed': 4, 'failed': 0, 'skipped': 0, 'inconclusive': 0}, 15.69s
+motion-editmenu-tests.json: {'total': 6, 'passed': 6, 'failed': 0, 'skipped': 0, 'inconclusive': 0}, 0.42s
+motion-final-MainMenuFlowTests-tests.json: {'total': 28, 'passed': 28, 'failed': 0, 'skipped': 0, 'inconclusive': 0}, 196.63s
+motion-final-GameplayHitFeedbackTests-tests.json: {'total': 4, 'passed': 4, 'failed': 0, 'skipped': 0, 'inconclusive': 0}, 10.39s
+motion-final-CompletionDisplaysThisPlayAndNextPlayReplacesIt-tests.json: {'total': 1, 'passed': 1, 'failed': 0, 'skipped': 0, 'inconclusive': 0}, 11.11s
+motion-final-ResultsWithoutRecommendationCanOpenTimingTestAndRetryWithAppliedOffset-tests.json: {'total': 1, 'passed': 1, 'failed': 0, 'skipped': 0, 'inconclusive': 0}, 16.48s
+{
+  "unique_cases": 81,
+  "passed": 81,
+  "remaining_nonpassing": [],
+  "note": "Latest per-case union of targeted runs; not a full-suite execution."
+}
+
+60-second held-input performance evidence: 60s real held input after warm-up; contacts=558 retainedBytes=13680640 animationAllocatedBytes=0 frames=3509 framesOver50ms=1 worstFrameSeconds=1.63572 authoredTransforms=109
+This reports zero allocation only for the warmed strike-animation path. The Editor run included one 1.64s frame; it is not a guarantee of player frame-time performance.
+
+Interrupted generation recovery: the incomplete Results copy saved as Assets/asdf.unity during generation was retained under Logs/motion-review/recovered-incomplete-results.unity with its meta, outside product assets.
+
+Final Editor state: exited Play Mode, Title open, Editor ready. Source/test diff whitespace checks passed.

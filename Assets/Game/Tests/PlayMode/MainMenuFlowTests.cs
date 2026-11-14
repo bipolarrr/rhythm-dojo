@@ -537,8 +537,10 @@ namespace RhythmDojo.Tests
                     "The departing title must leave before the new space arrives.");
                 Assert.That(mode.typography[2].titleGroup.alpha, Is.Zero);
                 Assert.That(mode.heading, Is.SameAs(heading), "Do not replace visible copy during departure.");
+                Assert.That(mode.travelInk.alpha, Is.GreaterThan(0), "Dry brush is visible only at running speed.");
+                Assert.That(mode.travelEchoes[0].color.a, Is.GreaterThan(0));
                 Capture("Logs/hanok-mode-travel-test.png");
-                while (mode.TravelProgress < .71f)
+                while (mode.TravelProgress < mode.titleArrival + .09f)
                 {
                     Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
                     yield return null;
@@ -556,6 +558,13 @@ namespace RhythmDojo.Tests
                 Assert.That(mode.heading.text, Is.EqualTo("실력 검정"));
                 Assert.That(mode.description.text, Is.EqualTo("하산할 준비가 되었다고 생각하나?"));
                 Assert.That(mode.character, Is.SameAs(character));
+                Assert.That(mode.travelInk.alpha, Is.Zero);
+                Assert.That(mode.travelEchoes[0].enabled, Is.False);
+                while (mode.IsArriving)
+                {
+                    Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                    yield return null;
+                }
                 Assert.That(mode.typography[2].copyGroup.alpha, Is.EqualTo(1));
                 Assert.That(mode.typography[2].titleGroup.transform.localScale, Is.EqualTo(Vector3.one));
                 contacts = mode.ContactCount;

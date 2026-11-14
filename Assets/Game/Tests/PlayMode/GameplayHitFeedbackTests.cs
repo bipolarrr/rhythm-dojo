@@ -188,6 +188,8 @@ namespace RhythmDojo.Tests
                 model.Hit(i % 4);
             }
 
+            Assert.That(ActiveBursts(feedback), Is.EqualTo(4),
+                "Dense repeats keep one burst per lane; simultaneous lanes remain distinct.");
             Assert.That(
                 feedback.GetComponentsInChildren<GameplayImpactGraphic>(true).Length,
                 Is.EqualTo(28)

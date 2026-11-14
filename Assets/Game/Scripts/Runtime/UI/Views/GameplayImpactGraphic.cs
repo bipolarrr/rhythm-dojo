@@ -38,9 +38,13 @@ namespace RhythmDojo.UI
 
         private void Update()
         {
+            if (sustained)
+            {
+                return;
+            }
             elapsed += Time.unscaledDeltaTime;
 
-            if (!sustained && elapsed >= Duration)
+            if (elapsed >= Duration)
             {
                 gameObject.SetActive(false);
 
@@ -55,91 +59,53 @@ namespace RhythmDojo.UI
             helper.Clear();
 
             float progress = Mathf.Clamp01(elapsed / Duration);
-            float fade;
-
-            if (sustained)
-            {
-                fade = .6f + .12f * Mathf.Sin(elapsed * 12);
-            }
-            else
-            {
-                fade = (1 - progress) * (1 - progress);
-            }
-
-            float radius = Mathf.Min(rectTransform.rect.width * .42f, 48);
-            float expanded;
-
-            if (sustained)
-            {
-                expanded = radius * .75f;
-            }
-            else
-            {
-                expanded = Mathf.Lerp(radius * .28f, radius, 1 - (1 - progress) * (1 - progress));
-            }
-
+            float radius = Mathf.Min(rectTransform.rect.width * .40f, 44);
             var tint = color;
-            tint.a = fade * strength;
-            Ring(helper, expanded, 2, tint);
-
-            var glow = tint;
-            glow.a *= .24f;
-
             if (sustained)
             {
-                Quad(helper, -radius * .55f, -3, radius * .55f, 3, glow);
-
+                // A quiet, steady contact mark; no continuous expanding rings.
+                tint.a *= strength * .65f;
+                DojoMotion.Stroke(helper, new Vector2(-radius * .65f, -5),
+                    new Vector2(radius * .65f, -3), 5, tint, Lane);
                 return;
             }
 
+            float attack = 1f - Mathf.Pow(1f - Mathf.Clamp01(elapsed / .065f), 3);
+            float fade = 1f - Mathf.SmoothStep(0, 1, Mathf.InverseLerp(.065f, Duration, elapsed));
+            tint.a *= fade * strength;
+            float direction = 1;
+            if (Lane % 2 != 0)
+            {
+                direction = -1;
+            }
             if (missed)
             {
+                // Failed contact sinks below the rail instead of celebrating with a burst.
+                DojoMotion.Stroke(helper, new Vector2(-radius * .45f, -6 - progress * 8),
+                    new Vector2(radius * .4f, -9 - progress * 8), 4, tint, Lane);
                 return;
             }
 
-            var core = new Color(.96f, .98f, .90f, fade * strength * .85f);
-            Quad(helper, -radius * .7f, -2.2f, radius * .7f, 2.2f, core);
-            Quad(helper, -2, 0, 2, Mathf.Lerp(16, 60, progress), glow);
-
-            for (int i = 0; i < 6; i++)
+            // Confined to this lane, below incoming notes, with a split dry tip.
+            DojoMotion.Stroke(helper, new Vector2(-direction * radius * .7f, -5),
+                new Vector2(direction * radius * attack, -9 - 9 * attack), 11 * fade, tint, Lane);
+            var core = new Color(.94f, .85f, .65f, fade * strength * .72f);
+            DojoMotion.Stroke(helper, new Vector2(-direction * radius * .5f, -4),
+                new Vector2(direction * radius * .7f * attack, -7), 4, core, Lane + 2);
+            for (int i = 0; i < 3; i++)
             {
-                float direction = (i - 2.5f) / 2.5f;
-                float x = direction * radius * (.15f + progress * .75f);
-                float y = (1 - Mathf.Abs(direction) * .55f) * (8 + progress * 50);
-                Quad(helper, x - 1.3f, y - 2.5f, x + 1.3f, y + 2.5f, tint);
+                float delay = .018f + i * .009f;
+                float flight = Mathf.Clamp01((elapsed - delay) / .12f);
+                if (flight <= 0)
+                {
+                    continue;
+                }
+                float x = direction * radius * (.2f + i * .2f) * attack;
+                float y = -14 - flight * (8 + i * 5);
+                DojoMotion.Stroke(helper, new Vector2(x, y),
+                    new Vector2(x + direction * 4, y - 3), 3, tint, i);
             }
         }
 
-        private static void Quad(
-            VertexHelper helper,
-            float x0,
-            float y0,
-            float x1,
-            float y1,
-            Color tint
-        )
-        {
-            int index = helper.currentVertCount;
-            helper.AddVert(new Vector2(x0, y0), tint, Vector2.zero);
-            helper.AddVert(new Vector2(x0, y1), tint, Vector2.zero);
-            helper.AddVert(new Vector2(x1, y1), tint, Vector2.zero);
-            helper.AddVert(new Vector2(x1, y0), tint, Vector2.zero);
-            helper.AddTriangle(index, index + 1, index + 2);
-            helper.AddTriangle(index, index + 2, index + 3);
-        }
-
-        private static void Ring(VertexHelper helper, float radius, float width, Color tint)
-        {
-            const int segments = 20;
-
-            for (int i = 0; i < segments; i++)
-            {
-                float a = i * Mathf.PI * 2 / segments,
-                    b = (i + 1) * Mathf.PI * 2 / segments;
-                float x = Mathf.Round(Mathf.Cos(a) * radius / 2) * 2;
-                float y = Mathf.Round(Mathf.Sin(b) * radius * .32f / 2) * 2;
-                Quad(helper, x - width, y - width, x + width, y + width, tint);
-            }
-        }
     }
 }

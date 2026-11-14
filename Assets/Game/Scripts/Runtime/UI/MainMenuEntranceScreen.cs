@@ -157,7 +157,7 @@ namespace RhythmDojo.UI
             while (elapsed < CameraDescentSeconds)
             {
                 elapsed += Time.unscaledDeltaTime;
-                sky.SetDescent(Mathf.SmoothStep(0f, 1f, elapsed / CameraDescentSeconds));
+                sky.SetDescent(DojoMotion.Travel(elapsed / CameraDescentSeconds));
                 yield return null;
             }
             sky.SetDescent(1f);

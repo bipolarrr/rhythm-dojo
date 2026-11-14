@@ -295,18 +295,19 @@ namespace RhythmDojo.UI
             float hold = spinSeconds * .0515f;
             float landing = spinSeconds * .1765f;
             float spin = Mathf.Clamp01((spinAge - hold) / (spinSeconds - hold - landing));
-            float yaw = spinStartYaw + spinTravel * Mathf.SmoothStep(0, 1, spin);
+            float yaw = spinStartYaw + spinTravel * DojoMotion.Travel(spin);
             float recoil = Mathf.Exp(-recoilAge * 30);
             float settle = Mathf.Clamp01((spinAge - spinSeconds + landing) / landing);
             float rebound = Mathf.Sin(settle * Mathf.PI * 2) * (1 - settle) * .38f;
             rig.Pose(yaw, StrikeDirection * recoil + spinDirection * rebound);
             ApplySongInformation();
-            float flash = 1f - Mathf.Clamp01(recoilAge / .05f);
+            float flash = 1f - Mathf.SmoothStep(0, 1, Mathf.InverseLerp(.04f, .18f, recoilAge));
             impact.alpha = flash;
             var impactRect = (RectTransform)impact.transform;
             impactRect.anchoredPosition = impactPosition;
-            impactRect.localScale = Vector3.one * (1 + (1 - flash) * .8f);
-            impactRect.localRotation = Quaternion.Euler(0, 0, ContactCount * 29 % 360);
+            float spread = 1f - Mathf.Pow(1f - Mathf.Clamp01(recoilAge / .065f), 3);
+            impactRect.localScale = new Vector3(StrikeDirection * (.45f + spread * .7f), .7f + spread * .3f, 1);
+            impactRect.localRotation = Quaternion.Euler(0, 0, -StrikeDirection * (12 + spread * 14));
             information.anchoredPosition = informationHome + new Vector2(StrikeDirection * recoil * 3, 0);
             room.anchoredPosition = BackgroundDestination + new Vector2(-StrikeDirection * recoil * 2, recoil);
 

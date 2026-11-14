@@ -65,6 +65,28 @@ namespace RhythmDojo.EditorTools
             entrance.leftDoor.offsetMin = entrance.leftDoor.offsetMax = Vector2.zero;
             entrance.rightDoor.offsetMin = entrance.rightDoor.offsetMax = Vector2.zero;
 
+            var dust = new GameObject("Door Threshold Ink", typeof(RectTransform), typeof(CanvasGroup));
+            dust.transform.SetParent(approach.transform, false);
+            entrance.doorInk = dust.GetComponent<CanvasGroup>();
+            entrance.doorInk.alpha = 0;
+            entrance.doorInk.blocksRaycasts = false;
+            Place((RectTransform)dust.transform, new Vector2(.5f, .19f), Vector2.zero, new Vector2(500, 40));
+            for (int i = 0; i < 4; i++)
+            {
+                var stroke = new GameObject("Threshold Bristle " + i, typeof(RectTransform), typeof(DojoInkGraphic));
+                stroke.transform.SetParent(dust.transform, false);
+                float direction = 1;
+                if (i < 2)
+                {
+                    direction = -1;
+                }
+                Place((RectTransform)stroke.transform, new Vector2(.5f, .5f),
+                    new Vector2(direction * (100 + i % 2 * 30), i % 2 * 9), new Vector2(90, 6));
+                stroke.transform.localScale = new Vector3(direction, 1, 1);
+                var ink = stroke.GetComponent<DojoInkGraphic>();
+                ink.color = new Color(.35f, .24f, .13f, .65f);
+                ink.raycastTarget = false;
+            }
             view.ambientLights = System.Array.Empty<Image>();
             Place((RectTransform)view.logo.transform, new Vector2(.5f, .746f), Vector2.zero, new Vector2(410, 70));
             view.logoArtwork.gameObject.SetActive(false);

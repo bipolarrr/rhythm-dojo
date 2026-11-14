@@ -209,24 +209,8 @@ namespace RhythmDojo.UI
                 return;
             }
 
-            const int steps = 24;
-            for (int i = 0; i <= steps; i++)
-            {
-                float t = i / (float)steps;
-                float taper = Mathf.Pow(Mathf.Max(0f, Mathf.Sin(t * Mathf.PI)), .35f);
-                float grain = .8f + .2f * Mathf.Sin(i * 7.1f);
-                float x = Mathf.Lerp(rect.xMin, rect.xMax, t);
-                float center = rect.center.y + rect.height * (t - .5f) * .25f;
-                float width = rect.height * .44f * taper * grain;
-                vh.AddVert(new Vector2(x, center - width), color, Vector2.zero);
-                vh.AddVert(new Vector2(x, center + width), color, Vector2.zero);
-                if (i > 0)
-                {
-                    int current = i * 2;
-                    vh.AddTriangle(current - 2, current - 1, current);
-                    vh.AddTriangle(current - 1, current + 1, current);
-                }
-            }
+            DojoMotion.Stroke(vh, new Vector2(rect.xMin, rect.center.y - rect.height * .1f),
+                new Vector2(rect.xMax, rect.center.y + rect.height * .1f), rect.height, color, 3);
         }
     }
 }

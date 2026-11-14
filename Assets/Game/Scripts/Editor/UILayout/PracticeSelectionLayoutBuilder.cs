@@ -144,11 +144,11 @@ namespace RhythmDojo.EditorTools
             practice.impact = impactRoot.gameObject.AddComponent<CanvasGroup>();
             practice.impact.alpha = 0;
             practice.impact.blocksRaycasts = false;
-            for (int i = 0; i < 9; i++)
+            for (int i = 0; i < 5; i++)
             {
-                float angle = i * 40f;
+                float angle = -28f + i * 13f;
                 var direction = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
-                var line = Stroke("Impact Stroke " + i, impactRoot, direction * 40, new Vector2(48, 7), Paper);
+                var line = Stroke("Impact Stroke " + i, impactRoot, direction * (24 + i * 5), new Vector2(64 - i * 7, 9 - i), Paper);
                 line.localRotation = Quaternion.Euler(0, 0, angle);
             }
             practice.effects = stage.gameObject.AddComponent<AudioSource>();

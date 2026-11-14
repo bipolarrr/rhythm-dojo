@@ -7,6 +7,27 @@ namespace RhythmDojo.EditorTools
 {
     public static class ResultsLayoutBuilder
     {
+        private static void AddReveal(RectTransform target, float delay, bool underline)
+        {
+            var group = target.gameObject.AddComponent<CanvasGroup>();
+            var reveal = target.gameObject.AddComponent<DojoReveal>();
+            reveal.group = group;
+            reveal.delay = delay;
+            if (underline)
+            {
+                var stroke = new GameObject("Result Brush Reveal", typeof(RectTransform), typeof(DojoInkGraphic));
+                stroke.transform.SetParent(target, false);
+                var rect = (RectTransform)stroke.transform;
+                rect.anchorMin = rect.anchorMax = new Vector2(.05f, .04f);
+                rect.pivot = new Vector2(0, .5f);
+                rect.sizeDelta = new Vector2(310, 10);
+                var ink = stroke.GetComponent<DojoInkGraphic>();
+                ink.color = new Color(.70f, .39f, .18f, .8f);
+                ink.raycastTarget = false;
+                reveal.brush = rect;
+            }
+        }
+
         private static readonly Color Ink = new Color(.24f, .12f, .085f);
         private static readonly Color Paper = new Color(.89f, .76f, .55f);
         private static readonly Color PanelColor = new Color(.98f, .88f, .68f);
@@ -38,6 +59,7 @@ namespace RhythmDojo.EditorTools
             var header = Panel("Result Header", surface, Color.clear, .045f, .86f, .955f, .965f);
             var heading = Label("Heading", header, "수련 결과", .05f, .08f, .95f, .92f, 64, role: UiTextRole.Title);
             heading.alignment = TextAnchor.MiddleLeft;
+            AddReveal(header, 0, true);
 
             view.backButton = Button("Back", surface, "곡 선택", .045f, .03f, .225f, .115f);
 
@@ -82,6 +104,7 @@ namespace RhythmDojo.EditorTools
             view.review = BuildReview(surface);
             UiFontSettings.ApplyTo(view.transform);
             RefineScoreHierarchy(view);
+            AddReveal(view.scoreValue.rectTransform, .09f, false);
             foreach (var text in new[] { heading, view.title, view.artist, view.difficulty,
                 view.perfect, view.good, view.miss, view.accuracy, view.maxCombo,
                 view.scoreValue, view.scoreSummary, view.progressNote, view.retryStatus })

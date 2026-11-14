@@ -202,6 +202,14 @@ namespace RhythmDojo.Presentation
 
         private void Impact(JudgmentEvent result, float strength)
         {
+            // Retire the lane's previous burst during dense repeats; chords remain independent.
+            foreach (var burst in bursts)
+            {
+                if (burst.gameObject.activeSelf && burst.Lane == result.Lane)
+                {
+                    burst.gameObject.SetActive(false);
+                }
+            }
             var graphic = bursts[nextBurst];
             nextBurst = (nextBurst + 1) % PoolSize;
             graphic.Lane = result.Lane;

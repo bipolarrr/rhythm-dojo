@@ -14,6 +14,7 @@ namespace RhythmDojo.UI
         public RectTransform leftDoor;
         public RectTransform rightDoor;
         public CanvasGroup frame;
+        public CanvasGroup doorInk;
         public CanvasGroup interiorBackdrop;
         public RectTransform doorwayApproach;
         public CanvasGroup trainingMenu;
@@ -117,7 +118,13 @@ namespace RhythmDojo.UI
             }
 
             SetOpening(Mathf.InverseLerp(.14f, .62f, amount));
-            float approach = SmootherStep(Mathf.InverseLerp(.43f, 1f, amount));
+            if (doorInk)
+            {
+                float sweep = Mathf.InverseLerp(.18f, .40f, amount);
+                doorInk.alpha = Mathf.Sin(sweep * Mathf.PI) * .55f;
+                doorInk.transform.localScale = new Vector3(.5f + sweep * .8f, 1f, 1f);
+            }
+            float approach = DojoMotion.Push(Mathf.InverseLerp(.43f, 1f, amount));
             float scale = Mathf.Lerp(1f, 3.65f, approach);
             doorwayApproach.localScale = Vector3.one * scale;
             doorwayApproach.anchoredPosition = Vector2.up * (65f * (scale - 1f));

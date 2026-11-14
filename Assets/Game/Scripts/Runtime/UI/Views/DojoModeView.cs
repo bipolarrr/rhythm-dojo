@@ -33,6 +33,8 @@ namespace RhythmDojo.UI
         public AudioClip contact;
         public RectTransform roomRoot, travelCover, teacherGesture, sageGesture;
         public RectTransform[] farLayers, middleLayers, nearLayers;
+        public CanvasGroup travelInk;
+        public Image[] travelEchoes;
         public DojoWindFlag summitFlag;
         public CanvasGroup[] interfaceGroups;
         public CanvasGroup scribingLight;
@@ -46,7 +48,7 @@ namespace RhythmDojo.UI
         public AudioClip footstep, wind;
         public bool IsArriving { get; private set; }
         public float TravelProgress { get; private set; }
-        public const float TravelSeconds = .82f;
+        public const float TravelSeconds = .68f;
         public int SelectedIndex { get; private set; } = 1;
         public bool IsMoving { get; private set; }
         public bool InputEnabled
@@ -89,6 +91,7 @@ namespace RhythmDojo.UI
         private float arrivalAge;
         private bool entranceArrived;
         private bool arrivalRun;
+        private int arrivalDirection = 1;
         private bool inputEnabled;
         private bool idleLocked;
         private float idleGap;
@@ -102,6 +105,17 @@ namespace RhythmDojo.UI
             "하산할 준비가 되었다고 생각하나?", "속세에서는 그것을 에디터라 부른다더라" };
         public void Validate()
         {
+            if (!travelInk || travelEchoes == null || travelEchoes.Length != 2)
+            {
+                throw new InvalidOperationException("Authored travel ink and echoes missing.");
+            }
+            foreach (var echo in travelEchoes)
+            {
+                if (!echo)
+                {
+                    throw new InvalidOperationException("Authored travel echo missing.");
+                }
+            }
             if (!traineeAnimation || !teacherAnimation)
             {
                 throw new InvalidOperationException("Dojo frame animations missing.");
@@ -305,6 +319,7 @@ namespace RhythmDojo.UI
 
         private IEnumerator Travel(int direction)
         {
+            arrivalDirection = direction;
             IsMoving = true;
             IsArriving = false;
             lesson = false;
@@ -318,6 +333,11 @@ namespace RhythmDojo.UI
             character.rectTransform.localRotation = Quaternion.identity;
             character.sprite = poses[1];
             stages[SelectedIndex].transform.SetAsLastSibling();
+            travelInk.transform.SetAsLastSibling();
+            foreach (var echo in travelEchoes)
+            {
+                echo.transform.SetAsLastSibling();
+            }
             character.transform.SetAsLastSibling();
             travelCover.SetAsLastSibling();
             stages[SelectedIndex].alpha = 1f;
@@ -330,8 +350,8 @@ namespace RhythmDojo.UI
                 elapsed += Time.unscaledDeltaTime;
                 float t = Mathf.Clamp01(elapsed / TravelSeconds);
                 TravelProgress = t;
-                float run = Mathf.InverseLerp(.12f, .88f, t);
-                float blend = run * run * run * (run * (run * 6f - 15f) + 10f);
+                float run = Mathf.InverseLerp(.08f, .84f, t);
+                float blend = DojoMotion.Travel(run);
                 SetTravelLayers(previousIndex, -direction * blend);
                 SetTravelLayers(SelectedIndex, direction * (1f - blend));
                 travelCover.anchoredPosition = new Vector2(direction * Mathf.Lerp(1000, -1000, blend), 0);
@@ -343,16 +363,31 @@ namespace RhythmDojo.UI
                 var position = Vector2.Lerp(characterHome, destination, blend);
                 position.x += direction * Mathf.Sin(blend * Mathf.PI) * 52f;
                 position.y += Mathf.Abs(Mathf.Sin(stride * Mathf.PI)) * 7f;
-                if (t < .12f)
+                if (t < .08f)
                 {
                     character.sprite = poses[0];
-                    position.x -= direction * Mathf.Sin(t / .12f * Mathf.PI) * 9f;
-                    position.y -= Mathf.Sin(t / .12f * Mathf.PI) * 4f;
+                    position.x -= direction * Mathf.Sin(t / .08f * Mathf.PI) * 9f;
+                    position.y -= Mathf.Sin(t / .08f * Mathf.PI) * 4f;
                 }
-                if (t > .88f)
+                if (t > .84f)
                 {
                     character.sprite = poses[0];
-                    position.x += direction * Mathf.Sin((t - .88f) / .12f * Mathf.PI) * 8f;
+                    position.x += direction * Mathf.Sin((t - .84f) / .16f * Mathf.PI) * 8f;
+                }
+                float speed = Mathf.InverseLerp(.04f, .24f, run)
+                    * (1f - Mathf.InverseLerp(.24f, .52f, run));
+                character.rectTransform.localScale = new Vector3(direction * (1f + speed * .10f), 1f - speed * .06f, 1);
+                travelInk.alpha = speed * .55f;
+                travelInk.transform.localPosition = position + new Vector2(-direction * (85 + speed * 22), -18);
+                travelInk.transform.localScale = new Vector3(direction * (.5f + speed * .5f), 1, 1);
+                for (int i = 0; i < travelEchoes.Length; i++)
+                {
+                    var echo = travelEchoes[i];
+                    echo.enabled = character.enabled;
+                    echo.sprite = character.sprite;
+                    echo.color = new Color(.28f, .20f, .13f, speed * (.17f - i * .06f));
+                    echo.rectTransform.anchoredPosition = position + Vector2.left * (direction * (i + 1) * (16 + speed * 18));
+                    echo.rectTransform.localScale = character.rectTransform.localScale;
                 }
                 character.rectTransform.anchoredPosition = position;
                 character.rectTransform.localRotation = Quaternion.Euler(0, 0, -direction * Mathf.Sin(run * Mathf.PI) * 5f);
@@ -386,14 +421,15 @@ namespace RhythmDojo.UI
             ShowStage();
             IsMoving = false;
             BeginArrival();
+            typography[SelectedIndex].Enter((1f - titleArrival) * TravelSeconds, direction);
         }
 
         private void SetTravelLayers(int index, float distance)
         {
             ((RectTransform)stages[index].transform).anchoredPosition = Vector2.zero;
             farLayers[index].anchoredPosition = new Vector2(distance * 1280f, 0);
-            middleLayers[index].anchoredPosition = new Vector2(distance * 1480f, 0);
-            nearLayers[index].anchoredPosition = new Vector2(distance * 1880f, 0);
+            middleLayers[index].anchoredPosition = new Vector2(distance * 1600f, 0);
+            nearLayers[index].anchoredPosition = new Vector2(distance * 2140f, 0);
         }
 
         public void CancelMotion()
@@ -419,7 +455,7 @@ namespace RhythmDojo.UI
 
         public void SetEntranceProgress(float amount)
         {
-            float approach = Mathf.SmoothStep(0, 1, Mathf.InverseLerp(.43f, 1f, amount));
+            float approach = DojoMotion.Push(Mathf.InverseLerp(.43f, 1f, amount));
             roomRoot.localScale = Vector3.one * Mathf.Lerp(.87f, 1f, approach);
             roomRoot.anchoredPosition = Vector2.down * (28f * (1f - approach));
             foreach (var layer in farLayers)
@@ -500,6 +536,11 @@ namespace RhythmDojo.UI
             ResetFigureMotion();
             struck = false;
             travelCover.gameObject.SetActive(false);
+            travelInk.alpha = 0;
+            foreach (var echo in travelEchoes)
+            {
+                echo.enabled = false;
+            }
             teacherGesture.localRotation = Quaternion.identity;
             sageGesture.localRotation = Quaternion.identity;
             for (int i = 0; i < stages.Length; i++)
@@ -761,8 +802,7 @@ namespace RhythmDojo.UI
                 case 3:
                     breath *= .5f;
                     weight = 0;
-                    scribingLight.alpha = .78f + Mathf.Sin(age * 2.7f) * .12f
-                        + Mathf.Sin(age * 6.1f) * .07f;
+                    scribingLight.alpha = .83f + Mathf.Sin(age * 1.3f) * .025f;
                     break;
             }
             traineeMotion.SetPose(breath, weight, focus, breeze, 0);
@@ -1041,6 +1081,13 @@ namespace RhythmDojo.UI
             traineeMotion.SetPose(0, weight, 0, -weight * .08f, 0);
             traineeAnimation.Sample(DojoIdleVariation.Motion.Punch,
                 t / StrikeSeconds * traineeAnimation.Duration(DojoIdleVariation.Motion.Punch));
+            // Sampling supplies the pose; automatic Animator evaluation must not replace
+            // the contact silhouette later in the same rendered frame.
+            traineeAnimation.animator.enabled = false;
+            if (t >= StrikeContactSeconds && t < .27f)
+            {
+                character.sprite = poses[3];
+            }
             if (t >= StrikeSeconds)
             {
                 strikeAge = -1f;
@@ -1093,6 +1140,10 @@ namespace RhythmDojo.UI
             {
                 typography[SelectedIndex].Enter(t, 1);
             }
+            else
+            {
+                typography[SelectedIndex].Enter(t + (1f - titleArrival) * TravelSeconds, arrivalDirection);
+            }
             switch (SelectedIndex)
             {
                 case 0:
@@ -1131,7 +1182,12 @@ namespace RhythmDojo.UI
                         ArrivalStrike(strikeTime);
                     }
                     break;
+                case 3:
+                    // The desk receives a brief lamplight lift; no running dust in the manuscript room.
+                    scribingLight.alpha = .83f + .12f * Gesture(t, .36f);
+                    break;
                 case 2:
+                    summitFlag.Animate(Time.unscaledTime, DojoAmbientMotion.Wind(Time.unscaledTime) + Gesture(t, .42f) * .35f);
                     float resolve = Gesture(t, .86f);
                     traineeMotion.SetPose(0, -resolve * 1.2f, .6f, DojoAmbientMotion.Wind(Time.unscaledTime), 0);
                     sageMotion.SetPose(0, 0, 0, DojoAmbientMotion.Wind(Time.unscaledTime),

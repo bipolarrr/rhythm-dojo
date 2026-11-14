@@ -154,6 +154,7 @@ namespace RhythmDojo.Tests
             Assert.That(offset, Is.InRange(32, 40));
 
             yield return Press(Key.Escape);
+            yield return Await(() => !settings.gameObject.activeSelf, "Settings exit animation did not finish.");
             Assert.That(settings.gameObject.activeSelf, Is.False);
             Assert.That(flow.LastResult, Is.SameAs(result));
             Assert.That(SceneManager.GetActiveScene().path, Is.EqualTo(AppFlowController.ResultsPath));
@@ -184,6 +185,11 @@ namespace RhythmDojo.Tests
             yield return Await(() => Object.FindFirstObjectByType<ResultsScreen>());
             yield return null;
             var view = Object.FindFirstObjectByType<ResultsView>();
+            // The current art direction replaces the legacy demo placeholder with the dojo cover.
+            if (!expectedCover || expectedCover == view.legacyFallbackCover)
+            {
+                expectedCover = view.fallbackCover;
+            }
             Assert.That(view.cover.sprite, Is.SameAs(expectedCover));
             Assert.That(view.cover.enabled, Is.True);
             Assert.That(SceneManager.GetActiveScene().path, Is.EqualTo(AppFlowController.ResultsPath));

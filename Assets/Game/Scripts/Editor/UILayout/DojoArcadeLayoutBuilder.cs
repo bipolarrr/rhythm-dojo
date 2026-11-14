@@ -79,7 +79,7 @@ namespace RhythmDojo.EditorTools
 
                     position = new Vector2(118, 112);
                     size = new Vector2(380, 250);
-                    copyPosition = new Vector2(134, 394);
+                    copyPosition = new Vector2(134, 360);
 
                     fontSize = 145;
                     color = Paper;
@@ -158,6 +158,10 @@ namespace RhythmDojo.EditorTools
             headingScope.font = font;
             headingScope.useSmoothRendering = true;
             composition.heading.lineSpacing = .76f;
+            if (index == 1)
+            {
+                composition.heading.lineSpacing = .58f;
+            }
             composition.heading.alignment = TextAnchor.UpperLeft;
             composition.heading.horizontalOverflow = HorizontalWrapMode.Overflow;
             composition.heading.verticalOverflow = VerticalWrapMode.Overflow;

@@ -16,6 +16,7 @@ namespace RhythmDojo.UI
         public Sprite[] birdFrames;
         public float Descent { get; private set; }
         private float elapsed;
+        private Vector2[] cloudHomes;
 
         public void Validate()
         {
@@ -60,6 +61,14 @@ namespace RhythmDojo.UI
 
         public void ResetIdle()
         {
+            if (cloudHomes == null)
+            {
+                cloudHomes = new Vector2[clouds.Length];
+                for (int i = 0; i < clouds.Length; i++)
+                {
+                    cloudHomes[i] = clouds[i].anchoredPosition;
+                }
+            }
             elapsed = 0f;
             SetDescent(0f);
             logo.alpha = 1f;
@@ -92,6 +101,10 @@ namespace RhythmDojo.UI
                 var position = clouds[i].anchoredPosition;
                 // Wrap only after the entire sprite has left the clipped composition.
                 position.x = Mathf.Repeat(elapsed * (5f + i * 2f) + i * 530f + 150f, 1800f) - 900f;
+                if (cloudHomes != null)
+                {
+                    position.y = cloudHomes[i].y + Descent * (45f + i * 60f);
+                }
                 clouds[i].anchoredPosition = position;
             }
             for (int i = 0; i < birds.Length; i++)

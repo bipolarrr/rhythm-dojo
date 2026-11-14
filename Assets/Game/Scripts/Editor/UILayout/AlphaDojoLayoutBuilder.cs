@@ -256,10 +256,30 @@ namespace RhythmDojo.EditorTools
                 new Vector2(-30, -122), new Vector2(190, 253), DojoFigureGraphic.Figure.Trainee);
             mode.character = mode.traineeMotion;
             DojoAnimationAssetBuilder.Configure(mode);
+            var travelInk = Group("Travel Dry Brush", mode.roomRoot);
+            mode.travelInk = travelInk.gameObject.AddComponent<CanvasGroup>();
+            mode.travelInk.alpha = 0;
+            mode.travelInk.blocksRaycasts = false;
+            for (int i = 0; i < 3; i++)
+            {
+                var stroke = Group("Travel Bristle " + i, travelInk);
+                Place(stroke, new Vector2(.5f, .5f), new Vector2(-i * 13, i * 16 - 16), new Vector2(108 - i * 19, 8 - i));
+                var ink = stroke.gameObject.AddComponent<DojoInkGraphic>();
+                ink.color = new Color(.12f, .08f, .055f, .8f);
+                ink.raycastTarget = false;
+            }
+            mode.travelEchoes = new Image[2];
+            for (int i = 0; i < mode.travelEchoes.Length; i++)
+            {
+                mode.travelEchoes[i] = Art("Running Echo " + i, mode.roomRoot, mode.poses[0],
+                    Vector2.zero, mode.character.rectTransform.sizeDelta);
+                mode.travelEchoes[i].enabled = false;
+            }
             mode.travelCover = Art("Passing Timber", mode.roomRoot,
                 DojoRenewalLayoutBuilder.Slice("TimberPost", DojoRenewalLayoutBuilder.Load("HanokEntrance"),
                     new Rect(.215f, .19f, .027f, .48f)), new Vector2(1100, 0), new Vector2(190, 940)).rectTransform;
             mode.travelCover.gameObject.SetActive(false);
+            mode.titleArrival = .72f;
             DojoArcadeLayoutBuilder.Build(view, mode, stage.transform);
             // Direct left/right input owns mode changes. Up/down retains native UI navigation.
             var navigation = new Navigation

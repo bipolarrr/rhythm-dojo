@@ -85,7 +85,7 @@ namespace RhythmDojo.UI
             titleGroup.transform.localScale = Vector3.one * (1f + .035f * (1f - settle));
             if (brush)
             {
-                brush.localScale = new Vector3(Mathf.SmoothStep(0, 1, t), 1, 1);
+                brush.localScale = new Vector3(1f - Mathf.Pow(1f - t, 3), 1, 1);
             }
             float copy = Mathf.SmoothStep(0, 1, Mathf.Clamp01((seconds - copyDelay) / copySeconds));
             copyGroup.alpha = copy;
