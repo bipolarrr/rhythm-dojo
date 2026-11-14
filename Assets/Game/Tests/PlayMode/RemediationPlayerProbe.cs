@@ -382,7 +382,7 @@ namespace RhythmDojo.Tests
             yield return Click(workspace.view.actions.Single(binding => binding.action == WorkspaceAction.Exit).button);
             yield return Wait(() => workspace.view.exitPopup.activeSelf, "Editor exit confirmation");
             yield return Click(workspace.view.actions.Single(binding => binding.action == WorkspaceAction.SaveExit).button);
-            yield return Wait(() => SceneManager.GetActiveScene().path == TitlePath, "Editor save and exit");
+            yield return Wait(() => SceneManager.GetActiveScene().path == MainMenuActions.ModeSelectionScenePath, "Editor save and exit");
             Require(File.Exists(Path.Combine(folder, FileSongProjectStore.FileName)),
                 "Editor Back saved its new draft through the real store.");
             CleanupProjects();

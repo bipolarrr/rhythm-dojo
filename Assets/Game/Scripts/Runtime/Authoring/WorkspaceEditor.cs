@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using RhythmDojo.Application;
 using RhythmDojo.Content;
+using RhythmDojo.Core;
 using RhythmDojo.Gameplay;
 using RhythmDojo.Services;
 using RhythmDojo.UI;
@@ -1056,7 +1057,7 @@ namespace RhythmDojo.Authoring
 
                 if (action == WorkspaceAction.DiscardExit)
                 {
-                    SceneManager.LoadSceneAsync("Assets/Game/Scenes/Title.unity");
+                    SceneManager.LoadSceneAsync(MainMenuActions.ModeSelectionScenePath);
                     return;
                 }
 
@@ -1261,12 +1262,12 @@ namespace RhythmDojo.Authoring
                     }
                     else
                     {
-                        SceneManager.LoadSceneAsync("Assets/Game/Scenes/Title.unity");
+                        SceneManager.LoadSceneAsync(MainMenuActions.ModeSelectionScenePath);
                     }
                     break;
                 case WorkspaceAction.SaveExit:
                     await Save();
-                    SceneManager.LoadSceneAsync("Assets/Game/Scenes/Title.unity");
+                    SceneManager.LoadSceneAsync(MainMenuActions.ModeSelectionScenePath);
                     break;
                 case WorkspaceAction.ApplySettings:
                     double bpm = Number(view.bpm);

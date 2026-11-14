@@ -1,0 +1,14 @@
+Editor exit routing — 2026-11-14
+
+Workspace clean exit, SaveExit and DiscardExit now load MainMenuActions.ModeSelectionScenePath directly. The legacy ChartEditorMenu.ReturnToMainMenu handler uses the same destination. Save/discard/cancel behavior is unchanged; no new transition or scene composition was added.
+
+Unity 6000.3.23f1 compile passed. Sequential PlayMode runs:
+- Clean workspace Escape: 1/1 passed.
+- SaveExit and DiscardExit: 2/2 passed; verified saved draft contents and discarded draft absence, and no loaded Title scene.
+- Exit cancellation: 1/1 passed.
+- Smoke: 4/4 passed.
+No skips or inconclusive cases. This is targeted verification, not a full-suite run.
+
+Detailed local evidence: Logs/motion-editor-exit-*-tests.json.
+The player remediation probe expectation was updated, but a player build/probe was not run for this routing-only change.
+Scene regeneration is unnecessary because only runtime destinations and tests changed; the previously regenerated visual scenes are committed separately.

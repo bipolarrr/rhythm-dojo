@@ -971,11 +971,43 @@ namespace RhythmDojo.Tests
             Assert.That(workspace.HasUnsavedChanges, Is.False);
             yield return PressKeys(Key.Escape);
             double deadline = Time.realtimeSinceStartupAsDouble + 10;
-            while (!SceneManager.GetActiveScene().path.EndsWith("/Title.unity"))
+            while (SceneManager.GetActiveScene().path != MainMenuActions.ModeSelectionScenePath)
             {
                 Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline), "Workspace operation did not finish before its deadline.");
                 yield return null;
             }
+        }
+
+        [UnityTest]
+        [Category("SceneIntegration")]
+        public IEnumerator SaveExitReturnsToModesAfterSavingTheDraft()
+        {
+            var session = workspace.screen.Session;
+            var store = workspace.menu.Store;
+            session.Edit(edit => edit.SetMetadata("Saved on exit", "Test"));
+            workspace.Run(WorkspaceAction.Exit);
+            Assert.That(workspace.view.exitPopup.activeSelf, Is.True);
+            workspace.Run(WorkspaceAction.SaveExit);
+            yield return WaitFor(() => SceneManager.GetActiveScene().path == MainMenuActions.ModeSelectionScenePath,
+                "Saving and exiting must return directly to mode selection.");
+            Assert.That(store.Read(session.Snapshot.Id).Title, Is.EqualTo("Saved on exit"));
+            Assert.That(SceneManager.GetSceneByPath(MainMenuActions.TitleScenePath).isLoaded, Is.False);
+        }
+
+        [UnityTest]
+        [Category("SceneIntegration")]
+        public IEnumerator DiscardExitReturnsToModesWithoutSavingTheDraft()
+        {
+            var session = workspace.screen.Session;
+            var store = workspace.menu.Store;
+            session.Edit(edit => edit.SetMetadata("Discard on exit", "Test"));
+            workspace.Run(WorkspaceAction.Exit);
+            Assert.That(workspace.view.exitPopup.activeSelf, Is.True);
+            workspace.Run(WorkspaceAction.DiscardExit);
+            yield return WaitFor(() => SceneManager.GetActiveScene().path == MainMenuActions.ModeSelectionScenePath,
+                "Discarding and exiting must return directly to mode selection.");
+            Assert.That(store.ListSongIds(), Has.No.Member(session.Snapshot.Id));
+            Assert.That(SceneManager.GetSceneByPath(MainMenuActions.TitleScenePath).isLoaded, Is.False);
         }
 
         [UnityTest]

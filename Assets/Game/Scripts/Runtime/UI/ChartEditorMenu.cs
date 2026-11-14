@@ -293,10 +293,10 @@ namespace RhythmDojo.UI
         public void ReturnToMainMenu() =>
             RunAsync(async () =>
             {
-                const string titleScenePath = "Assets/Game/Scenes/Title.unity";
+                const string titleScenePath = RhythmDojo.Core.MainMenuActions.ModeSelectionScenePath;
                 if (!UnityEngine.Application.CanStreamedLevelBeLoaded(titleScenePath))
                 {
-                    throw new InvalidOperationException("Title scene is not registered in Build Settings.");
+                    throw new InvalidOperationException("Mode selection scene is not registered in Build Settings.");
                 }
 
                 if (screen.Session.IsDirty)
@@ -309,7 +309,7 @@ namespace RhythmDojo.UI
                 returningSession = null;
                 if (UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(titleScenePath) == null)
                 {
-                    throw new InvalidOperationException("Cannot load Title.");
+                    throw new InvalidOperationException("Cannot load mode selection.");
                 }
 
                 leavingForMainMenu = true;
