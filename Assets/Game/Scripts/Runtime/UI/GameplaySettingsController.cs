@@ -116,6 +116,9 @@ namespace RhythmDojo.UI
                 view.judgmentPositionList.onValueChanged.AddListener(JudgmentPositionChanged);
             }
 
+            view.focusHudButton.onClick.AddListener(ToggleFocusHud);
+            view.railOpacity.SetValueWithoutNotify(this.presentation.railOpacity * 100);
+            view.railOpacity.onValueChanged.AddListener(RailOpacityChanged);
             RefreshGameplay();
         }
 
@@ -137,6 +140,11 @@ namespace RhythmDojo.UI
 
         private void HardRuleChanged(int index)
         {
+            if (!view.CanEdit)
+            {
+                return;
+            }
+
             var rule = hardMode.GetRule((Judgment)index);
             hardMode.SetRule(
                 (Judgment)index,
@@ -149,6 +157,11 @@ namespace RhythmDojo.UI
 
         private void HardCountChanged(int index, string value)
         {
+            if (!view.CanEdit)
+            {
+                return;
+            }
+
             var rule = hardMode.GetRule((Judgment)index);
 
             if (!int.TryParse(value, out int count))
@@ -273,12 +286,22 @@ namespace RhythmDojo.UI
 
         internal void OpenTimingCalibration(Action<int> onApplied)
         {
+            if (!view.CanEdit)
+            {
+                return;
+            }
+
             calibrationApplied = onApplied;
             calibration.Open(false);
         }
 
         private void ApplyCalibration(int value)
         {
+            if (!view.CanEdit)
+            {
+                return;
+            }
+
             TimingChanged(value);
             calibrationApplied?.Invoke(value);
         }
@@ -306,6 +329,11 @@ namespace RhythmDojo.UI
 
         private void SpeedChanged(float value)
         {
+            if (!view.CanEdit)
+            {
+                return;
+            }
+
             double rounded = Math.Round(
                 Math.Clamp((double)value, 1, 10),
                 1,
@@ -349,6 +377,11 @@ namespace RhythmDojo.UI
 
         private void TimingChanged(float value)
         {
+            if (!view.CanEdit)
+            {
+                return;
+            }
+
             preferences.TimingOffsetMs = Mathf.RoundToInt(value);
             preferences.Save();
             view.timingOffset.SetValueWithoutNotify(preferences.TimingOffsetMs);
@@ -357,6 +390,11 @@ namespace RhythmDojo.UI
 
         private void JudgmentPositionChanged(int value)
         {
+            if (!view.CanEdit)
+            {
+                return;
+            }
+
             if (value < 0 || value >= JudgmentPositions.Length)
             {
                 return;
@@ -368,8 +406,35 @@ namespace RhythmDojo.UI
 
         private void RefreshGameplay()
         {
+            string caption = "HUD · 기본";
+            if (presentation.focusHud)
+            {
+                caption = "HUD · 집중";
+            }
+            view.focusHudButton.GetComponentInChildren<Text>().text = caption;
             view.speedLabel.text = $"속도  {view.speedSlider.value:0.0#}x";
             view.timingLabel.text = $"입력 타이밍 보정  {preferences.TimingOffsetMs:+0;-0;0} ms";
+        }
+
+        private void ToggleFocusHud()
+        {
+            if (!view.CanEdit)
+            {
+                return;
+            }
+            presentation.focusHud = !presentation.focusHud;
+            presentation.SaveValues();
+            RefreshGameplay();
+        }
+
+        private void RailOpacityChanged(float value)
+        {
+            if (!view.CanEdit)
+            {
+                return;
+            }
+            presentation.railOpacity = value / 100;
+            presentation.SaveValues();
         }
 
         private static void Configure(Dropdown dropdown, string[] options, int value)
@@ -381,6 +446,8 @@ namespace RhythmDojo.UI
 
         public void Dispose()
         {
+            view.focusHudButton.onClick.RemoveListener(ToggleFocusHud);
+            view.railOpacity.onValueChanged.RemoveListener(RailOpacityChanged);
             calibration.Dispose();
             gameplayRules?.Dispose();
 

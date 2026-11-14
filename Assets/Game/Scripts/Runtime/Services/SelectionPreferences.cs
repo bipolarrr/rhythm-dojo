@@ -135,31 +135,59 @@ namespace RhythmDojo.Services
         public string Difficulty
         {
             get => data.difficulty;
-            set => data.difficulty = value;
+            set
+            {
+                if (SettingsAccessPolicy.CanChange)
+                {
+                    data.difficulty = value;
+                }
+            }
         }
 
         public ScrollMode ScrollMode
         {
             get => data.scrollMode;
-            set => data.scrollMode = value;
+            set
+            {
+                if (SettingsAccessPolicy.CanChange)
+                {
+                    data.scrollMode = value;
+                }
+            }
         }
 
         public double Multiplier
         {
             get => data.multiplier;
-            set => data.multiplier = value;
+            set
+            {
+                if (SettingsAccessPolicy.CanChange)
+                {
+                    data.multiplier = value;
+                }
+            }
         }
 
         public int TimingOffsetMs
         {
             get => data.timingOffsetMs;
-            set => data.timingOffsetMs = Mathf.Clamp(value, -200, 200);
+            set
+            {
+                if (SettingsAccessPolicy.CanChange)
+                {
+                    data.timingOffsetMs = Mathf.Clamp(value, -200, 200);
+                }
+            }
         }
 
         public bool IsFavorite(string id) => id != null && data.favorites.Contains(id);
 
         public void ToggleFavorite(string id)
         {
+            if (!SettingsAccessPolicy.CanChange)
+            {
+                return;
+            }
             if (string.IsNullOrWhiteSpace(id))
             {
                 return;
@@ -231,7 +259,7 @@ namespace RhythmDojo.Services
                     if (snapshot.IsFullCombo && !record.fullCombo)
                     {
                         record.fullCombo = true;
-                        Save();
+                        SaveRecords();
                     }
 
                     return;
@@ -253,10 +281,20 @@ namespace RhythmDojo.Services
             record.rate = rate;
             record.maxCombo = maxCombo;
             record.fullCombo |= snapshot.IsFullCombo;
-            Save();
+            SaveRecords();
         }
 
         public void Save()
+        {
+            if (!SettingsAccessPolicy.CanChange)
+            {
+                return;
+            }
+            SaveRecords();
+        }
+
+        // Completion records remain writable; gameplay cannot mutate the settings fields above.
+        private void SaveRecords()
         {
             if (key == null)
             {
@@ -298,7 +336,7 @@ namespace RhythmDojo.Services
                 record.challengeAchievements |= 1 << (rules.ChallengePreset - 1);
             }
 
-            Save();
+            SaveRecords();
         }
     }
 

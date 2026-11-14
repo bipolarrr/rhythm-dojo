@@ -27,21 +27,24 @@ namespace RhythmDojo.EditorTools
             mode.description = mode.typography[1].description;
             mode.detail = mode.typography[1].detail;
 
+            var navigationInk = Contrast("Navigation Ink Background", bottom, new Vector2(630, 661),
+                new Vector2(584, 56), new Color(.045f, .065f, .07f, .93f));
             var help = Label("Navigation Help", bottom, "← →  이동     Enter  선택     Esc  대문으로", 16, Paper);
             Place(help.rectTransform, new Vector2(650, 674), new Vector2(540, 30));
             help.alignment = TextAnchor.MiddleRight;
+            UiFontSettings.Apply(help);
+            FitInk(navigationInk, help, 0, 18, 7);
             Shadow(help, new Color(.03f, .04f, .05f, .95f));
             mode.selectionMarks = System.Array.Empty<Image>();
 
-            StyleButton(view.start, parent, "수련 시작", new Vector2(970, 625), new Vector2(220, 62), 30);
-            mode.actionLabel = view.start.GetComponentInChildren<Text>();
             StyleButton(view.settings, parent, "설정", new Vector2(1050, 14), new Vector2(82, 44), 18);
             StyleButton(view.quit, parent, "종료", new Vector2(1150, 14), new Vector2(66, 44), 18);
             StyleButton(view.editor, parent, "율보 편찬", new Vector2(68, 14), new Vector2(130, 44), 18);
+            view.editor.gameObject.SetActive(false);
             mode.previous = Control("Previous Mode", parent, "〈", new Vector2(28, 316));
             mode.next = Control("Next Mode", parent, "〉", new Vector2(1188, 316));
-            mode.interfaceGroups = new CanvasGroup[8];
-            var controls = new[] { top.gameObject, bottom.gameObject, view.start.gameObject,
+            mode.interfaceGroups = new CanvasGroup[7];
+            var controls = new[] { top.gameObject, bottom.gameObject,
                 view.settings.gameObject, view.quit.gameObject, view.editor.gameObject,
                 mode.previous.gameObject, mode.next.gameObject };
             for (int i = 0; i < controls.Length; i++)
@@ -63,7 +66,7 @@ namespace RhythmDojo.EditorTools
             string description = "처음이지? 내가 옆에서 박자를 짚어 줄게.";
             var position = new Vector2(380, 87);
             var size = new Vector2(540, 140);
-            var copyPosition = new Vector2(395, 229);
+            var copyPosition = new Vector2(371, 229);
 
             int fontSize = 114;
             Color color = Ink;
@@ -114,6 +117,41 @@ namespace RhythmDojo.EditorTools
                     break;
             }
 
+            Color contrast = new Color(1f, .95f, .82f, .92f);
+            if (index == 1 || index == 3)
+            {
+                contrast = new Color(.045f, .065f, .07f, .92f);
+            }
+            var titleInk = Contrast("Title Ink Background", title,
+                position + new Vector2(-24, -4), new Vector2(size.x + 20, size.y), contrast);
+            RectTransform lowerInk = null;
+            if (index == 1)
+            {
+                titleInk.sizeDelta = new Vector2(340, 146);
+                lowerInk = Contrast("Title Lower Ink Background", title, position + new Vector2(-12, 110),
+                    new Vector2(350, 146), contrast);
+            }
+            if (index == 3)
+            {
+                titleInk.localRotation = Quaternion.Euler(0, 0, 3);
+            }
+            // The tutorial replaces its copy with feedback, so retain the full authored copy width.
+            float copyWidth = 584;
+            if (index == 1)
+            {
+                copyWidth = 250;
+            }
+            else if (index == 2)
+            {
+                copyWidth = 430;
+            }
+            else if (index == 3)
+            {
+                copyWidth = 470;
+            }
+            var descriptionInk = Contrast("Description Ink Background", copy, copyPosition + new Vector2(-20, -5),
+                new Vector2(copyWidth, 48), contrast);
+
             composition.heading = Label("Mode Title", title, caption, fontSize, color);
             composition.heading.font = font;
             var headingScope = composition.heading.gameObject.AddComponent<UiFontScope>();
@@ -126,13 +164,27 @@ namespace RhythmDojo.EditorTools
             Place(composition.heading.rectTransform, position, size);
             UiFontSettings.Apply(composition.heading);
             composition.heading.material = null;
+            FitInk(titleInk, composition.heading, 0, 16, 10);
+            if (index == 2)
+            {
+                // Keep the upper edge fixed and lift only the lower edge by 16 canvas pixels.
+                titleInk.sizeDelta -= new Vector2(0, 16);
+                titleInk.anchoredPosition += new Vector2(0, 8);
+            }
+            if (lowerInk)
+            {
+                FitInk(lowerInk, composition.heading, 1, 16, 10);
+            }
             composition.description = Label("Mode Description", copy, description, 23, color);
             Place(composition.description.rectTransform, copyPosition, new Vector2(560, 38));
             if (index == 3)
             {
                 composition.heading.rectTransform.localRotation = Quaternion.Euler(0, 0, 3);
                 composition.description.fontSize = 21;
+                FitInk(titleInk, composition.heading, 0, 16, 10);
             }
+            UiFontSettings.Apply(composition.description);
+            FitInk(descriptionInk, composition.description, 0, 14, 4);
             // Tutorial feedback reuses the one-line description instead of a second text block.
             composition.detail = composition.description;
             if (index == 1 || index == 3)
@@ -141,6 +193,24 @@ namespace RhythmDojo.EditorTools
                 Shadow(composition.description, new Color(.03f, .04f, .05f, .95f));
             }
             return composition;
+        }
+
+        private static void FitInk(RectTransform ink, Text text, int line, float horizontal, float vertical)
+        {
+            DojoInkGraphic.FitInk(ink, text, line, horizontal, vertical);
+        }
+
+        private static RectTransform Contrast(string name, Transform parent,
+            Vector2 position, Vector2 size, Color color)
+        {
+            var go = new GameObject(name, typeof(RectTransform), typeof(DojoInkGraphic));
+            go.transform.SetParent(parent, false);
+            var graphic = go.GetComponent<DojoInkGraphic>();
+            graphic.contrastStroke = true;
+            graphic.color = color;
+            graphic.raycastTarget = false;
+            Place(graphic.rectTransform, position, size);
+            return graphic.rectTransform;
         }
 
         private static void StyleButton(Button button, Transform parent, string caption,
@@ -168,6 +238,9 @@ namespace RhythmDojo.EditorTools
             UiFontSettings.Apply(text);
             text.material = null;
             Shadow(text, new Color(.03f, .04f, .05f, .95f));
+            var buttonInk = Contrast("Control Ink Background", button.transform,
+                Vector2.zero, size, new Color(.045f, .065f, .07f, .9f));
+            FitInk(buttonInk, text, 0, 6, 3);
             button.targetGraphic = text;
             // The transparent Image owns the full accessible hit area; tint responds on the text.
             var colors = button.colors;

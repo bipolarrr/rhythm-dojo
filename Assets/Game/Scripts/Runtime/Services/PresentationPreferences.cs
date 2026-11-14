@@ -22,6 +22,7 @@ namespace RhythmDojo.Services
             frameRate = 1,
             quality = 1;
         public bool focusHud;
+        public float railOpacity = 1;
         public JudgmentPosition judgmentPosition;
         public static readonly int[] FrameRates = { 30, 60, 120, 144, 240, -1 };
 
@@ -58,6 +59,7 @@ namespace RhythmDojo.Services
             Current.resolution = Mathf.Clamp(Current.resolution, 0, 1);
             Current.frameRate = Mathf.Clamp(Current.frameRate, 0, FrameRates.Length - 1);
             Current.quality = Mathf.Clamp(Current.quality, 0, 2);
+            Current.railOpacity = Mathf.Clamp01(Current.railOpacity);
             if (!Enum.IsDefined(typeof(JudgmentPosition), Current.judgmentPosition))
             {
                 Current.judgmentPosition = JudgmentPosition.Middle;
@@ -105,6 +107,11 @@ namespace RhythmDojo.Services
 
         public void ApplyAudio()
         {
+            if (!SettingsAccessPolicy.CanChange)
+            {
+                return;
+            }
+
             AudioListener.volume = masterVolume;
             Changed?.Invoke();
         }
@@ -119,6 +126,11 @@ namespace RhythmDojo.Services
 
         public void ApplyGraphicsValues(bool resize = true)
         {
+            if (!SettingsAccessPolicy.CanChange)
+            {
+                return;
+            }
+
             QualitySettings.vSyncCount = 0;
             UnityEngine.Application.targetFrameRate = FrameRates[frameRate];
 
@@ -137,6 +149,11 @@ namespace RhythmDojo.Services
 
         private void Save()
         {
+            if (!SettingsAccessPolicy.CanChange)
+            {
+                return;
+            }
+
             PlayerPrefs.SetString(StorageKey, JsonUtility.ToJson(this));
             PlayerPrefs.Save();
         }

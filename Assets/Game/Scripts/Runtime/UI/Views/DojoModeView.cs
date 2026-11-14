@@ -26,7 +26,7 @@ namespace RhythmDojo.UI
         [Min(0)] public float idleSeparation = .45f;
         public DojoFigureGraphic[] scrollMotion;
         public Sprite[] poses;
-        public Text heading, description, detail, counter, actionLabel;
+        public Text heading, description, detail, counter;
         public Button previous, next;
         public Button practiceTarget;
         public AudioSource effects;
@@ -166,7 +166,7 @@ namespace RhythmDojo.UI
             {
                 throw new InvalidOperationException("Dojo arrival composition missing.");
             }
-            if (!summitFlag.cloth || interfaceGroups.Length != 8)
+            if (!summitFlag.cloth || interfaceGroups.Length != 7)
             {
                 throw new InvalidOperationException("Dojo arrival artwork or controls missing.");
             }
@@ -247,7 +247,7 @@ namespace RhythmDojo.UI
             {
                 throw new InvalidOperationException("Dojo mode labels missing.");
             }
-            if (!previous || !next || !actionLabel)
+            if (!previous || !next)
             {
                 throw new InvalidOperationException("Dojo mode controls missing.");
             }
@@ -567,15 +567,6 @@ namespace RhythmDojo.UI
             {
                 mark.gameObject.SetActive(false);
             }
-            actionLabel.text = "수련 시작";
-            if (SelectedIndex == 0)
-            {
-                actionLabel.text = "박자 배우기";
-            }
-            else if (SelectedIndex == 3)
-            {
-                actionLabel.text = "편찬 시작";
-            }
             for (int i = 0; i < selectionMarks.Length; i++)
             {
                 selectionMarks[i].color = new Color(1, .94f, .8f, .38f);
@@ -620,7 +611,6 @@ namespace RhythmDojo.UI
                 UpdateLessonMarks();
                 lessonBeat = -1;
                 cueBeat = -1;
-                actionLabel.text = "두드리기";
                 detail.text = "사형의 손짓에 Space 또는 버튼!  0 / 4";
                 return;
             }
@@ -652,7 +642,6 @@ namespace RhythmDojo.UI
             {
                 lesson = false;
                 detail.text = "기초 수련 완료! → 자유 연습에서 곡을 골라 보세요.";
-                actionLabel.text = "다시 배우기";
                 lessonCue.text = "잘했다! 이제 혼자서도 해볼 수 있겠네.";
             }
         }

@@ -56,6 +56,11 @@ namespace RhythmDojo.Services
 
         public void Update(PlayRules rules)
         {
+            if (!SettingsAccessPolicy.CanChange)
+            {
+                return;
+            }
+
             rules.Validate();
             this.rules = rules.Copy();
             PlayerPrefs.SetString(

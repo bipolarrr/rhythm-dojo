@@ -153,7 +153,7 @@ namespace RhythmDojo.Core
             if (screen)
             {
                 view.SetExpansion(1f);
-                events.SetSelectedGameObject(view.start.gameObject);
+                events.SetSelectedGameObject(screen.gameObject);
             }
             else
             {

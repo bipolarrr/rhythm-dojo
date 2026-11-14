@@ -26,7 +26,13 @@ namespace RhythmDojo.Services
         public bool Enabled
         {
             get => data.enabled;
-            set => data.enabled = value;
+            set
+            {
+                if (SettingsAccessPolicy.CanChange)
+                {
+                    data.enabled = value;
+                }
+            }
         }
 
         public HardModePreferences(string storageKey = StorageKey)
@@ -86,11 +92,11 @@ namespace RhythmDojo.Services
 
                 if (Enum.IsDefined(typeof(HealthRuleAction), action))
                 {
-                    SetRule(grade, ((HealthRuleAction)action), count);
+                    LoadRule(grade, ((HealthRuleAction)action), count);
                 }
                 else
                 {
-                    SetRule(
+                    LoadRule(
                         grade,
                         (
                             i switch
@@ -127,6 +133,16 @@ namespace RhythmDojo.Services
 
         public void SetRule(Judgment grade, HealthRuleAction action, int count)
         {
+            if (!SettingsAccessPolicy.CanChange)
+            {
+                return;
+            }
+
+            LoadRule(grade, action, count);
+        }
+
+        private void LoadRule(Judgment grade, HealthRuleAction action, int count)
+        {
             if (!Enum.IsDefined(typeof(HealthRuleAction), action))
             {
                 throw new ArgumentOutOfRangeException(nameof(action));
@@ -161,6 +177,11 @@ namespace RhythmDojo.Services
 
         public void Save()
         {
+            if (!SettingsAccessPolicy.CanChange)
+            {
+                return;
+            }
+
             if (key == null)
             {
                 return;

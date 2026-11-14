@@ -26,9 +26,16 @@ namespace RhythmDojo.EditorTools
             var fit = backdrop.GetComponent<AspectRatioFitter>();
             fit.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
             fit.aspectRatio = image.sprite.rect.width / image.sprite.rect.height;
-            view.transform.Find("Modal Shade").GetComponent<Image>().color = new Color(.075f, .035f, .02f, .62f);
+            backdrop.SetActive(false);
+            view.transform.Find("Modal Shade").GetComponent<Image>().color = new Color(.055f, .035f, .025f, .55f);
             var popup = view.transform.Find("Settings Popup");
-            popup.GetComponent<Image>().color = new Color(.98f, .88f, .68f, .96f);
+            var frame = PixelSongSelectionStyle.Frame((RectTransform)popup, new Color(.96f, .87f, .70f), 10);
+            frame.artwork = SettingsArtAssets.Load("SettingsPanel", UiArtworkCrop.Full,
+                new Vector4(128, 128, 128, 128));
+            frame.RefreshArtwork();
+            var shadow = frame.gameObject.AddComponent<Shadow>();
+            shadow.effectColor = new Color(.04f, .02f, .01f, .32f);
+            shadow.effectDistance = new Vector2(0, -12);
             foreach (var text in view.GetComponentsInChildren<Text>(true))
             {
                 text.font = AssetDatabase.LoadAssetAtPath<Font>(MainMenuLayoutBuilder.FontPath);
@@ -38,7 +45,8 @@ namespace RhythmDojo.EditorTools
             var title = popup.Find("Title").GetComponent<Text>();
             title.text = "도장 설정";
             title.fontStyle = FontStyle.Bold;
-            foreach (var button in new[] { view.soundTab, view.graphicsTab, view.gameplayTab, view.back })
+            foreach (var button in new[] { view.soundTab, view.graphicsTab, view.gameplayTab,
+                view.focusHudButton, view.back })
             {
                 Button(button, new Color(.79f, .63f, .42f), Ink);
                 StyleSettingsButton(button);

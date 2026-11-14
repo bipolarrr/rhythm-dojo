@@ -351,6 +351,8 @@ namespace RhythmDojo.EditorTools
             title.color = new Color(.24f, .12f, .085f);
             title.alignment = TextAnchor.MiddleCenter;
             menu.settingsButton = PauseButton("Pause Settings", dialog, "설정", .14f, .58f, .86f, .74f);
+            menu.settingsButton.interactable = false;
+            menu.settingsButton.gameObject.SetActive(false);
             menu.restartButton = PauseButton("Restart Play", dialog, "처음부터 다시", .14f, .35f, .86f, .51f);
             menu.exitButton = PauseButton("Exit Play", dialog, "곡 선택", .14f, .12f, .86f, .28f);
             menu.recoveryStatus = Label("Audio Recovery Status", dialog, "", .04f, .005f, .96f, .115f, 14);
@@ -388,10 +390,12 @@ namespace RhythmDojo.EditorTools
             var menu = view.GetComponent<GameplayPauseMenu>();
             var dialog = menu.settingsButton.transform.parent;
             Bounds((RectTransform)menu.settingsButton.transform, .14f, .45f, .86f, .55f);
-            Bounds((RectTransform)menu.restartButton.transform, .14f, .32f, .86f, .42f);
-            Bounds((RectTransform)menu.exitButton.transform, .14f, .19f, .86f, .29f);
+            Bounds((RectTransform)menu.restartButton.transform, .14f, .44f, .86f, .58f);
+            Bounds((RectTransform)menu.exitButton.transform, .14f, .23f, .86f, .37f);
             view.focusHudButton = PauseButton("Focus HUD", dialog, "HUD · 기본", .14f, .57f, .86f, .67f);
             view.focusHudButton.GetComponentInChildren<Text>().fontSize = 25;
+            view.focusHudButton.interactable = false;
+            view.focusHudButton.gameObject.SetActive(false);
         }
 
         private static Button PauseButton(string name, Transform parent, string text,

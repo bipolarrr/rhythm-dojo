@@ -97,7 +97,14 @@ namespace RhythmDojo.Gameplay
 
         public void RestartSession() => coordinator?.Restart();
 
-        public void RefreshScrollMultiplier(double multiplier) => coordinator?.RefreshScrollMultiplier(multiplier);
+        public void RefreshScrollMultiplier(double multiplier)
+        {
+            if (!RhythmDojo.Services.SettingsAccessPolicy.CanChange)
+            {
+                return;
+            }
+            coordinator?.RefreshScrollMultiplier(multiplier);
+        }
 
         private void Update() => coordinator?.Tick();
 

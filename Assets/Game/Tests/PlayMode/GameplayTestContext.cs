@@ -281,6 +281,7 @@ namespace RhythmDojo.Tests
 
         protected IEnumerator Click(Button button)
         {
+            yield return WaitForSettingsMotion();
             Assert.That(
                 button.isActiveAndEnabled && button.interactable,
                 Is.True,
@@ -323,6 +324,16 @@ namespace RhythmDojo.Tests
             InputSystem.QueueStateEvent(mouse, new MouseState { position = point });
             yield return null;
             yield return null;
+            yield return WaitForSettingsMotion();
+        }
+
+        private IEnumerator WaitForSettingsMotion()
+        {
+            yield return Await(() =>
+            {
+                var settings = UnityEngine.Object.FindFirstObjectByType<SettingsScreen>();
+                return !settings || (!settings.IsOpening && !settings.IsClosing);
+            }, "Settings animation did not complete.");
         }
 
         protected IEnumerator Choose(Dropdown dropdown, int value)

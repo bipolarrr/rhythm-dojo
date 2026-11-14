@@ -160,7 +160,7 @@ namespace RhythmDojo.Tests
         {
             yield return PrepareTitle();
             var view = UnityEngine.Object.FindFirstObjectByType<MainMenuView>();
-            var titleFocus = view.start.gameObject;
+            var titleFocus = view.GetComponent<MainMenuScreen>().gameObject;
             EventSystem.current.SetSelectedGameObject(titleFocus);
             flow.ShowTitleSettings();
             yield return null;
@@ -172,6 +172,7 @@ namespace RhythmDojo.Tests
             yield return Wait(() => preparation.IsSelectionPrepared);
             Assert.That(EventSystem.current.currentSelectedGameObject, Is.SameAs(popupFocus));
             flow.ReturnFromSettings();
+            yield return Wait(() => !popup.gameObject.activeSelf);
             Assert.That(EventSystem.current.currentSelectedGameObject, Is.SameAs(titleFocus));
             new MainMenuActions(flow.Settings, view).StartGame();
             flow.ShowSelection();

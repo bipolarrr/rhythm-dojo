@@ -10,7 +10,6 @@ namespace RhythmDojo.UI
             startPrompt,
             quitQuestion;
         public Button logo,
-            start,
             settings,
             quit,
             confirmQuit,
@@ -58,7 +57,7 @@ namespace RhythmDojo.UI
             if (modeSelection)
             {
                 modeSelection.Validate();
-                if (!menuPanel || !start || !settings)
+                if (!menuPanel || !settings)
                 {
                     throw new InvalidOperationException("Mode selection controls missing.");
                 }
@@ -106,7 +105,7 @@ namespace RhythmDojo.UI
             }
             if (modeSelection)
             {
-                start.interactable = settings.interactable = quit.interactable = value;
+                settings.interactable = quit.interactable = value;
             }
 
             if (editor)

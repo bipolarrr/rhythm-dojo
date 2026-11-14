@@ -52,7 +52,8 @@ namespace RhythmDojo.Tests
             yield return Await(() => UnityEngine.SceneManagement.SceneManager.GetActiveScene().path
                 == RhythmDojo.Core.MainMenuActions.ModeSelectionScenePath);
             menu = Object.FindFirstObjectByType<MainMenuScreen>().GetComponent<MainMenuView>();
-            yield return Click(menu.start);
+            yield return Await(() => menu.GetComponent<MainMenuScreen>().CanSubmit);
+            menu.GetComponent<MainMenuScreen>().OnSubmit(null);
             yield return Await(() => UnityEngine.SceneManagement.SceneManager.GetActiveScene().path
                 == RhythmDojo.Core.AppFlowController.SelectionPath);
             yield return Await(() => !DojoEntranceTransition.Active);

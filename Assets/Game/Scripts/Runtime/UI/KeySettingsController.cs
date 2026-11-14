@@ -115,6 +115,11 @@ namespace RhythmDojo.UI
 
         private void Begin(int lane)
         {
+            if (!view.CanEdit)
+            {
+                return;
+            }
+
             if (!view.keyBindingButtons[lane].interactable)
             {
                 return;
@@ -212,6 +217,11 @@ namespace RhythmDojo.UI
 
         private void Reset()
         {
+            if (!view.CanEdit)
+            {
+                return;
+            }
+
             Cancel();
             if (legacy)
             {

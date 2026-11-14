@@ -142,10 +142,19 @@ namespace RhythmDojo.EditorTools
             railOpacity.SetParent(dialog, false);
             Bounds(railOpacity, .44f, .095f, .86f, .18f);
             view.railOpacity.targetGraphic.color = new Color(.50f, .18f, .10f);
+            view.railOpacity.interactable = false;
+            view.railOpacity.gameObject.SetActive(false);
+            railOpacityLabel.gameObject.SetActive(false);
+            Bounds((RectTransform)menu.resumeButton.transform, .14f, .65f, .86f, .79f);
             Bounds((RectTransform)menu.settingsButton.transform, .14f, .61f, .86f, .75f);
             Bounds((RectTransform)menu.restartButton.transform, .14f, .42f, .86f, .56f);
             Bounds((RectTransform)menu.exitButton.transform, .14f, .23f, .86f, .37f);
             Bounds(menu.recoveryStatus.rectTransform, .08f, .034f, .92f, .092f);
+            var hint = UiElements.Label("Settings Menu Hint", dialog, "설정은 수련을 마친 뒤 메뉴에서 변경할 수 있습니다.",
+                Vector2.zero, Vector2.zero, 16, role: UiTextRole.Help);
+            Bounds(hint.rectTransform, .08f, .10f, .92f, .19f);
+            hint.color = Ink;
+            hint.alignment = TextAnchor.MiddleCenter;
 
             SceneResources.ApplyReadableFont(view.songDetails, view.counts, view.accuracy, view.combo,
                 view.bestCombo, view.healthLabel, view.timing, view.progress, railOpacityLabel);

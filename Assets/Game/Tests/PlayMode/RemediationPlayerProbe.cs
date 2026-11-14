@@ -243,28 +243,12 @@ namespace RhythmDojo.Tests
             yield return Press(Key.Escape);
             Require(game.IsPaused, "Esc pauses gameplay.");
             double frozen = game.Clock.SongTime;
-            yield return Click(menu.settingsButton);
-            yield return Wait(() => Object.FindFirstObjectByType<SettingsView>(), "Paused settings");
-            var view = Object.FindFirstObjectByType<SettingsView>();
-            yield return Click(view.graphicsTab);
-            // Dropdown values use their normal onValueChanged route; Apply uses queued pointer input.
-            int option = 0;
-            for (int i = 0; i < flow.Audio.OptionCount; i++)
-            {
-                if (flow.Audio.GetBufferSize(i) == 256)
-                {
-                    option = i;
-                }
-            }
-            Require(option != 0, "256-sample option exists.");
-            view.bufferList.value = option;
+            flow.ShowGameplaySettings();
+            Require(!Object.FindFirstObjectByType<SettingsView>(), "Paused settings are blocked.");
+            Require(!flow.ApplyBufferSize(), "Gameplay cannot apply audio settings.");
+            // Device recovery is independent of settings access and remains supported during pause.
+            Require(AudioSettings.Reset(AudioSettings.GetConfiguration()), "Simulated device reset.");
             report.requestedBuffer = flow.Audio.RequestedBufferSize;
-            yield return Click(view.apply);
-            yield return Wait(() => !flow.Audio.IsBufferValidationPending,
-                "DSP clock-rate validation", 25);
-            Require(flow.Audio.ClockRateVerified, "Device DSP clock-rate intervals verified: " + flow.BufferStatus);
-            Require(game.IsPaused && !game.Clock.Running, "Settings validation keeps gameplay paused.");
-            Require(Math.Abs(game.Clock.SongTime - frozen) < .000001, "Logical time stays frozen during reset.");
             var configuration = AudioSettings.GetConfiguration();
             report.appliedBuffer = configuration.dspBufferSize;
             report.sampleRate = configuration.sampleRate;
@@ -281,7 +265,6 @@ namespace RhythmDojo.Tests
                 });
             }
             yield return Capture("paused-audio-settings");
-            yield return Click(view.back);
             yield return Click(menu.resumeButton);
             yield return Wait(() => !game.IsPaused && game.Clock.Running,
                 "Recovered scheduled resume", 15);
@@ -362,6 +345,14 @@ namespace RhythmDojo.Tests
             }
         }
 
+        private IEnumerator SubmitMode()
+        {
+            var screen = MainMenuCompositionRoot.InScene(SceneManager.GetActiveScene()).GetComponent<MainMenuScreen>();
+            UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(screen.gameObject);
+            screen.OnSubmit(null);
+            yield return null;
+        }
+
         private IEnumerator EditorRoundTrip()
         {
             var view = MainMenuCompositionRoot.InScene(SceneManager.GetActiveScene()).View;
@@ -371,7 +362,7 @@ namespace RhythmDojo.Tests
             yield return Wait(() => !view.modeSelection.IsMoving, "Travel to scribing room");
             Require(view.modeSelection.SelectedIndex == 3, "Fourth mode is the scribing room.");
             yield return Capture("scribing-room");
-            yield return Click(view.start);
+            yield return SubmitMode();
             yield return Wait(() => Object.FindFirstObjectByType<ChartEditorMenu>(), "Editor load");
             yield return Wait(() => Object.FindFirstObjectByType<ChartEditorMenu>().IsInitialized, "Editor initialize");
             var screen = Object.FindFirstObjectByType<ChartEditorScreen>();
@@ -420,7 +411,7 @@ namespace RhythmDojo.Tests
         private IEnumerator EnterSelection()
         {
             yield return Capture("practice-mode");
-            yield return Click(MainMenuCompositionRoot.InScene(SceneManager.GetActiveScene()).View.start);
+            yield return SubmitMode();
             yield return Wait(() => SceneManager.GetActiveScene().path == AppFlowController.SelectionPath,
                 "Title entrance");
             yield return Wait(() => !DojoEntranceTransition.Active, "Door completion");
@@ -449,7 +440,7 @@ namespace RhythmDojo.Tests
             var view = MainMenuCompositionRoot.InScene(SceneManager.GetActiveScene()).View;
             yield return Click(view.modeSelection.previous);
             yield return Wait(() => !view.modeSelection.IsMoving, "Travel to lesson");
-            yield return Click(view.start);
+            yield return SubmitMode();
             Require(view.modeSelection.lessonCue.gameObject.activeInHierarchy, "Lesson begins inside ModeSelection.");
             yield return Capture("lesson");
             for (int i = 0; i < 2; i++)
@@ -458,7 +449,7 @@ namespace RhythmDojo.Tests
                 yield return Wait(() => !view.modeSelection.IsMoving, "Travel to Challenge");
             }
             yield return Capture("challenge-mode");
-            yield return Click(view.start);
+            yield return SubmitMode();
             yield return Wait(() => SceneManager.GetActiveScene().path == AppFlowController.SelectionPath,
                 "Challenge selection");
             yield return Wait(() => !flow.Transitioning, "Challenge activation cleanup");

@@ -118,19 +118,17 @@ namespace RhythmDojo.EditorTools
             view.menuPanel = menu.GetComponent<CanvasGroup>();
             view.entrance.trainingMenu = view.menuPanel;
             Anchor((RectTransform)menu.transform, new Vector2(.5f, .5f), Vector2.zero, new Vector2(350, 290));
-            view.start = MenuButton("Play", menu.transform, "플레이", font, -135);
             view.settings = MenuButton("Settings", menu.transform, "설정", font, -45);
             view.editor = MenuButton("Showcase Editor", menu.transform, "에디터", font, 45);
             view.quit = MenuButton("Quit", menu.transform, "종료", font, 135);
             // Keep plaques above the doors but behind both logo halves throughout reveal and reversal.
             menu.transform.SetParent(entrance.transform, false);
             menu.transform.SetSiblingIndex(view.entrance.logoClip.GetSiblingIndex());
-            SetNavigation(view.start, view.quit, view.settings);
-            SetNavigation(view.settings, view.start, view.editor);
+            SetNavigation(view.settings, view.quit, view.editor);
             SetNavigation(view.editor, view.settings, view.quit);
-            SetNavigation(view.quit, view.editor, view.start);
-            logoNavigation.selectOnRight = view.start;
-            logoNavigation.selectOnDown = view.start;
+            SetNavigation(view.quit, view.editor, view.settings);
+            logoNavigation.selectOnRight = view.settings;
+            logoNavigation.selectOnDown = view.settings;
             view.logo.navigation = logoNavigation;
 
             view.SetExpansion(0f);
@@ -213,7 +211,7 @@ namespace RhythmDojo.EditorTools
                 throw new InvalidOperationException("Selection wood text material missing.");
             }
 
-            foreach (var button in new[] { view.start, view.settings, view.editor, view.quit })
+            foreach (var button in new[] { view.settings, view.editor, view.quit })
             {
                 var text = button.GetComponentInChildren<Text>(true);
                 UiFontSettings.Apply(text);

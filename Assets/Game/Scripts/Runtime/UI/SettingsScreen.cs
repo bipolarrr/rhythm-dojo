@@ -19,6 +19,13 @@ namespace RhythmDojo.UI
         private GraphicsSettingsController graphics;
         private GameplaySettingsController gameplay;
         private KeySettingsController keys;
+        private float animationTime;
+        private float closeProgress;
+        private Action closed;
+
+        public bool IsOpening { get; private set; }
+        public bool IsClosing { get; private set; }
+        public bool IsOpen => isActiveAndEnabled && !IsOpening && !IsClosing;
 
         public void Validate()
         {
@@ -48,6 +55,12 @@ namespace RhythmDojo.UI
         {
             Unbind();
             Validate();
+            if (!SettingsAccessPolicy.CanChange)
+            {
+                gameObject.SetActive(false);
+                return;
+            }
+
             navigation = appNavigation;
             presentation ??= new PresentationPreferences();
             sound = new SoundSettingsController(view, presentation);
@@ -67,6 +80,7 @@ namespace RhythmDojo.UI
                 presentation
             );
             view.back.onClick.AddListener(Back);
+            view.dismiss.onClick.AddListener(Back);
             if (!keyMode && modeId == null && gameSettings)
             {
                 keyMode = gameSettings.catalog[0].Mode;
@@ -78,6 +92,12 @@ namespace RhythmDojo.UI
             view.graphicsTab.onClick.AddListener(ShowGraphics);
             view.gameplayTab.onClick.AddListener(ShowGameplay);
             ShowSound();
+            animationTime = 0;
+            IsOpening = true;
+            IsClosing = false;
+            closed = null;
+            view.panelOpacity.interactable = false;
+            SetPresentation(0);
 
             if (EventSystem.current)
             {
@@ -200,6 +220,40 @@ namespace RhythmDojo.UI
 
         private void Update()
         {
+            if (!SettingsAccessPolicy.CanChange)
+            {
+                CloseImmediately();
+                return;
+            }
+
+            if (IsClosing)
+            {
+                animationTime += Time.unscaledDeltaTime;
+                float t = Mathf.Clamp01(animationTime / .32f);
+                SetPresentation(closeProgress * (1 - t * t * t));
+                if (t >= 1)
+                {
+                    CloseImmediately();
+                }
+                return;
+            }
+
+            if (IsOpening)
+            {
+                animationTime += Time.unscaledDeltaTime;
+                float t = Mathf.Clamp01(animationTime / .38f);
+                SetPresentation(1 - Mathf.Pow(1 - t, 3));
+                if (t >= 1)
+                {
+                    IsOpening = false;
+                    view.panelOpacity.interactable = true;
+                }
+            }
+            else
+            {
+                SetPresentation(1);
+            }
+
             if (gameplay?.TickCalibration() == true)
             {
                 return;
@@ -246,6 +300,45 @@ namespace RhythmDojo.UI
             }
         }
 
+        private void SetPresentation(float progress)
+        {
+            var canvasRect = (RectTransform)view.transform;
+            float scale = Mathf.Min(1, Mathf.Min(
+                canvasRect.rect.width / 1100f, canvasRect.rect.height / 730f));
+            scale = Mathf.Max(.01f, scale);
+            view.panelRect.localScale = Vector3.one * scale;
+            float hiddenY = (canvasRect.rect.height + view.panelRect.rect.height * scale) * .5f + 24;
+            view.panelRect.anchoredPosition = new Vector2(0, hiddenY * (1 - progress));
+            view.panelOpacity.alpha = progress;
+            view.dimOpacity.alpha = progress;
+        }
+
+        public void Close(Action completed)
+        {
+            if (IsClosing)
+            {
+                return;
+            }
+            closed = completed;
+            closeProgress = view.panelOpacity.alpha;
+            animationTime = 0;
+            IsOpening = false;
+            IsClosing = true;
+            view.panelOpacity.interactable = false;
+            Unbind();
+        }
+
+        public void CloseImmediately()
+        {
+            var completed = closed;
+            closed = null;
+            IsOpening = false;
+            IsClosing = false;
+            Unbind();
+            gameObject.SetActive(false);
+            completed?.Invoke();
+        }
+
         private void Unbind()
         {
             keys?.Dispose();
@@ -263,6 +356,7 @@ namespace RhythmDojo.UI
             }
 
             view.back.onClick.RemoveListener(Back);
+            view.dismiss.onClick.RemoveListener(Back);
             view.soundTab.onClick.RemoveListener(ShowSound);
             view.graphicsTab.onClick.RemoveListener(ShowGraphics);
             view.gameplayTab.onClick.RemoveListener(ShowGameplay);

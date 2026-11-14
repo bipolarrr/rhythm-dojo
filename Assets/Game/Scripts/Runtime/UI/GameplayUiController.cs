@@ -53,9 +53,11 @@ namespace RhythmDojo.UI
 
             if (railOpacityChanged != null)
             {
-                view.railOpacity.onValueChanged.AddListener(railOpacityChanged);
+                view.railOpacity.SetValueWithoutNotify(PresentationPreferences.Current.railOpacity);
                 railOpacityChanged(view.railOpacity.value);
             }
+            view.railOpacity.interactable = false;
+            view.focusHudButton.interactable = false;
 
             Refresh();
         }
@@ -64,6 +66,11 @@ namespace RhythmDojo.UI
 
         private void ToggleFocusHud()
         {
+            if (!SettingsAccessPolicy.CanChange)
+            {
+                return;
+            }
+
             var preferences = PresentationPreferences.Current ?? PresentationPreferences.Load();
             preferences.focusHud = !preferences.focusHud;
             preferences.SaveValues();

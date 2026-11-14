@@ -60,6 +60,7 @@ namespace RhythmDojo.EditorTools
             else
             {
                 var entranceScreen = view.gameObject.AddComponent<MainMenuEntranceScreen>();
+                SceneDependencyAssembler.Wire(entranceScreen, "sky", TitleSkyLayoutBuilder.Build(view));
                 SceneDependencyAssembler.Wire(entranceScreen, "view", view);
                 SceneDependencyAssembler.Wire(entranceScreen, "effects", effects);
                 SceneDependencyAssembler.Wire(root, "entranceScreen", entranceScreen);

@@ -59,7 +59,8 @@ namespace RhythmDojo.UI
             this.flow = flow;
             this.root = root;
             resumeButton.onClick.AddListener(BeginResume);
-            settingsButton.onClick.AddListener(OpenSettings);
+            settingsButton.interactable = false;
+            settingsButton.gameObject.SetActive(false);
             restartButton.onClick.AddListener(Restart);
             exitButton.onClick.AddListener(Exit);
         }
@@ -337,7 +338,7 @@ namespace RhythmDojo.UI
         private void SetRecoveryControls(bool enabled)
         {
             resumeButton.interactable = enabled;
-            settingsButton.interactable = enabled;
+            settingsButton.interactable = false;
             restartButton.interactable = enabled;
             exitButton.interactable = true;
         }
@@ -346,7 +347,7 @@ namespace RhythmDojo.UI
         {
             if (panel.activeSelf)
             {
-                EventSystem.current?.SetSelectedGameObject(settingsButton.gameObject);
+                EventSystem.current?.SetSelectedGameObject(resumeButton.gameObject);
             }
         }
 

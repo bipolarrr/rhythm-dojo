@@ -144,13 +144,11 @@ namespace RhythmDojo.Tests
             yield return Press(Key.Escape);
             var pause = Object.FindFirstObjectByType<GameplayPauseMenu>();
             Assert.That(game.IsPaused, Is.True);
-            yield return Click(pause.settingsButton);
-            var view = Object.FindFirstObjectByType<SettingsView>();
-            yield return Click(view.keySettingsTab);
-            yield return Click(view.keyBindingButtons[0]);
-            yield return Press(Key.Q);
-            Assert.That(hud.lanes.laneRoot.GetChild(0).GetComponentInChildren<Text>().text, Is.EqualTo("Q"));
-            yield return Click(view.back);
+            Assert.That(pause.settingsButton.gameObject.activeSelf, Is.False);
+            Object.FindFirstObjectByType<AppFlowController>().ShowGameplaySettings();
+            Assert.That(Object.FindFirstObjectByType<SettingsView>(), Is.Null);
+            Assert.That(PlayKeyBindings.TrySetKey(0, Key.Q, out _), Is.False);
+            Assert.That(hud.lanes.laneRoot.GetChild(0).GetComponentInChildren<Text>().text, Is.EqualTo("A"));
             yield return Click(pause.resumeButton);
             yield return Await(
                 () => !game.IsPaused && !pause.countdown.activeSelf,
@@ -158,13 +156,13 @@ namespace RhythmDojo.Tests
             Assert.That(game.IsPaused, Is.False);
             Assert.That(game.Clock.Running, Is.True);
             pressed = -1;
-            yield return Press(Key.A);
-            Assert.That(pressed, Is.EqualTo(-1));
             yield return Press(Key.Q);
+            Assert.That(pressed, Is.EqualTo(-1));
+            yield return Press(Key.A);
             Assert.That(pressed, Is.EqualTo(0));
             game.Session.Advance(game.Chart.CompletionTime + 1);
             yield return Await(() => Object.FindFirstObjectByType<ResultsScreen>());
-            Assert.That(Object.FindFirstObjectByType<AppFlowController>().LastResult.LaneLabels[0], Is.EqualTo("Q"));
+            Assert.That(Object.FindFirstObjectByType<AppFlowController>().LastResult.LaneLabels[0], Is.EqualTo("A"));
         }
 
         [UnityTest]
@@ -229,27 +227,22 @@ namespace RhythmDojo.Tests
                 yield return Press(Key.Escape);
                 flow.Selection.UpdateSelection("test-pulse", flow.Settings.defaultDifficulty, ScrollMode.Constant, 1);
                 var pause = Object.FindFirstObjectByType<GameplayPauseMenu>();
-                yield return Click(pause.settingsButton);
-                var view = Object.FindFirstObjectByType<SettingsView>();
-                yield return Click(view.keySettingsTab);
-                Assert.That(view.keyBindingButtons.Length, Is.EqualTo(6));
-                yield return Click(view.keyBindingButtons[0]);
-                yield return Press(Key.Q);
-                var hud = Object.FindFirstObjectByType<GameplayHudView>();
-                Assert.That(hud.lanes.laneRoot.GetChild(0).GetComponentInChildren<Text>().text, Is.EqualTo("Q"));
-                yield return Click(view.back);
+                flow.ShowGameplaySettings();
+                Assert.That(Object.FindFirstObjectByType<SettingsView>(), Is.Null);
+                Assert.That(flow.Selection.SelectedSongId, Is.EqualTo("mode-key-regression"));
+                Assert.That(PlayKeyBindings.TrySetKey(mode, mode.name, 0, Key.Q, out _), Is.False);
                 yield return Click(pause.resumeButton);
                 yield return Await(() => !game.IsPaused && !pause.countdown.activeSelf);
                 int pressed = -1;
                 game.Input.Pressed += (lane, time) => pressed = lane;
-                yield return Press(Key.A);
-                Assert.That(pressed, Is.EqualTo(-1));
                 yield return Press(Key.Q);
+                Assert.That(pressed, Is.EqualTo(-1));
+                yield return Press(Key.A);
                 Assert.That(pressed, Is.EqualTo(0));
                 game.Session.Advance(game.Chart.CompletionTime + 1);
                 yield return Await(() => Object.FindFirstObjectByType<ResultsScreen>());
                 Assert.That(flow.LastResult.LaneLabels.Count, Is.EqualTo(6));
-                Assert.That(flow.LastResult.LaneLabels[0], Is.EqualTo("Q"));
+                Assert.That(flow.LastResult.LaneLabels[0], Is.EqualTo("Left A"));
                 Assert.That(flow.LastResult.LaneLabels[5], Is.EqualTo("Pad South"));
             }
             finally
@@ -275,7 +268,7 @@ namespace RhythmDojo.Tests
                 InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.D));
                 yield return null;
                 Assert.That(input.IsHeld(0), Is.True);
-                Assert.That(PlayKeyBindings.TrySetKey(mode, mode.name, 0, Key.Q, out _), Is.True);
+                Assert.That(PlayKeyBindings.TrySetKey(mode, mode.name, 0, Key.Q, out _), Is.False);
                 yield return null;
                 Assert.That(input.IsHeld(0), Is.True);
                 Assert.That(released, Is.Zero);

@@ -39,18 +39,33 @@ namespace RhythmDojo.UI
 
         private void MasterChanged(float value)
         {
+            if (!view.CanEdit)
+            {
+                return;
+            }
+
             presentation.masterVolume = value / 100f;
             ApplyAudio();
         }
 
         private void BackgroundChanged(float value)
         {
+            if (!view.CanEdit)
+            {
+                return;
+            }
+
             presentation.backgroundVolume = value / 100f;
             ApplyAudio();
         }
 
         private void GameplayChanged(float value)
         {
+            if (!view.CanEdit)
+            {
+                return;
+            }
+
             presentation.gameplayVolume = value / 100f;
             ApplyAudio();
         }

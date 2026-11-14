@@ -1,0 +1,19 @@
+{
+  "tool": "built-in image_gen",
+  "reference": "Assets/Game/Art/DojoRenewal/HanokEntrance.png",
+  "assets": [
+    {
+      "file": "SkySource.png",
+      "prompt": "Use case: stylized-concept. Create a production game background, landscape 16:9, sky only for a Korean hanok rhythm dojo game. Reference image is style/palette only: C:/Users/song/RhythmDojo/Assets/Game/Art/DojoRenewal/HanokEntrance.png (already viewed). Match its clear medium cornflower blue sky (#6399e1 approx), warm daylight and detailed softly pixel-painted retro game artwork, crisp small pixel clusters, no outlines or coarse oversized pixels. Very subtle airy tonal variation, mostly clean blue with sparse wispy distant white cloud fragments ONLY in far upper corners, quiet central negative space for existing game logo. Bottom quarter uninterrupted medium cornflower blue approximately #6197df to connect above existing dojo roof. No buildings, trees, horizon, ground, birds, text, logo, sun disk or UI. Do not reproduce or redesign the dojo. Save generated image for use in Unity project."
+    },
+    {
+      "file": "Cloud.png",
+      "prompt": "Use case: stylized-concept. Production Unity 2D game sprite: one elongated small fair-weather cumulus cloud isolated on a genuinely transparent background. Wide 3:1 composition with transparent padding on all sides, entire cloud visible. Korean hanok dojo game, softly pixel-painted retro game art with crisp small pixel clusters and stepped silhouette, warm ivory sunlit top and pale blue lavender shaded underside. Soft airy body with restrained detail, not a cartoon icon, not photorealistic. Cloud will drift slowly on cornflower blue sky. No sky background, no landscape, no text, no shadows outside cloud. One cloud only."
+    },
+    {
+      "file": "SwallowSheet.png",
+      "prompt": "Use case: stylized-concept. Production sprite animation sheet on genuine transparent background: a tiny distant swallow flying right, SIX consecutive wingbeat frames in ONE HORIZONTAL ROW, six identical square cells, no grid lines. All birds identical body proportions, identical scale and right facing orientation, body centered identically in each cell, generous transparent margin. Frame sequence left to right: wings up high, wings raised diagonal, wings horizontal, wings swept down, wings down low, wings returning horizontal. Dark indigo brown silhouette, subtle warm ivory belly, forked tail. Clear actual changing wing shapes. Crisp pixel art, small clustered pixels, designed to be shown at 32 pixels wide in a detailed Korean hanok dojo game's blue sky. Keep every frame completely inside its cell. No words, letters, numbers, scenery or cloud. Aspect ratio 6:1 if possible, otherwise wide canvas with the single row vertically centered. Every cell must be same size."
+    }
+  ],
+  "derived": "TitleSkyLayoutBuilder bakes Sky.png's bottom eight rows against the unchanged doorway edge and authors six Swallow sprite assets. Build Title regenerates the connection. Existing BrushTitle.png is reused unchanged for the centered overlay."
+}

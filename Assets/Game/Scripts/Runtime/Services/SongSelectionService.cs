@@ -87,6 +87,11 @@ namespace RhythmDojo.Services
             double multiplier
         )
         {
+            if (!SettingsAccessPolicy.CanChange)
+            {
+                return;
+            }
+
             if (songId != null && Library.Find(songId) == null)
             {
                 throw new ArgumentException("Song not registered.");

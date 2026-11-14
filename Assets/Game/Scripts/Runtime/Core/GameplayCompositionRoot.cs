@@ -145,6 +145,7 @@ namespace RhythmDojo.Core
             Validate();
             flow = appFlow;
             playRequest = request;
+            SettingsAccessPolicy.Block(this);
 
             var song = request.Song;
             song.Validate();
@@ -367,6 +368,10 @@ namespace RhythmDojo.Core
 
         public void SetScrollMultiplier(double multiplier)
         {
+            if (!SettingsAccessPolicy.CanChange)
+            {
+                return;
+            }
             if (!initialized || !controller.IsPaused)
             {
                 return;
@@ -616,6 +621,7 @@ namespace RhythmDojo.Core
 
         private void OnDestroy()
         {
+            SettingsAccessPolicy.Release(this);
             ReleasePlaybackRecovery();
             if (input)
             {

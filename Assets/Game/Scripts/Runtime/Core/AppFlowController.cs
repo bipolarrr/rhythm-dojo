@@ -168,14 +168,14 @@ namespace RhythmDojo.Core
 
         private bool CanApplyAudioSettings()
         {
-            if (Transitioning)
+            if (Transitioning || !SettingsAccessPolicy.CanChange)
             {
                 return false;
             }
 
             if (settingsPopup && settingsPopup.gameObject.activeInHierarchy)
             {
-                return true;
+                return !settingsPopup.IsClosing;
             }
 
             return SceneManager.GetSceneByPath(SettingsPath).isLoaded;
@@ -183,6 +183,10 @@ namespace RhythmDojo.Core
 
         private void Update()
         {
+            if (settingsInputScope != null && !SettingsAccessPolicy.CanChange)
+            {
+                CloseSettingsImmediately();
+            }
             Audio?.Tick();
             selectionPreparation?.Tick();
         }
@@ -193,6 +197,10 @@ namespace RhythmDojo.Core
 
         private void SceneLoaded(Scene scene, LoadSceneMode mode)
         {
+            if (mode == LoadSceneMode.Single && settingsInputScope != null)
+            {
+                CloseSettingsImmediately();
+            }
             if (selectionPreparation != null && selectionPreparation.HandleSceneLoaded(scene, mode))
             {
                 return;
@@ -204,8 +212,9 @@ namespace RhythmDojo.Core
                 FindFirstObjectByType<GameplayCompositionRoot>()
                     .Initialize(CurrentRequest, Settings, this);
             }
-            else if (scene.path != GameplayPath)
+            else if (scene.path != GameplayPath && mode == LoadSceneMode.Single)
             {
+                SettingsAccessPolicy.Release(this);
                 ReleaseRequest();
 
                 if (scene.path != ResultsPath)
@@ -300,6 +309,8 @@ namespace RhythmDojo.Core
             (string Id, string Revision)? expectedChart = null
         )
         {
+            CloseSettingsImmediately();
+            SettingsAccessPolicy.Block(this);
             Audio.CancelBufferValidation();
             Transitioning = true;
 
@@ -349,6 +360,7 @@ namespace RhythmDojo.Core
             {
                 song?.Dispose();
                 ReleaseRequest();
+                SettingsAccessPolicy.Release(this);
                 Transitioning = false;
                 throw;
             }
@@ -415,6 +427,8 @@ namespace RhythmDojo.Core
             }
 
             var rules = Rules.Snapshot;
+            CloseSettingsImmediately();
+            SettingsAccessPolicy.Block(this);
             Audio.CancelBufferValidation();
             Transitioning = true;
 
@@ -451,6 +465,7 @@ namespace RhythmDojo.Core
             {
                 song?.Dispose();
                 ReleaseRequest();
+                SettingsAccessPolicy.Release(this);
                 ClearEditorReturn();
                 Transitioning = false;
                 throw;
@@ -629,21 +644,7 @@ namespace RhythmDojo.Core
 
         public void ShowGameplaySettings()
         {
-            if (Transitioning || !SceneManager.GetSceneByPath(GameplayPath).isLoaded)
-            {
-                return;
-            }
-
-            var game = FindFirstObjectByType<RhythmGameController>();
-            if (!game || !game.IsPaused)
-            {
-                return;
-            }
-
-            settingsReturnPath = GameplayPath;
-            settingsKeyMode = CurrentRequest?.Song.Mode;
-            settingsKeyModeId = CurrentRequest?.Song.ModeId ?? "";
-            OpenSettingsPopup(game);
+            // Retained for existing callers; settings are unavailable until gameplay has exited.
         }
 
         public void ShowTitleSettings()
@@ -717,13 +718,31 @@ namespace RhythmDojo.Core
                 return;
             }
 
-            settingsPopup.gameObject.SetActive(false);
-            settingsInputScope.Dispose();
+            settingsPopup.Close(ReleaseSettingsInput);
+        }
+
+        private void ReleaseSettingsInput()
+        {
+            settingsInputScope?.Dispose();
             settingsInputScope = null;
+        }
+
+        private void CloseSettingsImmediately()
+        {
+            Audio?.CancelBufferValidation();
+            if (settingsPopup)
+            {
+                settingsPopup.CloseImmediately();
+            }
+            ReleaseSettingsInput();
         }
 
         private void OpenSettingsPopup(RhythmGameController game = null, Action<int> onApplied = null)
         {
+            if (Transitioning || !SettingsAccessPolicy.CanChange)
+            {
+                return;
+            }
             if (SceneManager.GetSceneByPath(SettingsPath).isLoaded)
             {
                 return;
@@ -765,17 +784,6 @@ namespace RhythmDojo.Core
                     settingsKeyModeId
                 );
 
-                if (game)
-                {
-                    var snapshot = game.ReadModel.Snapshot;
-                    var gameplay = game.GetComponent<GameplayCompositionRoot>();
-                    settingsPopup.BindGameplaySpeed(
-                        snapshot.ScrollMode,
-                        snapshot.ScrollMultiplier,
-                        gameplay.SetScrollMultiplier
-                    );
-                }
-
                 if (onApplied != null)
                 {
                     settingsPopup.OpenTimingCalibration(onApplied);
@@ -796,13 +804,7 @@ namespace RhythmDojo.Core
 
         private void Load(string path)
         {
-            Audio?.CancelBufferValidation();
-            if (settingsInputScope != null)
-            {
-                settingsPopup.gameObject.SetActive(false);
-                settingsInputScope.Dispose();
-                settingsInputScope = null;
-            }
+            CloseSettingsImmediately();
 
             Transitioning = true;
 
@@ -852,6 +854,7 @@ namespace RhythmDojo.Core
 
         private void OnDestroy()
         {
+            SettingsAccessPolicy.Release(this);
             selectionPreparation?.Dispose();
             settingsInputScope?.Dispose();
             lifetime.Cancel();

@@ -54,13 +54,15 @@ namespace RhythmDojo.Tests
                 {
                     Assert.That(view.modeSelection.heading.font.HasCharacter(glyph), Is.True, "Missing glyph: " + glyph);
                 }
-                foreach (var button in new[] { view.start, view.settings, view.editor, view.quit })
+                Assert.That(view.transform.Find("Menu Buttons/Mode Stages/Play"), Is.Null,
+                    "The retired start button must not remain in the serialized scene.");
+                foreach (var button in new[] { view.settings, view.editor, view.quit })
                 {
                     var rect = (RectTransform)button.transform;
                     Assert.That(rect.rect.width, Is.GreaterThanOrEqualTo(44));
                     Assert.That(rect.rect.height, Is.GreaterThanOrEqualTo(44));
                     Assert.That(button.targetGraphic.raycastTarget, Is.True);
-                    var others = new[] { view.start, view.settings, view.editor, view.quit }.Where(other => other != button);
+                    var others = new[] { view.settings, view.editor, view.quit }.Where(other => other != button);
                     foreach (var other in others)
                     {
                         var bounds = RectTransformUtility.CalculateRelativeRectTransformBounds(view.menuPanel.transform, rect);

@@ -25,6 +25,76 @@ namespace RhythmDojo.Tests
     {
         [UnityTest]
         [Category("SceneIntegration")]
+        public IEnumerator StartingPlayClosesPendingSettingsAndBlocksLegacyAndDirectMutationPaths()
+        {
+            var flow = Object.FindFirstObjectByType<AppFlowController>();
+            flow.ShowSettings();
+            var view = Object.FindFirstObjectByType<SettingsView>();
+            view.masterVolume.value = 43;
+            view.gameplayTab.onClick.Invoke();
+            view.timingOffset.value = 25;
+            view.railOpacity.value = 60;
+            view.focusHudButton.onClick.Invoke();
+            view.keySettingsTab.onClick.Invoke();
+            view.keyBindingButtons[0].onClick.Invoke();
+
+            var play = flow.PlaySelectedAsync(CancellationToken.None);
+            Assert.That(view.gameObject.activeSelf, Is.False);
+            Assert.That(RhythmDojo.Services.SettingsAccessPolicy.CanChange, Is.False);
+            string stored = PlayerPrefs.GetString(RhythmDojo.Services.PresentationPreferences.StorageKey);
+            view.masterVolume.onValueChanged.Invoke(99);
+            view.timingOffset.onValueChanged.Invoke(-150);
+            flow.ShowSettings();
+            yield return Await(() => play.IsCompleted);
+            Assert.That(play.IsFaulted, Is.False, play.Exception?.ToString());
+            yield return Await(() => Object.FindFirstObjectByType<RhythmGameController>());
+            yield return WaitForGameplayIntroduction();
+            var game = Object.FindFirstObjectByType<RhythmGameController>();
+            var request = flow.CurrentRequest;
+            Assert.That(request.TimingOffsetMs, Is.EqualTo(25));
+            Assert.That(PlayerPrefs.GetString(RhythmDojo.Services.PresentationPreferences.StorageKey), Is.EqualTo(stored));
+            Assert.That(Object.FindFirstObjectByType<GameplayHudView>().railOpacity.value, Is.EqualTo(.6f));
+
+            yield return Press(Key.Space);
+            yield return Press(Key.Escape);
+            var pause = Object.FindFirstObjectByType<GameplayPauseMenu>();
+            Assert.That(game.IsPaused, Is.True);
+            var rules = flow.Rules.Snapshot;
+            rules.SelectChallenge(3);
+            flow.Rules.Update(rules);
+            Assert.That(flow.Rules.Snapshot.ChallengePreset, Is.Not.EqualTo(3));
+            var hard = flow.HardMode.GetRule(Judgment.Miss);
+            flow.HardMode.SetRule(Judgment.Miss, HealthRuleAction.Damage, 4);
+            flow.HardMode.Save();
+            Assert.That(flow.HardMode.GetRule(Judgment.Miss).Action, Is.EqualTo(hard.Action));
+            Assert.That(RhythmDojo.Services.PlayKeyBindings.TrySetKey(0, Key.Q, out _), Is.False);
+            var presentation = new RhythmDojo.Services.PresentationPreferences { masterVolume = .1f };
+            presentation.SaveAudio();
+            presentation.SaveValues();
+            Assert.That(AudioListener.volume, Is.EqualTo(.43f).Within(.001f));
+            Assert.That(PlayerPrefs.GetString(RhythmDojo.Services.PresentationPreferences.StorageKey), Is.EqualTo(stored));
+
+            yield return SceneManager.LoadSceneAsync(AppFlowController.SettingsPath, LoadSceneMode.Additive);
+            yield return null;
+            Assert.That(flow.CurrentRequest, Is.SameAs(request));
+            Assert.That(Object.FindFirstObjectByType<SettingsScreen>(), Is.Null);
+            Assert.That(game.IsPaused, Is.True);
+            yield return SceneManager.UnloadSceneAsync(AppFlowController.SettingsPath);
+            yield return Press(Key.Escape);
+            yield return Await(() => !game.IsPaused && !pause.countdown.activeSelf);
+            Assert.That(game.Clock.Running, Is.True);
+            yield return Press(Key.Escape);
+            yield return Click(pause.exitButton);
+            yield return Await(() => Object.FindFirstObjectByType<SongSelectionScreen>());
+            Assert.That(RhythmDojo.Services.SettingsAccessPolicy.CanChange, Is.True);
+            flow.ShowSettings();
+            yield return Click(view.gameplayTab);
+            view.timingOffset.value = -15;
+            Assert.That(flow.Preferences.TimingOffsetMs, Is.EqualTo(-15));
+        }
+
+        [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator ReopeningSettingsReusesCalibrationObjectsAndSwitchesBothLayouts()
         {
             var selection = Object.FindFirstObjectByType<SongSelectionView>();
@@ -220,7 +290,24 @@ namespace RhythmDojo.Tests
             Assert.That(UnityEngine.Object.FindObjectsByType<SettingsView>(
                 FindObjectsSortMode.None).Length, Is.EqualTo(1));
 
+            var screen = view.GetComponent<SettingsScreen>();
+            Assert.That(screen.IsOpening, Is.True);
+            Assert.That(view.panelOpacity.alpha, Is.Zero);
+            Assert.That(view.dimOpacity.alpha, Is.Zero);
+            float hiddenY = view.panelRect.anchoredPosition.y;
+            yield return new WaitForSecondsRealtime(.12f);
+            Assert.That(view.panelRect.anchoredPosition.y, Is.InRange(0, hiddenY));
+            Assert.That(view.panelOpacity.alpha, Is.GreaterThan(.4f));
+            Assert.That(view.dimOpacity.alpha, Is.EqualTo(view.panelOpacity.alpha));
+            yield return Await(() => screen.IsOpen);
+            Assert.That(view.panelRect.anchoredPosition, Is.EqualTo(Vector2.zero));
+            CaptureSelection("settings-modal-sound", 1920, 1080);
             flow.ReturnFromSettings();
+            flow.ReturnFromSettings();
+            flow.ShowSettings();
+            Assert.That(screen.IsClosing, Is.True);
+            Assert.That(selection.GetComponent<GraphicRaycaster>().enabled, Is.False);
+            yield return Await(() => !view.gameObject.activeSelf);
             Assert.That(view.gameObject.activeSelf, Is.False);
             Assert.That(selection.GetComponent<GraphicRaycaster>().enabled, Is.True);
             Assert.That(EventSystem.current.currentSelectedGameObject,
@@ -233,8 +320,18 @@ namespace RhythmDojo.Tests
             yield return Click(view.gameplayTab);
             Assert.That(view.gameplayPanel.activeSelf, Is.True);
             CaptureSelection("settings-hold-rules", 1920, 1080);
-            yield return Press(Key.Escape);
-            Assert.That(view.gameObject.activeSelf, Is.False);
+            // Real pointer input outside the panel must dismiss without reaching the menu.
+            var point = new Vector2(6, 6);
+            var hits = new System.Collections.Generic.List<RaycastResult>();
+            EventSystem.current.RaycastAll(new PointerEventData(EventSystem.current) { position = point }, hits);
+            Assert.That(hits[0].gameObject, Is.EqualTo(view.dismiss.gameObject));
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = point });
+            yield return null;
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = point }.WithButton(MouseButton.Left));
+            yield return null;
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = point });
+            yield return Await(() => screen.IsClosing);
+            yield return Await(() => !view.gameObject.activeSelf);
             Assert.That(SceneManager.GetActiveScene(), Is.EqualTo(scene));
         }
 

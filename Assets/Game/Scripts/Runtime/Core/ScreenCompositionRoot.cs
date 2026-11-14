@@ -83,6 +83,14 @@ namespace RhythmDojo.Core
 
         public void Initialize(AppFlowController flow)
         {
+            if (audioSettings && !RhythmDojo.Services.SettingsAccessPolicy.CanChange)
+            {
+                foreach (var root in gameObject.scene.GetRootGameObjects())
+                {
+                    root.SetActive(false);
+                }
+                return;
+            }
             if (initialized)
             {
                 return;

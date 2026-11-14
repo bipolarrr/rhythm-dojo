@@ -53,6 +53,11 @@ namespace RhythmDojo.UI
 
         private void Save()
         {
+            if (!SettingsAccessPolicy.CanChange)
+            {
+                return;
+            }
+
             var rules = service.Snapshot;
             rules.Profile = (JudgmentProfile)controls[0].value;
             rules.Mode = (PlayMode)controls[1].value;

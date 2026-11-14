@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 
 namespace RhythmDojo.UI
 {
-    public sealed class MainMenuScreen : MonoBehaviour, IModalInputParticipant
+    public sealed class MainMenuScreen : MonoBehaviour, IModalInputParticipant, ISubmitHandler, IMoveHandler
     {
         [SerializeField]
         private MainMenuView view;
@@ -18,6 +18,44 @@ namespace RhythmDojo.UI
         private AudioSource effects;
         private int modalClosedFrame = -1;
         public const float MenuExpansionSeconds = 1.35f;
+
+        public bool CanSubmit
+        {
+            get
+            {
+                if (Busy || view.quitPopup.activeSelf)
+                {
+                    return false;
+                }
+                return view.menuPanel.interactable && view.modeSelection.CanEnter;
+            }
+        }
+
+        public void OnSubmit(BaseEventData eventData)
+        {
+            // The screen owns mode confirmation; no invisible Selectable is needed.
+            if (CanSubmit)
+            {
+                StartGame();
+            }
+        }
+
+        public void OnMove(AxisEventData eventData)
+        {
+            if (!CanSubmit || !EventSystem.current)
+            {
+                return;
+            }
+            switch (eventData.moveDir)
+            {
+                case MoveDirection.Up:
+                    EventSystem.current.SetSelectedGameObject(view.settings.gameObject);
+                    break;
+                case MoveDirection.Down:
+                    EventSystem.current.SetSelectedGameObject(view.quit.gameObject);
+                    break;
+            }
+        }
 
         public void Validate()
         {
@@ -58,7 +96,6 @@ namespace RhythmDojo.UI
                 view.editor.onClick.AddListener(OpenEditor);
             }
 
-            view.start.onClick.AddListener(StartGame);
             view.settings.onClick.AddListener(OpenSettings);
             view.quit.onClick.AddListener(ShowQuit);
             view.confirmQuit.onClick.AddListener(ConfirmQuit);
@@ -70,7 +107,7 @@ namespace RhythmDojo.UI
 
             if (EventSystem.current)
             {
-                EventSystem.current.SetSelectedGameObject(view.start.gameObject);
+                EventSystem.current.SetSelectedGameObject(gameObject);
             }
         }
 
@@ -123,10 +160,6 @@ namespace RhythmDojo.UI
                 bool available = !Busy && !view.quitPopup.activeSelf;
                 view.modeSelection.InputEnabled = available;
                 view.modeSelection.practiceTarget.interactable = available && !view.modeSelection.IsArriving;
-                if (available)
-                {
-                    view.start.interactable = view.modeSelection.CanEnter;
-                }
                 if (available && !view.modeSelection.IsMoving)
                 {
                     if (keyboard?.leftArrowKey.wasPressedThisFrame == true || gamepad?.dpad.left.wasPressedThisFrame == true)
@@ -222,7 +255,7 @@ namespace RhythmDojo.UI
                 StartCoroutine(ApproachPractice());
                 return;
             }
-            StartCoroutine(BreakAndInvoke(view.start, actions.StartGame, true));
+            StartCoroutine(BreakAndInvoke(null, actions.StartGame, true));
         }
 
         private IEnumerator ApproachPractice()
@@ -254,7 +287,11 @@ namespace RhythmDojo.UI
         private IEnumerator BreakAndInvoke(
             UnityEngine.UI.Button button, Action action, bool leaving)
         {
-            var board = button.GetComponent<DojoBoardBreak>();
+            DojoBoardBreak board = null;
+            if (button)
+            {
+                board = button.GetComponent<DojoBoardBreak>();
+            }
             if (board)
             {
                 if (view.boardCrack)
@@ -310,7 +347,7 @@ namespace RhythmDojo.UI
             starting = true;
             view.SetMenuInteractable(false);
 
-            StartCoroutine(BreakAndInvoke(view.start, mainMenuActions.ShowEditor, true));
+            StartCoroutine(BreakAndInvoke(null, mainMenuActions.ShowEditor, true));
         }
 
         public void ResumeFromSettings()
@@ -414,7 +451,7 @@ namespace RhythmDojo.UI
             view.modeSelection.Move(direction);
             if (EventSystem.current)
             {
-                EventSystem.current.SetSelectedGameObject(view.start.gameObject);
+                EventSystem.current.SetSelectedGameObject(gameObject);
             }
         }
 
@@ -440,7 +477,6 @@ namespace RhythmDojo.UI
                 view.editor.onClick.RemoveListener(OpenEditor);
             }
 
-            view.start.onClick.RemoveListener(StartGame);
             view.settings.onClick.RemoveListener(OpenSettings);
             view.quit.onClick.RemoveListener(ShowQuit);
             view.confirmQuit.onClick.RemoveListener(ConfirmQuit);

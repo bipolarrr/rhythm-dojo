@@ -82,6 +82,11 @@ namespace RhythmDojo.UI
 
         private void Changed(int option)
         {
+            if (!view.CanEdit)
+            {
+                return;
+            }
+
             audio.SelectBufferOption(option);
             bufferSelectionChanged = true;
             Refresh();
@@ -89,6 +94,11 @@ namespace RhythmDojo.UI
 
         private void Apply()
         {
+            if (!view.CanEdit)
+            {
+                return;
+            }
+
             if (view.graphicsPanel.activeSelf)
             {
                 bool graphicsChanged = presentation.aspect != view.aspectList.value

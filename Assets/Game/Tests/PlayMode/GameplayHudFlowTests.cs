@@ -98,16 +98,14 @@ namespace RhythmDojo.Tests
             Assert.That(holdBody, Is.Not.Null);
             Assert.That(tailMarker.localScale.x, Is.GreaterThan(holdBody.localScale.x));
 
+            float beforeOpacity = lane.sharedMaterial.GetColor("_BaseColor").a;
+            Assert.That(view.railOpacity.interactable, Is.False);
             view.railOpacity.value = .5f;
-            Assert.That(lane.sharedMaterial.GetColor("_BaseColor").a, Is.EqualTo(.5f));
-            Assert.That(rail.sharedMaterial.GetColor("_BaseColor").a, Is.EqualTo(.5f));
-            view.railOpacity.value = 0;
-            Assert.That(lane.enabled, Is.False);
-            Assert.That(rail.enabled, Is.False);
-            Assert.That(judgment.enabled, Is.True);
-            view.railOpacity.value = 1;
+            view.railOpacity.onValueChanged.Invoke(0);
+            Assert.That(lane.sharedMaterial.GetColor("_BaseColor").a, Is.EqualTo(beforeOpacity));
             Assert.That(lane.enabled, Is.True);
             Assert.That(rail.enabled, Is.True);
+            Assert.That(judgment.enabled, Is.True);
 
             var tempo = new TempoMap(new[] { new TempoPoint(0, 120), new TempoPoint(1, 60) });
             var scroll = new ConstantScrollTimeline(10, 1);

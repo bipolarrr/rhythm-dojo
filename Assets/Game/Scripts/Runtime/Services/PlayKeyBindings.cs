@@ -185,6 +185,11 @@ namespace RhythmDojo.Services
         public static bool TrySetKey(GameModeDefinition mode, string modeId, int lane, Key key,
             out string message)
         {
+            if (!SettingsAccessPolicy.CanChange)
+            {
+                message = "플레이를 종료한 뒤 메뉴에서 키를 변경할 수 있습니다.";
+                return false;
+            }
             Validate(mode, modeId, lane);
             if (!CanEdit(mode, lane))
             {
@@ -236,6 +241,10 @@ namespace RhythmDojo.Services
 
         public static void Reset(string modeId)
         {
+            if (!SettingsAccessPolicy.CanChange)
+            {
+                return;
+            }
             if (string.IsNullOrWhiteSpace(modeId))
             {
                 throw new ArgumentException("ModeId is required.", nameof(modeId));

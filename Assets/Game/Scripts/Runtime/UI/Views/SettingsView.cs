@@ -9,6 +9,14 @@ namespace RhythmDojo.UI
         public TimingCalibrationView calibration;
         public bool pixelTheme;
         public GameObject backdrop;
+        public RectTransform panelRect;
+        public CanvasGroup panelOpacity;
+        public CanvasGroup dimOpacity;
+        public Button dismiss;
+        public Button focusHudButton;
+        public Slider railOpacity;
+
+        public bool CanEdit => isActiveAndEnabled && RhythmDojo.Services.SettingsAccessPolicy.CanChange;
         public Dropdown bufferList;
         public Text actualState,
             status;
@@ -52,6 +60,18 @@ namespace RhythmDojo.UI
 
         public void Validate()
         {
+            if (!panelRect || !panelOpacity)
+            {
+                throw new InvalidOperationException("Settings modal panel missing. Rebuild Settings.");
+            }
+            if (!dimOpacity || !dismiss)
+            {
+                throw new InvalidOperationException("Settings modal dim layer missing. Rebuild Settings.");
+            }
+            if (!focusHudButton || !railOpacity)
+            {
+                throw new InvalidOperationException("Settings gameplay presentation controls missing.");
+            }
             if (!calibration)
             {
                 throw new InvalidOperationException("Timing calibration view missing.");

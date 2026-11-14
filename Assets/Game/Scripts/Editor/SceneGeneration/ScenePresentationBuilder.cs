@@ -177,7 +177,7 @@ namespace RhythmDojo.EditorTools
 
             UnityEngine.Object.DestroyImmediate(popupInput);
             UnityEngine.Object.DestroyImmediate(screen);
-            view.backdrop.SetActive(true);
+            view.backdrop.SetActive(false);
             view.gameObject.SetActive(true);
             SceneDependencyAssembler.Assemble(view, content.Settings);
             UiElements.EventSystem(

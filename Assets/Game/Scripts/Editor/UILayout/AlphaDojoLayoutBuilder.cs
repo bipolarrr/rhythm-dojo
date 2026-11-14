@@ -262,8 +262,16 @@ namespace RhythmDojo.EditorTools
             mode.travelCover.gameObject.SetActive(false);
             DojoArcadeLayoutBuilder.Build(view, mode, stage.transform);
             // Direct left/right input owns mode changes. Up/down retains native UI navigation.
-            var navigation = new Navigation { mode = Navigation.Mode.Explicit, selectOnUp = view.settings };
-            view.start.navigation = navigation;
+            var navigation = new Navigation
+            {
+                mode = Navigation.Mode.Explicit,
+                selectOnUp = view.quit,
+                selectOnDown = view.quit
+            };
+            view.settings.navigation = navigation;
+            navigation.selectOnUp = view.settings;
+            navigation.selectOnDown = view.settings;
+            view.quit.navigation = navigation;
             view.logo.navigation = new Navigation { mode = Navigation.Mode.None };
             view.entrance.trainingMenu = null;
             DojoRenewalLayoutBuilder.BuildEntrance(view);

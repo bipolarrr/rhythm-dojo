@@ -29,6 +29,11 @@ namespace RhythmDojo.EditorTools
             shade.GetComponent<RectTransform>().offsetMin = shade
                 .GetComponent<RectTransform>()
                 .offsetMax = Vector2.zero;
+            view.dimOpacity = shade.AddComponent<CanvasGroup>();
+            view.dismiss = shade.AddComponent<Button>();
+            view.dismiss.transition = Selectable.Transition.None;
+            view.dismiss.targetGraphic = shade.GetComponent<Image>();
+            view.dismiss.navigation = new Navigation { mode = Navigation.Mode.None };
 
             var popup = Panel(
                 "Settings Popup",
@@ -37,6 +42,11 @@ namespace RhythmDojo.EditorTools
                 new Vector2(1020, 650),
                 new Color(.015f, .02f, .025f, .88f)
             );
+            view.panelRect = (RectTransform)popup.transform;
+            view.panelRect.anchorMin = view.panelRect.anchorMax = new Vector2(.5f, .5f);
+            view.panelRect.pivot = new Vector2(.5f, .5f);
+            view.panelRect.anchoredPosition = Vector2.zero;
+            view.panelOpacity = popup.AddComponent<CanvasGroup>();
             UiElements.Label(
                 "Title",
                 popup.transform,
@@ -219,11 +229,6 @@ namespace RhythmDojo.EditorTools
                 StyleHardRuleDropdown(view.playRuleLists[i]);
             }
 
-            UiElements.Label(
-                "Hold End Help", view.gameplayPanel.transform,
-                "Automatic: 재입력 허용 · 끝에서 누르고 있으면 자동 판정\nRelease: 조기 해제·시작 Miss 후 복구 불가 · 남은 유지 판정 Miss",
-                new Vector2(0, -398), new Vector2(700, 54), 17, role: UiTextRole.Help);
-
             view.masterLabel = UiElements.Label(
                 "Master Volume Label",
                 view.soundPanel.transform,
@@ -355,19 +360,32 @@ namespace RhythmDojo.EditorTools
             view.gameplayPanel.SetActive(false);
             BuildKeySettings(view);
 
+            view.focusHudButton = UiElements.Button("Focus HUD", view.gameplayPanel.transform,
+                "HUD · 기본", new Vector2(0, -408), new Vector2(230, 38));
+            UiElements.Label("Rail Opacity Label", view.gameplayPanel.transform, "레인 불투명도",
+                new Vector2(260, -408), new Vector2(190, 38), 22);
+            view.railOpacity = Volume("Rail Opacity", view.gameplayPanel.transform, -416);
+            UiElements.Position((RectTransform)view.railOpacity.transform,
+                new Vector2(460, -416), new Vector2(240, 26));
             PixelOptionsStyle.Apply(view);
             PixelOptionsStyle.StyleKeySettings(view);
             ApplyFont(view);
             ApplyCaptionSizes(view);
+            SetCaptionSize(view.focusHudButton.GetComponentInChildren<Text>(), 26, 22);
             ApplyPlayRuleSizes(view);
             BuildJudgmentPosition(view);
             TimingCalibrationLayoutBuilder.Build(view);
-            var help = UiElements.Label("Navigation Help", canvas.transform, "Esc  닫기",
-                Vector2.zero, new Vector2(220, 28), 16, role: UiTextRole.Help);
-            help.alignment = TextAnchor.MiddleRight;
-            help.rectTransform.anchorMin = help.rectTransform.anchorMax = new Vector2(1, 0);
-            help.rectTransform.pivot = new Vector2(1, 0);
-            help.rectTransform.anchoredPosition = new Vector2(-28, 12);
+            var help = UiElements.Label("Navigation Help", popup.transform, "Esc  닫기",
+                new Vector2(38, -584), new Vector2(220, 28), 18, role: UiTextRole.Help);
+            help.color = new Color(.40f, .28f, .18f);
+
+            view.back.GetComponentInChildren<Text>().text = "닫기";
+            foreach (var selectable in view.GetComponentsInChildren<Selectable>(true))
+            {
+                var colors = selectable.colors;
+                colors.fadeDuration = .09f;
+                selectable.colors = colors;
+            }
 
             return view;
         }

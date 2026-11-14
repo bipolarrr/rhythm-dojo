@@ -138,6 +138,119 @@ namespace RhythmDojo.Tests
             yield return null;
         }
 
+        [UnityTest]
+        [Category("SceneIntegration")]
+        public IEnumerator ModeReentryAndRepeatedTravelKeepSubmitTargetFreeOfLegacyArtwork()
+        {
+            for (int entry = 0; entry < 2; entry++)
+            {
+                yield return OpenMenu();
+                var button = screen;
+                var actions = new Actions();
+                screen.Initialize(actions);
+                screen.Initialize(actions);
+                screen.ResumeAfterModal();
+                AssertSubmitHasNoArtwork();
+
+                for (int step = 0; step < 8; step++)
+                {
+                    int expected = (view.modeSelection.SelectedIndex + 1) % 4;
+                    if (step % 2 == 0)
+                    {
+                        yield return Click(view.modeSelection.next);
+                    }
+                    else
+                    {
+                        var keyboard = InputSystem.AddDevice<Keyboard>();
+                        try
+                        {
+                            InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.RightArrow));
+                            yield return null;
+                            yield return null;
+                            InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+                            yield return null;
+                        }
+                        finally
+                        {
+                            InputSystem.RemoveDevice(keyboard);
+                        }
+                    }
+                    double deadline = Time.realtimeSinceStartupAsDouble + 5;
+                    while (view.modeSelection.IsMoving || view.modeSelection.IsArriving)
+                    {
+                        Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
+                        AssertSubmitHasNoArtwork();
+                        yield return null;
+                    }
+                    Assert.That(view.modeSelection.SelectedIndex, Is.EqualTo(expected));
+                    Assert.That(screen, Is.SameAs(button));
+                    AssertSubmitHasNoArtwork();
+                    Capture("Logs/mode-clean-" + expected + ".png", 1920, 1080);
+                }
+
+                if (entry == 0)
+                {
+                    yield return SubmitStart();
+                }
+                else
+                {
+                    var gamepad = InputSystem.AddDevice<Gamepad>();
+                    try
+                    {
+                        UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(screen.gameObject);
+                        InputSystem.QueueStateEvent(gamepad, new GamepadState().WithButton(GamepadButton.South));
+                        yield return null;
+                        yield return null;
+                        InputSystem.QueueStateEvent(gamepad, new GamepadState());
+                        yield return null;
+                    }
+                    finally
+                    {
+                        InputSystem.RemoveDevice(gamepad);
+                    }
+                }
+                double submitDeadline = Time.realtimeSinceStartupAsDouble + 5;
+                while (actions.Starts == 0)
+                {
+                    Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(submitDeadline));
+                    AssertSubmitHasNoArtwork();
+                    yield return null;
+                }
+                Assert.That(actions.Starts, Is.EqualTo(1));
+                if (entry == 0)
+                {
+                    yield return LoadTitle();
+                }
+            }
+        }
+
+        private void AssertSubmitHasNoArtwork()
+        {
+            Assert.That(view.transform.Find("Menu Buttons/Mode Stages/Play"), Is.Null,
+                "The retired start button must not survive as an invisible focus target.");
+            Assert.That(screen.GetComponent<UnityEngine.UI.Selectable>(), Is.Null);
+            Assert.That(screen.transform.Find("Dojo Focus Border"), Is.Null,
+                "Screen confirmation must not acquire a button focus rectangle.");
+        }
+
+        private IEnumerator SubmitStart()
+        {
+            var keyboard = InputSystem.AddDevice<Keyboard>();
+            try
+            {
+                UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(screen.gameObject);
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.Enter));
+                yield return null;
+                yield return null;
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+                yield return null;
+            }
+            finally
+            {
+                InputSystem.RemoveDevice(keyboard);
+            }
+        }
+
         private IEnumerator Click(Button button)
         {
             Canvas.ForceUpdateCanvases();
@@ -167,7 +280,7 @@ namespace RhythmDojo.Tests
         {
             if (!view.modeSelection)
             {
-                yield return Click(view.logo);
+                yield return Click(view.GetComponent<TitleSkyView>().start);
                 yield return WaitForMenuScene(MainMenuActions.ModeSelectionScenePath);
             }
             yield return null;
@@ -234,7 +347,50 @@ namespace RhythmDojo.Tests
             var entrance = view;
             var leftDoor = view.entrance.leftDoor;
             var rightDoor = view.entrance.rightDoor;
-            yield return Click(view.entranceTrigger);
+            var sky = view.GetComponent<TitleSkyView>();
+            var entranceScreen = view.GetComponent<MainMenuEntranceScreen>();
+            var cloudPosition = sky.clouds[1].anchoredPosition;
+            var birdPosition = sky.birds[0].rectTransform.anchoredPosition;
+            var birdFrame = sky.birds[0].sprite;
+            bool flapped = false;
+            double idleDeadline = Time.realtimeSinceStartupAsDouble + 1.2;
+            while (Time.realtimeSinceStartupAsDouble < idleDeadline)
+            {
+                flapped |= sky.birds[0].sprite != birdFrame;
+                Assert.That(entranceScreen.State, Is.EqualTo(MainMenuEntranceScreen.EntranceState.Idle));
+                Assert.That(entrance.entrance.Opening, Is.Zero);
+                yield return null;
+            }
+            Assert.That(flapped, Is.True, "Birds must flap while waiting for input.");
+            Assert.That(sky.clouds[1].anchoredPosition, Is.Not.EqualTo(cloudPosition));
+            Assert.That(sky.birds[0].rectTransform.anchoredPosition, Is.Not.EqualTo(birdPosition));
+            Assert.That(sky.logo.alpha, Is.EqualTo(1));
+            Assert.That(view.startPrompt.gameObject.activeInHierarchy, Is.False);
+            Assert.That(SceneManager.GetSceneByPath(MainMenuActions.ModeSelectionScenePath).isLoaded, Is.False);
+            Directory.CreateDirectory("Logs/sky-intro");
+            Capture("Logs/sky-intro/idle.png");
+            yield return Click(sky.start);
+            Assert.That(entranceScreen.State, Is.EqualTo(MainMenuEntranceScreen.EntranceState.CameraDescending));
+            sky.start.onClick.Invoke();
+            view.entranceTrigger.onClick.Invoke();
+            float previousDescent = 0f;
+            bool captured = false;
+            double descentDeadline = Time.realtimeSinceStartupAsDouble + 5;
+            while (entranceScreen.State == MainMenuEntranceScreen.EntranceState.CameraDescending)
+            {
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(descentDeadline));
+                Assert.That(sky.Descent, Is.GreaterThanOrEqualTo(previousDescent));
+                Assert.That(entrance.entrance.Opening, Is.Zero, "Doors must wait for camera descent.");
+                if (!captured && sky.Descent >= .5f)
+                {
+                    Capture("Logs/sky-intro/descending.png");
+                    captured = true;
+                }
+                previousDescent = sky.Descent;
+                yield return null;
+            }
+            Assert.That(sky.Descent, Is.EqualTo(1));
+            Assert.That(sky.logo.alpha, Is.Zero);
             double deadline = Time.realtimeSinceStartupAsDouble + 10;
             while (entrance.entrance.Opening <= 0)
             {
@@ -245,13 +401,13 @@ namespace RhythmDojo.Tests
             var mode = MainMenuCompositionRoot.InScene(SceneManager.GetSceneByPath(MainMenuActions.ModeSelectionScenePath));
             var character = mode.View.modeSelection.character;
             Assert.That(mode.View.modeSelection.InputEnabled, Is.False);
-            Assert.That(mode.View.start.interactable, Is.False);
+            Assert.That(mode.GetComponent<MainMenuScreen>().CanSubmit, Is.False);
             Assert.That(entrance.entrance.leftDoor, Is.SameAs(leftDoor));
             Assert.That(entrance.entrance.rightDoor, Is.SameAs(rightDoor));
             Assert.That(entrance.entrance.interiorBackdrop.alpha, Is.Zero);
             Assert.That(entrance.entrance.frame.alpha, Is.EqualTo(1));
             entrance.logo.onClick.Invoke();
-            mode.View.start.onClick.Invoke();
+            mode.GetComponent<MainMenuScreen>().OnSubmit(null);
             yield return WaitForMenuScene(MainMenuActions.ModeSelectionScenePath);
             Assert.That(view.modeSelection.character, Is.SameAs(character),
                 "Door reveal must use the same authored room and actors as the active scene.");
@@ -261,6 +417,10 @@ namespace RhythmDojo.Tests
             Assert.That(view.entrance.Opening, Is.Zero);
             Assert.That(view.modeSelection, Is.Null);
             Assert.That(view.menuPanel, Is.Null);
+            Assert.That(view.GetComponent<MainMenuEntranceScreen>().State,
+                Is.EqualTo(MainMenuEntranceScreen.EntranceState.Idle));
+            Assert.That(view.GetComponent<TitleSkyView>().Descent, Is.Zero);
+            Assert.That(view.GetComponent<TitleSkyView>().logo.alpha, Is.EqualTo(1));
         }
 
         [UnityTest]
@@ -272,7 +432,17 @@ namespace RhythmDojo.Tests
             var keyboard = InputSystem.AddDevice<Keyboard>();
             try
             {
-                yield return Click(view.entranceTrigger);
+                var sky = view.GetComponent<TitleSkyView>();
+                yield return Click(sky.start);
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.Escape));
+                yield return null;
+                yield return null;
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+                Assert.That(view.GetComponent<MainMenuEntranceScreen>().State,
+                    Is.EqualTo(MainMenuEntranceScreen.EntranceState.Idle));
+                Assert.That(sky.Descent, Is.Zero);
+                Assert.That(sky.start.interactable, Is.True);
+                yield return Click(view.GetComponent<TitleSkyView>().start);
                 double deadline = Time.realtimeSinceStartupAsDouble + 10;
                 while (view.entrance.Opening <= 0)
                 {
@@ -350,7 +520,7 @@ namespace RhythmDojo.Tests
                 yield return new WaitForSecondsRealtime(.13f);
                 Assert.That(mode.character.sprite, Is.Not.EqualTo(mode.poses[0]));
                 view.modeSelection.next.onClick.Invoke();
-                view.start.onClick.Invoke();
+                screen.OnSubmit(null);
                 Assert.That(actions.Starts, Is.Zero);
                 while (mode.TravelProgress < .35f)
                 {
@@ -411,11 +581,16 @@ namespace RhythmDojo.Tests
             Assert.That(SceneManager.GetActiveScene().path, Is.EqualTo(MainMenuActions.TitleScenePath));
             yield return OpenMenu();
             Assert.That(view.editor.transform.IsChildOf(view.menuPanel.transform), Is.True);
-            Assert.That(view.editor.gameObject.activeInHierarchy, Is.True);
+            Assert.That(view.editor.gameObject.activeInHierarchy, Is.False);
             yield return ReturnToTitle();
             Assert.That(view.editor, Is.Null);
             yield return OpenMenu();
-            yield return Click(view.editor);
+            for (int i = 0; i < 2; i++)
+            {
+                yield return Click(view.modeSelection.next);
+                yield return WaitForModeMotion(view.modeSelection);
+            }
+            yield return SubmitStart();
             double deadline = Time.realtimeSinceStartupAsDouble + 20;
             while (SceneManager.GetActiveScene().path != ChartEditorMenu.ScenePath)
             {
@@ -423,22 +598,7 @@ namespace RhythmDojo.Tests
                 yield return null;
             }
 
-            yield return SceneManager.LoadSceneAsync(MainMenuActions.ModeSelectionScenePath);
-            yield return null;
-            view = UnityEngine.Object.FindFirstObjectByType<MainMenuView>();
-            for (int i = 0; i < 2; i++)
-            {
-                yield return Click(view.modeSelection.next);
-                yield return WaitForModeMotion(view.modeSelection);
-            }
-            Assert.That(view.modeSelection.SelectedIndex, Is.EqualTo(3));
-            yield return Click(view.start);
-            deadline = Time.realtimeSinceStartupAsDouble + 20;
-            while (SceneManager.GetActiveScene().path != ChartEditorMenu.ScenePath)
-            {
-                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
-                yield return null;
-            }
+
         }
 
         [UnityTest]
@@ -471,7 +631,7 @@ namespace RhythmDojo.Tests
             yield return new WaitForSecondsRealtime(.45f);
                 Assert.That(view.quitPopup.activeSelf, Is.True);
                 Assert.That(
-                    view.start.interactable || view.settings.interactable || view.quit.interactable,
+                    screen.CanSubmit || view.settings.interactable || view.quit.interactable,
                     Is.False
                 );
                 yield return ClickAt(new Vector2(Screen.width * .2f, Screen.height * .8f));
@@ -480,7 +640,7 @@ namespace RhythmDojo.Tests
                 yield return Click(view.cancelQuit);
                 Assert.That(view.quitPopup.activeSelf, Is.False);
                 Assert.That(
-                    view.start.interactable && view.settings.interactable && view.quit.interactable,
+                    screen.CanSubmit && view.settings.interactable && view.quit.interactable,
                     Is.True
                 );
             }
@@ -519,12 +679,12 @@ namespace RhythmDojo.Tests
             Assert.That(actions.Starts, Is.Zero);
             yield return new WaitForSecondsRealtime(MainMenuScreen.MenuExpansionSeconds + .1f);
             Assert.That(view.menuPanel.blocksRaycasts, Is.True);
-            yield return Click(view.start);
+            yield return SubmitStart();
             yield return WaitForStart(actions);
-            view.start.onClick.Invoke();
+            screen.OnSubmit(null);
             Assert.That(actions.Starts, Is.EqualTo(1));
             Assert.That(oldActions.Starts, Is.Zero);
-            Assert.That(view.start.interactable, Is.False);
+            Assert.That(screen.CanSubmit, Is.False);
         }
 
         [UnityTest]
@@ -534,12 +694,12 @@ namespace RhythmDojo.Tests
             var actions = new Actions();
             screen.Initialize(actions);
             yield return OpenMenu();
-            Assert.That(view.start.GetComponent<DojoBoardBreak>(), Is.Null);
+            Assert.That(screen.GetComponent<DojoBoardBreak>(), Is.Null);
             Assert.That(view.menuPanel.alpha, Is.EqualTo(1f));
-            view.start.onClick.Invoke();
+            screen.OnSubmit(null);
             Assert.That(view.modeSelection.roomRoot.localScale.x, Is.GreaterThan(1f),
                 "Play must begin the approach immediately.");
-            Assert.That(view.start.interactable, Is.False);
+            Assert.That(screen.CanSubmit, Is.False);
             Assert.That(actions.Starts, Is.Zero);
             yield return WaitForStart(actions);
             Assert.That(actions.Starts, Is.EqualTo(1));
@@ -564,12 +724,12 @@ namespace RhythmDojo.Tests
             Assert.That(selection.GetComponent<CanvasGroup>().interactable, Is.False);
             Assert.That(selection.GetComponent<CanvasGroup>().blocksRaycasts, Is.False);
             Assert.That(UnityEngine.EventSystems.EventSystem.current.gameObject.scene.path, Does.EndWith("/ModeSelection.unity"));
-            Assert.That(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject, Is.SameAs(view.start.gameObject));
+            Assert.That(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject, Is.SameAs(screen.gameObject));
             Assert.That(Array.FindAll(UnityEngine.Object.FindObjectsByType<AudioListener>(FindObjectsSortMode.None),
                 item => item.isActiveAndEnabled), Has.Length.EqualTo(1));
             Assert.That(DojoEntranceTransition.Active, Is.Null);
             yield return OpenMenu();
-            Assert.That(view.start.interactable, Is.True);
+            Assert.That(screen.CanSubmit, Is.True);
         }
 
         [UnityTest]
@@ -605,7 +765,22 @@ namespace RhythmDojo.Tests
                 }
                 int preparedHandle = SceneManager.GetSceneByPath(AppFlowController.SelectionPath).handle;
                 selectionLoads = 0;
-                yield return Click(view.start);
+                Assert.That(view.editor.gameObject.activeInHierarchy, Is.False);
+                AssertSubmitHasNoArtwork();
+
+                var keyboard = InputSystem.AddDevice<Keyboard>();
+                try
+                {
+                    InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.Enter));
+                    yield return null;
+                    yield return null;
+                    InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+                    yield return null;
+                }
+                finally
+                {
+                    InputSystem.RemoveDevice(keyboard);
+                }
 
                 double deadline = Time.realtimeSinceStartupAsDouble + 20;
 
@@ -790,7 +965,7 @@ namespace RhythmDojo.Tests
         {
             yield return OpenMenu();
             var character = view.modeSelection.character;
-            var start = view.start;
+            var start = screen;
             yield return ReturnToTitle();
             Assert.That(character == null, Is.True);
             Assert.That(start == null, Is.True);
@@ -798,7 +973,7 @@ namespace RhythmDojo.Tests
             Assert.That(view.modeSelection, Is.Null);
             yield return OpenMenu();
             Assert.That(view.modeSelection.SelectedIndex, Is.EqualTo(1));
-            Assert.That(view.start.interactable, Is.True);
+            Assert.That(screen.CanSubmit, Is.True);
         }
 
         [UnityTest]
@@ -840,7 +1015,7 @@ namespace RhythmDojo.Tests
                 InputSystem.RemoveDevice(keyboard);
             }
 
-            while (SceneManager.GetActiveScene().path != MainMenuActions.ModeSelectionScenePath)
+            while (settingsView.gameObject.activeInHierarchy)
             {
                 Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
                 yield return null;
@@ -856,7 +1031,7 @@ namespace RhythmDojo.Tests
                 "Popup preserves the expanded title menu."
             );
             Assert.That(screen.enabled, Is.True);
-            Assert.That(view.start.interactable, Is.True);
+            Assert.That(screen.CanSubmit, Is.True);
             yield return null;
             Assert.That(view.menuPanel.gameObject.activeSelf, Is.True);
         }
@@ -884,7 +1059,7 @@ namespace RhythmDojo.Tests
             screen.Initialize(actions);
             yield return OpenMenu();
             view.settings.onClick.Invoke();
-            view.start.onClick.Invoke();
+            screen.OnSubmit(null);
             view.quit.onClick.Invoke();
             view.settings.onClick.Invoke();
             Assert.That(actions.Settings, Is.Zero);
@@ -902,7 +1077,7 @@ namespace RhythmDojo.Tests
             actions.Transitioning = false;
             screen.ResumeFromSettings();
             Assert.That(view.settings.GetComponent<Image>().enabled, Is.True);
-            Assert.That(view.start.interactable, Is.True);
+            Assert.That(screen.CanSubmit, Is.True);
         }
 
         [UnityTest]
@@ -962,7 +1137,7 @@ namespace RhythmDojo.Tests
             var keyboard = InputSystem.AddDevice<Keyboard>();
             try
             {
-                UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(view.logo.gameObject);
+                UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(view.GetComponent<TitleSkyView>().start.gameObject);
                 InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.Enter));
                 yield return null;
                 yield return null;
@@ -971,7 +1146,7 @@ namespace RhythmDojo.Tests
                 var actions = new Actions();
                 screen.Initialize(actions);
                 Assert.That(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject,
-                    Is.EqualTo(view.start.gameObject));
+                    Is.EqualTo(screen.gameObject));
                 InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.Enter));
                 yield return null;
                 yield return null;
@@ -1027,7 +1202,7 @@ namespace RhythmDojo.Tests
                 Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
                 yield return null;
             }
-            yield return Click(view.start);
+            yield return SubmitStart();
             deadline = Time.realtimeSinceStartupAsDouble + 15;
             while (SceneManager.GetActiveScene().path != AppFlowController.SelectionPath)
             {
@@ -1040,7 +1215,7 @@ namespace RhythmDojo.Tests
             Assert.That(selectionView.modeLabel.text, Does.Contain("Challenge"));
             Assert.That(selectionView.practice.heading.text, Is.EqualTo("실력 검정"));
             Assert.That(selectionView.libraryPanel.activeSelf, Is.False);
-            Assert.That(SceneManager.GetActiveScene().handle, Is.EqualTo(preparedHandle));
+            Assert.That((int)SceneManager.GetActiveScene().handle, Is.EqualTo(preparedHandle));
         }
 
         [UnityTest]
@@ -1076,7 +1251,7 @@ namespace RhythmDojo.Tests
             Assert.That(view.modeSelection.lessonCue.gameObject.activeSelf, Is.False,
                 "The lesson cue should appear only after starting the lesson.");
             Capture("Logs/renewal-lesson.png");
-            yield return Click(view.start);
+            yield return SubmitStart();
             Assert.That(view.modeSelection.lessonCue.gameObject.activeSelf, Is.True);
             double startTime = Time.realtimeSinceStartupAsDouble;
             for (int i = 0; i < 4; i++)
@@ -1085,7 +1260,7 @@ namespace RhythmDojo.Tests
                 {
                     yield return null;
                 }
-                yield return Click(view.start);
+                yield return SubmitStart();
             }
             Assert.That(view.modeSelection.LessonHits, Is.EqualTo(4));
             Assert.That(view.modeSelection.traineeIdle.IsPlaying, Is.False);
@@ -1120,10 +1295,9 @@ namespace RhythmDojo.Tests
                 yield return null;
             }
             Assert.That(view.modeSelection.SelectedIndex, Is.EqualTo(3));
-            Assert.That(view.start.interactable, Is.True);
+            Assert.That(screen.CanSubmit, Is.True);
             Assert.That(view.modeSelection.heading.text, Is.EqualTo("율보 편찬"));
             Assert.That(view.modeSelection.description.text, Is.EqualTo("속세에서는 그것을 에디터라 부른다더라"));
-            Assert.That(view.modeSelection.actionLabel.text, Is.EqualTo("편찬 시작"));
             Assert.That(character.enabled, Is.False, "The manuscript close-up must not have a fighting figure over it.");
             Capture("Logs/scribing-menu-1920.png", 1920, 1080);
             Capture("Logs/scribing-menu-4x3.png", 1024, 768);
@@ -1137,7 +1311,7 @@ namespace RhythmDojo.Tests
             }
             yield return null;
             Assert.That(view.modeSelection.SelectedIndex, Is.Zero);
-            Assert.That(view.start.interactable, Is.True);
+            Assert.That(screen.CanSubmit, Is.True);
             Assert.That(character.enabled, Is.True);
             yield return Click(view.modeSelection.previous);
             yield return WaitForModeMotion(view.modeSelection);
@@ -1148,7 +1322,7 @@ namespace RhythmDojo.Tests
             var keyboard = InputSystem.AddDevice<Keyboard>();
             try
             {
-                UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(view.start.gameObject);
+                UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(screen.gameObject);
                 InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.Enter));
                 yield return null;
                 yield return null;
@@ -1186,16 +1360,16 @@ namespace RhythmDojo.Tests
             preparation = new PreparedSelectionScene(flow, () => ready, readyTimeout: .3);
             field.SetValue(flow, preparation);
             yield return OpenMenu();
-            yield return Click(view.start);
+            yield return SubmitStart();
             deadline = Time.realtimeSinceStartupAsDouble + 5;
             while (!view.modeSelection.detail.text.Contains("다시 수련 시작"))
             {
                 Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
                 yield return null;
             }
-            Assert.That(view.start.interactable, Is.True);
+            Assert.That(screen.CanSubmit, Is.True);
             ready = true;
-            yield return Click(view.start);
+            yield return SubmitStart();
             while (SceneManager.GetActiveScene().path != AppFlowController.SelectionPath)
             {
                 Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
@@ -1525,7 +1699,6 @@ namespace RhythmDojo.Tests
                         Assert.That(text.preferredHeight, Is.LessThanOrEqualTo(text.rectTransform.rect.height + 1f),
                             text.name + " must remain readable without truncation.");
                     }
-                    AssertVisibleInCamera((RectTransform)view.start.transform, camera);
                 }
                 camera.Render();
                 RenderTexture.active = target;
