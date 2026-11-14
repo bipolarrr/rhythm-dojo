@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
+using RhythmDojo.Application;
+using RhythmDojo.Content;
 using RhythmDojo.Core;
 using RhythmDojo.Gameplay;
 using RhythmDojo.UI;
@@ -17,6 +19,29 @@ namespace RhythmDojo.Tests
     [Category("UI")]
     public sealed class PracticeSelectionTests : GameplayTestContext
     {
+
+        private sealed class DifficultySongProvider : ISongProvider
+        {
+            public IReadOnlyList<SongEntry> GetEntries()
+            {
+                return new[]
+                {
+                    new SongEntry("difficulty-input", "Difficulty Input", "Test", 30, 1, 4, 120, 120,
+                        charts: new[]
+                        {
+                            new ChartEntry("difficulty-input-easy", ChartSlot.Easy),
+                            new ChartEntry("difficulty-input-standard", ChartSlot.Standard),
+                            new ChartEntry("difficulty-input-hard", ChartSlot.Hard)
+                        })
+                };
+            }
+
+            public System.Threading.Tasks.Task<PlayableSong> LoadAsync(string songId,
+                System.Threading.CancellationToken cancellationToken)
+            {
+                throw new NotSupportedException("This provider tests selection without playback.");
+            }
+        }
 
         private PracticeSelectionView OpenPractice()
         {
@@ -525,13 +550,48 @@ namespace RhythmDojo.Tests
             var practice = OpenPractice();
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
             var view = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
-            int difficulty = Array.IndexOf(flow.Settings.difficulties, flow.SelectedDifficulty);
-            yield return Press(Key.DownArrow);
-            int expected = difficulty + 1;
-            if (expected < view.difficultyButtons.Length && view.difficultyButtons[expected].interactable)
+            var provider = new DifficultySongProvider();
+            flow.Library.Register(provider);
+            var gamepad = InputSystem.AddDevice<Gamepad>();
+            try
             {
+                flow.Selection.UpdateSelection("difficulty-input", flow.Settings.difficulties[1],
+                    flow.Selection.SelectedScrollMode, flow.Selection.SelectedMultiplier);
+                view.GetComponent<SongSelectionScreen>().RestoreEntryFocus();
+                yield return null;
+                Assert.That(practice.difficulties.All(button => button.interactable), Is.True);
+                int difficulty = Array.IndexOf(flow.Settings.difficulties, flow.SelectedDifficulty);
+                yield return Press(Key.UpArrow);
+                int expected = difficulty + 1;
                 Assert.That(flow.Selection.SelectedDifficulty, Is.SameAs(flow.Settings.difficulties[expected]));
+                yield return Press(Key.UpArrow);
+                Assert.That(flow.Selection.SelectedDifficulty, Is.SameAs(flow.Settings.difficulties[expected]),
+                    "Up cannot move above the hardest difficulty.");
+                yield return Press(Key.DownArrow);
+                Assert.That(flow.Selection.SelectedDifficulty, Is.SameAs(flow.Settings.difficulties[1]));
+                yield return Press(Key.DownArrow);
+                Assert.That(flow.Selection.SelectedDifficulty, Is.SameAs(flow.Settings.difficulties[0]));
+                yield return Press(Key.DownArrow);
+                Assert.That(flow.Selection.SelectedDifficulty, Is.SameAs(flow.Settings.difficulties[0]),
+                    "Down cannot move below the easiest difficulty.");
+
+                InputSystem.QueueStateEvent(gamepad, new GamepadState().WithButton(GamepadButton.DpadUp));
+                yield return null;
+                yield return null;
+                Assert.That(flow.Selection.SelectedDifficulty, Is.SameAs(flow.Settings.difficulties[1]));
+                InputSystem.QueueStateEvent(gamepad, new GamepadState());
+                yield return null;
+                InputSystem.QueueStateEvent(gamepad, new GamepadState().WithButton(GamepadButton.DpadDown));
+                yield return null;
+                yield return null;
+                Assert.That(flow.Selection.SelectedDifficulty, Is.SameAs(flow.Settings.difficulties[0]));
             }
+            finally
+            {
+                InputSystem.RemoveDevice(gamepad);
+                flow.Library.Unregister(provider);
+            }
+            yield return null;
             yield return Click(practice.library);
             yield return Click(view.favoritesTab);
             Assert.That(view.Rows, Is.Empty);

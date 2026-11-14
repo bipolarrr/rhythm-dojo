@@ -93,10 +93,10 @@ namespace RhythmDojo.UI
             bool down = keyboard?.downArrowKey.wasPressedThisFrame == true || gamepad?.dpad.down.wasPressedThisFrame == true;
             if (up || down)
             {
-                int step = 1;
+                int step = -1;
                 if (up)
                 {
-                    step = -1;
+                    step = 1;
                 }
                 int index = presentation.SelectedDifficulty + step;
                 while (index >= 0 && index < difficultyOptions.Length)
