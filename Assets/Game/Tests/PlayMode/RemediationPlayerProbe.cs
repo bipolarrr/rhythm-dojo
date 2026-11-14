@@ -441,13 +441,20 @@ namespace RhythmDojo.Tests
             yield return Click(view.modeSelection.previous);
             yield return Wait(() => !view.modeSelection.IsMoving, "Travel to lesson");
             yield return SubmitMode();
-            Require(view.modeSelection.lessonCue.gameObject.activeInHierarchy, "Lesson begins inside ModeSelection.");
+            yield return Wait(() => SceneManager.GetActiveScene().path == MainMenuActions.TutorialScenePath,
+                "Tutorial story entry");
+            var tutorial = Object.FindFirstObjectByType<TutorialView>();
+            Require(tutorial, "The story scene opens on one submit.");
+            tutorial.Validate();
             yield return Capture("lesson");
-            for (int i = 0; i < 2; i++)
-            {
-                yield return Click(view.modeSelection.next);
-                yield return Wait(() => !view.modeSelection.IsMoving, "Travel to Challenge");
-            }
+            yield return Click(tutorial.backButton);
+            yield return Wait(() => SceneManager.GetActiveScene().path == MainMenuActions.ModeSelectionScenePath,
+                "Tutorial return to modes");
+            yield return null;
+            view = MainMenuCompositionRoot.InScene(SceneManager.GetActiveScene()).View;
+            yield return Wait(() => !view.modeSelection.IsMoving, "Mode return arrival");
+            yield return Click(view.modeSelection.next);
+            yield return Wait(() => !view.modeSelection.IsMoving, "Travel to Challenge");
             yield return Capture("challenge-mode");
             yield return SubmitMode();
             yield return Wait(() => SceneManager.GetActiveScene().path == AppFlowController.SelectionPath,
@@ -459,7 +466,7 @@ namespace RhythmDojo.Tests
             CheckSelectionCleanup();
             yield return Capture("challenge-selection");
             yield return ReturnToTitle();
-            Step("training-modes", "Lesson, practice and Challenge use the authored mode rooms.");
+            Step("training-modes", "Tutorial opens the story scene; practice and Challenge open song selection.");
         }
 
         private IEnumerator ReturnToTitle()

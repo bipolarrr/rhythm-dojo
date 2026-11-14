@@ -388,6 +388,7 @@ namespace RhythmDojo.EditorTools
                         SceneBuilder.SettingsPath,
                         SceneBuilder.ResultsPath,
                         ChartEditorSceneBuilder.ScenePath,
+                        SceneBuilder.TutorialPath,
                     },
                     locationPathName = "Builds/Windows/RhythmDojo.exe",
                     target = BuildTarget.StandaloneWindows64,

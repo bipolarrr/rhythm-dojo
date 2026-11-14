@@ -13,8 +13,6 @@ namespace RhythmDojo.UI
         public RectTransform[] companions;
         public RectTransform[] banners;
         public RectTransform[] characterMarks;
-        public Image[] lessonMarks;
-        public Text lessonCue;
         public Image character;
         public DojoFigureGraphic traineeMotion, teacherMotion, sageMotion;
         public DojoActorAnimation traineeAnimation, teacherAnimation;
@@ -29,6 +27,7 @@ namespace RhythmDojo.UI
         public Text heading, description, detail, counter;
         public Button previous, next;
         public Button practiceTarget;
+        public Button tutorialEntry;
         public AudioSource effects;
         public AudioClip contact;
         public RectTransform roomRoot, travelCover, teacherGesture, sageGesture;
@@ -68,20 +67,15 @@ namespace RhythmDojo.UI
             }
         }
         public bool CanEnter => SelectedIndex >= 0 && SelectedIndex < stages.Length;
-        public int LessonHits { get; private set; }
         public int ContactCount { get; private set; }
         private float age;
         private float reaction;
         private float strikeAge = -1f;
         private bool contactMade;
-        private float instructionAge = -1f;
         private const float StrikeContactSeconds = .22f;
         private const float StrikeSeconds = .54f;
         private const float ReactionSeconds = .85f;
         private bool struck;
-        private bool lesson;
-        private int lessonBeat = -1;
-        private int cueBeat = -1;
         private Vector2 characterHome;
         private Color backdropColor;
         private Vector2[] propHomes;
@@ -97,8 +91,6 @@ namespace RhythmDojo.UI
         private float idleGap;
         private bool awaitingResponse;
         private bool practiceContactMade;
-        private float feedbackAge = -1;
-        private bool lessonCorrect;
         private readonly string[] titles = { "비급 전수", "자유 연습", "실력 검정", "율보 편찬" };
         private readonly string[] descriptions = {
             "처음이지? 내가 옆에서 박자를 짚어 줄게.", "자유롭게 연습하자!",
@@ -215,11 +207,11 @@ namespace RhythmDojo.UI
             {
                 throw new InvalidOperationException("Dojo stage composition missing.");
             }
-            if (characterMarks == null || banners == null || lessonMarks == null)
+            if (characterMarks == null || banners == null)
             {
                 throw new InvalidOperationException("Dojo authored motion references missing.");
             }
-            if (characterMarks.Length != 4 || banners.Length != 4 || lessonMarks.Length != 4)
+            if (characterMarks.Length != 4 || banners.Length != 4)
             {
                 throw new InvalidOperationException("Dojo authored motion references missing.");
             }
@@ -237,7 +229,7 @@ namespace RhythmDojo.UI
                 {
                     throw new InvalidOperationException("Dojo training figure reference missing.");
                 }
-                if (!characterMarks[i] || !lessonMarks[i])
+                if (!characterMarks[i])
                 {
                     throw new InvalidOperationException("Dojo authored motion reference missing.");
                 }
@@ -253,10 +245,6 @@ namespace RhythmDojo.UI
                     throw new InvalidOperationException("Dojo trainee pose missing.");
                 }
             }
-            if (!lessonCue)
-            {
-                throw new InvalidOperationException("Dojo lesson labels missing.");
-            }
             if (!heading || !description || !detail)
             {
                 throw new InvalidOperationException("Dojo mode labels missing.");
@@ -268,6 +256,10 @@ namespace RhythmDojo.UI
             if (!practiceTarget)
             {
                 throw new InvalidOperationException("Dojo practice target interaction missing.");
+            }
+            if (!tutorialEntry)
+            {
+                throw new InvalidOperationException("Dojo tutorial entry missing.");
             }
         }
 
@@ -297,14 +289,11 @@ namespace RhythmDojo.UI
             entranceArrived = false;
             TravelProgress = 0f;
             ContactCount = 0;
-            lesson = false;
-            LessonHits = 0;
             SelectedIndex = 1;
             characterHome = characterMarks[SelectedIndex].anchoredPosition;
             character.rectTransform.anchoredPosition = characterHome;
             character.rectTransform.localScale = Vector3.one;
             character.rectTransform.localRotation = Quaternion.identity;
-            UpdateLessonMarks();
             ShowStage();
         }
 
@@ -322,7 +311,6 @@ namespace RhythmDojo.UI
             arrivalDirection = direction;
             IsMoving = true;
             IsArriving = false;
-            lesson = false;
             ResetFigureMotion();
             float elapsed = 0f;
             previousIndex = SelectedIndex;
@@ -441,7 +429,6 @@ namespace RhythmDojo.UI
             }
             IsMoving = false;
             IsArriving = false;
-            lesson = false;
             if (propHomes == null)
             {
                 return;
@@ -576,7 +563,6 @@ namespace RhythmDojo.UI
                 readyMark.localScale = Vector3.one;
             }
             UpdateLabels();
-            lessonCue.text = "내 손을 보고, 천천히 따라 해 봐.";
         }
 
         private void UpdateLabels()
@@ -603,11 +589,6 @@ namespace RhythmDojo.UI
             {
                 counter.text = $"0{SelectedIndex + 1} / 04";
             }
-            lessonCue.gameObject.SetActive(false);
-            foreach (var mark in lessonMarks)
-            {
-                mark.gameObject.SetActive(false);
-            }
             for (int i = 0; i < selectionMarks.Length; i++)
             {
                 selectionMarks[i].color = new Color(1, .94f, .8f, .38f);
@@ -624,90 +605,12 @@ namespace RhythmDojo.UI
             }
         }
 
-        public void Practice()
-        {
-            if (!InputEnabled || IsMoving || SelectedIndex != 0)
-            {
-                return;
-            }
-            IsArriving = false;
-            CancelIdleVariations();
-            if (!lesson)
-            {
-                strikeAge = -1f;
-                instructionAge = -1f;
-            }
-            typography[SelectedIndex].SetRest(true);
-            teacherGesture.localRotation = Quaternion.identity;
-            if (!lesson)
-            {
-                lesson = true;
-                lessonCue.gameObject.SetActive(true);
-                foreach (var mark in lessonMarks)
-                {
-                    mark.gameObject.SetActive(true);
-                }
-                age = 0;
-                LessonHits = 0;
-                UpdateLessonMarks();
-                lessonBeat = -1;
-                cueBeat = -1;
-                detail.text = "사형의 손짓에 Space 또는 버튼!  0 / 4";
-                return;
-            }
-            int beat = Mathf.FloorToInt(age / .75f);
-            float phase = age % .75f;
-            if (beat == lessonBeat)
-            {
-                return;
-            }
-            if (strikeAge >= 0f)
-            {
-                return;
-            }
-            lessonBeat = beat;
-            Strike();
-            feedbackAge = 0;
-            lessonCorrect = phase < .19f || phase > .56f;
-            if (lessonCorrect)
-            {
-                LessonHits++;
-                UpdateLessonMarks();
-                detail.text = $"좋아, 그 박자야. 자세도 잊지 마!  {LessonHits} / 4";
-            }
-            else
-            {
-                detail.text = "어깨에 힘 빼고, 내 손짓에 맞춰 다시 해 봐.";
-            }
-            if (LessonHits >= 4)
-            {
-                lesson = false;
-                detail.text = "기초 수련 완료! → 자유 연습에서 곡을 골라 보세요.";
-                lessonCue.text = "잘했다! 이제 혼자서도 해볼 수 있겠네.";
-            }
-        }
-
-        private void UpdateLessonMarks()
-        {
-            for (int i = 0; i < lessonMarks.Length; i++)
-            {
-                lessonMarks[i].color = new Color(.52f, .38f, .24f);
-                if (i < LessonHits)
-                {
-                    lessonMarks[i].color = new Color(1, .85f, .4f);
-                }
-                lessonMarks[i].rectTransform.localScale = Vector3.one;
-            }
-        }
-
         private void ResetFigureMotion()
         {
             CancelIdleVariations();
-            feedbackAge = -1;
             reaction = 0f;
             strikeAge = -1f;
             contactMade = false;
-            instructionAge = -1f;
             traineeMotion.Rest();
             teacherMotion.Rest();
             sageMotion.Rest();
@@ -763,18 +666,12 @@ namespace RhythmDojo.UI
             character.rectTransform.localScale = Vector3.one;
             UpdateStandingPose();
             UpdateIdleVariations();
-            if (lesson)
-            {
-                UpdateLesson();
-            }
             if (IsArriving)
             {
                 UpdateArrival();
             }
             UpdateStrike();
             UpdatePropReaction();
-            UpdateInstruction();
-            UpdateLessonFeedback();
         }
 
         private void UpdateStandingPose()
@@ -855,9 +752,8 @@ namespace RhythmDojo.UI
 
         private void UpdateIdleVariations()
         {
-            bool locked = IsArriving || lesson;
+            bool locked = IsArriving;
             locked |= strikeAge >= 0;
-            locked |= instructionAge >= 0 || feedbackAge >= 0;
             if (locked)
             {
                 if (!idleLocked)
@@ -975,74 +871,6 @@ namespace RhythmDojo.UI
             PlayEffect(contact, .14f);
         }
 
-        private void UpdateLessonFeedback()
-        {
-            if (feedbackAge < 0)
-            {
-                return;
-            }
-            feedbackAge += Time.unscaledDeltaTime;
-            if (feedbackAge < .24f)
-            {
-                return;
-            }
-            teacherMotion.sprite = teacherPoses[4];
-            if (lessonCorrect)
-            {
-                teacherMotion.sprite = teacherPoses[3];
-            }
-            teacherMotion.SetPose(0, 0, 0, .1f, Gesture(feedbackAge - .24f, .55f));
-            if (lessonCorrect)
-            {
-                teacherAnimation.Sample(DojoIdleVariation.Motion.Approve, feedbackAge - .24f);
-            }
-            if (feedbackAge >= .8f)
-            {
-                feedbackAge = -1;
-                teacherMotion.sprite = teacherPoses[0];
-            }
-        }
-
-        private void UpdateLesson()
-        {
-            float phase = age % .75f;
-            lessonCue.text = "듣고…";
-            if (phase < .19f || phase > .56f)
-            {
-                lessonCue.text = "지금!  톡";
-            }
-            if (LessonHits < lessonMarks.Length)
-            {
-                float pulse = 1 + Mathf.Max(0, 1 - phase / .19f) * .16f;
-                lessonMarks[LessonHits].rectTransform.localScale = Vector3.one * pulse;
-            }
-            int beat = Mathf.FloorToInt(age / .75f);
-            if (beat != cueBeat)
-            {
-                cueBeat = beat;
-                instructionAge = 0f;
-                PlayEffect(contact, .16f);
-            }
-        }
-
-        private void UpdateInstruction()
-        {
-            if (SelectedIndex != 0 || instructionAge < 0f)
-            {
-                return;
-            }
-            instructionAge += Time.unscaledDeltaTime;
-            teacherMotion.sprite = teacherPoses[2];
-            teacherMotion.SetPose(0, 0, 0, .1f, Gesture(instructionAge, .46f));
-            teacherAnimation.Sample(DojoIdleVariation.Motion.Point,
-                instructionAge / .46f * teacherAnimation.Duration(DojoIdleVariation.Motion.Point));
-            if (instructionAge >= .46f)
-            {
-                instructionAge = -1f;
-                teacherMotion.sprite = teacherPoses[0];
-            }
-        }
-
         private void UpdateStrike()
         {
             if (strikeAge < 0f)
@@ -1151,18 +979,9 @@ namespace RhythmDojo.UI
                     teacherMotion.sprite = teacherPoses[2];
                     float gesture = Gesture(t, .48f);
                     teacherMotion.SetPose(0, 0, 0, .1f, gesture);
-                    lessonCue.text = "자, 한 박자에 한 동작!";
                     if (t > .25f)
                     {
                         ArrivalStrike(t - .25f);
-                    }
-                    if (t > .61f)
-                    {
-                        float pulse = Mathf.Max(0, 1 - (t - .61f) / .35f);
-                        foreach (var mark in lessonMarks)
-                        {
-                            mark.rectTransform.localScale = Vector3.one * (1 + pulse * .12f);
-                        }
                     }
                     break;
                 case 1:
@@ -1203,7 +1022,6 @@ namespace RhythmDojo.UI
                 if (SelectedIndex == 0)
                 {
                     teacherMotion.sprite = teacherPoses[0];
-                    lessonCue.text = "내 손을 보고, 천천히 따라 해 봐.";
                 }
             }
         }

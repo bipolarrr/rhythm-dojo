@@ -23,6 +23,12 @@ namespace RhythmDojo.EditorTools
                 mode.typography[i] = Composition(top, i, view.title.font);
                 mode.typography[i].SetRest(i == 1);
             }
+            // The existing title is the pointer target; no extra plaque or start panel.
+            mode.tutorialEntry = mode.typography[0].heading.gameObject.AddComponent<Button>();
+            mode.tutorialEntry.targetGraphic = mode.typography[0].heading;
+            mode.tutorialEntry.transition = Selectable.Transition.None;
+            mode.tutorialEntry.navigation = new Navigation { mode = Navigation.Mode.None };
+            mode.typography[0].titleGroup.blocksRaycasts = true;
             mode.heading = mode.typography[1].heading;
             mode.description = mode.typography[1].description;
             mode.detail = mode.typography[1].detail;
@@ -135,7 +141,7 @@ namespace RhythmDojo.EditorTools
             {
                 titleInk.localRotation = Quaternion.Euler(0, 0, 3);
             }
-            // The tutorial replaces its copy with feedback, so retain the full authored copy width.
+            // Fit each room's existing one-line description to its authored composition.
             float copyWidth = 584;
             if (index == 1)
             {
@@ -189,7 +195,7 @@ namespace RhythmDojo.EditorTools
             }
             UiFontSettings.Apply(composition.description);
             FitInk(descriptionInk, composition.description, 0, 14, 4);
-            // Tutorial feedback reuses the one-line description instead of a second text block.
+            // Secondary status uses the same line instead of a second text block.
             composition.detail = composition.description;
             if (index == 1 || index == 3)
             {

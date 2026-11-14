@@ -38,14 +38,14 @@ namespace RhythmDojo.Tests
             AssertContentPreserved(guids);
 
             SceneBuilder.BuildAll();
-            Assert.That(Signature(), Is.EqualTo(first), "All eight scenes must regenerate consistently.");
+            Assert.That(Signature(), Is.EqualTo(first), "All nine scenes must regenerate consistently.");
             Assert.That(GeneratedSceneSnapshot.Files().Where(path => !path.EndsWith(".unity") && !path.EndsWith(".prefab")),
                 Is.EquivalentTo(generatedFiles.Keys), "Repeated generation must not add assets.");
             AssertContentPreserved(generatedFiles);
             AssertContentPreserved(files);
             AssertContentPreserved(guids);
             Assert.That(EditorBuildSettings.scenes.Where(scene => scene.enabled).Select(scene => scene.path),
-                Is.EqualTo(paths), "All eight scenes must be registered in startup order.");
+                Is.EqualTo(paths), "All nine scenes must be registered in startup order.");
         }
 
         private static void AssertContentPreserved(System.Collections.Generic.Dictionary<string, byte[]> files)

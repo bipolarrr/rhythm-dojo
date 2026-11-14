@@ -7,6 +7,8 @@ namespace RhythmDojo.UI
     public sealed class GameplayHudView : MonoBehaviour
     {
         public bool pixelTheme;
+        public GameplayAtmosphere atmosphere;
+        public GameplayJudgmentMotion judgmentMotion;
         public Image album;
         public Sprite fallbackCover;
         public GameObject introduction;
@@ -41,6 +43,13 @@ namespace RhythmDojo.UI
 
         public void Validate()
         {
+            if (!atmosphere || !judgmentMotion)
+            {
+                throw new InvalidOperationException("Gameplay atmosphere/judgment composition missing.");
+            }
+            atmosphere.Validate();
+            judgmentMotion.Validate();
+
             if (!album || !fallbackCover || !introduction)
             {
                 throw new InvalidOperationException("Gameplay song/introduction references missing.");

@@ -9,6 +9,7 @@ namespace RhythmDojo.EditorTools
     {
         public static void Build(GameplayHitFeedback feedback, Transform parent)
         {
+            SceneDependencyAssembler.Wire(feedback, "atmosphere", parent.GetComponent<GameplayHudView>().atmosphere);
             IngamePresentationAssets.PrepareAudio();
             var inputSource = new GameObject("Strike Input Audio", typeof(AudioSource)).GetComponent<AudioSource>();
             inputSource.transform.SetParent(feedback.transform, false);

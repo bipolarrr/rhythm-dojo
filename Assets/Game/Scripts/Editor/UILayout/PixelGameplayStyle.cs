@@ -50,6 +50,7 @@ namespace RhythmDojo.EditorTools
             var fit = backdrop.gameObject.AddComponent<AspectRatioFitter>();
             fit.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
             fit.aspectRatio = image.sprite.rect.width / image.sprite.rect.height;
+            view.atmosphere = GameplayAtmosphereBuilder.Build(background.transform, backdrop);
             var field = Panel("Training Floor Frame", background.transform, Color.clear, .285f, .015f, .715f, .80f);
             camera.backgroundColor = new Color(.055f, .035f, .025f, 0f);
             var viewport = new GameObject("Gameplay Viewport", typeof(RectTransform), typeof(RawImage));

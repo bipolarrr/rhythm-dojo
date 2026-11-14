@@ -2,7 +2,7 @@
 
 ## Development Baseline
 
-`main` is the authoritative development baseline and integration target. The user has retired the independent `song` baseline; do not resume work from it or restore its version over `main`. Perform the requested repairs on `main` unless the user specifies another branch. The user authorizes and decides this repair work; historical team ownership documents provide architectural context and do not require teammate approval for user-requested fixes.
+The project is currently in an emergency response. Perform ongoing repair work on `emergency`, as directed by the user, until the user changes this instruction. `main` remains the authoritative development baseline and integration target. The user has retired the independent `song` baseline; do not resume work from it or restore its version over `main`. The user authorizes and decides this repair work; historical team ownership documents provide architectural context and do not require teammate approval for user-requested fixes.
 
 ## Project Structure & Module Organization
 

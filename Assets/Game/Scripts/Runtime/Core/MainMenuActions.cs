@@ -12,6 +12,7 @@ namespace RhythmDojo.Core
         public const string BootstrapScenePath = "Assets/Game/Scenes/Bootstrap.unity";
         public const string TitleScenePath = "Assets/Game/Scenes/Title.unity";
         public const string ModeSelectionScenePath = "Assets/Game/Scenes/ModeSelection.unity";
+        public const string TutorialScenePath = "Assets/Game/Scenes/Tutorial.unity";
 
         public bool Transitioning { get; private set; }
 
@@ -82,6 +83,15 @@ namespace RhythmDojo.Core
             {
                 if (view && view.modeSelection)
                 {
+                    if (view.modeSelection.SelectedIndex == 0)
+                    {
+                        AppFlowController.Create(settings).CancelSelectionPreparation();
+                        if (SceneManager.LoadSceneAsync(TutorialScenePath, LoadSceneMode.Single) == null)
+                        {
+                            throw new InvalidOperationException("Cannot load Tutorial.");
+                        }
+                        return;
+                    }
                     var flow = AppFlowController.Create(settings);
                     selectionFlow = flow;
                     var rules = flow.Rules.Snapshot;

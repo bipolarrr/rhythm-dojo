@@ -50,6 +50,7 @@ namespace RhythmDojo.EditorTools
                     SceneBuilder.SettingsPath,
                     SceneBuilder.ResultsPath,
                     ChartEditorSceneBuilder.ScenePath,
+                    SceneBuilder.TutorialPath,
                 },
             };
             Directory.CreateDirectory(Path.GetDirectoryName(evidencePath));

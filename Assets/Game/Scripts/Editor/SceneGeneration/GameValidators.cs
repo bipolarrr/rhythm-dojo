@@ -73,6 +73,11 @@ namespace RhythmDojo.EditorTools
                     bootstrap.Validate();
                 }
 
+                foreach (var tutorial in root.GetComponentsInChildren<TutorialCompositionRoot>(true))
+                {
+                    tutorial.Validate();
+                }
+
                 foreach (
                     var composition in root.GetComponentsInChildren<GameplayCompositionRoot>(true)
                 )

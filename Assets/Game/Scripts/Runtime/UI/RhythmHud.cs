@@ -9,7 +9,7 @@ namespace RhythmDojo.UI
 {
     public sealed class RhythmHud : MonoBehaviour
     {
-        private const float JudgmentOpacity = .55f;
+        private const float JudgmentOpacity = .84f;
 
         [SerializeField]
         private GameplayHudView view;
@@ -80,9 +80,9 @@ namespace RhythmDojo.UI
             if (view.pixelTheme)
             {
                 Cream = new Color(.98f, .86f, .65f);
-                Cyan = new Color(.70f, .86f, .61f);
-                Gold = new Color(1f, .74f, .36f);
-                Red = new Color(1f, .40f, .32f);
+                Cyan = new Color(.68f, .83f, .72f);
+                Gold = new Color(.96f, .76f, .46f);
+                Red = new Color(.90f, .43f, .34f);
             }
 
             settings = presentation;
@@ -155,11 +155,11 @@ namespace RhythmDojo.UI
 
             if (hold)
             {
-                view.judgment.fontSize = 19;
+                view.judgment.fontSize = 30;
             }
             else
             {
-                view.judgment.fontSize = 25;
+                view.judgment.fontSize = 40;
             }
 
             view.timing.fontSize = 14;
@@ -176,6 +176,8 @@ namespace RhythmDojo.UI
             {
                 view.judgment.color = Gold;
             }
+
+            view.judgmentMotion.Play(result.Grade, hold);
 
             double milliseconds = result.ErrorSeconds * 1000;
 
@@ -252,6 +254,7 @@ namespace RhythmDojo.UI
             SetJudgmentPosition(JudgmentPosition.Middle);
             view.judgmentGroup.alpha = 0;
             view.judgmentGroup.transform.localScale = Vector3.one;
+            view.judgmentMotion.ResetPresentation();
             view.judgment.fontSize = 36;
             view.judgment.text = "";
             view.judgment.color = Cyan;
@@ -423,9 +426,7 @@ namespace RhythmDojo.UI
             }
 
             float age = (float)(now - judgmentAt);
-            view.judgmentGroup.alpha = JudgmentOpacity * (1 - Mathf.Clamp01((age - .32f) / .30f));
-            view.judgmentGroup.transform.localScale =
-                Vector3.one * (1 + .025f * Mathf.Clamp01(1 - age / .16f));
+            view.judgmentMotion.Render(age);
         }
 
         private void RefreshTrainingDisplay(GameplaySnapshot snapshot, double now)
@@ -505,6 +506,7 @@ namespace RhythmDojo.UI
 
             if (!showingJudgment)
             {
+                view.judgmentMotion.ResetPresentation();
                 if (s.State == SessionState.Ready)
                 {
                     view.judgment.text = "";

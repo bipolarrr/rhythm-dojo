@@ -13,6 +13,7 @@ namespace RhythmDojo.EditorTools
     {
         public const string TitlePath = "Assets/Game/Scenes/Title.unity";
         public const string ModeSelectionPath = "Assets/Game/Scenes/ModeSelection.unity";
+        public const string TutorialPath = "Assets/Game/Scenes/Tutorial.unity";
         public const string BootstrapPath = "Assets/Game/Scenes/Bootstrap.unity";
         public const string SelectionPath = "Assets/Game/Scenes/SongSelection.unity";
         public const string GameplayPath = "Assets/Game/Scenes/Gameplay.unity";
@@ -35,9 +36,20 @@ namespace RhythmDojo.EditorTools
             ChartEditorSceneBuilder.Build();
             BuildResults();
             BuildModeSelection();
+            BuildTutorial();
             BuildTitle();
             AssetDatabase.SaveAssets();
-            Debug.Log("Rhythm Dojo: eight scenes generated and validated.");
+            Debug.Log("Rhythm Dojo: nine scenes generated and validated.");
+        }
+
+        [MenuItem("Game Tools/Scenes/Build Tutorial")]
+        public static void BuildTutorial()
+        {
+            Guard();
+            Save(TutorialSceneBuilder.Create(), TutorialPath);
+            AssetDatabase.ImportAsset(TutorialPath, ImportAssetOptions.ForceSynchronousImport);
+            RegisterScenes();
+            AssetDatabase.SaveAssets();
         }
 
         [MenuItem("Game Tools/Scenes/Build Mode Selection")]
@@ -213,6 +225,8 @@ namespace RhythmDojo.EditorTools
                 GameplayPath,
                 SettingsPath,
                 ResultsPath,
+                ChartEditorSceneBuilder.ScenePath,
+                TutorialPath,
             };
             var other = EditorBuildSettings.scenes.Where(s => !paths.Contains(s.path));
             EditorBuildSettings.scenes = paths

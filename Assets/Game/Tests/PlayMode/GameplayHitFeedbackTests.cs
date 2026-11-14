@@ -120,6 +120,9 @@ namespace RhythmDojo.Tests
         {
             yield return LoadGameplay();
             var feedback = UnityEngine.Object.FindFirstObjectByType<GameplayHitFeedback>();
+            var atmosphere = UnityEngine.Object.FindFirstObjectByType<GameplayAtmosphere>();
+            var scenery = atmosphere.GetComponentsInChildren<Transform>(true)
+                .Select(item => item.GetInstanceID()).ToArray();
             var objects = feedback.GetComponentsInChildren<GameplayImpactGraphic>(true)
                 .Select(item => item.GetInstanceID()).OrderBy(id => id).ToArray();
             var first = new FeedbackReadModel();
@@ -136,6 +139,8 @@ namespace RhythmDojo.Tests
             Assert.That(ActiveBursts(feedback), Is.Zero, "Rebinding must release the previous model.");
             second.Hit(0);
             Assert.That(ActiveBursts(feedback), Is.EqualTo(1));
+            CollectionAssert.AreEqual(scenery, atmosphere.GetComponentsInChildren<Transform>(true)
+                .Select(item => item.GetInstanceID()).ToArray());
         }
 
         [UnityTest]
@@ -237,7 +242,8 @@ namespace RhythmDojo.Tests
                     yield return null;
                     Assert.That(
                         Vector3.Distance(camera.transform.position, origin),
-                        Is.LessThanOrEqualTo(.0251f)
+                        Is.LessThan(.0001f),
+                        "Strike feedback must leave the note projection stationary."
                     );
                 }
 
@@ -257,6 +263,49 @@ namespace RhythmDojo.Tests
                     Vector3.Distance(camera.transform.position, origin),
                     Is.LessThan(.0001f)
                 );
+            }
+            finally
+            {
+                Time.timeScale = previous;
+            }
+        }
+
+        [UnityTest]
+        [Category("SceneIntegration")]
+        public IEnumerator BrushGradesStayBelowRailInsideLaneAndExpireWithoutScaledTime()
+        {
+            yield return LoadGameplay();
+            var feedback = UnityEngine.Object.FindFirstObjectByType<GameplayHitFeedback>();
+            var model = new FeedbackReadModel();
+            Bind(feedback, model);
+            float previous = Time.timeScale;
+            try
+            {
+                Time.timeScale = 0;
+                foreach (var grade in new[] { Judgment.Perfect, Judgment.Good, Judgment.Miss })
+                {
+                    for (int variation = 0; variation < 3; variation++)
+                    {
+                        model.Hit(1, grade);
+                        yield return new WaitForSecondsRealtime(.06f);
+                        Canvas.ForceUpdateCanvases();
+                        var graphic = feedback.GetComponentsInChildren<GameplayImpactGraphic>().Single();
+                        var mesh = graphic.canvasRenderer.GetMesh();
+                        Assert.That(mesh, Is.Not.Null);
+                        Assert.That(mesh.vertexCount, Is.GreaterThan(0));
+                        foreach (var vertex in mesh.vertices)
+                        {
+                            Assert.That(vertex.y, Is.LessThanOrEqualTo(0),
+                                "Pigment must not extend into approaching notes.");
+                            Assert.That(Mathf.Abs(vertex.x), Is.LessThan(graphic.rectTransform.rect.width * .5f),
+                                "Chord feedback must stay within its own lane.");
+                        }
+                    }
+                }
+
+                yield return new WaitForSecondsRealtime(.3f);
+                Assert.That(ActiveBursts(feedback), Is.Zero);
+                Assert.That(model.Snapshot.Session.Resolved, Is.Zero);
             }
             finally
             {

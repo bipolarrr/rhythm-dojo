@@ -397,9 +397,11 @@ namespace RhythmDojo.Tests
             Assert.That(judgmentRect.anchorMin.y, Is.GreaterThan(middle.y));
             Assert.That(view.judgment.transform.IsChildOf(judgmentRect), Is.True);
             Assert.That(view.timing.transform.IsChildOf(judgmentRect), Is.True);
-            Assert.That(view.judgmentGroup.alpha, Is.EqualTo(.55f));
-            Assert.That(view.judgment.fontSize, Is.EqualTo(25));
+            Assert.That(view.judgmentGroup.alpha, Is.EqualTo(.84f));
+            Assert.That(view.judgment.fontSize, Is.EqualTo(40));
             Assert.That(view.timing.fontSize, Is.EqualTo(14));
+            float perfectScale = judgmentRect.localScale.x;
+            Assert.That(view.judgmentMotion.echo.color.a, Is.GreaterThan(0));
             yield return new WaitForSecondsRealtime(.07f);
             Assert.That(view.combo.text, Is.EqualTo("1"));
             Assert.That(view.judgment.text, Is.EqualTo("Perfect"));
@@ -407,7 +409,7 @@ namespace RhythmDojo.Tests
             presentation.judgmentPosition = JudgmentPosition.Middle;
             model.Hold();
             Assert.That(judgmentRect.anchorMin, Is.EqualTo(middle));
-            Assert.That(view.judgment.fontSize, Is.EqualTo(19));
+            Assert.That(view.judgment.fontSize, Is.EqualTo(30));
             yield return new WaitForSecondsRealtime(.07f);
             Assert.That(view.judgment.text, Is.EqualTo("HOLD · Perfect"));
             Assert.That(
@@ -418,11 +420,14 @@ namespace RhythmDojo.Tests
             model.Set(SessionState.Playing, 1, 1, 0, 2);
             presentation.judgmentPosition = JudgmentPosition.Lower;
             model.Judge(Judgment.Good, .055);
+            Assert.That(judgmentRect.localScale.x, Is.LessThan(perfectScale));
             Assert.That(judgmentRect.anchorMin.y, Is.LessThan(middle.y));
             StringAssert.Contains("늦음", view.timing.text);
             Assert.That(view.judgment.text, Is.EqualTo("Hmm..."));
             model.Set(SessionState.Playing, 1, 1, 1, 0);
             model.Judge(Judgment.Miss, .25);
+            Assert.That(view.judgmentMotion.echo.color.a, Is.Zero,
+                "Misses must not use the successful strike's luminous afterimage.");
             yield return new WaitForSecondsRealtime(.07f);
             Assert.That(view.combo.text, Is.EqualTo("0"));
             Assert.That(
@@ -446,6 +451,9 @@ namespace RhythmDojo.Tests
             Assert.That(view.judgmentGroup.transform.parent, Is.EqualTo(view.transform));
             StringAssert.Contains("창 전환", view.timing.text);
             Assert.That(view.judgmentGroup.alpha, Is.Zero);
+            Assert.That(view.judgmentMotion.echo.text, Is.Empty);
+            Assert.That(judgmentRect.anchoredPosition, Is.EqualTo(Vector2.zero));
+            Assert.That(judgmentRect.localRotation, Is.EqualTo(Quaternion.identity));
             Assert.That(view.judgment.fontSize, Is.EqualTo(36));
             Assert.That(view.timing.fontSize, Is.EqualTo(18));
             Assert.That(view.progressFill.rectTransform.anchorMax.x, Is.Zero);

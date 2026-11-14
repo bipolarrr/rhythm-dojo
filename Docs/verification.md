@@ -77,21 +77,21 @@ $unity = 'C:/Program Files/Unity/Hub/Editor/6000.3.23f1/Editor/Unity.exe'
 
 `NativeInputScope`는 입력 설정을 바꾸기 전에 생성한다. 정상 정리 외에도 Editor의 Play Mode 종료와 도메인 재로드에서 테스트가 끈 물리 장치를 복원하고, scope 안에서 추가된 가상 장치를 제거한다. 재로드 전후의 입력 상태 직렬화 순서 차이는 SessionState 복원 기록으로 처리한다. 원래 비활성이던 장치와 scope 이전 장치는 보존한다. 실제 사용자 입력 회귀를 확인할 때는 테스트 종료 후 Game View에 초점을 둔 상태에서 native Keyboard/Mouse 활성 여부와 가상 장치 잔존 여부도 확인한다.
 
-씬 전체 생성은 한 시나리오에서 두 번 실행한다. 첫 번째는 씬 파일 삭제 후 GUID 보존과 복구, 두 번째는 반복 생성 안정성을 확인한다. 8개 씬의 필수 참조·직렬화된 구성, 생성 프리팹·이미지, 설정·음원·재질 불변 및 Build Settings를 검사한다. 파일·meta·Editor 상태의 스냅샷은 성공과 예외 모두에서 복원하며 새로 생성한 파일을 정리한다. 참조 누락은 독립 View·프리팹 복제본에서, 마이그레이션 분기는 메모리 객체에서 검사한다. 실제 생성·보존 경로는 AssetGeneration에 남긴다.
+씬 전체 생성은 한 시나리오에서 두 번 실행한다. 첫 번째는 씬 파일 삭제 후 GUID 보존과 복구, 두 번째는 반복 생성 안정성을 확인한다. 9개 씬의 필수 참조·직렬화된 구성, 생성 프리팹·이미지, 설정·음원·재질 불변 및 Build Settings를 검사한다. 파일·meta·Editor 상태의 스냅샷은 성공과 예외 모두에서 복원하며 새로 생성한 파일을 정리한다. 참조 누락은 독립 View·프리팹 복제본에서, 마이그레이션 분기는 메모리 객체에서 검사한다. 실제 생성·보존 경로는 AssetGeneration에 남긴다.
 
 `Title`은 닫힌 대문과 진입·복귀 연출을, `ModeSelection`은 기존 모드 선택 UI와 캐릭터·상호작용을 소유한다. 문이 열리는 동안에는 `ModeSelection`의 실제 방을 입력이 차단된 additive 씬으로 표시하고, 문 열림이 끝나면 활성 씬과 카메라·입력·음악 재생을 넘긴 뒤 `Title`을 해제한다. Esc 또는 게임패드 뒤로 가기는 `Title`의 문 닫힘 연출을 거쳐 모드 씬을 해제한다. 곡 선택의 사전 준비는 활성화된 `ModeSelection`에서 시작한다.
 
-두 씬은 Project 창에서 각각 열 수 있다. `Build Title`, `Build Mode Selection`, `Build All Scenes`가 각 구성을 재생성하며 디자인 수정은 기존 레이아웃 빌더에 반영한다. `ModeSelection`에서 바로 Play Mode를 확인하려면 기존 **Start Play Mode From Title** 옵션을 끈다. 씬 분리 검증은 `MainMenuTests`, `MainMenuFlowTests`, `ScenePreparationFlowTests`와 Smoke를 사용한다.
+두 씬은 Project 창에서 각각 열 수 있다. `Build Title`, `Build Mode Selection`, `Build Tutorial`, `Build All Scenes`가 각 구성을 재생성하며 디자인 수정은 기존 레이아웃 빌더에 반영한다. `ModeSelection`에서 바로 Play Mode를 확인하려면 기존 **Start Play Mode From Title** 옵션을 끈다. 씬 분리 검증은 `MainMenuTests`, `MainMenuFlowTests`, `ScenePreparationFlowTests`와 Smoke를 사용한다.
 
 ### 제품 씬과 직접 실행 경로
 
-Build Settings의 순서는 `Title`, `ModeSelection`, `Bootstrap`, `SongSelection`, `Gameplay`, `Settings`, `Results`, `ChartEditor`다. 별도 활성 Build Profile이 씬 목록을 덮어쓰는지도 확인한다. 이름만으로 판단하지 않고 `MainMenuActions`, `MainMenuEntranceScreen`, `AppFlowController`, `PreparedSelectionScene`의 실제 호출과 각 composition root의 참조를 추적한다.
+Build Settings의 순서는 `Title`, `ModeSelection`, `Bootstrap`, `SongSelection`, `Gameplay`, `Settings`, `Results`, `ChartEditor`, `Tutorial`이다. 별도 활성 Build Profile이 씬 목록을 덮어쓰는지도 확인한다. 이름만으로 판단하지 않고 `MainMenuActions`, `MainMenuEntranceScreen`, `AppFlowController`, `PreparedSelectionScene`의 실제 호출과 각 composition root의 참조를 추적한다.
 
 | 씬/화면 | 현재 소유 구성과 실행 경로 |
 | --- | --- |
 | Title | `MainMenuEntranceScreen`과 한옥 대문. 입장 시 ModeSelection을 additive로 로드하고 입력·카메라·음악 소유권을 넘긴 뒤 Title을 해제한다. |
 | ModeSelection | `MainMenuScreen`/`DojoModeView`가 네 방을 소유한다. `AlphaDojoLayoutBuilder`가 최신 배경·인물·타이포그래피를 조립한다. |
-| 비급 전수 | 별도 씬이 아닌 첫 번째 방의 사형·수련생 튜토리얼. 시작 버튼이 `DojoModeView.Practice()`를 호출한다. |
+| 비급 전수 | 첫 번째 방의 제목 클릭 또는 시작 입력으로 `Tutorial` 씬에 바로 진입한다. 메뉴의 4박자 맞히기는 제거했다. `TutorialLayoutBuilder`의 `Story Stage`가 향후 스토리를 담는 영역이며, 복귀 버튼·Esc는 ModeSelection으로 돌아간다. |
 | 자유 연습 | 두 번째 방 → SongSelection의 `PracticeSelectionView`/목인. 준비 중인 씬도 활성화 직전에 최종 선택 상태를 다시 적용한다. |
 | 실력 검정 | 세 번째 방 → 같은 SongSelection의 목인 화면, Challenge 규칙. 제목과 기록은 규칙에서 결정하며 ‘곡 목록’은 두 모드의 공통 보조 패널이다. |
 | 율보 편찬 | 네 번째 방 → ChartEditor. `ChartEditorSceneBuilder.Build()`는 `WorkspaceSceneBuilder.Build()`로 연결되어 확장 편집 UI를 생성한다. |

@@ -81,7 +81,6 @@ namespace RhythmDojo.EditorTools
             mode.companions = new RectTransform[4];
             mode.banners = new RectTransform[4];
             mode.characterMarks = new RectTransform[4];
-            mode.lessonMarks = new Image[4];
             mode.scrollMotion = new DojoFigureGraphic[4];
             mode.farLayers = new RectTransform[4];
             mode.middleLayers = new RectTransform[4];
@@ -183,19 +182,6 @@ namespace RhythmDojo.EditorTools
                     // The new sheet has less transparent space below the soles than Actor0.
                     mode.companions[i].anchoredPosition = new Vector2(170, -94);
                     mode.companions[i].sizeDelta = new Vector2(253, 253);
-                    mode.lessonCue = Label("Teacher Cue", group.transform, "내 손을 보고, 천천히 따라 해 봐.", 20, Ink);
-                    Place(mode.lessonCue.rectTransform, new Vector2(.5f, .5f), new Vector2(270, 66), new Vector2(360, 36));
-                    mode.lessonCue.gameObject.SetActive(false);
-                    for (int beat = 0; beat < 4; beat++)
-                    {
-                        var stamp = Art("Lesson Beat " + (beat + 1), group.transform,
-                            DojoEntranceAssets.Load("RoundPlaque"), new Vector2(-60 + beat * 40, 57), new Vector2(30, 30));
-                        stamp.color = new Color(.52f, .38f, .24f);
-                        mode.lessonMarks[beat] = stamp;
-                        var number = Label("Beat Number", stamp.transform, (beat + 1).ToString(), 17, Paper);
-                        Stretch(number.rectTransform);
-                        stamp.gameObject.SetActive(false);
-                    }
                 }
                 if (i == 2)
                 {
@@ -208,14 +194,6 @@ namespace RhythmDojo.EditorTools
                 if (mode.banners[i])
                 {
                     mode.banners[i].SetAsLastSibling();
-                }
-                if (i == 0)
-                {
-                    mode.lessonCue.transform.SetParent(mode.middleLayers[i], false);
-                    foreach (var stamp in mode.lessonMarks)
-                    {
-                        stamp.transform.SetParent(mode.middleLayers[i], false);
-                    }
                 }
                 if (i == 1)
                 {

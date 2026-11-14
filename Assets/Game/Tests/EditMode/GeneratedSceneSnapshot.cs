@@ -19,7 +19,7 @@ namespace RhythmDojo.Tests
         {
             SceneBuilder.TitlePath, SceneBuilder.ModeSelectionPath, SceneBuilder.BootstrapPath, SceneBuilder.SelectionPath,
             SceneBuilder.GameplayPath, SceneBuilder.SettingsPath, SceneBuilder.ResultsPath,
-            ChartEditorSceneBuilder.ScenePath,
+            ChartEditorSceneBuilder.ScenePath, SceneBuilder.TutorialPath,
         };
         private readonly Dictionary<string, byte[]> originals;
         private readonly HashSet<string> directories;

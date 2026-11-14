@@ -10,14 +10,15 @@ namespace RhythmDojo.Presentation
     public sealed class GameplayHitFeedback : MonoBehaviour
     {
         private const int PoolSize = 24;
-        private static readonly Color Perfect = new Color(.46f, .91f, .85f);
-        private static readonly Color Good = new Color(1, .77f, .42f);
-        private static readonly Color Miss = new Color(.96f, .29f, .31f);
+        private static readonly Color Perfect = new Color(.68f, .83f, .72f);
+        private static readonly Color Good = new Color(.96f, .76f, .46f);
+        private static readonly Color Miss = new Color(.90f, .43f, .34f);
         private IGameplayReadModel model;
         private GameModeDefinition mode;
         private Camera targetCamera;
         private Canvas canvas;
-        private Vector3 cameraOrigin;
+        [SerializeField]
+        private GameplayAtmosphere atmosphere;
         [SerializeField]
         private GameplayImpactGraphic[] bursts;
         [SerializeField]
@@ -69,8 +70,6 @@ namespace RhythmDojo.Presentation
             // One attack per chord, short preloaded clips; no per-input allocations.
             inputSource.PlayOneShot(inputSound, .24f);
         }
-        private double kickAt = -10;
-        private float kickStrength;
         [SerializeField]
         private RectTransform effectsRoot;
 
@@ -101,7 +100,6 @@ namespace RhythmDojo.Presentation
             mode = gameMode;
             targetCamera = camera;
             canvas = hudCanvas;
-            cameraOrigin = camera.transform.position;
             source = GetComponent<AudioSource>();
             source.playOnAwake = false;
             source.spatialBlend = 0;
@@ -121,6 +119,12 @@ namespace RhythmDojo.Presentation
             {
                 throw new InvalidOperationException("Authored hit feedback layout missing.");
             }
+
+            if (!atmosphere)
+            {
+                throw new InvalidOperationException("Authored gameplay atmosphere missing.");
+            }
+            atmosphere.Validate();
 
             if (bursts == null || bursts.Length != PoolSize)
             {
@@ -213,38 +217,28 @@ namespace RhythmDojo.Presentation
             var graphic = bursts[nextBurst];
             nextBurst = (nextBurst + 1) % PoolSize;
             graphic.Lane = result.Lane;
-            graphic.Play(
-                (
-                    result.Grade switch
-                    {
-                        Judgment.Perfect => Perfect,
-                        _ => (
-                            result.Grade switch
-                            {
-                                Judgment.Good => Good,
-                                _ => Miss,
-                            }
-                        ),
-                    }
-                ),
-                (
-                    result.Grade switch
-                    {
-                        Judgment.Miss => .35f,
-                        _ => strength,
-                    }
-                ),
-                result.Grade == Judgment.Miss
-            );
+            graphic.Variation = nextBurst % 3;
+            var tint = Miss;
+            switch (result.Grade)
+            {
+                case Judgment.Perfect:
+                    tint = Perfect;
+                    break;
+                case Judgment.Good:
+                    tint = Good;
+                    break;
+                case Judgment.Miss:
+                    strength = .55f;
+                    break;
+            }
+            graphic.Play(tint, strength, result.Grade);
             Position(graphic);
+            atmosphere.React(result.Grade);
 
             if (result.Grade == Judgment.Miss)
             {
                 return;
             }
-
-            kickAt = Time.unscaledTimeAsDouble;
-            kickStrength = Mathf.Min(.025f, .025f * strength);
 
             // A chord gets one attack sound so six simultaneous lanes cannot multiply the volume.
             if (lastSoundFrame == Time.frameCount)
@@ -271,13 +265,6 @@ namespace RhythmDojo.Presentation
             {
                 return;
             }
-
-            float age = (float)(Time.unscaledTimeAsDouble - kickAt);
-            float envelope = Mathf.Clamp01(1 - age / .10f);
-            targetCamera.transform.position =
-                cameraOrigin
-                + Vector3.up
-                    * (kickStrength * envelope * envelope * Mathf.Sin(age / .10f * Mathf.PI * 2));
 
             foreach (var graphic in bursts)
             {
@@ -349,12 +336,9 @@ namespace RhythmDojo.Presentation
             {
                 inputSource.Stop();
             }
-            kickAt = -10;
-            kickStrength = 0;
-
-            if (targetCamera)
+            if (atmosphere)
             {
-                targetCamera.transform.position = cameraOrigin;
+                atmosphere.ResetPresentation();
             }
 
             if (source)

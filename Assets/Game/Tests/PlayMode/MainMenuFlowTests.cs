@@ -1231,57 +1231,42 @@ namespace RhythmDojo.Tests
         [Category("SceneIntegration")]
         public IEnumerator LessonRespondsToRhythmAndCompletesWithoutLeavingTitle()
         {
+            // Keep the historical case name; entering now opens the story scene on one submit.
             yield return OpenMenu();
-            var character = view.modeSelection.character;
-            var freePosition = view.modeSelection.characterMarks[1].anchoredPosition;
             yield return Click(view.modeSelection.previous);
-            double deadline = Time.realtimeSinceStartupAsDouble + 3;
-            while (view.modeSelection.IsMoving)
-            {
-                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
-                yield return null;
-            }
-            Assert.That(view.modeSelection.character, Is.SameAs(character));
-            Assert.That(Vector2.Distance(character.rectTransform.anchoredPosition, freePosition), Is.GreaterThan(80));
-            int contacts = view.modeSelection.ContactCount;
-            var teacherVertices = ReadVertices(view.modeSelection.teacherMotion);
-            yield return new WaitForSecondsRealtime(.16f);
-            AssertGroundedMotion(view.modeSelection.teacherMotion, teacherVertices);
-            Assert.That(view.modeSelection.teacherGesture.localRotation, Is.EqualTo(Quaternion.identity));
-            Assert.That(view.modeSelection.props[0].localRotation, Is.EqualTo(Quaternion.identity),
-                "The target must wait for the player's answer to the senior.");
-            while (view.modeSelection.IsArriving)
-            {
-                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
-                yield return null;
-            }
-            Assert.That(view.modeSelection.ContactCount, Is.EqualTo(contacts + 1));
-            Assert.That(view.modeSelection.description.text, Is.EqualTo("처음이지? 내가 옆에서 박자를 짚어 줄게."));
-            Assert.That(view.modeSelection.lessonCue.gameObject.activeSelf, Is.False,
-                "The lesson cue should appear only after starting the lesson.");
-            Capture("Logs/renewal-lesson.png");
+            yield return WaitForModeMotion(view.modeSelection);
             yield return SubmitStart();
-            Assert.That(view.modeSelection.lessonCue.gameObject.activeSelf, Is.True);
-            double startTime = Time.realtimeSinceStartupAsDouble;
-            for (int i = 0; i < 4; i++)
+            yield return AwaitScene("Tutorial");
+            var tutorial = UnityEngine.Object.FindFirstObjectByType<TutorialView>();
+            Assert.That(tutorial, Is.Not.Null);
+            tutorial.Validate();
+            Assert.That(UnityEngine.Object.FindFirstObjectByType<DojoModeView>(), Is.Null);
+            Assert.That(UnityEngine.Object.FindObjectsByType<UnityEngine.EventSystems.EventSystem>(
+                FindObjectsSortMode.None).Length, Is.EqualTo(1));
+            yield return Click(tutorial.backButton);
+            yield return AwaitScene("ModeSelection");
+            view = UnityEngine.Object.FindFirstObjectByType<MainMenuView>();
+            screen = UnityEngine.Object.FindFirstObjectByType<MainMenuScreen>();
+            yield return WaitForModeMotion(view.modeSelection);
+            yield return Click(view.modeSelection.previous);
+            yield return WaitForModeMotion(view.modeSelection);
+            yield return Click(view.modeSelection.tutorialEntry);
+            yield return AwaitScene("Tutorial");
+            tutorial = UnityEngine.Object.FindFirstObjectByType<TutorialView>();
+            Assert.That(tutorial, Is.Not.Null, "Clicking the existing title also opens the story directly.");
+            var keyboard = InputSystem.AddDevice<Keyboard>();
+            try
             {
-                while (Time.realtimeSinceStartupAsDouble < startTime + i * .75)
-                {
-                    yield return null;
-                }
-                yield return SubmitStart();
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.Escape));
+                yield return null;
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+                yield return AwaitScene("ModeSelection");
+                Assert.That(UnityEngine.Object.FindFirstObjectByType<TutorialScreen>(), Is.Null);
             }
-            Assert.That(view.modeSelection.LessonHits, Is.EqualTo(4));
-            Assert.That(view.modeSelection.traineeIdle.IsPlaying, Is.False);
-            Assert.That(view.modeSelection.teacherIdle.IsPlaying, Is.False);
-            Assert.That(view.modeSelection.detail.text, Does.Contain("기초 수련 완료"));
-            Assert.That(view.modeSelection.lessonCue.text, Does.Contain("잘했다"));
-            foreach (var mark in view.modeSelection.lessonMarks)
+            finally
             {
-                Assert.That(mark.color.r, Is.EqualTo(1));
+                InputSystem.RemoveDevice(keyboard);
             }
-            Assert.That(SceneManager.GetActiveScene().path, Does.EndWith("/ModeSelection.unity"));
-            Capture("Logs/emergency-lesson.png");
         }
 
         [UnityTest]
@@ -1573,14 +1558,10 @@ namespace RhythmDojo.Tests
                     Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
                     yield return null;
                 }
-                mode.Practice();
+                mode.Move(1);
                 Assert.That(mode.lessonSequence.Phase, Is.EqualTo(DojoLessonSequence.Step.Waiting));
                 Assert.That(mode.teacherIdle.IsPlaying, Is.False);
                 Assert.That(mode.traineeIdle.IsPlaying, Is.False);
-                yield return new WaitForSecondsRealtime(1.1f);
-                Assert.That(mode.teacherIdle.IsPlaying, Is.False, "The entire guided lesson owns the actors.");
-                Assert.That(mode.traineeIdle.IsPlaying, Is.False);
-                mode.Move(1);
                 Assert.That(teacher.sprite, Is.SameAs(teacherSprite));
                 Assert.That(mode.teacherIdle.IsPlaying, Is.False);
                 yield return WaitForModeMotion(mode);
@@ -1608,6 +1589,17 @@ namespace RhythmDojo.Tests
                 }
                 mode.CancelMotion();
             }
+        }
+
+        private static IEnumerator AwaitScene(string name)
+        {
+            double deadline = Time.realtimeSinceStartupAsDouble + 5;
+            while (SceneManager.GetActiveScene().name != name)
+            {
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline), name);
+                yield return null;
+            }
+            yield return null;
         }
 
         private static IEnumerator WaitForStart(Actions actions)

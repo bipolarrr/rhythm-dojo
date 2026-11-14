@@ -82,6 +82,7 @@ namespace RhythmDojo.UI
                 view.modeSelection.previous.onClick.AddListener(PreviousMode);
                 view.modeSelection.next.onClick.AddListener(NextMode);
                 view.modeSelection.practiceTarget.onClick.AddListener(view.modeSelection.PracticeTarget);
+                view.modeSelection.tutorialEntry.onClick.AddListener(StartGame);
             }
             actions = menuActions ?? throw new ArgumentNullException(nameof(menuActions));
             starting = quitting = false;
@@ -159,6 +160,9 @@ namespace RhythmDojo.UI
             {
                 bool available = !Busy && !view.quitPopup.activeSelf;
                 view.modeSelection.InputEnabled = available;
+                bool tutorialSelected = view.modeSelection.SelectedIndex == 0;
+                view.modeSelection.tutorialEntry.interactable = available && tutorialSelected;
+                view.modeSelection.tutorialEntry.targetGraphic.raycastTarget = available && tutorialSelected;
                 view.modeSelection.practiceTarget.interactable = available && !view.modeSelection.IsArriving;
                 if (available && !view.modeSelection.IsMoving)
                 {
@@ -174,7 +178,7 @@ namespace RhythmDojo.UI
                     {
                         if (view.modeSelection.SelectedIndex == 0)
                         {
-                            view.modeSelection.Practice();
+                            StartGame();
                         }
                         else if (view.modeSelection.SelectedIndex == 1)
                         {
@@ -231,11 +235,6 @@ namespace RhythmDojo.UI
             {
                 if (view.modeSelection.IsMoving)
                 {
-                    return;
-                }
-                if (view.modeSelection.SelectedIndex == 0)
-                {
-                    view.modeSelection.Practice();
                     return;
                 }
                 if (!view.modeSelection.CanEnter)
@@ -466,6 +465,7 @@ namespace RhythmDojo.UI
             {
                 view.modeSelection.previous.onClick.RemoveListener(PreviousMode);
                 view.modeSelection.next.onClick.RemoveListener(NextMode);
+                view.modeSelection.tutorialEntry.onClick.RemoveListener(StartGame);
                 if (view.modeSelection.practiceTarget)
                 {
                     view.modeSelection.practiceTarget.onClick.RemoveListener(view.modeSelection.PracticeTarget);

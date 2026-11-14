@@ -254,6 +254,7 @@ namespace RhythmDojo.EditorTools
             UiFontSettings.Apply(help);
             view.introduction = help.gameObject;
             ApplyIngameLayout(view);
+            GameplayAtmosphereBuilder.RefineHud(view);
 
             return view;
         }
@@ -315,7 +316,8 @@ namespace RhythmDojo.EditorTools
             var judgmentRoot = (RectTransform)view.judgmentGroup.transform;
             judgmentRoot.SetParent(view.transform, false);
             judgmentRoot.SetSiblingIndex(view.combo.transform.parent.GetSiblingIndex() + 1);
-            Bounds(judgmentRoot, .30f, .195f, .70f, .285f);
+            // The default stamp sits in the spent-note area below the rail.
+            Bounds(judgmentRoot, .30f, .08f, .70f, .17f);
             view.judgment.text = "SPACE로 수련 시작";
             view.judgment.fontSize = 36;
             view.timing.fontSize = 18;
