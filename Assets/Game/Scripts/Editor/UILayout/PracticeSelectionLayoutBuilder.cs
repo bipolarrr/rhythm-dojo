@@ -30,13 +30,12 @@ namespace RhythmDojo.EditorTools
 
             var interfaceRoot = Group("Ink and Hanging Song Labels", stage);
             practice.interfaceGroup = interfaceRoot.gameObject.AddComponent<CanvasGroup>();
-            var heading = Label("Practice Heading", interfaceRoot, "자유 연습", new Vector2(-410, 276), new Vector2(360, 65), 58);
+            var heading = Label("Practice Heading", interfaceRoot, "자유 연습", new Vector2(-410, 255), new Vector2(360, 120), 90);
             practice.heading = heading;
             heading.font = AssetDatabase.LoadAssetAtPath<Font>("Assets/Game/Fonts/Dokdo-Regular.ttf");
             var headingScope = heading.gameObject.AddComponent<UiFontScope>();
             headingScope.font = heading.font;
             headingScope.useSmoothRendering = true;
-            Label("Practice Subheading", interfaceRoot, "목인을 두드려, 다음 가락으로", new Vector2(-410, 223), new Vector2(360, 35), 19);
 
             practice.information = Group("Song Calligraphy", interfaceRoot);
             Place(practice.information, new Vector2(-415, 53), new Vector2(365, 270));
@@ -71,14 +70,28 @@ namespace RhythmDojo.EditorTools
             practice.next = Button("Strike Right", interfaceRoot, "▶\n다음 곡", new Vector2(205, 118), new Vector2(115, 85), 22);
             practice.play = Button("Begin Practice", interfaceRoot, "수련 시작", new Vector2(0, -260), new Vector2(270, 68), 27);
             practice.back = Button("Return to Dojo", interfaceRoot, "도장으로", new Vector2(-505, 324), new Vector2(230, 40), 17);
+            // Keep the shared view binding; navigation is exposed through Escape only.
+            practice.back.gameObject.SetActive(false);
             practice.settings = Button("Practice Settings", interfaceRoot, "설정", new Vector2(548, 324), new Vector2(105, 40), 17);
             practice.library = Button("Browse Song Library", interfaceRoot, "곡 목록 · 정렬 / 속도", new Vector2(430, -155), new Vector2(270, 46), 18);
             practice.preview = Button("Preview Selected Song", interfaceRoot, "미리듣기", new Vector2(430, -103), new Vector2(270, 46), 18);
             practice.status = Label("Practice Playback Status", interfaceRoot, "", new Vector2(0, -196), new Vector2(600, 56), 18);
             practice.status.alignment = TextAnchor.MiddleCenter;
 
-            var hint = Label("Strike Instructions", interfaceRoot, "← →  곡 선택 / 길게 눌러 연타   ·   ↑ ↓  난이도   ·   Enter  시작   ·   Esc  도장으로", new Vector2(190, -328), new Vector2(820, 36), 16);
+            var hint = Label("Strike Instructions", interfaceRoot, "← →  곡 선택   ·   ↑ ↓  난이도   ·   Enter  시작   ·   Esc  돌아가기", new Vector2(190, -328), new Vector2(820, 36), 16);
             hint.alignment = TextAnchor.MiddleRight;
+
+            // Only the labels exposed to the painted hall need local contrast. The library
+            // already has opaque panels, and the jacket display retains its authored backing.
+            Contrast(heading, 10, 5);
+            Contrast(practice.title, 10, 6);
+            Contrast(practice.artist, 8, 4);
+            Contrast(practice.chart, 8, 4);
+            Contrast(practice.record, 8, 5);
+            Contrast(practice.comboRecord, 8, 4);
+            Contrast(practice.counter, 6, 3);
+            Contrast(practice.status, 8, 4);
+            Contrast(hint, 7, 3);
 
             var handRoot = Group("First Person Hands", stage);
             practice.hands = handRoot.gameObject.AddComponent<CanvasGroup>();
@@ -372,6 +385,7 @@ namespace RhythmDojo.EditorTools
             button.navigation = new Navigation { mode = Navigation.Mode.None };
             var label = Label("Caption", image.transform, value, Vector2.zero, size - new Vector2(10, 4), fontSize);
             label.alignment = TextAnchor.MiddleCenter;
+            Contrast(label, 6, 3);
             button.targetGraphic = label;
             var colors = button.colors;
             colors.highlightedColor = new Color(1f, .75f, .45f);
@@ -379,6 +393,18 @@ namespace RhythmDojo.EditorTools
             colors.pressedColor = new Color(1f, .48f, .24f);
             button.colors = colors;
             return button;
+        }
+
+        private static void Contrast(Text text, float horizontal, float vertical)
+        {
+            var rect = Stroke(text.name + " Ink Background", text.transform.parent,
+                Vector2.zero, Vector2.zero, new Color(.055f, .035f, .025f, .9f));
+            var graphic = rect.GetComponent<DojoInkGraphic>();
+            graphic.contrastStroke = true;
+            graphic.fittedText = text;
+            graphic.textPadding = new Vector2(horizontal, vertical);
+            DojoInkGraphic.FitInk(rect, text, -1, horizontal, vertical);
+            rect.SetAsFirstSibling();
         }
 
         private static RectTransform Stroke(string name, Transform parent, Vector2 position, Vector2 size, Color color)
