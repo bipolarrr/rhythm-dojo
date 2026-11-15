@@ -9,7 +9,9 @@ namespace RhythmDojo.Authoring
     {
         New, Open, Save, SaveAs, Exit, ApplySettings, EstimateBpm, ImportAudio, ImportJacket,
         Undo, Redo, Copy, Paste, Delete, SelectAll, SelectTaps, SelectHolds, Deselect,
-        Mirror, Randomize, PlayPause, Stop, Loop, Slow, Test, TestHere, AutoTest, AutoTestHere,
+        Mirror, Randomize, PlayPause, Stop,
+        // Keep serialized action IDs after the retired Loop (22) and Slow (23) entries.
+        Test = 24, TestHere, AutoTest, AutoTestHere,
         SaveExit, DiscardExit, CancelExit, Pencil, Select, Eraser, Position, Tap, Hold, ImportPupa,
         SaveNew, DiscardNew, ConfirmSaveAs, CancelSaveAs, ProjectFiles, ChartSettings, ResetView,
         PlayReturn, Scroll, ApplyEstimatedBpm, CloseNoteSpeedWarning, OnAir, ConfirmOnAir, CancelOnAir,
@@ -28,14 +30,14 @@ namespace RhythmDojo.Authoring
         public WorkspaceActionBinding[] actions;
         public WorkspaceActionBinding[] toolActions;
         public InputField title, artist, audioPath, jacketPath, soundPath, bpm, offset, volume,
-            saveAsName, position, loopStart, loopEnd;
+            saveAsName, position;
         public InputField noteSpeed;
         public InputField openProjectId;
         public Slider volumeControl;
         public Dropdown recent, quantization;
         public Button quantizationCycle;
         public Text quantizationCycleValue;
-        public Text status, selection, playback;
+        public Text status, selection;
         public Text bpmSuggestion;
         public Button applyEstimatedBpm;
         public RawImage jacket;

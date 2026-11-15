@@ -210,30 +210,24 @@ namespace RhythmDojo.Tests
             yield return new WaitForSecondsRealtime(.5f);
             Assert.That(source.isPlaying, Is.True);
 
-            var presentation = RhythmDojo.Services.PresentationPreferences.Current;
-            presentation.backgroundVolume = 0;
-            presentation.SaveAudio();
-            Assert.That(
-                source.volume,
-                Is.EqualTo(flow.Settings.audio.Volume * .35f).Within(.001f),
-                "Background control must not change gameplay music."
-            );
-            presentation.gameplayVolume = 0;
-            presentation.SaveAudio();
-            Assert.That(
-                source.volume,
-                Is.Zero,
-                "Live gameplay volume must mute the existing source."
-            );
-            Assert.That(source.isPlaying, Is.True);
-            presentation.gameplayVolume = 1;
-            presentation.SaveAudio();
-            Assert.That(source.volume, Is.EqualTo(flow.Settings.audio.Volume).Within(.001f));
+            yield return Press(Key.Escape);
+            yield return Click(UnityEngine.Object.FindFirstObjectByType<GameplayPauseMenu>().exitButton);
+            yield return Await(() => UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>());
+            yield return Click(UnityEngine.Object.FindFirstObjectByType<SongSelectionView>().settingsButton);
+            view = UnityEngine.Object.FindFirstObjectByType<SettingsView>();
+            Assert.That(view.gameplayVolume.value, Is.EqualTo(35));
+            view.gameplayVolume.value = 0;
+            yield return Click(view.back);
+            yield return Await(() => !UnityEngine.Object.FindFirstObjectByType<SettingsScreen>());
+            yield return Click(UnityEngine.Object.FindFirstObjectByType<SongSelectionView>().play);
+            yield return Await(() => UnityEngine.Object.FindFirstObjectByType<RhythmGameController>());
             yield return WaitForGameplayIntroduction();
+            game = UnityEngine.Object.FindFirstObjectByType<RhythmGameController>();
+            source = UnityEngine.Object.FindFirstObjectByType<SongClock>().GetComponent<AudioSource>();
             game.StartSession();
             yield return new WaitForSecondsRealtime(.5f);
             Assert.That(source.isPlaying, Is.True);
-            Assert.That(source.volume, Is.EqualTo(flow.Settings.audio.Volume).Within(.001f));
+            Assert.That(source.volume, Is.Zero, "The next play must use the volume saved from selection.");
         }
 
         private static IEnumerator MeasureOutputRms(System.Action<double> measured)

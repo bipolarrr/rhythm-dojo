@@ -61,7 +61,7 @@ namespace RhythmDojo.EditorTools
             activeChart.rectTransform.anchorMin = activeChart.rectTransform.anchorMax = new Vector2(1, 1);
             activeChart.rectTransform.pivot = new Vector2(1, 1);
 
-            foreach (string name in new[] { "파일", "설정", "도구", "테스트", "File Panel", "Settings Panel", "Tools Panel" })
+            foreach (string name in new[] { "File Panel", "Settings Panel" })
             {
                 var item = canvas.transform.Find(name);
                 if (item)

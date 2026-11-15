@@ -10,6 +10,8 @@ using RhythmDojo.Gameplay;
 using RhythmDojo.UI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
@@ -63,7 +65,43 @@ namespace RhythmDojo.Tests
             menu.GetComponentsInChildren<T>(true).Single(c => c.name == name
                 && !c.GetComponentInParent<WorkspaceMenuPopup>(true));
 
-        private void Click(string name) => Control<Button>(name).onClick.Invoke();
+        private void Click(string name)
+        {
+            var workspace = Object.FindFirstObjectByType<WorkspaceEditor>();
+            switch (name)
+            {
+                case "파일":
+                    ClickAction(workspace, WorkspaceAction.ProjectFiles);
+                    return;
+                case "설정":
+                    ClickAction(workspace, WorkspaceAction.ChartSettings);
+                    return;
+                case "Undo":
+                    ClickAction(workspace, WorkspaceAction.Undo);
+                    return;
+                case "Redo":
+                    ClickAction(workspace, WorkspaceAction.Redo);
+                    return;
+                case "테스트":
+                    ClickAction(workspace, WorkspaceAction.Test);
+                    return;
+            }
+
+            var button = Control<Button>(name);
+            Assert.That(button.gameObject.activeInHierarchy && button.interactable, Is.True, name);
+            button.onClick.Invoke();
+        }
+
+        private static void ClickAction(WorkspaceEditor workspace, WorkspaceAction action)
+        {
+            var button = workspace.view.actions.Single(binding => binding.action == action).button;
+            var popup = button.GetComponentInParent<WorkspaceMenuPopup>(true);
+            workspace.view.CloseMenus();
+            Assert.That(popup.trigger.gameObject.activeInHierarchy, Is.True);
+            popup.trigger.onClick.Invoke();
+            Assert.That(button.gameObject.activeInHierarchy && button.interactable, Is.True, action.ToString());
+            button.onClick.Invoke();
+        }
 
         private void Input(string name, string value) => Control<InputField>(name).text = value;
 
@@ -170,7 +208,20 @@ namespace RhythmDojo.Tests
             var marker = screen.GetComponentInChildren<ChartBeatGrid>().NoteBounds(0, 4, 4);
             float height = ((RectTransform)screen.transform).rect.height;
             Assert.That(marker.yMax, Is.EqualTo(-height + height * 4 / 16 + 3.5f).Within(0.1f));
-            Click("도구");
+            using (var nativeInput = new NativeInputScope())
+            {
+                InputSystem.settings.editorInputBehaviorInPlayMode =
+                    InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+                InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
+                var keyboard = InputSystem.AddDevice<Keyboard>();
+                keyboard.MakeCurrent();
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.Escape));
+                yield return null;
+                yield return null;
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+                yield return null;
+            }
+            Assert.That(Control<InputField>("BPM").gameObject.activeInHierarchy, Is.False);
             Click("Undo");
             Assert.That(screen.Session.GetNotes(screen.ChartId), Is.Empty);
             Click("Redo");

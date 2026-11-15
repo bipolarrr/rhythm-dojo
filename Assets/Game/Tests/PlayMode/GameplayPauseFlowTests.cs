@@ -34,20 +34,22 @@ namespace RhythmDojo.Tests
             var menu = Object.FindFirstObjectByType<GameplayPauseMenu>();
             yield return Press(Key.Escape);
             Assert.That(menu.panel.activeSelf, Is.True);
-            Assert.That(menu.resumeButton.transform.Find("Dojo Focus Border")?.gameObject.activeInHierarchy,
-                Is.True);
+            Assert.That(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject,
+                Is.SameAs(menu.resumeButton.gameObject));
+            yield return Press(Key.DownArrow);
+            Assert.That(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject,
+                Is.SameAs(menu.restartButton.gameObject));
+            yield return Press(Key.UpArrow);
             Assert.That(game.IsPaused, Is.True);
             Assert.That(game.Clock.Running, Is.False);
             double time = game.Clock.SongTime;
             int resolved = game.Session.Resolved;
             yield return new WaitForSecondsRealtime(.3f);
+            CaptureSelection("dojo-menu-refresh/pause", 1920, 1080);
             yield return Press(Key.D);
             Assert.That(game.Clock.SongTime, Is.EqualTo(time));
             Assert.That(game.Session.Resolved, Is.EqualTo(resolved));
             var flow = Object.FindFirstObjectByType<AppFlowController>();
-            Assert.That(menu.settingsButton.gameObject.activeSelf, Is.False);
-            menu.settingsButton.onClick.Invoke();
-            flow.ShowGameplaySettings();
             flow.ShowSettings();
             flow.ShowTitleSettings();
             Assert.That(Object.FindFirstObjectByType<SettingsView>(), Is.Null);
@@ -76,13 +78,15 @@ namespace RhythmDojo.Tests
             Assert.That(game.Clock.SongTime, Is.GreaterThan(time));
             Assert.That(game.Clock.SongTime, Is.LessThan(time + .5));
             yield return Press(Key.Escape);
-            yield return Click(menu.restartButton);
+            yield return Press(Key.DownArrow);
+            yield return Press(Key.Space);
             Assert.That(menu.panel.activeSelf, Is.False);
             Assert.That(game.IsPaused, Is.False);
             Assert.That(game.Session.Resolved, Is.Zero);
             Assert.That(game.Clock.SongTime, Is.LessThan(.5));
             yield return Press(Key.Escape);
-            yield return Click(menu.exitButton);
+            yield return Press(Key.UpArrow);
+            yield return Press(Key.Enter);
             yield return Await(() => Object.FindFirstObjectByType<SongSelectionScreen>());
             Assert.That(Object.FindFirstObjectByType<AppFlowController>().LastResult, Is.Null);
         }
@@ -118,7 +122,6 @@ namespace RhythmDojo.Tests
             // Existing pause regression now enforces immutable settings, including direct callers.
             var stored = PlayerPrefs.GetString(SelectionPreferences.StorageKey);
             int offset = flow.Preferences.TimingOffsetMs;
-            flow.ShowGameplaySettings();
             Assert.That(Object.FindFirstObjectByType<SettingsView>(), Is.Null);
             flow.Preferences.Multiplier = 2;
             flow.Preferences.TimingOffsetMs = 100;

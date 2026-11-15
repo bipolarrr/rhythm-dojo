@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using RhythmDojo.Audio;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -30,6 +31,7 @@ namespace RhythmDojo.UI
         public Button tutorialEntry;
         public AudioSource effects;
         public AudioClip contact;
+        public DojoSoundPlayer sounds;
         public RectTransform roomRoot, travelCover, teacherGesture, sageGesture;
         public RectTransform[] farLayers, middleLayers, nearLayers;
         public CanvasGroup travelInk;
@@ -63,6 +65,10 @@ namespace RhythmDojo.UI
                 if (!value)
                 {
                     CancelIdleVariations();
+                    if (sounds)
+                    {
+                        sounds.StopAll();
+                    }
                 }
             }
         }
@@ -91,12 +97,21 @@ namespace RhythmDojo.UI
         private float idleGap;
         private bool awaitingResponse;
         private bool practiceContactMade;
+        private bool swingMade;
+        private bool practiceSwingMade;
+        private DojoLessonSequence.Step audibleLessonPhase;
+        private bool lessonSwingMade;
         private readonly string[] titles = { "비급 전수", "자유 연습", "실력 검정", "율보 편찬" };
         private readonly string[] descriptions = {
             "처음이지? 내가 옆에서 박자를 짚어 줄게.", "자유롭게 연습하자!",
             "하산할 준비가 되었다고 생각하나?", "속세에서는 그것을 에디터라 부른다더라" };
         public void Validate()
         {
+            if (!sounds)
+            {
+                throw new InvalidOperationException("Recorded dojo room audio pool missing.");
+            }
+            sounds.Validate();
             if (!travelInk || travelEchoes == null || travelEchoes.Length != 2)
             {
                 throw new InvalidOperationException("Authored travel ink and echoes missing.");
@@ -308,6 +323,7 @@ namespace RhythmDojo.UI
 
         private IEnumerator Travel(int direction)
         {
+            sounds.Play(DojoSoundCue.Transition, .6f, direction * .12f);
             arrivalDirection = direction;
             IsMoving = true;
             IsArriving = false;
@@ -422,6 +438,10 @@ namespace RhythmDojo.UI
 
         public void CancelMotion()
         {
+            if (sounds)
+            {
+                sounds.StopAll();
+            }
             StopAllCoroutines();
             if (IsMoving)
             {
@@ -511,10 +531,17 @@ namespace RhythmDojo.UI
 
         private void PlayEffect(AudioClip clip, float volume)
         {
-            if (effects && clip)
+            if (clip == footstep)
             {
-                effects.PlayOneShot(clip, volume);
+                sounds.Play(DojoSoundCue.Footstep);
+                return;
             }
+            if (clip == wind)
+            {
+                sounds.SetAmbience(.055f);
+                return;
+            }
+            sounds.Play(DojoSoundCue.DummyHit, Mathf.Clamp01(volume / .22f), -.12f);
         }
 
         private void ShowStage()
@@ -632,6 +659,7 @@ namespace RhythmDojo.UI
             strikeAge = 0f;
             CancelIdleVariations();
             contactMade = false;
+            swingMade = false;
         }
 
         public void PracticeTarget()
@@ -654,6 +682,12 @@ namespace RhythmDojo.UI
                 return;
             }
             age += Time.unscaledDeltaTime;
+            float ambienceLevel = .026f;
+            if (SelectedIndex == 2)
+            {
+                ambienceLevel = .055f;
+            }
+            sounds.SetAmbience(ambienceLevel);
             reaction = Mathf.Max(0, reaction - Time.unscaledDeltaTime);
             float readyPulse = Mathf.Sin(age * 24f) * Mathf.Exp(-age * 7f);
             if (readyMark)
@@ -732,6 +766,9 @@ namespace RhythmDojo.UI
             idleGap = idleSeparation;
             awaitingResponse = false;
             practiceContactMade = false;
+            practiceSwingMade = false;
+            lessonSwingMade = false;
+            audibleLessonPhase = DojoLessonSequence.Step.Waiting;
             if (traineeMotion)
             {
                 traineeMotion.SetVariation(DojoIdleVariation.Motion.None, 0, 0, SelectedIndex);
@@ -768,6 +805,7 @@ namespace RhythmDojo.UI
             if (SelectedIndex == 0)
             {
                 lessonSequence.Advance(seconds, age, teacherIdle, teacherAnimation, traineeAnimation);
+                UpdateLessonSound();
                 awaitingResponse = lessonSequence.Phase == DojoLessonSequence.Step.Delay;
                 return;
             }
@@ -843,11 +881,56 @@ namespace RhythmDojo.UI
             }
         }
 
+        private void PlaySwing(DojoIdleVariation.Motion motion, float strength, float pan)
+        {
+            switch (motion)
+            {
+                case DojoIdleVariation.Motion.Punch:
+                    sounds.Play(DojoSoundCue.Swing, strength, pan);
+                    break;
+                case DojoIdleVariation.Motion.Kick:
+                    sounds.Play(DojoSoundCue.KickSwing, strength, pan);
+                    break;
+            }
+        }
+
+        private void UpdateLessonSound()
+        {
+            if (audibleLessonPhase != lessonSequence.Phase)
+            {
+                audibleLessonPhase = lessonSequence.Phase;
+                lessonSwingMade = false;
+            }
+            DojoActorAnimation actor;
+            float pan;
+            switch (lessonSequence.Phase)
+            {
+                case DojoLessonSequence.Step.Demonstration:
+                    actor = teacherAnimation;
+                    pan = .18f;
+                    break;
+                case DojoLessonSequence.Step.Imitation:
+                    actor = traineeAnimation;
+                    pan = -.18f;
+                    break;
+                default:
+                    return;
+            }
+            if (lessonSwingMade || lessonSequence.Elapsed < actor.Duration(lessonSequence.Motion) * .18f)
+            {
+                return;
+            }
+            lessonSwingMade = true;
+            // The lesson is an air demonstration: no wood impact without a target contact.
+            PlaySwing(lessonSequence.Motion, .70f, pan);
+        }
+
         private void UpdatePracticeContact()
         {
             if (!traineeIdle.IsPlaying)
             {
                 practiceContactMade = false;
+                practiceSwingMade = false;
                 return;
             }
             if (SelectedIndex != 1 || practiceContactMade)
@@ -858,6 +941,11 @@ namespace RhythmDojo.UI
             if (motion != DojoIdleVariation.Motion.Punch && motion != DojoIdleVariation.Motion.Kick)
             {
                 return;
+            }
+            if (!practiceSwingMade && traineeIdle.Progress >= .18f)
+            {
+                practiceSwingMade = true;
+                PlaySwing(motion, .65f, -.12f);
             }
             if (traineeIdle.Progress < .36f)
             {
@@ -879,6 +967,11 @@ namespace RhythmDojo.UI
             }
             strikeAge += Time.unscaledDeltaTime;
             float t = strikeAge;
+            if (!swingMade && t >= .12f)
+            {
+                swingMade = true;
+                sounds.Play(DojoSoundCue.Swing, .85f, -.12f);
+            }
             float reach = 36f;
             float weight;
             if (t < .12f)
@@ -898,6 +991,7 @@ namespace RhythmDojo.UI
                     ContactCount++;
                     reaction = ReactionSeconds;
                     PlayEffect(contact, .22f);
+                    sounds.Play(DojoSoundCue.Creak, .35f, -.12f);
                 }
                 float recovery = Mathf.SmoothStep(0, 1, Mathf.InverseLerp(.27f, StrikeSeconds, t));
                 weight = reach * (1 - recovery);

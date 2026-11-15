@@ -39,10 +39,7 @@ namespace RhythmDojo.UI
             timingOffset;
         public Text speedLabel,
             timingLabel;
-        public Dropdown[] hardRuleLists;
         public Dropdown[] playRuleLists;
-        public InputField[] hardLossCounts;
-        public Text hardModeHint;
         public GameObject soundPanel,
             graphicsPanel;
         public Slider masterVolume,
@@ -134,28 +131,12 @@ namespace RhythmDojo.UI
                 throw new InvalidOperationException("Settings view references missing.");
             }
 
-            if ((!timingLabel || !hardModeHint) || playRuleLists == null)
+            if (!timingLabel || playRuleLists == null)
             {
                 throw new InvalidOperationException("Settings view references missing.");
             }
 
-            if (
-                (playRuleLists.Length != 5 || Array.Exists(playRuleLists, value => !value))
-                || hardRuleLists == null
-            )
-            {
-                throw new InvalidOperationException("Settings view references missing.");
-            }
-
-            if (
-                (hardRuleLists.Length != 3 || Array.Exists(hardRuleLists, value => !value))
-                || hardLossCounts == null
-            )
-            {
-                throw new InvalidOperationException("Settings view references missing.");
-            }
-
-            if (hardLossCounts.Length != 3 || Array.Exists(hardLossCounts, value => !value))
+            if (playRuleLists.Length != 5 || Array.Exists(playRuleLists, value => !value))
             {
                 throw new InvalidOperationException("Settings view references missing.");
             }

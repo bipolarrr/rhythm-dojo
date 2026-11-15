@@ -213,7 +213,7 @@ namespace RhythmDojo.UI
             knockTime = .18f;
             if (view.knock)
             {
-                effects.PlayOneShot(view.knock, .6f);
+                effects.PlayOneShot(view.knock, .38f * RhythmDojo.Audio.DojoSoundPlayer.EffectsVolume);
             }
             while (menuExpanded && expansion < 1f)
             {
@@ -223,7 +223,7 @@ namespace RhythmDojo.UI
                     doorSoundPlayed = true;
                     if (view.doorSlide)
                     {
-                        effects.PlayOneShot(view.doorSlide, .42f);
+                        effects.PlayOneShot(view.doorSlide, .30f * RhythmDojo.Audio.DojoSoundPlayer.EffectsVolume);
                     }
                 }
                 ApplyExpansion();

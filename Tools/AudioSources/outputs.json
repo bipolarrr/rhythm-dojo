@@ -1,0 +1,335 @@
+[
+  {
+    "path": "Assets/Game/Audio/Foley/HitPerfect1.wav",
+    "seconds": 0.3249,
+    "peak_db": -4.01,
+    "rms_db": -26.6,
+    "pcm_bytes": 20796,
+    "sha256": "f6c92833be6cec838f559182d2962c4bae8327136c0ac7183e53057d5bb041e6",
+    "sources": [
+      "punch1",
+      "wood"
+    ]
+  },
+  {
+    "path": "Assets/Game/Audio/Foley/HitGood1.wav",
+    "seconds": 0.3259,
+    "peak_db": -6.02,
+    "rms_db": -31.48,
+    "pcm_bytes": 20860,
+    "sha256": "403536de1c403dbdb5aea9446b965939d1c4dbe10d341deff2d052120f6a5bbd",
+    "sources": [
+      "punch1",
+      "wood"
+    ]
+  },
+  {
+    "path": "Assets/Game/Audio/Foley/DummyHit1.wav",
+    "seconds": 0.3239,
+    "peak_db": -4.01,
+    "rms_db": -24.33,
+    "pcm_bytes": 20732,
+    "sha256": "b34dfe0c2b2c653dbb4e45380bbfbfeca7c690c2bc712671c6d5c372ec2a5875",
+    "sources": [
+      "wood",
+      "punch1"
+    ]
+  },
+  {
+    "path": "Assets/Game/Audio/Foley/HitPerfect2.wav",
+    "seconds": 0.3249,
+    "peak_db": -4.01,
+    "rms_db": -22.69,
+    "pcm_bytes": 20796,
+    "sha256": "bfbf472e56b723f8d0cdfe8c61bf6582269a4e8a345ea35e5ce95561e53de240",
+    "sources": [
+      "punch2",
+      "wood"
+    ]
+  },
+  {
+    "path": "Assets/Game/Audio/Foley/HitGood2.wav",
+    "seconds": 0.3259,
+    "peak_db": -6.02,
+    "rms_db": -25.54,
+    "pcm_bytes": 20860,
+    "sha256": "df07f2e911233189d2e0dd41d526498696d283bc28286f2aeee1e53f8cfd5201",
+    "sources": [
+      "punch2",
+      "wood"
+    ]
+  },
+  {
+    "path": "Assets/Game/Audio/Foley/DummyHit2.wav",
+    "seconds": 0.3239,
+    "peak_db": -4.01,
+    "rms_db": -23.63,
+    "pcm_bytes": 20732,
+    "sha256": "82da742c493e0d3289a459835ab377a1ec7855f3ca6fb30783ba98cde9ecf923",
+    "sources": [
+      "wood",
+      "punch2"
+    ]
+  },
+  {
+    "path": "Assets/Game/Audio/Foley/HitPerfect3.wav",
+    "seconds": 0.3249,
+    "peak_db": -4.01,
+    "rms_db": -22.8,
+    "pcm_bytes": 20796,
+    "sha256": "e458110a03b79a4356df567c49634a47c7ca4400ac3a8361c60c179445dbcb49",
+    "sources": [
+      "punch3",
+      "wood"
+    ]
+  },
+  {
+    "path": "Assets/Game/Audio/Foley/HitGood3.wav",
+    "seconds": 0.3259,
+    "peak_db": -6.02,
+    "rms_db": -25.84,
+    "pcm_bytes": 20860,
+    "sha256": "0c13ed8555163b13dcb87ce4695315754ac05ca9ad4d34bebf761095d1cb7ae1",
+    "sources": [
+      "punch3",
+      "wood"
+    ]
+  },
+  {
+    "path": "Assets/Game/Audio/Foley/DummyHit3.wav",
+    "seconds": 0.3239,
+    "peak_db": -4.01,
+    "rms_db": -24.22,
+    "pcm_bytes": 20732,
+    "sha256": "a335ca86eb6b4e3d40f1619a8e693a8645e107e5bf44da90718e59a1466090aa",
+    "sources": [
+      "wood",
+      "punch3"
+    ]
+  },
+  {
+    "path": "Assets/Game/Audio/Gameplay/StrikeImpact.wav",
+    "seconds": 0.3249,
+    "peak_db": -4.01,
+    "rms_db": -26.6,
+    "pcm_bytes": 20796,
+    "sha256": "f6c92833be6cec838f559182d2962c4bae8327136c0ac7183e53057d5bb041e6",
+    "sources": [
+      "punch1",
+      "wood"
+    ]
+  },
+  {
+    "path": "Assets/Game/Audio/DojoKnock.wav",
+    "seconds": 0.3239,
+    "peak_db": -5.19,
+    "rms_db": -25.35,
+    "pcm_bytes": 20732,
+    "sha256": "5591697d5fb9a4a4a27f8d94b0ee55451300d4e43ff5d4d3b856d1bc808dbe61",
+    "sources": [
+      "wood"
+    ]
+  },
+  {
+    "path": "Assets/Game/Audio/Foley/Swing1.wav",
+    "seconds": 0.1499,
+    "peak_db": -6.38,
+    "rms_db": -28.21,
+    "pcm_bytes": 9592,
+    "sha256": "b7567a77d65f25061d8f2dcb93d3812bac041ee865caeb0b53d4bad5cbc3efe4",
+    "sources": [
+      "swings"
+    ]
+  },
+  {
+    "path": "Assets/Game/Audio/Gameplay/StrikeWhoosh.wav",
+    "seconds": 0.1499,
+    "peak_db": -6.38,
+    "rms_db": -28.21,
+    "pcm_bytes": 9592,
+    "sha256": "b7567a77d65f25061d8f2dcb93d3812bac041ee865caeb0b53d4bad5cbc3efe4",
+    "sources": [
+      "swings"
+    ]
+  },
+  {
+    "path": "Assets/Game/Audio/Foley/Swing2.wav",
+    "seconds": 0.1353,
+    "peak_db": -6.38,
+    "rms_db": -29.33,
+    "pcm_bytes": 8662,
+    "sha256": "a700a951f85392e702180a87b5a5dff484be40ef6cb65fd52939fe62167519fe",
+    "sources": [
+      "swings"
+    ]
+  },
+  {
+    "path": "Assets/Game/Audio/Foley/Swing3.wav",
+    "seconds": 0.2184,
+    "peak_db": -6.38,
+    "rms_db": -25.8,
+    "pcm_bytes": 13976,
+    "sha256": "8765fe0d1f43b954b257f46d4331cecfeea2073d3736d7281de66fa166600ecf",
+    "sources": [
+      "swings"
+    ]
+  },
+  {
+    "path": "Assets/Game/Audio/Foley/KickSwing.wav",
+    "seconds": 0.2081,
+    "peak_db": -5.19,
+    "rms_db": -23.49,
+    "pcm_bytes": 13316,
+    "sha256": "ddbfc99764e87a0eb88da94b81632a3c6da4cff3ece376011d577bbb7f8c9f00",
+    "sources": [
+      "bamboo"
+    ]
+  },
+  {
+    "path": "Assets/Game/Audio/DojoBoardCrack.wav",
+    "seconds": 0.3239,
+    "peak_db": -3.1,
+    "rms_db": -24.38,
+    "pcm_bytes": 20732,
+    "sha256": "15b7e2ee0fab71f683eda426fb7888eb70265e3124b3bc859d1c1dc211ee32e6",
+    "sources": [
+      "wood",
+      "crack"
+    ]
+  },
+  {
+    "path": "Assets/Game/Audio/Foley/WoodCreak.wav",
+    "seconds": 0.7694,
+    "peak_db": -7.54,
+    "rms_db": -34.01,
+    "pcm_bytes": 49240,
+    "sha256": "3eb5e36d09314cd0dd26cb3609710437ccbbe03edb754d454a6f1792aedd1f02",
+    "sources": [
+      "creak"
+    ]
+  },
+  {
+    "path": "Assets/Game/Audio/DojoDoorSlide.wav",
+    "seconds": 1.0614,
+    "peak_db": -6.38,
+    "rms_db": -30.8,
+    "pcm_bytes": 67930,
+    "sha256": "523418b39ee22fcad1663a1f58b22530f236c91dbc1146b731604c96e374c546",
+    "sources": [
+      "creak",
+      "wood"
+    ]
+  },
+  {
+    "path": "Assets/Game/Audio/Foley/Footstep1.wav",
+    "seconds": 0.2743,
+    "peak_db": -6.74,
+    "rms_db": -24.65,
+    "pcm_bytes": 17554,
+    "sha256": "0e58ff38ef0ab51e4fadea66642caca1f059d473087293325cca6994e2e39d50",
+    "sources": [
+      "steps"
+    ]
+  },
+  {
+    "path": "Assets/Game/Audio/TrainingFootstep.wav",
+    "seconds": 0.2743,
+    "peak_db": -6.74,
+    "rms_db": -24.65,
+    "pcm_bytes": 17554,
+    "sha256": "0e58ff38ef0ab51e4fadea66642caca1f059d473087293325cca6994e2e39d50",
+    "sources": [
+      "steps"
+    ]
+  },
+  {
+    "path": "Assets/Game/Audio/Foley/Footstep2.wav",
+    "seconds": 0.2268,
+    "peak_db": -6.74,
+    "rms_db": -24.03,
+    "pcm_bytes": 14518,
+    "sha256": "761ac1820b24b55009e7050276f81da547545d45af755fbe043399ee2389f472",
+    "sources": [
+      "steps"
+    ]
+  },
+  {
+    "path": "Assets/Game/Audio/Foley/Footstep3.wav",
+    "seconds": 0.2787,
+    "peak_db": -6.74,
+    "rms_db": -23.45,
+    "pcm_bytes": 17836,
+    "sha256": "e65d78f17b9b118f8cce849ab3daa6d7de71ff7457408dff123d27d099239bf7",
+    "sources": [
+      "steps"
+    ]
+  },
+  {
+    "path": "Assets/Game/Audio/Foley/RoomTransition.wav",
+    "seconds": 0.2268,
+    "peak_db": -9.9,
+    "rms_db": -32.21,
+    "pcm_bytes": 14518,
+    "sha256": "cc80bab1294e2d4241971070e8eb00a859486972f0637df623e08a08808217d4",
+    "sources": [
+      "swings"
+    ]
+  },
+  {
+    "path": "Assets/Game/Resources/UI/DojoClick.wav",
+    "seconds": 0.3239,
+    "peak_db": -9.12,
+    "rms_db": -29.14,
+    "pcm_bytes": 20732,
+    "sha256": "073b079c172183f29169e2a105b04cc26b46b99c187202d82f9b11127a72831f",
+    "sources": [
+      "wood",
+      "swings"
+    ]
+  },
+  {
+    "path": "Assets/Game/Audio/Foley/CourtyardWind.wav",
+    "seconds": 10.0,
+    "peak_db": -9.12,
+    "rms_db": -22.05,
+    "pcm_bytes": 640000,
+    "sha256": "8d64b3cd395a01de926dc903b0cf5cb59fdcabd031df72e0b81c6f7ed3892d6b",
+    "sources": [
+      "wind"
+    ]
+  },
+  {
+    "path": "Assets/Game/Audio/SummitGust.wav",
+    "seconds": 3.0,
+    "peak_db": -11.06,
+    "rms_db": -23.03,
+    "pcm_bytes": 192000,
+    "sha256": "9670a9e8491fc1b0750e9652ef9f766fa4fd3d7a2cd5b9b04a2ab3cf5f0d4e38",
+    "sources": [
+      "wind"
+    ]
+  },
+  {
+    "path": "Assets/Game/Audio/Foley/TrainingComplete.wav",
+    "seconds": 0.4639,
+    "peak_db": -6.38,
+    "rms_db": -26.44,
+    "pcm_bytes": 29692,
+    "sha256": "0da00a5e9fea967e08468150c4024743e8ef0763aa75fd3d84cc51775f4d015b",
+    "sources": [
+      "wood"
+    ]
+  },
+  {
+    "path": "Assets/Game/Audio/Foley/TrainingFailed.wav",
+    "seconds": 0.8475,
+    "peak_db": -8.4,
+    "rms_db": -31.8,
+    "pcm_bytes": 54238,
+    "sha256": "de38ff34929aa57409ba0a4a2e61d9893b8fb0d41ea84ef8d29ec976fd704e5b",
+    "sources": [
+      "wood",
+      "creak"
+    ]
+  }
+]

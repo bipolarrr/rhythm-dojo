@@ -34,6 +34,7 @@ namespace RhythmDojo.UI
         [Range(0, 4)] public int maximumAfterimages = 4;
 
         public event Action<int, bool, bool> Contact;
+        public event Action<int, int, bool> Started;
         public int LastMotion { get; private set; } = -1;
         public int LastContactMotion { get; private set; }
         public Vector2 LastContactPosition { get; private set; }
@@ -137,6 +138,7 @@ namespace RhythmDojo.UI
                 visual.image.color = Color.white;
                 Pose(visual);
                 ActiveCount++;
+                Started?.Invoke(direction, motion, rapid);
                 return true;
             }
             return false;

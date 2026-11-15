@@ -70,63 +70,37 @@ namespace RhythmDojo.Core
                 return;
             }
 
-            if (!UnityEngine.Application.CanStreamedLevelBeLoaded(BootstrapScenePath))
+            if (!view || !view.modeSelection)
             {
-                throw new InvalidOperationException(
-                    "Bootstrap scene is not registered in Build Settings."
-                );
+                throw new InvalidOperationException("Start game requires the mode selection screen.");
             }
 
             Transitioning = true;
 
             try
             {
-                if (view && view.modeSelection)
+                if (view.modeSelection.SelectedIndex == 0)
                 {
-                    if (view.modeSelection.SelectedIndex == 0)
+                    AppFlowController.Create(settings).CancelSelectionPreparation();
+                    if (SceneManager.LoadSceneAsync(TutorialScenePath, LoadSceneMode.Single) == null)
                     {
-                        AppFlowController.Create(settings).CancelSelectionPreparation();
-                        if (SceneManager.LoadSceneAsync(TutorialScenePath, LoadSceneMode.Single) == null)
-                        {
-                            throw new InvalidOperationException("Cannot load Tutorial.");
-                        }
-                        return;
+                        throw new InvalidOperationException("Cannot load Tutorial.");
                     }
-                    var flow = AppFlowController.Create(settings);
-                    selectionFlow = flow;
-                    var rules = flow.Rules.Snapshot;
-                    rules.Mode = RhythmDojo.Gameplay.PlayMode.Gauge;
-                    if (view.modeSelection.SelectedIndex == 2)
-                    {
-                        rules.Mode = RhythmDojo.Gameplay.PlayMode.Challenge;
-                    }
-                    flow.Rules.Update(rules);
-                    flow.ShowSelection();
                     return;
                 }
-                if (view && view.entrance)
+                var flow = AppFlowController.Create(settings);
+                selectionFlow = flow;
+                var rules = flow.Rules.Snapshot;
+                rules.Mode = RhythmDojo.Gameplay.PlayMode.Gauge;
+                if (view.modeSelection.SelectedIndex == 2)
                 {
-                    DojoEntranceTransition.Begin(
-                        view.entrance, view.doorSlide, view.startPrompt.font, ReturnToTitle);
-                    // The title already has the settings needed to compose selection.
-                    // Avoid activating and unloading an intermediate Bootstrap scene.
-                    AppFlowController.Create(settings).ShowSelection();
-                    return;
+                    rules.Mode = RhythmDojo.Gameplay.PlayMode.Challenge;
                 }
-
-                AppFlowController.Create(settings).CancelSelectionPreparation();
-                if (SceneManager.LoadSceneAsync(BootstrapScenePath, LoadSceneMode.Single) == null)
-                {
-                    throw new InvalidOperationException("Cannot load Bootstrap.");
-                }
+                flow.Rules.Update(rules);
+                flow.ShowSelection();
             }
             catch
             {
-                if (DojoEntranceTransition.Active)
-                {
-                    DojoEntranceTransition.Active.Cancel();
-                }
-
                 Transitioning = false;
                 throw;
             }

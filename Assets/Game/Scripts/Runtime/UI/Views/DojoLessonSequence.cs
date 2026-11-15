@@ -16,6 +16,7 @@ namespace RhythmDojo.UI
         public Step Phase { get; private set; }
         public DojoIdleVariation.Motion Motion { get; private set; }
         public int CompletedSets { get; private set; }
+        public float Elapsed => elapsed;
         private float elapsed;
 
         public void Cancel()

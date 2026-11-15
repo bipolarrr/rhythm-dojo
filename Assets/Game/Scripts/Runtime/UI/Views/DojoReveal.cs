@@ -12,8 +12,11 @@ namespace RhythmDojo.UI
         private Vector2 home;
         private float elapsed;
         private bool captured;
+        private int replayFrame;
 
-        private void OnEnable()
+        private void OnEnable() => Replay();
+
+        public void Replay()
         {
             if (!group)
             {
@@ -26,11 +29,18 @@ namespace RhythmDojo.UI
                 captured = true;
             }
             elapsed = 0;
+            replayFrame = Time.frameCount;
             Apply(0);
         }
 
         private void Update()
         {
+            // A preview can restart after this frame's delta was measured during scene startup.
+            if (Time.frameCount == replayFrame)
+            {
+                return;
+            }
+
             if (elapsed >= delay + .28f)
             {
                 return;

@@ -9,8 +9,6 @@ namespace RhythmDojo.EditorTools
 {
     public static class SettingsLayoutBuilder
     {
-        private static readonly Color accent = new Color(.27f, .82f, .88f);
-
         public static SettingsView Build()
         {
             var canvas = UiElements.Canvas("Settings");
@@ -125,86 +123,6 @@ namespace RhythmDojo.EditorTools
             view.timingOffset = Volume("Input Timing Offset", view.gameplayPanel.transform, -124);
             view.timingOffset.minValue = -200;
             view.timingOffset.maxValue = 200;
-            UiElements.Label(
-                "Hard Mode Heading",
-                view.gameplayPanel.transform,
-                "하드 모드 설정  ·  회복 없음",
-                new Vector2(0, -162),
-                new Vector2(700, 28),
-                20,
-                role: UiTextRole.Title
-            );
-            view.hardRuleLists = new Dropdown[3];
-            view.hardLossCounts = new InputField[3];
-
-            var grades = new[] { "Perfect", "Good", "Miss" };
-
-            for (int i = 0; i < grades.Length; i++)
-            {
-                float y = -202 - i * 44;
-                UiElements.Label(
-                    grades[i] + " Rule Label",
-                    view.gameplayPanel.transform,
-                    grades[i],
-                    new Vector2(0, y),
-                    new Vector2(120, 34),
-                    20
-                );
-                view.hardRuleLists[i] = UiElements.Dropdown(
-                    grades[i] + " Health Rule",
-                    view.gameplayPanel.transform,
-                    new Vector2(128, y),
-                    new Vector2(330, 34)
-                );
-                StyleHardRuleDropdown(view.hardRuleLists[i]);
-
-                var countObject = DefaultControls.CreateInputField(new DefaultControls.Resources());
-                countObject.name = grades[i] + " Loss Count";
-                countObject.transform.SetParent(view.gameplayPanel.transform, false);
-                UiElements.Position(
-                    (RectTransform)countObject.transform,
-                    new Vector2(480, y),
-                    new Vector2(105, 34)
-                );
-                view.hardLossCounts[i] = countObject.GetComponent<InputField>();
-                view.hardLossCounts[i].contentType = InputField.ContentType.IntegerNumber;
-                view.hardLossCounts[i].characterLimit = 4;
-
-                foreach (var text in countObject.GetComponentsInChildren<Text>(true))
-                {
-                    text.font = RhythmDojo.UI.UiFontSettings.Current;
-                    text.fontSize = 18;
-                    text.alignment = TextAnchor.MiddleCenter;
-                }
-
-                UiElements.Label(
-                    grades[i] + " Count Unit",
-                    view.gameplayPanel.transform,
-                    "회",
-                    new Vector2(595, y),
-                    new Vector2(90, 34),
-                    18
-                );
-            }
-
-            view.hardModeHint = UiElements.Label(
-                "Hard Mode Help",
-                view.gameplayPanel.transform,
-                "하드 모드에서만 적용 · 체력 감소 5회 = 판정마다 20 감소 · 자동 저장",
-                new Vector2(0, -338),
-                new Vector2(700, 34),
-                14,
-                role: UiTextRole.Help
-            );
-
-            foreach (Transform child in view.gameplayPanel.transform)
-            {
-                if (child.GetComponent<RectTransform>().anchoredPosition.y <= -162)
-                {
-                    child.gameObject.SetActive(false);
-                }
-            }
-
             view.playRuleLists = new Dropdown[5];
 
             var ruleLabels = new[] { "판정", "플레이", "롱노트 끝", "Gauge 실패", "Challenge" };
@@ -220,13 +138,12 @@ namespace RhythmDojo.EditorTools
                     new Vector2(215, 34),
                     18
                 );
-                view.playRuleLists[i] = UiElements.Dropdown(
+                view.playRuleLists[i] = DojoScreenStyle.Dropdown(
                     "Play Rule Option " + i,
                     view.gameplayPanel.transform,
                     new Vector2(230, y),
                     new Vector2(470, 34)
                 );
-                StyleHardRuleDropdown(view.playRuleLists[i]);
             }
 
             view.masterLabel = UiElements.Label(
@@ -259,21 +176,21 @@ namespace RhythmDojo.EditorTools
 
             var parent = view.graphicsPanel.transform;
             Caption(parent, "화면 비율", 0);
-            view.aspectList = UiElements.Dropdown(
+            view.aspectList = DojoScreenStyle.Dropdown(
                 "Aspect Ratio",
                 parent,
                 new Vector2(180, 0),
                 new Vector2(520, 64)
             );
             Caption(parent, "해상도", -94);
-            view.resolutionList = UiElements.Dropdown(
+            view.resolutionList = DojoScreenStyle.Dropdown(
                 "Resolution",
                 parent,
                 new Vector2(180, -94),
                 new Vector2(520, 64)
             );
             Caption(parent, "FPS", -188);
-            view.fpsList = UiElements.Dropdown(
+            view.fpsList = DojoScreenStyle.Dropdown(
                 "Frame Rate",
                 parent,
                 new Vector2(180, -188),
@@ -282,7 +199,7 @@ namespace RhythmDojo.EditorTools
             view.qualityButtons = System.Array.Empty<Button>();
             view.qualityLabels = System.Array.Empty<Text>();
             Caption(parent, "DSP 버퍼", -282);
-            view.bufferList = UiElements.Dropdown(
+            view.bufferList = DojoScreenStyle.Dropdown(
                 "DSP Buffer",
                 parent,
                 new Vector2(180, -282),
@@ -330,37 +247,12 @@ namespace RhythmDojo.EditorTools
             view.apply = Tab("Apply", popup.transform, "적용", new Vector2(640, -574));
             view.back = Tab("Back", popup.transform, "닫기", new Vector2(816, -574));
 
-            var nav = view.bufferList.navigation;
-            nav.mode = Navigation.Mode.Explicit;
-            nav.selectOnUp = view.fpsList;
-            nav.selectOnDown = view.apply;
-            view.bufferList.navigation = nav;
-            nav = view.apply.navigation;
-            nav.mode = Navigation.Mode.Explicit;
-            nav.selectOnUp = view.bufferList;
-            nav.selectOnRight = view.back;
-            view.apply.navigation = nav;
-            nav = view.back.navigation;
-            nav.mode = Navigation.Mode.Explicit;
-            nav.selectOnLeft = view.apply;
-            nav.selectOnUp = view.graphicsTab;
-            view.back.navigation = nav;
-            nav = view.speedSlider.navigation;
-            nav.mode = Navigation.Mode.Explicit;
-            nav.selectOnUp = view.gameplayTab;
-            nav.selectOnDown = view.timingOffset;
-            view.speedSlider.navigation = nav;
-            nav = view.timingOffset.navigation;
-            nav.mode = Navigation.Mode.Explicit;
-            nav.selectOnUp = view.speedSlider;
-            nav.selectOnDown = view.apply;
-            view.timingOffset.navigation = nav;
             view.soundPanel.SetActive(true);
             view.graphicsPanel.SetActive(false);
             view.gameplayPanel.SetActive(false);
             BuildKeySettings(view);
 
-            view.focusHudButton = UiElements.Button("Focus HUD", view.gameplayPanel.transform,
+            view.focusHudButton = DojoScreenStyle.Action("Focus HUD", view.gameplayPanel.transform,
                 "HUD · 기본", new Vector2(0, -408), new Vector2(230, 38));
             UiElements.Label("Rail Opacity Label", view.gameplayPanel.transform, "레인 불투명도",
                 new Vector2(260, -408), new Vector2(190, 38), 22);
@@ -375,8 +267,8 @@ namespace RhythmDojo.EditorTools
             ApplyPlayRuleSizes(view);
             BuildJudgmentPosition(view);
             TimingCalibrationLayoutBuilder.Build(view);
-            var help = UiElements.Label("Navigation Help", popup.transform, "Esc  닫기",
-                new Vector2(38, -584), new Vector2(220, 28), 18, role: UiTextRole.Help);
+            var help = UiElements.Label("Navigation Help", popup.transform, "↑↓ 이동  ·  ←→ 조절  ·  Enter / Space 선택  ·  Esc 닫기",
+                new Vector2(38, -584), new Vector2(580, 28), 17, role: UiTextRole.Help);
             help.color = new Color(.40f, .28f, .18f);
 
             view.back.GetComponentInChildren<Text>().text = "닫기";
@@ -386,8 +278,63 @@ namespace RhythmDojo.EditorTools
                 colors.fadeDuration = .09f;
                 selectable.colors = colors;
             }
+            RefinePresentation(view);
 
             return view;
+        }
+
+        private static void RefinePresentation(SettingsView view)
+        {
+            var frame = view.panelRect.GetComponentInChildren<PixelDojoFrameGraphic>();
+            frame.color = DojoScreenStyle.Paper;
+            frame.borderWidth = 14;
+            frame.RefreshArtwork();
+            var title = view.panelRect.Find("Title").GetComponent<Text>();
+            UiElements.Position(title.rectTransform, new Vector2(38, -22), new Vector2(700, 54));
+            title.fontSize = 44;
+            title.color = DojoScreenStyle.Ink;
+            DojoScreenStyle.Rule("Header Ink Rule", view.panelRect, new Color(.27f, .22f, .15f, .65f),
+                new Vector2(36, -84), new Vector2(948, 4));
+            DojoScreenStyle.Rule("Category Divider", view.panelRect, new Color(.27f, .22f, .15f, .18f),
+                new Vector2(214, -108), new Vector2(2, 432));
+            DojoScreenStyle.Rule("Footer Ink Rule", view.panelRect, new Color(.27f, .22f, .15f, .25f),
+                new Vector2(36, -556), new Vector2(948, 2));
+            foreach (int y in new[] { -98, -212, -326 })
+            {
+                DojoScreenStyle.Rule("Volume Row Rule " + y, view.soundPanel.transform,
+                    new Color(.27f, .22f, .15f, .16f), new Vector2(0, y), new Vector2(700, 2));
+            }
+
+            foreach (var button in view.panelRect.GetComponentsInChildren<Button>(true))
+            {
+                bool primary = button == view.apply;
+                DojoScreenStyle.Button(button, primary);
+            }
+            DojoScreenStyle.PaperFrame(view.calibration.panelRect, 8);
+            DojoScreenStyle.Button(view.calibration.start, true);
+            DojoScreenStyle.Button(view.calibration.apply, true);
+            DojoScreenStyle.Button(view.calibration.close);
+            DojoScreenStyle.Typography(view.transform);
+            foreach (var button in new[] { view.soundTab, view.graphicsTab, view.gameplayTab, view.keySettingsTab })
+            {
+                var label = button.GetComponentInChildren<Text>();
+                SetCaptionSize(label, 34, 28);
+                button.GetComponent<DojoControlFocus>().activateOnSelect = true;
+                label.horizontalOverflow = HorizontalWrapMode.Overflow;
+            }
+            foreach (var text in view.panelRect.GetComponentsInChildren<Text>(true))
+            {
+                if (text.GetComponentInParent<Button>(true))
+                {
+                    continue;
+                }
+                text.color = DojoScreenStyle.Ink;
+            }
+            foreach (var text in new[] { view.actualState, view.displayState, view.status, view.keyBindingStatus })
+            {
+                text.color = DojoScreenStyle.Muted;
+            }
+            SetCaptionSize(view.apply.GetComponentInChildren<Text>(), 27, 24);
         }
 
         internal static void BuildJudgmentPosition(SettingsView view)
@@ -404,7 +351,7 @@ namespace RhythmDojo.EditorTools
             label.alignment = TextAnchor.MiddleLeft;
             label.color = new Color(.24f, .12f, .085f);
 
-            var dropdown = UiElements.Dropdown(
+            var dropdown = DojoScreenStyle.Dropdown(
                 "Judgment Position",
                 parent,
                 new Vector2(500, 0),
@@ -465,7 +412,7 @@ namespace RhythmDojo.EditorTools
             view.keyRowTemplate = template.GetComponent<KeyBindingRowView>();
             view.keyRowTemplate.caption = UiElements.Label("Lane Caption", template.transform,
                 "", Vector2.zero, new Vector2(410, 48), 26);
-            view.keyRowTemplate.button = UiElements.Button("Lane Key", template.transform,
+            view.keyRowTemplate.button = DojoScreenStyle.Action("Lane Key", template.transform,
                 "", new Vector2(430, 0), new Vector2(250, 46));
             SetCaptionSize(view.keyRowTemplate.button.GetComponentInChildren<Text>(), 30, 18);
             template.SetActive(false);
@@ -480,13 +427,14 @@ namespace RhythmDojo.EditorTools
                 row.button.GetComponentInChildren<Text>().text = mode.GetLane(i).displayName;
                 view.keyBindingButtons[i] = row.button;
             }
-            UiElements.Label("Key Settings Help", parent,
+            var help = UiElements.Label("Key Settings Help", parent,
                 "바꿀 키를 누른 뒤 원하는 키보드 키를 입력하세요.\nEsc: 변경 취소 · 시작·복귀 키 및 중복 키 사용 불가",
                 new Vector2(0, -274), new Vector2(700, 52), 23, role: UiTextRole.Help);
+            help.verticalOverflow = VerticalWrapMode.Overflow;
             view.keyBindingStatus = UiElements.Label("Key Binding Status", parent,
                 "변경한 키는 이 모드에 자동 저장됩니다.",
                 new Vector2(0, -328), new Vector2(700, 34), 22);
-            view.resetKeys = UiElements.Button("Reset Play Keys", parent, "기본값으로 복원",
+            view.resetKeys = DojoScreenStyle.Action("Reset Play Keys", parent, "기본값으로 복원",
                 new Vector2(0, -366), new Vector2(250, 40));
             view.resetKeys.GetComponentInChildren<Text>().fontSize = 26;
             view.keySettingsPanel.SetActive(false);
@@ -564,74 +512,10 @@ namespace RhythmDojo.EditorTools
         private static void SetCaptionSize(Text text, int size, int minimumSize)
         {
             text.fontSize = size;
+            text.verticalOverflow = VerticalWrapMode.Overflow;
             text.resizeTextForBestFit = true;
             text.resizeTextMinSize = minimumSize;
             text.resizeTextMaxSize = size;
-        }
-
-        private static void StyleHardRuleDropdown(Dropdown dropdown)
-        {
-            var font = AssetDatabase.LoadAssetAtPath<Font>(MainMenuLayoutBuilder.FontPath);
-
-            if (!font)
-            {
-                throw new InvalidOperationException("Settings Korean font missing.");
-            }
-
-            var background = new Color(.09f, .115f, .13f);
-            dropdown.GetComponent<Image>().color = background;
-
-            foreach (var image in dropdown.template.GetComponentsInChildren<Image>(true))
-            {
-                image.color = background;
-            }
-
-            foreach (var text in dropdown.GetComponentsInChildren<Text>(true))
-            {
-                text.font = font;
-                text.fontSize = 18;
-                text.color = Color.white;
-                text.alignment = TextAnchor.MiddleLeft;
-                text.horizontalOverflow = HorizontalWrapMode.Overflow;
-                text.verticalOverflow = VerticalWrapMode.Overflow;
-            }
-
-            dropdown.captionText.rectTransform.offsetMin = new Vector2(12, 0);
-            dropdown.captionText.rectTransform.offsetMax = new Vector2(-32, 0);
-            dropdown.template.sizeDelta = new Vector2(dropdown.template.sizeDelta.x, 140);
-
-            var content = dropdown.template.Find("Viewport/Content") as RectTransform;
-            var item = dropdown.template.Find("Viewport/Content/Item") as RectTransform;
-
-            if (!content || !item)
-            {
-                throw new InvalidOperationException("Hard rule dropdown template missing.");
-            }
-
-            content.sizeDelta = new Vector2(content.sizeDelta.x, 44);
-            item.sizeDelta = new Vector2(item.sizeDelta.x, 44);
-            dropdown.itemText.rectTransform.offsetMin = new Vector2(28, 2);
-            dropdown.itemText.rectTransform.offsetMax = new Vector2(-12, -2);
-
-            var arrow = dropdown.transform.Find("Arrow");
-
-            if (arrow)
-            {
-                arrow.GetComponent<Image>().enabled = false;
-            }
-
-            var indicator = UiElements.Label(
-                "Rule Expand Indicator",
-                dropdown.transform,
-                "▾",
-                new Vector2(302, -3),
-                new Vector2(20, 28),
-                18
-            );
-            indicator.font = font;
-            indicator.color = accent;
-            indicator.alignment = TextAnchor.MiddleCenter;
-            indicator.verticalOverflow = VerticalWrapMode.Overflow;
         }
 
         private static void Caption(Transform parent, string caption, float y) =>
@@ -663,17 +547,8 @@ namespace RhythmDojo.EditorTools
 
         private static Button Tab(string name, Transform parent, string caption, Vector2 position)
         {
-            var button = UiElements.Button(name, parent, caption, position, new Vector2(158, 52));
-            button.image.color = new Color(.13f, .17f, .20f, .95f);
-
-            var text = button.GetComponentInChildren<Text>();
-            text.color = Color.white;
-            text.fontSize = 23;
-
-            var colors = button.colors;
-            colors.highlightedColor = new Color(.5f, .9f, .95f);
-            colors.selectedColor = new Color(.5f, .9f, .95f);
-            button.colors = colors;
+            var button = DojoScreenStyle.Action(name, parent, caption, position, new Vector2(158, 52));
+            button.GetComponentInChildren<Text>().fontSize = 30;
 
             return button;
         }
@@ -693,7 +568,6 @@ namespace RhythmDojo.EditorTools
             slider.minValue = 0;
             slider.maxValue = 100;
             slider.wholeNumbers = true;
-            slider.fillRect.GetComponent<Image>().color = accent;
 
             return slider;
         }

@@ -22,8 +22,7 @@ namespace RhythmDojo.UI
 
         [SerializeField]
         private GameObject filePanel,
-            settingsPanel,
-            toolsPanel;
+            settingsPanel;
 
         [SerializeField]
         private InputField projectId,
@@ -36,10 +35,6 @@ namespace RhythmDojo.UI
 
         [SerializeField]
         private Text status;
-
-        [SerializeField]
-        private Button undo,
-            redo;
 
         [SerializeField]
         private CanvasGroup controls;
@@ -116,9 +111,6 @@ namespace RhythmDojo.UI
 
         private void Refresh()
         {
-            undo.interactable = observed.CanUndo;
-            redo.interactable = observed.CanRedo;
-
             if (activeChart)
             {
                 activeChart.text =
@@ -148,11 +140,9 @@ namespace RhythmDojo.UI
             Toggle(settingsPanel);
         }
 
-        public void ToggleTools() => Toggle(toolsPanel);
-
         public bool ClosePanels()
         {
-            bool open = filePanel.activeSelf || settingsPanel.activeSelf || toolsPanel.activeSelf;
+            bool open = filePanel.activeSelf || settingsPanel.activeSelf;
             if (advancedPanel && advancedPanel.activeSelf)
             {
                 open = true;
@@ -161,7 +151,6 @@ namespace RhythmDojo.UI
 
             filePanel.SetActive(false);
             settingsPanel.SetActive(false);
-            toolsPanel.SetActive(false);
             return open;
         }
 
@@ -175,7 +164,6 @@ namespace RhythmDojo.UI
             bool open = !panel.activeSelf;
             filePanel.SetActive(false);
             settingsPanel.SetActive(false);
-            toolsPanel.SetActive(false);
             if (advancedPanel)
             {
                 advancedPanel.SetActive(false);
@@ -438,8 +426,6 @@ namespace RhythmDojo.UI
                 screen.Session.Edit(edit => edit.SetAudio(relative));
                 ShowStatus("음원을 가져왔습니다: " + Path.GetFileName(path));
             });
-
-        public void Playtest() => PlaytestFrom(0, false);
 
         public void PlaytestFrom(double startTime, bool automatic) =>
             RunAsync(async () =>

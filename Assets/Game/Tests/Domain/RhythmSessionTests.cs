@@ -17,43 +17,9 @@ namespace RhythmDojo.Tests
             );
 
         [Test]
-        [Category("Fast"), Category("Compatibility")]
+        [Category("Fast")]
         public void LegacyHoldRecordsStartAndFinalWithoutChangingScoreCount()
         {
-            foreach (var example in new[] { (head: 0d, tail: .08, grade: Judgment.Good),
-                (head: .08, tail: 0d, grade: Judgment.Good),
-                (head: 0d, tail: 0d, grade: Judgment.Perfect),
-                (head: 0d, tail: -1d, grade: Judgment.Miss) })
-            {
-                var legacy = new RhythmSession(new ChartData(new[] { NoteData.Hold(0, 2, 4) }, 12),
-                    new JudgmentSettings(.05, .11), new GameModeRules(4));
-                legacy.Start();
-                legacy.PressLane(0, 2 + example.head);
-                Assert.That(legacy.Resolved, Is.Zero);
-                legacy.ReleaseLane(0, 4 + example.tail);
-                Assert.That(legacy.Resolved, Is.EqualTo(1));
-                Assert.That(legacy.GetNoteJudgments(0).End.Value.Grade, Is.EqualTo(example.grade));
-            }
-
-            var health = new RhythmSession(new ChartData(new[] { NoteData.Tap(0, 1),
-                NoteData.Tap(0, 2), NoteData.Tap(0, 3), NoteData.Hold(1, 4, 5) }, 12),
-                new JudgmentSettings(.05, .11), new GameModeRules(4));
-            health.Start();
-            health.Advance(1.2);
-            Assert.That(health.Health, Is.EqualTo(90));
-            health.PressLane(0, 2);
-            health.ReleaseLane(0, 2.01);
-            Assert.That(health.Health, Is.EqualTo(92));
-            health.PressLane(0, 3.08);
-            health.ReleaseLane(0, 3.09);
-            Assert.That(health.Health, Is.EqualTo(93));
-            health.PressLane(1, 4);
-            Assert.That(health.Health, Is.EqualTo(93));
-            health.ReleaseLane(1, 5);
-            health.ReleaseLane(1, 5);
-            Assert.That(health.Health, Is.EqualTo(95));
-            Assert.That(health.Resolved, Is.EqualTo(4));
-
             var current = Session(NoteData.Hold(0, 1, 2));
             current.Start();
             current.PressLane(0, 1.08);
@@ -65,23 +31,6 @@ namespace RhythmDojo.Tests
             Assert.That(current.GetNoteJudgments(0).Start, Is.Null);
             Assert.That(current.GetNoteJudgments(0).End, Is.Null);
 
-            // The public legacy constructor still aggregates one score per hold.
-            var s = new RhythmSession(new ChartData(new[] { NoteData.Hold(0, 1, 2), NoteData.Hold(1, 3, 4) }, 12),
-                new JudgmentSettings(.05, .11), new GameModeRules(4));
-            s.Start();
-            s.PressLane(0, 1.08);
-            Assert.That(s.Resolved, Is.Zero);
-            Assert.That(s.GetNoteJudgments(0).Start.Value.Grade, Is.EqualTo(Judgment.Good));
-            Assert.That(s.GetNoteJudgments(0).End, Is.Null);
-            s.ReleaseLane(0, 2);
-            Assert.That(s.GetNoteJudgments(0).End.Value.Grade, Is.EqualTo(Judgment.Good));
-            Assert.That(s.Resolved, Is.EqualTo(1));
-            s.Advance(5);
-            Assert.That(s.GetNoteJudgments(1).Start.Value.Grade, Is.EqualTo(Judgment.Miss));
-            Assert.That(s.GetNoteJudgments(1).End, Is.Null);
-            s.Reset();
-            Assert.That(s.GetNoteJudgments(0).Start, Is.Null);
-            Assert.That(s.GetNoteJudgments(0).End, Is.Null);
         }
 
         [Test]

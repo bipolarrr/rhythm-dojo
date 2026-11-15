@@ -7,31 +7,9 @@ namespace RhythmDojo.EditorTools
 {
     public static class ResultsLayoutBuilder
     {
-        private static void AddReveal(RectTransform target, float delay, bool underline)
-        {
-            var group = target.gameObject.AddComponent<CanvasGroup>();
-            var reveal = target.gameObject.AddComponent<DojoReveal>();
-            reveal.group = group;
-            reveal.delay = delay;
-            if (underline)
-            {
-                var stroke = new GameObject("Result Brush Reveal", typeof(RectTransform), typeof(DojoInkGraphic));
-                stroke.transform.SetParent(target, false);
-                var rect = (RectTransform)stroke.transform;
-                rect.anchorMin = rect.anchorMax = new Vector2(.05f, .04f);
-                rect.pivot = new Vector2(0, .5f);
-                rect.sizeDelta = new Vector2(310, 10);
-                var ink = stroke.GetComponent<DojoInkGraphic>();
-                ink.color = new Color(.70f, .39f, .18f, .8f);
-                ink.raycastTarget = false;
-                reveal.brush = rect;
-            }
-        }
-
-        private static readonly Color Ink = new Color(.24f, .12f, .085f);
+        private static readonly Color Ink = DojoScreenStyle.Ink;
         private static readonly Color Paper = new Color(.89f, .76f, .55f);
         private static readonly Color PanelColor = new Color(.98f, .88f, .68f);
-        private static readonly Color BorderColor = new Color(.46f, .25f, .12f);
 
         public static ResultsView Build()
         {
@@ -46,28 +24,29 @@ namespace RhythmDojo.EditorTools
             scaler.referenceResolution = new Vector2(1920, 1080);
             scaler.matchWidthOrHeight = .5f;
             var view = canvas.gameObject.AddComponent<ResultsView>();
-            view.fallbackCover = DojoEntranceAssets.Load("SelectionBackground");
+            view.fallbackCover = DojoRenewalLayoutBuilder.Load("PracticeHall");
             view.legacyFallbackCover = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Game/Art/DemoCover.png");
             var surface = Panel("Background", canvas.transform, Color.clear, 0, 0, 1, 1);
             var backdrop = Panel("Dojo Scenery", surface, Color.white, 0, 0, 1, 1);
             var scenery = backdrop.GetComponent<Image>();
-            scenery.sprite = DojoEntranceAssets.Load("SelectionBackground");
+            scenery.sprite = DojoRenewalLayoutBuilder.Load("RecordAlcove");
             var fit = backdrop.gameObject.AddComponent<AspectRatioFitter>();
             fit.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
             fit.aspectRatio = scenery.sprite.rect.width / scenery.sprite.rect.height;
-            backdrop.localScale = Vector3.one * DojoEntranceView.InteriorScale;
-            var header = Panel("Result Header", surface, Color.clear, .045f, .86f, .955f, .965f);
+            var report = Panel("Training Record Paper", surface, Color.clear, .055f, .15f, .945f, .86f);
+            DojoScreenStyle.PaperFrame(report, 18);
+            var header = Panel("Result Header", surface, Color.clear, .065f, .875f, .935f, .975f);
             var heading = Label("Heading", header, "수련 결과", .05f, .08f, .95f, .92f, 64, role: UiTextRole.Title);
+            heading.color = DojoScreenStyle.Cream;
             heading.alignment = TextAnchor.MiddleLeft;
-            AddReveal(header, 0, true);
 
-            view.backButton = Button("Back", surface, "곡 선택", .045f, .03f, .225f, .115f);
-
-            view.backButton.GetComponentInChildren<Text>().fontSize = 56;
-
-            var summary = Panel("Song Summary", surface, Color.clear, .045f, .155f, .69f, .65f);
-            var album = Panel("Album", summary, Color.clear, .04f, .16f, .36f, .935f);
-            var interior = Panel("Album Interior", album, Color.clear, .035f, .035f, .965f, .965f);
+            var summary = Panel("Song Summary", surface, Color.clear, .075f, .19f, .69f, .635f);
+            var album = Panel("Album", summary, Color.white, .035f, .19f, .36f, .935f);
+            album.GetComponent<Image>().sprite = DojoGameplayAssets.Wood;
+            album.GetComponent<Image>().type = Image.Type.Sliced;
+            album.GetComponent<Image>().pixelsPerUnitMultiplier = 12;
+            album.GetComponent<Image>().color = new Color(.78f, .83f, .82f);
+            var interior = Panel("Album Interior", album, Color.clear, .045f, .045f, .955f, .955f);
             interior.gameObject.AddComponent<RectMask2D>();
             view.cover = Panel("Cover", interior, Color.white, 0, 0, 1, 1).GetComponent<Image>();
             var coverFit = view.cover.gameObject.AddComponent<AspectRatioFitter>();
@@ -76,47 +55,60 @@ namespace RhythmDojo.EditorTools
             view.cover.enabled = false;
             view.coverPlaceholder = Label("Album Placeholder", album, "앨범", .08f, .1f, .92f, .9f, 48);
             view.coverPlaceholder.alignment = TextAnchor.MiddleCenter;
+            view.coverPlaceholder.color = DojoScreenStyle.Cream;
 
-            view.title = Label("Song Title", summary, "노래 제목", .40f, .77f, .95f, .945f, 68, role: UiTextRole.Title);
-            view.artist = Label("Artist", summary, "작곡가", .40f, .65f, .95f, .755f, 46);
-            view.difficulty = Label("Difficulty", summary, "", .40f, .535f, .95f, .64f, 44);
+            view.title = Label("Song Title", summary, "노래 제목", .40f, .77f, .95f, .96f, 54, role: UiTextRole.Title);
+            view.artist = Label("Artist", summary, "작곡가", .40f, .65f, .95f, .755f, 28);
+            view.difficulty = Label("Difficulty", summary, "", .40f, .535f, .95f, .64f, 27);
+            view.artist.color = DojoScreenStyle.Muted;
+            view.difficulty.color = DojoScreenStyle.Muted;
             view.perfect = Stat(summary, "Perfect", .40f);
             view.good = Stat(summary, "Good", .27f);
             view.miss = Stat(summary, "Miss", .14f);
-            view.accuracy = Label("Accuracy", summary, "정확도  —", .04f, .025f, .49f, .115f, 44);
-            view.maxCombo = Label("Max Combo", summary, "최대 콤보  —", .53f, .025f, .96f, .115f, 44);
+            view.accuracy = Label("Accuracy", summary, "정확도  —", .04f, .025f, .49f, .115f, 30);
+            view.maxCombo = Label("Max Combo", summary, "최대 콤보  —", .53f, .025f, .96f, .115f, 30);
+            Panel("Record Divider", summary, new Color(.3f, .25f, .17f, .25f), .40f, .515f, .95f, .518f);
+            Panel("Totals Divider", summary, new Color(.3f, .25f, .17f, .25f), .04f, .135f, .95f, .138f);
 
-            view.feedback = Panel("Feedback", surface, Color.clear, .045f, .675f, .955f, .835f);
+            view.feedback = Panel("Feedback", surface, Color.clear, .075f, .67f, .925f, .835f);
+            var divider = Panel("Score Divider", surface, new Color(.3f, .25f, .17f, .3f), .10f, .65f, .90f, .653f);
             BuildScorePanel(view);
-            view.moreButton = Button("More", surface, "더보기", .73f, .03f, .955f, .115f);
-            view.moreButton.GetComponentInChildren<Text>().fontSize = 56;
-            var result = Panel("Result Plaque", surface, Color.clear, .715f, .155f, .955f, .65f);
-            view.outcome = Label("Outcome", result, "", .18f, .255f, .82f, .775f, 220, role: UiTextRole.Title);
+            view.moreButton = Button("More", surface, "더보기", .765f, .045f, .935f, .115f);
+            view.moreButton.GetComponentInChildren<Text>().fontSize = 34;
+            var result = Panel("Result Plaque", surface, Color.clear, .715f, .22f, .915f, .61f);
+            var resultCaption = Label("Result Caption", result, "수련 판정", .08f, .84f, .92f, .97f, 32);
+            resultCaption.alignment = TextAnchor.MiddleCenter;
+            resultCaption.color = DojoScreenStyle.Muted;
+            var seal = Panel("Result Ink Seal", result, Color.clear, .15f, .25f, .85f, .81f);
+            seal.GetComponent<Image>().color = new Color(.53f, .17f, .12f, .05f);
+            DojoScreenStyle.Rule("Seal Top Stroke", seal, DojoScreenStyle.Vermilion, Vector2.zero, new Vector2(268, 5));
+            DojoScreenStyle.Rule("Seal Bottom Stroke", seal, DojoScreenStyle.Vermilion, new Vector2(0, -231), new Vector2(268, 5));
+            DojoScreenStyle.Rule("Seal Left Stroke", seal, DojoScreenStyle.Vermilion, Vector2.zero, new Vector2(4, 235));
+            DojoScreenStyle.Rule("Seal Right Stroke", seal, DojoScreenStyle.Vermilion, new Vector2(264, 0), new Vector2(4, 235));
+            view.outcome = Label("Outcome", result, "", .18f, .285f, .82f, .78f, 190, role: UiTextRole.Title);
             view.outcome.alignment = TextAnchor.MiddleCenter;
             view.outcome.alignByGeometry = true;
-            view.outcome.color = new Color(1f, .91f, .69f);
-            var outcomeShadow = view.outcome.gameObject.AddComponent<Shadow>();
-            outcomeShadow.effectColor = new Color(.12f, .045f, .02f, .95f);
-            outcomeShadow.effectDistance = new Vector2(2, -2);
-            var resultNote = Label("Result Note", result, "", .08f, .04f, .92f, .15f, 36, role: UiTextRole.Help);
+            view.outcome.color = DojoScreenStyle.Vermilion;
+            var resultNote = Label("Result Note", result, "", .04f, .015f, .96f, .20f, 28, role: UiTextRole.Help);
             resultNote.alignment = TextAnchor.MiddleCenter;
             view.progressNote = resultNote;
             view.review = BuildReview(surface);
             UiFontSettings.ApplyTo(view.transform);
             RefineScoreHierarchy(view);
-            AddReveal(view.scoreValue.rectTransform, .09f, false);
-            foreach (var text in new[] { heading, view.title, view.artist, view.difficulty,
-                view.perfect, view.good, view.miss, view.accuracy, view.maxCombo,
-                view.scoreValue, view.scoreSummary, view.progressNote, view.retryStatus })
-            {
-                text.color = new Color(1f, .95f, .82f);
-                var shadow = text.gameObject.AddComponent<Shadow>();
-                shadow.effectColor = new Color(.03f, .02f, .01f, .9f);
-                shadow.effectDistance = new Vector2(1, -2);
-            }
-            var help = Label("Navigation Help", surface, "Esc  곡 선택", .72f, .005f, .955f, .035f, 20);
+            DojoScreenStyle.Typography(view.transform);
+            SceneResources.ApplyReadableFont(view.scoreValue);
+            var help = Label("Navigation Help", surface, "↑↓ / ←→ 이동   ·   Enter / Space 선택   ·   Esc 돌아가기", .065f, .045f, .76f, .10f, 22);
             help.color = new Color(1f, .95f, .82f);
-            help.alignment = TextAnchor.MiddleRight;
+            help.alignment = TextAnchor.MiddleLeft;
+            SceneResources.ApplyReadableFont(help);
+            foreach (var button in new[] { view.moreButton })
+            {
+                var focus = button.GetComponent<DojoControlFocus>();
+                focus.restingColor = DojoScreenStyle.Cream;
+                focus.selectedColor = new Color(1, .77f, .35f);
+                focus.stroke.GetComponent<DojoInkGraphic>().color = focus.selectedColor;
+            }
+            ResultsPresentationBuilder.Build(view, backdrop, report, summary, heading, seal, resultCaption, help, divider);
             view.Validate();
 
             return view;
@@ -135,9 +127,9 @@ namespace RhythmDojo.EditorTools
         {
             if (!view.scoreValue)
             {
-                Label("Score Caption", view.feedback, "이번 점수", .035f, .70f, .36f, .91f, 31).color = new Color(1f, .95f, .82f);
+                Label("Score Caption", view.feedback, "이번 점수", .035f, .70f, .36f, .91f, 27).color = DojoScreenStyle.Muted;
                 view.scoreValue = Label("Score Value", view.feedback, "—", .035f, .12f, .38f, .70f, 86, role: UiTextRole.Title);
-                var badge = Panel("New Record Badge", view.feedback, new Color(.26f, .37f, .22f),
+                var badge = Panel("New Record Badge", view.feedback, DojoScreenStyle.Vermilion,
                     .39f, .64f, .51f, .87f);
                 var badgeText = Label("New Record Text", badge, "신기록", 0, 0, 1, 1, 28, role: UiTextRole.Title);
                 badgeText.color = new Color(1f, .95f, .76f);
@@ -149,13 +141,9 @@ namespace RhythmDojo.EditorTools
             Place(view.scoreSummary.rectTransform, .39f, .32f, .68f, .65f);
             view.scoreSummary.resizeTextMinSize = 18;
             view.scoreSummary.resizeTextMaxSize = 31;
-            var retryFrame = view.retryButton.GetComponentInChildren<PixelDojoFrameGraphic>();
-            retryFrame.color = new Color(.57f, .14f, .10f);
-            var retryLabel = view.retryButton.GetComponentInChildren<Text>();
-            retryLabel.fontSize = 44;
-            retryLabel.color = new Color(1f, .92f, .76f);
-            view.EnsureScoreActions();
-            view.moreButton.GetComponentInChildren<PixelDojoFrameGraphic>().color = Color.white;
+            EnsureScoreActions(view);
+            DojoScreenStyle.Button(view.retryButton, true);
+            DojoScreenStyle.Button(view.recommendationButton);
             view.moreButton.GetComponentInChildren<Text>().color = Ink;
             SceneResources.ApplyReadableFont(view.scoreValue, view.scoreSummary, view.perfect, view.good,
                 view.miss, view.accuracy, view.maxCombo);
@@ -164,6 +152,7 @@ namespace RhythmDojo.EditorTools
         private static ResultsReviewView BuildReview(Transform parent)
         {
             var panel = Panel("Chart Review", parent, Paper, 0, 0, 1, 1);
+            DojoScreenStyle.PaperFrame(panel, 18);
             panel.GetComponent<Image>().raycastTarget = true;
             var view = panel.gameObject.AddComponent<ResultsReviewView>();
             var review = panel.gameObject.AddComponent<ResultsChartReview>();
@@ -181,18 +170,12 @@ namespace RhythmDojo.EditorTools
             Label("Review Legend", panel,
                 "<color=#167A68>Perfect</color>  <color=#946218>Good</color>  <color=#B9382A>Miss</color>  <color=#6D6054>미판정</color>  · 롱노트 색상: 시작·끝 중 낮은 판정",
                 .07f, .02f, .75f, .07f, 21, role: UiTextRole.Help);
-            view.zoom = UiElements.Dropdown("Review Zoom", panel, Vector2.zero, Vector2.zero);
+            view.zoom = DojoScreenStyle.Dropdown("Review Zoom", panel, Vector2.zero, Vector2.zero);
             Place((RectTransform)view.zoom.transform, .65f, .825f, .95f, .885f);
             view.zoom.ClearOptions();
             view.zoom.AddOptions(new System.Collections.Generic.List<string> { "8박씩 보기", "16박씩 보기", "32박씩 보기", "64박씩 보기" });
             view.zoom.value = 1;
-            SetWoodSurface(view.zoom.image);
-            view.zoom.captionText.color = Ink;
-            view.zoom.itemText.color = Ink;
-            SetWoodSurface(view.zoom.template.GetComponent<Image>());
-            SetWoodSurface(view.zoom.template.Find("Viewport/Content/Item/Item Background").GetComponent<Image>());
-            view.zoom.template.Find("Viewport/Content/Item/Item Checkmark").gameObject.SetActive(false);
-            view.zoom.transform.Find("Arrow").GetComponent<Image>().color = Ink;
+            DojoScreenStyle.Option(view.zoom);
             view.zoom.captionText.fontSize = 28;
             view.zoom.itemText.fontSize = 28;
             view.zoom.captionText.rectTransform.offsetMin = new Vector2(20, 6);
@@ -213,7 +196,8 @@ namespace RhythmDojo.EditorTools
             view.events.resizeTextMinSize = 24;
             view.previousButton = Button("Previous Note", panel, "이전 노트", .67f, .1f, .81f, .16f);
             view.nextButton = Button("Next Note", panel, "다음 노트", .82f, .1f, .96f, .16f);
-            Label("Review Help", panel, "노트 클릭: 상세 판정  /  Escape: 결과로 복귀", .67f, .055f, .97f, .095f, 18, role: UiTextRole.Help);
+            Label("Review Help", panel, "↑↓ 이동 · ←→ 조절 · Enter / Space 선택 · Esc 복귀",
+                .67f, .055f, .97f, .095f, 18, role: UiTextRole.Help);
             view.Validate();
             panel.gameObject.SetActive(false);
 
@@ -230,35 +214,29 @@ namespace RhythmDojo.EditorTools
             slider.minValue = 0;
             slider.maxValue = 1;
             slider.value = 0;
-            SetWoodSurface(go.transform.Find("Background").GetComponent<Image>());
-            go.transform.Find("Background").GetComponent<Image>().color = BorderColor;
-            SetWoodSurface(slider.fillRect.GetComponent<Image>());
-            slider.fillRect.GetComponent<Image>().color = new Color(.95f, .66f, .28f);
-            SetWoodSurface((Image)slider.targetGraphic);
+            DojoScreenStyle.Slider(slider);
 
             return slider;
         }
 
         private static Text Stat(Transform parent, string name, float y)
         {
-            var label = Label(name + " Label", parent, name, .40f, y, .72f, y + .12f, 49);
+            var row = Panel(name + " Row", parent, Color.clear, .40f, y, .95f, y + .12f);
+            var label = Label(name + " Label", row, name, 0, 0, .582f, 1, 30);
             if (name == "Perfect")
             {
-                label.color = new Color(.61f, .91f, .74f);
+                label.color = new Color(.19f, .38f, .29f);
             }
             else if (name == "Good")
             {
-                label.color = new Color(1f, .80f, .47f);
+                label.color = new Color(.49f, .33f, .12f);
             }
             else
             {
-                label.color = new Color(1f, .59f, .49f);
+                label.color = DojoScreenStyle.Vermilion;
             }
-            var shadow = label.gameObject.AddComponent<Shadow>();
-            shadow.effectColor = new Color(.03f, .02f, .01f, .9f);
-            shadow.effectDistance = new Vector2(1, -2);
 
-            var value = Label(name + " Count", parent, "—", .74f, y, .95f, y + .12f, 54);
+            var value = Label(name + " Count", row, "—", .618f, 0, 1, 1, 36);
             value.alignment = TextAnchor.MiddleRight;
 
             return value;
@@ -277,20 +255,6 @@ namespace RhythmDojo.EditorTools
             image.raycastTarget = false;
 
             return rect;
-        }
-
-        private static void TexturedFrame(RectTransform parent, string artwork, float width, Color tint)
-        {
-            var frame = PixelSongSelectionStyle.Frame(parent, tint, width);
-            frame.artwork = SettingsArtAssets.Load(artwork);
-        }
-
-        private static void SetWoodSurface(Image image)
-        {
-            image.sprite = SettingsArtAssets.Load("SettingsControl");
-            image.type = Image.Type.Sliced;
-            image.pixelsPerUnitMultiplier = 12;
-            image.color = Color.white;
         }
 
         private static Text Label(
@@ -316,25 +280,50 @@ namespace RhythmDojo.EditorTools
             UiTextRole role = UiTextRole.Body
         )
         {
-            var button = UiElements.Button(name, parent, caption, Vector2.zero, Vector2.zero, role);
+            var button = DojoScreenStyle.Action(name, parent, caption, Vector2.zero, Vector2.zero);
             Place((RectTransform)button.transform, x0, y0, x1, y1);
-            var image = button.GetComponent<Image>();
-            image.sprite = null;
-            image.color = Color.white;
-            var colors = button.colors;
-            colors.normalColor = Color.white;
-            colors.highlightedColor = new Color(1f, .94f, .79f);
-            colors.selectedColor = colors.highlightedColor;
-            colors.pressedColor = new Color(.74f, .58f, .39f);
-            colors.disabledColor = new Color(.64f, .57f, .48f);
-            button.colors = colors;
-            var label = button.GetComponentInChildren<Text>();
-            UiFontSettings.Apply(label);
-            label.fontSize = 32;
-            label.color = Ink;
-            TexturedFrame((RectTransform)button.transform, "SettingsControl", 10, Color.white);
+            button.GetComponentInChildren<Text>().fontSize = 36;
 
             return button;
+        }
+
+        private static void EnsureScoreActions(ResultsView view)
+        {
+            if (view.recommendationButton)
+            {
+                return;
+            }
+
+            PlaceScoreAction((RectTransform)view.retryButton.transform, new Vector2(.71f, .52f), new Vector2(.97f, .92f));
+            PlaceScoreAction(view.retryStatus.rectTransform, new Vector2(.39f, .035f), new Vector2(.69f, .29f));
+
+            view.recommendationButton = Object.Instantiate(view.retryButton, view.feedback);
+            view.recommendationButton.name = "Result Timing Recommendation";
+            view.recommendationButton.onClick = new Button.ButtonClickedEvent();
+            view.recommendationButton.navigation = Navigation.defaultNavigation;
+            PlaceScoreAction(
+                (RectTransform)view.recommendationButton.transform,
+                new Vector2(.71f, .08f),
+                new Vector2(.97f, .46f)
+            );
+
+            var label = view.recommendationButton.GetComponentInChildren<Text>(true);
+            label.color = new Color(.24f, .12f, .085f);
+            UiFontSettings.Apply(label, UiTextRole.Title);
+            label.text = "";
+            label.fontSize = 30;
+            label.resizeTextForBestFit = true;
+            label.resizeTextMinSize = 24;
+            label.resizeTextMaxSize = 30;
+            view.recommendationButton.gameObject.SetActive(false);
+        }
+
+        private static void PlaceScoreAction(RectTransform rect, Vector2 minimum, Vector2 maximum)
+        {
+            rect.anchorMin = minimum;
+            rect.anchorMax = maximum;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
         }
 
         private static void Place(RectTransform rect, float x0, float y0, float x1, float y1)

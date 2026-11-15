@@ -88,26 +88,6 @@ namespace RhythmDojo.EditorTools
                 Surface
             );
 
-            string[] captions = { "파일", "설정", "도구", "테스트" };
-            var menuButtons = new Button[captions.Length];
-
-            for (int i = 0; i < captions.Length; i++)
-            {
-                var button = UiElements.Button(
-                    captions[i],
-                    canvas.transform,
-                    captions[i],
-                    new Vector2(28 + i * 118, -9),
-                    new Vector2(108, 34)
-                );
-                menuButtons[i] = button;
-                button.GetComponent<Image>().color = new Color(0.18f, 0.21f, 0.27f);
-
-                var label = button.GetComponentInChildren<Text>();
-                label.color = Color.white;
-                label.fontSize = 17;
-            }
-
             var row = new GameObject(
                 "Editor Content",
                 typeof(RectTransform)
@@ -248,7 +228,7 @@ namespace RhythmDojo.EditorTools
             var view = ChartAudioTimelineLayoutBuilder.Build(canvas.transform, row, audioTimeline);
             SceneBuilder.Wire(audioTimeline, "view", view);
             SceneBuilder.Wire(screen, "audioTimeline", audioTimeline);
-            BuildMenus(canvas, screen, progress, menuButtons, audioTimeline, view);
+            BuildMenus(canvas, screen, progress, audioTimeline, view);
             UiElements.EventSystem(
                 AssetDatabase.LoadAssetAtPath<UnityEngine.InputSystem.InputActionAsset>(
                     "Assets/InputSystem_Actions.inputactions"
@@ -274,7 +254,6 @@ namespace RhythmDojo.EditorTools
             Canvas canvas,
             ChartEditorScreen screen,
             Text status,
-            Button[] buttons,
             ChartAudioTimeline audioTimeline,
             ChartAudioTimelineView view
         )
@@ -301,10 +280,8 @@ namespace RhythmDojo.EditorTools
 
             var file = MenuPanel("File Panel", canvas.transform, 490);
             var settings = MenuPanel("Settings Panel", canvas.transform, 520);
-            var tools = MenuPanel("Tools Panel", canvas.transform, 210);
             SceneBuilder.Wire(menu, "filePanel", file.gameObject);
             SceneBuilder.Wire(menu, "settingsPanel", settings.gameObject);
-            SceneBuilder.Wire(menu, "toolsPanel", tools.gameObject);
             SceneBuilder.Wire(menu, "projectId", Field(file, "Project ID", "곡 ID (불러오기)", 20));
             ActionButton(file, "Save", "저장", 104, menu.Save);
             ActionButton(file, "Load", "불러오기 (현재 작업 자동 저장)", 148, menu.Load);
@@ -349,24 +326,8 @@ namespace RhythmDojo.EditorTools
             );
             ActionButton(settings, "Apply Settings", "설정 적용", 408, menu.ApplySettings);
             view.gridSettingsControl = AudioTimelineUi.Button(settings, "Grid Settings", "그리드 세부 설정", 16, 458, 488, null);
-            SceneBuilder.Wire(
-                menu,
-                "undo",
-                ActionButton(tools, "Undo", "실행 취소", 18, menu.Undo)
-            );
-            SceneBuilder.Wire(
-                menu,
-                "redo",
-                ActionButton(tools, "Redo", "다시 실행", 72, menu.Redo)
-            );
-            ActionButton(tools, "Reset View", "처음 위치 / 기본 확대", 126, menu.ResetView);
-            UnityEventTools.AddPersistentListener(buttons[0].onClick, menu.ToggleFile);
-            UnityEventTools.AddPersistentListener(buttons[1].onClick, menu.ToggleSettings);
-            UnityEventTools.AddPersistentListener(buttons[2].onClick, menu.ToggleTools);
-            UnityEventTools.AddPersistentListener(buttons[3].onClick, menu.Playtest);
             file.gameObject.SetActive(false);
             settings.gameObject.SetActive(false);
-            tools.gameObject.SetActive(false);
 
             var composition = new GameObject(
                 "Chart Editor Composition"

@@ -97,9 +97,40 @@ Build Settings의 순서는 `Title`, `ModeSelection`, `Bootstrap`, `SongSelectio
 | 율보 편찬 | 네 번째 방 → ChartEditor. `ChartEditorSceneBuilder.Build()`는 `WorkspaceSceneBuilder.Build()`로 연결되어 확장 편집 UI를 생성한다. |
 | Bootstrap / SongSelection 직접 실행 | 새 AppFlow의 기본 진입은 자유 연습 목인 화면. 기존 AppFlow가 있으면 선택한 모드와 규칙을 보존한다. Bootstrap은 단축 초기화 경로이며 전체 메뉴 확인은 Title에서 시작한다. |
 | Gameplay | AppFlow의 선택 곡을 사용하며 직접 실행 시 기본 카탈로그 곡을 준비한다. 종료/결과 복귀 시 규칙·곡·난이도를 유지한 목인 화면으로 돌아가며 목록 패널은 닫는다. |
-| Settings / Results | 직접 실행 가능한 현행 씬. 일반 설정은 같은 빌더가 생성한 `Resources/UI/SettingsPopup.prefab`을 재사용한다. 결과 없는 Results 직접 실행은 빈 결과 표시이며 실제 결과/재시도는 플레이 경로에서 확인한다. |
+| Settings / Results | 유저 설정 경로는 Title·ModeSelection·SongSelection 또는 결과 보정 버튼에서 여는 `Resources/UI/SettingsPopup.prefab`이다. Results는 Gameplay 종료 후 진입하고 재시도·곡 선택 복귀를 제공한다. 별도 Settings 씬 강제 로드와 결과 없는 Results 직접 진입은 제품 흐름 검증 대상이 아니다. |
 
-`SongSelectionView.Validate()`는 목인 구성을 필수로 검사한다. 오래된 씬에서 참조가 없을 때 목록으로 조용히 대체하지 않는다. `GameplayTestContext`와 모든 fixture는 제품 기본 목인 화면을 그대로 사용한다. 목록 검사는 실제 곡 목록 버튼으로 패널을 연다. 정렬·필터·빈 결과와 표시 상태는 `SelectionPreferencesTests`에서 화면 없이도 검증한다. `MainMenuFlowTests`는 Title 입장, 네 방의 기능, 직접 진입, 사전 준비/해제와 중복 입력 소유권을 검증한다. Bootstrap의 view 없는 API 진입은 `Compatibility`로 식별한다.
+`SongSelectionView.Validate()`는 목인 구성을 필수로 검사한다. 오래된 씬에서 참조가 없을 때 목록으로 조용히 대체하지 않는다. `GameplayTestContext`와 모든 fixture는 제품 기본 목인 화면을 그대로 사용한다. 목록 검사는 실제 곡 목록 버튼으로 패널을 연다. 정렬·필터·빈 결과와 표시 상태는 `SelectionPreferencesTests`에서 화면 없이도 검증한다. `MainMenuFlowTests`는 Title 입장, 네 방의 기능, 사전 준비/해제와 중복 입력 소유권을 검증한다. Bootstrap의 view 없는 API 진입과 이전 Title→SongSelection 대문 오버레이는 제거했다. `GameplayTestContext`는 현재 SongSelection을 격리된 fixture의 준비 상태로 연다. 실제 진입 경로는 Title에서 시작하는 Smoke가 검증하며, Bootstrap을 모든 테스트의 입구로 사용하지 않는다.
+
+### 2026-11-14 현재 유저 흐름 기준 정리
+
+테스트 존치 기준은 등록된 씬 수가 아니라 현재 UI의 호출 경로다. `MainMenuEntranceScreen`이 Title에서 ModeSelection으로 이동하고, `MainMenuScreen`/`MainMenuActions`가 비급 전수·자유 연습·실력 검정·율보 편찬으로 분기한다. `PreparedSelectionScene`은 모드 선택에서만 곡 선택을 준비한다. 플레이 요청은 `AppFlowController`가 만들며 Gameplay 종료 시 Results, 결과 재시도 시 Gameplay, 돌아가기 시 SongSelection으로 이어진다. 편집기 게임 테스트는 같은 Gameplay/Results를 거쳐 원래 Workspace 세션으로 돌아온다.
+
+| 판단 | 대상과 이유 |
+| --- | --- |
+| 제거 | `MainMenuFlowTests`의 Bootstrap fallback·직접 진입 2개, 옛 대문 오버레이 readiness·timeout 2개. 현재 UI에서 호출되지 않는 진입과 테스트가 직접 만든 가짜 선택 화면이었다. `ScenePreparationFlowTests`의 준비 중 강제 Single 씬 로드 2개도 실제 모드 선택 전환을 우회하므로 제거했다. 현재 문 열림·닫힘과 준비 실패/재시도는 현행 Title/ModeSelection/ScenePreparation 사례가 담당한다. |
+| 제거 | `ResultsFlowTests.DirectResultsSceneHasEmptyStateAndBackWorks`. 플레이 결과 없이 결과 씬을 직접 여는 유저 동작은 없다. 실제 종료·실패·재시도·복귀 검증은 유지한다. |
+| 제거/수정 | 결과의 보정 버튼을 지워 구형 씬을 흉내 내던 `olderScene` 사례를 제거했다. 실제 결과의 보정 적용·저장·재시도는 유지한다. 버튼 생성은 `ResultsLayoutBuilder`에서만 수행하며 런타임은 필수 직렬화 참조를 검증한다. |
+| 수정 | `GameplayFlowTests.DirectGameplaySceneUsesCopiedPlayRules`는 선택 화면의 실제 플레이 버튼으로 진입한다. `SettingsFlowTests`는 Gameplay 중 Settings 씬을 강제 로드하지 않고 실제 팝업 진입 차단과 종료 후 재개를 검증한다. |
+| 수정 | `ChartEditorMenuTests` 5개는 Workspace의 현재 메뉴에서 ProjectFiles/ChartSettings/Undo/Redo/Test를 연다. 숨겨진 구형 상단 버튼 호출을 없애고 클릭할 컨트롤의 활성·상호작용 가능 여부를 확인한다. |
+| 제거/축소 | `HardModeHealthTests`의 구형 체력 알고리즘 전용 fixture를 제거하고, `RhythmSessionTests`의 구형 1회 합산 롱노트 검증을 현재 시작·끝 판정/초기화 검증으로 축소했다. `HardModePreferencesTests`는 실제 선택에서 쓰이는 모드 저장/복원만 검증한다. 실제 판정·Gauge/Challenge 실패·회복은 `PlayRulesTests`, `RhythmSessionTests`, `CoordinatorTests`, 현행 PlayMode 검사로 유지한다. |
+| 수정 | `ContentTests`는 Bootstrap 및 별도 Settings composition root 검사를 제거하고 현재 설정 팝업의 필수 참조 검사를 유지한다. 시작 씬 검사도 Bootstrap 등록을 유지 조건으로 삼지 않는다. |
+| 추가 제거/수정 | 현재 카탈로그 밖의 데모 곡을 추가하고 복원하지 않던 `SelectionPreferencesTests.DemoPreparationIsIdempotentAndPreservesExistingCharts`를 제거했다. 현행 HUD의 곡명·판정·잔상 붓글씨는 `UiTypographyTests`에서 실제 디자인 기준으로 검증하고, 별도 Settings 씬 검사는 기존 설정 팝업 검사로 통합했다. |
+| 수정 | `SelectionBrowserTests`의 표지·기록 검사는 현재 카탈로그 곡과 현재 규칙별 기록 키를 사용한다. 중단은 일시정지의 나가기, 완료 후 복귀는 결과의 돌아가기 버튼으로 실행한다. 음량 변경은 곡 선택으로 돌아와 설정을 저장한 다음 플레이에서 확인한다. 타이틀 클릭은 현재 `TitleSkyView.start`를 사용한다. |
+| 수정 | 체력 검사는 현재 세로 게이지와 Challenge 프리셋을 사용한다. 목인 회전은 프레임 간 건너뛸 수 있는 개별 셀의 전수 관측 대신 양쪽 측면의 순서·회전량·시간과 별도의 전체 포즈 검사를 유지한다. 불러오기 오류는 현재 목인 상태 표시에서 확인한다. 클릭 보조 함수는 설정 애니메이션만 기다리고, 로딩 완료는 각 테스트가 별도로 기다려 지연·실패를 검증한다. |
+| 제거/수정 | Workspace의 실제 메뉴·단축키에 없는 Loop/Slow 호출, 테스트가 만든 루프 범위 입력창, 루프 전용 사례를 제거했다. 관련 실행 분기·필드·반속/루프 API도 정리했다. 나머지 액션의 직렬화 번호는 보존한다. 현재 재생·Ctrl+Space 복귀·음원 시작 전 예약 재생·재생 위치 드래그/취소·노트 표시 속도 검사는 유지한다. |
+| 구현 정리 | 미사용 `DojoEntranceTransition`, 전용 프리팹·빌더·복제 도우미 및 호출 분기를 제거했다. 편집기의 숨겨진 구형 상단 4개 버튼/Tools Panel과 설정의 숨겨진 구형 체력 UI·리스너·참조 검증, 일시정지의 숨겨진 설정 버튼과 무동작 `ShowGameplaySettings` API/테스트 호출을 제거하고 빌더로 현행 에셋을 재생성했다. |
+
+곡 목록은 목인 화면의 ‘곡 목록’ 버튼으로 열 수 있으므로 검색·정렬·즐겨찾기·기록·난이도 검사를 유지한다. 편집기의 File/Settings 상세 패널은 Workspace 메뉴에서 여전히 제공되는 프로젝트 가져오기·채보 종료 시간 기능이므로 유지한다. ChartEditorScreen/ChartBeatGrid/ChartAudioTimeline은 Workspace 내부의 실제 편집·재생 구현이다. 저장 형식 가져오기와 키 설정 마이그레이션도 현재 유저 데이터 로드에서 사용하므로 유지한다.
+
+나머지 Domain/EditMode/PlayMode 검사도 현재 기능별로 대조했다. 오디오 시계·예약·재개·장치 복구, 키 입력·포커스·일시정지, 현재 HUD/판정/결과 상세, 곡 프로젝트·파형·그리드·편집 이력, 현재 씬/프리팹 생성과 필수 참조는 실제 플레이 또는 현재 콘텐츠 제작의 의존성이므로 유지한다. 현재 씬을 직접 로드하는 개별 기능 fixture는 구형 화면의 제품 진입 경로를 뜻하지 않는다. Bootstrap과 Settings 씬은 기존 개발 도구의 직접 실행/생성 대상으로 남아 있지만 정상 플레이 통합 테스트의 경로로 사용하지 않는다.
+
+기존 `CompletionDisplaysThisPlayAndNextPlayReplacesIt`는 Smoke로 확장해 실제 Title 시작 버튼 → ModeSelection의 Enter → SongSelection의 플레이 → Results의 상세/재시도 → SongSelection 복귀까지 연결한다. 판정 결과는 결정적인 세션 입력으로 준비하며, 실제 시간에 따른 음원 완주와 결과 전환은 별도 Endurance가 담당한다. 현재 카탈로그 초기 선택에는 구형 데모 곡만 특별히 우선 선택하던 분기도 제거했다.
+
+이 저장소의 이름 보존 지침에 따라 일부 기존 테스트/메서드 이름에 Bootstrap·Direct·Legacy·HardMode·Loop가 남아 있다. 현재 검증 내용은 위 표와 본문을 기준으로 판단한다. 실행 결과는 `Logs/current-flow-*.json`에 기록한다.
+
+검증은 Unity 6000.3.23f1의 실행 중인 Editor에서 빌드 없이 수행했다. 전체 EditMode는 451개 모두 통과했다. 최초 전체 PlayMode는 248개 중 10개가 실패했고, 현재 카탈로그·UI·규칙·비동기 대기로 수정한 뒤 해당 사례 전부가 후속 실행에서 통과했다. 이후 편집기 전체 59개, 타이틀→결과를 포함한 Smoke 5개, 현재 메뉴 5개, 씬 재생성 4개도 통과했다. 메뉴 재검증 중 발견한 상세 설정 닫기 문제는 실제 Escape 입력으로 수정하여 재확인했다. 실행한 검사에 Skip/Inconclusive는 없다. 이 결과는 전체 실행과 변경 영역 재실행을 합친 근거이며, 최종 소스의 단일 전체 실행으로 표현하지 않는다. [실행별 요약과 최초 실패의 재검증 결과](../Logs/current-flow-summary.json)에 원본 결과 파일을 연결했다.
+
+마지막으로 현재 유저 화면 7개와 설정 팝업의 필수 참조를 검사하고, Editor 준비 상태와 실제 키보드·마우스 활성 상태를 확인했다. 남아 있던 합성 마우스는 정리했다. 테스트가 변경한 기존 로그·카탈로그·빌드 설정은 복원했으며, 삭제한 에셋 GUID의 잔여 참조와 `git diff --check` 오류가 없다. [최종 상태 검사](../Logs/current-flow-final-validation.json).
 
 `Assets/Scenes/SampleScene.unity`와 로컬 무시 폴더의 `Assets/CodexIdeRepairTemp/MainMenuTestHost.unity`는 제품 빌드 및 현행 테스트의 진입 대상이 아니다. `Logs` 아래의 과거 씬·프로젝트 복사본과 기존 EXE는 현재 실행 증거로 사용하지 않는다. 삭제하거나 최신 제품 씬 위에 복사하지 않는다.
 
@@ -139,9 +170,13 @@ Results는 `ScreenCompositionRoot`가 결과와 복귀 Action을 주입한다. �
 
 ## 플레이 없이 결과 UI 미리보기
 
-Edit Mode에서 **Game Tools > Preview > Results**를 누르면 샘플 결과가 있는 Results 씬으로 바로 Play Mode를 시작한다. 실제 곡을 플레이하거나 Title 시작 옵션을 끌 필요가 없다. 더보기와 노트 선택을 그대로 사용할 수 있으며 Perfect/Good/Miss, 유지 Miss가 있는 롱노트를 포함한다. **Results (Game Over)**는 Release 조기 해제로 실패하고 이후 노트가 미판정인 예시다.
+**Game Tools > Preview > Mock Controls**에서 정상 클리어, 실패, 최고 점수, 전부 Miss, 일시정지창을 한 번에 호출한다. 점수·정확도·최대 콤보·판정 횟수·실패 시점은 직접 입력할 수 있고, `변경 즉시 적용`을 켜면 열려 있는 결과창에 바로 반영된다. 점수와 정확도는 경계 화면을 확인할 수 있도록 판정 분포와 독립적으로 지정한다. `결과 적용 / 연출 다시 보기`는 실제 `ResultsPresentation`의 Easing, 점수 집계 및 사운드를 처음부터 재생한다.
 
-미리보기는 에디터 전용 샘플을 화면에만 주입하므로 최고 기록이나 마지막 실제 플레이 결과를 저장하지 않는다. Play Mode를 종료하면 원래 작업 씬과 Play Mode 시작 씬 설정으로 돌아온다. 미리보기 메뉴는 Play Mode와 전체 검증 실행 중에는 비활성화된다.
+기존 **Results**, **Results (Game Over)** 단축 메뉴도 유지한다. 기본 결과는 요약 데이터만 전달하며, 더보기 검사는 창의 `기존 채보 상세 샘플` 버튼으로 전환한다. 원래의 유지 Miss·Release 조기 해제·미판정 노트 샘플을 판정 엔진 재생 없이 제공한다. **Pause**는 실제 Gameplay 씬의 일시정지 패널만 표시한다. Mock의 이어하기는 패널을 닫고, 처음부터 다시는 패널을 다시 표시하고, 곡 선택은 미리보기를 종료한다. 곡을 시작하거나 재개하지 않는다.
+
+최초 호출만 Play Mode에 진입한다. Mock 동안 도메인 재로딩을 생략하고 씬은 정상 로드한다. `sceneLoaded`에서 composition root의 `Start`를 차단한 뒤 `ResultsScreen.Initialize/Display` 또는 `GameplayPauseMenu.Display`에 전달한다. `AppFlowController`, 곡 로딩, `RhythmSession`, 저장 서비스는 생성하지 않는다. 두 화면은 처음 사용할 때만 로드하고 종료까지 재사용하며, 반복 적용은 UI·씬을 다시 생성하지 않는다. 씬 및 프리팹의 고정 구성은 기존 빌더가 계속 관리한다.
+
+일반 Play Mode와 Foundation 검증 중에는 Mock을 시작할 수 없다. 종료·진입 취소 시 작업 씬, Play Mode 시작 씬, 기존 Enter Play Mode 옵션을 복원한다. 스크립트 컴파일 시작 시 실행 중인 Mock을 종료한다. 실제 플레이 기록과 설정은 연결하지 않는다. 에디터 코드에서는 `ResultsPreview.Begin(new ResultsPreviewData { score = 123456, accuracy = 87.65, maxCombo = 432 })`, `ResultsPreview.BeginPause()`, `ResultsPreview.Stop()`을 호출할 수 있다. 일반 게임은 기존 API를 통해 계산된 결과를 그대로 표시한다.
 
 ### 외부 WAV 회귀 fixture
 

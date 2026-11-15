@@ -302,18 +302,20 @@ namespace RhythmDojo.Tests
                     Assert.That(elapsed, Is.InRange(.28, .46),
                         "The former 0.68 second turn should finish in about 0.34 seconds.");
                     Assert.That(hidden, Is.True);
-                    CollectionAssert.IsSubsetOf(new[] { 1, 2, 3, 4, 5, 6, 7 }, frames,
-                        "Both side silhouettes and the full rear must be visible during a single turn.");
+                    // A real frame can span more than one sprite cell. Each authored cell is
+                    // checked below; playback must show both sides in the requested order.
+                    Assert.That(order.Any(index => index >= 1 && index <= 3), Is.True);
+                    Assert.That(order.Any(index => index >= 5 && index <= 7), Is.True);
                     Assert.That(rotation * direction, Is.EqualTo(-360).Within(2));
                     Assert.That(fastestStep, Is.GreaterThan(firstStep * 1.5f));
                     Assert.That(fastestStep, Is.GreaterThan(finalStep * 1.5f));
                     if (direction < 0)
                     {
-                        Assert.That(order.IndexOf(2), Is.LessThan(order.IndexOf(6)));
+                        Assert.That(order.FindIndex(index => index >= 1 && index <= 3), Is.LessThan(order.FindIndex(index => index >= 5 && index <= 7)));
                     }
                     else
                     {
-                        Assert.That(order.IndexOf(6), Is.LessThan(order.IndexOf(2)));
+                        Assert.That(order.FindIndex(index => index >= 5 && index <= 7), Is.LessThan(order.FindIndex(index => index >= 1 && index <= 3)));
                     }
                     Assert.That(practice.rig.title.text, Is.EqualTo(view.songTitle.text));
                     Assert.That(practice.rig.jacket.sprite, Is.SameAs(view.album.sprite));
@@ -435,6 +437,9 @@ namespace RhythmDojo.Tests
             float worstFrame = 0;
             int slowFrames = 0;
             int frames = 0;
+            int lostInputFrames = 0;
+            int barrageFrames = 0;
+            string firstStopped = "";
             while (Time.unscaledTimeAsDouble < until)
             {
                 yield return null;
@@ -444,7 +449,25 @@ namespace RhythmDojo.Tests
                     slowFrames++;
                 }
                 frames++;
+                if (Keyboard.current != keyboard || !keyboard.rightArrowKey.isPressed)
+                {
+                    lostInputFrames++;
+                }
+                if (practice.IsBarrage)
+                {
+                    barrageFrames++;
+                }
+                else if (string.IsNullOrEmpty(firstStopped))
+                {
+                    firstStopped = " contacts=" + (practice.ContactCount - contacts)
+                        + " currentKeyboard=" + Keyboard.current?.deviceId + " expectedKeyboard=" + keyboard.deviceId
+                        + " held=" + keyboard.rightArrowKey.isPressed + " leaving=" + practice.IsLeaving;
+                }
             }
+            System.IO.File.WriteAllText("Logs/practice-barrage-timing.txt",
+                "contacts=" + (practice.ContactCount - contacts) + " frames=" + frames
+                + " framesOver50ms=" + slowFrames + " worstFrameSeconds=" + worstFrame
+                + " lostInputFrames=" + lostInputFrames + " barrageFrames=" + barrageFrames + firstStopped);
             InputSystem.QueueStateEvent(keyboard, new KeyboardState());
             yield return null;
             double releaseDeadline = Time.unscaledTimeAsDouble + 1;

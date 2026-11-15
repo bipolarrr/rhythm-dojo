@@ -155,6 +155,7 @@ namespace RhythmDojo.EditorTools
             practice.effects.playOnAwake = false;
             practice.effects.spatialBlend = 0;
             practice.contact = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Game/Audio/DojoKnock.wav");
+            practice.sounds = DojoSoundBuilder.Build(stage, practice.effects);
             practice.ResetPresentation();
         }
 

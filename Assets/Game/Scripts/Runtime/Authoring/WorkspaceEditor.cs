@@ -48,8 +48,6 @@ namespace RhythmDojo.Authoring
         private ResourcesSettings resources = new ResourcesSettings();
         private bool resourcesDirty;
         private bool working;
-        private bool looping;
-        private bool previousLoopPlaying;
         private bool draggingSelection;
         private bool draggingScroll;
         private int scrollPointerId;
@@ -195,51 +193,6 @@ namespace RhythmDojo.Authoring
             view.selection.text = "선택 " + editing.Selected.Count + " / "
                 + cachedNotes.Length + " · 도구 "
                 + new[] { "그리기", "선택", "지우개", "잡기", "재생 위치" }[tool];
-            if (view.playback)
-            {
-                view.playback.text = "속도 " + (timeline.PreviewSpeed * 100).ToString("0") + "% · 루프 "
-                    + looping.ToString() + " · " + timeline.MusicTime.ToString("0.000") + " s";
-            }
-
-            bool mayUpdateLoop = looping && !working;
-            if (timeline.IsBusy || timeline.IsSeeking)
-            {
-                mayUpdateLoop = false;
-            }
-            if (mayUpdateLoop)
-            {
-                double end = timeline.Duration;
-                if (double.TryParse(view.loopEnd?.text, NumberStyles.Float, CultureInfo.InvariantCulture, out double entered))
-                {
-                    end = entered;
-                }
-
-                bool mayLoop = timeline.IsPlaying;
-                if (!mayLoop && previousLoopPlaying && timeline.MusicTime >= timeline.Duration)
-                {
-                    mayLoop = true;
-                }
-                if (mayLoop && end > 0 && timeline.MusicTime >= end)
-                {
-                    if (!double.TryParse(view.loopStart?.text ?? "0", NumberStyles.Float, CultureInfo.InvariantCulture, out double loopStart))
-                    {
-                        timeline.PausePreview();
-                        looping = false;
-                        return;
-                    }
-                    if (loopStart < 0 || loopStart >= end)
-                    {
-                        timeline.PausePreview();
-                        looping = false;
-                        return;
-                    }
-                    timeline.RestartPreviewLoop(loopStart);
-                }
-            }
-            if (!timeline.IsSeeking)
-            {
-                previousLoopPlaying = timeline.IsPlaying;
-            }
 
             if (soundLease != null && timeline.IsPlaying)
             {
@@ -1371,33 +1324,6 @@ namespace RhythmDojo.Authoring
                     break;
                 case WorkspaceAction.Stop:
                     timeline.StopPreview();
-                    break;
-                case WorkspaceAction.Loop:
-                    double start = 0;
-                    if (view.loopStart)
-                    {
-                        start = Number(view.loopStart);
-                    }
-                    double end = timeline.Duration;
-                    if (!string.IsNullOrWhiteSpace(view.loopEnd?.text))
-                    {
-                        end = Number(view.loopEnd);
-                    }
-                    if (start < 0 || end <= start || end > timeline.Duration)
-                    {
-                        throw new ArgumentException("루프 범위를 음원 안의 시작 < 끝으로 입력하세요.");
-                    }
-                    looping = !looping;
-                    break;
-                case WorkspaceAction.Slow:
-                    if (timeline.PreviewSpeed < 1)
-                    {
-                        timeline.SetPreviewSpeed(1);
-                    }
-                    else
-                    {
-                        timeline.SetPreviewSpeed(.5f);
-                    }
                     break;
                 case WorkspaceAction.Test:
                     CacheResources();

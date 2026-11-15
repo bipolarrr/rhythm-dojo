@@ -111,27 +111,6 @@ namespace RhythmDojo.Tests
 
         [Test]
         [Category("Fast")]
-        public void DemoPreparationIsIdempotentAndPreservesExistingCharts()
-        {
-            var settings = AssetDatabase.LoadAssetAtPath<GameSettings>(
-                TestContentBuilder.SettingsPath
-            );
-            int count = settings.catalog.Count;
-            string original = System.IO.File.ReadAllText(SceneBuilder.ChartPath);
-            DemoContentBuilder.Prepare();
-            DemoContentBuilder.Prepare();
-            Assert.That(settings.catalog.Count, Is.EqualTo(count));
-            Assert.That(System.IO.File.ReadAllText(SceneBuilder.ChartPath), Is.EqualTo(original));
-
-            var demo = AssetDatabase.LoadAssetAtPath<SongDefinition>(DemoContentBuilder.SongPath);
-            demo.Validate();
-            Assert.That(demo.AudioClip.length, Is.EqualTo(30).Within(.01));
-            Assert.That(demo.Mode.LaneCount, Is.EqualTo(4));
-            Assert.That(demo.Cover, Is.Not.Null);
-        }
-
-        [Test]
-        [Category("Fast")]
         public void ListRetainsIdsAcrossSortAndClearsSelectionForEmptyFavorites()
         {
             var settings = AssetDatabase.LoadAssetAtPath<GameSettings>(TestContentBuilder.SettingsPath);

@@ -99,13 +99,10 @@ namespace RhythmDojo.EditorTools
             view.progressFill.color = new Color(.84f, .57f, .27f);
             view.progress.color = Cream;
 
-            Frame((RectTransform)view.returnButton.transform, new Color(.24f, .10f, .075f), 8);
-            view.returnButton.GetComponentInChildren<Text>().color = Cream;
-            var outline = view.returnButton.GetComponent<Outline>();
-            if (outline)
-            {
-                outline.enabled = false;
-            }
+            var focus = view.returnButton.GetComponent<DojoControlFocus>();
+            focus.restingColor = Cream;
+            focus.selectedColor = new Color(1, .77f, .35f);
+            focus.stroke.GetComponent<DojoInkGraphic>().color = focus.selectedColor;
             var result = Panel("Result Scroll", view.gameOverPanel.transform, Paper, .28f, .33f, .72f, .65f);
             Frame(result, new Color(.24f, .10f, .075f), 16);
             result.SetAsFirstSibling();
@@ -133,7 +130,7 @@ namespace RhythmDojo.EditorTools
             view.timing.color = Cream;
 
             var menu = view.GetComponent<GameplayPauseMenu>();
-            var dialog = menu.settingsButton.transform.parent;
+            var dialog = menu.resumeButton.transform.parent;
             var railOpacityLabel = (dialog.Find("Rail Opacity Label") ?? view.transform.Find("Rail Opacity Label"))
                 .GetComponent<Text>();
             railOpacityLabel.transform.SetParent(dialog, false);
@@ -147,14 +144,14 @@ namespace RhythmDojo.EditorTools
             view.railOpacity.gameObject.SetActive(false);
             railOpacityLabel.gameObject.SetActive(false);
             Bounds((RectTransform)menu.resumeButton.transform, .14f, .65f, .86f, .79f);
-            Bounds((RectTransform)menu.settingsButton.transform, .14f, .61f, .86f, .75f);
             Bounds((RectTransform)menu.restartButton.transform, .14f, .42f, .86f, .56f);
             Bounds((RectTransform)menu.exitButton.transform, .14f, .23f, .86f, .37f);
-            Bounds(menu.recoveryStatus.rectTransform, .08f, .034f, .92f, .092f);
-            var hint = UiElements.Label("Settings Menu Hint", dialog, "설정은 수련을 마친 뒤 메뉴에서 변경할 수 있습니다.",
-                Vector2.zero, Vector2.zero, 16, role: UiTextRole.Help);
-            Bounds(hint.rectTransform, .08f, .10f, .92f, .19f);
-            hint.color = Ink;
+            Bounds(menu.recoveryStatus.rectTransform, .08f, .025f, .92f, .075f);
+            var hint = UiElements.Label("Settings Menu Hint", dialog,
+                "↑↓ 이동 · Enter / Space 선택 · Esc 이어하기\n설정은 수련을 마친 뒤 메뉴에서 변경할 수 있습니다.",
+                Vector2.zero, Vector2.zero, 14, role: UiTextRole.Help);
+            Bounds(hint.rectTransform, .06f, .09f, .94f, .21f);
+            hint.color = DojoScreenStyle.Muted;
             hint.alignment = TextAnchor.MiddleCenter;
 
             SceneResources.ApplyReadableFont(view.songDetails, view.counts, view.accuracy, view.combo,

@@ -54,6 +54,8 @@ namespace RhythmDojo.UI
         private int? recommendation;
         private bool measuring;
         private bool audioChanged;
+        private UnityEngine.InputSystem.UI.InputSystemUIInputModule inputModule;
+        private InputActionReference menuSubmit;
 
         private IScrollTimeline speedTimeline;
         private JudgmentSettings speedTiming;
@@ -212,6 +214,16 @@ namespace RhythmDojo.UI
             audioChanged = false;
             AudioSettings.OnAudioConfigurationChanged += AudioConfigurationChanged;
             measuring = true;
+            // Space belongs to the calibration tap while measuring, even after pointer focus changes.
+            if (EventSystem.current)
+            {
+                inputModule = EventSystem.current.GetComponent<UnityEngine.InputSystem.UI.InputSystemUIInputModule>();
+                if (inputModule)
+                {
+                    menuSubmit = inputModule.submit;
+                    inputModule.submit = calibration.measuringSubmit;
+                }
+            }
             source.PlayScheduled(firstDspBeat);
             tap.Enable();
 
@@ -461,6 +473,12 @@ namespace RhythmDojo.UI
             }
 
             measuring = false;
+            if (inputModule)
+            {
+                inputModule.submit = menuSubmit;
+            }
+            inputModule = null;
+            menuSubmit = null;
             tap.Disable();
             source.Stop();
             speedLane.Reset();

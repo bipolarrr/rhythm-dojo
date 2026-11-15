@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using RhythmDojo.Audio;
 using RhythmDojo.Core;
 using RhythmDojo.Gameplay;
 using RhythmDojo.Services;
@@ -17,17 +18,28 @@ namespace RhythmDojo.UI
         private ResultsView view;
         [SerializeField]
         private ResultsChartReview review;
+        [SerializeField]
+        private ResultsSoundPlayer sounds;
         private Action flow;
         private Func<CancellationToken, Task> retry;
         private CancellationTokenSource retryLifetime;
         private SongLoadErrorDisplay retryFailure;
         private bool retrying;
         private PlayResult result;
+        private int displayedScore;
+        private double displayedAccuracyRate;
         private ISelectionPreferences preferences;
         private Button timingRecommendation;
         private Text timingRecommendationLabel;
         private Action openTimingCalibration;
         private int modalClosedFrame = -1;
+        private bool inputReady;
+        private int readyAfterFrame = -1;
+        private int displayFrame;
+        private GameObject lastSelection;
+        private bool replayOnEnable;
+        private readonly System.Collections.Generic.List<Selectable> menuControls =
+            new System.Collections.Generic.List<Selectable>();
 
         public void Validate()
         {
@@ -37,11 +49,22 @@ namespace RhythmDojo.UI
             }
 
             view.Validate();
+            if (!sounds)
+            {
+                throw new InvalidOperationException("Recorded results audio pool missing.");
+            }
+            sounds.Validate();
         }
 
         public void Initialize(PlayResult result, Action onReturn)
         {
             Initialize(result, onReturn, null);
+        }
+
+        // Presentation values can be supplied independently of the gameplay calculation.
+        public void Initialize(PlayResult result, Action onReturn, int score, double accuracyRate)
+        {
+            Initialize(result, onReturn, null, null, null, score, accuracyRate);
         }
 
         public void Initialize(PlayResult result, Action onReturn, Func<CancellationToken, Task> onRetry)
@@ -64,12 +87,13 @@ namespace RhythmDojo.UI
             Action onReturn,
             Func<CancellationToken, Task> onRetry,
             ISelectionPreferences savedPreferences,
-            Action openTimingCalibration
+            Action openTimingCalibration,
+            int? score = null,
+            double? accuracyRate = null
         )
         {
             Unbind();
             Validate();
-            view.EnsureScoreActions();
 
             flow = onReturn;
             retry = onRetry;
@@ -80,7 +104,6 @@ namespace RhythmDojo.UI
             retrying = false;
             modalClosedFrame = -1;
 
-            view.backButton.onClick.AddListener(Back);
             view.moreButton.onClick.AddListener(OpenReview);
             view.retryButton.onClick.AddListener(Retry);
 
@@ -90,21 +113,25 @@ namespace RhythmDojo.UI
             }
 
             review.Closed += ReviewClosed;
-            Display(result);
-
-            var primary = view.backButton;
-            if (view.retryButton.gameObject.activeInHierarchy && view.retryButton.interactable)
-            {
-                primary = view.retryButton;
-            }
-
-            EventSystem.current?.SetSelectedGameObject(primary.gameObject);
+            Display(result, score ?? result?.Score ?? 0, accuracyRate ?? result?.Session.AccuracyRate ?? 0);
         }
 
         public void Display(PlayResult result)
         {
+            Display(result, result?.Score ?? 0, result?.Session.AccuracyRate ?? 0);
+        }
+
+        public void Display(PlayResult result, int score, double accuracyRate)
+        {
             this.result = result;
+            displayedScore = score;
+            displayedAccuracyRate = accuracyRate;
             review.Close();
+            inputReady = false;
+            readyAfterFrame = -1;
+            displayFrame = Time.frameCount;
+            lastSelection = null;
+            EventSystem.current?.SetSelectedGameObject(null);
             view.moreButton.interactable = result?.Chart != null;
             view.cover.enabled = false;
             view.coverPlaceholder.gameObject.SetActive(true);
@@ -132,6 +159,7 @@ namespace RhythmDojo.UI
                 view.miss.text = "—";
                 view.accuracy.text = "정확도  —";
                 view.maxCombo.text = "최대 콤보  —";
+                BeginPresentation();
 
                 return;
             }
@@ -140,7 +168,12 @@ namespace RhythmDojo.UI
             RefreshScoreSummary(result);
             view.artist.text = result.Artist;
             view.difficulty.text = result.Difficulty;
-            view.outcome.text = new SongRecord { rate = result.Session.AccuracyRate }.Rank;
+            view.outcome.text = new SongRecord { rate = displayedAccuracyRate }.Rank;
+
+            if (view.progressNote && result.Session.State == SessionState.Completed)
+            {
+                view.progressNote.text = "수련 완료";
+            }
 
             if (result.Session.Failure.Failed)
             {
@@ -156,11 +189,10 @@ namespace RhythmDojo.UI
                     }
                 }
             }
-
             view.perfect.text = result.Session.Perfect.ToString(CultureInfo.InvariantCulture);
             view.good.text = result.Session.Good.ToString(CultureInfo.InvariantCulture);
             view.miss.text = result.Session.Miss.ToString(CultureInfo.InvariantCulture);
-            view.accuracy.text = "정확도  " + result.Session.AccuracyRate.ToString("F2", CultureInfo.InvariantCulture) + "%";
+            view.accuracy.text = "정확도  " + displayedAccuracyRate.ToString("F2", CultureInfo.InvariantCulture) + "%";
             view.maxCombo.text = "최대 콤보  " + result.MaxCombo.ToString(CultureInfo.InvariantCulture);
             view.cover.sprite = result.Cover;
             if (!result.Cover || result.Cover == view.legacyFallbackCover)
@@ -176,6 +208,21 @@ namespace RhythmDojo.UI
                 {
                     fit.aspectRatio = view.cover.sprite.rect.width / view.cover.sprite.rect.height;
                 }
+            }
+            BeginPresentation();
+        }
+
+        private void BeginPresentation()
+        {
+            // Capture display values; the animation never owns or modifies PlayResult.
+            view.presentation.Begin(displayedScore, result?.Session.Failure.Failed ?? false, result != null);
+            if (!UnityEngine.Application.isPlaying)
+            {
+                // Static editor consumers have no Update loop to advance the entrance.
+                view.presentation.Finish();
+                inputReady = true;
+                view.presentation.inputGate.interactable = true;
+                view.presentation.inputGate.blocksRaycasts = true;
             }
         }
 
@@ -227,10 +274,15 @@ namespace RhythmDojo.UI
 
         private void ApplyTimingRecommendation()
         {
+            if (!inputReady)
+            {
+                return;
+            }
             if (!timingRecommendation.interactable || result == null)
             {
                 return;
             }
+            PlayConfirmation();
 
             if (result.TimingOffsetRecommendationMs is not { } value)
             {
@@ -247,7 +299,7 @@ namespace RhythmDojo.UI
 
         private void RefreshScoreSummary(PlayResult result)
         {
-            view.scoreValue.text = result.Score.ToString("N0", CultureInfo.CurrentCulture);
+            view.scoreValue.text = displayedScore.ToString("N0", CultureInfo.CurrentCulture);
             if (!result.CanCompareScore)
             {
                 return;
@@ -260,7 +312,7 @@ namespace RhythmDojo.UI
             }
 
             int best = result.PreviousBestScore.Value;
-            int difference = result.Score - best;
+            int difference = displayedScore - best;
             string bestLabel = "이전 최고";
             if (result.Session.Failure.Failed)
             {
@@ -273,6 +325,10 @@ namespace RhythmDojo.UI
 
         private async void Retry()
         {
+            if (!inputReady)
+            {
+                return;
+            }
             if (retry == null || retrying || view.review.gameObject.activeSelf)
             {
                 return;
@@ -284,9 +340,10 @@ namespace RhythmDojo.UI
             }
 
             var currentLifetime = retryLifetime;
+            sounds.StopAll();
+            PlayConfirmation();
             retrying = true;
             view.retryButton.interactable = false;
-            view.backButton.interactable = false;
             view.moreButton.interactable = false;
             view.retryStatus.text = "곡 불러오는 중…";
             RefreshTimingRecommendation();
@@ -308,7 +365,6 @@ namespace RhythmDojo.UI
 
                 retrying = false;
                 view.retryButton.interactable = true;
-                view.backButton.interactable = true;
                 view.moreButton.interactable = result?.Chart != null;
                 view.retryStatus.text = "";
                 RefreshTimingRecommendation();
@@ -327,7 +383,6 @@ namespace RhythmDojo.UI
 
                 retrying = false;
                 view.retryButton.interactable = true;
-                view.backButton.interactable = true;
                 view.moreButton.interactable = result?.Chart != null;
                 var display = SongLoadErrorDisplay.FromException(e);
                 retryFailure = display;
@@ -341,14 +396,19 @@ namespace RhythmDojo.UI
         {
             if (!retrying)
             {
+                sounds.StopAll();
                 flow?.Invoke();
             }
         }
 
         private void OpenReview()
         {
+            if (!inputReady || retrying)
+            {
+                return;
+            }
+            PlayConfirmation();
             review.Show(result);
-            view.backButton.interactable = false;
             view.moreButton.interactable = false;
             view.retryButton.interactable = false;
             RefreshTimingRecommendation();
@@ -356,7 +416,6 @@ namespace RhythmDojo.UI
 
         private void ReviewClosed()
         {
-            view.backButton.interactable = true;
             view.moreButton.interactable = result?.Chart != null;
             view.retryButton.interactable = !retrying && (retryFailure?.CanRetry ?? true);
             RefreshTimingRecommendation();
@@ -369,14 +428,18 @@ namespace RhythmDojo.UI
 
         private void Update()
         {
+            if (!view || !RhythmDojo.Input.ApplicationFocusState.IsFocused)
+            {
+                return;
+            }
             var keyboard = UnityEngine.InputSystem.Keyboard.current;
 
-            if (flow == null || keyboard == null || Time.frameCount == modalClosedFrame)
+            if (Time.frameCount == modalClosedFrame)
             {
                 return;
             }
 
-            if (keyboard.escapeKey.wasPressedThisFrame)
+            if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame)
             {
                 if (view.review.gameObject.activeSelf)
                 {
@@ -391,6 +454,142 @@ namespace RhythmDojo.UI
                 {
                     Back();
                 }
+                return;
+            }
+
+            if (!inputReady)
+            {
+                if (view.presentation.IsRevealing)
+                {
+                    if (Time.frameCount > displayFrame && SubmitPressed())
+                    {
+                        view.presentation.Finish();
+                        readyAfterFrame = Time.frameCount;
+                    }
+                    return;
+                }
+                if (readyAfterFrame < 0)
+                {
+                    readyAfterFrame = Time.frameCount;
+                }
+                // Wait for release AND a later frame. EventSystem Update may run before
+                // or after this component; the skip must never also submit a menu action.
+                if (Time.frameCount <= readyAfterFrame + 1 || SubmitHeld())
+                {
+                    return;
+                }
+                inputReady = true;
+                view.presentation.inputGate.interactable = true;
+                view.presentation.inputGate.blocksRaycasts = true;
+            }
+
+            RefreshNavigation();
+            var selected = EventSystem.current?.currentSelectedGameObject;
+            if (selected != lastSelection)
+            {
+                if (lastSelection && selected)
+                {
+                    sounds.Menu(false);
+                }
+                lastSelection = selected;
+            }
+        }
+
+        private static bool SubmitPressed()
+        {
+            var keyboard = UnityEngine.InputSystem.Keyboard.current;
+            if (keyboard != null)
+            {
+                if (keyboard.enterKey.wasPressedThisFrame || keyboard.spaceKey.wasPressedThisFrame)
+                {
+                    return true;
+                }
+                if (keyboard.numpadEnterKey.wasPressedThisFrame)
+                {
+                    return true;
+                }
+            }
+            var gamepad = UnityEngine.InputSystem.Gamepad.current;
+            if (gamepad != null && gamepad.buttonSouth.wasPressedThisFrame)
+            {
+                return true;
+            }
+            var mouse = UnityEngine.InputSystem.Mouse.current;
+            return mouse != null && mouse.leftButton.wasPressedThisFrame;
+        }
+
+        private static bool SubmitHeld()
+        {
+            var keyboard = UnityEngine.InputSystem.Keyboard.current;
+            if (keyboard != null)
+            {
+                if (keyboard.enterKey.isPressed || keyboard.spaceKey.isPressed)
+                {
+                    return true;
+                }
+                if (keyboard.numpadEnterKey.isPressed)
+                {
+                    return true;
+                }
+            }
+            var gamepad = UnityEngine.InputSystem.Gamepad.current;
+            if (gamepad != null && gamepad.buttonSouth.isPressed)
+            {
+                return true;
+            }
+            var mouse = UnityEngine.InputSystem.Mouse.current;
+            return mouse != null && mouse.leftButton.isPressed;
+        }
+
+        private void PlayConfirmation()
+        {
+            // Pointer clicks already use the shared DojoClickFeedback source.
+            var mouse = UnityEngine.InputSystem.Mouse.current;
+            if (mouse != null && mouse.leftButton.wasReleasedThisFrame)
+            {
+                return;
+            }
+            sounds.Menu(true);
+        }
+
+        private void RefreshNavigation()
+        {
+            if (!view || !inputReady)
+            {
+                return;
+            }
+            if (view.review.gameObject.activeSelf)
+            {
+                return;
+            }
+
+            menuControls.Clear();
+            AddControl(view.retryButton);
+            AddControl(view.recommendationButton);
+            AddControl(view.moreButton);
+            DojoMenuNavigation.Chain(menuControls, true);
+            var system = EventSystem.current;
+            if (!system || menuControls.Count == 0)
+            {
+                return;
+            }
+
+            var selected = system.currentSelectedGameObject;
+            if (!selected || !selected.activeInHierarchy)
+            {
+                menuControls[0].Select();
+            }
+            else if (selected.TryGetComponent<Selectable>(out var control) && !control.IsInteractable())
+            {
+                menuControls[0].Select();
+            }
+        }
+
+        private void AddControl(Selectable control)
+        {
+            if (control.gameObject.activeInHierarchy && control.IsInteractable())
+            {
+                menuControls.Add(control);
             }
         }
 
@@ -415,14 +614,44 @@ namespace RhythmDojo.UI
                 review.Closed -= ReviewClosed;
             }
 
-            if (view && view.backButton)
+            if (sounds)
             {
-                view.backButton.onClick.RemoveListener(Back);
-                view.moreButton.onClick.RemoveListener(OpenReview);
+                sounds.StopAll();
+            }
+            if (view)
+            {
+                if (view.moreButton)
+                {
+                    view.moreButton.onClick.RemoveListener(OpenReview);
+                }
                 if (view.retryButton)
                 {
                     view.retryButton.onClick.RemoveListener(Retry);
                 }
+            }
+        }
+
+        private void OnDisable()
+        {
+            // ModalInputScope disables this controller alone. Only reopening the
+            // actual Results object should replay its presentation.
+            replayOnEnable = !gameObject.activeInHierarchy;
+            if (sounds)
+            {
+                sounds.StopAll();
+            }
+        }
+
+        private void OnEnable()
+        {
+            if (!replayOnEnable)
+            {
+                return;
+            }
+            replayOnEnable = false;
+            if (result != null && view)
+            {
+                Display(result, displayedScore, displayedAccuracyRate);
             }
         }
 

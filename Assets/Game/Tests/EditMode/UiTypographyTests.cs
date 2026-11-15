@@ -110,7 +110,6 @@ namespace RhythmDojo.Tests
 
         [TestCase("Title")]
         [TestCase("SongSelection")]
-        [TestCase("Settings")]
         [TestCase("Gameplay")]
         [TestCase("ChartEditor")]
         [TestCase("Results")]
@@ -170,6 +169,18 @@ namespace RhythmDojo.Tests
         private static void AssertRoleFont(Text text)
         {
             var settings = Resources.Load<UiFontSettings>("UI/UiFontSettings");
+            var gameplay = text.GetComponentInParent<GameplayHudView>(true);
+            if (gameplay && gameplay.judgmentMotion)
+            {
+                // The authored echo copies the judgment Text and deliberately has no role component.
+                if (text == gameplay.judgmentMotion.echo)
+                {
+                    Assert.That(text.font, Is.SameAs(AssetDatabase.LoadAssetAtPath<Font>(
+                        "Assets/Game/Fonts/Dokdo-Regular.ttf")), text.name);
+                    return;
+                }
+            }
+
             var style = text.GetComponent<UiTextStyle>();
             Assert.That(style, Is.Not.Null, text.name);
             Font expected = settings.font;
@@ -197,6 +208,41 @@ namespace RhythmDojo.Tests
             if (practice && text.GetComponent<UiFontScope>())
             {
                 expected = AssetDatabase.LoadAssetAtPath<Font>("Assets/Game/Fonts/Dokdo-Regular.ttf");
+            }
+
+            if (gameplay)
+            {
+                bool brush = text == gameplay.songTitle || text == gameplay.judgment;
+                if (brush)
+                {
+                    expected = AssetDatabase.LoadAssetAtPath<Font>("Assets/Game/Fonts/Dokdo-Regular.ttf");
+                }
+            }
+
+            var results = text.GetComponentInParent<ResultsView>(true);
+            bool displayHeading = style.role == UiTextRole.Title && !text.GetComponentInParent<Button>(true);
+            if (results && displayHeading && text != results.scoreValue)
+            {
+                expected = AssetDatabase.LoadAssetAtPath<Font>("Assets/Game/Fonts/Dokdo-Regular.ttf");
+            }
+            var options = text.GetComponentInParent<SettingsView>(true);
+            if (options && displayHeading)
+            {
+                expected = AssetDatabase.LoadAssetAtPath<Font>("Assets/Game/Fonts/Dokdo-Regular.ttf");
+            }
+            var control = text.GetComponentInParent<DojoControlFocus>(true);
+            if (control && control.control is Button)
+            {
+                expected = AssetDatabase.LoadAssetAtPath<Font>("Assets/Game/Fonts/Dokdo-Regular.ttf");
+            }
+            if (gameplay)
+            {
+                var pause = gameplay.GetComponent<GameplayPauseMenu>();
+                bool pauseHeading = text.transform.IsChildOf(pause.panel.transform) && displayHeading;
+                if (text == gameplay.gameOverText || pauseHeading)
+                {
+                    expected = AssetDatabase.LoadAssetAtPath<Font>("Assets/Game/Fonts/Dokdo-Regular.ttf");
+                }
             }
 
             Assert.That(text.font, Is.SameAs(expected), text.name);

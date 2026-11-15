@@ -155,7 +155,10 @@ namespace RhythmDojo.Tests
             yield return new WaitForSecondsRealtime(.12f);
 
             var source = feedback.GetComponent<AudioSource>();
+            var sounds = feedback.GetComponentInChildren<RhythmDojo.Audio.DojoSoundPlayer>();
+            int contacts = sounds.ContactCount;
             model.Hit(0, Judgment.Miss);
+            Assert.That(sounds.ContactCount, Is.EqualTo(contacts));
             Assert.That(
                 source.isPlaying,
                 Is.False,
@@ -165,6 +168,7 @@ namespace RhythmDojo.Tests
             model.Reset();
             yield return null;
             model.Hit(0);
+            Assert.That(sounds.ContactCount, Is.EqualTo(contacts + 1));
 
             var samples = new float[512];
             float peak = 0;
@@ -188,10 +192,12 @@ namespace RhythmDojo.Tests
                 "Successful note must reach the listener output."
             );
 
+            contacts = sounds.ContactCount;
             for (int i = 0; i < 100; i++)
             {
                 model.Hit(i % 4);
             }
+            Assert.That(sounds.ContactCount, Is.EqualTo(contacts + 1), "A dense chord has one contact sound.");
 
             Assert.That(ActiveBursts(feedback), Is.EqualTo(4),
                 "Dense repeats keep one burst per lane; simultaneous lanes remain distinct.");
@@ -213,6 +219,7 @@ namespace RhythmDojo.Tests
             model.Reset();
             Assert.That(ActiveBursts(feedback), Is.Zero);
             Assert.That(source.isPlaying, Is.False);
+            Assert.That(sounds.voices.All(voice => !voice.isPlaying), Is.True);
         }
 
         [UnityTest]

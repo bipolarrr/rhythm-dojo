@@ -80,49 +80,6 @@ namespace RhythmDojo.Tests
 
         [UnityTest]
         [Category("SceneIntegration")]
-        public IEnumerator SingleSelectionLoadDoesNotBecomePreparationOwned()
-        {
-            yield return PrepareTitle();
-            yield return SceneManager.LoadSceneAsync(AppFlowController.SelectionPath, LoadSceneMode.Single);
-            yield return Wait(() => !preparation.IsBusy);
-            yield return null;
-
-            var screen = UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>();
-            Assert.That(screen, Is.Not.Null);
-            Assert.That(screen.enabled, Is.True);
-            Assert.That(screen.GetComponent<SongSelectionView>().Rows.Count, Is.GreaterThan(0));
-            Assert.That(preparation.CanInitialize(screen.gameObject.scene), Is.True);
-            Assert.That(EventSystem.current.currentSelectedGameObject, Is.Not.Null);
-            Assert.That(preparation.IsSelectionPrepared, Is.False);
-            Assert.That(SceneManager.sceneCount, Is.EqualTo(1));
-            Assert.That(EventSystem.current.isActiveAndEnabled, Is.True);
-            LogAssert.NoUnexpectedReceived();
-        }
-
-        [UnityTest]
-        [Category("SceneIntegration")]
-        public IEnumerator ReplacingReadyPreparationWithSingleSelectionReleasesItsOwnership()
-        {
-            yield return PrepareTitle();
-            ready = true;
-            yield return Wait(() => preparation.IsSelectionPrepared);
-            yield return SceneManager.LoadSceneAsync(AppFlowController.SelectionPath, LoadSceneMode.Single);
-            yield return Wait(() => !preparation.IsBusy);
-            yield return null;
-
-            var screen = UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>();
-            Assert.That(screen.enabled, Is.True);
-            Assert.That(screen.GetComponent<SongSelectionView>().Rows.Count, Is.GreaterThan(0));
-            Assert.That(preparation.CanInitialize(screen.gameObject.scene), Is.True);
-            Assert.That(EventSystem.current.currentSelectedGameObject, Is.Not.Null);
-            Assert.That(SceneManager.sceneCount, Is.EqualTo(1));
-            Assert.That(UnityEngine.Object.FindObjectsByType<EventSystem>(FindObjectsSortMode.None)
-                .Count(value => value.isActiveAndEnabled), Is.EqualTo(1));
-            LogAssert.NoUnexpectedReceived();
-        }
-
-        [UnityTest]
-        [Category("SceneIntegration")]
         public IEnumerator CancellationAfterPriorSceneUnloadsKeepsLastSelectionUsable()
         {
             yield return PrepareTitle();

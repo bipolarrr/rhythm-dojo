@@ -144,8 +144,6 @@ namespace RhythmDojo.Tests
             yield return Press(Key.Escape);
             var pause = Object.FindFirstObjectByType<GameplayPauseMenu>();
             Assert.That(game.IsPaused, Is.True);
-            Assert.That(pause.settingsButton.gameObject.activeSelf, Is.False);
-            Object.FindFirstObjectByType<AppFlowController>().ShowGameplaySettings();
             Assert.That(Object.FindFirstObjectByType<SettingsView>(), Is.Null);
             Assert.That(PlayKeyBindings.TrySetKey(0, Key.Q, out _), Is.False);
             Assert.That(hud.lanes.laneRoot.GetChild(0).GetComponentInChildren<Text>().text, Is.EqualTo("A"));
@@ -182,6 +180,21 @@ namespace RhythmDojo.Tests
                 Assert.That(view.keyBindingButtons[5].interactable, Is.False);
                 Assert.That(view.keyBindingButtons[0].GetComponentInChildren<Text>().text, Is.EqualTo("Left A"));
                 CaptureSelection("pr-quality-remediation/task5-six-lanes-top");
+                yield return Press(Key.RightArrow);
+                for (int i = 1; i < 5; i++)
+                {
+                    yield return Press(Key.DownArrow);
+                }
+
+                Assert.That(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject,
+                    Is.SameAs(view.keyBindingButtons[4].gameObject));
+                var bounds = RectTransformUtility.CalculateRelativeRectTransformBounds(
+                    view.keyRowsScroll.viewport, view.keyBindingButtons[4].transform);
+                Assert.That(bounds.min.y, Is.GreaterThanOrEqualTo(view.keyRowsScroll.viewport.rect.yMin - 1));
+                CaptureSelection("dojo-menu-refresh/settings-keys-scrolled", 1920, 1080);
+                yield return Press(Key.DownArrow);
+                Assert.That(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject,
+                    Is.SameAs(view.resetKeys.gameObject), "Navigation skips the read-only gamepad binding.");
                 view.keyRowsScroll.verticalNormalizedPosition = 0;
                 yield return null;
                 CaptureSelection("pr-quality-remediation/task5-six-lanes-bottom");
@@ -227,7 +240,6 @@ namespace RhythmDojo.Tests
                 yield return Press(Key.Escape);
                 flow.Selection.UpdateSelection("test-pulse", flow.Settings.defaultDifficulty, ScrollMode.Constant, 1);
                 var pause = Object.FindFirstObjectByType<GameplayPauseMenu>();
-                flow.ShowGameplaySettings();
                 Assert.That(Object.FindFirstObjectByType<SettingsView>(), Is.Null);
                 Assert.That(flow.Selection.SelectedSongId, Is.EqualTo("mode-key-regression"));
                 Assert.That(PlayKeyBindings.TrySetKey(mode, mode.name, 0, Key.Q, out _), Is.False);

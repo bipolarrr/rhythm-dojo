@@ -51,6 +51,12 @@ namespace RhythmDojo.UI
                 return;
             }
 
+            if (selected.GetComponentInParent<DojoControlFocus>())
+            {
+                HideBorder();
+                return;
+            }
+
             if (!control.isActiveAndEnabled || !control.IsInteractable())
             {
                 HideBorder();

@@ -243,7 +243,6 @@ namespace RhythmDojo.Tests
             yield return Press(Key.Escape);
             Require(game.IsPaused, "Esc pauses gameplay.");
             double frozen = game.Clock.SongTime;
-            flow.ShowGameplaySettings();
             Require(!Object.FindFirstObjectByType<SettingsView>(), "Paused settings are blocked.");
             Require(!flow.ApplyBufferSize(), "Gameplay cannot apply audio settings.");
             // Device recovery is independent of settings access and remains supported during pause.
@@ -312,7 +311,7 @@ namespace RhythmDojo.Tests
             yield return Wait(() => Object.FindFirstObjectByType<ResultsScreen>(), "Built Results scene");
             Require(flow.LastResult.LaneLabels[0] == "Q", "Results retains selected mode label.");
             yield return Capture("results");
-            yield return Click(Object.FindFirstObjectByType<ResultsView>().backButton);
+            yield return Press(Key.Escape);
             yield return Wait(() => Object.FindFirstObjectByType<SongSelectionScreen>(), "Results Back");
             CheckSelectionCleanup();
             Step("results-navigation", "Explicit session advance used only to exercise the built Results scene and Back.");
@@ -397,8 +396,9 @@ namespace RhythmDojo.Tests
             var view = MainMenuCompositionRoot.InScene(SceneManager.GetActiveScene()).View;
             if (!view.modeSelection)
             {
-                yield return Wait(() => view.logo.IsInteractable(), "Title return animation completion");
-                yield return Click(view.logo);
+                var sky = view.GetComponent<TitleSkyView>();
+                yield return Wait(() => sky.start.IsInteractable(), "Title return animation completion");
+                yield return Click(sky.start);
                 yield return Wait(() => SceneManager.GetActiveScene().path == MainMenuActions.ModeSelectionScenePath,
                     "Mode selection entry");
                 yield return Wait(() => !SceneManager.GetSceneByPath(TitlePath).isLoaded, "Title cleanup");
@@ -414,7 +414,6 @@ namespace RhythmDojo.Tests
             yield return SubmitMode();
             yield return Wait(() => SceneManager.GetActiveScene().path == AppFlowController.SelectionPath,
                 "Title entrance");
-            yield return Wait(() => !DojoEntranceTransition.Active, "Door completion");
             yield return Wait(() => !flow.Transitioning, "Selection activation cleanup");
             CheckSelectionCleanup();
             var view = Object.FindFirstObjectByType<SongSelectionView>();
@@ -536,7 +535,4 @@ namespace RhythmDojo.Tests
         }
     }
 }
-
-
-
 

@@ -263,15 +263,6 @@ namespace RhythmDojo.Core
                     return;
                 }
             }
-            if (activatePreparedSelection && DojoEntranceTransition.Active)
-            {
-                if (DojoEntranceTransition.Active.Failed)
-                {
-                    Cancel();
-                    flow.SelectionPreparationFailed();
-                    return;
-                }
-            }
             if (Time.realtimeSinceStartupAsDouble - started >= readyTimeout)
             {
                 Fail(new TimeoutException("Song selection preparation timed out."));
@@ -396,20 +387,13 @@ namespace RhythmDojo.Core
 
         private void CompleteActivation()
         {
-            // Readiness is delivered only once initialization and old-scene cleanup both finished.
-            DojoEntranceTransition.SelectionReady(preparedSelectionScreen);
             inputScope.Dispose();
             inputScope = null;
             priorScope.Dispose();
             priorScope = null;
             RestoreCanvasOrders();
             ScreenCompositionRoot.EnableInput(preparedSelectionScene);
-            if (!DojoEntranceTransition.Active)
-            {
-                // Mode selection has already opened the doors. Restore focus after the
-                // prepared EventSystem is enabled, without waiting for the legacy overlay.
-                preparedSelectionScreen.RestoreEntryFocus();
-            }
+            preparedSelectionScreen.RestoreEntryFocus();
 
             var scene = preparedSelectionScene;
             ownedScenes.Remove(scene.handle);

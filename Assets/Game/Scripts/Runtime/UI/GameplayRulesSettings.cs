@@ -44,10 +44,6 @@ namespace RhythmDojo.UI
                 controls[i].SetValueWithoutNotify(values[i]);
                 actions[i] = _ => Save();
                 controls[i].onValueChanged.AddListener(actions[i]);
-
-                var nav = controls[i].navigation;
-                nav.mode = Navigation.Mode.Automatic;
-                controls[i].navigation = nav;
             }
         }
 

@@ -132,89 +132,80 @@ namespace RhythmDojo.UI
             view.gameplayPanel.SetActive(gameplay);
             view.keySettingsPanel.SetActive(keySettings);
 
-            if (!graphics && !gameplay && !keySettings)
-            {
-                view.soundTab.GetComponent<Image>().color = new Color(.15f, .46f, .5f);
-            }
-            else
-            {
-                view.soundTab.GetComponent<Image>().color = new Color(.13f, .17f, .2f);
-            }
-
-            if (graphics)
-            {
-                view.graphicsTab.GetComponent<Image>().color = new Color(.15f, .46f, .5f);
-            }
-            else
-            {
-                view.graphicsTab.GetComponent<Image>().color = new Color(.13f, .17f, .2f);
-            }
-
-            if (gameplay)
-            {
-                view.gameplayTab.GetComponent<Image>().color = new Color(.15f, .46f, .5f);
-            }
-            else
-            {
-                view.gameplayTab.GetComponent<Image>().color = new Color(.13f, .17f, .2f);
-            }
-
-            if (view.pixelTheme)
-            {
-                StylePixelTab(view.soundTab, !graphics && !gameplay && !keySettings);
-                StylePixelTab(view.graphicsTab, graphics);
-                StylePixelTab(view.gameplayTab, gameplay);
-                StylePixelTab(view.keySettingsTab, keySettings);
-            }
-            else if (keySettings)
-            {
-                view.keySettingsTab.image.color = new Color(.15f, .46f, .5f);
-            }
-            else
-            {
-                view.keySettingsTab.image.color = new Color(.13f, .17f, .2f);
-            }
-
-            var nav = view.apply.navigation;
-
-            if (keySettings)
-            {
-                nav.selectOnUp = view.resetKeys;
-            }
-            else if (gameplay)
-            {
-                nav.selectOnUp = this.gameplay.HardModeLastControl();
-            }
-            else if (graphics)
-            {
-                nav.selectOnUp = view.bufferList;
-            }
-            else
-            {
-                nav.selectOnUp = view.gameplayVolume;
-            }
-
-            view.apply.navigation = nav;
+            StylePixelTab(view.soundTab, view.soundPanel.activeSelf);
+            StylePixelTab(view.graphicsTab, graphics);
+            StylePixelTab(view.gameplayTab, gameplay);
+            StylePixelTab(view.keySettingsTab, keySettings);
+            ConfigureNavigation();
         }
 
         private static void StylePixelTab(Button button, bool selected)
         {
-            button.GetComponent<Image>().color = Color.clear;
-            var frame = button.GetComponentInChildren<PixelDojoFrameGraphic>();
-            var label = button.GetComponentInChildren<Text>();
-            if (selected)
+            var focus = button.GetComponent<DojoControlFocus>();
+            if (!focus)
             {
-                frame.color = new Color(.49f, .14f, .10f);
-                label.color = new Color(1f, .90f, .70f);
+                throw new InvalidOperationException("Authored settings tab focus missing. Rebuild Settings.");
+            }
+
+            focus.active = selected;
+        }
+
+        private void ConfigureNavigation()
+        {
+            var controls = new List<Selectable>();
+            Button tab = view.soundTab;
+            if (view.graphicsPanel.activeSelf)
+            {
+                tab = view.graphicsTab;
+                controls.AddRange(new Selectable[] { view.aspectList, view.resolutionList, view.fpsList, view.bufferList });
+            }
+            else if (view.gameplayPanel.activeSelf)
+            {
+                tab = view.gameplayTab;
+                controls.AddRange(new Selectable[] { view.speedSlider, view.judgmentPositionList,
+                    view.timingOffset, view.calibration.entry, view.calibration.speedEntry });
+                controls.AddRange(view.playRuleLists);
+                controls.Add(view.focusHudButton);
+                controls.Add(view.railOpacity);
+            }
+            else if (view.keySettingsPanel.activeSelf)
+            {
+                tab = view.keySettingsTab;
+                foreach (var button in view.keyBindingButtons)
+                {
+                    if (button.interactable)
+                    {
+                        controls.Add(button);
+                    }
+                }
+                if (view.resetKeys.interactable)
+                {
+                    controls.Add(view.resetKeys);
+                }
             }
             else
             {
-                frame.color = new Color(.79f, .63f, .42f);
-                if (frame.artwork)
+                controls.AddRange(new Selectable[] { view.masterVolume, view.backgroundVolume, view.gameplayVolume });
+            }
+            controls.Insert(0, tab);
+            controls.Add(view.apply);
+            controls.Add(view.back);
+            DojoMenuNavigation.Chain(controls);
+            var tabs = new[] { view.soundTab, view.graphicsTab, view.gameplayTab, view.keySettingsTab };
+            for (int i = 0; i < tabs.Length; i++)
+            {
+                DojoMenuNavigation.Link(tabs[i], tabs[(i + 3) % 4], tabs[(i + 1) % 4], null, controls[1]);
+            }
+            DojoMenuNavigation.Link(view.apply, controls[controls.Count - 3], view.back, tab, view.back);
+            DojoMenuNavigation.Link(view.back, view.apply, tab, view.apply, tab);
+            for (int i = 1; i < controls.Count - 2; i++)
+            {
+                if (controls[i] is Button)
                 {
-                    frame.color = Color.white;
+                    var nav = controls[i].navigation;
+                    nav.selectOnLeft = tab;
+                    controls[i].navigation = nav;
                 }
-                label.color = new Color(.24f, .12f, .085f);
             }
         }
 
@@ -229,7 +220,7 @@ namespace RhythmDojo.UI
             if (IsClosing)
             {
                 animationTime += Time.unscaledDeltaTime;
-                float t = Mathf.Clamp01(animationTime / .32f);
+                float t = Mathf.Clamp01(animationTime / .20f);
                 SetPresentation(closeProgress * (1 - t * t * t));
                 if (t >= 1)
                 {
@@ -241,7 +232,7 @@ namespace RhythmDojo.UI
             if (IsOpening)
             {
                 animationTime += Time.unscaledDeltaTime;
-                float t = Mathf.Clamp01(animationTime / .38f);
+                float t = Mathf.Clamp01(animationTime / .28f);
                 SetPresentation(1 - Mathf.Pow(1 - t, 3));
                 if (t >= 1)
                 {
@@ -306,8 +297,8 @@ namespace RhythmDojo.UI
             float scale = Mathf.Min(1, Mathf.Min(
                 canvasRect.rect.width / 1100f, canvasRect.rect.height / 730f));
             scale = Mathf.Max(.01f, scale);
-            view.panelRect.localScale = Vector3.one * scale;
-            float hiddenY = (canvasRect.rect.height + view.panelRect.rect.height * scale) * .5f + 24;
+            view.panelRect.localScale = Vector3.one * (scale * Mathf.Lerp(.985f, 1, progress));
+            float hiddenY = 24 * scale;
             view.panelRect.anchoredPosition = new Vector2(0, hiddenY * (1 - progress));
             view.panelOpacity.alpha = progress;
             view.dimOpacity.alpha = progress;
@@ -363,7 +354,18 @@ namespace RhythmDojo.UI
             view.keySettingsTab.onClick.RemoveListener(ShowKeys);
         }
 
-        private void OnDisable() => Unbind();
+        private void OnDisable()
+        {
+            var system = EventSystem.current;
+            if (system && system.currentSelectedGameObject)
+            {
+                if (system.currentSelectedGameObject.transform.IsChildOf(transform))
+                {
+                    system.SetSelectedGameObject(null);
+                }
+            }
+            Unbind();
+        }
 
         private void OnDestroy() => Unbind();
     }

@@ -41,12 +41,17 @@ namespace RhythmDojo.UI
         public Text heading;
         public Text status;
         public AudioSource source;
+        public UnityEngine.InputSystem.InputActionReference measuringSubmit;
         public SpeedTestLaneView speedLane;
         public TimingCalibrationLayout timingLayout;
         public TimingCalibrationLayout speedLayout;
 
         public void Validate()
         {
+            if (!measuringSubmit)
+            {
+                throw new InvalidOperationException("Timing calibration submit action missing. Rebuild Settings.");
+            }
             if (!overlay || !panelRect || !source)
             {
                 throw new InvalidOperationException("Timing calibration panel missing.");

@@ -114,15 +114,10 @@ namespace RhythmDojo.Tests
 
             if (fractional)
             {
-                rules.MissLimit = 2;
+                rules.SelectChallenge(1);
             }
 
             flow.Rules.Update(rules);
-
-            if (fractional)
-            {
-                flow.HardMode.SetRule(Judgment.Miss, HealthRuleAction.Damage, 3);
-            }
 
             string songId = "test-pulse";
             chartScale = 1;
@@ -249,7 +244,7 @@ namespace RhythmDojo.Tests
             yield return null;
             Assert.That(session.Health, Is.EqualTo(health));
             Assert.That(
-                view.healthFill.rectTransform.anchorMax.x,
+                view.healthFill.rectTransform.anchorMax.y,
                 Is.EqualTo((float)session.Snapshot.HealthRatio).Within(.001)
             );
             Assert.That(
@@ -293,7 +288,7 @@ namespace RhythmDojo.Tests
 
         private IEnumerator RestartFromResults()
         {
-            yield return Click(UnityEngine.Object.FindFirstObjectByType<ResultsView>().backButton);
+            yield return Press(Key.Escape);
             yield return Await(() => UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>());
             UnityEngine.Object.FindFirstObjectByType<AppFlowController>().PlaySelected();
             yield return Await(() => UnityEngine.Object.FindFirstObjectByType<RhythmGameController>());
@@ -375,9 +370,9 @@ namespace RhythmDojo.Tests
             yield return LoadGameplay("hard-good", true);
             PrepareInput(0, 1);
             yield return Press(Key.Space);
-            yield return Await(() => session.Perfect == 1);
-            yield return CheckHealth(100, "hard-perfect");
             yield return CheckResult(SessionState.GameOver, "hard-good");
+            Assert.That(judgments[0].grade, Is.EqualTo(Judgment.Perfect));
+            Assert.That(judgments[0].health, Is.EqualTo(100));
             Assert.That(session.Perfect, Is.EqualTo(1));
             Assert.That(session.Good, Is.EqualTo(1));
             Assert.That(session.Miss, Is.Zero);
@@ -392,11 +387,11 @@ namespace RhythmDojo.Tests
             yield return Press(Key.Space);
             yield return Await(() => session.Miss == 1);
             yield return null;
-            Assert.That(view.healthFill.rectTransform.anchorMax.x, Is.EqualTo(1f).Within(.001));
+            Assert.That(view.healthFill.rectTransform.anchorMax.y, Is.EqualTo(1f).Within(.001));
             yield return CheckResult(SessionState.GameOver, "hard-three-misses");
-            Assert.That(judgments.Select(item => item.health), Is.EqualTo(new[] { 100, 100, 100 }));
+            Assert.That(judgments.Select(item => item.health), Is.EqualTo(new[] { 100, 100 }));
             Assert.That(judgments[1].ratio, Is.EqualTo(1));
-            Assert.That(session.Miss, Is.EqualTo(3));
+            Assert.That(session.Miss, Is.EqualTo(2));
         }
 
         [UnityTearDown]

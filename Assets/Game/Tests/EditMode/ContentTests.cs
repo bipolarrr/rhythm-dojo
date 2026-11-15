@@ -240,7 +240,6 @@ namespace RhythmDojo.Tests
             return presenter;
         }
 
-        [TestCase("Bootstrap", "settings")]
         [TestCase("SongSelection", "settingsButton")]
         [TestCase("SongSelection", "practice")]
         [TestCase("Settings", "bufferList")]
@@ -248,20 +247,12 @@ namespace RhythmDojo.Tests
         [TestCase("Settings", "status")]
         [TestCase("Settings", "apply")]
         [TestCase("Settings", "back")]
-        [TestCase("Settings", "settings")]
         [Category("Fast")]
         public void MissingRequiredScreenReferencesFail(string sceneName, string field)
         {
             MonoBehaviour screen;
             Action validate;
-            if (sceneName == "Bootstrap")
-            {
-                var bootstrap = new GameObject("Bootstrap validation").AddComponent<Bootstrap>();
-                SceneDependencyAssembler.Wire(bootstrap, "settings", Settings);
-                screen = bootstrap;
-                validate = bootstrap.Validate;
-            }
-            else if (sceneName == "SongSelection")
+            if (sceneName == "SongSelection")
             {
                 var view = SongSelectionLayoutBuilder.Build();
                 screen = view;
@@ -274,15 +265,7 @@ namespace RhythmDojo.Tests
                 var view = clone.GetComponent<SettingsView>();
                 screen = view;
                 validate = view.Validate;
-                if (field == "settings")
-                {
-                    var controller = clone.GetComponent<SettingsScreen>();
-                    var root = clone.AddComponent<ScreenCompositionRoot>();
-                    SceneDependencyAssembler.Wire(root, "settings", Settings);
-                    SceneDependencyAssembler.Wire(root, "audioSettings", controller);
-                    screen = root;
-                    validate = root.Validate;
-                }
+
             }
 
             try

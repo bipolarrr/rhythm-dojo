@@ -23,13 +23,10 @@ namespace RhythmDojo.UI
         private readonly GameSettings settings;
         private readonly ISongSelectionService selection;
         private readonly ISelectionPreferences preferences;
-        private readonly HardModePreferences hardMode;
         private readonly float speedSliderMinimum;
         private readonly TimingCalibrationDialog calibration;
         private readonly PresentationPreferences presentation;
         private GameplayRulesSettings gameplayRules;
-        private UnityEngine.Events.UnityAction<int>[] hardRuleActions;
-        private UnityEngine.Events.UnityAction<string>[] hardCountActions;
 
         private ScrollMode speedScrollMode = ScrollMode.Constant;
         private Action<double> gameplaySpeedChanged;
@@ -61,7 +58,6 @@ namespace RhythmDojo.UI
             this.settings = settings;
             this.selection = selection;
             this.preferences = preferences;
-            this.hardMode = hardMode;
             this.presentation = presentation ?? new PresentationPreferences();
             speedScrollMode = selection?.SelectedScrollMode ?? preferences.ScrollMode;
             speedSliderMinimum = view.speedSlider.minValue;
@@ -79,25 +75,6 @@ namespace RhythmDojo.UI
                 gameplayRules = new GameplayRulesSettings(view.playRuleLists, rules);
             }
 
-            hardRuleActions = new UnityEngine.Events.UnityAction<int>[3];
-            hardCountActions = new UnityEngine.Events.UnityAction<string>[3];
-
-            for (int i = 0; i < 3; i++)
-            {
-                int index = i;
-                var rule = hardMode.GetRule((Judgment)i);
-                Configure(
-                    view.hardRuleLists[i],
-                    new[] { "체력 유지", "체력 감소", "즉시 게임 오버" },
-                    (int)rule.Action
-                );
-                hardRuleActions[i] = value => HardRuleChanged(index);
-                hardCountActions[i] = value => HardCountChanged(index, value);
-                view.hardRuleLists[i].onValueChanged.AddListener(hardRuleActions[i]);
-                view.hardLossCounts[i].onEndEdit.AddListener(hardCountActions[i]);
-            }
-
-            RefreshHardModeRows();
             view.speedSlider.SetValueWithoutNotify(
                 (float)(selection?.SelectedMultiplier ?? preferences.Multiplier)
             );
@@ -122,165 +99,7 @@ namespace RhythmDojo.UI
             RefreshGameplay();
         }
 
-        public Selectable HardModeLastControl()
-        {
-            if (gameplayRules != null)
-            {
-                return view.playRuleLists[4];
-            }
-            else if (view.hardLossCounts[2].interactable)
-            {
-                return (Selectable)view.hardLossCounts[2];
-            }
-            else
-            {
-                return view.hardRuleLists[2];
-            }
-        }
-
-        private void HardRuleChanged(int index)
-        {
-            if (!view.CanEdit)
-            {
-                return;
-            }
-
-            var rule = hardMode.GetRule((Judgment)index);
-            hardMode.SetRule(
-                (Judgment)index,
-                (HealthRuleAction)view.hardRuleLists[index].value,
-                rule.LossCount
-            );
-            hardMode.Save();
-            RefreshHardModeRows();
-        }
-
-        private void HardCountChanged(int index, string value)
-        {
-            if (!view.CanEdit)
-            {
-                return;
-            }
-
-            var rule = hardMode.GetRule((Judgment)index);
-
-            if (!int.TryParse(value, out int count))
-            {
-                count = rule.LossCount;
-            }
-
-            hardMode.SetRule((Judgment)index, rule.Action, count);
-            hardMode.Save();
-            RefreshHardModeRows();
-        }
-
-        private void RefreshHardModeRows()
-        {
-            for (int i = 0; i < 3; i++)
-            {
-                var rule = hardMode.GetRule((Judgment)i);
-                view.hardRuleLists[i].SetValueWithoutNotify((int)rule.Action);
-                view.hardLossCounts[i].SetTextWithoutNotify(rule.LossCount.ToString());
-
-                bool damage = rule.Action == HealthRuleAction.Damage;
-                view.hardLossCounts[i].interactable = damage;
-
-                Selectable next;
-
-                if (i < 2)
-                {
-                    next = view.hardRuleLists[i + 1];
-                }
-                else
-                {
-                    next = view.apply;
-                }
-
-                var nav = view.hardRuleLists[i].navigation;
-                nav.mode = Navigation.Mode.Explicit;
-
-                if (damage)
-                {
-                    nav.selectOnRight = view.hardLossCounts[i];
-                }
-                else
-                {
-                    nav.selectOnRight = null;
-                }
-
-                nav.selectOnDown = next;
-
-                if (i > 0)
-                {
-                    nav.selectOnUp = view.hardRuleLists[i - 1];
-                }
-                else
-                {
-                    nav.selectOnUp = view.timingOffset;
-                }
-
-                view.hardRuleLists[i].navigation = nav;
-                nav = view.hardLossCounts[i].navigation;
-                nav.mode = Navigation.Mode.Explicit;
-                nav.selectOnLeft = view.hardRuleLists[i];
-                nav.selectOnDown = next;
-                nav.selectOnUp = view.hardRuleLists[i];
-                view.hardLossCounts[i].navigation = nav;
-            }
-
-            var timingNavigation = view.timingOffset.navigation;
-
-            if (gameplayRules != null)
-            {
-                timingNavigation.selectOnDown = view.playRuleLists[0];
-            }
-            else
-            {
-                timingNavigation.selectOnDown = view.hardRuleLists[0];
-            }
-
-            var nextControl = timingNavigation.selectOnDown;
-            var nextNavigation = nextControl.navigation;
-            nextNavigation.selectOnUp = calibration.Entry;
-            nextControl.navigation = nextNavigation;
-
-            calibration.Entry.navigation = new Navigation
-            {
-                mode = Navigation.Mode.Explicit,
-                selectOnUp = view.timingOffset,
-                selectOnDown = nextControl,
-                selectOnRight = calibration.SpeedEntry,
-            };
-            calibration.SpeedEntry.navigation = new Navigation
-            {
-                mode = Navigation.Mode.Explicit,
-                selectOnUp = view.timingOffset,
-                selectOnDown = nextControl,
-                selectOnLeft = calibration.Entry,
-                selectOnRight = view.judgmentPositionList,
-            };
-
-            if (view.judgmentPositionList)
-            {
-                view.judgmentPositionList.navigation = new Navigation
-                {
-                    mode = Navigation.Mode.Explicit,
-                    selectOnUp = view.gameplayTab,
-                    selectOnLeft = calibration.SpeedEntry,
-                    selectOnDown = view.timingOffset,
-                };
-            }
-
-            timingNavigation.selectOnDown = calibration.Entry;
-            view.timingOffset.navigation = timingNavigation;
-
-            if (view.gameplayPanel.activeSelf)
-            {
-                var nav = view.apply.navigation;
-                nav.selectOnUp = HardModeLastControl();
-                view.apply.navigation = nav;
-            }
-        }
+        public Selectable HardModeLastControl() => view.playRuleLists[4];
 
         public bool TickCalibration() => calibration.Tick();
 
@@ -450,16 +269,6 @@ namespace RhythmDojo.UI
             view.railOpacity.onValueChanged.RemoveListener(RailOpacityChanged);
             calibration.Dispose();
             gameplayRules?.Dispose();
-
-            for (int i = 0; i < hardRuleActions.Length; i++)
-            {
-                view.hardRuleLists[i].onValueChanged.RemoveListener(hardRuleActions[i]);
-            }
-
-            for (int i = 0; i < hardCountActions.Length; i++)
-            {
-                view.hardLossCounts[i].onEndEdit.RemoveListener(hardCountActions[i]);
-            }
 
             view.speedSlider.onValueChanged.RemoveListener(SpeedChanged);
             view.speedSlider.minValue = speedSliderMinimum;

@@ -174,7 +174,7 @@ namespace RhythmDojo.EditorTools
             laneRoot.offsetMin = laneRoot.offsetMax = Vector2.zero;
             view.lanes = canvas.gameObject.AddComponent<HudLaneLayout>();
             view.lanes.laneRoot = laneRoot;
-            view.returnButton = UiElements.Button(
+            view.returnButton = DojoScreenStyle.Action(
                 "Song List",
                 canvas.transform,
                 "곡 선택으로",
@@ -182,12 +182,6 @@ namespace RhythmDojo.EditorTools
                 Vector2.zero
             );
             Bounds((RectTransform)view.returnButton.transform, .74f, .12f, .97f, .19f);
-            view.returnButton.GetComponent<Image>().color = new Color(.17f, .07f, .09f);
-
-            var outline = view.returnButton.gameObject.AddComponent<Outline>();
-            outline.effectColor = Red;
-            outline.effectDistance = new Vector2(1, -1);
-
             var caption = view.returnButton.GetComponentInChildren<Text>();
             caption.font = font;
             caption.fontSize = 16;
@@ -255,6 +249,9 @@ namespace RhythmDojo.EditorTools
             view.introduction = help.gameObject;
             ApplyIngameLayout(view);
             GameplayAtmosphereBuilder.RefineHud(view);
+            var menu = view.GetComponent<GameplayPauseMenu>();
+            DojoScreenStyle.Typography(menu.panel.transform);
+            DojoScreenStyle.Heading(view.gameOverText);
 
             return view;
         }
@@ -346,15 +343,11 @@ namespace RhythmDojo.EditorTools
             frame.artwork = SettingsArtAssets.Load("SettingsPanel", UiArtworkCrop.Full,
                 new Vector4(128, 128, 128, 128));
             frame.RefreshArtwork();
+            frame.color = DojoScreenStyle.Paper;
             menu.resumeButton = PauseButton("Resume Play", dialog, "이어하기", .14f, .69f, .86f, .80f);
-            menu.resumeButton.GetComponentInChildren<PixelDojoFrameGraphic>().color = new Color(.57f, .14f, .10f);
-            menu.resumeButton.GetComponentInChildren<Text>().color = Cream;
             var title = Label("Pause Heading", dialog, "수련 일시정지", .08f, .84f, .92f, .96f, 30, role: UiTextRole.Title);
             title.color = new Color(.24f, .12f, .085f);
             title.alignment = TextAnchor.MiddleCenter;
-            menu.settingsButton = PauseButton("Pause Settings", dialog, "설정", .14f, .58f, .86f, .74f);
-            menu.settingsButton.interactable = false;
-            menu.settingsButton.gameObject.SetActive(false);
             menu.restartButton = PauseButton("Restart Play", dialog, "처음부터 다시", .14f, .35f, .86f, .51f);
             menu.exitButton = PauseButton("Exit Play", dialog, "곡 선택", .14f, .12f, .86f, .28f);
             menu.recoveryStatus = Label("Audio Recovery Status", dialog, "", .04f, .005f, .96f, .115f, 14);
@@ -362,6 +355,12 @@ namespace RhythmDojo.EditorTools
             menu.recoveryStatus.alignment = TextAnchor.MiddleCenter;
             menu.recoveryStatus.raycastTarget = false;
             menu.recoveryStatus.gameObject.SetActive(false);
+            DojoMenuNavigation.Link(menu.resumeButton, menu.exitButton, menu.restartButton);
+            DojoMenuNavigation.Link(menu.restartButton, menu.resumeButton, menu.exitButton);
+            DojoMenuNavigation.Link(menu.exitButton, menu.restartButton, menu.resumeButton);
+            var group = dialog.gameObject.AddComponent<CanvasGroup>();
+            var reveal = dialog.gameObject.AddComponent<DojoReveal>();
+            reveal.group = group;
             shade.gameObject.SetActive(false);
 
             var countdown = Panel("Resume Countdown", parent, new Color(.08f, .035f, .015f, .55f), 0, 0, 1, 1);
@@ -390,8 +389,7 @@ namespace RhythmDojo.EditorTools
             view.judgmentRecordPanel = view.counts.transform.parent.gameObject;
 
             var menu = view.GetComponent<GameplayPauseMenu>();
-            var dialog = menu.settingsButton.transform.parent;
-            Bounds((RectTransform)menu.settingsButton.transform, .14f, .45f, .86f, .55f);
+            var dialog = menu.resumeButton.transform.parent;
             Bounds((RectTransform)menu.restartButton.transform, .14f, .44f, .86f, .58f);
             Bounds((RectTransform)menu.exitButton.transform, .14f, .23f, .86f, .37f);
             view.focusHudButton = PauseButton("Focus HUD", dialog, "HUD · 기본", .14f, .57f, .86f, .67f);
@@ -403,21 +401,10 @@ namespace RhythmDojo.EditorTools
         private static Button PauseButton(string name, Transform parent, string text,
             float x0, float y0, float x1, float y1)
         {
-            var button = UiElements.Button(name, parent, text, Vector2.zero, Vector2.zero);
+            var button = DojoScreenStyle.Action(name, parent, text, Vector2.zero, Vector2.zero,
+                name == "Resume Play");
             Bounds((RectTransform)button.transform, x0, y0, x1, y1);
-            var frame = PixelSongSelectionStyle.Frame((RectTransform)button.transform, Color.white, 10);
-            frame.artwork = SettingsArtAssets.Load("SettingsControl", UiArtworkCrop.Full,
-                new Vector4(128, 128, 128, 128));
-            frame.RefreshArtwork();
-            var label = button.GetComponentInChildren<Text>();
-            label.fontSize = 32;
-            label.color = new Color(.24f, .12f, .085f);
-            var colors = button.colors;
-            colors.normalColor = Color.white;
-            colors.highlightedColor = new Color(1, .91f, .70f);
-            colors.selectedColor = colors.highlightedColor;
-            colors.pressedColor = new Color(.74f, .55f, .34f);
-            button.colors = colors;
+            button.GetComponentInChildren<Text>().fontSize = 40;
             return button;
         }
 
@@ -432,7 +419,6 @@ namespace RhythmDojo.EditorTools
         )
         {
             var rect = Panel(name, parent, Color.clear, x0, y0, x1, y1);
-
 
             return rect;
         }

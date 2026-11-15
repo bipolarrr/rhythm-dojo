@@ -28,6 +28,11 @@ namespace RhythmDojo.Tests
             yield return WaitForGameplayIntroduction();
         }
 
+        private static IEnumerator WaitForResultsIntroduction()
+        {
+            yield return Await(() => Object.FindFirstObjectByType<ResultsView>().presentation.inputGate.interactable);
+        }
+
         private static void Complete(RhythmGameController game, bool perfect, double inputErrorSeconds = 0)
         {
             game.StartSession();
@@ -68,9 +73,103 @@ namespace RhythmDojo.Tests
 
         [UnityTest]
         [Category("SceneIntegration")]
-        public IEnumerator ConsistentTimingRecommendationIsSavedOnlyOnApplyAndUsedForRetry(
-            [Values(false, true)] bool olderScene
-        )
+        public IEnumerator RevealKeepsResultsImmutableAndSkipCannotSubmitRetry()
+        {
+            yield return LoadGameplay();
+            Complete(Object.FindFirstObjectByType<RhythmGameController>(), true);
+            yield return Await(() => Object.FindFirstObjectByType<ResultsScreen>());
+            yield return null;
+            var flow = Object.FindFirstObjectByType<AppFlowController>();
+            var result = flow.LastResult;
+            int score = result.Score;
+            var view = Object.FindFirstObjectByType<ResultsView>();
+            var screen = view.GetComponent<ResultsScreen>();
+            var presentation = view.presentation;
+            var sounds = presentation.sounds;
+            int children = view.GetComponentsInChildren<Transform>(true).Length;
+            Assert.That(presentation.IsRevealing, Is.True);
+            Assert.That(view.retryButton.IsInteractable(), Is.False);
+            Assert.That(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject, Is.Null);
+
+            yield return Await(() => presentation.Elapsed >= .30f);
+            CaptureSelection("results-reveal/01-brush", 1920, 1080);
+            yield return Await(() => presentation.Elapsed >= .76f);
+            int displayed = int.Parse(view.scoreValue.text, System.Globalization.NumberStyles.AllowThousands);
+            Assert.That(displayed, Is.InRange(1, score - 1));
+            Assert.That(result.Score, Is.EqualTo(score));
+            CaptureSelection("results-reveal/02-count", 1920, 1080);
+            yield return Await(() => presentation.Elapsed >= 1.25f);
+            CaptureSelection("results-reveal/03-statistics", 1920, 1080);
+            yield return WaitForResultsIntroduction();
+            Assert.That(view.scoreValue.text, Is.EqualTo(score.ToString("N0")));
+            Assert.That(flow.LastResult, Is.SameAs(result));
+            Assert.That(sounds.LastClip, Is.SameAs(sounds.complete));
+            yield return null;
+            yield return null;
+            CaptureSelection("results-reveal/04-complete", 1920, 1080);
+
+            // Reopening the authored view restarts the same sequence without new UI/audio objects.
+            view.gameObject.SetActive(false);
+            Assert.That(sounds.voices.All(source => !source.isPlaying), Is.True);
+            view.gameObject.SetActive(true);
+            yield return null;
+            Assert.That(presentation.IsRevealing, Is.True);
+            Assert.That(view.scoreValue.text, Is.EqualTo("0"));
+            Assert.That(view.GetComponentsInChildren<Transform>(true).Length, Is.EqualTo(children));
+            var samples = new float[1024];
+            float peak = 0;
+            double deadline = Time.realtimeSinceStartupAsDouble + 1;
+            while (peak < .00001f && Time.realtimeSinceStartupAsDouble < deadline)
+            {
+                yield return null;
+                AudioListener.GetOutputData(samples, 0);
+                foreach (float sample in samples)
+                {
+                    peak = Mathf.Max(peak, Mathf.Abs(sample));
+                }
+            }
+            Assert.That(peak, Is.GreaterThan(.00001f), "Authored Results Foley must reach the audio output.");
+            System.IO.File.WriteAllText("Logs/results-reveal/output-peak.txt", peak.ToString("R"));
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.Space));
+            yield return null;
+            yield return null;
+            Assert.That(presentation.IsRevealing, Is.False);
+            Assert.That(sounds.voices.All(source => !source.isPlaying), Is.True);
+            int played = sounds.PlayedCount;
+            yield return new WaitForSecondsRealtime(.25f);
+            Assert.That(view.retryButton.IsInteractable(), Is.False, "Held skip cannot submit retry.");
+            Assert.That(sounds.PlayedCount, Is.EqualTo(played), "No deferred cue may survive skipping.");
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+            yield return WaitForResultsIntroduction();
+            Assert.That(SceneManager.GetActiveScene().path, Is.EqualTo(AppFlowController.ResultsPath));
+            Assert.That(view.scoreValue.text, Is.EqualTo(score.ToString("N0")));
+            Assert.That(flow.LastResult, Is.SameAs(result));
+
+            yield return Press(Key.Space);
+            yield return Await(() => Object.FindFirstObjectByType<RhythmGameController>());
+            yield return WaitForGameplayIntroduction();
+            Complete(Object.FindFirstObjectByType<RhythmGameController>(), false);
+            yield return Await(() => Object.FindFirstObjectByType<ResultsScreen>());
+            yield return null;
+            view = Object.FindFirstObjectByType<ResultsView>();
+            Assert.That(view.presentation.IsRevealing, Is.True);
+            Assert.That(view.retryButton.IsInteractable(), Is.False);
+            yield return WaitForResultsIntroduction();
+            Assert.That(view.presentation.sounds.LastClip, Is.SameAs(view.presentation.sounds.failed));
+            Assert.That(view.outcome.text, Is.EqualTo("FAILED"));
+            yield return null;
+            yield return null;
+            CaptureSelection("results-reveal/05-failed", 1920, 1080);
+            screen = view.GetComponent<ResultsScreen>();
+            screen.Display(flow.LastResult);
+            yield return Press(Key.Escape);
+            yield return Await(() => SceneManager.GetActiveScene().path == AppFlowController.SelectionPath);
+            Assert.That(Object.FindFirstObjectByType<ResultsSoundPlayer>(), Is.Null);
+        }
+
+        [UnityTest]
+        [Category("SceneIntegration")]
+        public IEnumerator ConsistentTimingRecommendationIsSavedOnlyOnApplyAndUsedForRetry()
         {
             var flow = Object.FindFirstObjectByType<AppFlowController>();
             flow.Preferences.TimingOffsetMs = 10;
@@ -79,19 +178,10 @@ namespace RhythmDojo.Tests
             yield return WaitForGameplayIntroduction();
             Complete(game, true, .020);
             yield return Await(() => Object.FindFirstObjectByType<ResultsScreen>());
+            yield return WaitForResultsIntroduction();
             yield return null;
 
             var view = Object.FindFirstObjectByType<ResultsView>();
-            if (olderScene)
-            {
-                Object.Destroy(view.recommendationButton.gameObject);
-                view.recommendationButton = null;
-                yield return null;
-
-                var screen = Object.FindFirstObjectByType<ResultsScreen>();
-                screen.Initialize(flow.LastResult, flow.ReturnFromGameplay, flow.RetryResultAsync, flow.Preferences);
-            }
-
             var recommendation = view.recommendationButton;
             Assert.That(recommendation.gameObject.activeInHierarchy, Is.True);
             var recommendationRect = (RectTransform)recommendation.transform;
@@ -99,8 +189,7 @@ namespace RhythmDojo.Tests
             Assert.That(recommendationRect.anchorMax.y, Is.LessThan(retryRect.anchorMin.y));
             Assert.That(recommendationRect.anchorMin.x, Is.EqualTo(retryRect.anchorMin.x));
             Assert.That(recommendationRect.anchorMax.x, Is.EqualTo(retryRect.anchorMax.x));
-            Assert.That(recommendation.GetComponentInChildren<PixelDojoFrameGraphic>().artwork,
-                Is.SameAs(view.retryButton.GetComponentInChildren<PixelDojoFrameGraphic>().artwork));
+            Assert.That(recommendation.GetComponentsInChildren<PixelDojoFrameGraphic>(), Is.Empty);
             Assert.That(recommendation.GetComponentInChildren<Text>().text, Does.Contain("+30 ms"));
             Assert.That(flow.Preferences.TimingOffsetMs, Is.EqualTo(10));
             yield return Click(recommendation);
@@ -121,6 +210,7 @@ namespace RhythmDojo.Tests
             yield return WaitForGameplayIntroduction();
             Complete(Object.FindFirstObjectByType<RhythmGameController>(), true);
             yield return Await(() => Object.FindFirstObjectByType<ResultsScreen>());
+            yield return WaitForResultsIntroduction();
 
             var result = flow.LastResult;
             Assert.That(result.TimingOffsetRecommendationMs, Is.Null);
@@ -158,15 +248,27 @@ namespace RhythmDojo.Tests
             Assert.That(settings.gameObject.activeSelf, Is.False);
             Assert.That(flow.LastResult, Is.SameAs(result));
             Assert.That(SceneManager.GetActiveScene().path, Is.EqualTo(AppFlowController.ResultsPath));
+            Assert.That(view.presentation.IsRevealing, Is.False, "Closing calibration must not replay Results.");
+            Assert.That(view.retryButton.IsInteractable(), Is.True);
             yield return Click(view.retryButton);
             yield return Await(() => Object.FindFirstObjectByType<RhythmGameController>());
             Assert.That(flow.CurrentRequest.TimingOffsetMs, Is.EqualTo(offset));
         }
 
         [UnityTest]
+        [Category("Smoke")]
         [Category("SceneIntegration")]
         public IEnumerator CompletionDisplaysThisPlayAndNextPlayReplacesIt()
         {
+            yield return SceneManager.LoadSceneAsync(MainMenuActions.TitleScenePath);
+            yield return null;
+            yield return Click(Object.FindFirstObjectByType<TitleSkyView>().start);
+            yield return Await(() => SceneManager.GetActiveScene().path == MainMenuActions.ModeSelectionScenePath);
+            var menu = Object.FindFirstObjectByType<MainMenuScreen>();
+            yield return Await(() => menu.CanSubmit);
+            yield return Press(Key.Enter);
+            yield return Await(() => SceneManager.GetActiveScene().path == AppFlowController.SelectionPath);
+
             var flow = Object.FindFirstObjectByType<AppFlowController>();
             var expectedCover = Object.FindFirstObjectByType<SongSelectionView>().album.sprite;
             yield return LoadGameplay();
@@ -183,6 +285,7 @@ namespace RhythmDojo.Tests
             var expected = game.Session.Snapshot;
             yield return AssertOutcomeRemainsVisible("Full Combo", 2);
             yield return Await(() => Object.FindFirstObjectByType<ResultsScreen>());
+            yield return WaitForResultsIntroduction();
             yield return null;
             var view = Object.FindFirstObjectByType<ResultsView>();
             // The current art direction replaces the legacy demo placeholder with the dojo cover.
@@ -201,6 +304,7 @@ namespace RhythmDojo.Tests
             Assert.That(view.good.text, Is.EqualTo("0"));
             Assert.That(view.miss.text, Is.EqualTo("0"));
             Assert.That(view.outcome.text, Is.EqualTo("S"));
+            Assert.That(view.progressNote.text, Is.EqualTo("수련 완료"));
             Assert.That(flow.LastResult.MaxCombo, Is.EqualTo(expected.TotalNotes));
             Assert.That(view.accuracy.text, Is.EqualTo("정확도  100.00%"));
             Assert.That(flow.CurrentRequest, Is.Null);
@@ -211,10 +315,47 @@ namespace RhythmDojo.Tests
             Assert.That(view.scoreValue.text, Is.EqualTo(flow.LastResult.Score.ToString("N0")));
             Assert.That(view.retryButton.interactable, Is.True);
             Assert.That(view.moreButton.onClick.GetPersistentEventCount(), Is.Zero);
-            yield return Click(view.moreButton);
+            Assert.That(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject,
+                Is.SameAs(view.retryButton.gameObject));
+            var reveals = view.presentation.tracks;
+            var homes = reveals.Select(reveal => reveal.rect.anchoredPosition).ToArray();
+            var screen = view.GetComponent<ResultsScreen>();
+            screen.Display(flow.LastResult);
+            Assert.That(view.scoreValue.text, Is.EqualTo("0"));
+            Assert.That(reveals[0].group.alpha, Is.Zero);
+            yield return null;
+            screen.Display(flow.LastResult);
+            yield return WaitForResultsIntroduction();
+            for (int i = 0; i < reveals.Length; i++)
+            {
+                Assert.That(Vector2.Distance(reveals[i].rect.anchoredPosition, homes[i]), Is.LessThan(.01f));
+                Assert.That(reveals[i].group.alpha, Is.EqualTo(1));
+            }
+
+            yield return Press(Key.DownArrow);
+            if (view.recommendationButton.gameObject.activeInHierarchy && view.recommendationButton.interactable)
+            {
+                yield return Press(Key.DownArrow);
+            }
+            Assert.That(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject,
+                Is.SameAs(view.moreButton.gameObject));
+            yield return new WaitForSecondsRealtime(.3f);
+            CaptureSelection("dojo-menu-refresh/results", 1920, 1080);
+            yield return Press(Key.Space);
             Assert.That(SceneManager.GetActiveScene().path, Is.EqualTo(AppFlowController.ResultsPath));
             Assert.That(view.review.gameObject.activeSelf, Is.True);
-            yield return Click(view.review.closeButton);
+            yield return Press(Key.DownArrow);
+            int zoom = view.review.zoom.value;
+            yield return Press(Key.RightArrow);
+            Assert.That(view.review.zoom.value, Is.EqualTo(zoom + 1));
+            yield return Press(Key.Space);
+            yield return Press(Key.Escape);
+            yield return new WaitForSecondsRealtime(.2f);
+            Assert.That(view.review.gameObject.activeSelf, Is.True);
+            CaptureSelection("dojo-menu-refresh/results-review", 1920, 1080);
+            yield return Press(Key.Escape);
+            Assert.That(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject,
+                Is.SameAs(view.moreButton.gameObject));
             yield return Click(view.retryButton);
             yield return Await(() => Object.FindFirstObjectByType<RhythmGameController>());
             Assert.That(flow.CurrentRequest.Song.ChartId, Is.EqualTo(request.Song.ChartId));
@@ -231,6 +372,7 @@ namespace RhythmDojo.Tests
             Complete(game, false);
             expected = game.Session.Snapshot;
             yield return Await(() => Object.FindFirstObjectByType<ResultsScreen>());
+            yield return WaitForResultsIntroduction();
             yield return null;
             view = Object.FindFirstObjectByType<ResultsView>();
             Assert.That(expected.Miss, Is.EqualTo(expected.TotalNotes));
@@ -239,6 +381,10 @@ namespace RhythmDojo.Tests
             Assert.That(flow.LastResult.MaxCombo, Is.Zero);
             Assert.That(view.outcome.text, Is.EqualTo("FAILED"));
             Assert.That(view.accuracy.text, Is.EqualTo("정확도  0.00%"));
+            yield return Press(Key.Escape);
+            yield return Await(() => SceneManager.GetActiveScene().path == AppFlowController.SelectionPath);
+            Assert.That(Object.FindFirstObjectByType<SongSelectionView>().practice.gameObject.activeInHierarchy, Is.True);
+            Assert.That(flow.Selection.SelectedSongId, Is.EqualTo(request.Song.SongId));
         }
 
         [UnityTest]
@@ -256,6 +402,7 @@ namespace RhythmDojo.Tests
             Assert.That(game.Session.State, Is.EqualTo(SessionState.GameOver));
             yield return AssertOutcomeRemainsVisible("GAME OVER");
             yield return Await(() => Object.FindFirstObjectByType<ResultsScreen>());
+            yield return WaitForResultsIntroduction();
             yield return null;
             var view = Object.FindFirstObjectByType<ResultsView>();
             Assert.That(view.outcome.text, Is.EqualTo("FAILED"));
@@ -263,7 +410,7 @@ namespace RhythmDojo.Tests
             StringAssert.StartsWith("수련 중단", view.progressNote.text);
             Assert.That(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject,
                 Is.EqualTo(view.retryButton.gameObject));
-            yield return Click(view.backButton);
+            yield return Press(Key.Escape);
             yield return Await(() => Object.FindFirstObjectByType<SongSelectionScreen>());
             yield return LoadGameplay();
             yield return Press(Key.Space);
@@ -297,6 +444,7 @@ namespace RhythmDojo.Tests
             Complete(game, true);
             yield return AssertOutcomeRemainsVisible("Full Combo", 2);
             yield return Await(() => Object.FindFirstObjectByType<ResultsScreen>());
+            yield return WaitForResultsIntroduction();
         }
 
         private IEnumerator AssertOutcomeRemainsVisible(string outcome, double minimumDelay = 1)
@@ -316,22 +464,8 @@ namespace RhythmDojo.Tests
             Assert.That(Object.FindFirstObjectByType<ResultsScreen>(), Is.Null);
             Assert.That(view.gameOverPanel.activeSelf, Is.True);
             yield return Await(() => Object.FindFirstObjectByType<ResultsScreen>());
+            yield return WaitForResultsIntroduction();
             Assert.That(Time.realtimeSinceStartupAsDouble - started, Is.GreaterThanOrEqualTo(minimumDelay));
-        }
-
-        [UnityTest]
-        [Category("SceneIntegration")]
-        public IEnumerator DirectResultsSceneHasEmptyStateAndBackWorks()
-        {
-            yield return SceneManager.LoadSceneAsync(AppFlowController.ResultsPath);
-            yield return null;
-            var view = Object.FindFirstObjectByType<ResultsView>();
-            view.Validate();
-            Assert.That(view.title.text, Is.EqualTo("플레이 결과가 없습니다"));
-            Assert.That(view.perfect.text, Is.EqualTo("—"));
-            Assert.That(view.moreButton.interactable, Is.False);
-            yield return Click(view.backButton);
-            yield return Await(() => Object.FindFirstObjectByType<SongSelectionScreen>());
         }
 
         [UnityTest]
@@ -343,6 +477,7 @@ namespace RhythmDojo.Tests
             int total = game.Session.Snapshot.TotalNotes;
             yield return Press(Key.Space);
             yield return Await(() => Object.FindFirstObjectByType<ResultsScreen>());
+            yield return WaitForResultsIntroduction();
             yield return null;
             var flow = Object.FindFirstObjectByType<AppFlowController>();
             Assert.That(flow.LastResult.Session.State, Is.EqualTo(SessionState.Completed));
@@ -373,6 +508,7 @@ namespace RhythmDojo.Tests
             Assert.That(expected.Good, Is.GreaterThan(0));
             Assert.That(expected.Perfect, Is.Zero);
             yield return Await(() => Object.FindFirstObjectByType<ResultsScreen>());
+            yield return WaitForResultsIntroduction();
             yield return null;
             var view = Object.FindFirstObjectByType<ResultsView>();
             Assert.That(view.good.text, Is.EqualTo(expected.Good.ToString()));
@@ -400,6 +536,7 @@ namespace RhythmDojo.Tests
             game.Session.Advance(chart.CompletionTime + 1);
             var expected = game.Session.Snapshot;
             yield return Await(() => Object.FindFirstObjectByType<ResultsScreen>());
+            yield return WaitForResultsIntroduction();
             yield return null;
             var view = Object.FindFirstObjectByType<ResultsView>();
             var result = flow.LastResult;
@@ -414,7 +551,7 @@ namespace RhythmDojo.Tests
             Assert.That(view.miss.text, Is.EqualTo(expected.Miss.ToString()));
             yield return Click(view.moreButton);
             Assert.That(view.review.gameObject.activeSelf, Is.True);
-            Assert.That(view.backButton.interactable, Is.False);
+            Assert.That(view.moreButton.interactable, Is.False);
             Assert.That(view.review.events.text, Does.Contain("시작: Good"));
             view.review.zoom.Show();
             yield return null;
@@ -473,12 +610,12 @@ namespace RhythmDojo.Tests
             yield return Press(Key.Escape);
             Assert.That(view.review.gameObject.activeSelf, Is.False);
             Assert.That(flow.LastResult, Is.SameAs(result));
-            Assert.That(view.backButton.interactable, Is.True);
+            Assert.That(view.moreButton.interactable, Is.True);
             Assert.That(SceneManager.GetActiveScene().path, Is.EqualTo(AppFlowController.ResultsPath));
             yield return Click(view.moreButton);
             Assert.That(view.review.GetComponent<ResultsChartReview>().SelectedIndex, Is.Zero);
             yield return Click(view.review.closeButton);
-            yield return Click(view.backButton);
+            yield return Press(Key.Escape);
             yield return Await(() => Object.FindFirstObjectByType<SongSelectionScreen>());
         }
 
@@ -496,6 +633,7 @@ namespace RhythmDojo.Tests
             yield return WaitForGameplayIntroduction();
             Complete(game, false);
             yield return Await(() => Object.FindFirstObjectByType<ResultsScreen>());
+            yield return WaitForResultsIntroduction();
             yield return null;
             var result = flow.LastResult;
             Assert.That(result.Notes.Count, Is.EqualTo(count));

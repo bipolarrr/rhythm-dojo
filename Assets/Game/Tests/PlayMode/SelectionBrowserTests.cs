@@ -119,11 +119,11 @@ namespace RhythmDojo.Tests
         {
             var screen = Object.FindFirstObjectByType<SongSelectionScreen>();
             var view = Object.FindFirstObjectByType<SongSelectionView>();
-            screen.SelectSong("demo-melody");
+            screen.SelectSong("test-pulse");
             yield return null;
-            Assert.That(view.songTitle.text, Does.Contain("Demo Melody"));
+            Assert.That(view.songTitle.text, Does.Contain("Foundation Pulse"));
             Assert.That(view.album.sprite, Is.Not.Null);
-            Assert.That(view.artistBpm.text, Does.Contain("120"));
+            Assert.That(view.artistBpm.text, Does.Contain("100"));
             CaptureSelection("demo-selection-1920", 1920, 1080);
             CaptureSelection("demo-selection-1280");
             CaptureSelection("demo-selection-4x3", 1024, 768);
@@ -142,7 +142,7 @@ namespace RhythmDojo.Tests
             yield return null;
             Assert.That(
                 Object.FindFirstObjectByType<RhythmGameController>().Chart.Count,
-                Is.EqualTo(54)
+                Is.EqualTo(18)
             );
         }
 
@@ -273,7 +273,7 @@ namespace RhythmDojo.Tests
             var screen = Object.FindFirstObjectByType<SongSelectionScreen>();
             var view = Object.FindFirstObjectByType<SongSelectionView>();
             var flow = Object.FindFirstObjectByType<AppFlowController>();
-            screen.SelectSong("demo-melody");
+            screen.SelectSong("test-pulse");
             yield return Click(view.play);
             yield return Await(
                 () => Object.FindFirstObjectByType<RhythmGameController>(),
@@ -282,15 +282,20 @@ namespace RhythmDojo.Tests
             yield return null;
 
             var game = Object.FindFirstObjectByType<RhythmGameController>();
-            var root = Object.FindFirstObjectByType<GameplayCompositionRoot>();
-            root.ReturnToSelection();
+            string recordKey = RecordIdentity.Rules(
+                flow.CurrentRequest.Song.ChartId,
+                flow.CurrentRequest.Song.Revision,
+                flow.CurrentRequest.Rules);
+            yield return WaitForGameplayIntroduction();
+            yield return Press(Key.Escape);
+            yield return Click(Object.FindFirstObjectByType<GameplayPauseMenu>().exitButton);
             yield return Await(
                 () => Object.FindFirstObjectByType<SongSelectionView>(),
                 "Record test: return to selection"
             );
             yield return null;
             Assert.That(
-                flow.Preferences.FindRecord("demo-melody", flow.SelectedDifficulty.name),
+                flow.Preferences.FindRecord("test-pulse", recordKey),
                 Is.Null
             );
             view = Object.FindFirstObjectByType<SongSelectionView>();
@@ -337,7 +342,8 @@ namespace RhythmDojo.Tests
                 );
             }
 
-            game.Session.Start();
+            yield return WaitForGameplayIntroduction();
+            game.StartSession();
 
             foreach (var input in inputs.OrderBy(e => e.time).ThenBy(e => e.press))
             {
@@ -352,21 +358,17 @@ namespace RhythmDojo.Tests
             }
 
             game.Session.Advance(game.Chart.CompletionTime + 1);
-            yield return null;
-            yield return null;
+            int totalNotes = game.Session.Snapshot.TotalNotes;
+            yield return Await(() => Object.FindFirstObjectByType<ResultsView>());
 
             var best = new SelectionPreferences().FindRecord(
-                "demo-melody",
-                RecordIdentity.Rules(
-                    flow.CurrentRequest.Song.ChartId,
-                    flow.CurrentRequest.Song.Revision,
-                    flow.CurrentRequest.Rules
-                )
+                "test-pulse",
+                recordKey
             );
             Assert.That(best, Is.Not.Null);
             Assert.That(best.score, Is.EqualTo(1000000));
-            Assert.That(best.maxCombo, Is.EqualTo(game.Session.Snapshot.TotalNotes));
-            Object.FindFirstObjectByType<GameplayCompositionRoot>().ReturnToSelection();
+            Assert.That(best.maxCombo, Is.EqualTo(totalNotes));
+            yield return Press(Key.Escape);
             yield return Await(
                 () => Object.FindFirstObjectByType<SongSelectionView>(),
                 "Record test: return to selection"

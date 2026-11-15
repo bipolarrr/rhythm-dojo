@@ -33,11 +33,6 @@ namespace RhythmDojo.EditorTools
 
             var view = MainMenuLayoutBuilder.Build(modeSelection);
             SceneManager.MoveGameObjectToScene(view.gameObject, scene);
-            if (view.entrance)
-            {
-                view.entrance.transitionTemplate = AssetDatabase.LoadAssetAtPath<DojoEntranceTransition>(
-                    "Assets/Game/Prefabs/DojoEntranceTransition.prefab");
-            }
             var effects = view.gameObject.AddComponent<AudioSource>();
             effects.playOnAwake = false;
             if (view.modeSelection)

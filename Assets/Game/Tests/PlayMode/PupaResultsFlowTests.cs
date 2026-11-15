@@ -154,10 +154,11 @@ namespace RhythmDojo.Tests
             Assert.That(flow.CurrentRequest, Is.Null);
             Assert.That(PlayerPrefs.GetString(Services.SelectionPreferences.StorageKey, ""), Is.EqualTo(preferences));
             var view = Object.FindFirstObjectByType<ResultsView>();
+            yield return Await(() => view.presentation.inputGate.interactable);
             yield return Click(view.moreButton);
             Assert.That(view.review.GetComponent<ResultsChartReview>().Result.Notes.Count, Is.EqualTo(929));
             yield return Click(view.review.closeButton);
-            yield return Click(view.backButton);
+            yield return Press(UnityEngine.InputSystem.Key.Escape);
             yield return Await(() => returned != null);
             Assert.That(returned, Is.EqualTo("pupa-unsaved-session"));
             Assert.That(flow.IsEditorPlaytest, Is.False);

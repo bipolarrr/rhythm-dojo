@@ -33,7 +33,7 @@ namespace RhythmDojo.Tests
                 Assert.That(view.recommendationButton, Is.Not.Null);
                 Assert.That(view.recommendationButton.gameObject.activeSelf, Is.False);
                 Assert.That(view.moreButton.onClick.GetPersistentEventCount(), Is.Zero);
-                foreach (var button in new[] { view.backButton, view.moreButton })
+                foreach (var button in new[] { view.moreButton })
                 {
                     var label = button.GetComponentInChildren<Text>();
                     Assert.That(label.preferredWidth, Is.LessThanOrEqualTo(label.rectTransform.rect.width), label.text);
@@ -42,10 +42,10 @@ namespace RhythmDojo.Tests
                 var summary = (RectTransform)view.title.transform.parent;
                 Assert.That(view.feedback.anchorMin.y, Is.GreaterThan(summary.anchorMax.y));
                 Assert.That(view.progressNote, Is.Not.Null);
-                Assert.That(view.retryButton.GetComponentInChildren<PixelDojoFrameGraphic>().color,
-                    Is.Not.EqualTo(view.recommendationButton.GetComponentInChildren<PixelDojoFrameGraphic>().color));
+                Assert.That(view.retryButton.GetComponent<DojoControlFocus>().restingColor,
+                    Is.Not.EqualTo(view.recommendationButton.GetComponent<DojoControlFocus>().restingColor));
                 Canvas.ForceUpdateCanvases();
-                var buttons = new[] { view.backButton, view.moreButton, view.retryButton };
+                var buttons = new[] { view.moreButton, view.retryButton };
                 foreach (var button in buttons)
                 {
                     Assert.That(button.GetComponentsInChildren<Graphic>().Any(graphic => graphic.raycastTarget), Is.True);

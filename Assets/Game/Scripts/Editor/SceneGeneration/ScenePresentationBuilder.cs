@@ -103,6 +103,8 @@ namespace RhythmDojo.EditorTools
                 )
             );
 
+            ConfigureMenuInput(UnityEngine.Object.FindFirstObjectByType<UnityEngine.InputSystem.UI.InputSystemUIInputModule>());
+
             return parts;
         }
 
@@ -167,9 +169,10 @@ namespace RhythmDojo.EditorTools
             popupInput.transform.SetParent(view.transform, false);
             popupInput.AddComponent<UnityEngine.InputSystem.UI.InputSystemUIInputModule>()
                 .AssignDefaultActions();
+            ConfigureMenuInput(popupInput.GetComponent<UnityEngine.InputSystem.UI.InputSystemUIInputModule>());
 
             SceneBuilder.PrepareArtwork(scene);
-            view.backdrop.SetActive(false);
+            view.backdrop.SetActive(true);
             view.gameObject.SetActive(false);
             System.IO.Directory.CreateDirectory("Assets/Game/Resources/UI");
             PrefabUtility.SaveAsPrefabAsset(
@@ -177,7 +180,7 @@ namespace RhythmDojo.EditorTools
 
             UnityEngine.Object.DestroyImmediate(popupInput);
             UnityEngine.Object.DestroyImmediate(screen);
-            view.backdrop.SetActive(false);
+            view.backdrop.SetActive(true);
             view.gameObject.SetActive(true);
             SceneDependencyAssembler.Assemble(view, content.Settings);
             UiElements.EventSystem(
@@ -186,7 +189,78 @@ namespace RhythmDojo.EditorTools
                 )
             );
 
+            ConfigureMenuInput(UnityEngine.Object.FindFirstObjectByType<UnityEngine.InputSystem.UI.InputSystemUIInputModule>());
             return scene;
+        }
+
+        internal static void ConfigureMenuInput(UnityEngine.InputSystem.UI.InputSystemUIInputModule module)
+        {
+            const string path = "Assets/InputSystem_Actions.inputactions";
+            module.actionsAsset = SceneResources.Require<UnityEngine.InputSystem.InputActionAsset>(path);
+            // The module creates transient references when its asset changes. Replace them with
+            // imported subassets so prefab serialization retains every binding.
+            module.move = null;
+            module.submit = null;
+            module.cancel = null;
+            module.point = null;
+            module.leftClick = null;
+            module.rightClick = null;
+            module.middleClick = null;
+            module.scrollWheel = null;
+            module.trackedDevicePosition = null;
+            module.trackedDeviceOrientation = null;
+            foreach (var asset in AssetDatabase.LoadAllAssetsAtPath(path))
+            {
+                if (asset is UnityEngine.InputSystem.InputActionReference reference)
+                {
+                    if (reference.action.actionMap.name != "UI")
+                    {
+                        continue;
+                    }
+                    switch (reference.action.name)
+                    {
+                        case "Navigate":
+                            module.move = reference;
+                            break;
+                        case "MenuSubmit":
+                            module.submit = reference;
+                            break;
+                        case "Cancel":
+                            module.cancel = reference;
+                            break;
+                        case "Point":
+                            module.point = reference;
+                            break;
+                        case "Click":
+                            module.leftClick = reference;
+                            break;
+                        case "RightClick":
+                            module.rightClick = reference;
+                            break;
+                        case "MiddleClick":
+                            module.middleClick = reference;
+                            break;
+                        case "ScrollWheel":
+                            module.scrollWheel = reference;
+                            break;
+                        case "TrackedDevicePosition":
+                            module.trackedDevicePosition = reference;
+                            break;
+                        case "TrackedDeviceOrientation":
+                            module.trackedDeviceOrientation = reference;
+                            break;
+                    }
+                }
+            }
+            module.deselectOnBackgroundClick = false;
+            if (!module.submit || !module.move)
+            {
+                throw new System.InvalidOperationException("Menu navigation action references missing.");
+            }
+            if (!module.point || !module.leftClick)
+            {
+                throw new System.InvalidOperationException("Menu UI action references missing.");
+            }
         }
     }
 }

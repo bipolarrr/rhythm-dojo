@@ -62,15 +62,12 @@ namespace RhythmDojo.Tests
             yield return Press(Key.Space);
             yield return Press(Key.Escape);
             yield return Await(() => pauseMenu.panel.activeSelf);
-            view.SetFocusHud(true);
             Assert.That(game.IsPaused, Is.True);
             Assert.That(view.songInformationPanel.activeInHierarchy, Is.True);
             Assert.That(view.judgmentRecordPanel.activeInHierarchy, Is.False);
             Assert.That(view.combo.gameObject.activeInHierarchy, Is.False);
             Assert.That(view.healthFill.gameObject.activeInHierarchy, Is.True);
             Assert.That(view.progress.gameObject.activeInHierarchy, Is.False);
-            view.SetFocusHud(false);
-            Assert.That(view.judgmentRecordPanel.activeInHierarchy, Is.False);
             Assert.That(view.focusHudButton.gameObject.activeSelf, Is.False);
         }
 
@@ -356,7 +353,7 @@ namespace RhythmDojo.Tests
             Assert.That(flow.LastResult.Session.Resolved, Is.EqualTo(resolved));
 
             // Retry through song selection now that a finished play owns a separate scene.
-            yield return Click(view.backButton);
+            yield return Press(Key.Escape);
             yield return Await(() => UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>());
             yield return LoadGameplay();
             game = UnityEngine.Object.FindFirstObjectByType<RhythmGameController>();
@@ -574,8 +571,7 @@ namespace RhythmDojo.Tests
             Assert.That(result.Session.Resolved, Is.EqualTo(result.Session.TotalNotes));
             Assert.That(result.Session.IsFullCombo, Is.True);
             Assert.That(view.outcome.text, Is.EqualTo("S"));
-            Assert.That(view.backButton.gameObject.activeSelf, Is.True);
-            yield return Click(view.backButton);
+            yield return Press(Key.Escape);
             yield return Await(() =>
                 UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>()
             );

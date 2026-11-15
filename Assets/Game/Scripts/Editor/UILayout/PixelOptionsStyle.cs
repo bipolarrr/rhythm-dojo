@@ -17,170 +17,41 @@ namespace RhythmDojo.EditorTools
             view.pixelTheme = true;
             var backdrop = new GameObject("Pixel Dojo Backdrop", typeof(RectTransform), typeof(Image), typeof(AspectRatioFitter));
             view.backdrop = backdrop;
-            backdrop.transform.SetParent(view.transform, false);
+            backdrop.transform.SetParent(view.dimOpacity.transform, false);
             backdrop.transform.SetAsFirstSibling();
             Stretch((RectTransform)backdrop.transform);
             var image = backdrop.GetComponent<Image>();
-            image.sprite = DojoEntranceAssets.Load("TrainingInterior", UiArtworkCrop.Full);
+            image.sprite = DojoRenewalLayoutBuilder.Load("PreparationRoom");
             image.raycastTarget = false;
             var fit = backdrop.GetComponent<AspectRatioFitter>();
             fit.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
             fit.aspectRatio = image.sprite.rect.width / image.sprite.rect.height;
-            backdrop.SetActive(false);
-            view.transform.Find("Modal Shade").GetComponent<Image>().color = new Color(.055f, .035f, .025f, .55f);
-            var popup = view.transform.Find("Settings Popup");
-            var frame = PixelSongSelectionStyle.Frame((RectTransform)popup, new Color(.96f, .87f, .70f), 10);
-            frame.artwork = SettingsArtAssets.Load("SettingsPanel", UiArtworkCrop.Full,
-                new Vector4(128, 128, 128, 128));
-            frame.RefreshArtwork();
-            var shadow = frame.gameObject.AddComponent<Shadow>();
-            shadow.effectColor = new Color(.04f, .02f, .01f, .32f);
-            shadow.effectDistance = new Vector2(0, -12);
-            foreach (var text in view.GetComponentsInChildren<Text>(true))
-            {
-                text.font = AssetDatabase.LoadAssetAtPath<Font>(MainMenuLayoutBuilder.FontPath);
-                text.color = Ink;
-                text.verticalOverflow = VerticalWrapMode.Overflow;
-            }
-            var title = popup.Find("Title").GetComponent<Text>();
+            view.dimOpacity.GetComponent<Image>().color = Color.clear;
+            DojoScreenStyle.PaperFrame(view.panelRect, 14);
+            var title = view.panelRect.Find("Title").GetComponent<Text>();
             title.text = "도장 설정";
-            title.fontStyle = FontStyle.Bold;
-            foreach (var button in new[] { view.soundTab, view.graphicsTab, view.gameplayTab,
-                view.focusHudButton, view.back })
-            {
-                Button(button, new Color(.79f, .63f, .42f), Ink);
-                StyleSettingsButton(button);
-            }
-            view.back.GetComponentInChildren<PixelDojoFrameGraphic>().color = Color.white;
-            Button(view.apply, Red, Cream);
-            StyleSettingsButton(view.apply);
             foreach (var slider in view.GetComponentsInChildren<Slider>(true))
             {
-                StyleSlider(slider);
-                StyleSettingsSlider(slider);
+                DojoScreenStyle.Slider(slider);
             }
             foreach (var dropdown in view.GetComponentsInChildren<Dropdown>(true))
             {
                 ApplyDropdownStyle(dropdown);
             }
-            foreach (var input in view.GetComponentsInChildren<InputField>(true))
-            {
-                SetSettingsSurface(input.image);
-            }
         }
 
         public static void StyleKeySettings(SettingsView view)
         {
-            if (view.keyRowTemplate)
-            {
-                Button(view.keyRowTemplate.button, Color.white, Ink);
-                StyleSettingsButton(view.keyRowTemplate.button);
-            }
+            view.keyRowTemplate.button.GetComponent<DojoControlFocus>().scroll = view.keyRowsScroll;
             foreach (var button in view.keyBindingButtons)
             {
-                Button(button, Color.white, Ink);
-                StyleSettingsButton(button);
+                button.GetComponent<DojoControlFocus>().scroll = view.keyRowsScroll;
             }
-            foreach (var button in new[] { view.keySettingsTab, view.resetKeys })
-            {
-                Button(button, Color.white, Ink);
-                StyleSettingsButton(button);
-            }
-            foreach (var text in view.keySettingsPanel.GetComponentsInChildren<Text>(true))
-            {
-                text.color = Ink;
-            }
-        }
-
-        private static void StyleSettingsButton(Button button)
-        {
-            var frame = button.GetComponentInChildren<PixelDojoFrameGraphic>();
-            frame.artwork = SettingsArtAssets.Load("SettingsControl", UiArtworkCrop.Full,
-                new Vector4(128, 128, 128, 128));
-            frame.borderWidth = 8;
-            frame.RefreshArtwork();
-        }
-
-        private static void SetSettingsSurface(Image image)
-        {
-            image.sprite = SettingsArtAssets.Load("SettingsControl", UiArtworkCrop.Full,
-                new Vector4(128, 128, 128, 128));
-            image.type = Image.Type.Sliced;
-            image.pixelsPerUnitMultiplier = 16;
-            image.color = Color.white;
-        }
-
-        private static void StyleSettingsSlider(Slider slider)
-        {
-            var track = slider.transform.Find("Background");
-            if (track)
-            {
-                var image = track.GetComponent<Image>();
-                SetSettingsSurface(image);
-                image.color = new Color(.32f, .20f, .12f);
-            }
-
-            var fill = slider.fillRect.GetComponent<Image>();
-            SetSettingsSurface(fill);
-            fill.color = new Color(.95f, .62f, .26f);
-            SetSettingsSurface((Image)slider.targetGraphic);
         }
 
         internal static void ApplyDropdownStyle(Dropdown dropdown)
         {
-            StyleDropdown(dropdown);
-            StyleSettingsDropdown(dropdown);
-        }
-
-        private static void StyleSettingsDropdown(Dropdown dropdown)
-        {
-            SetSettingsSurface(dropdown.image);
-            SetSettingsSurface(dropdown.template.GetComponent<Image>());
-            foreach (var toggle in dropdown.template.GetComponentsInChildren<Toggle>(true))
-            {
-                var image = toggle.targetGraphic as Image;
-                if (image)
-                {
-                    SetSettingsSurface(image);
-                }
-
-                if (toggle.graphic)
-                {
-                    toggle.graphic.raycastTarget = false;
-                    toggle.graphic.gameObject.SetActive(false);
-                }
-            }
-
-            var arrow = dropdown.transform.Find("Arrow");
-            if (arrow)
-            {
-                arrow.GetComponent<Image>().enabled = false;
-            }
-
-            var ruleIndicator = dropdown.transform.Find("Rule Expand Indicator");
-            if (ruleIndicator)
-            {
-                ruleIndicator.gameObject.SetActive(false);
-            }
-
-            var indicator = new GameObject("Settings Expand Indicator", typeof(RectTransform));
-            indicator.transform.SetParent(dropdown.transform, false);
-            var rect = (RectTransform)indicator.transform;
-            rect.anchorMin = rect.anchorMax = new Vector2(1f, .5f);
-            rect.anchoredPosition = new Vector2(-22f, 0f);
-            rect.sizeDelta = new Vector2(16f, 12f);
-            for (int i = 0; i < 3; i++)
-            {
-                var step = new GameObject("Arrow Step " + i, typeof(RectTransform), typeof(Image));
-                step.transform.SetParent(indicator.transform, false);
-                var stepRect = (RectTransform)step.transform;
-                stepRect.anchorMin = stepRect.anchorMax = new Vector2(.5f, .5f);
-                stepRect.anchoredPosition = new Vector2(0f, 3f - i * 3f);
-                stepRect.sizeDelta = new Vector2(14f - i * 4f, 3f);
-                var image = step.GetComponent<Image>();
-                image.color = Ink;
-                image.raycastTarget = false;
-            }
+            DojoScreenStyle.Option(dropdown);
         }
 
         public static void ApplyQuit(MainMenuView view)

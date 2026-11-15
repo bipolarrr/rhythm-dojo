@@ -170,7 +170,8 @@ namespace RhythmDojo.Tests
                 var invalid = Object.FindFirstObjectByType<SongSelectionView>();
                 yield return Click(invalid.difficultyButtons[2]);
                 Assert.That(invalid.play.interactable, Is.False);
-                Assert.That(invalid.details.text, Does.Contain("재생 불가"));
+                Assert.That(invalid.practice.status.gameObject.activeInHierarchy, Is.True);
+                Assert.That(invalid.practice.status.text, Does.Contain("채보를 재생할 수 없어요"));
                 project.Charts = project.Charts.Take(2).ToArray();
                 saved = store.SaveAsync(project, default);
                 yield return Await(() => saved.IsCompleted, "Project operation did not complete: saved");

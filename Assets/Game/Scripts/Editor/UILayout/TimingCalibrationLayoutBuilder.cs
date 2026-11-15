@@ -15,6 +15,16 @@ namespace RhythmDojo.EditorTools
         public static void Build(SettingsView view)
         {
             var result = view.gameObject.AddComponent<TimingCalibrationView>();
+            foreach (var asset in AssetDatabase.LoadAllAssetsAtPath("Assets/InputSystem_Actions.inputactions"))
+            {
+                if (asset is UnityEngine.InputSystem.InputActionReference reference)
+                {
+                    if (reference.action.name == "Submit")
+                    {
+                        result.measuringSubmit = reference;
+                    }
+                }
+            }
             result.entry = CreateButton(
                 "Timing Calibration",
                 view.gameplayPanel.transform,

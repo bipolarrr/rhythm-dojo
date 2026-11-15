@@ -186,6 +186,7 @@ namespace RhythmDojo.EditorTools
             // composition owned by this scene. No presentation is rebuilt at runtime.
             if (modeSelection)
             {
+                view.modeSelection.sounds = DojoSoundBuilder.Build(view.modeSelection.transform);
                 UnityEngine.Object.DestroyImmediate(view.entrance.gameObject);
                 view.alwaysVisibleMenu = true;
                 view.menuPanel.gameObject.SetActive(true);

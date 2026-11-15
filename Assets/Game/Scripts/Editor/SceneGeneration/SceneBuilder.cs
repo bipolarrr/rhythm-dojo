@@ -142,6 +142,8 @@ namespace RhythmDojo.EditorTools
                     "Assets/InputSystem_Actions.inputactions"
                 )
             );
+            ScenePresentationBuilder.ConfigureMenuInput(
+                UnityEngine.Object.FindFirstObjectByType<UnityEngine.InputSystem.UI.InputSystemUIInputModule>());
             Save(scene, ResultsPath);
             RegisterScenes();
             AssetDatabase.SaveAssets();

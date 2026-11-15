@@ -14,7 +14,6 @@ namespace RhythmDojo.UI
     {
         public GameObject panel;
         public Button resumeButton;
-        public Button settingsButton;
         public Button restartButton;
         public Button exitButton;
         public GameObject countdown;
@@ -34,7 +33,7 @@ namespace RhythmDojo.UI
 
         public void Validate()
         {
-            if (!panel || !resumeButton || !settingsButton)
+            if (!panel || !resumeButton)
             {
                 throw new System.InvalidOperationException("Gameplay pause menu references missing.");
             }
@@ -59,8 +58,6 @@ namespace RhythmDojo.UI
             this.flow = flow;
             this.root = root;
             resumeButton.onClick.AddListener(BeginResume);
-            settingsButton.interactable = false;
-            settingsButton.gameObject.SetActive(false);
             restartButton.onClick.AddListener(Restart);
             exitButton.onClick.AddListener(Exit);
         }
@@ -78,6 +75,13 @@ namespace RhythmDojo.UI
                 return;
             }
 
+            Display();
+        }
+
+        // Show the authored panel without changing playback or requiring a session.
+        public void Display()
+        {
+            Validate();
             CancelRecovery();
             resumeAt = -1;
             countdown.SetActive(false);
@@ -172,8 +176,6 @@ namespace RhythmDojo.UI
             countdownText.text = "3";
             EventSystem.current?.SetSelectedGameObject(null);
         }
-
-        private void OpenSettings() => flow.ShowGameplaySettings();
 
         private async void Restart()
         {
@@ -338,7 +340,6 @@ namespace RhythmDojo.UI
         private void SetRecoveryControls(bool enabled)
         {
             resumeButton.interactable = enabled;
-            settingsButton.interactable = false;
             restartButton.interactable = enabled;
             exitButton.interactable = true;
         }
@@ -355,7 +356,6 @@ namespace RhythmDojo.UI
         {
             CancelRecovery();
             resumeButton.onClick.RemoveListener(BeginResume);
-            settingsButton.onClick.RemoveListener(OpenSettings);
             restartButton.onClick.RemoveListener(Restart);
             exitButton.onClick.RemoveListener(Exit);
         }

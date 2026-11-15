@@ -114,7 +114,9 @@ namespace RhythmDojo.Tests
             keyboard.MakeCurrent();
             mouse = InputSystem.AddDevice<Mouse>();
             mouse.MakeCurrent();
-            yield return SceneManager.LoadSceneAsync("Assets/Game/Scenes/Bootstrap.unity");
+            // Fixture setup opens the current selection screen; navigation is covered from Title
+            // in MainMenuFlowTests, without replaying its animations for every gameplay case.
+            yield return SceneManager.LoadSceneAsync(AppFlowController.SelectionPath);
             yield return Await(() =>
                 UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>()
             );
@@ -329,11 +331,19 @@ namespace RhythmDojo.Tests
 
         private IEnumerator WaitForSettingsMotion()
         {
-            yield return Await(() =>
+            double deadline = Time.realtimeSinceStartupAsDouble + 15;
+            while (true)
             {
                 var settings = UnityEngine.Object.FindFirstObjectByType<SettingsScreen>();
-                return !settings || (!settings.IsOpening && !settings.IsClosing);
-            }, "Settings animation did not complete.");
+                if (!settings || (!settings.IsOpening && !settings.IsClosing))
+                {
+                    yield break;
+                }
+
+                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline),
+                    "Settings animation did not complete.");
+                yield return null;
+            }
         }
 
         protected IEnumerator Choose(Dropdown dropdown, int value)

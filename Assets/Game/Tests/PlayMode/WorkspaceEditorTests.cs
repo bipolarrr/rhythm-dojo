@@ -446,13 +446,11 @@ namespace RhythmDojo.Tests
             yield return new WaitForSecondsRealtime(0.1f);
             Assert.That(workspace.timeline.MusicTime, Is.EqualTo(paused).Within(1e-8));
 
-            workspace.timeline.SetPreviewSpeed(0.5f);
             workspace.timeline.PlayPreview();
             yield return new WaitForSecondsRealtime(1.2f);
             Assert.That(workspace.timeline.MusicTime, Is.GreaterThan(0));
             Assert.That(workspace.timeline.GetComponent<AudioSource>().timeSamples, Is.GreaterThan(0));
             workspace.timeline.StopPreview();
-            workspace.timeline.SetPreviewSpeed(1);
             Assert.That(workspace.timeline.MusicTime, Is.Zero);
 
             workspace.timeline.Seek(0.75);
@@ -1336,9 +1334,6 @@ namespace RhythmDojo.Tests
             Assert.That(actions[0].button.transform.Find("Shortcut").GetComponent<Text>().text, Is.EqualTo("Space"));
             Assert.That(actions[1].button.GetComponentInChildren<Text>().text, Is.EqualTo("처음으로"));
             Assert.That(actions[1].button.transform.Find("Shortcut").GetComponent<Text>().text, Is.EqualTo("0"));
-            Assert.That(workspace.view.loopStart, Is.Null);
-            Assert.That(workspace.view.loopEnd, Is.Null);
-            Assert.That(workspace.view.playback, Is.Null);
 
             workspace.view.OpenMenu(workspace.view.menus[4]);
             yield return ClickAt(Center(actions[0].button.GetComponent<RectTransform>()));
@@ -1417,68 +1412,6 @@ namespace RhythmDojo.Tests
             yield return new WaitForSecondsRealtime(.3f);
             yield return PressSpace();
             Assert.That(workspace.timeline.MusicTime, Is.GreaterThan(.1));
-        }
-
-        [UnityTest]
-        [Category("PreviewLoop")]
-        [Category("SceneIntegration")]
-        public IEnumerator PreviewLoopPreservesReturnPositionAcrossBoundariesAndSpeedChanges()
-        {
-            workspace.view.audioPath.text = WriteTempoWave();
-            workspace.Run(WorkspaceAction.ImportAudio);
-            yield return Idle();
-            var loopStart = new GameObject("Test loop start", typeof(RectTransform), typeof(InputField));
-            loopStart.transform.SetParent(workspace.transform, false);
-            workspace.view.loopStart = loopStart.GetComponent<InputField>();
-            workspace.view.loopStart.text = (workspace.timeline.Duration - .3).ToString("R",
-                System.Globalization.CultureInfo.InvariantCulture);
-            double start = workspace.timeline.Duration - .15;
-            workspace.timeline.Seek(start);
-            workspace.Run(WorkspaceAction.Loop);
-            yield return PressKeys(Key.Space, Key.LeftCtrl);
-
-            for (int iteration = 0; iteration < 4; iteration++)
-            {
-                if (iteration == 2)
-                {
-                    workspace.timeline.SetPreviewSpeed(.5f);
-                }
-                double previous = workspace.timeline.MusicTime;
-                double deadline = Time.realtimeSinceStartupAsDouble + 3;
-                do
-                {
-                    previous = workspace.timeline.MusicTime;
-                    yield return null;
-                    Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline), "Workspace operation did not finish before its deadline.");
-                }
-                while (workspace.timeline.MusicTime >= previous);
-                Assert.That(workspace.timeline.IsPlaying, Is.True);
-            }
-            yield return PressSpace();
-            Assert.That(workspace.timeline.IsPlaying, Is.False);
-            Assert.That(workspace.timeline.MusicTime, Is.EqualTo(start).Within(.001));
-
-            workspace.Run(WorkspaceAction.Loop);
-            workspace.timeline.Seek(2);
-            workspace.timeline.TogglePreview(true);
-            workspace.timeline.RestartPreviewLoop(1);
-            workspace.timeline.Seek(3);
-            yield return new WaitForSecondsRealtime(.15f);
-            workspace.timeline.TogglePreview();
-            Assert.That(workspace.timeline.MusicTime, Is.GreaterThan(3));
-            workspace.timeline.TogglePreview(true);
-            workspace.timeline.StopPreview();
-            workspace.timeline.TogglePreview();
-            yield return new WaitForSecondsRealtime(.15f);
-            workspace.timeline.TogglePreview();
-            Assert.That(workspace.timeline.MusicTime, Is.GreaterThan(0));
-
-            workspace.timeline.Seek(2);
-            workspace.timeline.TogglePreview();
-            workspace.timeline.RestartPreviewLoop(1);
-            yield return new WaitForSecondsRealtime(.15f);
-            workspace.timeline.TogglePreview();
-            Assert.That(workspace.timeline.MusicTime, Is.InRange(1.01, 1.3));
         }
 
         private IEnumerator PressSpace()
@@ -1825,7 +1758,7 @@ namespace RhythmDojo.Tests
             yield return PressKeys(Key.Enter);
             Assert.That(field.text, Is.EqualTo("5.5"));
             Assert.That(preview.VisibleNoteCount, Is.EqualTo(1));
-            Assert.That(workspace.timeline.PreviewSpeed, Is.EqualTo(1));
+            Assert.That(workspace.timeline.GetComponent<AudioSource>().pitch, Is.EqualTo(1));
 
             var warning = workspace.view.noteSpeedWarning;
             var confirm = workspace.view.actions.Single(item => item.action == WorkspaceAction.CloseNoteSpeedWarning).button;
@@ -1930,11 +1863,6 @@ namespace RhythmDojo.Tests
             workspace.Run(WorkspaceAction.ImportAudio);
             yield return Idle();
             workspace.Run(WorkspaceAction.Scroll);
-            var loopEnd = new GameObject("Test loop end", typeof(RectTransform), typeof(InputField));
-            loopEnd.transform.SetParent(workspace.transform, false);
-            workspace.view.loopEnd = loopEnd.GetComponent<InputField>();
-            workspace.view.loopEnd.text = "1";
-            workspace.Run(WorkspaceAction.Loop);
             var pointer = new PointerEventData(EventSystem.current)
             {
                 position = GridPoint(2, 2),
@@ -1953,8 +1881,8 @@ namespace RhythmDojo.Tests
             workspace.screen.OnPointerUp(pointer);
             yield return null;
             yield return null;
-            Assert.That(workspace.timeline.MusicTime, Is.LessThan(1));
-            workspace.Run(WorkspaceAction.Loop);
+            Assert.That(workspace.timeline.IsSeeking, Is.False);
+            Assert.That(workspace.timeline.MusicTime, Is.GreaterThan(2));
             workspace.timeline.PausePreview();
 
             for (int cancellation = 0; cancellation < 5; cancellation++)
@@ -2785,10 +2713,6 @@ namespace RhythmDojo.Tests
             Assert.That(notes[1].Data.Lane, Is.EqualTo(2));
             workspace.view.quantization.value = 9;
             Assert.That(workspace.screen.SnapBeats, Is.EqualTo(4.0 / 192));
-            workspace.Run(WorkspaceAction.Slow);
-            Assert.That(workspace.timeline.PreviewSpeed, Is.EqualTo(.5f));
-            workspace.Run(WorkspaceAction.Slow);
-            Assert.That(workspace.timeline.PreviewSpeed, Is.EqualTo(1));
             yield return null;
         }
 

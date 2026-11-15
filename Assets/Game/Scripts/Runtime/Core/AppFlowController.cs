@@ -149,16 +149,6 @@ namespace RhythmDojo.Core
             presentation.ApplyGraphics(hasPresentation);
             flow.Selection = new SongSelectionService(settings, flow.Library, flow.Preferences);
 
-            if (flow.Library.Find("demo-melody") != null)
-            {
-                flow.Selection.UpdateSelection(
-                    "demo-melody",
-                    flow.SelectedDifficulty,
-                    flow.SelectedScrollMode,
-                    flow.SelectedMultiplier
-                );
-            }
-
             flow.Audio = new AudioSettingsService(flow.CanApplyAudioSettings);
             flow.selectionPreparation = new PreparedSelectionScene(flow);
             DontDestroyOnLoad(flow.gameObject);
@@ -564,10 +554,7 @@ namespace RhythmDojo.Core
 
         public void SelectionInitialized(SongSelectionScreen screen)
         {
-            if (!selectionPreparation.SelectionInitialized(screen))
-            {
-                DojoEntranceTransition.SelectionReady(screen);
-            }
+            selectionPreparation.SelectionInitialized(screen);
         }
 
         public void CancelSelectionPreparation()
@@ -583,10 +570,6 @@ namespace RhythmDojo.Core
         public void SelectionPreparationFailed()
         {
             Transitioning = false;
-            if (DojoEntranceTransition.Active)
-            {
-                DojoEntranceTransition.Active.Fail();
-            }
         }
 
         public void SelectionPreparationActivated() => Transitioning = false;
@@ -640,11 +623,6 @@ namespace RhythmDojo.Core
             settingsReturnPath = ResultsPath;
             SelectSettingsKeyMode();
             OpenSettingsPopup(onApplied: offset => result.AppliedTimingOffsetMs = offset);
-        }
-
-        public void ShowGameplaySettings()
-        {
-            // Retained for existing callers; settings are unavailable until gameplay has exited.
         }
 
         public void ShowTitleSettings()
@@ -814,7 +792,7 @@ namespace RhythmDojo.Core
                 {
                     bool fromTitle = SceneManager.GetActiveScene().path == "Assets/Game/Scenes/Title.unity";
                     fromTitle = fromTitle || SceneManager.GetActiveScene().path == MainMenuActions.ModeSelectionScenePath;
-                    if (DojoEntranceTransition.Active || fromTitle)
+                    if (fromTitle)
                     {
                         LoadEntranceSelection(path);
                         return;

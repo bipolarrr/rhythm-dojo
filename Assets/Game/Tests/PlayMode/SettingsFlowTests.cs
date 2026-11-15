@@ -25,6 +25,91 @@ namespace RhythmDojo.Tests
     {
         [UnityTest]
         [Category("SceneIntegration")]
+        public IEnumerator KeyboardControlsAllSettingsAndRestoresFocusAfterNestedMenus()
+        {
+            var selection = Object.FindFirstObjectByType<SongSelectionView>();
+            yield return Click(selection.settingsButton);
+            var view = Object.FindFirstObjectByType<SettingsView>();
+            var screen = view.GetComponent<SettingsScreen>();
+            yield return Await(() => screen.IsOpen);
+            Assert.That(EventSystem.current.currentSelectedGameObject, Is.SameAs(view.soundTab.gameObject));
+            yield return Press(Key.RightArrow);
+            Assert.That(EventSystem.current.currentSelectedGameObject, Is.SameAs(view.masterVolume.gameObject));
+            float before = view.masterVolume.value;
+            yield return Press(Key.LeftArrow);
+            Assert.That(view.masterVolume.value, Is.EqualTo(before - 1));
+            var rect = (RectTransform)view.masterVolume.transform;
+            Vector2 point = RectTransformUtility.WorldToScreenPoint(null, rect.TransformPoint(rect.rect.center));
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = point }.WithButton(MouseButton.Left));
+            yield return null;
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = point });
+            yield return null;
+            Assert.That(view.masterVolume.value, Is.InRange(45, 55), "The whole ink slider must accept pointer clicks.");
+            before = view.masterVolume.value;
+            yield return Press(Key.RightArrow);
+            Assert.That(view.masterVolume.value, Is.EqualTo(before + 1));
+            yield return Press(Key.DownArrow);
+            Assert.That(EventSystem.current.currentSelectedGameObject, Is.SameAs(view.backgroundVolume.gameObject));
+            CaptureSelection("dojo-menu-refresh/settings-sound", 1920, 1080);
+
+            yield return Click(view.gameplayTab);
+            yield return Press(Key.RightArrow);
+            Assert.That(EventSystem.current.currentSelectedGameObject, Is.SameAs(view.speedSlider.gameObject));
+            before = view.speedSlider.value;
+            yield return Press(Key.RightArrow);
+            Assert.That(view.speedSlider.value, Is.EqualTo(before + .1f).Within(.001f));
+            yield return Press(Key.DownArrow);
+            Assert.That(EventSystem.current.currentSelectedGameObject, Is.SameAs(view.judgmentPositionList.gameObject));
+            yield return Press(Key.RightArrow);
+            Assert.That(view.judgmentPositionList.value, Is.EqualTo(2));
+            yield return Press(Key.Space);
+            yield return Await(() => view.judgmentPositionList.GetComponentInChildren<Canvas>());
+            yield return Press(Key.Escape);
+            yield return new WaitForSecondsRealtime(.2f);
+            Assert.That(screen.IsOpen, Is.True, "First Esc must close only the option list.");
+            Assert.That(EventSystem.current.currentSelectedGameObject, Is.SameAs(view.judgmentPositionList.gameObject));
+            yield return Press(Key.DownArrow);
+            yield return Press(Key.DownArrow);
+            yield return Press(Key.Enter);
+            Assert.That(view.calibration.overlay.activeSelf, Is.True);
+            yield return Press(Key.Escape);
+            Assert.That(screen.IsOpen, Is.True);
+            Assert.That(EventSystem.current.currentSelectedGameObject, Is.SameAs(view.calibration.entry.gameObject));
+            CaptureSelection("dojo-menu-refresh/settings-gameplay", 1920, 1080);
+
+            yield return Click(view.graphicsTab);
+            yield return Press(Key.RightArrow);
+            Assert.That(EventSystem.current.currentSelectedGameObject, Is.SameAs(view.aspectList.gameObject));
+            CaptureSelection("dojo-menu-refresh/settings-graphics", 1920, 1080);
+            yield return Press(Key.DownArrow);
+            yield return Press(Key.DownArrow);
+            yield return Press(Key.DownArrow);
+            Assert.That(EventSystem.current.currentSelectedGameObject, Is.SameAs(view.bufferList.gameObject));
+            yield return Press(Key.Space);
+            yield return new WaitForSecondsRealtime(.2f);
+            CaptureSelection("dojo-menu-refresh/settings-options", 1920, 1080);
+            yield return Press(Key.Escape);
+            yield return new WaitForSecondsRealtime(.2f);
+            Assert.That(screen.IsOpen, Is.True);
+            yield return Click(view.keySettingsTab);
+            yield return Press(Key.RightArrow);
+            Assert.That(EventSystem.current.currentSelectedGameObject, Is.SameAs(view.keyBindingButtons[0].gameObject));
+            yield return Press(Key.Space);
+            yield return Press(Key.Escape);
+            Assert.That(screen.IsOpen, Is.True, "Esc cancels key capture before closing settings.");
+            yield return Press(Key.DownArrow);
+            Assert.That(EventSystem.current.currentSelectedGameObject, Is.SameAs(view.keyBindingButtons[1].gameObject));
+            CaptureSelection("dojo-menu-refresh/settings-keys", 1920, 1080);
+            yield return Press(Key.Escape);
+            yield return Await(() => !screen.isActiveAndEnabled);
+            Assert.That(EventSystem.current.currentSelectedGameObject, Is.SameAs(selection.settingsButton.gameObject));
+            yield return Click(selection.settingsButton);
+            yield return Await(() => screen.IsOpen);
+            Assert.That(EventSystem.current.currentSelectedGameObject, Is.SameAs(view.soundTab.gameObject));
+        }
+
+        [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator StartingPlayClosesPendingSettingsAndBlocksLegacyAndDirectMutationPaths()
         {
             var flow = Object.FindFirstObjectByType<AppFlowController>();
@@ -63,10 +148,6 @@ namespace RhythmDojo.Tests
             rules.SelectChallenge(3);
             flow.Rules.Update(rules);
             Assert.That(flow.Rules.Snapshot.ChallengePreset, Is.Not.EqualTo(3));
-            var hard = flow.HardMode.GetRule(Judgment.Miss);
-            flow.HardMode.SetRule(Judgment.Miss, HealthRuleAction.Damage, 4);
-            flow.HardMode.Save();
-            Assert.That(flow.HardMode.GetRule(Judgment.Miss).Action, Is.EqualTo(hard.Action));
             Assert.That(RhythmDojo.Services.PlayKeyBindings.TrySetKey(0, Key.Q, out _), Is.False);
             var presentation = new RhythmDojo.Services.PresentationPreferences { masterVolume = .1f };
             presentation.SaveAudio();
@@ -74,12 +155,11 @@ namespace RhythmDojo.Tests
             Assert.That(AudioListener.volume, Is.EqualTo(.43f).Within(.001f));
             Assert.That(PlayerPrefs.GetString(RhythmDojo.Services.PresentationPreferences.StorageKey), Is.EqualTo(stored));
 
-            yield return SceneManager.LoadSceneAsync(AppFlowController.SettingsPath, LoadSceneMode.Additive);
+            flow.ShowSettings();
             yield return null;
             Assert.That(flow.CurrentRequest, Is.SameAs(request));
             Assert.That(Object.FindFirstObjectByType<SettingsScreen>(), Is.Null);
             Assert.That(game.IsPaused, Is.True);
-            yield return SceneManager.UnloadSceneAsync(AppFlowController.SettingsPath);
             yield return Press(Key.Escape);
             yield return Await(() => !game.IsPaused && !pause.countdown.activeSelf);
             Assert.That(game.Clock.Running, Is.True);
@@ -101,6 +181,12 @@ namespace RhythmDojo.Tests
             yield return Click(selection.settingsButton);
             var view = Object.FindFirstObjectByType<SettingsView>();
             var calibration = view.calibration;
+            var screen = view.GetComponent<SettingsScreen>();
+            var panelRect = view.panelRect;
+            // Mode-dependent key rows are recreated by their controller; the authored shell must survive.
+            var panelObjects = panelRect.GetComponentsInChildren<Transform>(true)
+                .Where(item => !item.IsChildOf(view.keyRowsContainer))
+                .Select(item => item.GetInstanceID()).OrderBy(id => id).ToArray();
             var notes = calibration.speedLane.notes.ToArray();
             var objects = calibration.overlay.GetComponentsInChildren<Transform>(true)
                 .Select(item => item.GetInstanceID()).OrderBy(id => id).ToArray();
@@ -122,6 +208,14 @@ namespace RhythmDojo.Tests
                 Assert.That(calibration.overlay.activeSelf, Is.False);
                 yield return Click(selection.settingsButton);
                 Assert.That(Object.FindFirstObjectByType<SettingsView>(), Is.SameAs(view));
+                yield return Await(() => screen.IsOpen);
+                Assert.That(view.panelRect, Is.SameAs(panelRect));
+                Assert.That(panelRect.anchoredPosition, Is.EqualTo(Vector2.zero));
+                Assert.That(view.panelOpacity.alpha, Is.EqualTo(1));
+                Assert.That(view.panelOpacity.interactable, Is.True);
+                CollectionAssert.AreEqual(panelObjects, panelRect.GetComponentsInChildren<Transform>(true)
+                    .Where(item => !item.IsChildOf(view.keyRowsContainer))
+                    .Select(item => item.GetInstanceID()).OrderBy(id => id).ToArray());
                 Assert.That(view.calibration, Is.SameAs(calibration));
                 CollectionAssert.AreEqual(notes, calibration.speedLane.notes);
                 CollectionAssert.AreEqual(objects, calibration.overlay.GetComponentsInChildren<Transform>(true)
@@ -168,7 +262,6 @@ namespace RhythmDojo.Tests
             yield return new WaitForSecondsRealtime(.1f);
             Assert.That(((RectTransform)rail.Find("Beat Note 0")).anchoredPosition.y, Is.LessThan(before));
 
-
             while (Time.realtimeSinceStartupAsDouble < hitAt)
             {
                 yield return null;
@@ -178,7 +271,6 @@ namespace RhythmDojo.Tests
             InputSystem.QueueStateEvent(keyboard, new KeyboardState(), hitAt + .001);
             yield return Await(() => judgment.text == "Perfect");
             Assert.That(timing.text, Does.Match(@"\+\d+ ms"));
-
 
             double lateHitAt = hitAt + .5 + .130;
             while (Time.realtimeSinceStartupAsDouble < lateHitAt)
@@ -230,6 +322,8 @@ namespace RhythmDojo.Tests
             Assert.That(apply.interactable, Is.False);
             start.onClick.Invoke();
             double firstBeat = Time.realtimeSinceStartupAsDouble + .25;
+            close.Select();
+            CaptureSelection("dojo-menu-refresh/settings-calibration", 1920, 1080);
             for (int beat = 4; beat < 16; beat++)
             {
                 double timestamp = firstBeat + beat * .5 + .035;
@@ -243,6 +337,8 @@ namespace RhythmDojo.Tests
             }
 
             yield return Await(() => apply.interactable);
+            Assert.That(panel.gameObject.activeInHierarchy, Is.True,
+                "Space taps must not submit the focused close button during measurement.");
             Assert.That(flow.Preferences.TimingOffsetMs, Is.Zero);
             yield return Click(apply);
             Assert.That(view.timingOffset.value, Is.InRange(32, 40));
@@ -252,20 +348,13 @@ namespace RhythmDojo.Tests
 
         private static void AssertSettingsButtonStyle(Button button, Button style)
         {
-            var frame = button.targetGraphic as PixelDojoFrameGraphic;
-            var sourceFrame = (PixelDojoFrameGraphic)style.targetGraphic;
+            Assert.That(button.GetComponentsInChildren<PixelDojoFrameGraphic>(), Is.Empty);
+            var frame = button.GetComponent<DojoControlFocus>();
+            var sourceFrame = style.GetComponent<DojoControlFocus>();
             Assert.That(frame, Is.Not.Null);
-            Assert.That(frame.artwork, Is.SameAs(sourceFrame.artwork));
-            Assert.That(frame.color, Is.EqualTo(sourceFrame.color));
-            Assert.That(frame.borderWidth, Is.EqualTo(sourceFrame.borderWidth));
-            Assert.That(button.colors, Is.EqualTo(style.colors));
-
-            var label = button.GetComponentInChildren<Text>();
-            var sourceLabel = style.GetComponentInChildren<Text>();
-            Assert.That(label.font, Is.SameAs(sourceLabel.font));
-            Assert.That(label.material, Is.SameAs(sourceLabel.material));
-            Assert.That(label.fontSize, Is.EqualTo(sourceLabel.fontSize));
-            Assert.That(label.color, Is.EqualTo(sourceLabel.color));
+            Assert.That(frame.restingColor, Is.EqualTo(sourceFrame.restingColor));
+            Assert.That(button.GetComponentInChildren<Text>().font,
+                Is.SameAs(style.GetComponentInChildren<Text>().font));
         }
 
         [UnityTest]
@@ -389,12 +478,10 @@ namespace RhythmDojo.Tests
             Assert.That(UnityEngine.Application.targetFrameRate, Is.EqualTo(beforeFrameRate));
             yield return Click(view.soundTab);
             Assert.That(view.gameplayPanel.activeSelf, Is.False);
-            Assert.That(view.backdrop.GetComponent<Image>().sprite.name, Is.EqualTo("TrainingInterior"));
+            Assert.That(view.backdrop.GetComponent<Image>().sprite.name, Is.EqualTo("PreparationRoom"));
             foreach (var button in new[] { view.soundTab, view.graphicsTab, view.gameplayTab, view.apply, view.back })
             {
-                var frame = button.GetComponentInChildren<PixelDojoFrameGraphic>();
-                Assert.That(frame.artwork.name, Is.EqualTo("SettingsControl"));
-                Assert.That(frame.mainTexture, Is.SameAs(frame.artwork.texture));
+                Assert.That(button.GetComponentsInChildren<PixelDojoFrameGraphic>(), Is.Empty);
             }
             Assert.That(view.soundPanel.activeSelf, Is.True);
             yield return Click(view.graphicsTab);
@@ -402,6 +489,8 @@ namespace RhythmDojo.Tests
             Assert.That(view.graphicsPanel.activeSelf, Is.True);
             yield return Click(view.gameplayTab);
             EventSystem.current.SetSelectedGameObject(view.speedSlider.gameObject);
+            yield return Press(Key.DownArrow);
+            Assert.That(EventSystem.current.currentSelectedGameObject, Is.EqualTo(view.judgmentPositionList.gameObject));
             yield return Press(Key.DownArrow);
             Assert.That(
                 EventSystem.current.currentSelectedGameObject,
@@ -664,14 +753,9 @@ namespace RhythmDojo.Tests
             {
                 Assert.That(((RectTransform)dropdown.transform).sizeDelta, Is.EqualTo(new Vector2(520, 64)));
                 Assert.That(dropdown.captionText.fontSize, Is.EqualTo(24));
-                Assert.That(dropdown.image.sprite.name, Is.EqualTo("SettingsControl"));
-                Assert.That(dropdown.image.type, Is.EqualTo(Image.Type.Sliced));
-                Assert.That(dropdown.transform.Find("Settings Expand Indicator"), Is.Not.Null);
-                foreach (var toggle in dropdown.template.GetComponentsInChildren<Toggle>(true))
-                {
-                    Assert.That(toggle.graphic.gameObject.activeSelf, Is.False,
-                        "Settings dropdowns must not show a square beside the selected option.");
-                }
+                Assert.That(dropdown, Is.InstanceOf<DojoOptionDropdown>());
+                Assert.That(dropdown.image.color.a, Is.Zero);
+
             }
 
             Assert.That(view.aspectList.options.Count, Is.EqualTo(2));

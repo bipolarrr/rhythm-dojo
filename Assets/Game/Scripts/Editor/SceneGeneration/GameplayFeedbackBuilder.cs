@@ -19,6 +19,8 @@ namespace RhythmDojo.EditorTools
             SceneDependencyAssembler.Wire(feedback, "inputSource", inputSource);
             SceneDependencyAssembler.Wire(feedback, "inputSound",
                 SceneResources.Require<AudioClip>("Assets/Game/Audio/Gameplay/StrikeWhoosh.wav"));
+            SceneDependencyAssembler.Wire(feedback, "sounds",
+                DojoSoundBuilder.Build(feedback.transform, feedback.GetComponent<AudioSource>(), inputSource));
             var effectsRoot = new GameObject("Gameplay Impacts", typeof(RectTransform)).GetComponent<RectTransform>();
             effectsRoot.SetParent(parent, false);
             effectsRoot.anchorMin = Vector2.zero;
@@ -33,7 +35,7 @@ namespace RhythmDojo.EditorTools
             SceneDependencyAssembler.Wire(feedback, "perfectSound",
                 SceneResources.Require<AudioClip>("Assets/Game/Audio/Gameplay/StrikeImpact.wav"));
             SceneDependencyAssembler.Wire(feedback, "goodSound",
-                SceneResources.Require<AudioClip>("Assets/Game/Audio/Gameplay/StrikeImpact.wav"));
+                SceneResources.Require<AudioClip>("Assets/Game/Audio/Foley/HitGood1.wav"));
             var serialized = new SerializedObject(feedback);
             var bursts = serialized.FindProperty("bursts");
             bursts.arraySize = 24;

@@ -110,11 +110,6 @@ namespace RhythmDojo.Tests
             input.editorInputBehaviorInPlayMode = editorBehavior;
             input.backgroundBehavior = backgroundBehavior;
 
-            if (DojoEntranceTransition.Active)
-            {
-                DojoEntranceTransition.Active.Cancel();
-            }
-
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
 
             if (flow)
@@ -406,7 +401,7 @@ namespace RhythmDojo.Tests
             Assert.That(entrance.entrance.rightDoor, Is.SameAs(rightDoor));
             Assert.That(entrance.entrance.interiorBackdrop.alpha, Is.Zero);
             Assert.That(entrance.entrance.frame.alpha, Is.EqualTo(1));
-            entrance.logo.onClick.Invoke();
+            sky.start.onClick.Invoke();
             mode.GetComponent<MainMenuScreen>().OnSubmit(null);
             yield return WaitForMenuScene(MainMenuActions.ModeSelectionScenePath);
             Assert.That(view.modeSelection.character, Is.SameAs(character),
@@ -607,7 +602,6 @@ namespace RhythmDojo.Tests
                 yield return null;
             }
 
-
         }
 
         [UnityTest]
@@ -736,7 +730,6 @@ namespace RhythmDojo.Tests
             Assert.That(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject, Is.SameAs(screen.gameObject));
             Assert.That(Array.FindAll(UnityEngine.Object.FindObjectsByType<AudioListener>(FindObjectsSortMode.None),
                 item => item.isActiveAndEnabled), Has.Length.EqualTo(1));
-            Assert.That(DojoEntranceTransition.Active, Is.Null);
             yield return OpenMenu();
             Assert.That(screen.CanSubmit, Is.True);
         }
@@ -805,13 +798,6 @@ namespace RhythmDojo.Tests
                     yield return null;
                 }
 
-                while (DojoEntranceTransition.Active)
-                {
-                    Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
-                    AssertHasDisplayCamera();
-                    yield return null;
-                }
-
                 Assert.That(UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>().enabled, Is.True);
                 var selectionView = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
                 Assert.That(selectionView.practice.gameObject.activeInHierarchy, Is.True);
@@ -823,7 +809,6 @@ namespace RhythmDojo.Tests
                 Canvas.ForceUpdateCanvases();
                 var selectionCorners = new Vector3[4];
                 backdrop.rectTransform.GetWorldCorners(selectionCorners);
-
 
                 AssertHasDisplayCamera();
                 Assert.That(bootstrapLoaded, Is.False,
@@ -839,96 +824,6 @@ namespace RhythmDojo.Tests
                     SceneManager.GetActiveScene().path,
                     Does.EndWith("/SongSelection.unity")
                 );
-            }
-            finally
-            {
-                SceneManager.sceneLoaded -= loaded;
-            }
-        }
-
-        [UnityTest]
-        [Category("SceneIntegration")]
-        public IEnumerator DirectSelectionEntryUsesPracticeWithoutAModeSelectionOverride()
-        {
-            foreach (string path in new[] { MainMenuActions.BootstrapScenePath, AppFlowController.SelectionPath })
-            {
-                var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
-                UnityEngine.Object.Destroy(flow.gameObject);
-                yield return null;
-                yield return SceneManager.LoadSceneAsync(path);
-
-                double deadline = Time.realtimeSinceStartupAsDouble + 20;
-                while (SceneManager.GetActiveScene().path != AppFlowController.SelectionPath)
-                {
-                    Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline), path);
-                    yield return null;
-                }
-                yield return null;
-                flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
-                while (flow.Transitioning)
-                {
-                    Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline), path);
-                    yield return null;
-                }
-
-                var selectionView = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
-                Assert.That(selectionView.practice.gameObject.activeInHierarchy, Is.True, path);
-                Assert.That(selectionView.libraryPanel.activeSelf, Is.False, path);
-                Assert.That(SceneManager.sceneCount, Is.EqualTo(1));
-                string song = flow.Selection.SelectedSongId;
-                Assert.That(selectionView.Rows.Count, Is.GreaterThan(1), path);
-                Assert.That(selectionView.practice.next.interactable, Is.True, path);
-                int contacts = selectionView.practice.SelectionContactCount;
-                // The second scene owns a new UI input module. Send a new pointer position
-                // before clicking the same screen coordinates used by the first scene.
-                InputSystem.QueueStateEvent(mouse, new MouseState { position = Vector2.zero });
-                yield return null;
-                yield return Click(selectionView.practice.next);
-                while (selectionView.practice.IsStriking)
-                {
-                    Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline), path);
-                    yield return null;
-                }
-                Assert.That(selectionView.practice.SelectionContactCount, Is.EqualTo(contacts + 1), path);
-                Assert.That(flow.Selection.SelectedSongId, Is.Not.EqualTo(song), path);
-                Assert.That(selectionView.practice.rig.title.text, Is.EqualTo(selectionView.songTitle.text));
-            }
-        }
-
-        [UnityTest]
-        [Category("Compatibility")]
-        [Category("SceneIntegration")]
-        public IEnumerator BootstrapFallbackStillStartsWithoutATitleView()
-        {
-            var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
-            double deadline = Time.realtimeSinceStartupAsDouble + 10d;
-            while (!flow.IsSelectionPrepared)
-            {
-                Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
-                yield return null;
-            }
-
-            bool bootstrapLoaded = false;
-            UnityEngine.Events.UnityAction<Scene, LoadSceneMode> loaded = (scene, mode) =>
-            {
-                if (scene.path == MainMenuActions.BootstrapScenePath)
-                {
-                    bootstrapLoaded = true;
-                }
-            };
-            SceneManager.sceneLoaded += loaded;
-            try
-            {
-                new MainMenuActions(flow.Settings).StartGame();
-                while (!bootstrapLoaded || SceneManager.GetActiveScene().path != AppFlowController.SelectionPath)
-                {
-                    Assert.That(Time.realtimeSinceStartupAsDouble, Is.LessThan(deadline));
-                    yield return null;
-                }
-                yield return null;
-                Assert.That(bootstrapLoaded, Is.True);
-                Assert.That(UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>().enabled, Is.True);
-                Assert.That(DojoEntranceTransition.Active, Is.Null);
             }
             finally
             {
@@ -1090,55 +985,6 @@ namespace RhythmDojo.Tests
         }
 
         [UnityTest]
-        [Category("Compatibility")]
-        [Category("SceneIntegration")]
-        public IEnumerator EntranceWaitsForReadyAndRestoresSelectionInput()
-        {
-            yield return LoadTitle();
-            var transition = DojoEntranceTransition.Begin(
-                view.entrance, view.doorSlide, view.startPrompt.font, () => { });
-            yield return new WaitForSecondsRealtime(DojoEntranceTransition.DoorOpeningSeconds + .2f);
-            Assert.That(DojoEntranceTransition.Active, Is.SameAs(transition));
-            Assert.That(transition.GetComponent<CanvasGroup>().alpha, Is.EqualTo(1f));
-            Assert.That(transition.GetComponentInChildren<DojoEntranceView>().frame.alpha, Is.EqualTo(1f));
-            Assert.That(transition.GetComponentInChildren<DojoEntranceView>().Opening, Is.Zero,
-                "Door motion must wait for selection loading and UI initialization.");
-
-            var host = new GameObject("Selection readiness test", typeof(CanvasGroup));
-            var selection = host.AddComponent<SongSelectionScreen>();
-            var panel = new GameObject("Selection panel", typeof(RectTransform), typeof(CanvasGroup)).GetComponent<RectTransform>();
-            panel.SetParent(host.transform, false);
-            panel.anchoredPosition = new Vector2(10f, 20f);
-            host.AddComponent<SongSelectionView>().entrancePanels = new[] { panel };
-            DojoEntranceTransition.SelectionReady(selection);
-            Assert.That(selection.enabled, Is.False);
-            Assert.That(host.GetComponent<CanvasGroup>().interactable, Is.False);
-            Assert.That(host.GetComponent<CanvasGroup>().alpha, Is.EqualTo(1f));
-            Assert.That(panel.GetComponent<CanvasGroup>().alpha, Is.Zero);
-            yield return new WaitForSecondsRealtime(DojoEntranceTransition.DoorOpeningSeconds + .4f);
-            Assert.That(DojoEntranceTransition.Active, Is.SameAs(transition));
-            Assert.That(transition.GetComponentInChildren<DojoEntranceView>().transform.localScale.x,
-                Is.InRange(1.001f, DojoEntranceView.InteriorScale));
-            Assert.That(transition.GetComponentInChildren<DojoEntranceView>().frame.alpha, Is.EqualTo(1f));
-            Assert.That(transition.GetComponent<CanvasGroup>().alpha, Is.EqualTo(1f));
-            Assert.That(selection.enabled, Is.False);
-            yield return new WaitForSecondsRealtime(.5f);
-            Assert.That(host.GetComponent<CanvasGroup>().alpha, Is.EqualTo(1f));
-            Assert.That(panel.GetComponent<CanvasGroup>().alpha, Is.InRange(.01f, .99f));
-            Assert.That(panel.anchoredPosition.y, Is.LessThan(20f));
-            Assert.That(selection.enabled, Is.False);
-            yield return new WaitForSecondsRealtime(.5f);
-            Assert.That(DojoEntranceTransition.Active, Is.Null);
-            Assert.That(selection.enabled, Is.True);
-            Assert.That(host.GetComponent<CanvasGroup>().interactable, Is.True);
-            Assert.That(host.GetComponent<CanvasGroup>().alpha, Is.EqualTo(1f));
-            Assert.That(Vector2.Distance(panel.anchoredPosition, new Vector2(10f, 20f)), Is.LessThan(.001f));
-            Assert.That(panel.localScale, Is.EqualTo(Vector3.one));
-            Assert.That(panel.GetComponent<CanvasGroup>().alpha, Is.EqualTo(1f));
-            UnityEngine.Object.Destroy(host);
-        }
-
-        [UnityTest]
         [Category("SceneIntegration")]
         public IEnumerator PlaqueRejectsCornersAndKeyboardCanExpandAndStart()
         {
@@ -1167,27 +1013,6 @@ namespace RhythmDojo.Tests
             {
                 InputSystem.RemoveDevice(keyboard);
             }
-        }
-
-        [UnityTest]
-        [Category("Compatibility")]
-        [Category("SceneIntegration")]
-        public IEnumerator EntranceTimeoutOffersRecoveryAndCleansUp()
-        {
-            bool recovered = false;
-            yield return LoadTitle();
-            var transition = DojoEntranceTransition.Begin(
-                view.entrance, view.doorSlide, view.startPrompt.font, () => recovered = true);
-            typeof(DojoEntranceTransition).GetField(
-                "readyTimeout",
-                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic
-            ).SetValue(transition, .05f);
-            yield return new WaitForSecondsRealtime(DojoEntranceTransition.DoorOpeningSeconds + .2f);
-            Assert.That(transition.Failed, Is.True);
-            transition.GetComponentInChildren<Button>().onClick.Invoke();
-            yield return null;
-            Assert.That(recovered, Is.True);
-            Assert.That(DojoEntranceTransition.Active, Is.Null);
         }
 
         [UnityTest]
@@ -1429,8 +1254,11 @@ namespace RhythmDojo.Tests
             yield return WaitForModeMotion(mode);
             yield return new WaitForSecondsRealtime(.9f);
             int contacts = mode.ContactCount;
+            int audibleContacts = mode.sounds.ContactCount;
+            int audibleSwings = mode.sounds.MotionCount;
             yield return Click(mode.practiceTarget);
             Assert.That(mode.ContactCount, Is.EqualTo(contacts), "Input begins anticipation, not contact.");
+            Assert.That(mode.sounds.ContactCount, Is.EqualTo(audibleContacts));
             Assert.That(mode.props[1].localRotation, Is.EqualTo(Quaternion.identity));
             yield return Click(mode.practiceTarget);
             double deadline = Time.realtimeSinceStartupAsDouble + 2;
@@ -1441,6 +1269,8 @@ namespace RhythmDojo.Tests
                 yield return null;
             }
             Assert.That(mode.character.sprite, Is.SameAs(mode.poses[3]));
+            Assert.That(mode.sounds.ContactCount, Is.EqualTo(audibleContacts + 1));
+            Assert.That(mode.sounds.MotionCount, Is.EqualTo(audibleSwings + 1));
             Assert.That(mode.props[1].localRotation, Is.EqualTo(Quaternion.identity));
             yield return new WaitForSecondsRealtime(.065f);
             Assert.That(mode.props[1].localRotation, Is.Not.EqualTo(Quaternion.identity));
@@ -1450,6 +1280,7 @@ namespace RhythmDojo.Tests
             Assert.That(mode.traineeAnimation.Current, Is.EqualTo(DojoIdleVariation.Motion.None));
             yield return Click(mode.practiceTarget);
             mode.CancelMotion();
+            Assert.That(Array.TrueForAll(mode.sounds.voices, source => !source.isPlaying), Is.True);
             yield return new WaitForSecondsRealtime(.8f);
             Assert.That(mode.ContactCount, Is.EqualTo(contacts + 1), "Cancelled contact must never replay later.");
             Assert.That(mode.props[1].localRotation, Is.EqualTo(Quaternion.identity));
@@ -1493,6 +1324,8 @@ namespace RhythmDojo.Tests
                         }
                     }
                     int completed = mode.lessonSequence.CompletedSets;
+                    int audibleSwings = mode.sounds.MotionCount;
+                    int audibleContacts = mode.sounds.ContactCount;
                     var previousPhase = DojoLessonSequence.Step.Waiting;
                     double delayStarted = 0;
                     while (mode.lessonSequence.CompletedSets == completed)
@@ -1544,6 +1377,15 @@ namespace RhythmDojo.Tests
                         }
                         yield return null;
                     }
+                    int expectedSwings = 2;
+                    if (motion == DojoIdleVariation.Motion.Ready)
+                    {
+                        expectedSwings = 0;
+                    }
+                    Assert.That(mode.sounds.MotionCount - audibleSwings, Is.EqualTo(expectedSwings),
+                        "Teacher and trainee each sound once on their own attack motion.");
+                    Assert.That(mode.sounds.ContactCount, Is.EqualTo(audibleContacts),
+                        "An air demonstration must not fabricate a wooden collision.");
                 }
                 Assert.That(seen.Count, Is.EqualTo(3));
                 Assert.That(responding && sawSprite, Is.True);

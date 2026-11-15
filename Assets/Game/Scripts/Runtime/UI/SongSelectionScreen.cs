@@ -755,6 +755,8 @@ namespace RhythmDojo.UI
                 return;
             }
             StopPreview();
+            // The practice utility has no automatic navigation; give the modal scope a return target.
+            EventSystem.current?.SetSelectedGameObject(view.settingsButton.gameObject);
             navigation.ShowSettings();
         }
 

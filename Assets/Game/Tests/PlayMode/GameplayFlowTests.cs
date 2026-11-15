@@ -70,7 +70,8 @@ namespace RhythmDojo.Tests
             var rules = flow.Rules.Snapshot;
             rules.GaugeFailure = GaugeFailureMode.Continue;
             flow.Rules.Update(rules);
-            yield return SceneManager.LoadSceneAsync(AppFlowController.GameplayPath);
+            yield return Click(UnityEngine.Object.FindFirstObjectByType<SongSelectionView>().play);
+            yield return Await(() => UnityEngine.Object.FindFirstObjectByType<RhythmGameController>());
             yield return null;
 
             var game = UnityEngine.Object.FindFirstObjectByType<RhythmGameController>();

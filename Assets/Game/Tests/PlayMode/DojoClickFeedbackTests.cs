@@ -48,15 +48,14 @@ namespace RhythmDojo.Tests
 
             var menu = Object.FindFirstObjectByType<MainMenuView>();
             Assert.That(menu.menuPanel, Is.Null);
-            yield return Click(menu.logo);
+            yield return Click(menu.GetComponent<TitleSkyView>().start);
             yield return Await(() => UnityEngine.SceneManagement.SceneManager.GetActiveScene().path
                 == RhythmDojo.Core.MainMenuActions.ModeSelectionScenePath);
             menu = Object.FindFirstObjectByType<MainMenuScreen>().GetComponent<MainMenuView>();
             yield return Await(() => menu.GetComponent<MainMenuScreen>().CanSubmit);
-            menu.GetComponent<MainMenuScreen>().OnSubmit(null);
+            yield return Press(UnityEngine.InputSystem.Key.Enter);
             yield return Await(() => UnityEngine.SceneManagement.SceneManager.GetActiveScene().path
                 == RhythmDojo.Core.AppFlowController.SelectionPath);
-            yield return Await(() => !DojoEntranceTransition.Active);
             yield return CheckClickOutput();
             yield return Click(Object.FindFirstObjectByType<PracticeSelectionView>().settings);
             yield return Await(() => Object.FindFirstObjectByType<SettingsScreen>());

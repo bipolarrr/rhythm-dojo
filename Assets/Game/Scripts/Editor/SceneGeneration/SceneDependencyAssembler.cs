@@ -26,6 +26,7 @@ namespace RhythmDojo.EditorTools
             var screen = view.gameObject.AddComponent<ResultsScreen>();
             Wire(screen, "view", view);
             Wire(screen, "review", view.review.GetComponent<ResultsChartReview>());
+            Wire(screen, "sounds", view.presentation.sounds);
             var root = view.gameObject.AddComponent<ScreenCompositionRoot>();
             Wire(root, "settings", settings);
             Wire(root, "results", screen);

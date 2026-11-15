@@ -81,7 +81,7 @@ namespace RhythmDojo.Tests
             Assert.That(returned, Is.Null);
             Assert.That(flow.LastResult.Title, Is.EqualTo("Unsaved song"));
             Assert.That(releases, Is.EqualTo(1));
-            yield return Click(UnityEngine.Object.FindFirstObjectByType<ResultsView>().backButton);
+            yield return Press(Key.Escape);
             yield return Await(() => returned != null);
             yield return null;
             Assert.That(returned, Is.EqualTo("editor-session-42"));

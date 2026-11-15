@@ -1,5 +1,6 @@
 using System;
 using RhythmDojo.Application;
+using RhythmDojo.Audio;
 using RhythmDojo.Gameplay;
 using RhythmDojo.UI;
 using UnityEngine;
@@ -40,6 +41,8 @@ namespace RhythmDojo.Presentation
         private ILaneInput input;
         private RhythmGameController controller;
         private int lastInputFrame = -1;
+        [SerializeField]
+        private DojoSoundPlayer sounds;
 
         public void BindInput(ILaneInput input, RhythmGameController controller)
         {
@@ -68,7 +71,7 @@ namespace RhythmDojo.Presentation
             }
             lastInputFrame = Time.frameCount;
             // One attack per chord, short preloaded clips; no per-input allocations.
-            inputSource.PlayOneShot(inputSound, .24f);
+            sounds.Play(DojoSoundCue.Swing, .65f);
         }
         [SerializeField]
         private RectTransform effectsRoot;
@@ -114,6 +117,11 @@ namespace RhythmDojo.Presentation
             {
                 throw new InvalidOperationException("Authored strike input audio missing.");
             }
+            if (!sounds)
+            {
+                throw new InvalidOperationException("Recorded gameplay audio pool missing.");
+            }
+            sounds.Validate();
 
             if (!effectsRoot || !holdTemplate)
             {
@@ -247,16 +255,12 @@ namespace RhythmDojo.Presentation
             }
 
             lastSoundFrame = Time.frameCount;
-            source.PlayOneShot(
-                (
-                    result.Grade switch
-                    {
-                        Judgment.Perfect => perfectSound,
-                        _ => goodSound,
-                    }
-                ),
-                strength
-            );
+            var cue = DojoSoundCue.Good;
+            if (result.Grade == Judgment.Perfect)
+            {
+                cue = DojoSoundCue.Perfect;
+            }
+            sounds.Play(cue, strength);
         }
 
         private void LateUpdate()
@@ -264,6 +268,10 @@ namespace RhythmDojo.Presentation
             if (model == null)
             {
                 return;
+            }
+            if (controller && controller.IsPaused)
+            {
+                sounds.StopAll();
             }
 
             foreach (var graphic in bursts)
@@ -332,6 +340,10 @@ namespace RhythmDojo.Presentation
             nextBurst = 0;
             lastSoundFrame = -1;
             lastInputFrame = -1;
+            if (sounds)
+            {
+                sounds.StopAll();
+            }
             if (inputSource)
             {
                 inputSource.Stop();

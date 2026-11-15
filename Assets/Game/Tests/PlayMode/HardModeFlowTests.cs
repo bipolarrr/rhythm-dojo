@@ -225,7 +225,7 @@ namespace RhythmDojo.Tests
             Assert.That(result.Session.Health, Is.EqualTo(100));
             Assert.That(Object.FindFirstObjectByType<RhythmDojo.Audio.SongClock>(), Is.Null);
             Assert.That(Object.FindFirstObjectByType<ResultsView>().outcome.text, Is.EqualTo("FAILED"));
-            yield return Click(Object.FindFirstObjectByType<ResultsView>().backButton);
+            yield return Press(Key.Escape);
             yield return Await(() => Object.FindFirstObjectByType<SongSelectionScreen>());
             yield return Click(Object.FindFirstObjectByType<SongSelectionView>().play);
             yield return Await(() => Object.FindFirstObjectByType<RhythmGameController>());

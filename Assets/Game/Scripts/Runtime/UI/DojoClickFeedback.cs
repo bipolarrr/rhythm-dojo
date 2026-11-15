@@ -11,6 +11,8 @@ namespace RhythmDojo.UI
         private AudioSource clickSource;
         [SerializeField]
         private AudioClip clickSound;
+        private int lastClickFrame = -1;
+        private int clickVariation;
 
         private void Awake()
         {
@@ -23,6 +25,16 @@ namespace RhythmDojo.UI
         public void Initialize(DojoPunchImpact impact)
         {
             this.impact = impact;
+        }
+
+        private void OnEnable()
+        {
+            RhythmDojo.Services.PresentationPreferences.Changed += ApplyVolume;
+        }
+
+        private void ApplyVolume()
+        {
+            clickSource.volume = .18f * RhythmDojo.Audio.DojoSoundPlayer.EffectsVolume;
         }
 
         private void Update()
@@ -77,7 +89,16 @@ namespace RhythmDojo.UI
 
             if (clickSound)
             {
-                clickSource.PlayOneShot(clickSound);
+                if (lastClickFrame == Time.frameCount)
+                {
+                    return;
+                }
+                lastClickFrame = Time.frameCount;
+                clickSource.clip = clickSound;
+                ApplyVolume();
+                clickSource.pitch = 1f + Mathf.Sin(++clickVariation * 2.4f) * .025f;
+                // A click owns one voice, including repeated input while the game is paused.
+                clickSource.Play();
             }
         }
 
@@ -96,11 +117,13 @@ namespace RhythmDojo.UI
 
         private void OnDisable()
         {
+            RhythmDojo.Services.PresentationPreferences.Changed -= ApplyVolume;
             Clear();
         }
 
         private void Clear()
         {
+            lastClickFrame = -1;
             if (clickSource)
             {
                 clickSource.Stop();

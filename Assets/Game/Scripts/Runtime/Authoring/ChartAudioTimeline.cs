@@ -105,7 +105,6 @@ namespace RhythmDojo.Authoring
             set => source.volume = Mathf.Clamp01(value);
         }
 
-        public float PreviewSpeed { get; private set; } = 1f;
         public bool IsSeeking { get; private set; }
         private bool IsFollowing => (useOnAirPageFollow && onAirFollow) || (!useOnAirPageFollow && follow);
 
@@ -130,36 +129,8 @@ namespace RhythmDojo.Authoring
             IsSeeking = false;
         }
 
-        public void SetPreviewSpeed(float value)
-        {
-            bool resume = playing;
-            double? previewReturnTime = this.previewReturnTime;
-            Pause();
-            PreviewSpeed = Mathf.Clamp(value, .5f, 1f);
-            source.pitch = PreviewSpeed;
-            if (resume)
-            {
-                Play();
-                this.previewReturnTime = previewReturnTime;
-            }
-        }
-
         public void PlayPreview() => Play();
         public void PausePreview() => Pause();
-
-        public void RestartPreviewLoop(double time)
-        {
-            if (IsBusy || !source.clip || !double.IsFinite(time))
-            {
-                return;
-            }
-
-            double? previewReturnTime = this.previewReturnTime;
-            Pause();
-            Seek(time);
-            Play();
-            this.previewReturnTime = previewReturnTime;
-        }
 
         public void TogglePreview(bool returnToStart = false)
         {
@@ -199,7 +170,7 @@ namespace RhythmDojo.Authoring
             {
                 if (playing)
                 {
-                    return Math.Min(Duration, playbackStart + Math.Max(0, AudioSettings.dspTime - playbackDsp) * PreviewSpeed);
+                    return Math.Min(Duration, playbackStart + Math.Max(0, AudioSettings.dspTime - playbackDsp));
                 }
 
                 return pausedTime;
@@ -498,7 +469,6 @@ namespace RhythmDojo.Authoring
             double time = MusicTime;
             if (playing && time >= Duration)
             {
-                // An internal loop may restart after this frame reaches the clip end.
                 double? previewReturnTime = this.previewReturnTime;
                 Pause();
                 this.previewReturnTime = previewReturnTime;
@@ -752,7 +722,7 @@ namespace RhythmDojo.Authoring
             if (pausedTime < 0)
             {
                 playbackStart = pausedTime;
-                audioDsp -= pausedTime / PreviewSpeed;
+                audioDsp -= pausedTime;
             }
 
             source.PlayScheduled(audioDsp);

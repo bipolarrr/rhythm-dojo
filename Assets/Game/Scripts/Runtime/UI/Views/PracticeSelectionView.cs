@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using RhythmDojo.Audio;
 using RhythmDojo.Services;
 using UnityEngine;
 using UnityEngine.UI;
@@ -27,6 +28,7 @@ namespace RhythmDojo.UI
         public Button[] difficulties;
         public AudioSource effects;
         public AudioClip contact;
+        public DojoSoundPlayer sounds;
         public PracticeStrikeAnimator strikes;
         [Range(.15f, .8f)] public float holdSeconds = .3f;
         [Range(.15f, .5f)] public float selectionRepeatSeconds = .2f;
@@ -147,6 +149,11 @@ namespace RhythmDojo.UI
             {
                 throw new InvalidOperationException("Practice selection audio missing.");
             }
+            if (!sounds)
+            {
+                throw new InvalidOperationException("Recorded practice audio pool missing.");
+            }
+            sounds.Validate();
             if (!previous || !next)
             {
                 throw new InvalidOperationException("Practice selection navigation missing.");
@@ -183,6 +190,8 @@ namespace RhythmDojo.UI
             awaitingContact = false;
             strikes.Contact -= StrikeContact;
             strikes.Contact += StrikeContact;
+            strikes.Started -= StrikeStarted;
+            strikes.Started += StrikeStarted;
             var preferences = PresentationPreferences.Current ?? PresentationPreferences.Load();
             contactVolume = .65f * preferences.gameplayVolume;
             effects.clip = contact;
@@ -327,6 +336,21 @@ namespace RhythmDojo.UI
             }
         }
 
+        private void StrikeStarted(int direction, int motion, bool rapid)
+        {
+            var cue = DojoSoundCue.Swing;
+            if (motion == 2)
+            {
+                cue = DojoSoundCue.KickSwing;
+            }
+            float strength = .85f;
+            if (rapid)
+            {
+                strength = .55f;
+            }
+            sounds.Play(cue, strength, direction * .22f);
+        }
+
         private void StrikeContact(int direction, bool changesSong, bool rapid)
         {
             ContactCount++;
@@ -334,15 +358,25 @@ namespace RhythmDojo.UI
             recoilAge = 0;
             impactPosition = impact.transform.parent.InverseTransformPoint(
                 strikes.transform.TransformPoint(strikes.LastContactPosition));
-            effects.pitch = 1 + (strikes.LastContactMotion - 1) * .08f;
             var preferences = PresentationPreferences.Current;
             if (preferences != null)
             {
                 contactVolume = .65f * preferences.gameplayVolume;
             }
-            effects.volume = contactVolume;
-            // One authored source bounds concurrent voices, even throughout a long barrage.
-            effects.Play();
+            float strength = .85f;
+            if (strikes.LastContactMotion == 2)
+            {
+                strength = 1f;
+            }
+            if (rapid)
+            {
+                strength *= .8f;
+            }
+            sounds.Play(DojoSoundCue.DummyHit, strength, direction * .16f);
+            if (changesSong && !rapid)
+            {
+                sounds.Play(DojoSoundCue.Creak, .5f, direction * .10f);
+            }
             if (!changesSong)
             {
                 if (spinAge >= spinSeconds)
@@ -415,6 +449,7 @@ namespace RhythmDojo.UI
 
         public IEnumerator Leave()
         {
+            sounds.StopAll();
             IsLeaving = true;
             IsStriking = IsBarrage = singleActive = false;
             pending.Clear();
@@ -437,6 +472,11 @@ namespace RhythmDojo.UI
             if (strikes)
             {
                 strikes.Contact -= StrikeContact;
+                strikes.Started -= StrikeStarted;
+            }
+            if (sounds)
+            {
+                sounds.StopAll();
             }
             if (captured)
             {

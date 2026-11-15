@@ -125,7 +125,6 @@ namespace RhythmDojo.Tests
             Assert.That(scenes[0].path, Is.EqualTo(SceneBuilder.TitlePath));
             Assert.That(scenes.Count(scene => scene.path == SceneBuilder.TitlePath), Is.EqualTo(1));
             Assert.That(scenes.Count(scene => scene.path == SceneBuilder.ModeSelectionPath), Is.EqualTo(1));
-            Assert.That(scenes.Any(scene => scene.path == SceneBuilder.BootstrapPath), Is.True);
         }
 
         [Test]

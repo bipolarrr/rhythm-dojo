@@ -14,6 +14,8 @@ namespace RhythmDojo.UI
         private PlayResult result;
         private bool bound;
         private int selectedIndex;
+        private readonly System.Collections.Generic.List<UnityEngine.UI.Selectable> menuControls =
+            new System.Collections.Generic.List<UnityEngine.UI.Selectable>();
 
         public PlayResult Result => result;
         public int SelectedIndex => selectedIndex;
@@ -98,6 +100,7 @@ namespace RhythmDojo.UI
                 view.events.text = "";
                 view.previousButton.interactable = false;
                 view.nextButton.interactable = false;
+                RefreshNavigation();
 
                 return;
             }
@@ -136,7 +139,39 @@ namespace RhythmDojo.UI
                 note.Note.StartTime, note.Note.EndTime, beat, state);
             view.previousButton.interactable = selectedIndex > 0;
             view.nextButton.interactable = selectedIndex < result.Notes.Count - 1;
+            RefreshNavigation();
             RefreshEvents();
+        }
+
+        private void RefreshNavigation()
+        {
+            menuControls.Clear();
+            menuControls.Add(view.closeButton);
+            menuControls.Add(view.zoom);
+            menuControls.Add(view.position);
+            if (view.previousButton.interactable)
+            {
+                menuControls.Add(view.previousButton);
+            }
+            if (view.nextButton.interactable)
+            {
+                menuControls.Add(view.nextButton);
+            }
+            DojoMenuNavigation.Chain(menuControls);
+            var system = UnityEngine.EventSystems.EventSystem.current;
+            if (!system || !system.currentSelectedGameObject)
+            {
+                return;
+            }
+            if (!system.currentSelectedGameObject.TryGetComponent<UnityEngine.UI.Selectable>(out var control))
+            {
+                return;
+            }
+
+            if (!control.IsInteractable())
+            {
+                view.position.Select();
+            }
         }
 
         private void RefreshEvents()

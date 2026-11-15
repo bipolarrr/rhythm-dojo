@@ -295,7 +295,7 @@ namespace RhythmDojo.UI
             {
                 if (view.boardCrack)
                 {
-                    effects.PlayOneShot(view.boardCrack, .7f);
+                    effects.PlayOneShot(view.boardCrack, .45f * RhythmDojo.Audio.DojoSoundPlayer.EffectsVolume);
                 }
 
                 yield return board.Play();

@@ -1,0 +1,94 @@
+[
+  {
+    "path": "Assets/Game/Audio/Foley/ResultsArrival.wav",
+    "seconds": 0.474,
+    "peak_db": -6.74,
+    "rms_db": -24.97,
+    "pcm_bytes": 30336,
+    "sha256": "471b7690c3551deea0a94af40ce349f80c23a491eb33dcfddca6d6c5e48a5d42",
+    "sources": [
+      "bamboo",
+      "wood",
+      "creak"
+    ]
+  },
+  {
+    "path": "Assets/Game/Audio/Foley/ResultsBrush.wav",
+    "seconds": 0.269,
+    "peak_db": -12.4,
+    "rms_db": -35.46,
+    "pcm_bytes": 17216,
+    "sha256": "f331b43eb4a38987416d860994d5f6490657d62f8c349cbec46dc1580962167a",
+    "sources": [
+      "creak"
+    ]
+  },
+  {
+    "path": "Assets/Game/Audio/Foley/ResultsCount1.wav",
+    "seconds": 0.134,
+    "peak_db": -10.46,
+    "rms_db": -27.23,
+    "pcm_bytes": 8576,
+    "sha256": "ab4dab4aaa973a52368332c52f2543e1b14540551c70df5a246dd2ba886bf80e",
+    "sources": [
+      "wood"
+    ]
+  },
+  {
+    "path": "Assets/Game/Audio/Foley/ResultsCount2.wav",
+    "seconds": 0.134,
+    "peak_db": -10.46,
+    "rms_db": -27.69,
+    "pcm_bytes": 8576,
+    "sha256": "1f98ad829a6de21fae7aeff97981e3435317bb9de1371b0fed4c84862b96d6e7",
+    "sources": [
+      "wood"
+    ]
+  },
+  {
+    "path": "Assets/Game/Audio/Foley/ResultsCount3.wav",
+    "seconds": 0.134,
+    "peak_db": -10.46,
+    "rms_db": -28.14,
+    "pcm_bytes": 8576,
+    "sha256": "44e22b18b2f1a64ce41ed7ba199f7696645dde5688a234230c42b371079e9991",
+    "sources": [
+      "wood"
+    ]
+  },
+  {
+    "path": "Assets/Game/Audio/Foley/ResultsStatistic.wav",
+    "seconds": 0.164,
+    "peak_db": -10.17,
+    "rms_db": -26.63,
+    "pcm_bytes": 10496,
+    "sha256": "931c4ffb72f4a680fad2972b1b14eb41233622aa81b2f1a4dec5d8d91655d732",
+    "sources": [
+      "wood"
+    ]
+  },
+  {
+    "path": "Assets/Game/Audio/Foley/ResultsClear.wav",
+    "seconds": 0.422,
+    "peak_db": -4.73,
+    "rms_db": -22.88,
+    "pcm_bytes": 27008,
+    "sha256": "003bf82c80ce0a7cfee3298f75d8c83d364f19ef14e95780969682c16a537dfd",
+    "sources": [
+      "wood",
+      "bamboo"
+    ]
+  },
+  {
+    "path": "Assets/Game/Audio/Foley/ResultsFailed.wav",
+    "seconds": 0.433,
+    "peak_db": -6.2,
+    "rms_db": -24.75,
+    "pcm_bytes": 27712,
+    "sha256": "fb1c2523e1218ca21f6758f9a11f025ca04b52112870d2d97793c3309a7f2d80",
+    "sources": [
+      "wood",
+      "creak"
+    ]
+  }
+]

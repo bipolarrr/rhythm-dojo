@@ -4,7 +4,6 @@ namespace RhythmDojo.UI
 {
     public sealed class DojoEntranceView : MonoBehaviour
     {
-        public DojoEntranceTransition transitionTemplate;
         public RectTransform startPrompt;
         public RectTransform trainingInterior;
         public const float InteriorScale = 1.08f;
@@ -56,16 +55,6 @@ namespace RhythmDojo.UI
             }
         }
         public float Opening { get; private set; }
-
-        public void CopyPresentationStateFrom(DojoEntranceView source)
-        {
-            startPrompt.gameObject.SetActive(source.startPrompt.gameObject.activeSelf);
-            startPrompt.localScale = source.startPrompt.localScale;
-            trainingInterior.localScale = source.trainingInterior.localScale;
-            slidingLogo.rectTransform.localScale = source.slidingLogo.rectTransform.localScale;
-            SetLogoSeparation(source.MenuLogoSeparation);
-            SetOpening(source.Opening);
-        }
 
         public void SetOpening(float amount)
         {

@@ -65,7 +65,7 @@ namespace RhythmDojo.Tests
                 view.retryButton.onClick.Invoke();
                 Assert.That(view.retryStatus.text, Does.Contain(message));
                 Assert.That(view.retryButton.interactable, Is.EqualTo(canRetry));
-                Assert.That(view.backButton.interactable, Is.True);
+                Assert.That(view.moreButton.interactable, Is.True);
                 view.moreButton.onClick.Invoke();
                 view.review.closeButton.onClick.Invoke();
                 Assert.That(view.retryButton.interactable, Is.EqualTo(canRetry));
@@ -111,7 +111,9 @@ namespace RhythmDojo.Tests
                 int returns = 0;
                 screen.Initialize(null, () => returns++);
                 screen.Initialize(null, () => returns++);
-                view.backButton.onClick.Invoke();
+                typeof(ResultsScreen).GetMethod("Back",
+                    System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                    .Invoke(screen, null);
                 Assert.That(returns, Is.EqualTo(1));
                 Assert.That(view.moreButton.interactable, Is.False);
                 var chart = new ChartData(new[] { NoteData.Tap(0, 1) }, 2);
@@ -123,7 +125,25 @@ namespace RhythmDojo.Tests
                 view.moreButton.onClick.Invoke();
                 Assert.That(view.review.GetComponent<ResultsChartReview>().Result, Is.SameAs(result));
                 view.review.closeButton.onClick.Invoke();
-                Assert.That(view.backButton.interactable, Is.True);
+                Assert.That(view.moreButton.interactable, Is.True);
+
+                // Explicit display values must not alter the result or leak into the
+                // next normal display. Reopening reuses the same authored controls.
+                int score = result.Score;
+                double accuracy = result.Session.AccuracyRate;
+                var children = view.GetComponentsInChildren<Transform>(true);
+                screen.Display(result, 765432, 98.76);
+                Assert.That(view.scoreValue.text, Is.EqualTo(765432.ToString("N0")));
+                Assert.That(view.accuracy.text, Does.Contain("98.76"));
+                view.gameObject.SetActive(false);
+                view.gameObject.SetActive(true);
+                Assert.That(view.scoreValue.text, Is.EqualTo(765432.ToString("N0")));
+                Assert.That(view.GetComponentsInChildren<Transform>(true), Is.EqualTo(children));
+                Assert.That(result.Score, Is.EqualTo(score));
+                Assert.That(result.Session.AccuracyRate, Is.EqualTo(accuracy));
+                screen.Display(result);
+                Assert.That(view.scoreValue.text, Is.EqualTo(score.ToString("N0")));
+                Assert.That(view.accuracy.text, Does.Contain(accuracy.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)));
             }
             finally
             {
