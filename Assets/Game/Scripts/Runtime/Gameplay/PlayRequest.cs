@@ -10,6 +10,7 @@ namespace RhythmDojo.Gameplay
         public ScrollMode ScrollMode { get; }
         public double Multiplier { get; }
         public int TimingOffsetMs { get; }
+        public bool DeveloperAutoplay { get; }
         public HardModeHealthRules HardModeRules { get; }
 
         public bool IsHardMode => HardModeRules != null;
@@ -34,7 +35,8 @@ namespace RhythmDojo.Gameplay
             double multiplier,
             int timingOffsetMs,
             HardModeHealthRules healthRules,
-            PlayRules rules = null
+            PlayRules rules = null,
+            bool developerAutoplay = false
         )
         {
             rules?.Validate();
@@ -67,6 +69,7 @@ namespace RhythmDojo.Gameplay
             ScrollMode = scrollMode;
             Multiplier = multiplier;
             TimingOffsetMs = UnityEngine.Mathf.Clamp(timingOffsetMs, -200, 200);
+            DeveloperAutoplay = developerAutoplay;
         }
     }
 }

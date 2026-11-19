@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f8fa5ad77500c54cb0b46d4d6d2a3b0, type: 3}
+  m_Name: BasicPulse
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.Content.TrainingLesson
+  lessonId: basic-pulse
+  title: "\uAE30\uCD08 \uBC15\uC790 \uC218\uB828"
+  definitionVersion: 1
+  stage: 0
+  song: {fileID: 11400000, guid: 93d3d8b429c827b41bc0c7c034b5e025, type: 2}
+  maximumMisses: 0
+  minimumAccuracy: 50
+  introductionDialogue: {fileID: 11400000, guid: 09d6f2fcefc4729489ca3ec8ef628669, type: 2}
+  successDialogue: {fileID: 11400000, guid: 51f30921c5142fc4b8d78d956e94af52, type: 2}
+  failureDialogue: {fileID: 11400000, guid: ad8740645c8832e44ba9b413d2a6baca, type: 2}
+  abortedDialogue: {fileID: 11400000, guid: 900c548d3cc27094081d50395fc5f495, type: 2}

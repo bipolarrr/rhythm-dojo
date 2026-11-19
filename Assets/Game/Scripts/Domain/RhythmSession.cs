@@ -38,6 +38,12 @@ namespace RhythmDojo.Gameplay
 
         private readonly HardModeHealthRules hardModeRules;
         private readonly RuleSession ruleSession;
+        private readonly JudgmentSchedule schedule;
+        private Guid sessionId;
+        public JudgmentSchedule Schedule => ruleSession?.Schedule ?? schedule;
+        public Guid SessionId => ruleSession?.SessionId ?? sessionId;
+        public event Action<JudgmentResolvedEvent> JudgmentResolved;
+        public event Action<InputResolutionEvent> InputResolved;
 
         public FailureSnapshot Failure => ruleSession?.Failure ?? default;
 
@@ -109,6 +115,8 @@ namespace RhythmDojo.Gameplay
                 SyncRules();
                 Judged?.Invoke(result);
             };
+            ruleSession.JudgmentResolved += result => JudgmentResolved?.Invoke(result);
+            ruleSession.InputResolved += result => InputResolved?.Invoke(result);
             ruleSession.HoldStarted += result => HoldStarted?.Invoke(result);
             ruleSession.Failed += result =>
             {
@@ -149,6 +157,7 @@ namespace RhythmDojo.Gameplay
             chart.Validate(mode);
             config.Validate();
             this.chart = chart;
+            schedule = new JudgmentSchedule(chart, null, null);
             this.config = config;
             records = new NoteJudgmentRecord[chart.Count];
             states = new NoteState[chart.Count];
@@ -168,6 +177,7 @@ namespace RhythmDojo.Gameplay
                 return;
             }
 
+            sessionId = Guid.NewGuid();
             Array.Clear(records, 0, records.Length);
             Array.Clear(states, 0, states.Length);
             Array.Clear(heads, 0, heads.Length);
@@ -279,10 +289,15 @@ namespace RhythmDojo.Gameplay
 
             if (best < 0)
             {
+                InputResolved?.Invoke(new InputResolutionEvent(SessionId, lane, songTime,
+                    InputResolution.EmptyPress));
                 return;
                 // Empty presses do not affect combo.
             }
 
+            InputResolved?.Invoke(new InputResolutionEvent(SessionId, lane, songTime,
+                InputResolution.AcceptedHead));
+            var judgmentSessionId = SessionId;
             double signed = songTime - chart[best].StartTime;
             var grade = Grade(signed);
             LastTimingError = signed;
@@ -301,6 +316,8 @@ namespace RhythmDojo.Gameplay
                 HoldStarted?.Invoke(
                     new HoldStartedEvent(new JudgmentEvent(best, chart[best], grade, signed))
                 );
+                JudgmentResolved?.Invoke(new JudgmentResolvedEvent(judgmentSessionId, Schedule.Head(best),
+                    grade, songTime));
             }
         }
 
@@ -335,6 +352,11 @@ namespace RhythmDojo.Gameplay
             }
 
             double error = songTime - chart[i].EndTime;
+            if (Grade(error) == Judgment.Miss)
+            {
+                InputResolved?.Invoke(new InputResolutionEvent(SessionId, lane, songTime,
+                    InputResolution.HoldInterrupted));
+            }
             Resolve(i, (Judgment)Math.Max((int)heads[i], (int)Grade(error)), error);
         }
 
@@ -406,6 +428,12 @@ namespace RhythmDojo.Gameplay
             }
 
             var judgment = new JudgmentEvent(i, chart[i], grade, error);
+            var judgmentSessionId = SessionId;
+            var unit = Schedule.Head(i);
+            if (states[i] == NoteState.Holding)
+            {
+                unit = Schedule.Tail(i);
+            }
 
             if (states[i] == NoteState.Holding)
             {
@@ -505,6 +533,8 @@ namespace RhythmDojo.Gameplay
 
             LastTimingError = error;
             Judged?.Invoke(new JudgmentEvent(i, chart[i], grade, error));
+            JudgmentResolved?.Invoke(new JudgmentResolvedEvent(judgmentSessionId, unit, grade,
+                unit.ScheduledTime + error));
         }
     }
 }

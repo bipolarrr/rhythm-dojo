@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efed7040ac1ebe24385781693a832114, type: 3}
+  m_Name: Failed
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.Content.DialogueSequenceAsset
+  sequenceId: basic-pulse-failed
+  version: 1
+  lines:
+  - id: encourage
+    speaker: "\uC0AC\uD615"
+    text: "\uC11C\uB450\uB97C \uAC83 \uC5C6\uB2E4. \uBC15\uC790\uB97C \uB193\uCCD0\uB3C4
+      \uD638\uD761\uBD80\uD130 \uB2E4\uC2DC \uACE0\uB974\uAC70\uB77C."
+    expression: 2
+    motion: 1
+  - id: retry
+    speaker: "\uC0AC\uD615"
+    text: "\uD55C \uBC88 \uB354 \uD574\uBCF4\uACA0\uB290\uB0D0? \uC774\uBC88\uC5D0\uB294
+      \uB0B4\uAC00 \uC9C0\uCF1C\uBCF4\uB9C8."
+    expression: 1
+    motion: 2

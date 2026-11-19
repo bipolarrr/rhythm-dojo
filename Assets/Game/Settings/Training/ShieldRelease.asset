@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f8fa5ad77500c54cb0b46d4d6d2a3b0, type: 3}
+  m_Name: ShieldRelease
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.Content.TrainingLesson
+  lessonId: shield-release
+  title: "\uC274\uB4DC\xB7\uD574\uC81C"
+  patternDescription: "\uB2E8\uD0C0\u2192\uAC19\uC740 \uD0A4 \uD640\uB4DC\u2192\uD574\uC81C\u2192\uB2E4\uB978
+    \uD0A4 \xB7 BPM 100"
+  guided: 1
+  definitionVersion: 1
+  stage: 1
+  song: {fileID: 11400000, guid: 2f32a54f9493aa440848e3e1961ae157, type: 2}
+  maximumMisses: 0
+  minimumAccuracy: 90
+  holdEnd: 1
+  maximumChordSpreadSeconds: 0
+  introductionDialogue: {fileID: 11400000, guid: f8914546f6bf4f242b78c04c3c02f43a, type: 2}
+  successDialogue: {fileID: 11400000, guid: 703ca10dd5a17424ba941e6cbf450d89, type: 2}
+  failureDialogue: {fileID: 11400000, guid: 899f79620130c784f9707896d9a5caa4, type: 2}
+  abortedDialogue: {fileID: 11400000, guid: 827dfadab515276459465210826bca03, type: 2}
+  imitationSong: {fileID: 11400000, guid: 1cab6948676cdef4eb61d46b96528c1b, type: 2}
+  applicationSong: {fileID: 11400000, guid: d90266b25e3f96941985910e42ca62cc, type: 2}
+  imitationDialogue: {fileID: 11400000, guid: 9b8bb60dacd12f2409dba62fe269cbee, type: 2}
+  applicationDialogue: {fileID: 11400000, guid: a73494e323806ce4abd320a209c5015e, type: 2}
+  assessmentDialogue: {fileID: 11400000, guid: 4021fd2ba342bb84388f321fb65f8460, type: 2}
+  demonstrationFinishedDialogue: {fileID: 11400000, guid: bb96403eb17ea1544af090129747561e, type: 2}
+  practiceSucceededDialogue: {fileID: 11400000, guid: 582b365ecc154f84f9228185721a4bf0, type: 2}
+  missingDialogue: {fileID: 11400000, guid: 6ab55349dee34a548991c5cf7f863923, type: 2}
+  timingDialogue: {fileID: 11400000, guid: 5cf55065b75bc714c807fe965d855e5a, type: 2}
+  extraInputDialogue: {fileID: 11400000, guid: 17fc141c8d809a641ac3298ccfe024b9, type: 2}

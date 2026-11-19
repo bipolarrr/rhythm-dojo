@@ -212,7 +212,7 @@ namespace RhythmDojo.Tests
 
             if (gameplay)
             {
-                bool brush = text == gameplay.songTitle || text == gameplay.judgment;
+                bool brush = text == gameplay.songTitle || text == gameplay.judgment || text == gameplay.combo;
                 if (brush)
                 {
                     expected = AssetDatabase.LoadAssetAtPath<Font>("Assets/Game/Fonts/Dokdo-Regular.ttf");

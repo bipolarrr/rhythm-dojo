@@ -116,6 +116,19 @@ namespace RhythmDojo.Tests
             Assert.That(presentation.IsRevealing, Is.True);
             Assert.That(view.scoreValue.text, Is.EqualTo("0"));
             Assert.That(view.GetComponentsInChildren<Transform>(true).Length, Is.EqualTo(children));
+
+            // A repeated preview can arrive before the editor button's click is
+            // consumed by the runtime input update. It must not skip its own reveal.
+            screen.Display(result);
+            InputSystem.QueueStateEvent(mouse, new MouseState().WithButton(MouseButton.Left));
+            yield return null;
+            yield return null;
+            yield return new WaitForSecondsRealtime(.2f);
+            Assert.That(presentation.IsRevealing, Is.True, "The invoking click must be released before skip is armed.");
+            Assert.That(presentation.Elapsed, Is.LessThan(ResultsPresentation.StampTime));
+            InputSystem.QueueStateEvent(mouse, new MouseState());
+            yield return null;
+            yield return null;
             var samples = new float[1024];
             float peak = 0;
             double deadline = Time.realtimeSinceStartupAsDouble + 1;

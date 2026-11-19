@@ -24,8 +24,11 @@ namespace RhythmDojo.Presentation
         [SerializeField]
         private Material fadeMaterial;
 
-        private readonly List<Renderer> lanes = new List<Renderer>();
-        private readonly List<Renderer> rails = new List<Renderer>();
+        [SerializeField] private List<Renderer> lanes = new List<Renderer>();
+        [SerializeField] private List<Renderer> rails = new List<Renderer>();
+        [SerializeField] private List<SpriteRenderer> shoes = new List<SpriteRenderer>();
+        [SerializeField] private Renderer judgmentLine;
+        private MeshRenderer beamTemplate;
         private Material fadedHighway;
         private Material fadedRails;
 
@@ -57,9 +60,24 @@ namespace RhythmDojo.Presentation
                 );
             }
 
-            lanes.Clear();
-            rails.Clear();
-            measureLines.Clear();
+            if (!settings.strikeShoe || !settings.strikeShoe.sprite)
+            {
+                throw new InvalidOperationException("Training floor strike shoe missing.");
+            }
+
+            if (!settings.beamTemplate)
+            {
+                throw new InvalidOperationException("Training floor beam template missing.");
+            }
+
+            beamTemplate = settings.beamTemplate;
+            Resize(lanes, mode.LaneCount, beamTemplate);
+            Resize(rails, mode.LaneCount + 1, beamTemplate);
+            Resize(shoes, mode.LaneCount, settings.strikeShoe);
+            foreach (var line in measureLines)
+            {
+                line.gameObject.SetActive(false);
+            }
             measureTempo = null;
             highwayEnd = settings.highwayCenter + settings.highwayLength * .5f;
             measureLineScale = new Vector3(
@@ -68,30 +86,17 @@ namespace RhythmDojo.Presentation
                 settings.judgmentLineDepth * .55f
             );
 
-            for (int i = transform.childCount - 1; i >= 0; i--)
-            {
-                var child = transform.GetChild(i).gameObject;
-                child.SetActive(false);
-
-                if (UnityEngine.Application.isPlaying)
-                {
-                    Destroy(child);
-                }
-                else
-                {
-                    DestroyImmediate(child);
-                }
-            }
-
             for (int i = 0; i < mode.LaneCount; i++)
             {
-                var renderer = Box(
-                    $"Lane {i}",
+                Box(lanes[i], $"Lane {i}",
                     new Vector3(mode.LaneX(i), -.15f, settings.highwayCenter),
                     new Vector3(mode.LaneSpacing - settings.laneGap, .2f, settings.highwayLength),
                     highwayMaterial
                 );
-                lanes.Add(renderer);
+
+                var shoe = shoes[i];
+                shoe.transform.localScale = Vector3.one * (mode.LaneSpacing - settings.laneGap);
+                shoe.transform.position = new Vector3(mode.LaneX(i), .094f, -.24f);
             }
 
             for (int i = 0; i <= mode.LaneCount; i++)
@@ -102,8 +107,7 @@ namespace RhythmDojo.Presentation
                     width *= 2;
                 }
 
-                var renderer = Box(
-                    $"Rail {i}",
+                Box(rails[i], $"Rail {i}",
                     new Vector3(
                         (i - mode.LaneCount * .5f) * mode.LaneSpacing,
                         0,
@@ -112,11 +116,14 @@ namespace RhythmDojo.Presentation
                     new Vector3(width, settings.railHeight, settings.highwayLength),
                     railMaterial
                 );
-                rails.Add(renderer);
             }
 
-            Box(
-                "Judgement Line",
+            if (!judgmentLine)
+            {
+                judgmentLine = Instantiate(beamTemplate, transform);
+            }
+
+            Box(judgmentLine, "Judgement Line",
                 new Vector3(0, .05f, 0),
                 new Vector3(
                     mode.LaneCount * mode.LaneSpacing,
@@ -156,6 +163,8 @@ namespace RhythmDojo.Presentation
             var color = source.GetColor("_BaseColor");
             color.a *= opacity;
             material.SetColor("_BaseColor", color);
+            material.SetTexture("_BaseMap", source.GetTexture("_BaseMap"));
+            material.SetTextureScale("_BaseMap", source.GetTextureScale("_BaseMap"));
         }
 
         private static void SetSurface(List<Renderer> renderers, Material material, bool visible)
@@ -195,12 +204,14 @@ namespace RhythmDojo.Presentation
 
                     if (visible == measureLines.Count)
                     {
-                        var renderer = Box("Measure Line", Vector3.zero, measureLineScale, judgmentMaterial);
+                        var renderer = Instantiate(beamTemplate, transform);
+                        Box(renderer, "Measure Line", Vector3.zero, measureLineScale, railMaterial);
                         renderer.shadowCastingMode = ShadowCastingMode.Off;
                         measureLines.Add(renderer.transform);
                     }
 
                     var line = measureLines[visible];
+                    line.localScale = measureLineScale;
                     line.position = new Vector3(0, .035f, (float)distance);
                     line.gameObject.SetActive(true);
 
@@ -215,29 +226,38 @@ namespace RhythmDojo.Presentation
             }
         }
 
-        private Renderer Box(string name, Vector3 position, Vector3 scale, Material material)
+        private void Resize<T>(List<T> items, int count, T template) where T : Renderer
         {
-            var go = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            go.name = name;
-            go.transform.SetParent(transform);
-            go.transform.position = position;
-            go.transform.localScale = scale;
-
-            var collider = go.GetComponent<Collider>();
-            collider.enabled = false;
-
-            if (UnityEngine.Application.isPlaying)
+            // Gameplay serializes the default mode's assembly. Only a mode with a
+            // different lane count or an empty chart-editor preview needs instances.
+            while (items.Count < count)
             {
-                Destroy(collider);
-            }
-            else
-            {
-                DestroyImmediate(collider);
+                items.Add(Instantiate(template, transform));
             }
 
-            var renderer = go.GetComponent<Renderer>();
+            for (int i = items.Count - 1; i >= count; i--)
+            {
+                var item = items[i].gameObject;
+                items.RemoveAt(i);
+                item.SetActive(false);
+                if (UnityEngine.Application.isPlaying)
+                {
+                    Destroy(item);
+                }
+                else
+                {
+                    DestroyImmediate(item);
+                }
+            }
+        }
+
+        private static void Box(Renderer renderer, string name, Vector3 position, Vector3 scale, Material material)
+        {
+            renderer.name = name;
+            renderer.transform.position = position;
+            renderer.transform.localScale = scale;
             renderer.sharedMaterial = material;
-            return renderer;
+            renderer.enabled = true;
         }
 
         private void OnDestroy()

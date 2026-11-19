@@ -71,13 +71,13 @@ namespace RhythmDojo.UI
                     break;
             }
 
-            float enter = Mathf.Clamp01(age / .12f);
+            float enter = Mathf.Clamp01(age / .14f);
             float back = enter - 1;
             float settle = 1 + 2.2f * back * back * back + 1.2f * back * back;
             float exit = Mathf.SmoothStep(0, 1, Mathf.InverseLerp(.19f, duration, age));
-            group.alpha = .84f * (1 - exit);
+            group.alpha = .96f * (1 - exit);
             rect.localScale = Vector3.one * (size * emphasis * Mathf.Lerp(.86f, 1, settle));
-            rect.anchoredPosition = new Vector2((1 - settle) * -5, exit * travel);
+            rect.anchoredPosition = new Vector2((1 - settle) * -7, (1 - settle) * 4 + exit * travel);
             rect.localRotation = Quaternion.Euler(0, 0, angle * (1 - enter));
 
             var tint = label.color;

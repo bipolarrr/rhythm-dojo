@@ -57,6 +57,11 @@ namespace RhythmDojo.Core
 
         public bool IsEditorPlaytest => returned != null;
 
+        public TrainingSession Training { get; private set; }
+        public TrainingLesson CurrentTrainingLesson { get; private set; }
+        public TrainingProgressStore TrainingProgress { get; private set; }
+        public bool IsTrainingPlay => Training != null && CurrentRequest != null;
+
         public PlayRequest CurrentRequest { get; private set; }
         public PlayResult LastResult { get; private set; }
         public bool CanRetryResult => retryPlay != null && SceneManager.GetSceneByPath(ResultsPath).isLoaded;
@@ -136,6 +141,7 @@ namespace RhythmDojo.Core
                 )
             );
             flow.Preferences = new SelectionPreferences();
+            flow.TrainingProgress = new TrainingProgressStore();
             flow.HardMode = HardModePreferences.Load();
             flow.Rules = new PlayRulesService();
             // A new application session starts in free practice; existing flows keep their rules.
@@ -207,6 +213,11 @@ namespace RhythmDojo.Core
                 SettingsAccessPolicy.Release(this);
                 ReleaseRequest();
 
+                if (scene.path != MainMenuActions.TutorialScenePath)
+                {
+                    ClearTraining();
+                }
+
                 if (scene.path != ResultsPath)
                 {
                     retryPlay = null;
@@ -254,7 +265,10 @@ namespace RhythmDojo.Core
             }
         }
 
-        public async Task PlaySelectedAsync(CancellationToken cancellationToken)
+        public Task PlaySelectedAsync(CancellationToken cancellationToken) =>
+            PlaySelectedAsync(cancellationToken, false);
+
+        public async Task PlaySelectedAsync(CancellationToken cancellationToken, bool developerAutoplay)
         {
             if (Transitioning)
             {
@@ -271,6 +285,11 @@ namespace RhythmDojo.Core
             var scrollMode = SelectedScrollMode;
             var multiplier = SelectedMultiplier;
             int timingOffsetMs = Preferences.TimingOffsetMs;
+            if (developerAutoplay)
+            {
+                // Authored inputs land on the song clock without human input latency.
+                timingOffsetMs = 0;
+            }
             HardModeHealthRules healthRules;
 
             if (HardMode.Enabled)
@@ -284,7 +303,7 @@ namespace RhythmDojo.Core
 
             var rules = Rules.Snapshot;
             await LoadCatalogPlayAsync(songId, difficulty, scrollMode, multiplier, timingOffsetMs,
-                healthRules, rules, cancellationToken);
+                healthRules, rules, cancellationToken, developerAutoplay);
         }
 
         private async Task LoadCatalogPlayAsync(
@@ -296,9 +315,11 @@ namespace RhythmDojo.Core
             HardModeHealthRules healthRules,
             PlayRules rules,
             CancellationToken cancellationToken,
+            bool developerAutoplay,
             (string Id, string Revision)? expectedChart = null
         )
         {
+            ClearTraining();
             CloseSettingsImmediately();
             SettingsAccessPolicy.Block(this);
             Audio.CancelBufferValidation();
@@ -336,7 +357,8 @@ namespace RhythmDojo.Core
                     multiplier,
                     timingOffsetMs,
                     healthRules,
-                    rules
+                    rules,
+                    developerAutoplay
                 );
                 ReleaseRequest();
                 CurrentRequest = request;
@@ -418,6 +440,7 @@ namespace RhythmDojo.Core
 
             var rules = Rules.Snapshot;
             CloseSettingsImmediately();
+            ClearTraining();
             SettingsAccessPolicy.Block(this);
             Audio.CancelBufferValidation();
             Transitioning = true;
@@ -464,6 +487,12 @@ namespace RhythmDojo.Core
 
         public void ReturnFromGameplay()
         {
+            if (!Transitioning && IsTrainingPlay)
+            {
+                Training.Abort();
+                Load(MainMenuActions.TutorialScenePath);
+                return;
+            }
             if (!Transitioning)
             {
                 Load(
@@ -476,6 +505,96 @@ namespace RhythmDojo.Core
                     )
                 );
             }
+        }
+
+        public TrainingSession PrepareTraining(TrainingLesson lesson)
+        {
+            if (!lesson)
+            {
+                throw new ArgumentNullException(nameof(lesson));
+            }
+            lesson.Validate();
+            if (Training != null && CurrentTrainingLesson == lesson)
+            {
+                return Training;
+            }
+            if (IsTrainingPlay || Transitioning)
+            {
+                throw new InvalidOperationException("Return from gameplay before changing training.");
+            }
+
+            CurrentTrainingLesson = lesson;
+            Training = new TrainingSession(lesson.LessonId, lesson.DefinitionVersion, lesson.Stage,
+                lesson.Criteria, TrainingProgress.IsCompleted(lesson.LessonId, lesson.DefinitionVersion), lesson.Guided);
+            return Training;
+        }
+
+        public bool PlayTraining(TrainingLesson lesson)
+        {
+            if (Transitioning || SceneManager.GetActiveScene().path != MainMenuActions.TutorialScenePath)
+            {
+                return false;
+            }
+
+            var session = PrepareTraining(lesson);
+            PlayableSong song = null;
+            try
+            {
+                song = SongAssetAdapter.Load(lesson.SongForStep(session.NextStep));
+                int timingOffsetMs = Preferences.TimingOffsetMs;
+                if (session.NextStep == TrainingStep.Demonstration)
+                {
+                    // The instructor follows the authored chart, independent of player calibration.
+                    timingOffsetMs = 0;
+                }
+                var request = new PlayRequest(song, settings.defaultDifficulty, SelectedScrollMode,
+                    SelectedMultiplier, timingOffsetMs, null, lesson.CreateRules());
+                session.BeginAttempt();
+                CloseSettingsImmediately();
+                SettingsAccessPolicy.Block(this);
+                Audio.CancelBufferValidation();
+                ReleaseRequest();
+                CurrentRequest = request;
+                song = null;
+                LastResult = null;
+                retryPlay = null;
+                ClearEditorReturn();
+                Load(GameplayPath);
+                return true;
+            }
+            catch
+            {
+                song?.Dispose();
+                ReleaseRequest();
+                session.Abort();
+                SettingsAccessPolicy.Release(this);
+                Transitioning = false;
+                throw;
+            }
+        }
+
+        internal void ShowTrainingResults(TrainingSession session, int attempt, PlayResult result,
+            IReadOnlyList<TrainingInputRecord> inputs = null)
+        {
+            if (Transitioning || !ReferenceEquals(Training, session))
+            {
+                return;
+            }
+            if (!session.Finish(attempt, result.Session, inputs))
+            {
+                return;
+            }
+
+            LastResult = result;
+            TrainingProgress.SaveCompleted(session);
+            Load(MainMenuActions.TutorialScenePath);
+        }
+
+        private void ClearTraining()
+        {
+            Training?.Abort();
+            Training = null;
+            CurrentTrainingLesson = null;
         }
 
         public void ShowResults(PlayResult result)
@@ -500,7 +619,11 @@ namespace RhythmDojo.Core
                 var scrollMode = CurrentRequest.ScrollMode;
                 int timingOffsetMs = CurrentRequest.TimingOffsetMs;
 
-                result.RecommendTimingOffset(timingOffsetMs);
+                bool developerAutoplay = CurrentRequest.DeveloperAutoplay;
+                if (!developerAutoplay)
+                {
+                    result.RecommendTimingOffset(timingOffsetMs);
+                }
 
                 var healthRules = CurrentRequest.HardModeRules;
                 var rules = CurrentRequest.Rules;
@@ -513,6 +636,7 @@ namespace RhythmDojo.Core
                     healthRules,
                     rules,
                     token,
+                    developerAutoplay,
                     expectedChart
                 );
             }

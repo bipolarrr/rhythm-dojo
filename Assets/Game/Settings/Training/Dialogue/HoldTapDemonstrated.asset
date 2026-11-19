@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efed7040ac1ebe24385781693a832114, type: 3}
+  m_Name: HoldTapDemonstrated
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.Content.DialogueSequenceAsset
+  sequenceId: HoldTap-Demonstrated
+  version: 1
+  lines:
+  - id: Demonstrated-0
+    speaker: "\uC0AC\uD615"
+    text: "\uC9E7\uC740 \uC74C\uC774 \uB05D\uB098\uB3C4 \uAE34 \uC74C\uC740 \uB0A8\uC544
+      \uC788\uC9C0? \uAF2C\uB9AC\uB97C \uD655\uC778\uD55C \uB4A4 \uD640\uB4DC \uC190\uC744
+      \uB193\uC544\uB77C."
+    expression: 5
+    motion: 1

@@ -6,20 +6,6 @@ namespace RhythmDojo.Gameplay
     // Chronological judgment schedule, independent of rendering and editor snap settings.
     internal sealed class RuleSession
     {
-        private readonly struct Check
-        {
-            public readonly int Note,
-                Part;
-            public readonly double Time;
-
-            public Check(int note, int part, double time)
-            {
-                Note = note;
-                Part = part;
-                Time = time;
-            }
-        }
-
         private readonly struct InputChange
         {
             public readonly int Lane;
@@ -36,7 +22,11 @@ namespace RhythmDojo.Gameplay
 
         private readonly ChartData chart;
         private readonly PlayRules rules;
-        private readonly List<Check> checks = new List<Check>();
+        private readonly IReadOnlyList<JudgmentSchedule.Check> checks;
+        public JudgmentSchedule Schedule { get; }
+        public Guid SessionId { get; private set; }
+        public event Action<JudgmentResolvedEvent> JudgmentResolved;
+        public event Action<InputResolutionEvent> InputResolved;
         private readonly List<InputChange> history = new List<InputChange>();
         private readonly bool[] heads,
             tails,
@@ -93,76 +83,8 @@ namespace RhythmDojo.Gameplay
             states = new NoteState[chart.Count];
             held = new bool[mode.LaneCount];
 
-            for (int i = 0; i < chart.Count; i++)
-            {
-                var note = chart[i];
-                checks.Add(new Check(i, 0, note.StartTime + rules.Timing.GoodWindow));
-
-                if (note.Kind != NoteKind.Hold)
-                {
-                    continue;
-                }
-
-                double startBeat = tempo.BeatAtTime(note.StartTime);
-
-                for (int tick = 1; ; tick++)
-                {
-                    double time = tempo.TimeAtBeat(startBeat + tick * rules.HoldCheckBeats);
-
-                    if (time >= note.EndTime - RhythmSession.TimingTolerance)
-                    {
-                        break;
-                    }
-
-                    checks.Add(new Check(i, 1, time));
-                }
-
-                checks.Add(
-                    new Check(
-                        i,
-                        2,
-                        note.EndTime
-                            + (
-                                rules.HoldEnd switch
-                                {
-                                    HoldEndMode.Release => rules.Timing.GoodWindow,
-                                    _ => 0,
-                                }
-                            )
-                    )
-                );
-            }
-
-            checks.Sort(
-                (a, b) =>
-                {
-                    int order = a.Time.CompareTo(b.Time);
-
-                    if (order != 0)
-                    {
-                        return order;
-                    }
-
-                    bool aTimeout =
-                        a.Part == 0 || a.Part == 2 && rules.HoldEnd == HoldEndMode.Release;
-                    bool bTimeout =
-                        b.Part == 0 || b.Part == 2 && rules.HoldEnd == HoldEndMode.Release;
-                    order = aTimeout.CompareTo(bTimeout);
-
-                    if (order != 0)
-                    {
-                        return order;
-                    }
-                    else if (a.Note != b.Note)
-                    {
-                        return a.Note.CompareTo(b.Note);
-                    }
-                    else
-                    {
-                        return a.Part.CompareTo(b.Part);
-                    }
-                }
-            );
+            Schedule = new JudgmentSchedule(chart, tempo, this.rules);
+            checks = Schedule.Checks;
             Reset();
         }
 
@@ -174,6 +96,7 @@ namespace RhythmDojo.Gameplay
 
         public void Reset()
         {
+            SessionId = Guid.NewGuid();
             Array.Clear(records, 0, records.Length);
             Array.Clear(broken, 0, broken.Length);
             Array.Clear(heads, 0, heads.Length);
@@ -279,6 +202,24 @@ namespace RhythmDojo.Gameplay
                 }
             }
 
+            InputResolution resolution = InputResolution.AcceptedHead;
+            if (best < 0)
+            {
+                resolution = InputResolution.EmptyPress;
+                for (int i = 0; i < chart.Count; i++)
+                {
+                    if (chart[i].Lane != lane || chart[i].Kind != NoteKind.Hold)
+                    {
+                        continue;
+                    }
+                    if (heads[i] && !tails[i])
+                    {
+                        resolution = InputResolution.HoldRecovery;
+                        break;
+                    }
+                }
+            }
+            InputResolved?.Invoke(new InputResolutionEvent(SessionId, lane, time, resolution));
             Sweep(checkTime, true);
         }
 
@@ -298,6 +239,7 @@ namespace RhythmDojo.Gameplay
                 return;
             }
 
+            bool wasHeld = held[lane];
             held[lane] = false;
             history.Add(new InputChange(lane, checkTime, false));
 
@@ -349,6 +291,11 @@ namespace RhythmDojo.Gameplay
                 }
                 else if (checkTime < note.EndTime)
                 {
+                    if (wasHeld && heads[i])
+                    {
+                        InputResolved?.Invoke(new InputResolutionEvent(SessionId, lane, time,
+                            InputResolution.HoldInterrupted));
+                    }
                     if (rules.HoldEnd == HoldEndMode.Release && heads[i])
                     {
                         broken[i] = true;
@@ -433,11 +380,11 @@ namespace RhythmDojo.Gameplay
                 {
                     if (!broken[i] && HeldAt(note.Lane, check.Time))
                     {
-                        Apply(i, Judgment.Perfect, 0, check.Time);
+                        Apply(i, Judgment.Perfect, 0, check.Time, 1, check);
                     }
                     else
                     {
-                        Apply(i, Judgment.Miss, 0, check.Time);
+                        Apply(i, Judgment.Miss, 0, check.Time, 1, check);
                     }
                 }
                 else
@@ -483,9 +430,11 @@ namespace RhythmDojo.Gameplay
             }
         }
 
-        private void Apply(int i, Judgment grade, double error, double time, int part = 1)
+        private void Apply(int i, Judgment grade, double error, double time, int part = 1,
+            JudgmentSchedule.Check unit = default)
         {
             var judgment = new JudgmentEvent(i, chart[i], grade, error);
+            var judgmentSessionId = SessionId;
 
             if (part == 0 && !records[i].Start.HasValue)
             {
@@ -554,6 +503,15 @@ namespace RhythmDojo.Gameplay
 
             LastTimingError = error;
             Judged?.Invoke(new JudgmentEvent(i, chart[i], grade, error));
+            if (part == 0)
+            {
+                unit = Schedule.Head(i);
+            }
+            else if (part == 2)
+            {
+                unit = Schedule.Tail(i);
+            }
+            JudgmentResolved?.Invoke(new JudgmentResolvedEvent(judgmentSessionId, unit, grade, time));
         }
     }
 }

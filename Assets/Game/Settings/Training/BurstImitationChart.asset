@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c192ff885248966469e5072687582fac, type: 3}
+  m_Name: BurstImitationChart
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.Gameplay.RhythmChart
+  notes:
+  - lane: 0
+    kind: 0
+    startTime: 2.4
+    endTime: 2.4
+  - lane: 1
+    kind: 0
+    startTime: 2.55
+    endTime: 2.55
+  - lane: 2
+    kind: 0
+    startTime: 2.6999999999999997
+    endTime: 2.6999999999999997
+  - lane: 3
+    kind: 0
+    startTime: 2.8499999999999996
+    endTime: 2.8499999999999996
+  - lane: 3
+    kind: 0
+    startTime: 6
+    endTime: 6
+  - lane: 2
+    kind: 0
+    startTime: 6.15
+    endTime: 6.15
+  - lane: 1
+    kind: 0
+    startTime: 6.3
+    endTime: 6.3
+  - lane: 0
+    kind: 0
+    startTime: 6.45
+    endTime: 6.45
+  completionTime: 7.65

@@ -108,6 +108,74 @@ namespace RhythmDojo.Tests
             public void Clear() => Clears++;
         }
 
+        [TestCase(true)]
+        [TestCase(false)]
+        [Category("Training")]
+        [Category("Fast")]
+        public void TrainingUsesChartTimeAndRecordsOnlyAcceptedPhysicalPresses(bool demonstration)
+        {
+            var chart = new ChartData(new[] { NoteData.Tap(0, 1), NoteData.Tap(2, 1.3),
+                NoteData.Tap(0, 1.6), NoteData.Tap(2, 1.9) }, 2.5);
+            var input = new FakeInput();
+            var clock = new FakeClock();
+            if (!demonstration)
+            {
+                clock.InputTimingOffsetSeconds = .03;
+            }
+            var playback = new TrainingPlayback(chart, demonstration);
+            using var c = new RhythmSessionCoordinator(chart, new JudgmentSettings(.05, .1),
+                new GameModeRules(4), new TempoMap(new[] { new TempoPoint(0, 100) }),
+                "Trill", "Training", ScrollMode.Constant, 1, new ConstantScrollTimeline(8, 1),
+                input, clock, new FakePresenter(), null, new PlayRules(), playback);
+            c.Start();
+            c.Pause();
+            input.Press(1, .5);
+            c.Tick();
+            Assert.That(playback.Inputs, Is.Empty);
+            Assert.That(c.Session.Resolved, Is.Zero);
+            c.Resume();
+            input.Press(1, -.1);
+            input.Release(1, -.05);
+            input.Press(1, .5);
+            input.Release(1, .6);
+            if (!demonstration)
+            {
+                input.Press(0, 1.03);
+                input.Release(0, 1.06);
+                input.Press(2, 1.41);
+                input.Release(2, 1.45);
+            }
+            clock.SongTime = 2.6;
+            c.Tick();
+            if (demonstration)
+            {
+                Assert.That(c.Session.Snapshot.Perfect, Is.EqualTo(4), "Slow frames must not skip the demonstration.");
+                Assert.That(playback.Inputs, Is.Empty);
+                for (int i = 0; i < chart.Count; i++)
+                {
+                    Assert.That(c.Session.GetNoteJudgments(i).Start.Value.ErrorSeconds, Is.Zero.Within(1e-8));
+                }
+            }
+            else
+            {
+                Assert.That(c.Session.Snapshot.Perfect, Is.EqualTo(1));
+                Assert.That(c.Session.Snapshot.Good, Is.EqualTo(1));
+                Assert.That(c.Session.Snapshot.Miss, Is.EqualTo(2));
+                Assert.That(playback.ExtraInputs, Is.EqualTo(1));
+                Assert.That(playback.Inputs.Count, Is.EqualTo(3));
+                Assert.That(playback.Inputs[1].Time, Is.EqualTo(1).Within(1e-8));
+            }
+            c.Restart();
+            Assert.That(playback.Inputs, Is.Empty);
+            Assert.That(playback.ExtraInputs, Is.Zero);
+            clock.SongTime = 1;
+            c.Tick();
+            if (demonstration)
+            {
+                Assert.That(c.Session.Snapshot.Perfect, Is.EqualTo(1));
+            }
+        }
+
         [Test]
         [Category("Fast")]
         public void GameOverStopsClockAndKeepsPresentationTimeUntilRestart()

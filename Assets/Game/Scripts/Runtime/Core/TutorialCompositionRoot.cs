@@ -1,9 +1,9 @@
 using System;
 using RhythmDojo.Audio;
+using RhythmDojo.Content;
 using RhythmDojo.Gameplay;
 using RhythmDojo.UI;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace RhythmDojo.Core
 {
@@ -13,6 +13,9 @@ namespace RhythmDojo.Core
         [SerializeField] private GameSettings gameSettings;
         [SerializeField] private TitleMusicPlayer music;
         [SerializeField] private TitleMusicSettings titleMusic;
+        [SerializeField] private TrainingLesson lesson;
+        [SerializeField] private TrainingLesson[] lessons;
+        private AppFlowController flow;
         private bool returning;
 
         public void Validate()
@@ -27,28 +30,54 @@ namespace RhythmDojo.Core
             }
             screen.Validate();
             titleMusic.Validate();
+            if (!lesson)
+            {
+                throw new InvalidOperationException("Tutorial training lesson missing. Rebuild Tutorial.");
+            }
+            lesson.Validate();
+            if (lessons == null || lessons.Length == 0)
+            {
+                throw new InvalidOperationException("Tutorial lessons missing. Rebuild Tutorial.");
+            }
+            var ids = new System.Collections.Generic.HashSet<string>();
+            foreach (var selected in lessons)
+            {
+                if (!selected || !ids.Add(selected.LessonId))
+                {
+                    throw new InvalidOperationException("Tutorial lesson is missing or duplicated.");
+                }
+                selected.Validate();
+            }
         }
 
         private void Start()
         {
             Validate();
-            AppFlowController.Create(gameSettings).CancelSelectionPreparation();
+            flow = AppFlowController.Create(gameSettings);
+            flow.CancelSelectionPreparation();
             music.Initialize(titleMusic);
-            screen.Initialize(Return);
+            screen.ConfigureLessons(lessons, SelectLesson, flow.TrainingProgress);
+            var selected = lesson;
+            if (Array.IndexOf(lessons, flow.CurrentTrainingLesson) >= 0)
+            {
+                selected = flow.CurrentTrainingLesson;
+            }
+            SelectLesson(selected);
+        }
+
+        private void SelectLesson(TrainingLesson selected)
+        {
+            screen.Initialize(Return, selected, flow.PrepareTraining(selected), () => flow.PlayTraining(selected));
         }
 
         private void Return()
         {
-            if (returning)
+            if (returning || flow.Transitioning)
             {
                 return;
             }
             returning = true;
-            if (SceneManager.LoadSceneAsync(MainMenuActions.ModeSelectionScenePath, LoadSceneMode.Single) == null)
-            {
-                returning = false;
-                throw new InvalidOperationException("Cannot return to ModeSelection.");
-            }
+            flow.ShowPracticeModes();
         }
     }
 }

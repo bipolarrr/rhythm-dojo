@@ -290,6 +290,7 @@ namespace RhythmDojo.EditorTools
 
             UiFontSettings.ApplyTo(canvas.transform);
             Canvas.ForceUpdateCanvases();
+            DojoHoverBuilder.Prepare(canvas.gameObject);
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
             EditorBuildSettings.scenes = EditorBuildSettings.scenes

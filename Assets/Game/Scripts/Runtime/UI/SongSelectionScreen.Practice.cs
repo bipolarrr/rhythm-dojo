@@ -142,7 +142,7 @@ namespace RhythmDojo.UI
             if (state == SongSelectionState.StartPending)
             {
                 state = SongSelectionState.Main;
-                Play();
+                Play(pendingDeveloperAutoplay);
             }
             RefreshPracticeFeedback();
         }

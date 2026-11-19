@@ -6,7 +6,7 @@ namespace RhythmDojo.EditorTools
 {
     public static class TutorialLayoutBuilder
     {
-        public static TutorialView Build()
+        public static TutorialView Build(int lessonCount = 7)
         {
             var canvas = UiElements.Canvas("Tutorial Story");
             canvas.GetComponent<CanvasScaler>().matchWidthOrHeight = .5f;
@@ -19,7 +19,7 @@ namespace RhythmDojo.EditorTools
             fit.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
             fit.aspectRatio = view.backdrop.sprite.rect.width / view.backdrop.sprite.rect.height;
 
-            // Fixed story actors and dialogue will be authored here as the story is developed.
+            // Training controls and the common dialogue overlay are authored by the scene builders.
             view.storyRoot = Rect("Story Stage", canvas.transform, Vector2.zero, Vector2.one);
             var title = Rect("Story Introduction", canvas.transform,
                 new Vector2(.5f, .76f), new Vector2(.5f, .76f));
@@ -54,6 +54,7 @@ namespace RhythmDojo.EditorTools
             buttonRect.offsetMin = buttonRect.offsetMax = Vector2.zero;
             view.backButton.GetComponent<Image>().color = Color.clear;
             var caption = view.backButton.GetComponentInChildren<Text>();
+            view.backLabel = caption;
             caption.color = new Color(1, .95f, .82f);
             caption.fontSize = 21;
             var backing = Rect("Return Ink", buttonRect, Vector2.zero, Vector2.one)
@@ -63,8 +64,56 @@ namespace RhythmDojo.EditorTools
             backing.color = new Color(.045f, .065f, .07f, .93f);
             backing.raycastTarget = false;
             view.backButton.targetGraphic = caption;
+            BuildTraining(view);
+            var choices = Rect("Lesson Selection", view.storyRoot, new Vector2(.04f, .12f), new Vector2(.27f, .65f));
+            view.lessonButtons = new Button[lessonCount];
+            view.lessonLabels = new Text[lessonCount];
+            for (int i = 0; i < lessonCount; i++)
+            {
+                var button = UiElements.Button("Lesson " + i, choices, "", Vector2.zero, Vector2.zero);
+                var rect = (RectTransform)button.transform;
+                rect.anchorMin = new Vector2(0, 1 - (i + 1f) / lessonCount + .012f);
+                rect.anchorMax = new Vector2(1, 1 - i / (float)lessonCount - .012f);
+                rect.offsetMin = rect.offsetMax = Vector2.zero;
+                button.GetComponent<Image>().color = new Color(.045f, .065f, .07f, .94f);
+                var colors = button.colors;
+                colors.disabledColor = Color.white;
+                button.colors = colors;
+                view.lessonButtons[i] = button;
+                view.lessonLabels[i] = button.GetComponentInChildren<Text>();
+                view.lessonLabels[i].fontSize = 23;
+                view.lessonLabels[i].color = new Color(1, .95f, .82f);
+            }
             view.Validate();
             return view;
+        }
+
+        private static void BuildTraining(TutorialView view)
+        {
+            var panel = Rect("Training", view.storyRoot, new Vector2(.3f, .12f), new Vector2(.96f, .65f));
+            panel.gameObject.AddComponent<Image>().color = new Color(.045f, .065f, .07f, .94f);
+            view.lessonTitle = TrainingLabel("Lesson Title", panel, .79f, .96f, 30);
+            view.progress = TrainingLabel("Progress", panel, .67f, .79f, 20);
+            view.instructions = TrainingLabel("Instructions", panel, .36f, .67f, 21);
+            view.feedback = TrainingLabel("Feedback", panel, .18f, .36f, 21);
+            view.startButton = UiElements.Button("Start Training", panel, "수련 시작", Vector2.zero, Vector2.zero);
+            var rect = (RectTransform)view.startButton.transform;
+            rect.anchorMin = new Vector2(.31f, .035f);
+            rect.anchorMax = new Vector2(.69f, .17f);
+            rect.offsetMin = rect.offsetMax = Vector2.zero;
+            view.startLabel = view.startButton.GetComponentInChildren<Text>();
+        }
+
+        private static Text TrainingLabel(string name, Transform parent, float bottom, float top, int size)
+        {
+            var label = UiElements.Label(name, parent, "", Vector2.zero, Vector2.zero, size);
+            label.rectTransform.anchorMin = new Vector2(.035f, bottom);
+            label.rectTransform.anchorMax = new Vector2(.965f, top);
+            label.rectTransform.offsetMin = label.rectTransform.offsetMax = Vector2.zero;
+            label.alignment = TextAnchor.MiddleCenter;
+            label.color = new Color(1, .95f, .82f);
+            label.raycastTarget = false;
+            return label;
         }
 
         private static RectTransform Rect(string name, Transform parent, Vector2 minimum, Vector2 maximum)

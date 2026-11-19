@@ -7,12 +7,13 @@ namespace RhythmDojo.UI
     public sealed class GameplayWindowLight : MaskableGraphic
     {
         public bool dust;
+        public bool AnimationControlled { get; set; }
         private float elapsed;
         private float nextFrame;
 
         private void Update()
         {
-            if (!dust)
+            if (!dust || AnimationControlled)
             {
                 return;
             }

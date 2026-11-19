@@ -36,6 +36,7 @@ namespace RhythmDojo.UI
         private bool inputReady;
         private int readyAfterFrame = -1;
         private int displayFrame;
+        private bool skipReady;
         private GameObject lastSelection;
         private bool replayOnEnable;
         private readonly System.Collections.Generic.List<Selectable> menuControls =
@@ -130,6 +131,7 @@ namespace RhythmDojo.UI
             inputReady = false;
             readyAfterFrame = -1;
             displayFrame = Time.frameCount;
+            skipReady = false;
             lastSelection = null;
             EventSystem.current?.SetSelectedGameObject(null);
             view.moreButton.interactable = result?.Chart != null;
@@ -461,7 +463,19 @@ namespace RhythmDojo.UI
             {
                 if (view.presentation.IsRevealing)
                 {
-                    if (Time.frameCount > displayFrame && SubmitPressed())
+                    // Editor buttons can rebind before their pointer event reaches
+                    // the next runtime input update. Drain that event and its release
+                    // before accepting a new skip, including on a reused screen.
+                    if (Time.frameCount <= displayFrame + 1)
+                    {
+                        return;
+                    }
+                    if (!skipReady)
+                    {
+                        skipReady = !SubmitHeld();
+                        return;
+                    }
+                    if (SubmitPressed())
                     {
                         view.presentation.Finish();
                         readyAfterFrame = Time.frameCount;

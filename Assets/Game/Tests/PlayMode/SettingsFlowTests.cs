@@ -269,7 +269,7 @@ namespace RhythmDojo.Tests
 
             InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.Space), hitAt);
             InputSystem.QueueStateEvent(keyboard, new KeyboardState(), hitAt + .001);
-            yield return Await(() => judgment.text == "Perfect");
+            yield return Await(() => judgment.text == "절묘");
             Assert.That(timing.text, Does.Match(@"\+\d+ ms"));
 
             double lateHitAt = hitAt + .5 + .130;
@@ -280,7 +280,7 @@ namespace RhythmDojo.Tests
 
             InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.Space), lateHitAt);
             InputSystem.QueueStateEvent(keyboard, new KeyboardState(), lateHitAt + .001);
-            yield return Await(() => judgment.text == "Nope." && timing.text.Contains("ms"));
+            yield return Await(() => judgment.text == "빗나감" && timing.text.Contains("ms"));
 
             yield return Click(start);
             var note = (RectTransform)rail.Find("Beat Note 0");
@@ -370,7 +370,8 @@ namespace RhythmDojo.Tests
             flow.ShowSettings();
             var view = UnityEngine.Object.FindFirstObjectByType<SettingsView>();
             Assert.That(view, Is.Not.Null, "Opening must not wait for scene loading.");
-            Assert.That(view.backdrop.activeSelf, Is.False);
+            Assert.That(view.backdrop.activeSelf, Is.True,
+                "The current settings popup retains its authored dojo backdrop.");
             Assert.That(SceneManager.GetActiveScene(), Is.EqualTo(scene));
             Assert.That(SceneManager.sceneCount, Is.EqualTo(sceneCount));
             Assert.That(SceneManager.GetSceneByPath(AppFlowController.SettingsPath).isLoaded, Is.False);

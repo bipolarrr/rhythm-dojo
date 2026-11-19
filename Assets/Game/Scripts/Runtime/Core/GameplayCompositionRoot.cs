@@ -50,6 +50,7 @@ namespace RhythmDojo.Core
 
         [SerializeField]
         private GameplayHitFeedback hits;
+        [SerializeField] private GameplayBackgroundDirector backgroundDirector;
         private AppFlowController flow;
         private bool initialized;
         private bool returnPending;
@@ -63,6 +64,10 @@ namespace RhythmDojo.Core
         private GameplayPresentationSettings runtimePresentation;
         private GameplayPauseMenu pauseMenu;
         private CancellationTokenSource playbackLifetime;
+        private TrainingSession trainingSession;
+        [SerializeField] private TrainingPlaybackView trainingView;
+        private TrainingPlayback trainingPlayback;
+        private int trainingAttempt;
         private bool introductionPending = true;
 
         public bool IntroductionPending => introductionPending;
@@ -92,11 +97,21 @@ namespace RhythmDojo.Core
                 );
             }
 
+            if (!backgroundDirector)
+            {
+                throw new InvalidOperationException("Gameplay background director missing.");
+            }
+            backgroundDirector.Validate();
             settings.ValidateOptions();
             clock.Validate();
             playfield.Validate();
             hud.Validate();
             ui.Validate();
+            if (!trainingView)
+            {
+                throw new InvalidOperationException("Training presentation missing. Rebuild Gameplay.");
+            }
+            trainingView.Validate();
 
             if (validateGeneratedViews)
             {
@@ -145,6 +160,11 @@ namespace RhythmDojo.Core
             Validate();
             flow = appFlow;
             playRequest = request;
+            if (flow.IsTrainingPlay)
+            {
+                trainingSession = flow.Training;
+                trainingAttempt = trainingSession.Attempt;
+            }
             SettingsAccessPolicy.Block(this);
 
             var song = request.Song;
@@ -155,6 +175,16 @@ namespace RhythmDojo.Core
 
             var mode = runtimeMode.ToRules();
             var chart = song.Chart;
+            if (request.DeveloperAutoplay)
+            {
+                trainingPlayback = new TrainingPlayback(chart, true, onDemonstrationPress: hits.PlaySwing);
+            }
+            else if (trainingSession?.Guided == true)
+            {
+                trainingPlayback = new TrainingPlayback(chart,
+                    trainingSession.Step == TrainingStep.Demonstration,
+                    flow.CurrentTrainingLesson.MaximumChordSpreadSeconds);
+            }
             var judgments = request.Rules?.Timing ?? request.Difficulty.ToSettings();
             double lastEnd = 0;
 
@@ -226,12 +256,19 @@ namespace RhythmDojo.Core
                     );
             }
 
+            string title = song.Title;
+            string difficulty = request.Difficulty.DisplayName;
+            if (trainingSession != null)
+            {
+                title = flow.CurrentTrainingLesson.Title;
+                difficulty = TrainingLesson.StepTitle(trainingSession.Step);
+            }
             controller.Initialize(
                 chart,
                 judgments,
                 mode,
                 tempo,
-                song.Title,
+                title,
                 ruleLabel,
                 request.ScrollMode,
                 request.Multiplier,
@@ -240,17 +277,24 @@ namespace RhythmDojo.Core
                 clock,
                 notes,
                 request.HardModeRules,
-                request.Rules
+                request.Rules,
+                trainingPlayback
             );
+            backgroundDirector.Initialize(controller, song.AudioClip.length, song.AudioOffset,
+                trainingSession == null && !flow.IsEditorPlaytest);
             hud.Initialize(controller.ReadModel, runtimeMode, runtimePresentation, song.ModeId);
-            hud.SetSongInformation(song.Title, request.Difficulty.DisplayName, flow.Library.Find(song.SongId)?.Cover);
+            hud.SetSongInformation(title, difficulty, flow.Library.Find(song.SongId)?.Cover);
             hits.Initialize(
                 controller.ReadModel,
                 runtimeMode,
                 gameplayCamera,
                 hud.GetComponent<Canvas>()
             );
-            hits.BindInput(input, controller);
+            if (trainingPlayback?.IsDemonstration != true)
+            {
+                hits.BindInput(input, controller);
+            }
+            trainingView.Initialize(controller, trainingSession, runtimeMode, song.ModeId, flow.CurrentTrainingLesson);
             controller.ReadModel.Judged += TrackCombo;
             controller.ReadModel.ResetOccurred += ResetRecord;
             pauseMenu = hud.GetComponent<GameplayPauseMenu>();
@@ -414,6 +458,11 @@ namespace RhythmDojo.Core
 
         private void ResetRecord()
         {
+            trainingSession?.ResetPlayback();
+            if (trainingSession != null)
+            {
+                trainingAttempt = trainingSession.Attempt;
+            }
             resultTransitionTime = -1;
             maxCombo = 0;
             recordSaved = false;
@@ -449,6 +498,11 @@ namespace RhythmDojo.Core
             }
 
             var snapshot = gameplay.Session;
+
+            if (snapshot.State != SessionState.Ready)
+            {
+                trainingSession?.MarkPlaying();
+            }
 
             if (snapshot.State != SessionState.Completed && snapshot.State != SessionState.GameOver)
             {
@@ -499,7 +553,14 @@ namespace RhythmDojo.Core
                 CanCompareScore = recordSaved && snapshot.TotalNotes > 0,
             };
             ShutdownGameplay();
-            flow.ShowResults(result, gameplay.ScrollMultiplier);
+            if (trainingSession != null)
+            {
+                flow.ShowTrainingResults(trainingSession, trainingAttempt, result, trainingPlayback?.Inputs);
+            }
+            else
+            {
+                flow.ShowResults(result, gameplay.ScrollMultiplier);
+            }
         }
 
         private void SaveRecord()
@@ -510,6 +571,10 @@ namespace RhythmDojo.Core
             }
 
             if (flow.IsEditorPlaytest || playRequest == null)
+            {
+                return;
+            }
+            if (trainingSession != null || playRequest.DeveloperAutoplay)
             {
                 return;
             }
@@ -607,9 +672,11 @@ namespace RhythmDojo.Core
 
         private void ShutdownGameplay()
         {
+            backgroundDirector.Shutdown();
             StopAllCoroutines();
             ReleasePlaybackRecovery();
             UnbindRecord();
+            trainingView.Unbind();
             hits.Unbind();
             controller.Shutdown();
             input.Shutdown();

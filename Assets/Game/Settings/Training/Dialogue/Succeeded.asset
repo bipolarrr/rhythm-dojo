@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efed7040ac1ebe24385781693a832114, type: 3}
+  m_Name: Succeeded
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.Content.DialogueSequenceAsset
+  sequenceId: basic-pulse-succeeded
+  version: 1
+  lines:
+  - id: praise
+    speaker: "\uC0AC\uD615"
+    text: "\uC798\uD588\uB2E4. \uC190\uB05D\uC5D0 \uBC15\uC790\uAC00 \uC81C\uBC95
+      \uC775\uC5C8\uAD6C\uB098."
+    expression: 6
+    motion: 1
+  - id: finish
+    speaker: "\uC0AC\uD615"
+    text: "\uC624\uB298 \uBC30\uC6B4 \uAC10\uAC01\uC744 \uAE30\uC5B5\uD574 \uB450\uAC70\uB77C.
+      \uC218\uB828\uC740 \uC5EC\uAE30\uAE4C\uC9C0\uB2E4."
+    expression: 0
+    motion: 0

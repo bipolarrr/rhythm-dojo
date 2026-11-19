@@ -27,16 +27,6 @@ namespace RhythmDojo.EditorTools
             var view = canvas.gameObject.AddComponent<GameplayHudView>();
             canvas.GetComponent<CanvasScaler>().matchWidthOrHeight = .5f;
 
-            var status = UiElements.Label(
-                "Session Status",
-                canvas.transform,
-                "",
-                Vector2.zero,
-                Vector2.zero
-            );
-            view.status = status;
-            status.enabled = false;
-
             var song = Card("Training Information", canvas.transform, .035f, .65f, .24f, .88f, Cyan);
             view.songTitle = Label("Song Title", song, "", .07f, .48f, .93f, .80f, 25, role: UiTextRole.Title);
             view.songTitle.horizontalOverflow = HorizontalWrapMode.Wrap;
@@ -45,17 +35,9 @@ namespace RhythmDojo.EditorTools
             view.sessionState = Label("Training State", song, "", .07f, .04f, .93f, .23f, 16);
             view.sessionState.color = Cyan;
 
-            var record = Card("Judgment Record", canvas.transform, .035f, .40f, .24f, .62f, Muted);
-            view.counts = Label("Judgment Counts", record, "", .07f, .30f, .93f, .76f, 18);
-            view.accuracy = Label("Accuracy", record, "", .07f, .04f, .93f, .28f, 17);
-            view.accuracy.color = Cyan;
-
             var feedback = Card("Rhythm Feedback", canvas.transform, .74f, .22f, .97f, .88f, Red);
             view.combo = Label("Combo Value", feedback, "0", .04f, .56f, .96f, .87f, 76, role: UiTextRole.Title);
             view.combo.alignment = TextAnchor.MiddleCenter;
-            view.bestCombo = Label("Best Combo", feedback, "BEST  0", .06f, .49f, .94f, .57f, 13);
-            view.bestCombo.alignment = TextAnchor.MiddleCenter;
-            view.bestCombo.color = Muted;
             view.healthLabel = Label(
                 "Health Value",
                 feedback,
@@ -116,29 +98,6 @@ namespace RhythmDojo.EditorTools
             view.timing.alignment = TextAnchor.MiddleCenter;
             view.timing.color = Muted;
             PositionJudgmentFeedback(view);
-
-            var track = Panel(
-                "Resolved Track",
-                canvas.transform,
-                new Color(.10f, .15f, .17f),
-                .03f,
-                .22f,
-                .26f,
-                .225f
-            );
-            view.progressFill = Panel("Resolved Fill", track, Cyan, 0, 0, 0, 1)
-                .GetComponent<Image>();
-            view.progress = Label(
-                "Resolved Notes",
-                canvas.transform,
-                "",
-                .03f,
-                .165f,
-                .26f,
-                .215f,
-                13
-            );
-            view.progress.color = Muted;
 
             var railOpacityLabel = Label(
                 "Rail Opacity Label",
@@ -295,12 +254,12 @@ namespace RhythmDojo.EditorTools
                 mark.sizeDelta = new Vector2(0, 2);
             }
             view.sessionState.gameObject.SetActive(false);
-            view.judgmentRecordPanel.SetActive(false);
-            view.combo.gameObject.SetActive(false);
-            view.bestCombo.gameObject.SetActive(false);
+            view.combo.transform.SetParent(view.transform, false);
+            view.combo.transform.SetSiblingIndex(feedback.GetSiblingIndex() + 1);
+            Bounds(view.combo.rectTransform, .38f, .80f, .62f, .925f);
+            view.combo.text = "";
+            view.combo.fontSize = 78;
             view.healthLabel.gameObject.SetActive(false);
-            view.progress.gameObject.SetActive(false);
-            view.progressFill.transform.parent.gameObject.SetActive(false);
             view.focusHudButton.gameObject.SetActive(false);
             view.introduction.SetActive(false);
             view.lanes.laneRoot.gameObject.SetActive(false);
@@ -314,7 +273,7 @@ namespace RhythmDojo.EditorTools
             judgmentRoot.SetParent(view.transform, false);
             judgmentRoot.SetSiblingIndex(view.combo.transform.parent.GetSiblingIndex() + 1);
             // The default stamp sits in the spent-note area below the rail.
-            Bounds(judgmentRoot, .30f, .08f, .70f, .17f);
+            Bounds(judgmentRoot, .30f, .029f, .70f, .142f);
             view.judgment.text = "SPACE로 수련 시작";
             view.judgment.fontSize = 36;
             view.timing.fontSize = 18;
@@ -386,7 +345,6 @@ namespace RhythmDojo.EditorTools
         internal static void BuildFocusHud(GameplayHudView view)
         {
             view.songInformationPanel = view.songTitle.transform.parent.gameObject;
-            view.judgmentRecordPanel = view.counts.transform.parent.gameObject;
 
             var menu = view.GetComponent<GameplayPauseMenu>();
             var dialog = menu.resumeButton.transform.parent;

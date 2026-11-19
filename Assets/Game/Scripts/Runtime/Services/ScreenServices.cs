@@ -14,6 +14,7 @@ namespace RhythmDojo.Services
         void ShowSelection();
         void ShowSettings();
         Task PlaySelectedAsync(CancellationToken cancellationToken);
+        Task PlaySelectedAsync(CancellationToken cancellationToken, bool developerAutoplay);
     }
 
     public interface ISongSelectionService

@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efed7040ac1ebe24385781693a832114, type: 3}
+  m_Name: ChordTrillPassed
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.Content.DialogueSequenceAsset
+  sequenceId: ChordTrill-Passed
+  version: 1
+  lines:
+  - id: Passed-0
+    speaker: "\uC0AC\uD615"
+    text: "\uB450 \uC190\uC774 \uD55C \uBC15\uC790\uB85C \uC6C0\uC9C1\uC774\uB294\uAD6C\uB098.
+      \uB3D9\uCE58\uD2B8\uB9B4 \uC218\uB828\uC744 \uC774\uC218\uD588\uB2E4."
+    expression: 6
+    motion: 1
+  - id: Passed-1
+    speaker: "\uC0AC\uD615"
+    text: "\uC774\uC218 \uAE30\uB85D\uC744 \uB0A8\uACBC\uB2E4. \uC218\uB828 \uC120\uD0DD\uC73C\uB85C
+      \uB3CC\uC544\uAC00\uAC70\uB098 \uAC80\uC815\uC5D0 \uB2E4\uC2DC \uB3C4\uC804\uD574\uB3C4
+      \uC88B\uB2E4."
+    expression: 6
+    motion: 1

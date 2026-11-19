@@ -11,8 +11,8 @@ namespace RhythmDojo.Presentation
     public sealed class GameplayHitFeedback : MonoBehaviour
     {
         private const int PoolSize = 24;
-        private static readonly Color Perfect = new Color(.68f, .83f, .72f);
-        private static readonly Color Good = new Color(.96f, .76f, .46f);
+        private static readonly Color Perfect = new Color(1, .83f, .46f);
+        private static readonly Color Good = new Color(.63f, .93f, .83f);
         private static readonly Color Miss = new Color(.90f, .43f, .34f);
         private IGameplayReadModel model;
         private GameModeDefinition mode;
@@ -65,6 +65,11 @@ namespace RhythmDojo.Presentation
             {
                 return;
             }
+            PlaySwing();
+        }
+
+        internal void PlaySwing()
+        {
             if (lastInputFrame == Time.frameCount)
             {
                 return;
@@ -123,7 +128,7 @@ namespace RhythmDojo.Presentation
             }
             sounds.Validate();
 
-            if (!effectsRoot || !holdTemplate)
+            if (!effectsRoot || !holdTemplate || !holdTemplate.HasArtwork)
             {
                 throw new InvalidOperationException("Authored hit feedback layout missing.");
             }
@@ -139,7 +144,7 @@ namespace RhythmDojo.Presentation
                 throw new InvalidOperationException("Authored hit burst pool missing.");
             }
 
-            if (Array.Exists(bursts, burst => !burst))
+            if (Array.Exists(bursts, burst => !burst || !burst.HasArtwork))
             {
                 throw new InvalidOperationException("Authored hit burst reference missing.");
             }
@@ -196,8 +201,17 @@ namespace RhythmDojo.Presentation
         {
             if (result.Kind == NoteKind.Hold)
             {
-                holdNotes[result.Lane] = -1;
-                holdGlows[result.Lane].gameObject.SetActive(false);
+                bool holding = model.GetNoteState(result.NoteIndex) == NoteState.Holding;
+                if (holding && result.Grade != Judgment.Miss)
+                {
+                    holdNotes[result.Lane] = result.NoteIndex;
+                    holdGlows[result.Lane].Sustain(Good);
+                }
+                else
+                {
+                    holdNotes[result.Lane] = -1;
+                    holdGlows[result.Lane].gameObject.SetActive(false);
+                }
             }
 
             Impact(
@@ -287,7 +301,7 @@ namespace RhythmDojo.Presentation
                 bool holding =
                     holdNotes[i] >= 0 && model.GetNoteState(holdNotes[i]) == NoteState.Holding;
 
-                if (!holding)
+                if (!holding || !model.IsHeld(i))
                 {
                     if (holdGlows[i])
                     {

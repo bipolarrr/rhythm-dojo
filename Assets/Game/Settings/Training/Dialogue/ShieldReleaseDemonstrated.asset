@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efed7040ac1ebe24385781693a832114, type: 3}
+  m_Name: ShieldReleaseDemonstrated
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.Content.DialogueSequenceAsset
+  sequenceId: ShieldRelease-Demonstrated
+  version: 1
+  lines:
+  - id: Demonstrated-0
+    speaker: "\uC0AC\uD615"
+    text: "\uB204\uB974\uACE0, \uB5BC\uACE0, \uB2E4\uC2DC \uC720\uC9C0\uD558\uACE0,
+      \uB05D\uC5D0\uC11C \uB193\uB294\uB2E4. \uD574\uC81C\uB3C4 \uD558\uB098\uC758
+      \uBC15\uC790\uB77C\uACE0 \uC0DD\uAC01\uD574\uB77C."
+    expression: 5
+    motion: 1

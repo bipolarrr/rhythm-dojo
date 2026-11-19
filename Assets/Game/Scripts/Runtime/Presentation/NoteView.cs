@@ -11,24 +11,15 @@ namespace RhythmDojo.Presentation
         private Transform head;
 
         [SerializeField]
-        private Renderer headRenderer;
-
-        [SerializeField]
         private Transform body;
 
         [SerializeField]
         private SpriteRenderer headSkin;
 
         [SerializeField]
-        private MeshRenderer tailMarker;
+        private SpriteRenderer tailMarker;
 
         public bool HasBody => body;
-
-        private void Awake()
-        {
-            headSkin.enabled = true;
-            headRenderer.enabled = false;
-        }
 
         public void Validate(NoteKind kind)
         {
@@ -37,7 +28,7 @@ namespace RhythmDojo.Presentation
                 throw new InvalidOperationException($"Missing head/body on {name}.");
             }
 
-            if (!headRenderer || !headSkin || !headSkin.sprite)
+            if (!headSkin || !headSkin.sprite)
             {
                 throw new InvalidOperationException($"Missing authored head skin on {name}.");
             }
@@ -50,16 +41,9 @@ namespace RhythmDojo.Presentation
 
         public void SetMaterial(Material material)
         {
-            headRenderer.sharedMaterial = material;
-
             if (body)
             {
                 body.GetComponent<Renderer>().sharedMaterial = material;
-            }
-
-            if (tailMarker)
-            {
-                tailMarker.sharedMaterial = material;
             }
         }
 
@@ -98,14 +82,7 @@ namespace RhythmDojo.Presentation
             float tail = (float)scroll.DistanceBetween(songTime, note.EndTime);
             float x = mode.LaneX(note.Lane);
             head.position = new Vector3(x, settings.headHeight, start);
-            if (UnityEngine.Application.isPlaying)
-            {
-                head.localScale = Vector3.one * settings.headSize.x;
-            }
-            else
-            {
-                head.localScale = settings.headSize;
-            }
+            head.localScale = Vector3.one * settings.headSize.x;
 
             if (body)
             {
@@ -114,7 +91,7 @@ namespace RhythmDojo.Presentation
 
             if (tailMarker)
             {
-                tailMarker.enabled = UnityEngine.Application.isPlaying && note.Kind == NoteKind.Hold;
+                tailMarker.enabled = note.Kind == NoteKind.Hold && tail > start + settings.minimumBodyLength;
             }
 
             if (note.Kind == NoteKind.Hold)
@@ -127,10 +104,7 @@ namespace RhythmDojo.Presentation
                     Mathf.Max(settings.minimumBodyLength, length)
                 );
 
-                if (UnityEngine.Application.isPlaying)
-                {
-                    RenderTailMarker(x, Mathf.Max(start, tail), settings);
-                }
+                RenderTailMarker(x, Mathf.Max(start, tail), settings);
             }
         }
 
@@ -138,7 +112,7 @@ namespace RhythmDojo.Presentation
         {
             var markerTransform = tailMarker.transform;
             markerTransform.position = new Vector3(x, settings.bodyElevation + settings.bodyHeight * .5f, tail);
-            markerTransform.localScale = new Vector3(settings.headSize.x, settings.bodyHeight, settings.headSize.z * .45f);
+            markerTransform.localScale = new Vector3(settings.headSize.x * .78f, settings.headSize.x * .61f, 1);
         }
 
     }

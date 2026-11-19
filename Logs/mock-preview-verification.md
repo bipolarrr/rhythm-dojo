@@ -52,3 +52,14 @@ Assets/Game/Scripts/Runtime/UI/ResultsScreen.cs
 Assets/Game/Scripts/Runtime/UI/GameplayPauseMenu.cs
 Assets/Game/Tests/EditMode/PlayResultReviewTests.cs
 Docs/verification.md (preview workflow), Docs/ingame-presentation.md
+
+Mock repeated-click regression fix — 2026-11-15
+- User trigger: click the same Mock button again while preview remains active.
+- Reproduced an input-order boundary: Display resets the reveal at frame N, then the caller's pointer press reaches the runtime input update. With runtime pointer input enabled, the old code finishes the reveal at N+2 (Elapsed 0 -> 2.02). The original repeated-API benchmark did not exercise this delayed input.
+- ResultsScreen.Display now clears skipReady. It waits for the initial input updates and release before accepting a fresh skip. The animation itself starts immediately, using the same view and audio sources.
+- The editor-only preview temporarily uses editor application focus (or an already-injected host provider), allowing Mock Controls/Inspector focus independently of the Game view. The original provider is restored with the existing preview cleanup. Ordinary gameplay focus is unchanged.
+- Extended the existing RevealKeepsResultsImmutableAndSkipCannotSubmitRetry case: delayed invoking pointer press remains revealing; release then a fresh Space still skips without also retrying. Passed, 16.31 s.
+- Existing PlayMode Smoke category: 5 passed, 37.78 s; zero skips or inconclusive results. No full-suite or build claim.
+- End-to-end diagnostic used the real Mock Controls IMGUI button with queued runtime pointer events for three repeated clicks. The reveals remained active at 0.148 / 0.117 / 0.115 s after the invoking press, completed at the expected score and success cue, and retained the same screen/children.
+- Also checked a fresh game click still skips, controlled host focus loss/resume, three full preview lifetimes, absence of AppFlow, and exact restoration of focus provider, play options and start scene.
+- Diagnostic input settings/devices/focus and previous screenshot artifacts were restored. Evidence: local Logs/mock-repeat/input-before.txt, after.txt, after-run.json, reveal-tests.json, smoke-tests.json. These automated IMGUI/InputSystem checks do not claim physical mouse testing.

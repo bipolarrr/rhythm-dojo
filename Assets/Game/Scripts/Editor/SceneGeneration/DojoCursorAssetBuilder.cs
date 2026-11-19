@@ -63,6 +63,7 @@ namespace RhythmDojo.EditorTools
                 var borderTemplate = PrefabUtility.SaveAsPrefabAsset(border.gameObject,
                     "Assets/Game/Prefabs/DojoFocusBorder.prefab").GetComponent<RectTransform>();
                 SceneDependencyAssembler.Wire(focus, "borderTemplate", borderTemplate);
+                BuildHover(focus, root.transform);
                 root.SetActive(true);
                 PrefabUtility.SaveAsPrefabAsset(root, "Assets/Game/Resources/UI/DojoCursor.prefab");
             }
@@ -70,6 +71,33 @@ namespace RhythmDojo.EditorTools
             {
                 Object.DestroyImmediate(root);
             }
+        }
+
+        public static void BuildHover(DojoButtonFocus focus, Transform parent)
+        {
+            var canvas = parent.GetComponentInChildren<Canvas>(true);
+            if (!canvas)
+            {
+                throw new System.InvalidOperationException("Authored cursor overlay missing.");
+            }
+            var serialized = new SerializedObject(focus);
+            var array = serialized.FindProperty("hoverCircles");
+            array.arraySize = 2;
+            for (int i = 0; i < array.arraySize; i++)
+            {
+                var circle = new GameObject("Hover Brush " + i, typeof(RectTransform), typeof(DojoBrushCircle))
+                    .GetComponent<DojoBrushCircle>();
+                circle.transform.SetParent(canvas.transform, false);
+                circle.transform.SetAsFirstSibling();
+                circle.rectTransform.anchorMin = circle.rectTransform.anchorMax = new Vector2(.5f, .5f);
+                circle.rectTransform.pivot = new Vector2(.5f, .5f);
+                circle.color = DojoScreenStyle.Vermilion;
+                circle.raycastTarget = false;
+                circle.maskable = false;
+                circle.gameObject.SetActive(false);
+                array.GetArrayElementAtIndex(i).objectReferenceValue = circle;
+            }
+            serialized.ApplyModifiedPropertiesWithoutUndo();
         }
 
         private static Texture2D SaveTexture(Texture2D texture, string name)

@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f8fa5ad77500c54cb0b46d4d6d2a3b0, type: 3}
+  m_Name: StairsDenim
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.Content.TrainingLesson
+  lessonId: stairs-denim
+  title: "\uACC4\uB2E8\xB7\uB370\uB2D8"
+  patternDescription: "\uC21C\uC11C\uC640 \uBC29\uD5A5 \xB7 \uAD50\uCC28 \uB3D9\uC2DC\uCE58\uAE30
+    \xB7 BPM 100"
+  guided: 1
+  definitionVersion: 1
+  stage: 1
+  song: {fileID: 11400000, guid: b4e57c8817238644497eb1e6ca5f984a, type: 2}
+  maximumMisses: 0
+  minimumAccuracy: 90
+  holdEnd: 0
+  maximumChordSpreadSeconds: 0
+  introductionDialogue: {fileID: 11400000, guid: 251258465e5665b4db834bc8af395e85, type: 2}
+  successDialogue: {fileID: 11400000, guid: b4110316b1cc91d4a90d47be5525bafc, type: 2}
+  failureDialogue: {fileID: 11400000, guid: 5400d0b78492f0b48b0f6d6e9e21b01b, type: 2}
+  abortedDialogue: {fileID: 11400000, guid: ee054744100ecb74aa0c544fd0dfd0d6, type: 2}
+  imitationSong: {fileID: 11400000, guid: f30cd694ed1bb87469ef7cea8e47fdfb, type: 2}
+  applicationSong: {fileID: 11400000, guid: 5588e1535f6b54e4f92da3f405a9c61c, type: 2}
+  imitationDialogue: {fileID: 11400000, guid: 4eb85ddf1e36a8c41ac8bc5888caea24, type: 2}
+  applicationDialogue: {fileID: 11400000, guid: 1f8cebc7c1f882841a6b94f07e7f3773, type: 2}
+  assessmentDialogue: {fileID: 11400000, guid: 5ad4f3e87258a24479af62cbc5a1355f, type: 2}
+  demonstrationFinishedDialogue: {fileID: 11400000, guid: dd730b2d640eaec47b35d789dafe9d50, type: 2}
+  practiceSucceededDialogue: {fileID: 11400000, guid: 0fde003801d27fb44840b55205c7eab4, type: 2}
+  missingDialogue: {fileID: 11400000, guid: 1ed930cf5f1f61644911ea09245550d9, type: 2}
+  timingDialogue: {fileID: 11400000, guid: 59ba545cc02939744a78f529458b6660, type: 2}
+  extraInputDialogue: {fileID: 11400000, guid: 0819a2524f8a1474eb5951de5bcbba7c, type: 2}

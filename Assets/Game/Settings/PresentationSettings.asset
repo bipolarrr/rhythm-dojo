@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2a39f260054b16c49861458c1f7a2829, type: 3}
   m_Name: PresentationSettings
   m_EditorClassIdentifier: Game.Runtime::RhythmDojo.Gameplay.GameplayPresentationSettings
+  beamTemplate: {fileID: 6921969022113597648, guid: 804bdc827df2fba478a8c589e73e02e0, type: 3}
+  strikeShoe: {fileID: 676888977679615526, guid: 46884610ec7fe444c956206e8fdde3aa, type: 3}
   headSize: {x: 1.05, y: 0.22, z: 0.32}
   headHeight: 0.28
   bodyWidth: 0.42
@@ -32,6 +34,6 @@ MonoBehaviour:
   missColor: {r: 0.92, g: 0.36, b: 0.29, a: 1}
   heldColor: {r: 0.76, g: 0.87, b: 0.73, a: 1}
   idleColor: {r: 0.24, g: 0.12, b: 0.085, a: 1}
-  highwayColor: {r: 0.085, g: 0.068, b: 0.058, a: 1}
+  highwayColor: {r: 1, g: 1, b: 1, a: 1}
   railColor: {r: 0.39, g: 0.29, b: 0.19, a: 1}
   judgmentLineColor: {r: 0.96, g: 0.83, b: 0.58, a: 1}

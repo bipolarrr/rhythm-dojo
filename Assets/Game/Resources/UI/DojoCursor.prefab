@@ -91,6 +91,71 @@ MonoBehaviour:
   m_EffectColor: {r: 0.13, g: 0.05, b: 0.025, a: 1}
   m_EffectDistance: {x: 1.5, y: -1.5}
   m_UseGraphicAlpha: 1
+--- !u!1 &1694225501793040882
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2726307352990058844}
+  - component: {fileID: 4919816296986776584}
+  - component: {fileID: 2134109943510254505}
+  m_Layer: 0
+  m_Name: Hover Brush 1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &2726307352990058844
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1694225501793040882}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3297277214231361345}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &4919816296986776584
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1694225501793040882}
+  m_CullTransparentMesh: 1
+--- !u!114 &2134109943510254505
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1694225501793040882}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 97c44344a9bb391478b35b08270b9891, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.DojoBrushCircle
+  m_Material: {fileID: 0}
+  m_Color: {r: 0.53, g: 0.17, b: 0.12, a: 1}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 0
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1788055817615327559
 GameObject:
   m_ObjectHideFlags: 0
@@ -256,6 +321,71 @@ MonoBehaviour:
     y: 0.07256778
     width: 0.8564593
     height: 0.79585326
+--- !u!1 &3976504512865276016
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5436018904639184680}
+  - component: {fileID: 4016815739657916213}
+  - component: {fileID: 6146905240802381537}
+  m_Layer: 0
+  m_Name: Hover Brush 0
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &5436018904639184680
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3976504512865276016}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3297277214231361345}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &4016815739657916213
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3976504512865276016}
+  m_CullTransparentMesh: 1
+--- !u!114 &6146905240802381537
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3976504512865276016}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 97c44344a9bb391478b35b08270b9891, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.DojoBrushCircle
+  m_Material: {fileID: 0}
+  m_Color: {r: 0.53, g: 0.17, b: 0.12, a: 1}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 0
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &5300723005507098624
 GameObject:
   m_ObjectHideFlags: 0
@@ -459,6 +589,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d36b3b862edbed041b822cbc3da8e4f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.DojoButtonFocus
+  hoverCircles:
+  - {fileID: 6146905240802381537}
+  - {fileID: 2134109943510254505}
   border: {fileID: 5032657056138954805}
   borderTemplate: {fileID: 1866369586723079086, guid: 2abe2a68d8ddd6447ba13d720ba41d72, type: 3}
 --- !u!114 &681705767789789009
@@ -692,6 +825,8 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 2726307352990058844}
+  - {fileID: 5436018904639184680}
   - {fileID: 8308948512351160057}
   m_Father: {fileID: 908123708486150677}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

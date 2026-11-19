@@ -1,0 +1,104 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c192ff885248966469e5072687582fac, type: 3}
+  m_Name: HoldTapAssessmentChart
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.Gameplay.RhythmChart
+  notes:
+  - lane: 0
+    kind: 1
+    startTime: 2.4
+    endTime: 4.8
+  - lane: 3
+    kind: 0
+    startTime: 3
+    endTime: 3
+  - lane: 2
+    kind: 0
+    startTime: 3.6
+    endTime: 3.6
+  - lane: 3
+    kind: 0
+    startTime: 4.2
+    endTime: 4.2
+  - lane: 3
+    kind: 1
+    startTime: 7.2
+    endTime: 9.6
+  - lane: 0
+    kind: 0
+    startTime: 7.8
+    endTime: 7.8
+  - lane: 1
+    kind: 0
+    startTime: 8.4
+    endTime: 8.4
+  - lane: 0
+    kind: 0
+    startTime: 9
+    endTime: 9
+  - lane: 1
+    kind: 1
+    startTime: 12
+    endTime: 14.4
+  - lane: 2
+    kind: 0
+    startTime: 12.6
+    endTime: 12.6
+  - lane: 3
+    kind: 0
+    startTime: 12.9
+    endTime: 12.9
+  - lane: 2
+    kind: 0
+    startTime: 13.2
+    endTime: 13.2
+  - lane: 3
+    kind: 0
+    startTime: 13.5
+    endTime: 13.5
+  - lane: 2
+    kind: 0
+    startTime: 13.799999999999999
+    endTime: 13.799999999999999
+  - lane: 3
+    kind: 0
+    startTime: 14.1
+    endTime: 14.1
+  - lane: 2
+    kind: 1
+    startTime: 16.8
+    endTime: 19.2
+  - lane: 1
+    kind: 0
+    startTime: 17.400000000000002
+    endTime: 17.400000000000002
+  - lane: 0
+    kind: 0
+    startTime: 17.700000000000003
+    endTime: 17.700000000000003
+  - lane: 1
+    kind: 0
+    startTime: 18.000000000000004
+    endTime: 18.000000000000004
+  - lane: 0
+    kind: 0
+    startTime: 18.3
+    endTime: 18.3
+  - lane: 1
+    kind: 0
+    startTime: 18.6
+    endTime: 18.6
+  - lane: 0
+    kind: 0
+    startTime: 18.900000000000002
+    endTime: 18.900000000000002
+  completionTime: 20.4

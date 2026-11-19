@@ -1,0 +1,43 @@
+{
+  "tool": "Built-in ImageGen",
+  "root": "Assets/Game/Art/DojoGameplay",
+  "assets": [
+    {
+      "files": [
+        "LaneTimber.png"
+      ],
+      "use": "레인 전체에 반복하는 옻칠 목재. 원근 축소를 위해 밉맵을 사용한다.",
+      "prompt": "One game environment albedo texture, orthographic top down material scan of a SINGLE long vertical plank from a Korean martial arts training floor. Very dark desaturated indigo-teal lacquer over aged walnut, restrained artisan pixel-art painterly surface for a beautiful 2.5D wuxia game. Full bleed rectangular texture; along each far left and far right 3% edge only, thin worn honey-brown brass inlay and dusk-brown beveled wood lips. Middle 94% quiet deep slate blue-green visible flowing wood fibres, minute nicks and irregular understated dry brush wear. Grain runs vertically. Continuous seamless repeating along height. Flat low-contrast value, no cast shadows, no ambient scene, no motifs across lane, no knots larger than 1/15 width, no text, no symbols. Portrait 1:2, surface occupies entire image edge to edge."
+    },
+    {
+      "files": [
+        "IvoryStrike.png",
+        "JadeHold.png",
+        "SilkBinding.png"
+      ],
+      "use": "투명 원화에서 단타와 롱노트의 타격면을 각각 잘라냈다. 옥색 타격면의 결속대를 별도로 잘라 롱노트 몸통에 사용한다.",
+      "prompt": "Production-ready transparent 2D game sprite atlas of exactly two long horizontal Korean dojang training baton plaques, stacked vertically, separated by ample completely transparent space. Orthographic FRONT view, perfect straight horizontal lower striking edges. Each plaque is a low, wide faceted bar approx 6:1 width:height. Identical widths. Top plaque: pale warm ivory bone-inlay striking face with subtly mottled fibers, pale-gold continuous bottom edge, slanted clipped ends with narrow umber wood caps and dark indigo outline. Tiny vermilion diamond maker's stamp dead center, no writing. Bottom plaque: wide luminous pale celadon-jade face, TWO parallel vertical warm-ivory silk binding bands at center, darker teal and honey-bronze end caps, continuous ivory bottom edge, dark ink outline. Hand-painted refined Korean historical pixel-art game sprites, readable high-contrast silhouettes, crisp highlights, no glow. Transparent isolation, no text, no frame, no backdrop, no contact shadows. Center the two above each other, nothing else."
+    },
+    {
+      "files": [
+        "StrikeShoe.png"
+      ],
+      "use": "판정선 바로 아래에 배치하는 목제 타격 받침.",
+      "prompt": "Isolated sprite, front-on top view of ONE Korean martial training floor's stationary target shoe. A short wide mortised reddish dark walnut block with clipped corners, umber ink bevel, worn bronze corner brackets, two little brass nail heads. At center a small inlaid matte gold V shaped alignment notch pointing upward, straight horizontal top lip. Width four times height. Lovely hand painted Korean historical game pixel art, aged warm material. Dark subdued values, the strongest highlights on the top lip and V only. No words, characters, writing, glow, ground or shadow. Transparent background and centered complete silhouette."
+    },
+    {
+      "files": [
+        "ImpactBristles.png"
+      ],
+      "use": "위쪽 1/4은 잔상과 파편에 사용할 마른 붓획, 아래쪽 3/4은 타격 순간 펼쳐지는 부채꼴 충격이다. 두 투명 원화를 한 텍스처로 구웠다.",
+      "prompts": [
+        "Single isolated two-dimensional VFX sprite for a Korean martial arts game. On a truly transparent background, one dry calligraphy brush slash, a wide shallow crescent swept left to right, thick at left, curving concavely upward into an extremely long sharp tapered right point. Hand-inked dense warm ivory pigment in the body, ragged dry-brush striations separating into parallel hairlines at tip, a few tiny flecks near end. White/ivory monochrome, designed to tint in engine. Wide horizontal silhouette 4:1. No calligraphy characters, lettering, hilt or weapon, gradient glow, smoke, drop shadow, ground or framing. No panels or separate alternate sprites. Transparent empty space surrounds the slash.",
+        "Single transparent hand-painted 2D action game VFX sprite. A powerful DOWNWARD cone of impact energy from a single contact point at TOP CENTER. Shaped like an inverted fan opening toward the bottom, wide horizontal crown at the top. Thick flat angular wedges of luminous warm ivory and pale gold in its center, bold cinnabar vermilion dry brush along the sides, an indigo ink shadow contour. Three large expressive torn triangular speed strokes and a few scattered gold and dark ink chips. The contact flare is a wide flat ivory flash along the upper edge, ink thrusts diagonally down to both lower corners. Strong legible arcade pixel-art silhouette at 35 pixels size, high contrast bold graphic compact second animation keyframe of Korean wuxia rhythm-game strike. Actual isolated visual effect, no training gear, hands, text, objects, backdrop, full scene, gradient glow, smoke or ground shadows. Transparent margin on every side, centered, landscape 3:2 silhouette. Do not create a circle or letters."
+      ]
+    }
+  ],
+  "font": [
+    "Assets/Game/Fonts/Dokdo-Regular.ttf",
+    "Assets/Game/Fonts/Dokdo-OFL.txt"
+  ]
+}

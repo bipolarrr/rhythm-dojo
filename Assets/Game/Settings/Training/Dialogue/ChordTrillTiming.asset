@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efed7040ac1ebe24385781693a832114, type: 3}
+  m_Name: ChordTrillTiming
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.Content.DialogueSequenceAsset
+  sequenceId: ChordTrill-Timing
+  version: 1
+  lines:
+  - id: Timing-0
+    speaker: "\uC0AC\uD615"
+    text: "\uD0C0\uC774\uBC0D\uC744 \uC0B4\uD3B4\uBCF4\uC790. \uAC01 \uB178\uD2B8\uC758
+      Perfect \uBC94\uC704\uC640 \uB450 \uD0A4 \uC0AC\uC774 50ms\uB97C \uD568\uAED8
+      \uD655\uC778\uD574\uB77C. \uC190 \uD558\uB098\uAC00 \uBA3C\uC800 \uB5A8\uC5B4\uC9C0\uC9C0
+      \uC54A\uAC8C \uB9DE\uCDB0\uB77C."
+    expression: 5
+    motion: 1

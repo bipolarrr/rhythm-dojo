@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efed7040ac1ebe24385781693a832114, type: 3}
+  m_Name: TrillAssessment
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.Content.DialogueSequenceAsset
+  sequenceId: trill-TrillAssessment
+  version: 1
+  lines:
+  - id: test
+    speaker: "\uC0AC\uD615"
+    text: "\uB9C8\uC9C0\uB9C9 \uAC80\uC815\uC774\uB2E4. \uB290\uB9B0 \uB124 \uD0C0\uB97C
+      \uB450 \uBB36\uC74C, \uBE60\uB978 \uC5EC\uB35F \uD0C0\uB97C \uB450 \uBB36\uC74C.
+      \uB124 \uD0C0\uACA9\uC744 \uC9C0\uCF1C\uBCF4\uB9C8."
+    expression: 2
+    motion: 1
+  - id: criteria
+    speaker: "\uC0AC\uD615"
+    text: "\uB05D\uAE4C\uC9C0 \uCE58\uACE0, Miss \uC5C6\uC774 \uC815\uD655\uB3C4
+      90% \uC774\uC0C1\uC774\uBA74 \uB41C\uB2E4. \uB178\uD2B8\uC5D0 \uB9DE\uC9C0
+      \uC54A\uB294 \uCD94\uAC00 \uC785\uB825\uB3C4 \uC5C6\uC5B4\uC57C \uD55C\uB2E4.
+      \uC900\uBE44\uB418\uBA74 \uC2DC\uC791\uD558\uC790."
+    expression: 3
+    motion: 1

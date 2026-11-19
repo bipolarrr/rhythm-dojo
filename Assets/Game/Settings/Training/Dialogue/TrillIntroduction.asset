@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efed7040ac1ebe24385781693a832114, type: 3}
+  m_Name: TrillIntroduction
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.Content.DialogueSequenceAsset
+  sequenceId: trill-TrillIntroduction
+  version: 1
+  lines:
+  - id: welcome
+    speaker: "\uC0AC\uD615"
+    text: "\uC654\uB290\uB0D0? \uC624\uB298 \uC804\uC218\uD560 \uAC83\uC740 \uD2B8\uB9B4\uC774\uB2E4.
+      \uB450 \uC790\uB9AC\uB97C \uBC88\uAC08\uC544, \uACE0\uB978 \uAC04\uACA9\uC73C\uB85C
+      \uB450\uB4DC\uB9AC\uB294 \uAE30\uC220\uC774\uC9C0."
+    expression: 0
+    motion: 1
+  - id: teach
+    speaker: "\uC0AC\uD615"
+    text: "\uC67C\uCABD\uBD80\uD130 1\xB72\xB73\xB74\uBC88 \uB808\uC778\uC774\uB2E4.
+      \uBA3C\uC800 1-3-1-3, \uC26C\uC5C8\uB2E4\uAC00 2-4-2-4. \uD55C \uBC15\uC5D0
+      \uD55C \uBC88, \uB124 \uD0C0\uC529 \uCE5C\uB2E4."
+    expression: 5
+    motion: 1
+  - id: watch
+    speaker: "\uC0AC\uD615"
+    text: "BPM 100\uC758 \uB290\uB9B0 \uBC15\uC790\uB2E4. \uB0B4\uAC00 \uBA3C\uC800
+      \uBCF4\uC5EC\uC8FC\uB9C8. \uC190\uC744 \uC26C\uACE0, \uB178\uD2B8\uC640 \uD0C0\uACA9
+      \uC21C\uAC04\uC744 \uC798 \uBCF4\uAC70\uB77C."
+    expression: 3
+    motion: 1

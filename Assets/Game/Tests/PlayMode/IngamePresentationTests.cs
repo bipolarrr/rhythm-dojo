@@ -3,6 +3,7 @@ using System.Linq;
 using NUnit.Framework;
 using RhythmDojo.Audio;
 using RhythmDojo.Core;
+using RhythmDojo.Presentation;
 using RhythmDojo.Gameplay;
 using RhythmDojo.UI;
 using UnityEngine;
@@ -32,8 +33,7 @@ namespace RhythmDojo.Tests
             Assert.That(view.album.sprite, Is.Not.Null);
             Assert.That(view.songTitle.text, Is.EqualTo(flow.CurrentRequest.Song.Title));
             Assert.That(view.songDetails.text, Is.EqualTo(flow.CurrentRequest.Difficulty.DisplayName));
-            Assert.That(view.combo.gameObject.activeInHierarchy, Is.False);
-            Assert.That(view.judgmentRecordPanel.activeInHierarchy, Is.False);
+            Assert.That(view.combo.text, Is.Empty);
             Assert.That(view.healthFill.gameObject.activeInHierarchy, Is.True);
             var mode = flow.CurrentRequest.Song.Mode;
             var presentation = flow.Settings.presentation;
@@ -80,7 +80,7 @@ namespace RhythmDojo.Tests
 
         private static void Capture(string name)
         {
-            var texture = GameplayHudFlowTests.CaptureGameplayDisplay(Object.FindFirstObjectByType<GameplayViewport>());
+            var texture = GameplayHudFlowTests.CaptureGameplayDisplay(GameplayHudFlowTests.LaneViewport());
             try
             {
                 System.IO.File.WriteAllBytes("Logs/" + name + ".png", texture.EncodeToPNG());
@@ -100,22 +100,26 @@ namespace RhythmDojo.Tests
             var root = Object.FindFirstObjectByType<GameplayCompositionRoot>();
             yield return Await(() => !root.IntroductionPending);
             var game = Object.FindFirstObjectByType<RhythmGameController>();
-            var feedback = Object.FindFirstObjectByType<RhythmDojo.Presentation.GameplayHitFeedback>();
-            var impact = feedback.GetComponent<AudioSource>();
-            var input = feedback.GetComponentsInChildren<AudioSource>().Single(source => source != impact);
+            var feedback = Object.FindFirstObjectByType<GameplayHitFeedback>();
+            var sounds = feedback.GetComponentInChildren<DojoSoundPlayer>();
+            int contacts = sounds.ContactCount;
+            int swings = sounds.MotionCount;
             // No note is in the window during the existing DSP preroll.
             InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.D));
             yield return null;
-            Assert.That(input.isPlaying, Is.True);
-            Assert.That(impact.isPlaying, Is.False);
+            Assert.That(sounds.MotionCount, Is.EqualTo(swings + 1));
+            Assert.That(sounds.LastCue, Is.EqualTo(DojoSoundCue.Swing));
+            Assert.That(sounds.voices.Any(voice => voice.clip == sounds.LastClip && voice.isPlaying), Is.True);
+            Assert.That(sounds.ContactCount, Is.EqualTo(contacts));
             InputSystem.QueueStateEvent(keyboard, new KeyboardState());
             yield return null;
             game.PauseSession();
             yield return new WaitForSecondsRealtime(.25f);
             InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.F));
             yield return null;
-            Assert.That(input.isPlaying, Is.False);
-            Assert.That(impact.isPlaying, Is.False);
+            Assert.That(sounds.MotionCount, Is.EqualTo(swings + 1));
+            Assert.That(sounds.ContactCount, Is.EqualTo(contacts));
+            Assert.That(sounds.voices.All(voice => !voice.isPlaying), Is.True);
             InputSystem.QueueStateEvent(keyboard, new KeyboardState());
             yield return null;
         }

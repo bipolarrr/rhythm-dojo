@@ -6,6 +6,8 @@ namespace RhythmDojo.Gameplay
     [CreateAssetMenu(menuName = "Rhythm Dojo/Presentation Settings")]
     public sealed class GameplayPresentationSettings : ScriptableObject
     {
+        public MeshRenderer beamTemplate;
+        public SpriteRenderer strikeShoe;
         public Vector3 headSize = new Vector3(1.05f, .22f, .32f);
         public float headHeight = .28f;
         public float bodyWidth = .42f;
@@ -26,7 +28,7 @@ namespace RhythmDojo.Gameplay
         public Color missColor = new Color(0.92f, 0.36f, 0.29f);
         public Color heldColor = new Color(0.76f, 0.87f, 0.73f);
         public Color idleColor = new Color(0.24f, 0.12f, 0.085f);
-        public Color highwayColor = new Color(0.085f, 0.068f, 0.058f);
+        public Color highwayColor = Color.white;
         public Color railColor = new Color(0.39f, 0.29f, 0.19f);
         public Color judgmentLineColor = new Color(0.96f, 0.83f, 0.58f);
 

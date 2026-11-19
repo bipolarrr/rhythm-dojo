@@ -203,15 +203,15 @@ namespace RhythmDojo.Gameplay
         {
             if (grade == Judgment.Perfect)
             {
-                return "Perfect";
+                return "절묘";
             }
             else if (grade == Judgment.Good)
             {
-                return "Hmm...";
+                return "명중";
             }
             else
             {
-                return "Nope.";
+                return "빗나감";
             }
         }
     }

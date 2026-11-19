@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efed7040ac1ebe24385781693a832114, type: 3}
+  m_Name: StairsDenimApplication
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.Content.DialogueSequenceAsset
+  sequenceId: StairsDenim-Application
+  version: 1
+  lines:
+  - id: Application-0
+    speaker: "\uC0AC\uD615"
+    text: "\uBC18 \uBC15 \uACC4\uB2E8\uC744 \uC624\uB974\uB2E4 \uB0B4\uB824\uC628\uB2E4.
+      \uB2E4\uC74C\uC740 [1+4]\u2192[2+3]\u2192[1+3]\u2192[2+4]. \uB300\uAD04\uD638
+      \uC548 \uB450 \uD0A4\uB294 \uD568\uAED8 \uCCD0\uB77C."
+    expression: 3
+    motion: 1

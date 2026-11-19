@@ -50,7 +50,7 @@ namespace RhythmDojo.EditorTools
         public static void RefineHud(GameplayHudView view)
         {
             var song = (RectTransform)view.songInformationPanel.transform;
-            Bounds(song, .04f, .31f, .24f, .75f);
+            Bounds(song, .065f, .34f, .235f, .70f);
             var frame = song.Find("Song Wood Frame").GetComponent<Image>();
             frame.color = new Color(.78f, .83f, .82f);
             frame.pixelsPerUnitMultiplier = 16;
@@ -77,6 +77,14 @@ namespace RhythmDojo.EditorTools
             Brush("Gauge Paper Light", view.healthFill.transform,
                 new Color(1, .95f, .76f, .32f), .55f, -.08f, 1.08f, 1.08f, true);
 
+            view.combo.font = brushFont;
+            view.combo.fontStyle = FontStyle.Normal;
+            var comboScope = view.combo.gameObject.AddComponent<UiFontScope>();
+            comboScope.font = brushFont;
+            comboScope.style = FontStyle.Normal;
+            var outline = view.combo.gameObject.AddComponent<Outline>();
+            outline.effectColor = new Color(.09f, .13f, .15f, .96f);
+            outline.effectDistance = new Vector2(2, -2);
             BuildJudgment(view, brushFont);
         }
 

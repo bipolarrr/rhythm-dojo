@@ -1,0 +1,25 @@
+{
+  "tool": "built-in image_gen.imagegen",
+  "reference_art": [
+    "Assets/Game/Art/DojoRenewal/PracticeHall.png",
+    "Assets/Game/Art/DojoRenewal/HanokDoors.png"
+  ],
+  "assets": [
+    {
+      "asset": "Assets/Game/Art/DojoRoom/RoomAtlas.png",
+      "transparent_background": false,
+      "prompt": "Use case: stylized-concept. Asset type: production game texture atlas for a first-person Korean hanok training room. Create one square image divided into EXACTLY four equal square quadrants (2 by 2), no gutters, no labels, no text, each square fills its quadrant edge to edge. Top LEFT: flat orthographic interior face of ONE closed wooden sliding door, aged dark walnut timber frame, warm grey hanji paper with slender rectangular lattice in its upper two thirds, solid dark wooden planks in lower third, a small iron recessed pull near the right edge. NO perspective. Top RIGHT: seamless-looking dark reddish walnut wooden planks, vertically aligned rich hand-painted grain, restrained ochre edge highlights, no hardware. Bottom LEFT: aged warm grey beige plaster wall with subtle hand-painted paper texture and sparse wear, flat lighting, no objects. Bottom RIGHT: flat cool grey stone courtyard paving, large irregular flagstones with fine muted moss seams, top-down orthographic, no perspective. Style: finely crafted pixel-painted Korean game environment, carefully clustered crisp pixels, restrained 16/32-bit palette, no noise filter. Moody warm dark walnut, beige paper, blue-grey stone, close to the project's hand-painted pixel Korean hanok art. Uniform diffuse lighting so assets can be lit in a game. No Japanese motifs, no torii, no people, no UI, no gradients at quadrant edges. 2048 by 2048."
+    },
+    {
+      "asset": "Assets/Game/Art/DojoRoom/Courtyard.png",
+      "transparent_background": false,
+      "prompt": "Use case stylized-concept. Production panoramic background asset for a Korean hanok martial arts training game, ONLY distant environment seen beyond an open dojo doorway. Widescreen 16:9. Seated first-person low eye level, horizon at 42 percent from top. At bottom a quiet muted cool grey stone courtyard recedes to a low stone wall, at left and right weathered Korean tile-roof walls, beyond them layered magnificent blue grey and sage mountain peaks, a winding mountain trail glimpsed in center, graceful Korean pine trees to far left and right. Morning warm sunlight from upper right catches stone and pine edges, pale ivory mist fills mountain valleys, restrained sky pale green-blue and a few fine clouds. Strong atmospheric depth, inspiring but tranquil. Center is subdued darker sage and blue grey mountain foothills, NOT a bright white blank rectangle; brightest warm highlights at edges. Fine hand-painted pixel game art with deliberate pixel clusters and detailed material edges matching a richly detailed walnut Korean hanok interior, 32bit aesthetic, no photorealism or smooth 3D render. No room framing, no doors, no pillars in foreground, no floor of an interior, no people, no Japanese torii or cherry trees, no text, no UI. This is the distant backdrop of a real layered scene."
+    },
+    {
+      "asset": "Assets/Game/Art/DojoRoom/DetailsAtlas.png",
+      "transparent_background": true,
+      "prompt": "Use case stylized-concept. Production transparent sprite atlas, square image divided into four equal quadrants with generous transparent gutters, NO labels. Each object is isolated with genuine transparent background. Top LEFT: one stack of three rolled woven straw training mats, golden ochre braided rope ends, soft grounded contact shadow, seen from low seated first-person eye level, width wider than height, no surrounding floor. Top RIGHT: an irregular spreading Korean pine bough extending from the right edge toward the left, dark curved wooden branch with rich layered sage-green needle clusters and warm sunlight edge, no background. Bottom LEFT: a hanging vertical faded indigo linen training banner, tied at two upper corners, narrow cream stitched border with a simple circular brushed cream emblem (no text), softly creased fabric with worn uneven bottom hem and small tassels, front view. Bottom RIGHT: one low weathered dark wooden stool with folded beige training cloth on it, small ceramic dark water jug beside it, low seated first-person view, no background. Style finely crafted hand-painted pixel Korean hanok game environment sprites, detailed deliberate pixels and 32bit shading, muted dark walnut, straw ochre and sage palette, uniform morning light upper right. No people, no letters, no UI, no Japanese motifs. Four independent reusable prop cutouts with clear alpha, not a whole scene."
+    }
+  ],
+  "derivatives": "GameplayBackgroundBuilder.PrepareArt / PrepareDetails bake cropped textures; source originals remain unchanged."
+}

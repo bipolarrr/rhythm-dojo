@@ -51,6 +51,7 @@ namespace RhythmDojo.EditorTools
             fit.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
             fit.aspectRatio = image.sprite.rect.width / image.sprite.rect.height;
             view.atmosphere = GameplayAtmosphereBuilder.Build(background.transform, backdrop);
+            GameplayBackgroundBuilder.Build(background, view.atmosphere, camera);
             var field = Panel("Training Floor Frame", background.transform, Color.clear, .285f, .015f, .715f, .80f);
             camera.backgroundColor = new Color(.055f, .035f, .025f, 0f);
             var viewport = new GameObject("Gameplay Viewport", typeof(RectTransform), typeof(RawImage));
@@ -67,20 +68,15 @@ namespace RhythmDojo.EditorTools
             view.lanes.sprite = DojoGameplayAssets.Tile;
 
             var song = view.transform.Find("Training Information");
-            var record = view.transform.Find("Judgment Record");
-            foreach (var panel in new[] { song, record })
+            foreach (var text in song.GetComponentsInChildren<Text>())
             {
-                foreach (var text in panel.GetComponentsInChildren<Text>())
-                {
-                    text.color = Cream;
-                }
+                text.color = Cream;
             }
             view.songTitle.fontStyle = FontStyle.Bold;
             view.songTitle.resizeTextForBestFit = true;
             view.songTitle.resizeTextMinSize = 18;
             view.songTitle.resizeTextMaxSize = 27;
             view.sessionState.color = Cream;
-            view.accuracy.color = Cream;
 
             var feedback = view.transform.Find("Rhythm Feedback");
             foreach (var text in feedback.GetComponentsInChildren<Text>(true))
@@ -95,9 +91,6 @@ namespace RhythmDojo.EditorTools
                 shadow.effectDistance = new Vector2(1, -2);
             }
             feedback.Find("Health Track").GetComponent<Image>().color = new Color(.10f, .055f, .035f);
-            view.transform.Find("Resolved Track").GetComponent<Image>().color = new Color(.23f, .13f, .075f);
-            view.progressFill.color = new Color(.84f, .57f, .27f);
-            view.progress.color = Cream;
 
             var focus = view.returnButton.GetComponent<DojoControlFocus>();
             focus.restingColor = Cream;
@@ -120,10 +113,7 @@ namespace RhythmDojo.EditorTools
             var feedback = (RectTransform)view.combo.transform.parent;
             Bounds(feedback, .76f, .57f, .965f, .88f);
             view.combo.fontSize = 58;
-            Bounds((RectTransform)view.transform.Find("Resolved Track"), .035f, .365f, .24f, .37f);
-            Bounds(view.progress.rectTransform, .035f, .323f, .24f, .36f);
             Bounds(view.combo.rectTransform, .04f, .45f, .96f, .83f);
-            Bounds(view.bestCombo.rectTransform, .06f, .36f, .94f, .46f);
             Bounds(view.healthLabel.rectTransform, .12f, .19f, .88f, .30f);
             Bounds((RectTransform)feedback.Find("Health Track"), .12f, .105f, .88f, .17f);
             view.healthLabel.fontSize = 16;
@@ -153,9 +143,7 @@ namespace RhythmDojo.EditorTools
             Bounds(hint.rectTransform, .06f, .09f, .94f, .21f);
             hint.color = DojoScreenStyle.Muted;
             hint.alignment = TextAnchor.MiddleCenter;
-
-            SceneResources.ApplyReadableFont(view.songDetails, view.counts, view.accuracy, view.combo,
-                view.bestCombo, view.healthLabel, view.timing, view.progress, railOpacityLabel);
+            SceneResources.ApplyReadableFont(view.songDetails, view.healthLabel, view.timing, railOpacityLabel);
         }
 
         private static void AddLaneShade(string name, Transform field, float x0, float x1, Color left, Color right)

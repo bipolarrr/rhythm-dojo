@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efed7040ac1ebe24385781693a832114, type: 3}
+  m_Name: TrillApplication
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.Content.DialogueSequenceAsset
+  sequenceId: trill-TrillApplication
+  version: 1
+  lines:
+  - id: shorter
+    speaker: "\uC0AC\uD615"
+    text: "\uC88B\uB2E4. \uC774\uC81C \uD55C \uBC15\uC5D0 \uB450 \uBC88, \uAC04\uACA9\uC744
+      \uC808\uBC18\uC73C\uB85C \uC904\uC778\uB2E4. 1-3, 2-4 \uC870\uD569\uC740 \uADF8\uB300\uB85C\uB2E4."
+    expression: 3
+    motion: 1
+  - id: longer
+    speaker: "\uC0AC\uD615"
+    text: "\uCC98\uC74C \uB450 \uBB36\uC74C\uC740 \uB124 \uD0C0, \uB2E4\uC74C \uB450
+      \uBB36\uC74C\uC740 \uC5EC\uB35F \uD0C0\uB2E4. \uAE38\uC5B4\uC838\uB3C4 \uAC04\uACA9\uC744
+      \uACE0\uB974\uAC8C. \uCDA9\uBD84\uD788 \uC270 \uB4A4 \uB2E4\uC2DC \uC2DC\uC791\uD558\uC790."
+    expression: 5
+    motion: 1

@@ -34,7 +34,7 @@ namespace RhythmDojo.Tests
             yield return LoadGameplay();
             Canvas.ForceUpdateCanvases();
 
-            var viewport = UnityEngine.Object.FindFirstObjectByType<GameplayViewport>();
+            var viewport = LaneViewport();
             var camera = viewport.gameplayCamera;
             Assert.That(camera.targetTexture, Is.Not.Null);
             Assert.That(Camera.main, Is.SameAs(camera));
@@ -58,16 +58,13 @@ namespace RhythmDojo.Tests
             var game = UnityEngine.Object.FindFirstObjectByType<RhythmGameController>();
             var pauseMenu = view.GetComponent<GameplayPauseMenu>();
             Assert.That(view.songInformationPanel.activeInHierarchy, Is.True);
-            Assert.That(view.judgmentRecordPanel.activeInHierarchy, Is.False);
             yield return Press(Key.Space);
             yield return Press(Key.Escape);
             yield return Await(() => pauseMenu.panel.activeSelf);
             Assert.That(game.IsPaused, Is.True);
             Assert.That(view.songInformationPanel.activeInHierarchy, Is.True);
-            Assert.That(view.judgmentRecordPanel.activeInHierarchy, Is.False);
-            Assert.That(view.combo.gameObject.activeInHierarchy, Is.False);
+            Assert.That(view.combo.text, Is.Empty);
             Assert.That(view.healthFill.gameObject.activeInHierarchy, Is.True);
-            Assert.That(view.progress.gameObject.activeInHierarchy, Is.False);
             Assert.That(view.focusHudButton.gameObject.activeSelf, Is.False);
         }
 
@@ -94,6 +91,16 @@ namespace RhythmDojo.Tests
             Assert.That(tailMarker, Is.Not.Null);
             Assert.That(holdBody, Is.Not.Null);
             Assert.That(tailMarker.localScale.x, Is.GreaterThan(holdBody.localScale.x));
+
+            var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
+            var assembly = playfield.GetComponentsInChildren<Renderer>(true);
+            playfield.Build(flow.CurrentRequest.Song.Mode, flow.Settings.presentation);
+            CollectionAssert.AreEqual(assembly, playfield.GetComponentsInChildren<Renderer>(true),
+                "Reinitializing the same mode must retain its authored floor and strike shoes.");
+            var grain = lane.sharedMaterial.GetTexture("_BaseMap");
+            playfield.SetRailOpacity(.5f);
+            Assert.That(lane.sharedMaterial.GetTexture("_BaseMap"), Is.SameAs(grain));
+            playfield.SetRailOpacity(1);
 
             float beforeOpacity = lane.sharedMaterial.GetColor("_BaseColor").a;
             Assert.That(view.railOpacity.interactable, Is.False);
@@ -122,11 +129,12 @@ namespace RhythmDojo.Tests
         public IEnumerator GameplayWindowRendersJudgmentLineBelowCenter()
         {
             yield return LoadGameplay();
-            var viewport = UnityEngine.Object.FindFirstObjectByType<GameplayViewport>();
+            var viewport = LaneViewport();
             var point = viewport.gameplayCamera.WorldToScreenPoint(new Vector3(.2f, .05f, 0));
             Assert.That(point.y, Is.LessThan(Screen.height * .5f));
 
-            var capture = CaptureGameplayDisplay(viewport);
+            yield return new WaitForEndOfFrame();
+            var capture = ScreenCapture.CaptureScreenshotAsTexture();
 
             try
             {
@@ -154,6 +162,13 @@ namespace RhythmDojo.Tests
             {
                 UnityEngine.Object.Destroy(capture);
             }
+        }
+
+        internal static GameplayViewport LaneViewport()
+        {
+            var hud = UnityEngine.Object.FindFirstObjectByType<GameplayHudView>();
+            return UnityEngine.Object.FindObjectsByType<GameplayViewport>(FindObjectsSortMode.None)
+                .Single(viewport => viewport.gameplayCamera == hud.gameplayCamera);
         }
 
         internal static Texture2D CaptureGameplayDisplay(GameplayViewport viewport)
@@ -231,7 +246,7 @@ namespace RhythmDojo.Tests
             yield return null;
             Canvas.ForceUpdateCanvases();
 
-            var viewport = UnityEngine.Object.FindFirstObjectByType<GameplayViewport>();
+            var viewport = LaneViewport();
             Assert.That(viewport, Is.Not.Null);
             var image = viewport.GetComponent<UnityEngine.UI.RawImage>();
             var camera = viewport.gameplayCamera;
@@ -391,24 +406,26 @@ namespace RhythmDojo.Tests
             model.Set(SessionState.Playing, 1, 0, 0, 1);
             presentation.judgmentPosition = JudgmentPosition.Upper;
             model.Judge(Judgment.Perfect, -.012);
-            Assert.That(judgmentRect.anchorMin.y, Is.GreaterThan(middle.y));
+            Assert.That(judgmentRect.anchorMin.y, Is.GreaterThanOrEqualTo(.80f),
+                "The upper stamp must clear the incoming notes.");
+            Assert.That(judgmentRect.anchorMax.y, Is.LessThanOrEqualTo(1));
             Assert.That(view.judgment.transform.IsChildOf(judgmentRect), Is.True);
             Assert.That(view.timing.transform.IsChildOf(judgmentRect), Is.True);
-            Assert.That(view.judgmentGroup.alpha, Is.EqualTo(.84f));
-            Assert.That(view.judgment.fontSize, Is.EqualTo(40));
+            Assert.That(view.judgmentGroup.alpha, Is.EqualTo(.96f));
+            Assert.That(view.judgment.fontSize, Is.EqualTo(52));
             Assert.That(view.timing.fontSize, Is.EqualTo(14));
             float perfectScale = judgmentRect.localScale.x;
             Assert.That(view.judgmentMotion.echo.color.a, Is.GreaterThan(0));
             yield return new WaitForSecondsRealtime(.07f);
             Assert.That(view.combo.text, Is.EqualTo("1"));
-            Assert.That(view.judgment.text, Is.EqualTo("Perfect"));
+            Assert.That(view.judgment.text, Is.EqualTo("절묘"));
             StringAssert.Contains("빠름", view.timing.text);
             presentation.judgmentPosition = JudgmentPosition.Middle;
             model.Hold();
             Assert.That(judgmentRect.anchorMin, Is.EqualTo(middle));
-            Assert.That(view.judgment.fontSize, Is.EqualTo(30));
+            Assert.That(view.judgment.fontSize, Is.EqualTo(44));
             yield return new WaitForSecondsRealtime(.07f);
-            Assert.That(view.judgment.text, Is.EqualTo("HOLD · Perfect"));
+            Assert.That(view.judgment.text, Is.EqualTo("절묘"));
             Assert.That(
                 view.combo.text,
                 Is.EqualTo("1"),
@@ -420,29 +437,22 @@ namespace RhythmDojo.Tests
             Assert.That(judgmentRect.localScale.x, Is.LessThan(perfectScale));
             Assert.That(judgmentRect.anchorMin.y, Is.LessThan(middle.y));
             StringAssert.Contains("늦음", view.timing.text);
-            Assert.That(view.judgment.text, Is.EqualTo("Hmm..."));
+            Assert.That(view.judgment.text, Is.EqualTo("명중"));
             model.Set(SessionState.Playing, 1, 1, 1, 0);
             model.Judge(Judgment.Miss, .25);
             Assert.That(view.judgmentMotion.echo.color.a, Is.Zero,
                 "Misses must not use the successful strike's luminous afterimage.");
             yield return new WaitForSecondsRealtime(.07f);
-            Assert.That(view.combo.text, Is.EqualTo("0"));
-            Assert.That(
-                view.bestCombo.text,
-                Is.EqualTo("BEST  2"),
-                "Keep peak combo even when a miss arrives in the same frame."
-            );
-            Assert.That(view.judgment.text, Is.EqualTo("Nope."));
-            Assert.That(view.timing.text, Is.EqualTo("COMBO BREAK"));
-            Assert.That(view.accuracy.text, Is.EqualTo("정확도  18.8%"));
-            Assert.That(
-                view.progressFill.rectTransform.anchorMax.x,
-                Is.EqualTo(3f / 8).Within(.001)
-            );
+            Assert.That(view.combo.text, Is.Empty);
+            Assert.That(view.judgment.text, Is.EqualTo("빗나감"));
+            Assert.That(view.timing.text, Is.EqualTo("연격 끊김"));
+            model.Set(SessionState.Playing, 99, 1, 1, 100);
+            model.Judge(Judgment.Perfect, 0);
+            yield return Await(() => view.combo.text == "100");
+            Assert.That(view.combo.rectTransform.anchorMin.y, Is.GreaterThanOrEqualTo(.80f));
             model.Set(SessionState.Ready, 0, 0, 0, 0, ReadyReason.FocusLost);
             model.Reset();
             yield return new WaitForSecondsRealtime(.07f);
-            Assert.That(view.bestCombo.text, Is.EqualTo("BEST  0"));
             Assert.That(view.judgment.text, Is.Empty);
             Assert.That(judgmentRect.anchorMin, Is.EqualTo(middle));
             Assert.That(view.judgmentGroup.transform.parent, Is.EqualTo(view.transform));
@@ -453,7 +463,6 @@ namespace RhythmDojo.Tests
             Assert.That(judgmentRect.localRotation, Is.EqualTo(Quaternion.identity));
             Assert.That(view.judgment.fontSize, Is.EqualTo(36));
             Assert.That(view.timing.fontSize, Is.EqualTo(18));
-            Assert.That(view.progressFill.rectTransform.anchorMax.x, Is.Zero);
             model.Set(SessionState.Completed, 8, 0, 0, 7);
             model.Judge(Judgment.Perfect, 0);
             yield return Await(

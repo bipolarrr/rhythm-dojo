@@ -101,6 +101,8 @@ Build Settings의 순서는 `Title`, `ModeSelection`, `Bootstrap`, `SongSelectio
 
 `SongSelectionView.Validate()`는 목인 구성을 필수로 검사한다. 오래된 씬에서 참조가 없을 때 목록으로 조용히 대체하지 않는다. `GameplayTestContext`와 모든 fixture는 제품 기본 목인 화면을 그대로 사용한다. 목록 검사는 실제 곡 목록 버튼으로 패널을 연다. 정렬·필터·빈 결과와 표시 상태는 `SelectionPreferencesTests`에서 화면 없이도 검증한다. `MainMenuFlowTests`는 Title 입장, 네 방의 기능, 사전 준비/해제와 중복 입력 소유권을 검증한다. Bootstrap의 view 없는 API 진입과 이전 Title→SongSelection 대문 오버레이는 제거했다. `GameplayTestContext`는 현재 SongSelection을 격리된 fixture의 준비 상태로 연다. 실제 진입 경로는 Title에서 시작하는 Smoke가 검증하며, Bootstrap을 모든 테스트의 입구로 사용하지 않는다.
 
+Unity 에디터 또는 Development Build의 자유 연습·실력 검정 곡 선택창에서 곡과 난이도를 고르고 **Ctrl+F5**를 누르면 개발자용 자동 플레이가 시작된다. 목인 화면과 곡 목록 양쪽에서 사용할 수 있다. 채보의 탭과 홀드를 곡 시각에 맞춰 입력하므로 일반 Gameplay의 배경 연출과 결과 화면까지 확인할 수 있다. 자동 플레이는 개인 기록과 입력 보정 추천에서 제외된다. 결과에서 재시도하면 자동 플레이가 이어지고, 곡 선택창에서 일반 시작을 누르면 수동으로 플레이한다.
+
 ### 2026-11-14 현재 유저 흐름 기준 정리
 
 테스트 존치 기준은 등록된 씬 수가 아니라 현재 UI의 호출 경로다. `MainMenuEntranceScreen`이 Title에서 ModeSelection으로 이동하고, `MainMenuScreen`/`MainMenuActions`가 비급 전수·자유 연습·실력 검정·율보 편찬으로 분기한다. `PreparedSelectionScene`은 모드 선택에서만 곡 선택을 준비한다. 플레이 요청은 `AppFlowController`가 만들며 Gameplay 종료 시 Results, 결과 재시도 시 Gameplay, 돌아가기 시 SongSelection으로 이어진다. 편집기 게임 테스트는 같은 Gameplay/Results를 거쳐 원래 Workspace 세션으로 돌아온다.
@@ -175,6 +177,8 @@ Results는 `ScreenCompositionRoot`가 결과와 복귀 Action을 주입한다. �
 기존 **Results**, **Results (Game Over)** 단축 메뉴도 유지한다. 기본 결과는 요약 데이터만 전달하며, 더보기 검사는 창의 `기존 채보 상세 샘플` 버튼으로 전환한다. 원래의 유지 Miss·Release 조기 해제·미판정 노트 샘플을 판정 엔진 재생 없이 제공한다. **Pause**는 실제 Gameplay 씬의 일시정지 패널만 표시한다. Mock의 이어하기는 패널을 닫고, 처음부터 다시는 패널을 다시 표시하고, 곡 선택은 미리보기를 종료한다. 곡을 시작하거나 재개하지 않는다.
 
 최초 호출만 Play Mode에 진입한다. Mock 동안 도메인 재로딩을 생략하고 씬은 정상 로드한다. `sceneLoaded`에서 composition root의 `Start`를 차단한 뒤 `ResultsScreen.Initialize/Display` 또는 `GameplayPauseMenu.Display`에 전달한다. `AppFlowController`, 곡 로딩, `RhythmSession`, 저장 서비스는 생성하지 않는다. 두 화면은 처음 사용할 때만 로드하고 종료까지 재사용하며, 반복 적용은 UI·씬을 다시 생성하지 않는다. 씬 및 프리팹의 고정 구성은 기존 빌더가 계속 관리한다.
+
+재호출 버튼의 클릭이 연출 건너뛰기로 이어지지 않도록, 표시 직후 입력 갱신과 버튼 해제를 확인한 뒤 새 입력부터 받는다. Mock의 포커스는 Unity 에디터 전체를 기준으로 판단하므로 Mock Controls나 Inspector 조작 중에도 연출을 진행한다. 에디터 밖으로 전환하면 기존처럼 멈추고, 미리보기 종료 시 원래 포커스 처리도 복원한다.
 
 일반 Play Mode와 Foundation 검증 중에는 Mock을 시작할 수 없다. 종료·진입 취소 시 작업 씬, Play Mode 시작 씬, 기존 Enter Play Mode 옵션을 복원한다. 스크립트 컴파일 시작 시 실행 중인 Mock을 종료한다. 실제 플레이 기록과 설정은 연결하지 않는다. 에디터 코드에서는 `ResultsPreview.Begin(new ResultsPreviewData { score = 123456, accuracy = 87.65, maxCombo = 432 })`, `ResultsPreview.BeginPause()`, `ResultsPreview.Stop()`을 호출할 수 있다. 일반 게임은 기존 API를 통해 계산된 결과를 그대로 표시한다.
 

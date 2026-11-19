@@ -196,6 +196,7 @@ GameObject:
   - component: {fileID: 133868079}
   - component: {fileID: 133868078}
   - component: {fileID: 133868077}
+  - component: {fileID: 133868080}
   m_Layer: 0
   m_Name: Door Interaction
   m_TagString: Untagged
@@ -304,6 +305,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 133868075}
   m_CullTransparentMesh: 1
+--- !u!114 &133868080
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 133868075}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 964087380e19a334dbc9d59ad70f7ba9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.DojoHoverGraphic
+  control: {fileID: 133868077}
 --- !u!1 &257496812
 GameObject:
   m_ObjectHideFlags: 0
@@ -1683,6 +1697,7 @@ GameObject:
   - component: {fileID: 961494499}
   - component: {fileID: 961494498}
   - component: {fileID: 961494497}
+  - component: {fileID: 961494500}
   m_Layer: 0
   m_Name: Game Logo
   m_TagString: Untagged
@@ -1748,6 +1763,19 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 12}
   m_SizeDelta: {x: 420, y: 150}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &961494500
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 961494496}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 964087380e19a334dbc9d59ad70f7ba9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.DojoHoverGraphic
+  control: {fileID: 1652989656}
 --- !u!1 &965333208
 GameObject:
   m_ObjectHideFlags: 0
@@ -1759,6 +1787,7 @@ GameObject:
   - component: {fileID: 965333209}
   - component: {fileID: 965333211}
   - component: {fileID: 965333210}
+  - component: {fileID: 965333212}
   m_Layer: 0
   m_Name: Brush Title
   m_TagString: Untagged
@@ -1823,6 +1852,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 965333208}
   m_CullTransparentMesh: 1
+--- !u!114 &965333212
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 965333208}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 964087380e19a334dbc9d59ad70f7ba9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.DojoHoverGraphic
+  control: {fileID: 1652989656}
 --- !u!1 &1025673638
 GameObject:
   m_ObjectHideFlags: 0
@@ -1977,6 +2019,7 @@ GameObject:
   - component: {fileID: 1119099819}
   - component: {fileID: 1119099818}
   - component: {fileID: 1119099817}
+  - component: {fileID: 1119099820}
   m_Layer: 0
   m_Name: Title
   m_TagString: Untagged
@@ -2061,6 +2104,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1119099815}
   m_CullTransparentMesh: 1
+--- !u!114 &1119099820
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1119099815}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 964087380e19a334dbc9d59ad70f7ba9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.DojoHoverGraphic
+  control: {fileID: 1652989656}
 --- !u!1 &1157487002
 GameObject:
   m_ObjectHideFlags: 0
@@ -2198,6 +2254,7 @@ GameObject:
   - component: {fileID: 1230868132}
   - component: {fileID: 1230868131}
   - component: {fileID: 1230868130}
+  - component: {fileID: 1230868134}
   m_Layer: 0
   m_Name: Sky Start Input
   m_TagString: Untagged
@@ -2306,6 +2363,19 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1230868134
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1230868129}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 964087380e19a334dbc9d59ad70f7ba9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.DojoHoverGraphic
+  control: {fileID: 1230868130}
 --- !u!114 &1252441847
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3141,6 +3211,7 @@ GameObject:
   - component: {fileID: 1652989657}
   - component: {fileID: 1652989656}
   - component: {fileID: 1652989655}
+  - component: {fileID: 1652989660}
   m_Layer: 0
   m_Name: Logo
   m_TagString: Untagged
@@ -3281,6 +3352,19 @@ MonoBehaviour:
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
   splitDepth: 12
+--- !u!114 &1652989660
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1652989653}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 964087380e19a334dbc9d59ad70f7ba9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.DojoHoverGraphic
+  control: {fileID: 1652989656}
 --- !u!114 &1739789300
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3593,6 +3677,7 @@ GameObject:
   - component: {fileID: 2107470287}
   - component: {fileID: 2107470289}
   - component: {fileID: 2107470288}
+  - component: {fileID: 2107470290}
   m_Layer: 0
   m_Name: Timber Sign
   m_TagString: Untagged
@@ -3657,6 +3742,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2107470286}
   m_CullTransparentMesh: 1
+--- !u!114 &2107470290
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2107470286}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 964087380e19a334dbc9d59ad70f7ba9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.DojoHoverGraphic
+  control: {fileID: 1652989656}
 --- !u!1 &2111117254
 GameObject:
   m_ObjectHideFlags: 0
@@ -3669,6 +3767,7 @@ GameObject:
   - component: {fileID: 2111117257}
   - component: {fileID: 2111117256}
   - component: {fileID: 2111117255}
+  - component: {fileID: 2111117259}
   m_Layer: 0
   m_Name: Sky Logo
   m_TagString: Untagged
@@ -3745,6 +3844,19 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 610, y: 205}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &2111117259
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2111117254}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 964087380e19a334dbc9d59ad70f7ba9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.DojoHoverGraphic
+  control: {fileID: 1230868130}
 --- !u!114 &2142168230
 MonoBehaviour:
   m_ObjectHideFlags: 0

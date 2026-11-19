@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f8fa5ad77500c54cb0b46d4d6d2a3b0, type: 3}
+  m_Name: Burst
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.Content.TrainingLesson
+  lessonId: burst
+  title: "\uD3ED\uD0C0"
+  patternDescription: "16\uBD84\uC74C\uD45C \xB7 4\u21928\u219212\u219216\uD0C0 \xB7
+    BPM 100"
+  guided: 1
+  definitionVersion: 1
+  stage: 1
+  song: {fileID: 11400000, guid: 06ec4b39dcf17134cbc2adc0b8080bb0, type: 2}
+  maximumMisses: 0
+  minimumAccuracy: 90
+  holdEnd: 0
+  maximumChordSpreadSeconds: 0
+  introductionDialogue: {fileID: 11400000, guid: 149c0cdf2cb464f4aa366423049598d7, type: 2}
+  successDialogue: {fileID: 11400000, guid: ac13f6845eea29f40b756e58698f9a66, type: 2}
+  failureDialogue: {fileID: 11400000, guid: b6d727a771d916749b976211be61031d, type: 2}
+  abortedDialogue: {fileID: 11400000, guid: e406b29bd4db55640a6c357f569f9379, type: 2}
+  imitationSong: {fileID: 11400000, guid: b26632c6c2148ab4598db9238077f294, type: 2}
+  applicationSong: {fileID: 11400000, guid: 03764f89d2f63dd438868bfd6379c508, type: 2}
+  imitationDialogue: {fileID: 11400000, guid: 68e112712de876446994a4ace2edeca5, type: 2}
+  applicationDialogue: {fileID: 11400000, guid: ae166d2e4c877aa43b1bf47ad695c45b, type: 2}
+  assessmentDialogue: {fileID: 11400000, guid: 083706c24284d9042a38d799d2b3b49b, type: 2}
+  demonstrationFinishedDialogue: {fileID: 11400000, guid: 3d6540051a440ec43b2a235e54c1ee7d, type: 2}
+  practiceSucceededDialogue: {fileID: 11400000, guid: b2f9f1ea14cbe8e4a9de2150014678b1, type: 2}
+  missingDialogue: {fileID: 11400000, guid: 0d91bd53667925b429b73fd3c35e219d, type: 2}
+  timingDialogue: {fileID: 11400000, guid: e0eb2a4bc5d9e734d89d05a7910182b7, type: 2}
+  extraInputDialogue: {fileID: 11400000, guid: 9a3d5cb9126aa52409300bdc7a44dd95, type: 2}

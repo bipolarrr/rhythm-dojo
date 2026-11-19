@@ -10,6 +10,12 @@ namespace RhythmDojo.UI
         public int Lane { get; set; }
         public int Variation { get; set; }
 
+        [SerializeField] private Texture2D bristles;
+
+        public override Texture mainTexture => bristles;
+        public bool HasArtwork => bristles;
+
+        private double struckAt;
         private float elapsed;
         private float strength;
         private bool sustained;
@@ -35,6 +41,7 @@ namespace RhythmDojo.UI
             missed = grade == Judgment.Miss;
             sustained = false;
             elapsed = 0;
+            struckAt = Time.unscaledTimeAsDouble;
             gameObject.SetActive(true);
             SetVerticesDirty();
         }
@@ -56,7 +63,7 @@ namespace RhythmDojo.UI
             {
                 return;
             }
-            elapsed += Time.unscaledDeltaTime;
+            elapsed = (float)(Time.unscaledTimeAsDouble - struckAt);
 
             if (elapsed >= Duration)
             {
@@ -72,21 +79,21 @@ namespace RhythmDojo.UI
         {
             helper.Clear();
 
-            float progress = Mathf.Clamp01(elapsed / Duration);
-            float radius = Mathf.Min(rectTransform.rect.width * .42f, 46);
-            var tint = color;
+            float radius = rectTransform.rect.width * .42f;
+            var contact = new Vector2(0, -2);
             if (sustained)
             {
-                // A quiet, steady contact mark; no continuous expanding rings.
-                tint.a *= strength * .65f;
-                DojoMotion.Stroke(helper, new Vector2(-radius * .65f, -5),
-                    new Vector2(radius * .65f, -3), 5, tint, Lane);
+                var tint = color;
+                tint.a *= .85f;
+                Sweep(helper, new Vector2(-radius * .74f, -4), new Vector2(radius * .74f, -4),
+                    radius * .18f, tint);
                 return;
             }
 
-            float attack = 1f - Mathf.Pow(1f - Mathf.Clamp01(elapsed / .055f), 3);
-            float fade = 1f - Mathf.SmoothStep(0, 1, Mathf.InverseLerp(.065f, Duration, elapsed));
-            tint.a *= fade * strength;
+            float progress = Mathf.Clamp01(elapsed / Duration);
+            float fade = 1 - Mathf.SmoothStep(0, 1, Mathf.InverseLerp(.048f, Duration, elapsed));
+            var pigment = color;
+            pigment.a *= fade * strength;
             float direction = 1;
             if ((Lane + Variation) % 2 != 0)
             {
@@ -94,67 +101,98 @@ namespace RhythmDojo.UI
             }
             if (missed)
             {
-                // Failed contact sinks below the rail instead of celebrating with a burst.
-                DojoMotion.Stroke(helper, new Vector2(-radius * .5f, -8 - progress * 10),
-                    new Vector2(-radius * .08f, -10 - progress * 10), 6, tint, Lane);
-                DojoMotion.Stroke(helper, new Vector2(radius * .10f, -10 - progress * 12),
-                    new Vector2(radius * .36f, -13 - progress * 12), 4, tint, Lane + 2);
+                var drop = contact + Vector2.down * radius * (.15f + .43f * progress);
+                Sweep(helper, drop + Vector2.left * radius * .44f, drop, radius * .23f, pigment);
+                Sweep(helper, drop + Vector2.right * radius * .44f,
+                    drop + Vector2.down * radius * .18f, radius * .15f, pigment);
                 return;
             }
 
-            float width = 17;
-            int fragments = 5;
+            float attack = 1 - Mathf.Pow(1 - Mathf.Clamp01(elapsed / .084f), 3);
+            radius *= Mathf.Lerp(.55f, 1, strength);
+            PaintImpact(helper, attack, radius, direction);
+            float reach = radius * (.13f + .87f * attack);
             if (grade == Judgment.Good)
             {
-                radius *= .78f;
-                width = 11;
-                fragments = 3;
+                reach *= .79f;
             }
 
-            // Dry pigment under the contact, then a shorter ivory edge. All geometry stays
-            // below the judgment rail and inside one lane even during six-note chords.
-            var start = new Vector2(-direction * radius * .72f, -9);
-            var end = new Vector2(direction * radius * .88f * attack, -15 - Variation * 3);
-            var ink = new Color(.035f, .065f, .065f, fade * strength * .85f);
-            DojoMotion.Stroke(helper, start + Vector2.down * 4,
-                end + Vector2.down * (4 + progress * 7), width * 1.55f, ink, Lane + Variation);
-            DojoMotion.Stroke(helper, start, end, width * (.65f + .35f * fade), tint, Lane + Variation);
-            var core = new Color(.98f, .91f, .72f, fade * strength * .85f);
-            DojoMotion.Stroke(helper, start * .6f + Vector2.down * 3,
-                new Vector2(direction * radius * .65f * attack, -10), 5, core, Lane + 2);
-            if (grade == Judgment.Perfect)
-            {
-                var echo = tint;
-                echo.a *= .24f * (1 - progress);
-                DojoMotion.Stroke(helper, start + Vector2.down * 13,
-                    end + Vector2.down * (12 + progress * 10), 7, echo, Lane + 1);
-            }
+            // Two descending cuts split from the same point. Late bristles peel away
+            // into the spent-note area while the next note approaches from above.
+            var lead = new Vector2(direction * reach * .91f, -reach * (1.22f + .16f * Variation));
+            var counter = new Vector2(-direction * reach * .83f, -reach * .63f);
+            var ink = new Color(.10f, .14f, .17f, pigment.a);
+            Sweep(helper, contact, contact + lead * .98f, radius * .43f, ink);
+            Sweep(helper, contact, contact + lead, radius * (.18f + .17f * fade), pigment);
+            Sweep(helper, contact, contact + counter, radius * .21f, pigment);
 
+            var core = new Color(1, .97f, .84f, strength * (1 - Mathf.Clamp01(elapsed / .083f)));
+            var span = Vector2.right * radius * (.28f + .44f * attack);
+            Sweep(helper, contact - span, contact + span, radius * .27f * (1 - progress), core);
+
+            float flight = Mathf.Clamp01((elapsed - .024f) / .19f);
+            int fragments = 3 + Variation;
             for (int i = 0; i < fragments; i++)
             {
-                float delay = .016f + i * .008f;
-                float flight = Mathf.Clamp01((elapsed - delay) / .16f);
-                if (flight <= 0)
-                {
-                    continue;
-                }
-                float x = direction * radius * (-.55f + i * .27f) * (.4f + flight * .6f);
-                float y = -17 - flight * (10 + i * 4);
-                var fragment = tint;
-                fragment.a *= 1 - flight;
-                PixelFragment(helper, x, y, 2 + i % 2, fragment);
+                float angle = (.18f + .66f * (i + .5f) / fragments) * Mathf.PI;
+                var ray = new Vector2(direction * Mathf.Cos(angle), -Mathf.Sin(angle));
+                float distance = radius * (.16f + flight * (1 + .12f * (i % 2)));
+                var tip = contact + ray * distance;
+                tip.y -= radius * flight * .55f;
+                var fleck = pigment;
+                fleck.a *= (1 - flight) * attack;
+                Sweep(helper, tip - ray * radius * (.11f + .18f * attack), tip,
+                    radius * (.09f + .025f * (i % 2)), fleck);
             }
         }
 
-        private static void PixelFragment(VertexHelper helper, float x, float y, float size, Color tint)
+        private void PaintImpact(VertexHelper helper, float attack, float radius, float direction)
         {
-            x = Mathf.Round(x);
-            y = Mathf.Round(y);
+            float opacity = 1 - Mathf.SmoothStep(0, 1, Mathf.InverseLerp(.054f, .155f, elapsed));
+            if (opacity <= 0)
+            {
+                return;
+            }
+
+            float width = radius * (.55f + .58f * attack);
+            float height = radius * (.22f + 1.55f * attack);
+            if (grade == Judgment.Good)
+            {
+                width *= .80f;
+                height *= .72f;
+            }
+
+            // The lower three quarters of the atlas hold the impact fan. Its top
+            // edge is pinned to the receptor as the pigment opens downwards.
+            float x = direction * width;
+            var tint = Color.Lerp(Color.white, color, .25f);
+            tint.a = opacity * strength;
             int index = helper.currentVertCount;
-            helper.AddVert(new Vector2(x, y), tint, Vector2.zero);
-            helper.AddVert(new Vector2(x, y + size), tint, Vector2.zero);
-            helper.AddVert(new Vector2(x + size, y + size), tint, Vector2.zero);
-            helper.AddVert(new Vector2(x + size, y), tint, Vector2.zero);
+            helper.AddVert(new Vector2(-x, -height), tint, Vector2.zero);
+            helper.AddVert(new Vector2(-x, 0), tint, new Vector2(0, .75f));
+            helper.AddVert(new Vector2(x, 0), tint, new Vector2(1, .75f));
+            helper.AddVert(new Vector2(x, -height), tint, Vector2.right);
+            helper.AddTriangle(index, index + 1, index + 2);
+            helper.AddTriangle(index, index + 2, index + 3);
+        }
+
+        private static void Sweep(VertexHelper helper, Vector2 start, Vector2 end, float width, Color tint)
+        {
+            Vector2 along = (end - start).normalized;
+            var side = new Vector2(-along.y, along.x) * (width * .5f);
+            // Let the uppermost bristle graze the line at contact.
+            float overhang = Mathf.Max(start.y, end.y) + Mathf.Abs(side.y);
+            if (overhang > 0)
+            {
+                start.y -= overhang;
+                end.y -= overhang;
+            }
+
+            int index = helper.currentVertCount;
+            helper.AddVert(start - side, tint, new Vector2(0, .75f));
+            helper.AddVert(start + side, tint, Vector2.up);
+            helper.AddVert(end + side, tint, Vector2.one);
+            helper.AddVert(end - side, tint, new Vector2(1, .75f));
             helper.AddTriangle(index, index + 1, index + 2);
             helper.AddTriangle(index, index + 2, index + 3);
         }

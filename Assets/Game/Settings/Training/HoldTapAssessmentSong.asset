@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72a3cc72ae1769a40976e58178a19abb, type: 3}
+  m_Name: HoldTapAssessmentSong
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.Gameplay.SongDefinition
+  songId: hold-tap-Assessment
+  title: "\uB871\uC7A1 \xB7 \uAC80\uC815"
+  artist: Rhythm Dojo
+  audioClip: {fileID: 8300000, guid: 2419e7348b233e443aea9587a8f35b8b, type: 3}
+  chart: {fileID: 11400000, guid: aaa701d22b013854ba18fb3de1e01723, type: 2}
+  mode: {fileID: 11400000, guid: b4b0e178a2cd7eb4fa7dedd0f10a62cb, type: 2}
+  cover: {fileID: 0}
+  timing:
+    chartAudioOffsetSeconds: 0
+    tempoPoints:
+    - startTimeSeconds: 0
+      bpm: 100

@@ -65,3 +65,4 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
+  bristles: {fileID: 2800000, guid: 01ca84e53fc4451a970d22595269ad3b, type: 3}

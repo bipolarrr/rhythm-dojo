@@ -34,6 +34,7 @@ namespace RhythmDojo.UI
         private SongSelectionList list;
         private SongSelectionPresentation presentation;
         private SongSelectionState state;
+        private bool pendingDeveloperAutoplay;
         private static readonly string[] LoadingCaptions = { "불러오는 중.", "불러오는 중..", "불러오는 중..." };
         public bool HardModeSelected { get; private set; }
         public SongSelectionState State => state;
@@ -195,7 +196,19 @@ namespace RhythmDojo.UI
                 }
                 return;
             }
-            if (ModalOpen || state == SongSelectionState.Library)
+            if (ModalOpen)
+            {
+                return;
+            }
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            var keyboard = Keyboard.current;
+            if (keyboard != null && keyboard.f5Key.wasPressedThisFrame && keyboard.ctrlKey.isPressed)
+            {
+                Play(true);
+                return;
+            }
+#endif
+            if (state == SongSelectionState.Library)
             {
                 return;
             }
@@ -621,14 +634,25 @@ namespace RhythmDojo.UI
             previewSong = null;
         }
 
-        private async void Play()
+        private void Play() => Play(false);
+
+        private async void Play(bool developerAutoplay)
         {
-            if (Busy || !CanPlay || state != SongSelectionState.Main)
+            if (Busy || !CanPlay)
+            {
+                return;
+            }
+            if (developerAutoplay && state == SongSelectionState.Library)
+            {
+                ClosePracticeLibrary();
+            }
+            if (state != SongSelectionState.Main)
             {
                 return;
             }
             if (view.practice.IsStriking)
             {
+                pendingDeveloperAutoplay = developerAutoplay;
                 state = SongSelectionState.StartPending;
                 view.practice.StopBarrage();
                 return;
@@ -644,7 +668,7 @@ namespace RhythmDojo.UI
             playCancellation = request;
             try
             {
-                await navigation.PlaySelectedAsync(request.Token);
+                await navigation.PlaySelectedAsync(request.Token, developerAutoplay);
             }
             catch (OperationCanceledException)
             {

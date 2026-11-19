@@ -15,20 +15,14 @@ namespace RhythmDojo.UI
         public Image healthDamage;
         public RectTransform healthGauge;
         public Camera gameplayCamera;
-        public Text status;
         public HudLaneLayout lanes;
         public Button returnButton;
         public Text songTitle;
         public Text songDetails;
         public Text sessionState;
         public Text combo;
-        public Text bestCombo;
         public Text judgment;
         public Text timing;
-        public Text counts;
-        public Text accuracy;
-        public Text progress;
-        public Image progressFill;
         public CanvasGroup judgmentGroup;
         public Image healthFill;
         public Text healthLabel;
@@ -39,7 +33,6 @@ namespace RhythmDojo.UI
         public Slider railOpacity;
         public Button focusHudButton;
         public GameObject songInformationPanel;
-        public GameObject judgmentRecordPanel;
 
         public void Validate()
         {
@@ -62,7 +55,7 @@ namespace RhythmDojo.UI
             {
                 throw new InvalidOperationException("Gameplay gauge positioning references missing.");
             }
-            if (!status || !lanes || !returnButton)
+            if (!lanes || !returnButton)
             {
                 throw new InvalidOperationException("HUD view references missing.");
             }
@@ -72,17 +65,12 @@ namespace RhythmDojo.UI
                 throw new InvalidOperationException("Training HUD references missing.");
             }
 
-            if ((!combo || !bestCombo) || !judgment)
+            if (!combo || !judgment)
             {
                 throw new InvalidOperationException("Training HUD references missing.");
             }
 
-            if ((!timing || !counts) || !accuracy)
-            {
-                throw new InvalidOperationException("Training HUD references missing.");
-            }
-
-            if ((!progress || !progressFill) || !judgmentGroup)
+            if (!timing || !judgmentGroup)
             {
                 throw new InvalidOperationException("Training HUD references missing.");
             }
@@ -97,7 +85,7 @@ namespace RhythmDojo.UI
                 throw new InvalidOperationException("Training HUD references missing.");
             }
 
-            if (!focusHudButton || !songInformationPanel || !judgmentRecordPanel)
+            if (!focusHudButton || !songInformationPanel)
             {
                 throw new InvalidOperationException("Gameplay focus HUD references missing.");
             }
@@ -108,7 +96,6 @@ namespace RhythmDojo.UI
         public void SetFocusHud(bool enabled)
         {
             songInformationPanel.SetActive(true);
-            judgmentRecordPanel.SetActive(false);
             var caption = focusHudButton.GetComponentInChildren<Text>(true);
             if (enabled)
             {

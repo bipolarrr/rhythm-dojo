@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using RhythmDojo.Core;
 using RhythmDojo.Gameplay;
+using RhythmDojo.Input;
 using RhythmDojo.UI;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -67,6 +68,7 @@ namespace RhythmDojo.EditorTools
         private static ResultsScreen screen;
         private static GameplayPauseMenu pauseMenu;
         private static double requestedAt;
+        private static Func<bool> previousFocus;
         private static readonly Dictionary<int, GameObject[]> sceneRoots = new Dictionary<int, GameObject[]>();
 
         public static bool IsActive => SessionState.GetBool(ActiveKey, false);
@@ -182,6 +184,8 @@ namespace RhythmDojo.EditorTools
             SessionState.SetBool(ActiveKey, true);
             SessionState.SetBool(PendingKey, true);
             deadline = EditorApplication.timeSinceStartup + 30;
+            previousFocus = ApplicationFocusState.Provider;
+            ApplicationFocusState.Provider = HasPreviewFocus;
             EditorSceneManager.playModeStartScene = scene;
             // This isolated UI host does not need a fresh game domain. Always reload
             // the authored scene, and restore the user's options on exit/cancellation.
@@ -200,6 +204,13 @@ namespace RhythmDojo.EditorTools
             {
                 Restore();
             }
+        }
+
+        private static bool HasPreviewFocus()
+        {
+            // The editor is the preview host: editing Mock Controls or the Inspector
+            // must not freeze the reveal because the Game view lost focus.
+            return previousFocus?.Invoke() ?? UnityEditorInternal.InternalEditorUtility.isApplicationActive;
         }
 
         private static void SceneLoaded(Scene scene, LoadSceneMode mode)
@@ -319,6 +330,8 @@ namespace RhythmDojo.EditorTools
 
         private static void Restore()
         {
+            ApplicationFocusState.Provider = previousFocus;
+            previousFocus = null;
             EditorSettings.enterPlayModeOptions = (EnterPlayModeOptions)SessionState.GetInt(PreviousOptionsKey, 0);
             EditorSettings.enterPlayModeOptionsEnabled = SessionState.GetBool(PreviousOptionsEnabledKey, false);
             EditorSceneManager.playModeStartScene = AssetDatabase.LoadAssetAtPath<SceneAsset>(

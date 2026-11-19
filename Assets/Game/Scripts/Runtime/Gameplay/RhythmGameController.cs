@@ -60,7 +60,8 @@ namespace RhythmDojo.Gameplay
             ISongClock clock,
             INotePresenter presenter,
             HardModeHealthRules healthRules,
-            PlayRules rules = null
+            PlayRules rules = null,
+            TrainingPlayback trainingPlayback = null
         )
         {
             Shutdown();
@@ -81,7 +82,8 @@ namespace RhythmDojo.Gameplay
                 clock,
                 presenter,
                 healthRules,
-                rules
+                rules,
+                trainingPlayback
             );
         }
 

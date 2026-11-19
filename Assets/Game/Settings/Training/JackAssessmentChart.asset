@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c192ff885248966469e5072687582fac, type: 3}
+  m_Name: JackAssessmentChart
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.Gameplay.RhythmChart
+  notes:
+  - lane: 0
+    kind: 0
+    startTime: 2.4
+    endTime: 2.4
+  - lane: 0
+    kind: 0
+    startTime: 3
+    endTime: 3
+  - lane: 3
+    kind: 0
+    startTime: 6
+    endTime: 6
+  - lane: 3
+    kind: 0
+    startTime: 6.6
+    endTime: 6.6
+  - lane: 3
+    kind: 0
+    startTime: 7.2
+    endTime: 7.2
+  - lane: 1
+    kind: 0
+    startTime: 10.8
+    endTime: 10.8
+  - lane: 1
+    kind: 0
+    startTime: 11.100000000000001
+    endTime: 11.100000000000001
+  - lane: 1
+    kind: 0
+    startTime: 11.4
+    endTime: 11.4
+  - lane: 2
+    kind: 0
+    startTime: 14.4
+    endTime: 14.4
+  - lane: 2
+    kind: 0
+    startTime: 14.700000000000001
+    endTime: 14.700000000000001
+  completionTime: 15.9

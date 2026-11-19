@@ -11,6 +11,15 @@ namespace RhythmDojo.UI
         public CanvasGroup introduction;
         public Text heading;
         public Button backButton;
+        public Text backLabel;
+        public Text lessonTitle;
+        public Text instructions;
+        public Text progress;
+        public Text feedback;
+        public Button startButton;
+        public Text startLabel;
+        public Button[] lessonButtons;
+        public Text[] lessonLabels;
 
         public void Validate()
         {
@@ -18,9 +27,32 @@ namespace RhythmDojo.UI
             {
                 throw new InvalidOperationException("Tutorial stage composition missing.");
             }
-            if (!heading || !backButton)
+            if (!heading || !backButton || !backLabel)
             {
                 throw new InvalidOperationException("Tutorial navigation composition missing.");
+            }
+            if (!lessonTitle || !instructions || !progress)
+            {
+                throw new InvalidOperationException("Tutorial lesson composition missing.");
+            }
+            if (!feedback || !startButton || !startLabel)
+            {
+                throw new InvalidOperationException("Tutorial training controls missing.");
+            }
+            if (lessonButtons == null || lessonLabels == null)
+            {
+                throw new InvalidOperationException("Tutorial lesson selection missing. Rebuild Tutorial.");
+            }
+            if (lessonButtons.Length == 0 || lessonButtons.Length != lessonLabels.Length)
+            {
+                throw new InvalidOperationException("Tutorial lesson selection is incomplete.");
+            }
+            for (int i = 0; i < lessonButtons.Length; i++)
+            {
+                if (!lessonButtons[i] || !lessonLabels[i])
+                {
+                    throw new InvalidOperationException("Tutorial lesson button missing.");
+                }
             }
         }
 

@@ -1,11 +1,14 @@
 using System.Collections;
+using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
 using RhythmDojo.UI;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.TestTools;
+using UnityEngine.UI;
 
 namespace RhythmDojo.Tests
 {
@@ -314,6 +317,220 @@ namespace RhythmDojo.Tests
             {
                 Time.timeScale = previousScale;
             }
+        }
+
+        [UnityTest]
+        [Category("SceneIntegration")]
+        public IEnumerator HoverDrawsOnceScalesOnlyArtworkAndRestoresAfterExit()
+        {
+            var view = Object.FindFirstObjectByType<SongSelectionView>();
+            yield return Click(view.practice.library);
+            var button = view.Rows.First(row => row.select.isActiveAndEnabled).favorite;
+            var label = button.GetComponentInChildren<Text>();
+            var focus = Object.FindFirstObjectByType<DojoButtonFocus>();
+            var rect = (RectTransform)button.transform;
+            var originalRect = rect.rect;
+            var originalPosition = rect.position;
+            var originalScale = rect.localScale;
+            var circles = focus.GetComponentsInChildren<DojoBrushCircle>(true);
+            var mesh = new Mesh();
+            try
+            {
+                InputSystem.QueueStateEvent(mouse, new MouseState { position = new Vector2(-50, -50) });
+                yield return new WaitForSecondsRealtime(.18f);
+                Canvas.ForceUpdateCanvases();
+                mesh.vertices = label.canvasRenderer.GetMesh().vertices;
+                mesh.RecalculateBounds();
+                float width = mesh.bounds.size.x;
+
+                var point = HoverPoint(button);
+                InputSystem.QueueStateEvent(mouse, new MouseState { position = point });
+                yield return null;
+                yield return null;
+                Assert.That(focus.Hovered, Is.SameAs(button));
+                var circle = circles.Single(item => item.gameObject.activeSelf);
+                Assert.That(circle.Reveal, Is.GreaterThan(0));
+                yield return Await(() => circle.Reveal == 1, "Hover stroke did not finish.");
+                Canvas.ForceUpdateCanvases();
+                mesh.vertices = label.canvasRenderer.GetMesh().vertices;
+                mesh.RecalculateBounds();
+                Assert.That(mesh.bounds.size.x / width, Is.EqualTo(1.14f).Within(.005f));
+                Assert.That(rect.rect, Is.EqualTo(originalRect));
+                Assert.That(rect.position, Is.EqualTo(originalPosition));
+                Assert.That(rect.localScale, Is.EqualTo(originalScale));
+                Assert.That(circle.raycastTarget, Is.False);
+                var hits = new System.Collections.Generic.List<RaycastResult>();
+                var edge = new Vector2(rect.rect.xMax - .25f, rect.rect.center.y);
+                var pointer = new PointerEventData(EventSystem.current);
+                pointer.position = RectTransformUtility.WorldToScreenPoint(null, rect.TransformPoint(edge));
+                EventSystem.current.RaycastAll(pointer, hits);
+                Assert.That(hits[0].gameObject.GetComponentInParent<Button>(), Is.SameAs(button));
+                edge.x += .5f;
+                pointer.position = RectTransformUtility.WorldToScreenPoint(null, rect.TransformPoint(edge));
+                hits.Clear();
+                EventSystem.current.RaycastAll(pointer, hits);
+                Assert.That(hits.All(hit => hit.gameObject.GetComponentInParent<Button>() != button), Is.True,
+                    "Expanded artwork must not expand the clickable rectangle.");
+                yield return new WaitForEndOfFrame();
+                ScreenCapture.CaptureScreenshot("Logs/hover-library.png");
+
+                string previous = label.text;
+                for (int i = 0; i < 2; i++)
+                {
+                    InputSystem.QueueStateEvent(mouse, new MouseState { position = point }.WithButton(MouseButton.Left));
+                    yield return null;
+                    Assert.That(circle.Reveal, Is.EqualTo(1), "Pressing must not redraw the circle.");
+                    InputSystem.QueueStateEvent(mouse, new MouseState { position = point });
+                    yield return null;
+                    Assert.That(circle.Reveal, Is.EqualTo(1), "Releasing must not redraw the circle.");
+                    Assert.That(label.text, Is.Not.EqualTo(previous), "Each native click must toggle the favorite.");
+                    previous = label.text;
+                }
+
+                InputSystem.QueueStateEvent(mouse, new MouseState { position = point + new Vector2(rect.rect.width, 0) });
+                yield return new WaitForSecondsRealtime(.18f);
+                Assert.That(focus.Hovered, Is.Not.SameAs(button));
+                mesh.vertices = label.canvasRenderer.GetMesh().vertices;
+                mesh.RecalculateBounds();
+                Assert.That(mesh.bounds.size.x, Is.EqualTo(width).Within(.01f));
+            }
+            finally
+            {
+                Object.Destroy(mesh);
+            }
+        }
+
+        [UnityTest]
+        [Category("SceneIntegration")]
+        public IEnumerator HoverRespectsKeyboardDisabledControlsModalShadeAndFocusLoss()
+        {
+            var view = Object.FindFirstObjectByType<SongSelectionView>();
+            yield return Click(view.practice.settings);
+            var settings = Object.FindFirstObjectByType<SettingsView>();
+            var focus = Object.FindFirstObjectByType<DojoButtonFocus>();
+            var circles = focus.GetComponentsInChildren<DojoBrushCircle>(true);
+            var button = settings.soundTab;
+            var point = HoverPoint(button);
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = point });
+            yield return Await(() => focus.Hovered == button, "Settings tab did not hover.");
+            yield return new WaitForSecondsRealtime(.25f);
+            yield return new WaitForEndOfFrame();
+            ScreenCapture.CaptureScreenshot("Logs/hover-settings.png");
+
+            yield return Press(Key.RightArrow);
+            Assert.That(EventSystem.current.currentSelectedGameObject, Is.SameAs(settings.masterVolume.gameObject));
+            yield return new WaitForSecondsRealtime(.18f);
+            Assert.That(circles.All(item => !item.gameObject.activeSelf), Is.True);
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = point + Vector2.one * 3 });
+            yield return Await(() => focus.Hovered == button);
+            button.interactable = false;
+            yield return null;
+            yield return null;
+            Assert.That(focus.Hovered, Is.Null);
+            Assert.That(circles.All(item => !item.gameObject.activeSelf), Is.True);
+            button.interactable = true;
+            settings.panelOpacity.interactable = false;
+            yield return null;
+            yield return null;
+            Assert.That(focus.Hovered, Is.Null, "A disabled parent group must suppress hover.");
+            settings.panelOpacity.interactable = true;
+
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = new Vector2(2, 2) });
+            yield return new WaitForSecondsRealtime(.18f);
+            Assert.That(focus.Hovered, Is.Null, "The modal background is not a visible action.");
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = point });
+            yield return Await(() => focus.Hovered == button);
+
+            var previousFocus = RhythmDojo.Input.ApplicationFocusState.Provider;
+            try
+            {
+                RhythmDojo.Input.ApplicationFocusState.Provider = () => false;
+                yield return null;
+                yield return null;
+                Assert.That(circles.All(item => !item.gameObject.activeSelf), Is.True);
+            }
+            finally
+            {
+                RhythmDojo.Input.ApplicationFocusState.Provider = previousFocus;
+            }
+            yield return Press(Key.Escape);
+        }
+
+        [UnityTest]
+        [Category("SceneIntegration")]
+        public IEnumerator HoverReusesAuthoredCirclesAcrossRapidMovementAndSceneChanges()
+        {
+            var view = Object.FindFirstObjectByType<SongSelectionView>();
+            var focus = Object.FindFirstObjectByType<DojoButtonFocus>();
+            var circles = focus.GetComponentsInChildren<DojoBrushCircle>(true);
+            var buttons = new[] { view.practice.library, view.practice.settings, view.practice.preview };
+            for (int i = 0; i < 9; i++)
+            {
+                InputSystem.QueueStateEvent(mouse, new MouseState { position = HoverPoint(buttons[i % buttons.Length]) });
+                yield return null;
+                yield return null;
+                Assert.That(focus.Hovered, Is.SameAs(buttons[i % buttons.Length]));
+            }
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = new Vector2(-20, -20) });
+            yield return new WaitForSecondsRealtime(.2f);
+            Assert.That(circles.All(item => !item.gameObject.activeSelf), Is.True);
+            yield return UnityEngine.SceneManagement.SceneManager.LoadSceneAsync("Assets/Game/Scenes/ModeSelection.unity");
+            yield return null;
+            foreach (string name in new[] { "Settings", "Next Mode" })
+            {
+                var button = Object.FindObjectsByType<Button>(FindObjectsSortMode.None)
+                    .Single(item => item.name == name && item.isActiveAndEnabled);
+                var rect = (RectTransform)button.transform;
+                var originalRect = rect.rect;
+                var originalPosition = rect.position;
+                var label = button.GetComponentInChildren<Text>();
+                var ink = button.GetComponentInChildren<DojoInkGraphic>();
+                var mesh = new Mesh();
+                try
+                {
+                    InputSystem.QueueStateEvent(mouse, new MouseState { position = new Vector2(-20, -20) });
+                    yield return new WaitForSecondsRealtime(.2f);
+                    Canvas.ForceUpdateCanvases();
+                    mesh.vertices = label.canvasRenderer.GetMesh().vertices;
+                    mesh.RecalculateBounds();
+                    float width = mesh.bounds.size.x;
+                    mesh.vertices = ink.canvasRenderer.GetMesh().vertices;
+                    mesh.RecalculateBounds();
+                    float inkWidth = mesh.bounds.size.x;
+                    InputSystem.QueueStateEvent(mouse, new MouseState { position = HoverPoint(button) });
+                    yield return Await(() => focus.Hovered == button, "Visible mode menu button did not hover.");
+                    yield return new WaitForSecondsRealtime(.25f);
+                    Canvas.ForceUpdateCanvases();
+                    mesh.vertices = label.canvasRenderer.GetMesh().vertices;
+                    mesh.RecalculateBounds();
+                    Assert.That(mesh.bounds.size.x / width, Is.EqualTo(1.14f).Within(.005f), name);
+                    mesh.vertices = ink.canvasRenderer.GetMesh().vertices;
+                    mesh.RecalculateBounds();
+                    Assert.That(mesh.bounds.size.x / inkWidth, Is.EqualTo(1.14f).Within(.005f), name + " ink");
+                    Assert.That(rect.rect, Is.EqualTo(originalRect));
+                    Assert.That(rect.position, Is.EqualTo(originalPosition));
+                    InputSystem.QueueStateEvent(mouse, new MouseState { position = new Vector2(-20, -20) });
+                    yield return new WaitForSecondsRealtime(.2f);
+                    Canvas.ForceUpdateCanvases();
+                    mesh.vertices = label.canvasRenderer.GetMesh().vertices;
+                    mesh.RecalculateBounds();
+                    Assert.That(mesh.bounds.size.x, Is.EqualTo(width).Within(.01f));
+                }
+                finally
+                {
+                    Object.Destroy(mesh);
+                }
+            }
+            yield return UnityEngine.SceneManagement.SceneManager.LoadSceneAsync("Assets/Game/Scenes/Title.unity");
+            yield return null;
+            CollectionAssert.AreEquivalent(circles, focus.GetComponentsInChildren<DojoBrushCircle>(true));
+            Assert.That(circles.All(item => !item.gameObject.activeSelf), Is.True);
+        }
+
+        private static Vector2 HoverPoint(Selectable control)
+        {
+            var rect = (RectTransform)control.transform;
+            return RectTransformUtility.WorldToScreenPoint(null, rect.TransformPoint(rect.rect.center));
         }
 
         private static int VisibleWidth(Texture2D texture)

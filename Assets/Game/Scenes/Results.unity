@@ -1039,6 +1039,7 @@ GameObject:
   - component: {fileID: 205596872}
   - component: {fileID: 205596874}
   - component: {fileID: 205596871}
+  - component: {fileID: 205596875}
   m_Layer: 0
   m_Name: Previous Note
   m_TagString: Untagged
@@ -1169,6 +1170,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &205596875
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 205596869}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 964087380e19a334dbc9d59ad70f7ba9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.DojoHoverGraphic
+  control: {fileID: 205596874}
 --- !u!1 &216678416
 GameObject:
   m_ObjectHideFlags: 0
@@ -1182,6 +1196,7 @@ GameObject:
   - component: {fileID: 216678420}
   - component: {fileID: 216678419}
   - component: {fileID: 216678418}
+  - component: {fileID: 216678422}
   m_Layer: 0
   m_Name: Text
   m_TagString: Untagged
@@ -1261,7 +1276,7 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 12800000, guid: 39bcbf68896a6bf43b8a98c73e10f749, type: 3}
-    m_FontSize: 34
+    m_FontSize: 37
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
@@ -1281,6 +1296,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 216678416}
   m_CullTransparentMesh: 1
+--- !u!114 &216678422
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 216678416}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 964087380e19a334dbc9d59ad70f7ba9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.DojoHoverGraphic
+  control: {fileID: 903848286}
 --- !u!1 &227287123
 GameObject:
   m_ObjectHideFlags: 0
@@ -1707,6 +1735,7 @@ GameObject:
   - component: {fileID: 284916145}
   - component: {fileID: 284916144}
   - component: {fileID: 284916143}
+  - component: {fileID: 284916147}
   m_Layer: 0
   m_Name: Text
   m_TagString: Untagged
@@ -1786,7 +1815,7 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 12800000, guid: 39bcbf68896a6bf43b8a98c73e10f749, type: 3}
-    m_FontSize: 36
+    m_FontSize: 40
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
@@ -1806,6 +1835,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 284916141}
   m_CullTransparentMesh: 1
+--- !u!114 &284916147
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 284916141}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 964087380e19a334dbc9d59ad70f7ba9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.DojoHoverGraphic
+  control: {fileID: 205596874}
 --- !u!1 &313176470
 GameObject:
   m_ObjectHideFlags: 0
@@ -2111,6 +2153,7 @@ GameObject:
   - component: {fileID: 349011322}
   - component: {fileID: 349011321}
   - component: {fileID: 349011320}
+  - component: {fileID: 349011324}
   m_Layer: 0
   m_Name: Text
   m_TagString: Untagged
@@ -2190,11 +2233,11 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 12800000, guid: 39bcbf68896a6bf43b8a98c73e10f749, type: 3}
-    m_FontSize: 30
+    m_FontSize: 33
     m_FontStyle: 0
     m_BestFit: 1
     m_MinSize: 24
-    m_MaxSize: 30
+    m_MaxSize: 33
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
@@ -2210,6 +2253,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 349011318}
   m_CullTransparentMesh: 1
+--- !u!114 &349011324
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 349011318}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 964087380e19a334dbc9d59ad70f7ba9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.DojoHoverGraphic
+  control: {fileID: 1548798920}
 --- !u!1 &355956546
 GameObject:
   m_ObjectHideFlags: 0
@@ -2292,6 +2348,7 @@ GameObject:
   - component: {fileID: 391916877}
   - component: {fileID: 391916876}
   - component: {fileID: 391916875}
+  - component: {fileID: 391916879}
   m_Layer: 0
   m_Name: Label
   m_TagString: Untagged
@@ -2391,6 +2448,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 391916873}
   m_CullTransparentMesh: 1
+--- !u!114 &391916879
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 391916873}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 964087380e19a334dbc9d59ad70f7ba9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.DojoHoverGraphic
+  control: {fileID: 796017794}
 --- !u!1 &411315818
 GameObject:
   m_ObjectHideFlags: 0
@@ -2404,6 +2474,7 @@ GameObject:
   - component: {fileID: 411315822}
   - component: {fileID: 411315821}
   - component: {fileID: 411315820}
+  - component: {fileID: 411315824}
   m_Layer: 0
   m_Name: Chart Position
   m_TagString: Untagged
@@ -2543,6 +2614,19 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &411315824
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 411315818}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 964087380e19a334dbc9d59ad70f7ba9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.DojoHoverGraphic
+  control: {fileID: 411315823}
 --- !u!1 &436617564
 GameObject:
   m_ObjectHideFlags: 0
@@ -2556,6 +2640,7 @@ GameObject:
   - component: {fileID: 436617568}
   - component: {fileID: 436617567}
   - component: {fileID: 436617566}
+  - component: {fileID: 436617570}
   m_Layer: 0
   m_Name: Text
   m_TagString: Untagged
@@ -2635,7 +2720,7 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 12800000, guid: 39bcbf68896a6bf43b8a98c73e10f749, type: 3}
-    m_FontSize: 40
+    m_FontSize: 44
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
@@ -2655,6 +2740,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 436617564}
   m_CullTransparentMesh: 1
+--- !u!114 &436617570
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 436617564}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 964087380e19a334dbc9d59ad70f7ba9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.DojoHoverGraphic
+  control: {fileID: 938739898}
 --- !u!1 &439808547
 GameObject:
   m_ObjectHideFlags: 0
@@ -3530,6 +3628,7 @@ GameObject:
   - component: {fileID: 568700621}
   - component: {fileID: 568700620}
   - component: {fileID: 568700619}
+  - component: {fileID: 568700623}
   m_Layer: 0
   m_Name: Item Label
   m_TagString: Untagged
@@ -3629,6 +3728,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 568700617}
   m_CullTransparentMesh: 1
+--- !u!114 &568700623
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 568700617}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 964087380e19a334dbc9d59ad70f7ba9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.DojoHoverGraphic
+  control: {fileID: 1454513143}
 --- !u!1 &643870877
 GameObject:
   m_ObjectHideFlags: 0
@@ -3642,6 +3754,7 @@ GameObject:
   - component: {fileID: 643870881}
   - component: {fileID: 643870880}
   - component: {fileID: 643870879}
+  - component: {fileID: 643870883}
   m_Layer: 0
   m_Name: Arrow
   m_TagString: Untagged
@@ -3741,6 +3854,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 643870877}
   m_CullTransparentMesh: 1
+--- !u!114 &643870883
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 643870877}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 964087380e19a334dbc9d59ad70f7ba9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.DojoHoverGraphic
+  control: {fileID: 796017794}
 --- !u!1 &677498488
 GameObject:
   m_ObjectHideFlags: 0
@@ -3754,6 +3880,7 @@ GameObject:
   - component: {fileID: 677498491}
   - component: {fileID: 677498493}
   - component: {fileID: 677498490}
+  - component: {fileID: 677498494}
   m_Layer: 0
   m_Name: Close Review
   m_TagString: Untagged
@@ -3884,6 +4011,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &677498494
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 677498488}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 964087380e19a334dbc9d59ad70f7ba9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.DojoHoverGraphic
+  control: {fileID: 677498493}
 --- !u!1 &707349151
 GameObject:
   m_ObjectHideFlags: 0
@@ -4416,6 +4556,7 @@ GameObject:
   - component: {fileID: 796017792}
   - component: {fileID: 796017794}
   - component: {fileID: 796017791}
+  - component: {fileID: 796017795}
   m_Layer: 0
   m_Name: Review Zoom
   m_TagString: Untagged
@@ -4566,6 +4707,19 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_AlphaFadeSpeed: 0.15
+--- !u!114 &796017795
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 796017789}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 964087380e19a334dbc9d59ad70f7ba9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.DojoHoverGraphic
+  control: {fileID: 796017794}
 --- !u!1 &797362594
 GameObject:
   m_ObjectHideFlags: 0
@@ -4577,6 +4731,7 @@ GameObject:
   - component: {fileID: 797362595}
   - component: {fileID: 797362597}
   - component: {fileID: 797362596}
+  - component: {fileID: 797362598}
   m_Layer: 0
   m_Name: Item Checkmark
   m_TagString: Untagged
@@ -4635,6 +4790,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 797362594}
   m_CullTransparentMesh: 1
+--- !u!114 &797362598
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 797362594}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 964087380e19a334dbc9d59ad70f7ba9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.DojoHoverGraphic
+  control: {fileID: 1454513143}
 --- !u!1 &820709219
 GameObject:
   m_ObjectHideFlags: 0
@@ -4648,6 +4816,7 @@ GameObject:
   - component: {fileID: 820709223}
   - component: {fileID: 820709222}
   - component: {fileID: 820709221}
+  - component: {fileID: 820709225}
   m_Layer: 0
   m_Name: Text
   m_TagString: Untagged
@@ -4727,7 +4896,7 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 12800000, guid: 39bcbf68896a6bf43b8a98c73e10f749, type: 3}
-    m_FontSize: 36
+    m_FontSize: 40
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
@@ -4747,6 +4916,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 820709219}
   m_CullTransparentMesh: 1
+--- !u!114 &820709225
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 820709219}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 964087380e19a334dbc9d59ad70f7ba9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.DojoHoverGraphic
+  control: {fileID: 677498493}
 --- !u!1 &833160572
 GameObject:
   m_ObjectHideFlags: 0
@@ -4760,6 +4942,7 @@ GameObject:
   - component: {fileID: 833160574}
   - component: {fileID: 833160573}
   - component: {fileID: 833160575}
+  - component: {fileID: 833160578}
   m_Layer: 0
   m_Name: Next Note
   m_TagString: Untagged
@@ -4890,6 +5073,19 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &833160578
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 833160572}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 964087380e19a334dbc9d59ad70f7ba9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.DojoHoverGraphic
+  control: {fileID: 833160573}
 --- !u!1 &854518212
 GameObject:
   m_ObjectHideFlags: 0
@@ -5574,6 +5770,7 @@ GameObject:
   - component: {fileID: 903848286}
   - component: {fileID: 903848285}
   - component: {fileID: 903848284}
+  - component: {fileID: 903848289}
   m_Layer: 0
   m_Name: More
   m_TagString: Untagged
@@ -5716,6 +5913,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 903848282}
   m_CullTransparentMesh: 1
+--- !u!114 &903848289
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 903848282}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 964087380e19a334dbc9d59ad70f7ba9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.DojoHoverGraphic
+  control: {fileID: 903848286}
 --- !u!1 &919075861
 GameObject:
   m_ObjectHideFlags: 0
@@ -5986,6 +6196,7 @@ GameObject:
   - component: {fileID: 938739898}
   - component: {fileID: 938739897}
   - component: {fileID: 938739896}
+  - component: {fileID: 938739901}
   m_Layer: 0
   m_Name: Retry
   m_TagString: Untagged
@@ -6128,6 +6339,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 938739894}
   m_CullTransparentMesh: 1
+--- !u!114 &938739901
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 938739894}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 964087380e19a334dbc9d59ad70f7ba9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.DojoHoverGraphic
+  control: {fileID: 938739898}
 --- !u!1 &941255795
 GameObject:
   m_ObjectHideFlags: 0
@@ -6355,6 +6579,7 @@ GameObject:
   - component: {fileID: 953016409}
   - component: {fileID: 953016411}
   - component: {fileID: 953016410}
+  - component: {fileID: 953016412}
   m_Layer: 0
   m_Name: Background
   m_TagString: Untagged
@@ -6413,6 +6638,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 953016408}
   m_CullTransparentMesh: 1
+--- !u!114 &953016412
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 953016408}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 964087380e19a334dbc9d59ad70f7ba9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.DojoHoverGraphic
+  control: {fileID: 411315823}
 --- !u!1 &953383055
 GameObject:
   m_ObjectHideFlags: 0
@@ -6424,6 +6662,7 @@ GameObject:
   - component: {fileID: 953383056}
   - component: {fileID: 953383058}
   - component: {fileID: 953383057}
+  - component: {fileID: 953383059}
   m_Layer: 0
   m_Name: Item Background
   m_TagString: Untagged
@@ -6488,6 +6727,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 953383055}
   m_CullTransparentMesh: 1
+--- !u!114 &953383059
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 953383055}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 964087380e19a334dbc9d59ad70f7ba9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.DojoHoverGraphic
+  control: {fileID: 1454513143}
 --- !u!1 &993519111
 GameObject:
   m_ObjectHideFlags: 0
@@ -7669,6 +7921,7 @@ GameObject:
   - component: {fileID: 1394058015}
   - component: {fileID: 1394058014}
   - component: {fileID: 1394058013}
+  - component: {fileID: 1394058016}
   m_Layer: 0
   m_Name: Scrollbar
   m_TagString: Untagged
@@ -7783,6 +8036,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1394058011}
   m_CullTransparentMesh: 1
+--- !u!114 &1394058016
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1394058011}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 964087380e19a334dbc9d59ad70f7ba9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.DojoHoverGraphic
+  control: {fileID: 1394058013}
 --- !u!1 &1412277291
 GameObject:
   m_ObjectHideFlags: 0
@@ -7919,6 +8185,7 @@ GameObject:
   - component: {fileID: 1423656666}
   - component: {fileID: 1423656668}
   - component: {fileID: 1423656667}
+  - component: {fileID: 1423656669}
   m_Layer: 0
   m_Name: Handle
   m_TagString: Untagged
@@ -7983,6 +8250,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1423656665}
   m_CullTransparentMesh: 1
+--- !u!114 &1423656669
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1423656665}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 964087380e19a334dbc9d59ad70f7ba9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.DojoHoverGraphic
+  control: {fileID: 1394058013}
 --- !u!1 &1451095501
 GameObject:
   m_ObjectHideFlags: 0
@@ -8514,6 +8794,7 @@ GameObject:
   - component: {fileID: 1548798920}
   - component: {fileID: 1548798919}
   - component: {fileID: 1548798918}
+  - component: {fileID: 1548798923}
   m_Layer: 0
   m_Name: Result Timing Recommendation
   m_TagString: Untagged
@@ -8656,6 +8937,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1548798916}
   m_CullTransparentMesh: 1
+--- !u!114 &1548798923
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1548798916}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 964087380e19a334dbc9d59ad70f7ba9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.DojoHoverGraphic
+  control: {fileID: 1548798920}
 --- !u!1 &1555596635
 GameObject:
   m_ObjectHideFlags: 0
@@ -9101,6 +9395,7 @@ GameObject:
   - component: {fileID: 1649694075}
   - component: {fileID: 1649694077}
   - component: {fileID: 1649694076}
+  - component: {fileID: 1649694078}
   m_Layer: 0
   m_Name: Fill
   m_TagString: Untagged
@@ -9159,6 +9454,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1649694074}
   m_CullTransparentMesh: 1
+--- !u!114 &1649694078
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1649694074}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 964087380e19a334dbc9d59ad70f7ba9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.DojoHoverGraphic
+  control: {fileID: 411315823}
 --- !u!1 &1660356793
 GameObject:
   m_ObjectHideFlags: 0
@@ -9665,6 +9973,7 @@ GameObject:
   - component: {fileID: 1733432170}
   - component: {fileID: 1733432172}
   - component: {fileID: 1733432171}
+  - component: {fileID: 1733432175}
   m_Layer: 0
   m_Name: Text
   m_TagString: Untagged
@@ -9694,7 +10003,7 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 12800000, guid: 39bcbf68896a6bf43b8a98c73e10f749, type: 3}
-    m_FontSize: 36
+    m_FontSize: 40
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
@@ -9764,6 +10073,19 @@ RectTransform:
   m_AnchoredPosition: {x: 12, y: -3}
   m_SizeDelta: {x: -24, y: -6}
   m_Pivot: {x: 0, y: 1}
+--- !u!114 &1733432175
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1733432169}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 964087380e19a334dbc9d59ad70f7ba9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.DojoHoverGraphic
+  control: {fileID: 833160573}
 --- !u!1 &1735725970
 GameObject:
   m_ObjectHideFlags: 0
@@ -10317,6 +10639,7 @@ GameObject:
   - component: {fileID: 1989504388}
   - component: {fileID: 1989504390}
   - component: {fileID: 1989504389}
+  - component: {fileID: 1989504391}
   m_Layer: 0
   m_Name: Value Rule
   m_TagString: Untagged
@@ -10375,6 +10698,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1989504387}
   m_CullTransparentMesh: 1
+--- !u!114 &1989504391
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1989504387}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 964087380e19a334dbc9d59ad70f7ba9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.DojoHoverGraphic
+  control: {fileID: 796017794}
 --- !u!1 &1994465372
 GameObject:
   m_ObjectHideFlags: 0
@@ -10657,6 +10993,7 @@ GameObject:
   - component: {fileID: 2088759490}
   - component: {fileID: 2088759492}
   - component: {fileID: 2088759491}
+  - component: {fileID: 2088759493}
   m_Layer: 0
   m_Name: Handle
   m_TagString: Untagged
@@ -10721,6 +11058,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2088759489}
   m_CullTransparentMesh: 1
+--- !u!114 &2088759493
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2088759489}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 964087380e19a334dbc9d59ad70f7ba9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Runtime::RhythmDojo.UI.DojoHoverGraphic
+  control: {fileID: 411315823}
 --- !u!1 &2133160154
 GameObject:
   m_ObjectHideFlags: 0

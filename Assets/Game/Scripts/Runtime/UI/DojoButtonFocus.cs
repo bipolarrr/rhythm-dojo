@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace RhythmDojo.UI
 {
-    public sealed class DojoButtonFocus : MonoBehaviour
+    public sealed partial class DojoButtonFocus : MonoBehaviour
     {
         [SerializeField]
         private RectTransform border;
@@ -16,7 +16,7 @@ namespace RhythmDojo.UI
 
         private void LateUpdate()
         {
-            if (Mouse.current?.leftButton.wasPressedThisFrame == true)
+            if (PointerMoved() || Mouse.current?.leftButton.wasPressedThisFrame == true)
             {
                 keyboardFocus = false;
             }
@@ -24,6 +24,8 @@ namespace RhythmDojo.UI
             {
                 keyboardFocus = true;
             }
+
+            UpdateHover();
 
             if (!keyboardFocus || DojoCursor.UsesDefaultPointer)
             {
@@ -93,6 +95,7 @@ namespace RhythmDojo.UI
 
         private void OnDestroy()
         {
+            ClearHover();
             if (border && UnityEngine.Application.isPlaying)
             {
                 Destroy(border.gameObject);

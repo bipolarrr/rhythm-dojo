@@ -97,6 +97,8 @@ namespace RhythmDojo.EditorTools
             parts.Ui = parts.HudView.gameObject.AddComponent<GameplayUiController>();
             parts.Hits = parts.HudView.gameObject.AddComponent<GameplayHitFeedback>();
             GameplayFeedbackBuilder.Build(parts.Hits, parts.HudView.transform);
+            SceneDependencyAssembler.Wire(parts.Root, "trainingView",
+                TrainingPlaybackLayoutBuilder.Build(parts.HudView.transform));
             UiElements.EventSystem(
                 AssetDatabase.LoadAssetAtPath<UnityEngine.InputSystem.InputActionAsset>(
                     "Assets/InputSystem_Actions.inputactions"

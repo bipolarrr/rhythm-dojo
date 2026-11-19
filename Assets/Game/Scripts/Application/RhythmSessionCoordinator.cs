@@ -6,6 +6,7 @@ namespace RhythmDojo.Application
     public sealed class RhythmSessionCoordinator
         : IGameplayReadModel,
             IFailureReadModel,
+            IBackgroundJudgmentReadModel,
             IDisposable
     {
         private readonly ILaneInput input;
@@ -16,6 +17,7 @@ namespace RhythmDojo.Application
             difficulty;
         private readonly ScrollMode scrollMode;
         private readonly GameplayTiming timing;
+        private readonly TrainingPlayback trainingPlayback;
         private double multiplier;
         private double songTime;
         private double pausedInputTime;
@@ -28,6 +30,11 @@ namespace RhythmDojo.Application
             new System.Collections.Generic.HashSet<int>();
 
         public RhythmSession Session { get; }
+
+        public Guid SessionId => Session.SessionId;
+        public JudgmentSchedule Schedule => Session.Schedule;
+        public event Action<JudgmentResolvedEvent> JudgmentResolved;
+        public event Action<InputResolutionEvent> InputResolved;
 
         public int LaneCount => Session.LaneCount;
 
@@ -92,12 +99,14 @@ namespace RhythmDojo.Application
             ISongClock clock,
             INotePresenter presenter,
             HardModeHealthRules healthRules,
-            PlayRules rules = null
+            PlayRules rules = null,
+            TrainingPlayback trainingPlayback = null
         )
         {
             this.input = input ?? throw new ArgumentNullException(nameof(input));
             this.clock = clock ?? throw new ArgumentNullException(nameof(clock));
             this.presenter = presenter;
+            this.trainingPlayback = trainingPlayback;
             timing = new GameplayTiming(clock);
             this.tempo = tempo ?? throw new ArgumentNullException(nameof(tempo));
 
@@ -126,6 +135,8 @@ namespace RhythmDojo.Application
                 scroll ?? throw new ArgumentNullException(nameof(scroll))
             );
             presenter?.Render(Session, songTime);
+            Session.JudgmentResolved += OnJudgmentResolved;
+            Session.InputResolved += OnInputResolved;
             Session.Judged += OnJudged;
             Session.HoldStarted += OnHoldStarted;
             Session.Failed += OnFailed;
@@ -137,6 +148,10 @@ namespace RhythmDojo.Application
         public bool IsHeld(int lane) => Session.IsHeld(lane);
 
         public NoteState GetNoteState(int index) => Session.GetState(index);
+
+        private void OnJudgmentResolved(JudgmentResolvedEvent result) => JudgmentResolved?.Invoke(result);
+
+        private void OnInputResolved(InputResolutionEvent result) => InputResolved?.Invoke(result);
 
         private void OnJudged(JudgmentEvent result)
         {
@@ -194,12 +209,23 @@ namespace RhythmDojo.Application
                 {
                     return;
                 }
-                Session.PressLaneFromClock(lane, timing.InputToLogicalTime(timestamp));
+                if (trainingPlayback != null)
+                {
+                    trainingPlayback.Press(Session, lane, timing.InputToLogicalTime(timestamp));
+                }
+                else
+                {
+                    Session.PressLaneFromClock(lane, timing.InputToLogicalTime(timestamp));
+                }
             }
         }
 
         private void Release(int lane, double timestamp)
         {
+            if (trainingPlayback?.IsDemonstration == true)
+            {
+                return;
+            }
             if (disposed)
             {
                 return;
@@ -245,6 +271,7 @@ namespace RhythmDojo.Application
             resumeRequested = false;
             resumeInputCutoff = false;
             Session.Reset();
+            trainingPlayback?.Reset();
             input.ResetHeld();
             presenter?.Reset();
             reason = ReadyReason.Initial;
@@ -279,6 +306,7 @@ namespace RhythmDojo.Application
 
             double sweepTime = timing.SongToLogicalTime(songTime);
 
+            trainingPlayback?.Advance(Session, songTime);
             Session.Advance(sweepTime);
             FreezeGameOver();
             presenter?.Render(Session, songTime);
@@ -493,6 +521,8 @@ namespace RhythmDojo.Application
             input.Pressed -= Press;
             input.Released -= Release;
             input.StartRequested -= Start;
+            Session.JudgmentResolved -= OnJudgmentResolved;
+            Session.InputResolved -= OnInputResolved;
             Session.Judged -= OnJudged;
             Session.HoldStarted -= OnHoldStarted;
             Session.Failed -= OnFailed;

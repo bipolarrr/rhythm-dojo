@@ -189,6 +189,7 @@ namespace RhythmDojo.EditorTools
             Canvas.ForceUpdateCanvases();
             foreach (var root in scene.GetRootGameObjects())
             {
+                DojoHoverBuilder.Prepare(root);
                 foreach (var frame in root.GetComponentsInChildren<PixelDojoFrameGraphic>(true))
                 {
                     frame.RefreshArtwork();

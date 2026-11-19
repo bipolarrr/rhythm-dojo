@@ -9,19 +9,22 @@ namespace RhythmDojo.EditorTools
 {
     public static class PresentationAssetBuilder
     {
+        private const string Art = "Assets/Game/Art/DojoGameplay/";
+
         public static GeneratedContent Prepare(GameSettings settings)
         {
             var presentation = settings.presentation;
             var content = new GeneratedContent
             {
                 Settings = settings,
-                NoteMaterial = Material("Note Base", Color.white),
+                NoteMaterial = Material("Note Base", new Color(.50f, .76f, .68f)),
                 HighwayMaterial = Material("Highway", presentation.highwayColor),
                 RailMaterial = Material("Rails", presentation.railColor),
                 JudgmentMaterial = Material("Judgement", presentation.judgmentLineColor),
             };
-            content.TapTemplate = Template("TapNote", false, content.NoteMaterial, presentation);
-            content.HoldTemplate = Template("HoldNote", true, content.NoteMaterial, presentation);
+            PrepareFieldTemplates(presentation);
+            content.TapTemplate = Template("TapNote", false, content.NoteMaterial);
+            content.HoldTemplate = Template("HoldNote", true, content.NoteMaterial);
             AssetDatabase.SaveAssets();
 
             return content;
@@ -46,7 +49,16 @@ namespace RhythmDojo.EditorTools
             }
 
             material.SetColor("_BaseColor", color);
-            material.SetFloat("_Smoothness", .3f);
+            material.SetFloat("_Smoothness", .2f);
+            if (name == "Highway")
+            {
+                material.SetTexture("_BaseMap", SceneResources.Require<Texture2D>(Art + "LaneTimber.png"));
+                material.SetTextureScale("_BaseMap", new Vector2(1, 18));
+            }
+            if (name == "Note Base")
+            {
+                material.SetTexture("_BaseMap", SceneResources.Require<Texture2D>(Art + "SilkBinding.png"));
+            }
             Dirty(material);
 
             return material;
@@ -55,40 +67,18 @@ namespace RhythmDojo.EditorTools
         private static NoteView Template(
             string name,
             bool hold,
-            Material material,
-            GameplayPresentationSettings settings
+            Material material
         )
         {
             string path = $"Assets/Game/Prefabs/{name}.prefab";
-            var existing = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-
-            if (existing)
-            {
-                var contents = PrefabUtility.LoadPrefabContents(path);
-                try
-                {
-                    ConfigureNote(contents.GetComponent<NoteView>(), hold);
-                    PrefabUtility.SaveAsPrefabAsset(contents, path);
-                }
-                finally
-                {
-                    PrefabUtility.UnloadPrefabContents(contents);
-                }
-
-                return existing.GetComponent<NoteView>();
-            }
-
             var root = new GameObject(name);
 
             try
             {
                 var view = root.AddComponent<NoteView>();
-                SceneDependencyAssembler.Wire(
-                    view,
-                    "head",
-                    Part("Head", root.transform, settings.headSize, material)
-                );
-
+                var head = new GameObject("Head").transform;
+                head.SetParent(root.transform, false);
+                SceneDependencyAssembler.Wire(view, "head", head);
                 if (hold)
                 {
                     SceneDependencyAssembler.Wire(
@@ -98,7 +88,7 @@ namespace RhythmDojo.EditorTools
                     );
                 }
 
-                ConfigureNote(view, hold);
+                ConfigureNote(view, head, hold);
                 return PrefabUtility.SaveAsPrefabAsset(root, path).GetComponent<NoteView>();
             }
             finally
@@ -110,54 +100,68 @@ namespace RhythmDojo.EditorTools
         public static void PrepareNoteTemplates()
         {
             var settings = SceneResources.Require<GameSettings>(TestContentBuilder.SettingsPath);
-            var material = SceneResources.Require<Material>("Assets/Game/Materials/Note Base.mat");
-            Template("TapNote", false, material, settings.presentation);
-            Template("HoldNote", true, material, settings.presentation);
+            PrepareFieldTemplates(settings.presentation);
+            Material("Highway", settings.presentation.highwayColor);
+            var material = Material("Note Base", new Color(.50f, .76f, .68f));
+            Template("TapNote", false, material);
+            Template("HoldNote", true, material);
         }
 
-        private static void ConfigureNote(NoteView view, bool hold)
+        private static void ConfigureNote(NoteView view, Transform head, bool hold)
         {
-            var serialized = new SerializedObject(view);
-            var head = (Transform)serialized.FindProperty("head").objectReferenceValue;
-            var body = (Transform)serialized.FindProperty("body").objectReferenceValue;
-            var headSkin = (SpriteRenderer)serialized.FindProperty("headSkin").objectReferenceValue;
-            if (!headSkin)
-            {
-                var skin = new GameObject("Songpan Skin", typeof(SpriteRenderer));
-                skin.transform.SetParent(head, false);
-                headSkin = skin.GetComponent<SpriteRenderer>();
-            }
-
-            SceneDependencyAssembler.Wire(view, "headRenderer", head.GetComponent<Renderer>());
-            headSkin.gameObject.layer = head.gameObject.layer;
+            var headSkin = new GameObject("Strike Face", typeof(SpriteRenderer)).GetComponent<SpriteRenderer>();
+            headSkin.transform.SetParent(head, false);
             headSkin.transform.localRotation = Quaternion.Euler(28f, 0, 0);
-            headSkin.sprite = SceneResources.Require<Sprite>("Assets/Game/Resources/UI/SongpanNote.png");
-            headSkin.enabled = false;
-            SceneDependencyAssembler.Wire(view, "headSkin", headSkin);
+            headSkin.transform.localPosition = new Vector3(0, -.08f, -.04f);
+            string artwork = "IvoryStrike";
             if (hold)
             {
-                var tailMarker = (MeshRenderer)serialized.FindProperty("tailMarker").objectReferenceValue;
-                if (!tailMarker)
-                {
-                    var marker = new GameObject("Hold End Marker", typeof(MeshFilter), typeof(MeshRenderer));
-                    marker.transform.SetParent(view.transform, false);
-                    tailMarker = marker.GetComponent<MeshRenderer>();
-                }
-
-                tailMarker.gameObject.layer = body.gameObject.layer;
-                tailMarker.GetComponent<MeshFilter>().sharedMesh = body.GetComponent<MeshFilter>().sharedMesh;
-                tailMarker.sharedMaterial = body.GetComponent<Renderer>().sharedMaterial;
-                tailMarker.enabled = false;
-                SceneDependencyAssembler.Wire(view, "tailMarker", tailMarker);
+                artwork = "JadeHold";
             }
+            headSkin.sprite = SceneResources.Require<Sprite>(Art + artwork + ".png");
+            SceneDependencyAssembler.Wire(view, "headSkin", headSkin);
 
             if (hold)
             {
+                var marker = new GameObject("Hold End Marker", typeof(SpriteRenderer)).GetComponent<SpriteRenderer>();
+                marker.transform.SetParent(view.transform, false);
+                marker.transform.localRotation = headSkin.transform.localRotation;
+                marker.sprite = headSkin.sprite;
+                SceneDependencyAssembler.Wire(view, "tailMarker", marker);
                 view.Validate(NoteKind.Hold);
             }
             else
             {
                 view.Validate(NoteKind.Tap);
+            }
+        }
+
+        private static void PrepareFieldTemplates(GameplayPresentationSettings settings)
+        {
+            var beam = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            try
+            {
+                UnityEngine.Object.DestroyImmediate(beam.GetComponent<Collider>());
+                settings.beamTemplate = PrefabUtility.SaveAsPrefabAsset(beam,
+                    "Assets/Game/Prefabs/TrainingBeam.prefab").GetComponent<MeshRenderer>();
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(beam);
+            }
+
+            const string path = "Assets/Game/Prefabs/StrikeShoe.prefab";
+            var root = new GameObject("Strike Shoe", typeof(SpriteRenderer));
+            try
+            {
+                root.GetComponent<SpriteRenderer>().sprite = SceneResources.Require<Sprite>(Art + "StrikeShoe.png");
+                root.transform.localRotation = Quaternion.Euler(68, 0, 0);
+                settings.strikeShoe = PrefabUtility.SaveAsPrefabAsset(root, path).GetComponent<SpriteRenderer>();
+                Dirty(settings);
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(root);
             }
         }
 

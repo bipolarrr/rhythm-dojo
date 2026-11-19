@@ -9,25 +9,20 @@ namespace RhythmDojo.UI
 {
     public sealed class RhythmHud : MonoBehaviour
     {
-        private const float JudgmentOpacity = .84f;
-
         [SerializeField]
         private GameplayHudView view;
         private IGameplayReadModel model;
         private GameplayPresentationSettings settings;
         private Image[] indicators;
         private Text[] keyLabels;
-        private Image gameOverBackground;
         private GameModeDefinition bindingMode;
         private string bindingModeId;
         private double[] flashUntil;
         private Color[] flashColor;
         private double nextTextRefresh;
-        private string recent = "Get ready";
         private double judgmentAt = -10;
         private double comboAt = -10;
         private int displayedCombo = -1;
-        private int maximumCombo;
         private bool showingJudgment;
         private string difficulty;
         private float previousHealth = 1;
@@ -80,9 +75,9 @@ namespace RhythmDojo.UI
             if (view.pixelTheme)
             {
                 Cream = new Color(.98f, .86f, .65f);
-                Cyan = new Color(.68f, .83f, .72f);
-                Gold = new Color(.96f, .76f, .46f);
-                Red = new Color(.90f, .43f, .34f);
+                Cyan = new Color(.67f, .90f, .83f);
+                Gold = new Color(1f, .87f, .57f);
+                Red = new Color(.99f, .52f, .40f);
             }
 
             settings = presentation;
@@ -91,7 +86,6 @@ namespace RhythmDojo.UI
             model = readModel;
             indicators = view.lanes.Build(mode, presentation, bindingModeId);
             keyLabels = new Text[indicators.Length];
-            gameOverBackground = view.gameOverPanel.GetComponent<Image>();
             if (!judgmentRect)
             {
                 judgmentRect = (RectTransform)view.judgmentGroup.transform;
@@ -123,14 +117,12 @@ namespace RhythmDojo.UI
 
         private void Judged(JudgmentEvent result)
         {
-            recent = $"{result.Grade} {result.ErrorSeconds * 1000:+0;-0;0} ms";
             Flash(result);
             ShowJudgment(result, false);
         }
 
         private void HoldStarted(HoldStartedEvent result)
         {
-            recent = $"HOLD {result.Head.Grade} {result.Head.ErrorSeconds * 1000:+0;-0;0} ms";
             Flash(result.Head);
             ShowJudgment(result.Head, true);
         }
@@ -140,26 +132,13 @@ namespace RhythmDojo.UI
             judgmentAt = Time.unscaledTimeAsDouble;
             showingJudgment = true;
             SetJudgmentPosition((PresentationPreferences.Current ?? PresentationPreferences.Load()).judgmentPosition);
-            view.judgmentGroup.alpha = JudgmentOpacity;
             nextTextRefresh = 0;
-            maximumCombo = Math.Max(maximumCombo, model.Snapshot.Session.Combo);
 
+            view.judgment.text = JudgmentDisplay.Label(result.Grade);
+            view.judgment.fontSize = 52;
             if (hold)
             {
-                view.judgment.text = "HOLD · " + JudgmentDisplay.Label(result.Grade);
-            }
-            else
-            {
-                view.judgment.text = "" + JudgmentDisplay.Label(result.Grade);
-            }
-
-            if (hold)
-            {
-                view.judgment.fontSize = 30;
-            }
-            else
-            {
-                view.judgment.fontSize = 40;
+                view.judgment.fontSize = 44;
             }
 
             view.timing.fontSize = 14;
@@ -170,11 +149,11 @@ namespace RhythmDojo.UI
             }
             else if (result.Grade == Judgment.Perfect)
             {
-                view.judgment.color = Cyan;
+                view.judgment.color = Gold;
             }
             else
             {
-                view.judgment.color = Gold;
+                view.judgment.color = Cyan;
             }
 
             view.judgmentMotion.Play(result.Grade, hold);
@@ -183,7 +162,7 @@ namespace RhythmDojo.UI
 
             if (result.Grade == Judgment.Miss)
             {
-                view.timing.text = "COMBO BREAK";
+                view.timing.text = "연격 끊김";
             }
             else if (Math.Abs(milliseconds) < .5)
             {
@@ -200,6 +179,11 @@ namespace RhythmDojo.UI
                     view.timing.text = $"늦음  {milliseconds:+0;-0;0} ms";
                 }
             }
+
+            if (hold && result.Grade != Judgment.Miss)
+            {
+                view.timing.text = "유지 · " + view.timing.text;
+            }
         }
 
         private void SetJudgmentPosition(JudgmentPosition position)
@@ -208,10 +192,11 @@ namespace RhythmDojo.UI
             switch (position)
             {
                 case JudgmentPosition.Upper:
-                    offset = .22f;
+                    // Keep the upper stamp above the point where incoming notes enter.
+                    offset = .997f - judgmentAnchorMax.y;
                     break;
                 case JudgmentPosition.Lower:
-                    offset = -.09f;
+                    offset = -.024f;
                     break;
             }
 
@@ -243,12 +228,11 @@ namespace RhythmDojo.UI
             previousHealth = (float)model.Snapshot.Session.HealthRatio;
             damagedAt = -10;
             Array.Clear(flashUntil, 0, flashUntil.Length);
-            recent = "Get ready";
             nextTextRefresh = 0;
             showingJudgment = false;
             judgmentAt = comboAt = -10;
             displayedCombo = -1;
-            maximumCombo = 0;
+            view.combo.text = "";
             view.combo.color = Cream;
             view.combo.rectTransform.localScale = Vector3.one;
             SetJudgmentPosition(JudgmentPosition.Middle);
@@ -316,7 +300,9 @@ namespace RhythmDojo.UI
                 }
             }
 
-            RefreshHealth(model.Snapshot.Session);
+            var snapshot = model.Snapshot;
+            RefreshHealth(snapshot.Session);
+            RefreshCombo(snapshot.Session, now);
             AnimateFeedback(now);
 
             if (now < nextTextRefresh)
@@ -325,8 +311,7 @@ namespace RhythmDojo.UI
             }
 
             nextTextRefresh = now + settings.hudRefreshInterval;
-            view.status.text = RhythmHudFormatter.Format(model.Snapshot, recent);
-            RefreshTrainingDisplay(model.Snapshot, now);
+            RefreshTrainingDisplay(snapshot);
         }
 
         private void RefreshHealth(SessionSnapshot snapshot)
@@ -417,8 +402,13 @@ namespace RhythmDojo.UI
         private void AnimateFeedback(double now)
         {
             float comboPulse = Mathf.Clamp01(1 - (float)(now - comboAt) / .20f);
-            view.combo.rectTransform.localScale =
-                Vector3.one * (1 + .08f * comboPulse * comboPulse);
+            float accent = .055f;
+            if (displayedCombo >= 50 && displayedCombo % 10 == 0)
+            {
+                accent = .13f;
+            }
+            view.combo.rectTransform.localScale = Vector3.one * (1 + accent * comboPulse * comboPulse);
+            view.combo.rectTransform.anchoredPosition = Vector2.up * (comboPulse * comboPulse * 3);
 
             if (!showingJudgment)
             {
@@ -429,7 +419,35 @@ namespace RhythmDojo.UI
             view.judgmentMotion.Render(age);
         }
 
-        private void RefreshTrainingDisplay(GameplaySnapshot snapshot, double now)
+        private void RefreshCombo(SessionSnapshot snapshot, double now)
+        {
+            int value = 0;
+            if (snapshot.State == SessionState.Playing)
+            {
+                value = snapshot.Combo;
+            }
+            if (displayedCombo == value)
+            {
+                return;
+            }
+
+            displayedCombo = value;
+            if (value == 0)
+            {
+                view.combo.text = "";
+                return;
+            }
+
+            view.combo.text = value.ToString();
+            view.combo.color = Cream;
+            if (value >= 50)
+            {
+                view.combo.color = Gold;
+            }
+            comboAt = now;
+        }
+
+        private void RefreshTrainingDisplay(GameplaySnapshot snapshot)
         {
             var s = snapshot.Session;
             view.songTitle.text = snapshot.SongTitle;
@@ -452,53 +470,6 @@ namespace RhythmDojo.UI
                 view.sessionState.text = "수련 중";
             }
 
-            if (displayedCombo != s.Combo)
-            {
-                displayedCombo = s.Combo;
-                comboAt = now;
-                maximumCombo = Math.Max(maximumCombo, s.Combo);
-                view.combo.text = s.Combo.ToString();
-            }
-
-            if (
-                showingJudgment
-                && view.judgment.text == JudgmentDisplay.Label(Judgment.Miss)
-                && now - judgmentAt < .35
-            )
-            {
-                view.combo.color = Red;
-            }
-            else
-            {
-                view.combo.color = Cream;
-            }
-
-            view.bestCombo.text = $"BEST  {maximumCombo}";
-            view.counts.text = $"Perfect    {s.Perfect}\nGood       {s.Good}\nMiss        {s.Miss}";
-
-            if (s.TotalNotes == 0)
-            {
-                view.accuracy.text = "정확도  —";
-            }
-            else
-            {
-                view.accuracy.text = $"정확도  {s.AccuracyRate:0.0}%";
-            }
-
-            view.progress.text = $"처리한 노트  {s.Resolved} / {s.TotalNotes}";
-
-            if (s.TotalNotes > 0)
-            {
-                view.progressFill.rectTransform.anchorMax = new Vector2(
-                    Mathf.Clamp01((float)s.Resolved / s.TotalNotes),
-                    1
-                );
-            }
-            else
-            {
-                view.progressFill.rectTransform.anchorMax = new Vector2(0, 1);
-            }
-
             if (s.State == SessionState.Completed || s.State == SessionState.GameOver)
             {
                 showingJudgment = false;
@@ -507,29 +478,11 @@ namespace RhythmDojo.UI
             if (!showingJudgment)
             {
                 view.judgmentMotion.ResetPresentation();
-                if (s.State == SessionState.Ready)
+                view.judgment.text = "";
+                view.timing.text = "";
+                if (s.State == SessionState.Ready && snapshot.ReadyReason == ReadyReason.FocusLost)
                 {
-                    view.judgment.text = "";
-                }
-                else
-                {
-                    view.judgment.text = "";
-                }
-
-                if (s.State == SessionState.Ready)
-                {
-                    if (snapshot.ReadyReason == ReadyReason.FocusLost)
-                    {
-                        view.timing.text = "창 전환으로 수련 중단";
-                    }
-                    else
-                    {
-                        view.timing.text = "";
-                    }
-                }
-                else
-                {
-                    view.timing.text = "";
+                    view.timing.text = "창 전환으로 수련 중단";
                 }
             }
         }

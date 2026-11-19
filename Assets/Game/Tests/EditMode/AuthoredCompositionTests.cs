@@ -43,7 +43,7 @@ namespace RhythmDojo.Tests
             var clone = UnityEngine.Object.Instantiate(prefab);
             try
             {
-                var cloneSkin = clone.GetComponentsInChildren<SpriteRenderer>(true).Single();
+                var cloneSkin = clone.GetComponentsInChildren<SpriteRenderer>(true).Single(renderer => renderer.transform.IsChildOf(clone.transform.Find("Head")));
                 Assert.That(cloneSkin.sprite, Is.SameAs(skin.sprite));
                 Assert.That(cloneSkin.sharedMaterial, Is.SameAs(skin.sharedMaterial));
                 UnityEngine.Object.DestroyImmediate(clone);
@@ -59,9 +59,9 @@ namespace RhythmDojo.Tests
             }
             if (kind == NoteKind.Hold)
             {
-                var tail = (MeshRenderer)fields.FindProperty("tailMarker").objectReferenceValue;
-                Assert.That(tail.GetComponent<MeshFilter>().sharedMesh, Is.Not.Null);
-                Assert.That(tail.sharedMaterial, Is.SameAs(((Transform)fields.FindProperty("body").objectReferenceValue).GetComponent<Renderer>().sharedMaterial));
+                var tail = (SpriteRenderer)fields.FindProperty("tailMarker").objectReferenceValue;
+                Assert.That(tail.sprite, Is.SameAs(skin.sprite));
+                Assert.That(tail.sharedMaterial, Is.SameAs(skin.sharedMaterial));
             }
         }
 

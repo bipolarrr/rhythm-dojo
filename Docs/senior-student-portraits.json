@@ -1,0 +1,110 @@
+{
+  "tool": "built-in image_gen",
+  "generatedDate": "2026-11-15",
+  "branch": "emergency",
+  "targetDirectory": "Assets/Game/Art/AlphaDojo/Portraits",
+  "identityReferences": [
+    "Assets/Game/Art/AlphaDojo/SeniorStudent.png",
+    "Assets/Game/Art/AlphaDojo/Training/SeniorSource.png"
+  ],
+  "artReferences": [
+    "Assets/Game/Art/DojoRenewal/LessonRoom.png",
+    "Assets/Game/Art/DojoRenewal/BrushTitle.png",
+    "Assets/Game/Art/DojoEntrance/SettingsPanel.png"
+  ],
+  "preservedFeatures": [
+    "dark brown high ponytail and red hair ribbon",
+    "brown eyes and side-swept bangs",
+    "deep teal martial vest and wrist guards",
+    "ivory overlapping collar and sleeves",
+    "muted gold piping and red knotted sash"
+  ],
+  "files": [
+    {
+      "file": "SeniorStudentCalm.png",
+      "generatedSource": "exec-54a09149-e2d8-437c-955c-6889c48cb0ad.png",
+      "purpose": "기본 인사와 평상시 대화",
+      "prompt": "Use case: identity-preserve.\nAsset type: FINAL production Unity dialogue character portrait A, calm / default, genuine transparent PNG.\nInput images: image 1 SeniorStudent.png is the ORIGINAL CHARACTER IDENTITY AND COSTUME reference (six poses of the same person); image 2 SeniorSource.png is supporting same identity reference; image 3 LessonRoom.png is palette and pixel-art environment reference ONLY, do not include scenery.\nPrimary request: Create a greatly polished half-length portrait of THIS SAME adult female senior martial disciple, a memorable attractive, composed, approachable older-sister-like mentor in a Korean/East Asian wuxia dojo. Mature young adult around late twenties, not a child or chibi. Preserve recognizable dark warm-brown high ponytail, red cloth hair tie with two flowing ends, swept side bangs and cheek-framing locks, brown eyes; deep muted jade/teal sleeveless martial vest with narrow worn antique-gold edging, high overlapping ivory inner collar modestly fully covering chest, ivory long loose sleeves gathered at deep teal wrist guards, vermilion-red knotted waist sash with two long cloth ends, dark teal loose trousers barely visible at crop. No new jewelry or weapons.\nFace: intentionally beautiful distinctive face, elegant almond-shaped brown eyes, readable expressive brows, softly defined cheekbones, natural warm skin, subtle warm closed-mouth smile, calm self-assured gaze slightly toward viewer-left, both eyes clearly visible. Subculture RPG character appeal through face, eyes, silhouette and tailoring. NO exaggerated bust, cleavage, sexual pose, idol costume, moe symbols, Japanese kimono or cherry blossom.\nComposition: ONE character ONLY, portrait canvas 1024 x 1536 if possible. Stable near frontal three-quarter waist-up/upper-hip framing, head not tilted, upright spine, relaxed shoulders, right side of image hand rests naturally on hip, other arm rests relaxed by waist. Show the whole ponytail and both elbows and hands, crop only below upper hips and below sash knot. Character centered around x=512, hair top around y=110, eye line around y=400, sash knot around y=1110, bottom crop at y=1510. Transparent margins left/right/top, flat bottom crop intentional for dialogue UI. Sufficient face size to read at a 450px displayed height.\nStyle: meticulously crafted high-end 16/32-bit RPG pixel illustration, cohesive clearly visible crisp square pixel clusters and stepped ink-dark contour edges, disciplined shaped highlights and 3-5 shade ramps per material, carefully placed dithering only in cloth shadows. Fine pixel craft, not a rough low-resolution sprite and not a smooth digital painting passed through a pixelation filter. Ink-like warm dark brown outlines, hanji ivory fabric, muted jade shadows, rusty cinnabar accents, restrained antique gold piping. Controlled warm upper-left illumination matching reference room, no glow or ambient shadow outside the silhouette. Natural hair volume and cloth folds, refined but restrained.\nExpression is A calm: welcoming, unhurried, dependable, friendly confidence. Keep arms and head suitable as a fixed base for later facial expression edits. Clean anatomy and natural five-fingered hand on hip. Truly transparent alpha outside character, no checkerboard baked in, no colored backdrop, no text, no labels, no watermark, no duplicates."
+    },
+    {
+      "file": "SeniorStudentPlayful.png",
+      "generatedSource": "exec-66022032-896f-464a-9aad-f2d868467f3a.png",
+      "purpose": "제자의 실수를 장난스럽게 놀리는 반응",
+      "prompt": "Use case: identity-preserve. Asset: production Unity dialogue portrait expression variant. The supplied image is the approved MASTER edit target, not loose inspiration. Keep EXACTLY the same 1024x1536 canvas, character position and scale, eye-line height, head shape and angle, skin tone, hair silhouette and individual strands, red hair ribbons, neck, clothing, trim, sash knot, folds, hands, arms, body, lighting, pixel cluster scale and all exterior pixels. Do not redraw the whole character. Change ONLY eyebrows, eyelids, gaze and mouth to achieve the following expression. Preserve adult female identity and beautiful restrained 16/32-bit pixel illustration style. Keep anatomy and face proportions unchanged; no cheek symbols, no emojis, no text, no props. Genuine transparent background; preserve input alpha outside character exactly, no glow, no shadow, no scenery, no checkerboard. One portrait only.\nB PLAYFUL TEASING SMILE: one eyebrow lifted subtly, eyes slightly narrowed in amused affection, one corner of the closed mouth raised into a knowing asymmetrical smirk. She is gently teasing her apprentice's charming mistake. Warm and mischievous, not arrogant, no wink, no open-mouth laughter. Clearly different from the neutral master smile."
+    },
+    {
+      "file": "SeniorStudentSerious.png",
+      "generatedSource": "exec-912cf773-d5ed-4946-9b69-a4931a535b52.png",
+      "purpose": "핵심 설명과 자세 교정",
+      "prompt": "Use case: identity-preserve. Asset: production Unity dialogue portrait expression variant. The supplied image is the approved MASTER edit target, not loose inspiration. Keep EXACTLY the same 1024x1536 canvas, character position and scale, eye-line height, head shape and angle, skin tone, hair silhouette and individual strands, red hair ribbons, neck, clothing, trim, sash knot, folds, hands, arms, body, lighting, pixel cluster scale and all exterior pixels. Do not redraw the whole character. Change ONLY eyebrows, eyelids, gaze and mouth to achieve the following expression. Preserve adult female identity and beautiful restrained 16/32-bit pixel illustration style. Keep anatomy and face proportions unchanged; no cheek symbols, no emojis, no text, no props. Genuine transparent background; preserve input alpha outside character exactly, no glow, no shadow, no scenery, no checkerboard. One portrait only.\nC SERIOUS FOCUSED: completely remove the smile. Relaxed closed straight mouth, brows subtly drawn inward and lowered, alert narrow focused brown eyes with a sharp disciplined gaze, precise calm martial instructor charisma. Strong emotional contrast with friendly master image. Not angry, no grimace, no heavy makeup."
+    },
+    {
+      "file": "SeniorStudentConfident.png",
+      "generatedSource": "exec-034c0e28-f607-453f-9a0a-ea89962be750.png",
+      "purpose": "도전과 실력 증명 권유",
+      "prompt": "Use case: identity-preserve. Asset: production Unity dialogue portrait expression variant. The supplied image is the approved MASTER edit target, not loose inspiration. Keep EXACTLY the same 1024x1536 canvas, character position and scale, eye-line height, head shape and angle, skin tone, hair silhouette and individual strands, red hair ribbons, neck, clothing, trim, sash knot, folds, hands, arms, body, lighting, pixel cluster scale and all exterior pixels. Do not redraw the whole character. Change ONLY eyebrows, eyelids, gaze and mouth to achieve the following expression. Preserve adult female identity and beautiful restrained 16/32-bit pixel illustration style. Keep anatomy and face proportions unchanged; no cheek symbols, no emojis, no text, no props. Genuine transparent background; preserve input alpha outside character exactly, no glow, no shadow, no scenery, no checkerboard. One portrait only.\nD CONFIDENT CHALLENGE: symmetrical confident small open grin with a restrained glimpse of upper teeth, steady boldly direct brown-eyed gaze, slightly lifted eyebrows, a poised look saying 'Show me what you can do'. Charismatic and inviting competitiveness, proud skill without contempt. More energized than calm, more direct and confident than playful asymmetrical teasing. Head and chin angle MUST remain fixed.\nCRITICAL OUTPUT QUALITY: Preserve the original CRISP PIXEL ART, staircase contour lines and tiny square clusters, especially in hair, sleeves and teal vest. No smoothing, vectorization, watercolor or painted gradients. Keep face outline/head angle fixed. Every pixel outside silhouette must have alpha=0, including corners, gaps under ponytail and around the hand. Do not copy the dark RGB backdrop from the reference into alpha. Keep crisp clean fully opaque character interior. The character will be displayed on WHITE / IVORY, so any remaining black smoky areas or translucent ghosts are unacceptable."
+    },
+    {
+      "file": "SeniorStudentExasperated.png",
+      "generatedSource": "exec-1e1c0d45-e73c-4559-972b-e3f71698b8f3.png",
+      "purpose": "반복 실수에 대한 난처함과 못마땅함",
+      "prompt": "Use case: identity-preserve. Asset: production Unity dialogue portrait expression variant. The supplied image is the approved MASTER edit target, not loose inspiration. Keep EXACTLY the same 1024x1536 canvas, character position and scale, eye-line height, head shape and angle, skin tone, hair silhouette and individual strands, red hair ribbons, neck, clothing, trim, sash knot, folds, hands, arms, body, lighting, pixel cluster scale and all exterior pixels. Do not redraw the whole character. Change ONLY eyebrows, eyelids, gaze and mouth to achieve the following expression. Preserve adult female identity and beautiful restrained 16/32-bit pixel illustration style. Keep anatomy and face proportions unchanged; no cheek symbols, no emojis, no text, no props. Genuine transparent background; preserve input alpha outside character exactly, no glow, no shadow, no scenery, no checkerboard. One portrait only.\nE MILDLY EXASPERATED / DISAPPROVING: the brow on viewer-left has a small incredulous lift while the other brow draws inward slightly; half-lidded brown eyes look at the apprentice with affectionate disbelief, lips pressed together into a small slightly off-center flat line, as if holding back a little sigh. Clearly NOT smiling or flirting, NOT the intense focused serious expression, NOT furious. Keep her beauty and dignity. No sweat drop or graphic symbols."
+    },
+    {
+      "file": "SeniorStudentTeaching.png",
+      "generatedSource": "exec-39b3796b-0b45-4758-8526-f7dfc2840d53.png",
+      "purpose": "손바닥을 펼쳐 동작과 방향 설명",
+      "prompt": "Use case: identity-preserve. Production Unity dialogue portrait F TEACHING GESTURE, genuine transparent PNG. Supplied image is exact approved MASTER edit target.\nChange ONLY the arm on viewer-LEFT: bend elbow naturally at her side and raise the forearm so a relaxed OPEN PALM faces upward around chest height (hand centered approximately x=140 y=740 in the 1024x1536 source canvas). Fingers extended together naturally with visible thumb, anatomically correct five fingers, friendly skilled instructor presenting a principle. Keep the whole hand and elbow inside canvas with at least 30px padding. This must be a welcoming explanation hand, not a martial strike, fist, salute or pointing at viewer. Arm anatomy and ivory gathered sleeve, teal cuff stay coherent.\nFacial expression: retain the master's warm composed confident slight smile, both eyes open. Keep EXACT head position, eye-line height, face anatomy, hair strands and ponytail silhouette, red hair ribbons, all torso clothing and folds, sash knot and tails, the OTHER hand resting on hip, body scale, bottom crop and lighting. Do not shift or resize the torso to accommodate the raised hand. Preserve 1024x1536 canvas exactly; keep everything outside edited viewer-left arm unchanged. Same mature attractive adult female mentor identity.\nMeticulous 16/32-bit pixel illustration, ink-dark stepped outlines, clustered pixel shading, muted jade vest with thin antique gold trim, ivory martial tunic, cinnabar red sash, dark brown ponytail. Preserve source palette, texture and pixel size. No jewelry, props, effects, text, checkerboard, scenery or glow. Background truly transparent with clean edges. One portrait only."
+    },
+    {
+      "file": "SeniorStudentPraising.png",
+      "generatedSource": "exec-fc3a62a0-6277-4c5a-aa1d-c38a224ad7e6.png",
+      "purpose": "눈을 감고 미소 지으며 수련 성공 칭찬",
+      "prompt": "Use case: identity-preserve. Asset: production Unity dialogue portrait expression variant. The supplied image is the approved MASTER edit target, not loose inspiration. Keep EXACTLY the same 1024x1536 canvas, character position and scale, eye-line height, head shape and angle, skin tone, hair silhouette and individual strands, red hair ribbons, neck, clothing, trim, sash knot, folds, hands, arms, body, lighting, pixel cluster scale and all exterior pixels. Do not redraw the whole character. Change ONLY eyebrows, eyelids, gaze and mouth to achieve the following expression. Preserve adult female identity and beautiful restrained 16/32-bit pixel illustration style. Keep anatomy and face proportions unchanged; no cheek symbols, no emojis, no text, no props. Genuine transparent background; preserve input alpha outside character exactly, no glow, no shadow, no scenery, no checkerboard. One portrait only.\nG EYES-CLOSED WARM PRAISE: both eyes comfortably closed in gentle smiling arcs, eyebrows relaxed and soft, a warmly lifted small smile with barely parted lips, pride in her apprentice's progress. Genuine humane affectionate encouragement, not laughing hard, not blushy, not winking. Preserve all facial anatomy and head position."
+    }
+  ],
+  "workflow": "Generate one identity-preserving calm master from existing emergency artwork; edit that same master separately for every variant using built-in image_gen. Final PNGs are direct generated outputs, without downscaling, pixelation filters, hand-painted facial patches or code-generated character geometry. Failed confident alpha extraction and a smoothed retry were rejected; the final confident expression was regenerated from the calm master.",
+  "integration": {
+    "unityVersion": "6000.3.23f1",
+    "imported": true,
+    "sceneApplied": false,
+    "existingCharacterAssetsReplaced": false,
+    "runtimeOrBuilderChanges": false,
+    "type": "Sprite (2D and UI)",
+    "mode": "Single",
+    "size": [
+      1024,
+      1536
+    ],
+    "pivotNormalized": [
+      0.5,
+      0
+    ],
+    "pixelsPerUnit": 100,
+    "mesh": "FullRect",
+    "filter": "Point",
+    "compression": "Uncompressed (RGBA32)",
+    "mipmaps": false,
+    "readWrite": false,
+    "maxTextureSize": 2048,
+    "npotScale": "None",
+    "wrap": "Clamp",
+    "alpha": "FromInput; alphaIsTransparency=true",
+    "fallbackPhysicsShape": false,
+    "usage": "Use each PNG's imported Sprite subasset directly. Keep the same RectTransform, size and pivot across expressions; do not auto-crop to alpha bounds or invoke per-expression SetNativeSize. Scene hookup is outside this asset-only task."
+  },
+  "review": {
+    "identity": "Original high ponytail, brown eyes, red hair ribbon and sash, teal vest/cuffs, ivory sleeves/collar and gold edging retained. All seven derive from one approved master.",
+    "appeal": "More expressive eyes/brows, beautiful mature face, refined hair and cloth shading, confident hand-on-hip pose, affectionate teasing vs focused teacher contrast; no revealing clothing or sexualized pose.",
+    "transparency": "Composited all seven over ivory, white and dark slate. Rejected visible smoky alpha remnants in the first confident output. Final PNGs retain generated alpha; the numeric report includes a negligible 1-2/255 alpha fringe at some canvas-border pixels.",
+    "consistency": "Same 1024x1536 canvas and bottom-center pivot. RGB patch matching in fixed hair and sash regions found at most 1 source pixel displacement per axis from Calm. These are consistent edited illustrations, not bit-identical bodies; small texture and contour differences remain.",
+    "readability": "Inspected full portraits at 384px height and face crops at 1:1. Expressions remain distinct at 384px. At 192px and smaller, fine differences between neutral and confident become less obvious; dialogue display should use a larger portrait.",
+    "harmony": "Static composite with the unchanged LessonRoom, SettingsPanel and BrushTitle: muted teal, cinnabar, ivory and warm brown align with timber/hanji and ink accents; clear dark contours separate the character from the pale room.",
+    "scope": "Asset imports and static art composites were verified. No Play Mode scenario, gameplay tests or player build were run; no dialogue, scene, story, chart, training or judgment implementation was changed.",
+    "expressionReview": "Docs/verification-images/senior-student-portraits.png",
+    "artComposite": "Docs/verification-images/senior-student-dojo-composite.png",
+    "compositeDisclaimer": "Art review composite only, not a screenshot of an implemented dialogue screen.",
+    "importEvidence": "Logs/senior-student-portraits/unity-import-verification.json",
+    "registrationEvidence": "Logs/senior-student-portraits/registration-verification.json"
+  }
+}

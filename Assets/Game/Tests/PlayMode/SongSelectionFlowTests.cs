@@ -40,6 +40,57 @@ namespace RhythmDojo.Tests
             }
         }
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        [UnityTest]
+        [Category("Endurance")]
+        public IEnumerator DeveloperAutoplayCompletesSelectedChartThroughTheNormalBackgroundAndResults()
+        {
+            var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
+            var view = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
+            string songId = flow.Selection.SelectedSongId;
+            var difficulty = flow.SelectedDifficulty;
+            flow.Preferences.TimingOffsetMs = -200;
+            yield return Click(view.practice.library);
+            yield return Press(Key.F5);
+            Assert.That(view.libraryPanel.activeSelf, Is.True);
+
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.LeftCtrl, Key.F5));
+            yield return null;
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+            yield return Await(() => UnityEngine.Object.FindFirstObjectByType<RhythmGameController>());
+            Assert.That(flow.CurrentRequest.Song.SongId, Is.EqualTo(songId));
+            Assert.That(flow.CurrentRequest.Difficulty, Is.SameAs(difficulty));
+            var game = UnityEngine.Object.FindFirstObjectByType<RhythmGameController>();
+            var director = UnityEngine.Object.FindFirstObjectByType<GameplayBackgroundDirector>();
+            int noteCount = game.Chart.Count;
+            string preferences = PlayerPrefs.GetString(Services.SelectionPreferences.StorageKey);
+            yield return Await(() => director && director.dummy.Destroyed,
+                "Autoplay did not reach the flawless finish.", game.Chart.CompletionTime + 12);
+            yield return Await(() => UnityEngine.Object.FindFirstObjectByType<ResultsScreen>());
+
+            var result = flow.LastResult;
+            Assert.That(result.Notes.Count, Is.EqualTo(noteCount));
+            Assert.That(result.Session.IsFullCombo, Is.True);
+            Assert.That(result.Session.Perfect, Is.EqualTo(result.Session.TotalNotes));
+            Assert.That(result.CanCompareScore, Is.False);
+            Assert.That(result.TimingOffsetRecommendationMs, Is.Null);
+            Assert.That(PlayerPrefs.GetString(Services.SelectionPreferences.StorageKey), Is.EqualTo(preferences));
+            Assert.That(flow.Preferences.TimingOffsetMs, Is.EqualTo(-200));
+
+            var retry = flow.RetryResultAsync(CancellationToken.None);
+            yield return Await(() => retry.IsCompleted && UnityEngine.Object.FindFirstObjectByType<RhythmGameController>());
+            Assert.That(flow.CurrentRequest.DeveloperAutoplay, Is.True);
+            flow.ReturnFromGameplay();
+            yield return Await(() => UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>());
+            view = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
+            yield return Click(view.play);
+            yield return Await(() => UnityEngine.Object.FindFirstObjectByType<RhythmGameController>());
+            Assert.That(flow.CurrentRequest.DeveloperAutoplay, Is.False);
+            Assert.That(flow.CurrentRequest.TimingOffsetMs, Is.EqualTo(-200));
+        }
+
+#endif
+
         [UnityTest]
         [Category("SceneIntegration")]
         public IEnumerator SongPreviewStopsOnSelectionChangeAndGameplayEntry()
