@@ -64,7 +64,7 @@ namespace RhythmDojo.Tests
             var director = UnityEngine.Object.FindFirstObjectByType<GameplayBackgroundDirector>();
             int noteCount = game.Chart.Count;
             string preferences = PlayerPrefs.GetString(Services.SelectionPreferences.StorageKey);
-            yield return Await(() => director && director.dummy.Destroyed,
+            yield return Await(() => director && director.room.Destroyed,
                 "Autoplay did not reach the flawless finish.", game.Chart.CompletionTime + 12);
             yield return Await(() => UnityEngine.Object.FindFirstObjectByType<ResultsScreen>());
 

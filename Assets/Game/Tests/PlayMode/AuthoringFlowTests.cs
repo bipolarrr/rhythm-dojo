@@ -69,6 +69,9 @@ namespace RhythmDojo.Tests
             yield return null;
 
             var game = UnityEngine.Object.FindFirstObjectByType<RhythmGameController>();
+            var director = UnityEngine.Object.FindFirstObjectByType<GameplayBackgroundDirector>();
+            Assert.That(director.room.scenery[0].gameObject.activeInHierarchy, Is.True);
+            Assert.That(director.Performance, Is.Not.Null);
             Assert.That(game.ReadModel.Snapshot.SongTitle, Is.EqualTo("Unsaved song"));
             Assert.That(flow.CurrentRequest.Song.Chart[0].Lane, Is.Zero);
             Assert.That(releases, Is.Zero);

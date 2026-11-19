@@ -1,3 +1,4 @@
+using RhythmDojo.Presentation;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -630,6 +631,9 @@ namespace RhythmDojo.Tests
             Assert.That(view.GetComponentsInChildren<Transform>(true), Is.EqualTo(objects));
 
             yield return StartTraining(false);
+            var director = UnityEngine.Object.FindFirstObjectByType<GameplayBackgroundDirector>();
+            Assert.That(director.room.scenery[0].gameObject.activeInHierarchy, Is.True);
+            Assert.That(director.Performance, Is.Not.Null);
             Assert.That(flow.PlayTraining(lesson), Is.False);
             Assert.That(flow.Training.Attempt, Is.EqualTo(1));
             var song = flow.CurrentRequest.Song;

@@ -43,8 +43,11 @@ namespace RhythmDojo.Tests
                 candidate.targetTexture == null && candidate.targetDisplay == camera.targetDisplay
             ).ToArray();
             Assert.That(displayCameras.Length, Is.EqualTo(1));
-            Assert.That(displayCameras[0].cullingMask, Is.Zero,
-                "The display camera must not render unclipped world geometry.");
+            var room = UnityEngine.Object.FindFirstObjectByType<DojoRoomPhaseView>();
+            Assert.That(displayCameras[0], Is.SameAs(room.stageCamera));
+            Assert.That(displayCameras[0].cullingMask, Is.EqualTo(1 << room.scenery[0].trainee.gameObject.layer));
+            Assert.That(displayCameras[0].cullingMask & camera.cullingMask, Is.Zero,
+                "The stage and lane geometry must have separate camera projections.");
             Assert.That(displayCameras[0].GetComponent<AudioListener>(), Is.Null);
             Assert.That(displayCameras[0].rect, Is.EqualTo(new Rect(0, 0, 1, 1)));
         }
@@ -190,7 +193,7 @@ namespace RhythmDojo.Tests
             try
             {
                 camera.targetTexture = target;
-                camera.cullingMask = 1 << LayerMask.NameToLayer("UI");
+                camera.cullingMask |= 1 << LayerMask.NameToLayer("UI");
                 foreach (var item in layers)
                 {
                     item.gameObject.layer = LayerMask.NameToLayer("UI");

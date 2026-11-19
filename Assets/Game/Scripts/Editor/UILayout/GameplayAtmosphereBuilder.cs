@@ -7,46 +7,6 @@ namespace RhythmDojo.EditorTools
 {
     public static class GameplayAtmosphereBuilder
     {
-        private static readonly Color Ink = new Color(.065f, .075f, .075f, .8f);
-
-        public static GameplayAtmosphere Build(Transform parent, RectTransform backdrop)
-        {
-            var atmosphere = parent.gameObject.AddComponent<GameplayAtmosphere>();
-            backdrop.GetComponent<Image>().color = new Color(.84f, .86f, .86f);
-
-            // Static depth, behind the world viewport. No wash can obscure an incoming note.
-            Brush("Quiet Corridor", parent, new Color(.045f, .065f, .07f, .62f),
-                .23f, -.08f, .77f, .98f, true);
-            Brush("Left Edge Ink", parent, Ink, -.22f, -.16f, .23f, 1.05f, true);
-            Brush("Right Edge Ink", parent, Ink, .77f, -.16f, 1.22f, 1.05f, true);
-
-            var light = Group("Window Atmosphere", backdrop);
-            atmosphere.windowLight = light.gameObject.AddComponent<CanvasGroup>();
-            atmosphere.windowLight.blocksRaycasts = false;
-            atmosphere.windowLight.alpha = .58f;
-            var shafts = Group("Window Shafts", light).gameObject.AddComponent<GameplayWindowLight>();
-            shafts.color = new Color(1, .83f, .55f);
-            shafts.raycastTarget = false;
-            var dust = Group("Sparse Window Dust", light).gameObject.AddComponent<GameplayWindowLight>();
-            dust.dust = true;
-            dust.color = new Color(1, .90f, .69f);
-            dust.raycastTarget = false;
-
-            var floor = Group("Floor Ink Atmosphere", parent);
-            atmosphere.floorInk = floor.gameObject.AddComponent<CanvasGroup>();
-            atmosphere.floorInk.alpha = .72f;
-            atmosphere.floorInk.blocksRaycasts = false;
-            atmosphere.farInk = Brush("Distant Floor Wash", floor,
-                new Color(.08f, .12f, .13f, .55f), .12f, -.12f, .93f, .33f, true).rectTransform;
-            atmosphere.nearInk = Brush("Foreground Dry Ink", floor, Ink,
-                -.06f, -.055f, 1.04f, .10f, false).rectTransform;
-            atmosphere.nearInk.localRotation = Quaternion.Euler(0, 0, -2);
-            Brush("Foreground Lifted Bristles", floor, new Color(.14f, .18f, .17f, .38f),
-                .08f, .015f, .94f, .065f, false);
-            atmosphere.Validate();
-            return atmosphere;
-        }
-
         public static void RefineHud(GameplayHudView view)
         {
             var song = (RectTransform)view.songInformationPanel.transform;

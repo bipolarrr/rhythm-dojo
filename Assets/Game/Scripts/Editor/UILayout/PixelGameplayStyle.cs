@@ -40,18 +40,6 @@ namespace RhythmDojo.EditorTools
                 UnityEngine.Object.DestroyImmediate(raycaster);
             }
 
-            var backdrop = Panel("Dojo Scenery", background.transform, Color.white, 0, 0, 1, 1);
-            var image = backdrop.GetComponent<Image>();
-            image.sprite = IngamePresentationAssets.Background();
-            if (!image.sprite)
-            {
-                throw new InvalidOperationException("Pixel dojo background missing.");
-            }
-            var fit = backdrop.gameObject.AddComponent<AspectRatioFitter>();
-            fit.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
-            fit.aspectRatio = image.sprite.rect.width / image.sprite.rect.height;
-            view.atmosphere = GameplayAtmosphereBuilder.Build(background.transform, backdrop);
-            GameplayBackgroundBuilder.Build(background, view.atmosphere, camera);
             var field = Panel("Training Floor Frame", background.transform, Color.clear, .285f, .015f, .715f, .80f);
             camera.backgroundColor = new Color(.055f, .035f, .025f, 0f);
             var viewport = new GameObject("Gameplay Viewport", typeof(RectTransform), typeof(RawImage));
@@ -62,6 +50,11 @@ namespace RhythmDojo.EditorTools
             viewportRect.offsetMax = new Vector2(-10, 0);
             viewport.GetComponent<RawImage>().raycastTarget = false;
             viewport.AddComponent<GameplayViewport>().gameplayCamera = camera;
+
+            var shade = new Color(.06f, .08f, .12f, .30f);
+            AddLaneShade("Lane shade left", field, .26f, .40f, Color.clear, shade);
+            AddLaneShade("Lane shade center", field, .40f, .60f, shade, shade);
+            AddLaneShade("Lane shade right", field, .60f, .74f, shade, Color.clear);
 
             view.lanes.pixelTheme = true;
             view.lanes.font = headingFont;

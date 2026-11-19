@@ -4,21 +4,12 @@ using RhythmDojo.Application;
 using RhythmDojo.Gameplay;
 using RhythmDojo.UI;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace RhythmDojo.Presentation
 {
     public sealed class GameplayBackgroundDirector : MonoBehaviour
     {
         public DojoRoomPhaseView room;
-        public GameObject fallback;
-        public GameplayAtmosphere atmosphere;
-        public Image transition;
-        public GameplayWindowLight[] fallbackLights;
-        public MountainPhaseView mountain;
-        public RunPhaseView run;
-        public DummyPhaseView dummy;
-        public JourneyPassageGraphic passage;
 
         private RhythmGameController controller;
         private IGameplayReadModel model;
@@ -27,60 +18,27 @@ namespace RhythmDojo.Presentation
         private BackgroundPerformanceState performance;
         private readonly Queue<JudgmentResolvedEvent> pending = new Queue<JudgmentResolvedEvent>();
         private readonly Queue<InputResolutionEvent> inputs = new Queue<InputResolutionEvent>();
-        private double previousTime;
-        private bool sampled;
-        private float handoffAge;
-
-        private const float HandoffDuration = 1.6f;
+        private float readyAge;
+        private bool scoredFinish;
 
         public int ActivePhase { get; private set; }
         public BackgroundPerformanceState Performance => performance;
 
         public void Validate()
         {
-            if (!room || !fallback)
+            if (!room)
             {
-                throw new InvalidOperationException("Gameplay background room or fallback missing.");
-            }
-            if (!atmosphere || !transition)
-            {
-                throw new InvalidOperationException("Gameplay background authored references missing.");
+                throw new InvalidOperationException("The gameplay action stages are missing.");
             }
             room.Validate();
-            if (!mountain || !run || !dummy)
-            {
-                throw new InvalidOperationException("Training journey phases are missing. Rebuild Gameplay.");
-            }
-            if (!passage)
-            {
-                throw new InvalidOperationException("Training journey wind passage is missing.");
-            }
-            mountain.Validate();
-            run.Validate();
-            dummy.Validate();
-            if (fallbackLights == null || fallbackLights.Length == 0)
-            {
-                throw new InvalidOperationException("Legacy background light references missing.");
-            }
-            foreach (var light in fallbackLights)
-            {
-                if (!light)
-                {
-                    throw new InvalidOperationException("Legacy background light reference missing.");
-                }
-            }
         }
 
         public void Initialize(RhythmGameController controller, double length, double offset, bool eligible)
         {
             Shutdown();
             Validate();
-            if (!eligible)
-            {
-                ShowLegacy();
-                return;
-            }
             this.controller = controller;
+            scoredFinish = eligible;
             model = controller.ReadModel;
             observations = model as IBackgroundJudgmentReadModel;
             if (observations == null)
@@ -90,19 +48,14 @@ namespace RhythmDojo.Presentation
             try
             {
                 plan = new BackgroundPhasePlan(controller.Chart, observations.Schedule, length, offset);
+                performance = new BackgroundPerformanceState(plan, observations.SessionId);
+                observations.JudgmentResolved += Observe;
+                observations.InputResolved += ObserveInput;
             }
             catch (ArgumentException exception)
             {
-                Debug.LogWarning("Dojo background kept legacy scenery: " + exception.Message, this);
-                ShowLegacy();
-                model = null;
-                observations = null;
-                return;
+                Debug.LogWarning("Using the courtyard drill: " + exception.Message, this);
             }
-            performance = new BackgroundPerformanceState(plan, observations.SessionId);
-            mountain.ConfigureDuration(plan.PhaseDuration);
-            observations.JudgmentResolved += Observe;
-            observations.InputResolved += ObserveInput;
             model.ResetOccurred += ResetPresentation;
             ResetPresentation();
         }
@@ -115,68 +68,57 @@ namespace RhythmDojo.Presentation
         {
             pending.Clear();
             inputs.Clear();
-            performance.Reset(observations.SessionId);
+            performance?.Reset(observations.SessionId);
             ActivePhase = 0;
-            sampled = false;
-            handoffAge = 0;
-            room.gameObject.SetActive(true);
-            room.picture.gameObject.SetActive(true);
-            room.picture.alpha = 1;
-            fallback.SetActive(false);
-            atmosphere.enabled = false;
-            foreach (var light in fallbackLights)
-            {
-                light.AnimationControlled = true;
-            }
+            readyAge = 0;
             room.ResetPresentation();
-            ResetJourney();
-            transition.color = Color.clear;
-        }
-
-        private void ResetJourney()
-        {
-            mountain.ResetPresentation();
-            run.ResetPresentation();
-            dummy.ResetPresentation();
-            mountain.SetVisible(false);
-            run.SetVisible(false);
-            dummy.SetVisible(false);
-            passage.SetPassage(0);
         }
 
         private void LateUpdate()
         {
-            if (model == null || plan == null)
+            if (model == null || controller.IsPaused)
             {
                 return;
             }
-            // Coordinator intentionally resets before notifying existing observers,
-            // then Start resets the simulation again. Read the final session identity
-            // here without discarding judgments already queued by that new session.
-            if (performance.SessionId != observations.SessionId)
+            var snapshot = model.Snapshot;
+            if (performance != null && performance.SessionId != observations.SessionId)
             {
+                // Start can change identity after ResetOccurred. Keep this session's queued judgments.
                 performance.Reset(observations.SessionId);
                 room.ResetPresentation();
-                ResetJourney();
-                sampled = false;
-                handoffAge = 0;
+                readyAge = 0;
             }
-            double time = model.Snapshot.SongTime;
-            float delta = 0;
-            if (sampled && !controller.IsPaused)
+            if (snapshot.Session.State == SessionState.Ready)
             {
-                delta = (float)Math.Max(0, time - previousTime);
-            }
-            previousTime = time;
-            sampled = true;
-            if (controller.IsPaused)
-            {
+                readyAge += Time.unscaledDeltaTime;
+                room.Step(0, 0, readyAge, readyAge * 1.6f, 1, 0);
                 return;
             }
 
+            double time = snapshot.SongTime;
+            float beat = (float)controller.Tempo.BeatAtTime(time);
+            if (plan == null)
+            {
+                room.Step(0, time, Mathf.Max(0, (float)time), beat, 1, 0);
+                return;
+            }
             ActivePhase = plan.PhaseAt(time);
+            Resolve(time);
+            float age = Mathf.Max(0, (float)(time - plan.AudioOffset - ActivePhase * plan.PhaseDuration));
+            float overlap = Mathf.Clamp01(age / (float)plan.TransitionDuration);
+            if (snapshot.Session.State == SessionState.Completed)
+            {
+                ActivePhase = 3;
+                room.BeginFinish(scoredFinish && performance.CanFinishFlawlessly(snapshot.Session));
+                age += room.FinishAge;
+                overlap = 1;
+            }
+            room.Step(ActivePhase, time, age, beat, overlap, (float)plan.PhaseDuration);
+        }
 
-            float reaction = 0;
+        private void Resolve(double time)
+        {
+            float headStrength = 0;
             bool missed = false;
             while (pending.Count > 0)
             {
@@ -185,31 +127,22 @@ namespace RhythmDojo.Presentation
                 {
                     continue;
                 }
-                if (plan.PhaseOf(result.Unit.Id) != ActivePhase)
+                // Score every scheduled unit. Only the head can trigger a physical action.
+                if (result.Unit.Part != 0 || plan.PhaseOf(result.Unit.Id) != ActivePhase)
                 {
                     continue;
                 }
                 if (result.Grade == Judgment.Miss)
                 {
                     missed = true;
-                    if (ActivePhase == 3)
-                    {
-                        dummy.React(controller.Chart[result.Unit.Note].Lane, result.Unit.Part, 0, true);
-                    }
                 }
-                else
+                else if (result.Grade == Judgment.Perfect)
                 {
-                    float strength = .55f;
-                    if (result.Grade == Judgment.Perfect)
-                    {
-                        strength = 1;
-                    }
-                    reaction = Mathf.Min(1, reaction + strength * (float)result.Unit.Weight);
-                    if (ActivePhase == 3)
-                    {
-                        dummy.React(controller.Chart[result.Unit.Note].Lane, result.Unit.Part,
-                            strength * (float)result.Unit.Weight, false);
-                    }
+                    headStrength = 1;
+                }
+                else if (result.Grade == Judgment.Good)
+                {
+                    headStrength = Mathf.Max(headStrength, .55f);
                 }
             }
             while (inputs.Count > 0)
@@ -220,139 +153,19 @@ namespace RhythmDojo.Presentation
                     continue;
                 }
                 performance.Consume(result);
-                if (result.Resolution == InputResolution.HoldInterrupted ||
-                    result.Resolution == InputResolution.EmptyPress)
+                if (result.Resolution == InputResolution.HoldInterrupted || result.Resolution == InputResolution.EmptyPress)
                 {
                     missed = true;
-                    if (ActivePhase == 3)
-                    {
-                        dummy.React(result.Lane, 0, 0, true);
-                    }
                 }
             }
-
-            var state = model.Snapshot.Session.State;
-            if (state == SessionState.GameOver)
+            if (headStrength > 0)
             {
-                if (ActivePhase == 3)
-                {
-                    dummy.BeginFinish(false);
-                    dummy.Step(Time.unscaledDeltaTime, (float)performance.Progress(3));
-                }
-                return;
+                room.Hit(ActivePhase, time, headStrength);
             }
-            if (state == SessionState.Ready)
+            if (missed)
             {
-                room.Step(Time.unscaledDeltaTime * .35f, 0, 0, false);
-                return;
+                room.Miss(time);
             }
-            if (state == SessionState.Completed)
-            {
-                ActivePhase = 3;
-                room.gameObject.SetActive(false);
-                room.picture.gameObject.SetActive(false);
-                mountain.SetVisible(false);
-                run.SetVisible(false);
-                dummy.SetVisible(true);
-                fallback.SetActive(false);
-                this.passage.SetPassage(0);
-                // Consume the entire final judgment batch before deciding. The root
-                // retains ownership of the existing one/two-second results transition.
-                dummy.BeginFinish(performance.CanFinishFlawlessly(model.Snapshot.Session));
-                dummy.Step(Time.unscaledDeltaTime, (float)performance.Progress(3));
-                return;
-            }
-            if (ActivePhase > 0)
-            {
-                room.BeginTimedExit();
-            }
-            bool roomVisible = handoffAge < HandoffDuration;
-            if (roomVisible && state == SessionState.Playing)
-            {
-                room.Step(delta, (float)performance.Progress(0), reaction, missed);
-                if (ActivePhase > 0 && room.ReadyForHandoff)
-                {
-                    handoffAge = Mathf.Min(HandoffDuration, handoffAge + Mathf.Min(delta, .1f));
-                }
-                else if (ActivePhase > 0 && plan.PhaseDuration < 16)
-                {
-                    // A short song cannot spend several phases waiting for the full
-                    // architectural passage. Carry its view into mist within Phase 2;
-                    // the existing door travel and earned progress remain untouched.
-                    float duration = (float)Math.Min(HandoffDuration, plan.PhaseDuration * .3);
-                    handoffAge = Mathf.Min(HandoffDuration,
-                        handoffAge + delta * HandoffDuration / Mathf.Max(.001f, duration));
-                }
-                else if (ActivePhase >= 2)
-                {
-                    handoffAge = HandoffDuration;
-                }
-            }
-            roomVisible = handoffAge < HandoffDuration;
-            room.gameObject.SetActive(roomVisible);
-            room.picture.gameObject.SetActive(roomVisible);
-            fallback.SetActive(false);
-
-            float passage = Mathf.Clamp01(handoffAge / HandoffDuration);
-            room.picture.alpha = 1 - passage * passage * passage * (passage * (passage * 6 - 15) + 10);
-            StepJourney(time, delta, reaction, missed);
-            if (handoffAge > 0 && roomVisible)
-            {
-                this.passage.SetPassage(passage);
-            }
-            transition.color = Color.clear;
-        }
-
-        private void StepJourney(double time, float delta, float reaction, bool missed)
-        {
-            double age = time - plan.AudioOffset - ActivePhase * plan.PhaseDuration;
-            float t = Mathf.Clamp01((float)(age / plan.TransitionDuration));
-            float blend = Mathf.SmoothStep(0, 1, t);
-            bool mountainVisible = ActivePhase == 1 || ActivePhase == 2 && t < 1;
-            bool runVisible = ActivePhase == 2 || ActivePhase == 3 && t < 1;
-            mountain.SetVisible(mountainVisible);
-            run.SetVisible(runVisible);
-            dummy.SetVisible(ActivePhase == 3);
-            passage.SetPassage(0);
-
-            if (ActivePhase == 1)
-            {
-                mountain.Step(delta, (float)performance.Progress(1), reaction, missed);
-            }
-            else if (ActivePhase == 2)
-            {
-                mountain.Step(delta, (float)performance.Progress(1), 0, false);
-                run.Step(delta, (float)performance.Progress(2), reaction, missed);
-                run.picture.alpha = blend;
-                passage.SetPassage(t);
-            }
-            else if (ActivePhase == 3)
-            {
-                if (runVisible)
-                {
-                    run.Step(delta, (float)performance.Progress(2), 0, false);
-                }
-                dummy.Step(delta, (float)performance.Progress(3));
-                dummy.picture.alpha = blend;
-                passage.SetPassage(t);
-            }
-        }
-
-        private void ShowLegacy()
-        {
-            room.gameObject.SetActive(false);
-            room.picture.gameObject.SetActive(false);
-            mountain.SetVisible(false);
-            run.SetVisible(false);
-            dummy.SetVisible(false);
-            passage.SetPassage(0);
-            fallback.SetActive(true);
-            atmosphere.enabled = true;
-            foreach (var light in fallbackLights)
-            {
-                light.AnimationControlled = false;
-            }
-            transition.color = Color.clear;
         }
 
         public void Shutdown()

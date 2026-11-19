@@ -61,9 +61,7 @@ namespace RhythmDojo.EditorTools
             camera.backgroundColor = new Color(.025f, .035f, .065f);
             camera.gameObject.AddComponent<AudioListener>();
 
-            // The world camera renders into GameplayViewport's texture. Keep a
-            // display camera active so Unity presents the overlay canvases without
-            // reporting "No cameras rendering" in the Game view.
+            // The display camera draws the action stage behind the lane viewport and overlay HUD.
             var displayCamera = new GameObject("Gameplay Display Camera").AddComponent<Camera>();
             displayCamera.clearFlags = CameraClearFlags.SolidColor;
             displayCamera.backgroundColor = camera.backgroundColor;
@@ -92,6 +90,7 @@ namespace RhythmDojo.EditorTools
             parts.Controller = game.AddComponent<RhythmGameController>();
             parts.Root = game.AddComponent<GameplayCompositionRoot>();
             SceneDependencyAssembler.Wire(parts.Root, "gameplayCamera", camera);
+            GameplayBackgroundBuilder.Build(camera, displayCamera, parts.Root);
             parts.HudView = GameplayHudLayoutBuilder.Build();
             parts.Hud = parts.HudView.gameObject.AddComponent<RhythmHud>();
             parts.Ui = parts.HudView.gameObject.AddComponent<GameplayUiController>();

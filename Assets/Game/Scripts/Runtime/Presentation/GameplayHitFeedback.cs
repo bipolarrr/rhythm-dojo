@@ -19,8 +19,6 @@ namespace RhythmDojo.Presentation
         private Camera targetCamera;
         private Canvas canvas;
         [SerializeField]
-        private GameplayAtmosphere atmosphere;
-        [SerializeField]
         private GameplayImpactGraphic[] bursts;
         [SerializeField]
         private GameplayImpactGraphic[] holdGlows;
@@ -132,12 +130,6 @@ namespace RhythmDojo.Presentation
             {
                 throw new InvalidOperationException("Authored hit feedback layout missing.");
             }
-
-            if (!atmosphere)
-            {
-                throw new InvalidOperationException("Authored gameplay atmosphere missing.");
-            }
-            atmosphere.Validate();
 
             if (bursts == null || bursts.Length != PoolSize)
             {
@@ -255,7 +247,6 @@ namespace RhythmDojo.Presentation
             }
             graphic.Play(tint, strength, result.Grade);
             Position(graphic);
-            atmosphere.React(result.Grade);
 
             if (result.Grade == Judgment.Miss)
             {
@@ -362,11 +353,6 @@ namespace RhythmDojo.Presentation
             {
                 inputSource.Stop();
             }
-            if (atmosphere)
-            {
-                atmosphere.ResetPresentation();
-            }
-
             if (source)
             {
                 source.Stop();

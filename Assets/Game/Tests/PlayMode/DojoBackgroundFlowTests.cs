@@ -10,6 +10,7 @@ using RhythmDojo.Gameplay;
 using RhythmDojo.Presentation;
 using RhythmDojo.UI;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.TestTools;
 
 namespace RhythmDojo.Tests
@@ -94,12 +95,13 @@ namespace RhythmDojo.Tests
             }
             chartNotes.Add(NoteData.Tap(0, 78));
             var chart = new ChartData(chartNotes.ToArray(), 80);
-            var tempo = new TempoMap(new[] { new TempoPoint(0, 120) });
+            var tempo = new TempoMap(new[] { new TempoPoint(0, 120), new TempoPoint(4, 170) });
             var rules = new PlayRules { GaugeFailure = GaugeFailureMode.Continue };
             var camera = Camera.main;
             var cameraPosition = camera.transform.position;
             var cameraRotation = camera.transform.rotation;
-            var authoredDoor = room.leftDoor;
+            var bout = (DojoCombatStage)room.scenery[0];
+            var authoredTarget = bout.partner;
             int authoredCount = room.GetComponentsInChildren<Transform>(true).Length;
 
             game.Initialize(chart, rules.Timing, mode.ToRules(), tempo, "도장 수련실", "시각 검증",
@@ -108,174 +110,66 @@ namespace RhythmDojo.Tests
             director.Initialize(game, 80, 0, true);
             input.Start();
             yield return null;
-            Assert.That(room.Opening, Is.Zero);
-            yield return Capture("start", room);
 
-            var hangingRotation = room.hanging[0].localRotation;
-            var dustPosition = room.dust[0].localPosition;
-            Advance(game, director, clock, input, .5, false);
-            input.Hit(3, .5); // Empty input must not open the painted doors.
-            director.SendMessage("LateUpdate");
-            Assert.That(director.Performance.Progress(0), Is.Zero);
-            Assert.That(room.Opening, Is.Zero);
-            Assert.That(room.hanging[0].localRotation, Is.Not.EqualTo(hangingRotation));
-            Assert.That(room.dust[0].localPosition, Is.Not.EqualTo(dustPosition));
+            Advance(game, director, clock, input, .94, false);
+            var ready = bout.trainee.sprite;
+            Advance(game, director, clock, input, 1.02, true);
+            Assert.That(bout.trainee.sprite, Is.Not.EqualTo(ready));
+            Assert.That(bout.contact.enabled, Is.True);
+            Assert.That(bout.partner.sprite, Is.EqualTo(bout.partnerPoses[5]));
+            Assert.That(director.Performance.Progress(0), Is.EqualTo(.05).Within(.001));
+            Assert.That(room.RecentFlow, Is.GreaterThan(0));
+
+            game.PauseSession();
+            var contactPose = bout.trainee.sprite;
+            var recoil = bout.partner.transform.localPosition;
+            yield return null;
+            yield return null;
+            Assert.That(bout.trainee.sprite, Is.EqualTo(contactPose));
+            Assert.That(bout.partner.transform.localPosition, Is.EqualTo(recoil));
+            game.ResumeSession();
+            clock.ResumeReady = true;
+            yield return Await(() => !game.IsPaused);
 
             Advance(game, director, clock, input, 7.4, true);
-            Assert.That(director.Performance.Progress(0), Is.EqualTo(.45).Within(.001));
-            Assert.That(room.Opening, Is.InRange(.45f, .6f));
-            yield return Capture("middle", room);
-            game.PauseSession();
-            float age = room.VisualTime;
-            float opening = room.Opening;
-            Vector3 position = room.roomCamera.transform.localPosition;
-            hangingRotation = room.hanging[0].localRotation;
-            for (int i = 0; i < 4; i++)
-            {
-                yield return null;
-            }
-            Assert.That(room.VisualTime, Is.EqualTo(age));
-            Assert.That(room.Opening, Is.EqualTo(opening));
-            Assert.That(room.roomCamera.transform.localPosition, Is.EqualTo(position));
-            Assert.That(room.hanging[0].localRotation, Is.EqualTo(hangingRotation));
-            game.ResumeSession();
-            yield return null;
-            Assert.That(game.IsPaused, Is.True);
-            Assert.That(room.VisualTime, Is.EqualTo(age));
-            clock.ResumeReady = true;
-            yield return null;
-            Assert.That(game.IsPaused, Is.False);
+            double earned = director.Performance.Progress(0);
+            float flowBeforeMiss = room.RecentFlow;
+            Advance(game, director, clock, input, 8.0, false);
+            Assert.That(game.Session.Miss, Is.EqualTo(1));
+            Assert.That(director.Performance.Progress(0), Is.EqualTo(earned));
+            Assert.That(room.RecentFlow, Is.LessThan(flowBeforeMiss));
+            var stumble = bout.trainee.sprite;
 
-            Advance(game, director, clock, input, 16.5, true);
-            Assert.That(director.Performance.Progress(0), Is.EqualTo(1).Within(.001));
-            Assert.That(room.Opening, Is.GreaterThan(.99f));
-            Assert.That(room.Travel, Is.InRange(3.1f, 8f));
-            yield return Capture("open", room);
-            Advance(game, director, clock, input, 19.95, true);
-            yield return Capture("before-transition", room);
-            Advance(game, director, clock, input, 20.2, true);
+            Advance(game, director, clock, input, 8.28, false);
+            Assert.That(bout.trainee.sprite, Is.Not.EqualTo(stumble));
+
+            Advance(game, director, clock, input, 15.6, true);
+            Assert.That(room.RecentFlow, Is.GreaterThan(flowBeforeMiss));
+            var flowAtRest = room.RecentFlow;
+            Advance(game, director, clock, input, 19.9, false);
+            Assert.That(director.Performance.Mistakes, Is.EqualTo(1));
+            Assert.That(room.RecentFlow, Is.EqualTo(flowAtRest));
+
+            Advance(game, director, clock, input, 20.3, false);
             Assert.That(director.ActivePhase, Is.EqualTo(1));
-            Assert.That(room.gameObject.activeSelf, Is.True);
-            Assert.That(room.picture.alpha, Is.GreaterThan(.98f));
-            yield return Capture("transition", room);
-            Advance(game, director, clock, input, 26, true);
-            Assert.That(director.mountain.gameObject.activeSelf, Is.True);
-            Assert.That(director.fallback.activeSelf, Is.False);
-            Assert.That(room.gameObject.activeSelf, Is.False);
-            yield return Capture("fallback", null);
+            Assert.That(room.stageCamera.transform.position.x, Is.GreaterThan(0));
+            Assert.That(room.scenery[0].gameObject.activeSelf, Is.True);
+            Advance(game, director, clock, input, 20.8, false);
+            Assert.That(room.scenery[0].gameObject.activeSelf, Is.False);
+            Assert.That(room.scenery[1].gameObject.activeSelf, Is.True);
+            Assert.That(camera.transform.position, Is.EqualTo(cameraPosition));
+            Assert.That(camera.transform.rotation, Is.EqualTo(cameraRotation));
 
             game.RestartSession();
             yield return null;
-            Assert.That(room.leftDoor, Is.SameAs(authoredDoor));
+            Assert.That(room.gameObject.activeSelf, Is.True);
+            Assert.That(bout.partner, Is.SameAs(authoredTarget));
             Assert.That(room.GetComponentsInChildren<Transform>(true).Length, Is.EqualTo(authoredCount));
-            Assert.That(room.Opening, Is.Zero);
-            Advance(game, director, clock, input, 15.8, false);
-            Assert.That(game.Session.Miss, Is.EqualTo(20));
+            Assert.That(room.Strikes, Is.Zero);
+            Assert.That(room.RecentFlow, Is.Zero);
             Assert.That(director.Performance.Progress(0), Is.Zero);
-            Assert.That(room.Opening, Is.Zero);
-            Assert.That(room.Travel, Is.Zero);
-            yield return Capture("misses", room);
-            Advance(game, director, clock, input, 19.95, false);
-            yield return Capture("miss-before-transition", room);
-            Advance(game, director, clock, input, 21, false);
-            Assert.That(director.ActivePhase, Is.EqualTo(1));
-            Assert.That(director.Performance.Progress(0), Is.Zero);
-            Assert.That(director.fallback.activeSelf, Is.False);
-            Assert.That(room.picture.alpha, Is.EqualTo(1));
-            Assert.That(room.Travel, Is.InRange(0.01f, .65f));
-            yield return Capture("miss-timed-departure", room);
-
-            game.PauseSession();
-            age = room.VisualTime;
-            position = room.roomCamera.transform.localPosition;
-            yield return null;
-            Assert.That(room.VisualTime, Is.EqualTo(age));
-            Assert.That(room.roomCamera.transform.localPosition, Is.EqualTo(position));
-            game.ResumeSession();
-            yield return Await(() => !game.IsPaused);
-            Advance(game, director, clock, input, 26, false);
-            Assert.That(room.Travel, Is.GreaterThan(3.1f));
-            Assert.That(room.picture.alpha, Is.EqualTo(1));
-            yield return Capture("miss-passage", room);
-            Advance(game, director, clock, input, 34, false);
-            Assert.That(room.ReadyForHandoff, Is.True);
-            Assert.That(room.gameObject.activeSelf, Is.False);
-            Assert.That(director.mountain.gameObject.activeSelf, Is.True);
-            Assert.That(director.fallback.activeSelf, Is.False);
-            Assert.That(director.Performance.Progress(0), Is.Zero);
-            Advance(game, director, clock, input, 61, false);
-            Assert.That(director.ActivePhase, Is.EqualTo(3));
-            Assert.That(camera.transform.position, Is.EqualTo(cameraPosition));
-            Assert.That(camera.transform.rotation, Is.EqualTo(cameraRotation));
             director.Initialize(game, 80, 0, false);
-            Assert.That(director.fallback.activeSelf, Is.True);
-            Assert.That(room.gameObject.activeSelf, Is.False);
-        }
-
-        [UnityTest]
-        [Category("SceneIntegration")]
-        public IEnumerator ThresholdBurstAndLateDepartureKeepVelocityAcrossFrameRates()
-        {
-            var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
-            flow.PlaySelected();
-            yield return Await(() => UnityEngine.Object.FindFirstObjectByType<RhythmGameController>());
-            yield return WaitForGameplayIntroduction();
-            var director = UnityEngine.Object.FindFirstObjectByType<GameplayBackgroundDirector>();
-            director.Shutdown();
-            var room = director.room;
-            float[] reference = new float[16];
-            int[] rates = { 120, 60, 30 };
-            foreach (int rate in rates)
-            {
-                room.ResetPresentation();
-                float previousTravel = 0;
-                float previousSpeed = 0;
-                for (int frame = 0; frame < rate * 16; frame++)
-                {
-                    float progress = .84f;
-                    if (frame >= rate * 2)
-                    {
-                        progress = .85f;
-                        room.BeginTimedExit(); // The music boundary coincides with the earned threshold.
-                    }
-                    room.Step(1f / rate, progress, 0, false);
-                    float speed = (room.Travel - previousTravel) * rate;
-                    Assert.That(speed, Is.InRange(-.001f, 1.81f));
-                    Assert.That(Mathf.Abs(speed - previousSpeed) * rate, Is.LessThan(4f));
-                    if (frame == rate * 2)
-                    {
-                        Assert.That(speed, Is.GreaterThan(previousSpeed * .95f),
-                            "Crossing the performance threshold must not restart camera velocity at zero.");
-                    }
-                    if (room.Travel > 3.4f)
-                    {
-                        Assert.That(room.Opening, Is.GreaterThan(.94f));
-                    }
-                    if ((frame + 1) % rate == 0)
-                    {
-                        int second = (frame + 1) / rate - 1;
-                        if (rate == 120)
-                        {
-                            reference[second] = room.Travel;
-                        }
-                        else
-                        {
-                            Assert.That(room.Travel, Is.EqualTo(reference[second]).Within(.035f));
-                        }
-                    }
-                    previousTravel = room.Travel;
-                    previousSpeed = speed;
-                }
-                Assert.That(room.ReadyForHandoff, Is.True);
-            }
-
-            room.ResetPresentation();
-            room.Step(5, 1, 0, false);
-            Assert.That(room.Travel, Is.LessThan(.02f), "A stalled frame must not jump through the door.");
-            room.ResetPresentation();
-            Assert.That(room.ReadyForHandoff, Is.False);
-            Assert.That(room.Travel, Is.Zero);
-            Assert.That(room.Opening, Is.Zero);
+            Assert.That(bout.gameObject.activeInHierarchy, Is.True);
         }
 
         [UnityTest]
@@ -307,8 +201,8 @@ namespace RhythmDojo.Tests
             var cameraPosition = camera.transform.position;
             var cameraRotation = camera.transform.rotation;
             float fieldOfView = camera.fieldOfView;
-            var piece = director.dummy.pieces[0].item;
-            int count = director.dummy.GetComponentsInChildren<Transform>(true).Length;
+            var piece = ((DojoCombatStage)director.room.scenery[3]).wood;
+            int count = director.room.GetComponentsInChildren<Transform>(true).Length;
 
             game.Initialize(chart, rules.Timing, mode.ToRules(), new TempoMap(new[] { new TempoPoint(0, 120) }),
                 "네 페이즈", "검증", ScrollMode.Constant, 1, new ConstantScrollTimeline(10, 1),
@@ -330,98 +224,59 @@ namespace RhythmDojo.Tests
                 var phases = new HashSet<int>();
                 for (int phase = 0; phase < 4; phase++)
                 {
-                    AdvanceJourney(game, director, clock, input, phase * 4 + 1.5, success, phases);
-                    Assert.That(director.ActivePhase, Is.EqualTo(phase));
-                    float age = director.room.VisualTime;
-                    if (phase > 0)
+                    var stage = director.room.scenery[phase];
+                    var drawings = new HashSet<Sprite>();
+                    bool captured = scenario == 0 && Environment.GetEnvironmentVariable("RHYTHM_DOJO_CAPTURE") == "1";
+                    for (int frame = 0; frame < 96; frame++)
                     {
-                        age = JourneyView(director, phase).VisualTime;
+                        double at = phase * 4 + frame / 24.0;
+                        AdvanceJourney(game, director, clock, input, at, success, phases);
+                        drawings.Add(stage.trainee.sprite);
+                        if (captured)
+                        {
+                            yield return CaptureJourneyState((phase * 96 + frame).ToString("D4"));
+                        }
+                        if (frame == 38)
+                        {
+                            Assert.That(director.ActivePhase, Is.EqualTo(phase));
+                            if (scenario == 0)
+                            {
+                                AssertActorRendered(director.room.stageCamera, stage.trainee);
+                            }
+                            float age = director.room.VisualTime;
+                            var foot = stage.trainee.transform.position;
+                            var pose = stage.trainee.sprite;
+                            game.PauseSession();
+                            yield return null;
+                            yield return null;
+                            Assert.That(stage.trainee.transform.position, Is.EqualTo(foot));
+                            Assert.That(stage.trainee.sprite, Is.SameAs(pose));
+                            Assert.That(director.room.VisualTime, Is.EqualTo(age));
+                            game.ResumeSession();
+                            clock.ResumeReady = true;
+                            yield return Await(() => !game.IsPaused);
+                        }
                     }
-                    game.PauseSession();
-                    yield return null;
-                    yield return null;
-                    float pausedAge = director.room.VisualTime;
-                    if (phase > 0)
-                    {
-                        pausedAge = JourneyView(director, phase).VisualTime;
-                    }
-                    Assert.That(pausedAge, Is.EqualTo(age));
-                    game.ResumeSession();
-                    clock.ResumeReady = true;
-                    yield return Await(() => !game.IsPaused);
-                    float slowed = 0;
-                    if (phase == 2 && scenario == 2)
-                    {
-                        AdvanceJourney(game, director, clock, input, 10.1, true, phases);
-                        float speed = director.run.Speed;
-                        input.Hit(0, clock.SongTime);
-                        AdvanceJourney(game, director, clock, input, 10.3, true, phases);
-                        slowed = director.run.Speed;
-                        Assert.That(slowed, Is.LessThan(speed));
-                    }
-                    AdvanceJourney(game, director, clock, input, phase * 4 + 3.03, success, phases);
-                    if (phase == 3 && success)
-                    {
-                        Assert.That(director.dummy.axis.localRotation, Is.Not.EqualTo(Quaternion.identity));
-                        Assert.That(director.dummy.hands[1].localPosition.y,
-                            Is.GreaterThan(director.dummy.handRest[1].y + .8f));
-                    }
-                    if (phase > 0 && scenario < 2)
-                    {
-                        yield return CaptureJourneyState($"scenario-{scenario}-phase-{phase + 1}-reaction");
-                    }
-                    AdvanceJourney(game, director, clock, input, phase * 4 + 3.97, success, phases);
-                    if (phase == 1 && scenario == 0)
-                    {
-                        yield return CaptureJourneyState("mountain-summit");
-                    }
-                    if (phase > 0)
-                    {
-                        var view = JourneyView(director, phase);
-                        Assert.That(view.picture.gameObject.activeInHierarchy, Is.True);
-                        Assert.That(view.picture.alpha, Is.GreaterThan(.99f));
-                        Assert.That(view.VisualTime, Is.GreaterThan(2));
-                    }
+                    Assert.That(drawings.Count, Is.GreaterThan(2), "Expected full-body changes during each drill.");
+                    Assert.That(stage.gameObject.activeInHierarchy, Is.True);
                     Assert.That(director.Performance.Progress(phase), Is.EqualTo(Convert.ToInt32(success)).Within(.001));
-                    if (phase == 1)
-                    {
-                        Assert.That(director.mountain.SummitReached, Is.EqualTo(success));
-                        if (success)
-                        {
-                            Assert.That(director.mountain.Altitude, Is.GreaterThan(14));
-                        }
-                        else
-                        {
-                            Assert.That(director.mountain.Altitude, Is.EqualTo(1.8f));
-                        }
-                    }
-                    if (phase == 2)
-                    {
-                        Assert.That(director.run.PeakReached, Is.EqualTo(success));
-                        if (scenario == 2)
-                        {
-                            Assert.That(director.run.Speed, Is.GreaterThan(slowed));
-                        }
-                    }
                 }
                 Assert.That(phases, Is.EquivalentTo(new[] { 0, 1, 2, 3 }));
                 AdvanceJourney(game, director, clock, input, 16.1, success, phases);
                 Assert.That(game.Session.State, Is.EqualTo(SessionState.Completed));
-                Assert.That(director.dummy.Finishing, Is.True);
-                Assert.That(director.dummy.Destroyed, Is.EqualTo(scenario == 0));
+                Assert.That(director.room.Finishing, Is.True);
+                Assert.That(director.room.Destroyed, Is.EqualTo(scenario == 0));
                 if (scenario == 0)
                 {
                     Assert.That(game.Session.Snapshot.IsFullCombo, Is.True);
-                    yield return Await(() => director.dummy.FinishComplete);
-                    Assert.That(director.dummy.pieces[0].item.localPosition.y, Is.LessThan(.3f));
-                    yield return CaptureJourneyState("flawless-collapse");
+                    yield return Await(() => director.room.FinishAge >= .65f);
+                    Assert.That(Quaternion.Angle(piece.transform.localRotation, Quaternion.identity), Is.GreaterThan(70));
+                    Assert.That(game.Session.Snapshot.Good, Is.GreaterThan(0));
                 }
                 else
                 {
-                    yield return Await(() => director.dummy.FinishAge > .75f);
-                    Assert.That(director.dummy.pieces[0].item.localPosition,
-                        Is.EqualTo(director.dummy.pieces[0].position));
-                    yield return CaptureJourneyState($"scenario-{scenario}-standing-finish");
+                    yield return Await(() => director.room.FinishAge > .75f);
+                    Assert.That(Quaternion.Angle(piece.transform.localRotation, Quaternion.identity), Is.LessThan(1));
                 }
                 Assert.That(camera.transform.position, Is.EqualTo(cameraPosition));
                 Assert.That(camera.transform.rotation, Is.EqualTo(cameraRotation));
@@ -429,12 +284,12 @@ namespace RhythmDojo.Tests
                 Assert.That(game.ReadModel.Snapshot.ScrollMultiplier, Is.EqualTo(1));
             }
 
-            Assert.That(director.dummy.pieces[0].item, Is.SameAs(piece));
-            Assert.That(director.dummy.GetComponentsInChildren<Transform>(true).Length, Is.EqualTo(count));
+            Assert.That(((DojoCombatStage)director.room.scenery[3]).wood, Is.SameAs(piece));
+            Assert.That(director.room.GetComponentsInChildren<Transform>(true).Length, Is.EqualTo(count));
             game.RestartSession();
             director.SendMessage("LateUpdate");
-            Assert.That(director.dummy.Destroyed, Is.False);
-            Assert.That(piece.localPosition, Is.EqualTo(director.dummy.pieces[0].position));
+            Assert.That(director.room.Destroyed, Is.False);
+            Assert.That(director.ActivePhase, Is.Zero);
         }
 
         [UnityTest]
@@ -486,14 +341,15 @@ namespace RhythmDojo.Tests
             chartNotes.Add(NoteData.Tap(1, 5.5));
             chartNotes.Add(NoteData.Tap(2, 5.75));
             var rules = new PlayRules { GaugeFailure = GaugeFailureMode.Continue };
-            game.Initialize(new ChartData(chartNotes.ToArray(), 7), rules.Timing, mode.ToRules(),
+            game.Initialize(new ChartData(chartNotes.ToArray(), 28), rules.Timing, mode.ToRules(),
                 new TempoMap(new[] { new TempoPoint(0, 120) }), "타격 수련", "고밀도",
                 ScrollMode.Constant, 1, new ConstantScrollTimeline(15, 1), input, clock, notes, null, rules);
-            director.Initialize(game, 7, 0, true);
+            director.Initialize(game, 28, 0, true);
             hud.GetComponent<RhythmHud>().Initialize(game.ReadModel, mode, flow.Settings.presentation);
             hits.Initialize(game.ReadModel, mode, hud.gameplayCamera, hud.GetComponent<Canvas>());
             input.Start();
             int next = 0;
+            int lastHead = 0;
             for (int frame = 0; frame <= 189; frame++)
             {
                 clock.SongTime = frame / 32.0;
@@ -516,40 +372,86 @@ namespace RhythmDojo.Tests
                 }
                 yield return null;
 
+                if (frame == 16)
+                {
+                    Assert.That(((DojoCombatStage)director.room.scenery[0]).contact.enabled, Is.True);
+                }
+                if (frame == 22)
+                {
+                    Assert.That(director.room.Strikes, Is.LessThan(4), "Dense heads need room to recover.");
+                }
+                if (frame == 144)
+                {
+                    lastHead = director.room.Strikes;
+                }
+                if (frame == 168)
+                {
+                    Assert.That(director.ActivePhase, Is.Zero);
+                    Assert.That(director.room.Strikes, Is.EqualTo(lastHead), "Hold ticks and release cannot trigger another strike.");
+                }
                 if (frame == 128)
                 {
                     Assert.That(game.Session.Snapshot.Combo, Is.GreaterThan(50));
                     Assert.That(hud.combo.text, Is.EqualTo(game.Session.Snapshot.Combo.ToString()));
                     Assert.That(hits.GetComponentsInChildren<GameplayImpactGraphic>()
                         .Count(graphic => graphic.name.StartsWith("Hold Glow")), Is.EqualTo(1));
-                    yield return CaptureJourneyState("dense-chord-and-hold");
                 }
             }
 
             Assert.That(game.Session.Snapshot.Miss, Is.EqualTo(2));
             Assert.That(hud.combo.text, Is.Empty);
             Assert.That(hud.judgment.text, Is.EqualTo("빗나감"));
-            yield return CaptureJourneyState("dense-combo-break");
         }
 
-        private static TrainingJourneyView JourneyView(GameplayBackgroundDirector director, int phase)
+        private static void AssertActorRendered(Camera camera, SpriteRenderer actor)
         {
-            switch (phase)
+            int width = Mathf.RoundToInt(160 * camera.aspect);
+            var target = RenderTexture.GetTemporary(width, 160, 24);
+            var texture = new Texture2D(width, 160, TextureFormat.RGB24, false);
+            var previous = RenderTexture.active;
+            bool enabled = actor.enabled;
+            try
             {
-                case 1: return director.mountain;
-                case 2: return director.run;
-                default: return director.dummy;
+                Color32[] ReadStage()
+                {
+                    var request = new RenderPipeline.StandardRequest { destination = target };
+                    RenderPipeline.SubmitRenderRequest(camera, request);
+                    RenderTexture.active = target;
+                    texture.ReadPixels(new Rect(0, 0, width, 160), 0, 0);
+                    texture.Apply();
+                    return texture.GetPixels32();
+                }
+
+                var withActor = ReadStage();
+                actor.enabled = false;
+                var withoutActor = ReadStage();
+                int visible = 0;
+                for (int i = 0; i < withActor.Length; i++)
+                {
+                    if (!withActor[i].Equals(withoutActor[i]))
+                    {
+                        visible++;
+                    }
+                }
+                Assert.That(visible, Is.GreaterThan(120), "The stage camera must actually draw the trainee.");
+            }
+            finally
+            {
+                actor.enabled = enabled;
+                RenderTexture.active = previous;
+                RenderTexture.ReleaseTemporary(target);
+                UnityEngine.Object.Destroy(texture);
             }
         }
 
         private static IEnumerator CaptureJourneyState(string name)
         {
-            Directory.CreateDirectory("Logs/training-journey/gameplay");
+            Directory.CreateDirectory("Logs/action-stages/frames");
             yield return new WaitForEndOfFrame();
             var texture = ScreenCapture.CaptureScreenshotAsTexture();
             try
             {
-                File.WriteAllBytes("Logs/training-journey/gameplay/" + name + ".png", texture.EncodeToPNG());
+                File.WriteAllBytes("Logs/action-stages/frames/" + name + ".png", texture.EncodeToPNG());
             }
             finally
             {
@@ -571,7 +473,12 @@ namespace RhythmDojo.Tests
                         var note = game.Chart[i];
                         if (note.StartTime > time + 1e-8 && note.StartTime <= next + 1e-8)
                         {
-                            input.Hit(note.Lane, note.StartTime);
+                            double hitTime = note.StartTime;
+                            if (i == 0)
+                            {
+                                hitTime += .075; // A Good head still counts towards the genuine flawless finish.
+                            }
+                            input.Hit(note.Lane, hitTime);
                         }
                     }
                 }
@@ -587,8 +494,6 @@ namespace RhythmDojo.Tests
             Clock clock, Input input, double end, bool success)
         {
             double time = clock.SongTime;
-            float previousSpeed = 0;
-            bool sampled = false;
             while (time < end - 1e-8)
             {
                 double next = Math.Min(time + 1.0 / 60, end);
@@ -603,62 +508,10 @@ namespace RhythmDojo.Tests
                         }
                     }
                 }
-                float previousTravel = director.room.Travel;
-                float previousAlpha = director.room.picture.alpha;
                 clock.SongTime = next;
                 game.SendMessage("Update");
                 director.SendMessage("LateUpdate");
-                float delta = (float)(next - time);
-                float speed = (director.room.Travel - previousTravel) / delta;
-                Assert.That(speed, Is.InRange(-.001f, 1.81f));
-                Assert.That(Mathf.Abs(director.room.picture.alpha - previousAlpha), Is.LessThan(.025f));
-                if (sampled)
-                {
-                    Assert.That(Mathf.Abs(speed - previousSpeed) / delta, Is.LessThan(4f));
-                }
-                previousSpeed = speed;
-                sampled = true;
                 time = next;
-            }
-        }
-
-        private static IEnumerator Capture(string name, DojoRoomPhaseView room)
-        {
-            Directory.CreateDirectory("Logs/dojo-room");
-            yield return new WaitForEndOfFrame();
-            var screen = ScreenCapture.CaptureScreenshotAsTexture();
-            try
-            {
-                File.WriteAllBytes("Logs/dojo-room/" + name + "-game.png", screen.EncodeToPNG());
-            }
-            finally
-            {
-                UnityEngine.Object.Destroy(screen);
-            }
-            if (!room)
-            {
-                yield break;
-            }
-            var previous = room.roomCamera.targetTexture;
-            var active = RenderTexture.active;
-            var target = new RenderTexture(1280, 720, 24);
-            var texture = new Texture2D(1280, 720, TextureFormat.RGB24, false);
-            try
-            {
-                room.roomCamera.targetTexture = target;
-                room.roomCamera.Render();
-                RenderTexture.active = target;
-                texture.ReadPixels(new Rect(0, 0, 1280, 720), 0, 0);
-                texture.Apply();
-                File.WriteAllBytes("Logs/dojo-room/" + name + "-room.png", texture.EncodeToPNG());
-            }
-            finally
-            {
-                room.roomCamera.targetTexture = previous;
-                RenderTexture.active = active;
-                target.Release();
-                UnityEngine.Object.Destroy(target);
-                UnityEngine.Object.Destroy(texture);
             }
         }
     }

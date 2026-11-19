@@ -13,6 +13,7 @@ namespace RhythmDojo.Gameplay
         public IGameplayReadModel ReadModel => coordinator;
 
         public ChartData Chart { get; private set; }
+        public TempoMap Tempo { get; private set; }
         public ISongClock Clock { get; private set; }
         public ILaneInput Input { get; private set; }
 
@@ -66,6 +67,7 @@ namespace RhythmDojo.Gameplay
         {
             Shutdown();
             Chart = chart;
+            Tempo = tempo;
             Clock = clock;
             Input = input;
             coordinator = new RhythmSessionCoordinator(

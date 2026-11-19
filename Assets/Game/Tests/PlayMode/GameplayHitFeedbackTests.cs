@@ -120,7 +120,7 @@ namespace RhythmDojo.Tests
         {
             yield return LoadGameplay();
             var feedback = UnityEngine.Object.FindFirstObjectByType<GameplayHitFeedback>();
-            var atmosphere = UnityEngine.Object.FindFirstObjectByType<GameplayAtmosphere>();
+            var atmosphere = UnityEngine.Object.FindFirstObjectByType<GameplayBackgroundDirector>();
             var scenery = atmosphere.GetComponentsInChildren<Transform>(true)
                 .Select(item => item.GetInstanceID()).ToArray();
             var objects = feedback.GetComponentsInChildren<GameplayImpactGraphic>(true)
