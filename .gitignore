@@ -49,6 +49,10 @@ __pycache__/
 *.[aA][cC]3
 *.[wW][eE][bB][mM]
 
+# Audio distributed with the default chart projects.
+!/Content/GaemunIlgyeok/audio/22a6f654fddbad007cae5e1584e48cd66732f77124d4ffe4152f13f8206e31b5.mp3
+!/Content/SAIKI/audio/f37aff12a8f558c3bab1697b652fcb15e303a95faab972eb7641dc72d8bc1abb.wav
+
 # Reviewed CC0 foley; unrelated downloaded music remains ignored.
 !/Assets/Game/Audio/Gameplay/StrikeWhoosh.wav
 !/Assets/Game/Audio/Gameplay/StrikeImpact.wav

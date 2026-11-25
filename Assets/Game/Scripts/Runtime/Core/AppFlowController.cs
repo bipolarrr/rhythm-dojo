@@ -1,9 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using RhythmDojo.Application;
+using RhythmDojo.Authoring;
 using RhythmDojo.Content;
 using RhythmDojo.Gameplay;
 using RhythmDojo.Services;
@@ -132,14 +134,15 @@ namespace RhythmDojo.Core
             PlayKeyBindings.ConfigureDefaultMode(settings.catalog[0].Mode);
             flow.Library = new SongLibrary();
             flow.Library.Register(new BuiltInSongProvider(settings.catalog));
-            flow.Library.Register(
-                new ProjectSongProvider(
-                    new RhythmDojo.Authoring.FileSongProjectStore(
-                        System.IO.Path.Combine(UnityEngine.Application.persistentDataPath, "Songs")
-                    ),
-                    settings.catalog[0].Mode
-                )
-            );
+            var store = new FileSongProjectStore(Path.Combine(UnityEngine.Application.persistentDataPath, "Songs"));
+            var mode = settings.catalog[0].Mode;
+            flow.Library.Register(new ProjectSongProvider(store, mode));
+            if (UnityEngine.Application.platform == RuntimePlatform.WindowsPlayer)
+            {
+                var bundled = new FileSongProjectStore(Path.Combine(UnityEngine.Application.streamingAssetsPath, "Songs"));
+                flow.Library.Register(new ProjectSongProvider(bundled, mode, store));
+            }
+
             flow.Preferences = new SelectionPreferences();
             flow.TrainingProgress = new TrainingProgressStore();
             flow.HardMode = HardModePreferences.Load();

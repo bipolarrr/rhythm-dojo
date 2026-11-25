@@ -53,6 +53,14 @@ ChartEditor를 실행하고 **파일 → PUPA 음원 + 채보**를 누른다. `L
 
 게임 시계는 DSP 시각을 실시간으로 보간하고 DSP와의 차이는 1초 시정수로 보정한다. 버퍼 갱신 간격이 키 이벤트 시각 변환에 그대로 섞이지 않도록 하며 사용자 입력 보정값은 별도로 한 번 차감한다. GAME CLEAR / GAME OVER 표시 후에는 곡 시계와 무관한 실제 시간으로 1초를 기다려 결과 화면을 연다. 대기 중 재시작하면 예정된 결과 전환을 취소한다.
 
+### Windows 기본 수록곡
+
+Windows용 **Build** 또는 **Build and Run**을 실행하면 프로젝트 루트의 `Content`에 있는 개문일격과 SAIKI가 음원과 함께 포함된다. 빌드 폴더 전체를 전달하면 받는 사람은 첫 실행부터 자유 수련의 곡 목록에서 두 곡의 Easy·Standard·Hard를 선택할 수 있다.
+
+수록곡을 추가하려면 `Content/<곡 폴더>/project.rdchart.json`과 해당 파일의 `song.audio`가 가리키는 `audio/<SHA-256>.<확장자>`를 함께 Git에 추가한다. 음원은 해당 파일 경로를 `.gitignore` 예외에 등록한다. 빌드는 지정된 난이도의 재생 규칙과 음원 해시를 확인한 뒤 두 파일을 `StreamingAssets/Songs/<곡 UUID>/`에 담는다.
+
+채보 에디터에서 저장한 개인 프로젝트가 같은 곡 UUID를 사용하면 곡 선택과 재생 모두 개인 편집본을 사용한다. 개인 편집본을 제거하고 목록을 갱신하면 기본 수록본을 다시 사용할 수 있다.
+
 ### JSON 저장 규칙
 
 UTF-8(BOM 없음), LF, 2칸 들여쓰기와 마지막 줄바꿈을 사용한다. 경로는 `<persistentDataPath>/Songs/<song UUID>/project.rdchart.json`이며 음원은 같은 폴더의 `audio/<SHA-256>.<extension>`이다. 저장 루트는 생성자에서 주입한다. 동일한 문서 내용은 동일한 JSON을 생성한다. 예제는 [완성 채보](examples/complete.rdchart.json), [초안](examples/draft.rdchart.json), 구조는 [JSON Schema](rdchart-v1.schema.json)를 참고한다. 예제의 음원은 별도로 제공해야 한다.

@@ -20,6 +20,70 @@ namespace RhythmDojo.Tests
     {
         [UnityTest]
         [Category("SceneIntegration")]
+        public IEnumerator PersonalChartOverridesBundledChartUntilRemoved()
+        {
+            string root = Path.Combine(UnityEngine.Application.temporaryCachePath, "Bundled-" + Guid.NewGuid());
+            var bundled = new FileSongProjectStore(Path.Combine(root, "bundled"));
+            var personal = new FileSongProjectStore(Path.Combine(root, "personal"));
+            var mode = Object.FindFirstObjectByType<AppFlowController>().Settings.catalog[0].Mode;
+            var project = new SongProject
+            {
+                Title = "Bundled",
+                Charts = new[] { new ChartDocument
+                {
+                    Slot = ChartSlot.Standard, ModeId = mode.name, LaneCount = mode.LaneCount,
+                    CompletionTimeSeconds = 1, Notes = new[] { NoteData.Tap(0, .25) }
+                } }
+            };
+            string id = project.Id.ToString("D");
+            using var original = new TemporaryWaveFile(1, 0);
+            using var edited = new TemporaryWaveFile(2, 0);
+            try
+            {
+                var import = bundled.ImportAsync(project.Id, original.Path, default);
+                yield return Await(() => import.IsCompleted);
+                project.Audio = import.GetAwaiter().GetResult();
+                var save = bundled.SaveAsync(project, default);
+                yield return Await(() => save.IsCompleted);
+                save.GetAwaiter().GetResult();
+
+                var library = new SongLibrary();
+                library.Register(new ProjectSongProvider(personal, mode));
+                library.Register(new ProjectSongProvider(bundled, mode, personal));
+                project.Title = "Personal";
+                import = personal.ImportAsync(project.Id, edited.Path, default);
+                yield return Await(() => import.IsCompleted);
+                project.Audio = import.GetAwaiter().GetResult();
+                save = personal.SaveAsync(project, default);
+                yield return Await(() => save.IsCompleted);
+                save.GetAwaiter().GetResult();
+
+                library.Refresh();
+                Assert.That(library.Entries.Single().Title, Is.EqualTo("Personal"));
+                var load = library.LoadChartAsync(id, ChartSlot.Standard, default);
+                yield return Await(() => load.IsCompleted);
+                using var personalSong = load.GetAwaiter().GetResult();
+                Assert.That(personalSong.AudioClip.length, Is.EqualTo(2f).Within(.01));
+
+                File.Delete(Path.Combine(personal.GetSongFolder(project.Id), FileSongProjectStore.FileName));
+                library.Refresh();
+                Assert.That(library.Entries.Single().Title, Is.EqualTo("Bundled"));
+                load = library.LoadChartAsync(id, ChartSlot.Standard, default);
+                yield return Await(() => load.IsCompleted);
+                using var bundledSong = load.GetAwaiter().GetResult();
+                Assert.That(bundledSong.AudioClip.length, Is.EqualTo(1f).Within(.01));
+            }
+            finally
+            {
+                if (Directory.Exists(root))
+                {
+                    Directory.Delete(root, true);
+                }
+            }
+        }
+
+        [UnityTest]
+        [Category("SceneIntegration")]
         public IEnumerator RestoredAudioLoadsAfterStructuredFailureAndRefresh()
         {
             string root = Path.Combine(UnityEngine.Application.temporaryCachePath, "Recovery-" + Guid.NewGuid());

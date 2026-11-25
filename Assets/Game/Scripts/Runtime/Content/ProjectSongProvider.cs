@@ -13,18 +13,31 @@ namespace RhythmDojo.Content
     {
         private readonly FileSongProjectStore store;
         private readonly GameModeDefinition mode;
+        private readonly FileSongProjectStore personalOverrides;
 
         public ProjectSongProvider(FileSongProjectStore store, GameModeDefinition mode)
+            : this(store, mode, null)
+        {
+        }
+
+        public ProjectSongProvider(FileSongProjectStore store, GameModeDefinition mode,
+            FileSongProjectStore personalOverrides)
         {
             this.store = store;
             this.mode = mode;
+            this.personalOverrides = personalOverrides;
         }
 
         public IReadOnlyList<SongEntry> GetEntries()
         {
             var entries = new List<SongEntry>();
+            IEnumerable<Guid> ids = store.ListSongIds();
+            if (personalOverrides != null)
+            {
+                ids = ids.Except(personalOverrides.ListSongIds());
+            }
 
-            foreach (Guid id in store.ListSongIds())
+            foreach (Guid id in ids)
             {
                 try
                 {
