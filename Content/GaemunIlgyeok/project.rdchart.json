@@ -1,0 +1,5323 @@
+{
+  "format": "rhythm-dojo-chart",
+  "version": 3,
+  "song": {
+    "id": "88b05d1c-c83f-5ea9-a639-e69d634afb29",
+    "title": "개문일격",
+    "artist": "",
+    "audio": "audio/22a6f654fddbad007cae5e1584e48cd66732f77124d4ffe4152f13f8206e31b5.mp3"
+  },
+  "timing": {
+    "audioOffsetSeconds": 0.0,
+    "tempoPoints": [
+      {
+        "timeSeconds": 0.0,
+        "bpm": 105.0
+      }
+    ],
+    "grid": {
+      "originSeconds": 0.35601873477786433,
+      "meters": [
+        {
+          "timeSeconds": 0.0,
+          "numerator": 4,
+          "denominator": 4
+        }
+      ]
+    }
+  },
+  "charts": [
+    {
+      "id": "8fe8b93b-7b2f-56b5-8f17-6fa9e626c362",
+      "name": "Easy",
+      "modeId": "FourLaneMode",
+      "laneCount": 4,
+      "completionTimeSeconds": 110.453515,
+      "notes": [
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 0.35601873477786433
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 0.9274473062064357
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 1.498875877635007
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 2.0703044490635785
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 2.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 3.2131615919207213
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 3.784590163349293
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 4.356018734777864
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 4.927447306206435
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 5.498875877635006
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 6.070304449063578
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 6.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 7.213161591920721
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 7.784590163349292
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 8.356018734777864
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 8.927447306206435
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 9.498875877635006
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 10.070304449063578
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 10.641733020492149
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 11.21316159192072
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 11.784590163349291
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 12.356018734777864
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 12.927447306206435
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 13.498875877635006
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 14.070304449063578
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 14.641733020492149
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 15.21316159192072
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 15.784590163349291
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 16.356018734777866
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 16.927447306206435
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 17.498875877635008
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 18.070304449063578
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 18.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 19.213161591920723
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 19.784590163349293
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 20.356018734777866
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 20.927447306206435
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 21.498875877635008
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 22.070304449063578
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 22.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 23.21316159192072
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 23.784590163349293
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 24.356018734777866
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 24.927447306206435
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 25.498875877635008
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 26.070304449063578
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 26.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 27.21316159192072
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 27.784590163349293
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 28.356018734777866
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 28.927447306206435
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 29.498875877635008
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 30.070304449063578
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 30.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 31.21316159192072
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 31.784590163349293
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 32.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 32.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 33.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 34.07030444906358
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 34.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 35.213161591920716
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 35.784590163349286
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 36.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 36.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 37.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 38.07030444906358
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 38.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 39.213161591920716
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 39.784590163349286
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 40.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 40.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 41.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 42.07030444906358
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 42.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 43.213161591920716
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 43.784590163349286
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 44.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 44.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 45.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 46.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 46.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 47.213161591920716
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 47.784590163349286
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 48.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 48.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 49.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 50.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 50.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 51.213161591920716
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 51.784590163349286
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 52.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 52.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 53.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 54.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 54.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 55.213161591920716
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 55.784590163349286
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 56.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 56.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 57.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 58.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 58.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 59.213161591920716
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 59.784590163349286
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 60.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 60.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 61.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 62.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 62.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 63.213161591920716
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 63.784590163349286
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 64.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 64.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 65.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 66.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 66.64173302049214
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 67.21316159192071
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 67.78459016334929
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 68.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 68.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 69.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 70.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 70.64173302049214
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 71.21316159192071
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 71.78459016334929
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 72.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 72.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 73.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 74.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 74.64173302049214
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 75.21316159192071
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 75.78459016334929
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 76.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 76.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 77.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 78.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 78.64173302049214
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 79.21316159192071
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 79.78459016334929
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 80.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 80.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 81.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 82.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 82.64173302049214
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 83.21316159192071
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 83.78459016334929
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 84.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 84.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 85.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 86.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 86.64173302049214
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 87.21316159192071
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 87.78459016334929
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 88.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 88.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 89.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 90.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 90.64173302049214
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 91.21316159192071
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 91.78459016334928
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 92.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 92.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 93.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 94.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 94.64173302049214
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 95.21316159192071
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 95.78459016334928
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 96.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 96.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 97.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 98.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 98.64173302049214
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 99.21316159192071
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 99.78459016334928
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 100.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 100.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 101.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 102.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 102.64173302049214
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 103.21316159192071
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 103.78459016334928
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 104.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 104.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 105.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 106.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 106.64173302049214
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 107.21316159192071
+        },
+        {
+          "kind": "hold",
+          "lane": 1,
+          "timeSeconds": 107.78459016334929,
+          "endTimeSeconds": 110.07030444906358
+        }
+      ],
+      "slot": "Easy"
+    },
+    {
+      "id": "729b6784-20ba-588f-a367-8b4d39cfae6a",
+      "name": "Standard",
+      "modeId": "FourLaneMode",
+      "laneCount": 4,
+      "completionTimeSeconds": 110.453515,
+      "notes": [
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 0.35601873477786433
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 0.9274473062064357
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 1.498875877635007
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 2.0703044490635785
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 2.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 3.2131615919207213
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 3.784590163349293
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 4.356018734777864
+        },
+        {
+          "kind": "hold",
+          "lane": 0,
+          "timeSeconds": 4.927447306206435,
+          "endTimeSeconds": 5.498875877635006
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 5.498875877635006
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 6.070304449063578
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 6.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 7.213161591920721
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 7.784590163349292
+        },
+        {
+          "kind": "hold",
+          "lane": 1,
+          "timeSeconds": 8.356018734777864,
+          "endTimeSeconds": 8.927447306206435
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 8.927447306206435
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 9.498875877635006
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 10.070304449063578
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 10.641733020492149
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 11.21316159192072
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 11.784590163349291
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 12.356018734777864
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 12.927447306206435
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 13.498875877635006
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 14.070304449063578
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 14.641733020492149
+        },
+        {
+          "kind": "hold",
+          "lane": 0,
+          "timeSeconds": 15.21316159192072,
+          "endTimeSeconds": 15.784590163349291
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 15.784590163349291
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 16.356018734777866
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 16.927447306206435
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 17.498875877635008
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 18.070304449063578
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 18.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 18.927447306206435
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 19.070304449063578
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 19.213161591920723
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 19.498875877635008
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 19.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 19.784590163349293
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 19.927447306206435
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 20.070304449063578
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 20.213161591920723
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 20.356018734777866
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 20.498875877635008
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 20.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 20.784590163349293
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 20.927447306206435
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 20.927447306206435
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 21.498875877635008
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 22.070304449063578
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 22.070304449063578
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 22.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 23.21316159192072
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 23.21316159192072
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 23.784590163349293
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 24.356018734777866
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 24.356018734777866
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 24.927447306206435
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 25.498875877635008
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 26.070304449063578
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 26.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 26.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 27.21316159192072
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 27.784590163349293
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 28.356018734777866
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 28.927447306206435
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 29.498875877635008
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 30.070304449063578
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 30.070304449063578
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 30.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 31.21316159192072
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 31.21316159192072
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 31.784590163349293
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 32.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 32.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 32.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 33.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 34.07030444906358
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 34.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 35.213161591920716
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 35.784590163349286
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 36.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 36.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 37.213161591920716
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 37.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 37.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 37.784590163349286
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 37.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 38.07030444906358
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 38.213161591920716
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 38.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 38.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 38.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 38.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 39.213161591920716
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 39.784590163349286
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 40.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 40.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 40.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 41.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 41.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 42.07030444906358
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 42.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 42.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 43.213161591920716
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 43.784590163349286
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 43.784590163349286
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 44.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 44.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 44.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 45.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 46.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 46.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 46.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 47.213161591920716
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 47.213161591920716
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 47.784590163349286
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 48.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 48.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 48.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 49.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 49.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 50.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 50.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 50.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 51.213161591920716
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 51.784590163349286
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 51.784590163349286
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 52.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 52.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 53.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 54.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 54.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 54.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 55.213161591920716
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 55.213161591920716
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 55.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 55.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 55.784590163349286
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 56.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 56.213161591920716
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 56.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 56.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 56.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 56.784590163349286
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 56.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 57.213161591920716
+        },
+        {
+          "kind": "hold",
+          "lane": 0,
+          "timeSeconds": 57.498875877635,
+          "endTimeSeconds": 58.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 58.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 58.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 58.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 59.213161591920716
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 59.784590163349286
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 59.784590163349286
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 60.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 60.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 60.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 61.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 62.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 62.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 63.213161591920716
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 63.213161591920716
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 63.784590163349286
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 64.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 64.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 64.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 65.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 65.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 66.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 66.64173302049214
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 67.21316159192071
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 67.78459016334929
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 67.78459016334929
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 68.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 68.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 69.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 70.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 70.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 70.64173302049214
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 71.21316159192071
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 71.78459016334929
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 72.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 72.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 73.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 73.78459016334929
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 73.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 74.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 74.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 74.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 74.64173302049214
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 74.78459016334929
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 74.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 75.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 75.21316159192071
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 75.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 75.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 75.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 75.78459016334929
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 76.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 76.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 76.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 77.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 78.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 78.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 78.64173302049214
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 79.21316159192071
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 79.21316159192071
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 79.78459016334929
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 80.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 80.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 80.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 81.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 81.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 82.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 82.64173302049214
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 82.64173302049214
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 83.21316159192071
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 83.78459016334929
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 84.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 84.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 85.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 86.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 86.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 86.64173302049214
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 87.21316159192071
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 87.21316159192071
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 87.78459016334929
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 88.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 88.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 88.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 89.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 89.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 90.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 90.64173302049214
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 91.21316159192071
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 91.78459016334928
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 92.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 92.21316159192071
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 92.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 92.64173302049214
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 92.78459016334928
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 92.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 93.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 93.21316159192071
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 93.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 93.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 93.78459016334928
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 94.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 94.64173302049214
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 95.21316159192071
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 95.21316159192071
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 95.78459016334928
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 96.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 96.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 96.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 97.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 97.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 98.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 98.64173302049214
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 98.64173302049214
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 99.21316159192071
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 99.78459016334928
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 99.78459016334928
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 100.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 100.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 100.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 101.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 102.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 102.64173302049214
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 103.21316159192071
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 103.78459016334928
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 104.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 104.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 104.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 105.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 106.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 106.64173302049214
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 107.21316159192071
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 107.78459016334928
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 108.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 108.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 109.498875877635
+        }
+      ],
+      "slot": "Standard"
+    },
+    {
+      "id": "29f34c14-1d21-5f54-b69b-503f2de23a3a",
+      "name": "Hard",
+      "modeId": "FourLaneMode",
+      "laneCount": 4,
+      "completionTimeSeconds": 110.453515,
+      "notes": [
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 0.2369711157302453
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 0.8203044490635786
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 1.3917330204921499
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 1.9631615919207213
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 2.4274473062064357
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 2.534590163349293
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 2.534590163349293
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 3.022685401444531
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 3.1298282585873882
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 3.4274473062064357
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 3.6060187347778645
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 3.6893520681111975
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 3.9988758776350073
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 4.165542544301673
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 4.272685401444531
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 4.856018734777864
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 5.33220921096834
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 5.427447306206435
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 5.713161591920721
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 5.998875877635006
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 6.284590163349292
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 6.463161591920721
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 6.570304449063578
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 6.856018734777864
+        },
+        {
+          "kind": "hold",
+          "lane": 1,
+          "timeSeconds": 7.165542544301673,
+          "endTimeSeconds": 7.7369711157302445
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 7.629828258587388
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 7.725066353825483
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 8.01078063953977
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 8.189352068111198
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 8.284590163349293
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 8.58220921096834
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 8.58220921096834
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 8.77268540144453
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 8.867923496682625
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 9.153637782396912
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 9.33220921096834
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 9.451256830015959
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 9.725066353825483
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 10.01078063953977
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 10.308399687158817
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 10.58220921096834
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 10.879828258587388
+        },
+        {
+          "kind": "hold",
+          "lane": 3,
+          "timeSeconds": 11.165542544301672,
+          "endTimeSeconds": 12.02268540144453
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 11.356018734777864
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 11.439352068111196
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 11.617923496682625
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 11.725066353825483
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 12.034590163349291
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 12.21316159192072
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 12.308399687158817
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 12.308399687158817
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 12.594113972873101
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 12.760780639539767
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 12.879828258587388
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 13.165542544301672
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 13.451256830015959
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 13.641733020492149
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 13.748875877635006
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 14.034590163349291
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 14.034590163349291
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 14.308399687158815
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 14.594113972873101
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 14.784590163349291
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 14.891733020492149
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 15.177447306206435
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 15.177447306206435
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 15.46316159192072
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 15.736971115730244
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 16.034590163349293
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 16.33220921096834
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 16.33220921096834
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 16.606018734777866
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 16.784590163349293
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 16.903637782396913
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 17.189352068111198
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 17.463161591920723
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 17.76078063953977
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 18.046494925254056
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 18.046494925254056
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 18.213161591920723
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 18.30839968715882
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 18.617923496682625
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 18.617923496682625
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 18.903637782396913
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 19.05839968715882
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 19.189352068111198
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 19.475066353825483
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 19.475066353825483
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 19.629828258587388
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 19.76078063953977
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 20.046494925254056
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 20.046494925254056
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 20.20125683001596
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 20.486971115730245
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 20.606018734777866
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 20.77268540144453
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 20.89173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 21.177447306206435
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 21.45125683001596
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 21.748875877635008
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 22.034590163349293
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 22.320304449063578
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 22.51078063953977
+        },
+        {
+          "kind": "hold",
+          "lane": 3,
+          "timeSeconds": 22.594113972873103,
+          "endTimeSeconds": 23.165542544301672
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 22.903637782396913
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 23.070304449063578
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 23.177447306206435
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 23.475066353825483
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 23.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 23.736971115730245
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 23.939352068111198
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 24.034590163349293
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 24.320304449063578
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 24.51078063953977
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 24.617923496682625
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 24.796494925254056
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 24.903637782396913
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 25.070304449063578
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 25.177447306206435
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 25.356018734777866
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 25.46316159192072
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 25.748875877635008
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 25.927447306206435
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 26.034590163349293
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 26.225066353825483
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 26.320304449063578
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 26.498875877635008
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 26.606018734777866
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 26.784590163349293
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 26.89173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 27.08220921096834
+        },
+        {
+          "kind": "hold",
+          "lane": 2,
+          "timeSeconds": 27.165542544301672,
+          "endTimeSeconds": 27.736971115730245
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 27.367923496682625
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 27.475066353825483
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 27.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 27.760780639539767
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 28.034590163349293
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 28.30839968715882
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 28.498875877635008
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 28.617923496682625
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 28.879828258587388
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 29.189352068111198
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 29.46316159192072
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 29.653637782396913
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 29.748875877635008
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 29.939352068111198
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 30.034590163349293
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 30.33220921096834
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 30.510780639539767
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 30.606018734777866
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 30.784590163349293
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 30.89173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 31.070304449063578
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 31.177447306206435
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 31.46316159192072
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 31.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 31.748875877635008
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 31.939352068111198
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 32.04649492525405
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 32.213161591920716
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 32.32030444906358
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 32.60601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 32.784590163349286
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 32.89173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 33.08220921096834
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 33.17744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 33.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 33.463161591920716
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 33.748875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 34.034590163349286
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 34.33220921096834
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 34.60601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 34.89173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 35.07030444906358
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 35.17744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 35.36792349668262
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 35.463161591920716
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 35.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 35.748875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 35.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 36.034590163349286
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 36.22506635382548
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 36.32030444906358
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 36.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 36.60601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 36.89173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 36.89173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 37.17744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 37.33220921096834
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 37.45125683001596
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 37.748875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 37.903637782396906
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 38.02268540144453
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 38.02268540144453
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 38.18935206811119
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 38.32030444906358
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 38.48697111573024
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 38.60601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 38.89173302049215
+        },
+        {
+          "kind": "hold",
+          "lane": 0,
+          "timeSeconds": 39.17744730620643,
+          "endTimeSeconds": 39.748875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 39.47506635382548
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 39.57030444906358
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 39.73697111573024
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 40.034590163349286
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 40.32030444906358
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 40.60601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 40.784590163349286
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 40.87982825858738
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 41.17744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 41.45125683001596
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 41.73697111573024
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 42.02268540144453
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 42.32030444906358
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 42.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 42.60601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 42.89173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 43.07030444906358
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 43.17744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 43.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 43.748875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 44.02268540144453
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 44.30839968715881
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 44.60601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 44.784590163349286
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 44.89173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 45.17744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 45.35601873477786
+        },
+        {
+          "kind": "hold",
+          "lane": 1,
+          "timeSeconds": 45.45125683001596,
+          "endTimeSeconds": 46.02268540144453
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 45.748875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 45.91554254430167
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 46.034590163349286
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 46.32030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 46.463161591920716
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 46.60601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 46.89173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 47.17744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 47.32030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 47.463161591920716
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 47.61792349668262
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 47.73697111573024
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 47.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 48.04649492525405
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 48.225066353825476
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 48.32030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 48.60601873477786
+        },
+        {
+          "kind": "hold",
+          "lane": 3,
+          "timeSeconds": 48.89173302049215,
+          "endTimeSeconds": 49.463161591920716
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 49.08220921096834
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 49.16554254430167
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 49.45125683001596
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 49.748875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 50.034590163349286
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 50.30839968715881
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 50.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 50.60601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 50.77268540144453
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 50.89173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 51.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 51.16554254430167
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 51.16554254430167
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 51.463161591920716
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 51.73697111573024
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 52.02268540144453
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 52.32030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 52.594113972873096
+        },
+        {
+          "kind": "hold",
+          "lane": 0,
+          "timeSeconds": 52.89173302049215,
+          "endTimeSeconds": 53.463161591920716
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 53.17744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 53.344113972873096
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 53.45125683001596
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 53.64173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 53.748875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 54.034590163349286
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 54.33220921096834
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 54.58220921096834
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 54.89173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 55.17744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 55.17744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 55.463161591920716
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 55.62982825858738
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 55.748875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 56.034590163349286
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 56.32030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 56.32030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 56.60601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 56.89173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 56.89173302049215
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 57.17744730620643
+        },
+        {
+          "kind": "hold",
+          "lane": 0,
+          "timeSeconds": 57.463161591920716,
+          "endTimeSeconds": 58.034590163349286
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 57.82030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 57.87982825858738
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 57.975066353825476
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 58.20125683001596
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 58.30839968715881
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 58.48697111573024
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 58.594113972873096
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 58.87982825858738
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 59.05839968715881
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 59.165542544301665
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 59.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 59.45125683001596
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 59.62982825858738
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 59.73697111573024
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 59.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 60.034590163349286
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 60.18935206811119
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 60.29649492525405
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 60.594113972873096
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 60.77268540144453
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 60.87982825858738
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 61.17744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 61.45125683001596
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 61.73697111573024
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 62.034590163349286
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 62.30839968715881
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 62.37982825858738
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 62.463161591920716
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 62.594113972873096
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 62.77268540144453
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 62.87982825858738
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 63.05839968715881
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 63.165542544301665
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 63.35601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 63.463161591920716
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 63.62982825858738
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 63.73697111573024
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 63.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 64.02268540144453
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 64.21316159192072
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 64.30839968715881
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 64.5941139728731
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 64.78459016334929
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 64.87982825858738
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 65.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 65.17744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 65.3441139728731
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 65.45125683001595
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 65.62982825858738
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 65.748875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 66.02268540144452
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 66.20125683001595
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 66.30839968715881
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 66.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 66.5941139728731
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 66.89173302049214
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 67.16554254430167
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 67.3441139728731
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 67.45125683001595
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 67.62982825858738
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 67.73697111573024
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 67.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 68.03459016334929
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 68.21316159192071
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 68.30839968715881
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 68.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 68.5941139728731
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 68.78459016334929
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 68.87982825858738
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 69.05839968715881
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 69.16554254430167
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 69.33220921096833
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 69.43935206811119
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 69.62982825858738
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 69.73697111573024
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 69.91554254430167
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 70.02268540144452
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 70.20125683001595
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 70.30839968715881
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 70.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 70.5941139728731
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 70.78459016334929
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 70.87982825858738
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 71.16554254430167
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 71.46316159192071
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 71.64173302049214
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 71.72506635382548
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 71.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 72.03459016334929
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 72.03459016334929
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 72.30839968715881
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 72.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 72.60601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 72.77268540144452
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 72.86792349668262
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 73.07030444906357
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 73.17744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 73.3441139728731
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 73.46316159192071
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 73.46316159192071
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 73.76078063953976
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 73.76078063953976
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 73.91554254430167
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 74.02268540144452
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 74.33220921096833
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 74.46316159192071
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 74.5941139728731
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 74.77268540144452
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 74.77268540144452
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 74.87982825858738
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 75.05839968715881
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 75.16554254430167
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 75.3441139728731
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 75.46316159192071
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 75.64173302049214
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 75.73697111573024
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 76.02268540144452
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 76.20125683001595
+        },
+        {
+          "kind": "hold",
+          "lane": 2,
+          "timeSeconds": 76.30839968715881,
+          "endTimeSeconds": 76.87982825858738
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 76.48697111573024
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 76.5941139728731
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 76.87982825858738
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 77.05839968715881
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 77.16554254430167
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 77.45125683001595
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 77.45125683001595
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 77.73697111573024
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 78.02268540144452
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 78.30839968715881
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 78.5941139728731
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 78.87982825858738
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 79.16554254430167
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 79.45125683001595
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 79.73697111573024
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 79.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 80.02268540144452
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 80.20125683001595
+        },
+        {
+          "kind": "hold",
+          "lane": 0,
+          "timeSeconds": 80.30839968715881,
+          "endTimeSeconds": 80.87982825858738
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 80.59411397287309
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 80.77268540144452
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 80.87982825858738
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 81.16554254430167
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 81.45125683001595
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 81.62982825858738
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 81.73697111573024
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 82.02268540144452
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 82.30839968715881
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 82.59411397287309
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 82.77268540144452
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 82.87982825858738
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 83.05839968715881
+        },
+        {
+          "kind": "hold",
+          "lane": 0,
+          "timeSeconds": 83.16554254430167,
+          "endTimeSeconds": 84.02268540144452
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 83.34411397287309
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 83.45125683001595
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 83.62982825858738
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 83.73697111573024
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 83.91554254430167
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 84.02268540144452
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 84.20125683001595
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 84.29649492525405
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 84.498875877635
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 84.60601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 84.77268540144452
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 84.89173302049214
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 84.89173302049214
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 85.16554254430167
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 85.45125683001595
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 85.45125683001595
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 85.64173302049214
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 85.73697111573024
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 85.91554254430167
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 86.02268540144452
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 86.29649492525405
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 86.58220921096833
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 86.77268540144452
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 86.86792349668262
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 87.05839968715881
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 87.16554254430167
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 87.34411397287309
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 87.45125683001595
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 87.62982825858738
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 87.73697111573024
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 87.92744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 88.02268540144452
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 88.30839968715881
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 88.59411397287309
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 88.87982825858738
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 89.45125683001595
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 89.72506635382548
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 90.02268540144452
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 90.18935206811119
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 90.30839968715881
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 90.48697111573024
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 90.59411397287309
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 90.87982825858738
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 91.05839968715881
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 91.16554254430167
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 91.34411397287309
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 91.45125683001595
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 91.73697111573024
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 91.73697111573024
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 92.02268540144452
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 92.17744730620643
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 92.30839968715881
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 92.60601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 92.76078063953976
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 92.87982825858738
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 93.03459016334928
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 93.16554254430167
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 93.45125683001595
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 94.02268540144452
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 94.02268540144452
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 94.48697111573024
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 94.59411397287309
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 94.77268540144452
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 94.86792349668262
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 95.04649492525405
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 95.16554254430167
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 95.34411397287309
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 95.43935206811119
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 95.62982825858738
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 95.72506635382548
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 95.91554254430167
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 96.01078063953976
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 96.20125683001595
+        },
+        {
+          "kind": "hold",
+          "lane": 0,
+          "timeSeconds": 96.30839968715881,
+          "endTimeSeconds": 97.16554254430167
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 96.48697111573024
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 96.58220921096833
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 96.77268540144452
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 96.87982825858738
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 97.05839968715881
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 97.1536377823969
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 97.34411397287309
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 97.45125683001595
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 97.62982825858738
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 97.73697111573024
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 98.02268540144452
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 98.30839968715881
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 98.30839968715881
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 98.59411397287309
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 99.05839968715881
+        },
+        {
+          "kind": "hold",
+          "lane": 2,
+          "timeSeconds": 99.1536377823969,
+          "endTimeSeconds": 99.72506635382548
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 99.34411397287309
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 99.45125683001595
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 99.62982825858738
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 99.73697111573024
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 99.91554254430167
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 100.01078063953976
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 100.20125683001595
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 100.29649492525405
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 100.48697111573024
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 100.59411397287309
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 100.77268540144452
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 100.87982825858738
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 101.05839968715881
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 101.1536377823969
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 101.34411397287309
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 101.45125683001595
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 101.62982825858738
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 101.72506635382548
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 101.91554254430167
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 102.02268540144452
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 102.20125683001595
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 102.30839968715881
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 102.59411397287309
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 102.86792349668262
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 103.16554254430167
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 103.60601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 103.73697111573024
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 103.73697111573024
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 104.02268540144452
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 104.30839968715881
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 104.30839968715881
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 104.60601873477786
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 104.77268540144452
+        },
+        {
+          "kind": "hold",
+          "lane": 3,
+          "timeSeconds": 104.87982825858738,
+          "endTimeSeconds": 105.45125683001595
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 105.16554254430167
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 105.45125683001595
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 105.73697111573024
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 105.9036377823969
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 106.02268540144452
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 106.02268540144452
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 106.30839968715881
+        },
+        {
+          "kind": "tap",
+          "lane": 1,
+          "timeSeconds": 106.59411397287309
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 106.86792349668262
+        },
+        {
+          "kind": "tap",
+          "lane": 0,
+          "timeSeconds": 107.16554254430167
+        },
+        {
+          "kind": "tap",
+          "lane": 2,
+          "timeSeconds": 107.16554254430167
+        },
+        {
+          "kind": "tap",
+          "lane": 3,
+          "timeSeconds": 107.60601873477786
+        },
+        {
+          "kind": "hold",
+          "lane": 1,
+          "timeSeconds": 107.87982825858737,
+          "endTimeSeconds": 110.07030444906358
+        },
+        {
+          "kind": "hold",
+          "lane": 2,
+          "timeSeconds": 107.87982825858737,
+          "endTimeSeconds": 110.07030444906358
+        }
+      ],
+      "slot": "Hard"
+    }
+  ]
+}
