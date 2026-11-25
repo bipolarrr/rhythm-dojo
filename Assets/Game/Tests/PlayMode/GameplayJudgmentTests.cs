@@ -199,7 +199,7 @@ namespace RhythmDojo.Tests
                     FindObjectsSortMode.None
                 )
                 .Single(view => view.name.StartsWith("Note 04", StringComparison.Ordinal));
-            Assert.That(note.transform.Find("Head").position.z, Is.EqualTo(0).Within(.001));
+            Assert.That(((RectTransform)note.transform.Find("Head")).anchoredPosition.y, Is.EqualTo(GameplayViewport.StrikeY).Within(.001));
             yield return Completed();
             Assert.That(hitched, Is.True);
             Assert.That(completedSession.Perfect, Is.EqualTo(33), string.Join("\n",

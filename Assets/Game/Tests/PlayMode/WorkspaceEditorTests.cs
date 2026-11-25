@@ -1658,7 +1658,7 @@ namespace RhythmDojo.Tests
 
         [UnityTest]
         [Category("SceneIntegration")]
-        public IEnumerator GameplayPreviewFollowsAudioEditsAndChartSelectionAndReleasesTexture()
+        public IEnumerator GameplayPreviewFollowsAudioEditsAndChartSelection()
         {
             string path = Path.GetFullPath("LocalAudio/Saiki.wav");
             if (!File.Exists(path))
@@ -1679,36 +1679,28 @@ namespace RhythmDojo.Tests
             yield return null;
             var preview = UnityEngine.Object.FindFirstObjectByType<ChartGameplayPreview>();
             Assert.That(preview, Is.Not.Null);
-            Assert.That(preview.Target.IsCreated(), Is.True);
             Assert.That(preview.image.raycastTarget, Is.False);
-            Assert.That(preview.VisibleNoteCount, Is.EqualTo(3));
-            var camera = Camera.allCameras.Single(item => item.targetTexture == preview.Target);
-            Assert.That(camera.GetComponent<AudioListener>(), Is.Null);
-            Assert.That(camera.cullingMask, Is.EqualTo(1 << 31));
-            Assert.That(Camera.main.cullingMask & (1 << 31), Is.Zero);
+            Assert.That(preview.VisibleNoteCount, Is.EqualTo(2));
+            Assert.That(preview.playfield.viewport.field.GetComponent<RectMask2D>(), Is.Not.Null);
 
             workspace.timeline.Seek(3);
             yield return null;
             yield return null;
             Assert.That(preview.SongTime, Is.EqualTo(3).Within(.001));
             Assert.That(preview.VisibleNoteCount, Is.EqualTo(2));
-            Assert.That(preview.playfield.GetComponentsInChildren<RhythmDojo.Presentation.NoteView>()
-                .Count(view => view.HasBody), Is.EqualTo(1));
-            var previous = RenderTexture.active;
-            var snapshot = new Texture2D(preview.Target.width, preview.Target.height, TextureFormat.RGB24, false);
+            var hold = preview.playfield.GetComponentsInChildren<RhythmDojo.Presentation.NoteView>()
+                .Single(view => view.HasBody);
+            var marker = hold.transform.Find("Hold End Marker");
+            var point = RectTransformUtility.WorldToScreenPoint(null, marker.position);
+            var snapshot = GameplayHudFlowTests.CaptureGameplayDisplay();
             try
             {
-                RenderTexture.active = preview.Target;
-                snapshot.ReadPixels(new Rect(0, 0, snapshot.width, snapshot.height), 0, 0);
-                snapshot.Apply();
-                Assert.That(snapshot.GetPixels32().Select(pixel => pixel.r).Distinct().Count(), Is.GreaterThan(5));
-                string evidence = Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath, "../Logs"));
-                Directory.CreateDirectory(evidence);
-                File.WriteAllBytes(Path.Combine(evidence, "editor-gameplay-preview.png"), snapshot.EncodeToPNG());
+                var pixel = snapshot.GetPixel(Mathf.RoundToInt(point.x), Mathf.RoundToInt(point.y));
+                Assert.That(pixel.g, Is.GreaterThan(pixel.r + .12f), "Jade end cap must be visible in the editor panel.");
+                File.WriteAllBytes(Path.Combine("Logs", "editor-gameplay-preview.png"), snapshot.EncodeToPNG());
             }
             finally
             {
-                RenderTexture.active = previous;
                 UnityEngine.Object.Destroy(snapshot);
             }
 
@@ -1716,7 +1708,7 @@ namespace RhythmDojo.Tests
             yield return new WaitForSecondsRealtime(.3f);
             workspace.timeline.PausePreview();
             Assert.That(preview.SongTime, Is.GreaterThan(3.1));
-            workspace.screen.Session.Edit(edit => edit.AddNote(workspace.screen.ChartId, NoteData.Tap(2, 6)));
+            workspace.screen.Session.Edit(edit => edit.AddNote(workspace.screen.ChartId, NoteData.Tap(2, 4.75)));
             yield return null;
             Assert.That(preview.VisibleNoteCount, Is.EqualTo(3));
             workspace.screen.Session.Undo();
@@ -1729,7 +1721,7 @@ namespace RhythmDojo.Tests
             yield return null;
             Assert.That(preview.VisibleNoteCount, Is.EqualTo(2));
 
-            var target = preview.Target;
+            var target = preview.playfield;
             yield return SceneManager.LoadSceneAsync("Assets/Game/Scenes/Title.unity");
             yield return null;
             Assert.That(target == null, Is.True);
@@ -1744,8 +1736,8 @@ namespace RhythmDojo.Tests
         {
             workspace.screen.Session.Edit(edit =>
             {
-                edit.AddNote(workspace.screen.ChartId, NoteData.Tap(0, 1));
-                edit.AddNote(workspace.screen.ChartId, NoteData.Tap(1, 5));
+                edit.AddNote(workspace.screen.ChartId, NoteData.Tap(0, .25));
+                edit.AddNote(workspace.screen.ChartId, NoteData.Tap(1, 1.75));
             });
             yield return null;
 

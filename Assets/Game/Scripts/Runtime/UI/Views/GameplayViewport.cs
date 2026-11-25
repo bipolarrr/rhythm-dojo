@@ -1,127 +1,52 @@
+using System;
+using RhythmDojo.Gameplay;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace RhythmDojo.UI
 {
-    // Keep the original screen projection (including hit feedback), but expose only
-    // the portion inside the gameplay window. UI masks alone cannot clip world meshes.
+    // Notes, timing marks and receptors share drawing units independent of texture resolution.
     [ExecuteAlways]
-    [RequireComponent(typeof(RawImage))]
     public sealed class GameplayViewport : MonoBehaviour
     {
-        public Camera gameplayCamera;
+        public const float LaneWidth = 32;
+        public const float Height = 240;
+        public const float StrikeY = 18;
+        public const float PixelsPerDistance = 10;
 
-        private RawImage image;
-        private RenderTexture target;
-        private RenderTexture previousTarget;
-        private float previousAspect;
-        private Camera boundCamera;
-        private readonly Vector3[] corners = new Vector3[4];
+        public RectTransform field;
 
-        private void OnEnable()
+        public static Vector2 Position(int lane, int count, double distance)
         {
-            image = GetComponent<RawImage>();
-            Canvas.willRenderCanvases += Refresh;
+            return new Vector2(GameModeDefinition.CenteredPosition(lane, count, LaneWidth),
+                StrikeY + (float)distance * PixelsPerDistance);
         }
 
-        private void LateUpdate()
+        public void Fit(int count)
         {
-            Refresh();
+            if (!field)
+            {
+                throw new InvalidOperationException("Missing authored lane drawing.");
+            }
+
+            field.sizeDelta = new Vector2(count * LaneWidth + 6, Height);
+            OnRectTransformDimensionsChange();
         }
 
-        private void Refresh()
+        private void OnRectTransformDimensionsChange()
         {
-            if (!gameplayCamera || !image || !image.canvas)
+            if (!field || field.sizeDelta.x <= 0)
             {
                 return;
             }
 
-            var canvas = image.canvas.rootCanvas;
-            var size = ((RectTransform)canvas.transform).rect.size * canvas.scaleFactor;
-            int width = Mathf.Max(1, Mathf.RoundToInt(size.x));
-            int height = Mathf.Max(1, Mathf.RoundToInt(size.y));
-            if (boundCamera != gameplayCamera)
+            var size = ((RectTransform)transform).rect.size;
+            float verticalScale = size.y / Height;
+            float scale = Mathf.Min(size.x / field.sizeDelta.x, verticalScale);
+            var fitted = new Vector3(scale, verticalScale, 1);
+            if (field.localScale != fitted)
             {
-                Release();
-                boundCamera = gameplayCamera;
-                previousTarget = gameplayCamera.targetTexture;
-                previousAspect = gameplayCamera.aspect;
+                field.localScale = fitted;
             }
-
-            if (!target || target.width != width || target.height != height)
-            {
-                ReleaseTexture();
-                target = new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32)
-                {
-                    name = "Gameplay Window",
-                    hideFlags = HideFlags.HideAndDontSave,
-                    filterMode = FilterMode.Bilinear,
-                };
-                target.Create();
-                gameplayCamera.targetTexture = target;
-                image.texture = target;
-            }
-
-            gameplayCamera.aspect = (float)width / height;
-            image.rectTransform.GetWorldCorners(corners);
-            Camera eventCamera = null;
-            if (canvas.renderMode != RenderMode.ScreenSpaceOverlay)
-            {
-                eventCamera = canvas.worldCamera;
-            }
-
-            var min = RectTransformUtility.WorldToScreenPoint(eventCamera, corners[0]);
-            var max = RectTransformUtility.WorldToScreenPoint(eventCamera, corners[2]);
-            image.uvRect = new Rect(min.x / width, min.y / height,
-                (max.x - min.x) / width, (max.y - min.y) / height);
-        }
-
-        private void OnDisable()
-        {
-            Canvas.willRenderCanvases -= Refresh;
-            Release();
-        }
-
-        private void Release()
-        {
-            if (boundCamera)
-            {
-                boundCamera.targetTexture = previousTarget;
-                boundCamera.aspect = previousAspect;
-            }
-
-            ReleaseTexture();
-            boundCamera = null;
-        }
-
-        private void ReleaseTexture()
-        {
-            if (image)
-            {
-                image.texture = null;
-            }
-
-            if (!target)
-            {
-                return;
-            }
-
-            if (boundCamera && boundCamera.targetTexture == target)
-            {
-                boundCamera.targetTexture = previousTarget;
-            }
-
-            target.Release();
-            if (UnityEngine.Application.isPlaying)
-            {
-                Destroy(target);
-            }
-            else
-            {
-                DestroyImmediate(target);
-            }
-
-            target = null;
         }
     }
 }

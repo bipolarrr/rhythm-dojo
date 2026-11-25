@@ -23,42 +23,13 @@ namespace RhythmDojo.EditorTools
                 throw new InvalidOperationException("Gameplay heading font missing.");
             }
 
-            var camera = Camera.main;
-            if (!camera)
-            {
-                throw new InvalidOperationException("Gameplay camera missing.");
-            }
-
-            // Composite the world camera over the dojo art, with the lanes entering below the ceiling.
-            var background = UiElements.Canvas("Pixel Dojo Gameplay Backdrop");
-            background.renderMode = RenderMode.ScreenSpaceOverlay;
-            background.sortingOrder = -100;
-            background.GetComponent<CanvasScaler>().matchWidthOrHeight = .5f;
-            var raycaster = background.GetComponent<GraphicRaycaster>();
-            if (raycaster)
-            {
-                UnityEngine.Object.DestroyImmediate(raycaster);
-            }
-
-            var field = Panel("Training Floor Frame", background.transform, Color.clear, .285f, .015f, .715f, .80f);
-            camera.backgroundColor = new Color(.055f, .035f, .025f, 0f);
-            var viewport = new GameObject("Gameplay Viewport", typeof(RectTransform), typeof(RawImage));
-            viewport.transform.SetParent(field, false);
-            var viewportRect = (RectTransform)viewport.transform;
-            Bounds(viewportRect, 0, 0, 1, 1);
-            viewportRect.offsetMin = new Vector2(10, 10);
-            viewportRect.offsetMax = new Vector2(-10, 0);
-            viewport.GetComponent<RawImage>().raycastTarget = false;
-            viewport.AddComponent<GameplayViewport>().gameplayCamera = camera;
-
-            var shade = new Color(.06f, .08f, .12f, .30f);
-            AddLaneShade("Lane shade left", field, .26f, .40f, Color.clear, shade);
-            AddLaneShade("Lane shade center", field, .40f, .60f, shade, shade);
-            AddLaneShade("Lane shade right", field, .60f, .74f, shade, Color.clear);
-
-            view.lanes.pixelTheme = true;
-            view.lanes.font = headingFont;
-            view.lanes.sprite = DojoGameplayAssets.Tile;
+            var host = PresentationAssetBuilder.Group("Gameplay Viewport", view.transform);
+            host.SetAsFirstSibling();
+            Bounds(host, .27f, .01f, .73f, .985f);
+            var field = PresentationAssetBuilder.BuildField(host);
+            view.viewport = field.viewport;
+            view.lanes.laneRoot.SetParent(view.viewport.field, false);
+            view.lanes.template = BuildKeyTemplate(headingFont);
 
             var song = view.transform.Find("Training Information");
             foreach (var text in song.GetComponentsInChildren<Text>())
@@ -118,20 +89,17 @@ namespace RhythmDojo.EditorTools
                 .GetComponent<Text>();
             railOpacityLabel.transform.SetParent(dialog, false);
             railOpacityLabel.color = Ink;
-            Bounds(railOpacityLabel.rectTransform, .14f, .095f, .44f, .18f);
+            Bounds(railOpacityLabel.rectTransform, .14f, .375f, .44f, .485f);
             var railOpacity = (RectTransform)view.railOpacity.transform;
             railOpacity.SetParent(dialog, false);
-            Bounds(railOpacity, .44f, .095f, .86f, .18f);
+            Bounds(railOpacity, .44f, .375f, .86f, .485f);
             view.railOpacity.targetGraphic.color = new Color(.50f, .18f, .10f);
-            view.railOpacity.interactable = false;
-            view.railOpacity.gameObject.SetActive(false);
-            railOpacityLabel.gameObject.SetActive(false);
             Bounds((RectTransform)menu.resumeButton.transform, .14f, .65f, .86f, .79f);
-            Bounds((RectTransform)menu.restartButton.transform, .14f, .42f, .86f, .56f);
+            Bounds((RectTransform)menu.restartButton.transform, .14f, .50f, .86f, .62f);
             Bounds((RectTransform)menu.exitButton.transform, .14f, .23f, .86f, .37f);
             Bounds(menu.recoveryStatus.rectTransform, .08f, .025f, .92f, .075f);
             var hint = UiElements.Label("Settings Menu Hint", dialog,
-                "↑↓ 이동 · Enter / Space 선택 · Esc 이어하기\n설정은 수련을 마친 뒤 메뉴에서 변경할 수 있습니다.",
+                "↑↓ 이동 · ←→ 불투명도 조절 · Enter / Space 선택 · Esc 이어하기",
                 Vector2.zero, Vector2.zero, 14, role: UiTextRole.Help);
             Bounds(hint.rectTransform, .06f, .09f, .94f, .21f);
             hint.color = DojoScreenStyle.Muted;
@@ -139,22 +107,31 @@ namespace RhythmDojo.EditorTools
             SceneResources.ApplyReadableFont(view.songDetails, view.healthLabel, view.timing, railOpacityLabel);
         }
 
-        private static void AddLaneShade(string name, Transform field, float x0, float x1, Color left, Color right)
+        private static Image BuildKeyTemplate(Font font)
         {
-            var shade = field.parent.Find(name);
-            if (!shade)
+            var root = PresentationAssetBuilder.Group("Key Legend", null);
+            try
             {
-                shade = new GameObject(name, typeof(RectTransform), typeof(SelectionGradientImage)).transform;
-                shade.SetParent(field.parent, false);
-                shade.SetSiblingIndex(field.GetSiblingIndex());
+                root.anchorMin = root.anchorMax = new Vector2(.5f, 0);
+                root.sizeDelta = new Vector2(26, 10);
+                var face = root.gameObject.AddComponent<Image>();
+                face.sprite = SceneResources.Require<Sprite>(PresentationAssetBuilder.Art + "Keycap.png");
+                face.raycastTarget = false;
+                var key = UiElements.Label("Key", root, "", Vector2.zero, new Vector2(76, 30), 21);
+                key.rectTransform.anchorMin = key.rectTransform.anchorMax = new Vector2(.5f, .5f);
+                key.rectTransform.pivot = new Vector2(.5f, .5f);
+                key.rectTransform.anchoredPosition = Vector2.zero;
+                key.rectTransform.localScale = Vector3.one / 3;
+                key.alignment = TextAnchor.MiddleCenter;
+                key.raycastTarget = false;
+                key.font = font;
+                return PrefabUtility.SaveAsPrefabAsset(root.gameObject, "Assets/Game/Prefabs/LaneKey.prefab")
+                    .GetComponent<Image>();
             }
-
-            var graphic = shade.GetComponent<SelectionGradientImage>();
-            Bounds(graphic.rectTransform, x0, 0, x1, .825f);
-            graphic.useGradient = true;
-            graphic.leftColor = left;
-            graphic.rightColor = right;
-            graphic.raycastTarget = false;
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(root.gameObject);
+            }
         }
 
         private static void Frame(RectTransform rect, Color fill, float width)

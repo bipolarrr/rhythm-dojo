@@ -13,20 +13,9 @@ namespace RhythmDojo.EditorTools
         public GameSettings Settings;
         public NoteView TapTemplate,
             HoldTemplate;
-        public Material NoteMaterial,
-            HighwayMaterial,
-            RailMaterial,
-            JudgmentMaterial;
-
         public void ReloadAfterSceneChange()
         {
             Settings = SceneResources.Require<GameSettings>(TestContentBuilder.SettingsPath);
-            NoteMaterial = SceneResources.Require<Material>("Assets/Game/Materials/Note Base.mat");
-            HighwayMaterial = SceneResources.Require<Material>("Assets/Game/Materials/Highway.mat");
-            RailMaterial = SceneResources.Require<Material>("Assets/Game/Materials/Rails.mat");
-            JudgmentMaterial = SceneResources.Require<Material>(
-                "Assets/Game/Materials/Judgement.mat"
-            );
             TapTemplate = SceneResources
                 .Require<GameObject>("Assets/Game/Prefabs/TapNote.prefab")
                 .GetComponent<NoteView>();

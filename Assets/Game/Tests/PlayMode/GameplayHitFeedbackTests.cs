@@ -99,8 +99,7 @@ namespace RhythmDojo.Tests
             feedback.Initialize(
                 model,
                 Resources.FindObjectsOfTypeAll<GameModeDefinition>().First(m => m.LaneCount == 4),
-                Camera.main,
-                UnityEngine.Object.FindFirstObjectByType<GameplayHudView>().GetComponent<Canvas>()
+                UnityEngine.Object.FindFirstObjectByType<PlayfieldPresenter>()
             );
         }
 
@@ -236,6 +235,10 @@ namespace RhythmDojo.Tests
             var camera = Camera.main;
             var origin = camera.transform.position;
             model.Hold();
+            var held = feedback.GetComponentsInChildren<GameplayImpactGraphic>().Single(g => g.name == "Hold Glow 1");
+            var field = UnityEngine.Object.FindFirstObjectByType<PlayfieldPresenter>();
+            Assert.That(held.transform.position.y, Is.EqualTo(field.judgmentLine.transform.position.y).Within(.01f));
+            Assert.That(held.transform.position.x, Is.EqualTo(field.transform.Find("Strike Shoe 1").position.x).Within(.01f));
             Assert.That(ActiveHolds(feedback), Is.EqualTo(1));
 
             float previous = Time.timeScale;

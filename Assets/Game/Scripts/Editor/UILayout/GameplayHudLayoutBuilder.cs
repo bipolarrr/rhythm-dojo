@@ -97,12 +97,11 @@ namespace RhythmDojo.EditorTools
             );
             view.timing.alignment = TextAnchor.MiddleCenter;
             view.timing.color = Muted;
-            PositionJudgmentFeedback(view);
 
             var railOpacityLabel = Label(
                 "Rail Opacity Label",
                 canvas.transform,
-                "레일 투명도",
+                "레인 불투명도",
                 .03f,
                 .11f,
                 .26f,
@@ -117,7 +116,6 @@ namespace RhythmDojo.EditorTools
             Bounds((RectTransform)railOpacityObject.transform, .03f, .075f, .26f, .11f);
             view.railOpacity = railOpacityObject.GetComponent<Slider>();
             view.railOpacity.value = 1;
-            view.railOpacity.navigation = new Navigation { mode = Navigation.Mode.None };
             railOpacityObject.transform.Find("Background").GetComponent<Image>().color =
                 new Color(.23f, .13f, .075f);
             view.railOpacity.fillRect.GetComponent<Image>().color = new Color(.84f, .57f, .27f);
@@ -191,7 +189,7 @@ namespace RhythmDojo.EditorTools
             view.gameOverPanel.SetActive(false);
 
             PixelGameplayStyle.Apply(view);
-            BuildPauseMenu(view.transform);
+            BuildPauseMenu(view.transform, view.railOpacity);
             UiFontSettings.ApplyTo(view.transform);
             PixelGameplayStyle.RefineReadability(view);
             BuildFocusHud(view);
@@ -237,7 +235,6 @@ namespace RhythmDojo.EditorTools
             var feedback = (RectTransform)view.combo.transform.parent;
             Bounds(feedback, .722f, .18f, .758f, .76f);
             view.healthGauge = feedback;
-            view.gameplayCamera = Camera.main;
             var healthTrack = (RectTransform)view.healthFill.transform.parent;
             Bounds(healthTrack, .18f, .02f, .82f, .98f);
             var gaugeFrame = Panel("Gauge Wood Frame", feedback, Color.white, 0, 0, 1, 1).GetComponent<Image>();
@@ -254,11 +251,11 @@ namespace RhythmDojo.EditorTools
                 mark.sizeDelta = new Vector2(0, 2);
             }
             view.sessionState.gameObject.SetActive(false);
-            view.combo.transform.SetParent(view.transform, false);
-            view.combo.transform.SetSiblingIndex(feedback.GetSiblingIndex() + 1);
-            Bounds(view.combo.rectTransform, .38f, .80f, .62f, .925f);
+            // Insert the readout before the notes so passing heads stay visible.
+            view.laneReadout = PresentationAssetBuilder.Group("Lane Readout", view.viewport.field);
+            PositionJudgmentFeedback(view);
             view.combo.text = "";
-            view.combo.fontSize = 78;
+            view.combo.fontSize = 46;
             view.healthLabel.gameObject.SetActive(false);
             view.focusHudButton.gameObject.SetActive(false);
             view.introduction.SetActive(false);
@@ -269,12 +266,17 @@ namespace RhythmDojo.EditorTools
 
         public static void PositionJudgmentFeedback(GameplayHudView view)
         {
+            var readout = view.laneReadout;
+            readout.anchorMin = readout.anchorMax = new Vector2(.5f, .75f);
+            readout.anchoredPosition = Vector2.zero;
+            readout.sizeDelta = new Vector2(192, 120);
+            readout.localScale = Vector3.one * .25f;
+            view.combo.transform.SetParent(readout, false);
+            Bounds(view.combo.rectTransform, 0, .61f, 1, 1);
+
             var judgmentRoot = (RectTransform)view.judgmentGroup.transform;
-            judgmentRoot.SetParent(view.transform, false);
-            judgmentRoot.SetSiblingIndex(view.combo.transform.parent.GetSiblingIndex() + 1);
-            // The default stamp sits in the spent-note area below the rail.
-            Bounds(judgmentRoot, .30f, .029f, .70f, .142f);
-            view.judgment.text = "SPACE로 수련 시작";
+            judgmentRoot.SetParent(readout, false);
+            Bounds(judgmentRoot, 0, 0, 1, .61f);
             view.judgment.fontSize = 36;
             view.timing.fontSize = 18;
 
@@ -291,7 +293,7 @@ namespace RhythmDojo.EditorTools
             }
         }
 
-        private static void BuildPauseMenu(Transform parent)
+        private static void BuildPauseMenu(Transform parent, Slider railOpacity)
         {
             var menu = parent.gameObject.AddComponent<GameplayPauseMenu>();
             var shade = Panel("Pause Overlay", parent, new Color(.08f, .035f, .015f, .78f), 0, 0, 1, 1);
@@ -315,8 +317,9 @@ namespace RhythmDojo.EditorTools
             menu.recoveryStatus.raycastTarget = false;
             menu.recoveryStatus.gameObject.SetActive(false);
             DojoMenuNavigation.Link(menu.resumeButton, menu.exitButton, menu.restartButton);
-            DojoMenuNavigation.Link(menu.restartButton, menu.resumeButton, menu.exitButton);
-            DojoMenuNavigation.Link(menu.exitButton, menu.restartButton, menu.resumeButton);
+            DojoMenuNavigation.Link(menu.restartButton, menu.resumeButton, railOpacity);
+            DojoMenuNavigation.Link(railOpacity, menu.restartButton, menu.exitButton);
+            DojoMenuNavigation.Link(menu.exitButton, railOpacity, menu.resumeButton);
             var group = dialog.gameObject.AddComponent<CanvasGroup>();
             var reveal = dialog.gameObject.AddComponent<DojoReveal>();
             reveal.group = group;
@@ -348,8 +351,6 @@ namespace RhythmDojo.EditorTools
 
             var menu = view.GetComponent<GameplayPauseMenu>();
             var dialog = menu.resumeButton.transform.parent;
-            Bounds((RectTransform)menu.restartButton.transform, .14f, .44f, .86f, .58f);
-            Bounds((RectTransform)menu.exitButton.transform, .14f, .23f, .86f, .37f);
             view.focusHudButton = PauseButton("Focus HUD", dialog, "HUD · 기본", .14f, .57f, .86f, .67f);
             view.focusHudButton.GetComponentInChildren<Text>().fontSize = 25;
             view.focusHudButton.interactable = false;

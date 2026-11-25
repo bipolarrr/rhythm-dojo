@@ -16,8 +16,7 @@ namespace RhythmDojo.Presentation
         private static readonly Color Miss = new Color(.90f, .43f, .34f);
         private IGameplayReadModel model;
         private GameModeDefinition mode;
-        private Camera targetCamera;
-        private Canvas canvas;
+        private PlayfieldPresenter playfield;
         [SerializeField]
         private GameplayImpactGraphic[] bursts;
         [SerializeField]
@@ -63,6 +62,7 @@ namespace RhythmDojo.Presentation
             {
                 return;
             }
+            playfield.FlashInput(lane);
             PlaySwing();
         }
 
@@ -82,20 +82,19 @@ namespace RhythmDojo.Presentation
         public void Initialize(
             IGameplayReadModel readModel,
             GameModeDefinition gameMode,
-            Camera camera,
-            Canvas hudCanvas
+            PlayfieldPresenter playfield
         )
         {
             Unbind();
 
-            if ((readModel == null || !gameMode) || !camera)
+            if ((readModel == null || !gameMode) || !playfield)
             {
                 throw new InvalidOperationException(
                     "Hit feedback dependencies missing or lane counts differ."
                 );
             }
 
-            if (!hudCanvas || readModel.LaneCount != gameMode.LaneCount)
+            if (readModel.LaneCount != gameMode.LaneCount)
             {
                 throw new InvalidOperationException(
                     "Hit feedback dependencies missing or lane counts differ."
@@ -104,8 +103,7 @@ namespace RhythmDojo.Presentation
 
             model = readModel;
             mode = gameMode;
-            targetCamera = camera;
-            canvas = hudCanvas;
+            this.playfield = playfield;
             source = GetComponent<AudioSource>();
             source.playOnAwake = false;
             source.spatialBlend = 0;
@@ -186,6 +184,7 @@ namespace RhythmDojo.Presentation
                         }
                     )
                 );
+            Position(holdGlows[result.Head.Lane]);
             Impact(result.Head, 1);
         }
 
@@ -198,6 +197,7 @@ namespace RhythmDojo.Presentation
                 {
                     holdNotes[result.Lane] = result.NoteIndex;
                     holdGlows[result.Lane].Sustain(Good);
+                    Position(holdGlows[result.Lane]);
                 }
                 else
                 {
@@ -279,14 +279,6 @@ namespace RhythmDojo.Presentation
                 sounds.StopAll();
             }
 
-            foreach (var graphic in bursts)
-            {
-                if (graphic.gameObject.activeSelf)
-                {
-                    Position(graphic);
-                }
-            }
-
             for (int i = 0; i < holdGlows.Length; i++)
             {
                 bool holding =
@@ -301,43 +293,13 @@ namespace RhythmDojo.Presentation
 
                     holdNotes[i] = -1;
                 }
-                else
-                {
-                    Position(holdGlows[i]);
-                }
             }
         }
 
         private void Position(GameplayImpactGraphic graphic)
         {
-            var rect = (RectTransform)canvas.transform;
-            var world = new Vector3(mode.LaneX(graphic.Lane), .12f, 0);
-            var screen = targetCamera.WorldToScreenPoint(world);
-            Camera uiCamera;
-
-            if (canvas.renderMode == RenderMode.ScreenSpaceOverlay)
-            {
-                uiCamera = null;
-            }
-            else
-            {
-                uiCamera = canvas.worldCamera;
-            }
-
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                rect,
-                screen,
-                uiCamera,
-                out var point
-            );
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                rect,
-                targetCamera.WorldToScreenPoint(world + Vector3.right * mode.LaneSpacing),
-                uiCamera,
-                out var edge
-            );
-            graphic.rectTransform.anchoredPosition = point;
-            graphic.rectTransform.sizeDelta = new Vector2(Mathf.Abs(edge.x - point.x) * .9f, 140);
+            graphic.rectTransform.anchoredPosition = GameplayViewport.Position(graphic.Lane, mode.LaneCount, 0);
+            graphic.rectTransform.sizeDelta = new Vector2(GameplayViewport.LaneWidth * .9f, 28);
         }
 
         private void ResetFeedback()

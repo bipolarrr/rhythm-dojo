@@ -155,6 +155,12 @@ namespace RhythmDojo.Tests
             Assert.That(AudioListener.volume, Is.EqualTo(.43f).Within(.001f));
             Assert.That(PlayerPrefs.GetString(RhythmDojo.Services.PresentationPreferences.StorageKey), Is.EqualTo(stored));
 
+            Object.FindFirstObjectByType<GameplayHudView>().railOpacity.value = .35f;
+            var saved = JsonUtility.FromJson<RhythmDojo.Services.PresentationPreferences>(stored);
+            saved.railOpacity = .35f;
+            Assert.That(PlayerPrefs.GetString(RhythmDojo.Services.PresentationPreferences.StorageKey),
+                Is.EqualTo(JsonUtility.ToJson(saved)));
+
             flow.ShowSettings();
             yield return null;
             Assert.That(flow.CurrentRequest, Is.SameAs(request));
@@ -169,6 +175,7 @@ namespace RhythmDojo.Tests
             Assert.That(RhythmDojo.Services.SettingsAccessPolicy.CanChange, Is.True);
             flow.ShowSettings();
             yield return Click(view.gameplayTab);
+            Assert.That(view.railOpacity.value, Is.EqualTo(35));
             view.timingOffset.value = -15;
             Assert.That(flow.Preferences.TimingOffsetMs, Is.EqualTo(-15));
         }

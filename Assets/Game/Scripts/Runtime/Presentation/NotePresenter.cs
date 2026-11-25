@@ -14,9 +14,6 @@ namespace RhythmDojo.Presentation
         private NoteView holdTemplate;
 
         [SerializeField]
-        private Material noteMaterial;
-
-        [SerializeField]
         private NoteView[] views;
         private GameModeDefinition mode;
         private GameplayPresentationSettings settings;
@@ -35,10 +32,10 @@ namespace RhythmDojo.Presentation
 
         public void Validate(ChartData generatedChart = null)
         {
-            if (!tapTemplate || !holdTemplate || !noteMaterial)
+            if (!tapTemplate || !holdTemplate)
             {
                 throw new InvalidOperationException(
-                    $"NotePresenter dependencies: tap={tapTemplate}, hold={holdTemplate}, material={noteMaterial}."
+                    $"NotePresenter dependencies: tap={tapTemplate}, hold={holdTemplate}."
                 );
             }
 
@@ -122,7 +119,6 @@ namespace RhythmDojo.Presentation
             for (int i = 0; i < views.Length; i++)
             {
                 views[i].name = $"Note {i:00} - {chart[i].Kind} - Lane {chart[i].Lane}";
-                views[i].SetMaterial(noteMaterial);
                 views[i].Render(chart[i], NoteState.Pending, 0, scroll, mode, settings);
             }
         }

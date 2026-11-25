@@ -25,9 +25,6 @@ namespace RhythmDojo.Core
         private GameSettings settings;
 
         [SerializeField]
-        private Camera gameplayCamera;
-
-        [SerializeField]
         private RhythmGameController controller;
 
         [SerializeField]
@@ -287,8 +284,7 @@ namespace RhythmDojo.Core
             hits.Initialize(
                 controller.ReadModel,
                 runtimeMode,
-                gameplayCamera,
-                hud.GetComponent<Canvas>()
+                playfield
             );
             if (trainingPlayback?.IsDemonstration != true)
             {
@@ -485,6 +481,7 @@ namespace RhythmDojo.Core
             }
 
             var gameplay = readModel.Snapshot;
+            playfield.RenderInputs(readModel);
             playfield.RenderMeasureLines(gameplay.Session.State, gameplay.SongTime);
 
             if (!flow || flow.Transitioning)

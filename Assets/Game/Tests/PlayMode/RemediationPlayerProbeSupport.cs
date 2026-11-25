@@ -436,8 +436,7 @@ namespace RhythmDojo.Tests
         private IEnumerator Capture(string name)
         {
             yield return null;
-            // Gameplay's MainCamera feeds a RawImage, while a separate camera presents the UI.
-            // Select by output ownership rather than camera names or tags.
+            // Capture the camera that actually presents the current scene on display zero.
             var camera = Object.FindObjectsByType<Camera>(FindObjectsSortMode.None)
                 .Where(value => value.isActiveAndEnabled && !value.targetTexture)
                 .Where(value => value.targetDisplay == 0)
@@ -447,7 +446,7 @@ namespace RhythmDojo.Tests
             var canvases = Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None)
                 .Where(canvas => canvas.isRootCanvas && canvas.renderMode == RenderMode.ScreenSpaceOverlay)
                 .Select(canvas => (canvas, canvas.worldCamera, canvas.planeDistance)).ToArray();
-            // Match the player dimensions so GameplayViewport keeps its projection and texture size.
+            // Match the player dimensions so the overlay retains its fitted lane and HUD layout.
             var target = new RenderTexture(Screen.width, Screen.height, 24, RenderTextureFormat.ARGB32);
             var texture = new Texture2D(Screen.width, Screen.height, TextureFormat.RGB24, false);
             var previous = RenderTexture.active;
@@ -475,7 +474,7 @@ namespace RhythmDojo.Tests
                     RenderOffscreen(source, source.targetTexture);
                 }
                 // Canvas layers may also contain world meshes. Preserve the display camera's
-                // original world visibility after filling the gameplay RawImage sources.
+                // original world visibility while compositing the overlay.
                 foreach (var renderer in Object.FindObjectsByType<Renderer>(FindObjectsSortMode.None))
                 {
                     if (!renderer.enabled)

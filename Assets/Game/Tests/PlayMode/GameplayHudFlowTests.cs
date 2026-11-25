@@ -29,27 +29,18 @@ namespace RhythmDojo.Tests
 
         [UnityTest]
         [Category("SceneIntegration")]
-        public IEnumerator GameplayKeepsDisplayCameraWhileWorldRendersIntoWindow()
+        public IEnumerator StageCameraAndOverlayDrawGameplayInOrder()
         {
             yield return LoadGameplay();
             Canvas.ForceUpdateCanvases();
 
             var viewport = LaneViewport();
-            var camera = viewport.gameplayCamera;
-            Assert.That(camera.targetTexture, Is.Not.Null);
-            Assert.That(Camera.main, Is.SameAs(camera));
-
-            var displayCameras = Camera.allCameras.Where(candidate =>
-                candidate.targetTexture == null && candidate.targetDisplay == camera.targetDisplay
-            ).ToArray();
-            Assert.That(displayCameras.Length, Is.EqualTo(1));
             var room = UnityEngine.Object.FindFirstObjectByType<DojoRoomPhaseView>();
-            Assert.That(displayCameras[0], Is.SameAs(room.stageCamera));
-            Assert.That(displayCameras[0].cullingMask, Is.EqualTo(1 << room.scenery[0].trainee.gameObject.layer));
-            Assert.That(displayCameras[0].cullingMask & camera.cullingMask, Is.Zero,
-                "The stage and lane geometry must have separate camera projections.");
-            Assert.That(displayCameras[0].GetComponent<AudioListener>(), Is.Null);
-            Assert.That(displayCameras[0].rect, Is.EqualTo(new Rect(0, 0, 1, 1)));
+            Assert.That(Camera.allCameras, Is.EquivalentTo(new[] { room.stageCamera }));
+            Assert.That(room.stageCamera.orthographic, Is.True);
+            Assert.That(room.stageCamera.targetTexture, Is.Null);
+            Assert.That(viewport.GetComponentInParent<Canvas>().renderMode, Is.EqualTo(RenderMode.ScreenSpaceOverlay));
+            Assert.That(viewport.GetComponentsInChildren<MeshRenderer>(true), Is.Empty);
         }
 
         [UnityTest]
@@ -81,48 +72,46 @@ namespace RhythmDojo.Tests
             Assert.That(view.railOpacity.transform.IsChildOf(pauseMenu.panel.transform), Is.True);
             Assert.That(view.railOpacity.gameObject.activeInHierarchy, Is.False);
             var playfield = UnityEngine.Object.FindFirstObjectByType<PlayfieldPresenter>();
-            var lane = playfield.transform.Find("Lane 0").GetComponent<Renderer>();
-            var rail = playfield.transform.Find("Rail 0").GetComponent<Renderer>();
-            var centerRail = playfield.transform.Find("Rail 2");
-            var judgment = playfield.transform.Find("Judgement Line").GetComponent<Renderer>();
-            Assert.That(centerRail.localScale.x, Is.GreaterThan(rail.transform.localScale.x));
-
-            var hold = UnityEngine.Object.FindObjectsByType<NoteView>(FindObjectsSortMode.None)
-                .First(note => note.HasBody);
-            var tailMarker = hold.transform.Find("Hold End Marker");
-            var holdBody = hold.transform.Find("Hold Body");
-            Assert.That(tailMarker, Is.Not.Null);
-            Assert.That(holdBody, Is.Not.Null);
-            Assert.That(tailMarker.localScale.x, Is.GreaterThan(holdBody.localScale.x));
-
+            var lane = playfield.transform.Find("Lane 0").GetComponent<Image>();
+            var rail = playfield.transform.Find("Rail 0").GetComponent<Image>();
+            var judgment = playfield.judgmentLine;
             var flow = UnityEngine.Object.FindFirstObjectByType<AppFlowController>();
-            var assembly = playfield.GetComponentsInChildren<Renderer>(true);
+            var assembly = playfield.GetComponentsInChildren<Image>(true);
             playfield.Build(flow.CurrentRequest.Song.Mode, flow.Settings.presentation);
-            CollectionAssert.AreEqual(assembly, playfield.GetComponentsInChildren<Renderer>(true),
-                "Reinitializing the same mode must retain its authored floor and strike shoes.");
-            var grain = lane.sharedMaterial.GetTexture("_BaseMap");
-            playfield.SetRailOpacity(.5f);
-            Assert.That(lane.sharedMaterial.GetTexture("_BaseMap"), Is.SameAs(grain));
-            playfield.SetRailOpacity(1);
+            CollectionAssert.AreEquivalent(assembly, playfield.GetComponentsInChildren<Image>(true));
+            var note = UnityEngine.Object.FindFirstObjectByType<NotePresenter>().GetComponentInChildren<NoteView>(true);
+            var head = note.transform.Find("Head").GetComponent<Image>();
+            yield return Press(Key.Space);
+            yield return Press(Key.Escape);
+            yield return Await(() => pauseMenu.panel.activeSelf);
+            yield return Press(Key.DownArrow);
+            yield return Press(Key.DownArrow);
+            Assert.That(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject,
+                Is.SameAs(view.railOpacity.gameObject));
+            yield return Press(Key.LeftArrow);
+            Assert.That(lane.color.a, Is.LessThan(1));
+            Assert.That(lane.color.a, Is.EqualTo(view.railOpacity.value));
 
-            float beforeOpacity = lane.sharedMaterial.GetColor("_BaseColor").a;
-            Assert.That(view.railOpacity.interactable, Is.False);
+            view.railOpacity.value = 0;
+            Assert.That(lane.color.a, Is.Zero);
+            Assert.That(rail.color.a, Is.Zero);
+            Assert.That(judgment.color.a, Is.EqualTo(1));
+            Assert.That(head.color.a, Is.EqualTo(1));
             view.railOpacity.value = .5f;
-            view.railOpacity.onValueChanged.Invoke(0);
-            Assert.That(lane.sharedMaterial.GetColor("_BaseColor").a, Is.EqualTo(beforeOpacity));
-            Assert.That(lane.enabled, Is.True);
-            Assert.That(rail.enabled, Is.True);
-            Assert.That(judgment.enabled, Is.True);
+            Assert.That(lane.color.a, Is.EqualTo(.5f));
 
             var tempo = new TempoMap(new[] { new TempoPoint(0, 120), new TempoPoint(1, 60) });
-            var scroll = new ConstantScrollTimeline(10, 1);
+            var scroll = new ConstantScrollTimeline(5, 1);
             var chart = new ChartData(new[] { NoteData.Tap(0, 4) }, 5);
             playfield.ConfigureMeasureLines(tempo, scroll, chart);
             playfield.RenderMeasureLines(SessionState.Playing, 1);
-            var line = playfield.transform.Find("Measure Line");
-            Assert.That(line.position.z, Is.EqualTo(20).Within(.001));
+            var line = playfield.grid.GetComponentsInChildren<Image>().Single(i => i.sprite == flow.Settings.presentation.measure);
+            Assert.That(line.color.a, Is.EqualTo(.5f));
+            Assert.That(line.rectTransform.anchoredPosition.y - judgment.rectTransform.anchoredPosition.y,
+                Is.EqualTo(100).Within(.001));
             playfield.RenderMeasureLines(SessionState.Playing, 3);
-            Assert.That(line.position.z, Is.Zero.Within(.001));
+            line = playfield.grid.GetComponentsInChildren<Image>().First(i => i.sprite == flow.Settings.presentation.measure);
+            Assert.That(line.rectTransform.position.y, Is.EqualTo(judgment.rectTransform.position.y).Within(.001));
             playfield.RenderMeasureLines(SessionState.Ready, 0);
             Assert.That(line.gameObject.activeSelf, Is.False);
         }
@@ -133,8 +122,16 @@ namespace RhythmDojo.Tests
         {
             yield return LoadGameplay();
             var viewport = LaneViewport();
-            var point = viewport.gameplayCamera.WorldToScreenPoint(new Vector3(.2f, .05f, 0));
-            Assert.That(point.y, Is.LessThan(Screen.height * .5f));
+            var playfield = viewport.GetComponentInChildren<PlayfieldPresenter>();
+            var line = playfield.judgmentLine.rectTransform;
+            var point = RectTransformUtility.WorldToScreenPoint(null, line.TransformPoint(3, 0, 0));
+            var drawing = (RectTransform)playfield.transform.Find("Lane 0");
+            var entry = RectTransformUtility.WorldToScreenPoint(null, drawing.TransformPoint(0, drawing.rect.yMax, 0));
+            var bottom = RectTransformUtility.WorldToScreenPoint(null, drawing.TransformPoint(0, drawing.rect.yMin, 0));
+            Assert.That((entry.y - bottom.y) / Screen.height, Is.GreaterThanOrEqualTo(.90f));
+            Assert.That(bottom.y / Screen.height, Is.InRange(0f, .02f));
+            Assert.That(point.y / Screen.height, Is.InRange(.06f, .10f));
+            Assert.That((entry.y - point.y) / Screen.height, Is.GreaterThanOrEqualTo(.90f));
 
             yield return new WaitForEndOfFrame();
             var capture = ScreenCapture.CaptureScreenshotAsTexture();
@@ -170,16 +167,32 @@ namespace RhythmDojo.Tests
         internal static GameplayViewport LaneViewport()
         {
             var hud = UnityEngine.Object.FindFirstObjectByType<GameplayHudView>();
-            return UnityEngine.Object.FindObjectsByType<GameplayViewport>(FindObjectsSortMode.None)
-                .Single(viewport => viewport.gameplayCamera == hud.gameplayCamera);
+            return hud.viewport;
         }
 
-        internal static Texture2D CaptureGameplayDisplay(GameplayViewport viewport)
+        private static void AssertFeedbackInsideLane(GameplayHudView view)
+        {
+            var field = view.viewport.field;
+            var combo = RectTransformUtility.CalculateRelativeRectTransformBounds(field, view.combo.rectTransform);
+            var grade = RectTransformUtility.CalculateRelativeRectTransformBounds(field, view.judgment.rectTransform);
+            var timing = RectTransformUtility.CalculateRelativeRectTransformBounds(field, view.timing.rectTransform);
+            foreach (var bounds in new[] { combo, grade, timing })
+            {
+                Assert.That(bounds.center.x, Is.EqualTo(field.rect.center.x).Within(3));
+                Assert.That(bounds.min.x, Is.GreaterThan(field.rect.xMin));
+                Assert.That(bounds.max.x, Is.LessThan(field.rect.xMax));
+                Assert.That(bounds.min.y, Is.GreaterThan(field.rect.center.y));
+                Assert.That(bounds.max.y, Is.LessThan(field.rect.yMax));
+            }
+
+            Assert.That(combo.center.y, Is.GreaterThan(grade.max.y));
+            Assert.That(timing.center.y, Is.LessThan(grade.min.y));
+        }
+
+        internal static Texture2D CaptureGameplayDisplay()
         {
             Canvas.ForceUpdateCanvases();
-            viewport.gameplayCamera.Render();
-            var camera = Camera.allCameras.Single(candidate =>
-                candidate.targetTexture == null && candidate.targetDisplay == viewport.gameplayCamera.targetDisplay);
+            var camera = Camera.main;
             var canvases = UnityEngine.Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None)
                 .Where(canvas => canvas.isRootCanvas && canvas.renderMode == RenderMode.ScreenSpaceOverlay)
                 .Select(canvas => (canvas, canvas.worldCamera, canvas.planeDistance))
@@ -243,7 +256,7 @@ namespace RhythmDojo.Tests
 
         [UnityTest]
         [Category("SceneIntegration")]
-        public IEnumerator GameplayWindowPreservesProjectionAndReleasesCameraOnDisable()
+        public IEnumerator ViewportResizesWithoutSeparatingNotesReceptorsAndJudgment()
         {
             yield return LoadGameplay();
             yield return null;
@@ -251,42 +264,30 @@ namespace RhythmDojo.Tests
 
             var viewport = LaneViewport();
             Assert.That(viewport, Is.Not.Null);
-            var image = viewport.GetComponent<UnityEngine.UI.RawImage>();
-            var camera = viewport.gameplayCamera;
-            var target = camera.targetTexture;
-            Assert.That(target, Is.Not.Null);
-            Assert.That(image.texture, Is.SameAs(target));
-            Assert.That(target.IsCreated(), Is.True);
-            Assert.That(image.raycastTarget, Is.False);
+            var host = (RectTransform)viewport.transform;
+            var field = viewport.GetComponentInChildren<PlayfieldPresenter>();
+            var note = UnityEngine.Object.FindFirstObjectByType<NotePresenter>().GetComponentInChildren<NoteView>(true);
+            var head = (RectTransform)note.transform.Find("Head");
+            var mode = UnityEngine.Object.FindFirstObjectByType<AppFlowController>().CurrentRequest.Song.Mode;
+            var settings = UnityEngine.Object.FindFirstObjectByType<AppFlowController>().Settings.presentation;
+            foreach (var size in new[] { new Vector2(650, 500), new Vector2(220, 500), new Vector2(800, 250) })
+            {
+                host.anchorMin = host.anchorMax = Vector2.one * .5f;
+                host.sizeDelta = size;
+                Canvas.ForceUpdateCanvases();
+                note.Render(NoteData.Tap(2, 1), NoteState.Pending, 1, new ConstantScrollTimeline(8, 1), mode, settings);
+                var shoe = (RectTransform)field.transform.Find("Strike Shoe 2");
+                Assert.That(head.position.x, Is.EqualTo(shoe.position.x).Within(.01));
+                Assert.That(head.position.y, Is.EqualTo(field.judgmentLine.rectTransform.position.y).Within(.01));
+                Assert.That(viewport.field.rect.width * viewport.field.localScale.x, Is.LessThanOrEqualTo(size.x + .01f));
+                Assert.That(viewport.field.rect.height * viewport.field.localScale.y, Is.EqualTo(size.y).Within(.01f));
 
-            // A projected judgment point must stay at the same screen position after
-            // cropping, so the HUD's world-space hit feedback remains aligned.
-            var point = camera.WorldToViewportPoint(Vector3.zero);
-            var corners = new Vector3[4];
-            image.rectTransform.GetWorldCorners(corners);
-            var min = RectTransformUtility.WorldToScreenPoint(null, corners[0]);
-            var max = RectTransformUtility.WorldToScreenPoint(null, corners[2]);
-            var uv = image.uvRect;
-            Assert.That(uv.xMin, Is.GreaterThan(0));
-            Assert.That(uv.xMax, Is.LessThan(1));
-            Assert.That(uv.yMin, Is.GreaterThan(0));
-            Assert.That(uv.yMax, Is.LessThan(1));
-            float displayedX = Mathf.LerpUnclamped(min.x, max.x, (point.x - uv.x) / uv.width);
-            float displayedY = Mathf.LerpUnclamped(min.y, max.y, (point.y - uv.y) / uv.height);
-            Assert.That(displayedX, Is.EqualTo(point.x * target.width).Within(1));
-            Assert.That(displayedY, Is.EqualTo(point.y * target.height).Within(1));
-
-            viewport.enabled = false;
-            Assert.That(camera.targetTexture, Is.Null);
-            Assert.That(image.texture, Is.Null);
-            yield return null;
-            Assert.That(target == null, Is.True, "The old render texture must be destroyed.");
-
-            viewport.enabled = true;
-            yield return null;
-            Canvas.ForceUpdateCanvases();
-            Assert.That(camera.targetTexture, Is.Not.Null);
-            Assert.That(image.texture, Is.SameAs(camera.targetTexture));
+                // At this speed the head used to be clipped 2.5 seconds ahead of contact.
+                note.Render(NoteData.Tap(2, 3.5), NoteState.Pending, 1, new ConstantScrollTimeline(8, 1), mode, settings);
+                Assert.That(note.gameObject.activeSelf, Is.True);
+                float travel = head.position.y - field.judgmentLine.rectTransform.position.y;
+                Assert.That(travel, Is.EqualTo(200 * viewport.field.lossyScale.y).Within(.01f));
+            }
         }
 
         private sealed class HudReadModel : IGameplayReadModel
@@ -404,14 +405,13 @@ namespace RhythmDojo.Tests
             yield return new WaitForSecondsRealtime(.07f);
             Assert.That(view.songTitle.text, Is.EqualTo("HUD 검증곡"));
             var judgmentRect = (RectTransform)view.judgmentGroup.transform;
-            Vector2 middle = judgmentRect.anchorMin;
+            float middle = view.laneReadout.position.y;
             var presentation = PresentationPreferences.Current;
             model.Set(SessionState.Playing, 1, 0, 0, 1);
             presentation.judgmentPosition = JudgmentPosition.Upper;
             model.Judge(Judgment.Perfect, -.012);
-            Assert.That(judgmentRect.anchorMin.y, Is.GreaterThanOrEqualTo(.80f),
-                "The upper stamp must clear the incoming notes.");
-            Assert.That(judgmentRect.anchorMax.y, Is.LessThanOrEqualTo(1));
+            Assert.That(view.laneReadout.position.y, Is.GreaterThan(middle));
+            AssertFeedbackInsideLane(view);
             Assert.That(view.judgment.transform.IsChildOf(judgmentRect), Is.True);
             Assert.That(view.timing.transform.IsChildOf(judgmentRect), Is.True);
             Assert.That(view.judgmentGroup.alpha, Is.EqualTo(.96f));
@@ -425,7 +425,8 @@ namespace RhythmDojo.Tests
             StringAssert.Contains("빠름", view.timing.text);
             presentation.judgmentPosition = JudgmentPosition.Middle;
             model.Hold();
-            Assert.That(judgmentRect.anchorMin, Is.EqualTo(middle));
+            Assert.That(view.laneReadout.position.y, Is.EqualTo(middle));
+            AssertFeedbackInsideLane(view);
             Assert.That(view.judgment.fontSize, Is.EqualTo(44));
             yield return new WaitForSecondsRealtime(.07f);
             Assert.That(view.judgment.text, Is.EqualTo("절묘"));
@@ -438,7 +439,8 @@ namespace RhythmDojo.Tests
             presentation.judgmentPosition = JudgmentPosition.Lower;
             model.Judge(Judgment.Good, .055);
             Assert.That(judgmentRect.localScale.x, Is.LessThan(perfectScale));
-            Assert.That(judgmentRect.anchorMin.y, Is.LessThan(middle.y));
+            Assert.That(view.laneReadout.position.y, Is.LessThan(middle));
+            AssertFeedbackInsideLane(view);
             StringAssert.Contains("늦음", view.timing.text);
             Assert.That(view.judgment.text, Is.EqualTo("명중"));
             model.Set(SessionState.Playing, 1, 1, 1, 0);
@@ -452,13 +454,11 @@ namespace RhythmDojo.Tests
             model.Set(SessionState.Playing, 99, 1, 1, 100);
             model.Judge(Judgment.Perfect, 0);
             yield return Await(() => view.combo.text == "100");
-            Assert.That(view.combo.rectTransform.anchorMin.y, Is.GreaterThanOrEqualTo(.80f));
             model.Set(SessionState.Ready, 0, 0, 0, 0, ReadyReason.FocusLost);
             model.Reset();
             yield return new WaitForSecondsRealtime(.07f);
             Assert.That(view.judgment.text, Is.Empty);
-            Assert.That(judgmentRect.anchorMin, Is.EqualTo(middle));
-            Assert.That(view.judgmentGroup.transform.parent, Is.EqualTo(view.transform));
+            Assert.That(view.laneReadout.position.y, Is.EqualTo(middle));
             StringAssert.Contains("창 전환", view.timing.text);
             Assert.That(view.judgmentGroup.alpha, Is.Zero);
             Assert.That(view.judgmentMotion.echo.text, Is.Empty);

@@ -1,81 +1,32 @@
 using System;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace RhythmDojo.Gameplay
 {
     [CreateAssetMenu(menuName = "Rhythm Dojo/Presentation Settings")]
     public sealed class GameplayPresentationSettings : ScriptableObject
     {
-        public MeshRenderer beamTemplate;
-        public SpriteRenderer strikeShoe;
-        public Vector3 headSize = new Vector3(1.05f, .22f, .32f);
-        public float headHeight = .28f;
-        public float bodyWidth = .42f;
-        public float bodyHeight = .16f;
-        public float bodyElevation = .2f;
-        public float minimumBodyLength = .01f;
-        public float highwayLength = 100;
-        public float highwayCenter = 48;
-        public float laneGap = .08f;
-        public float railWidth = .045f;
-        public float railHeight = .06f;
-        public float judgmentLineDepth = .13f;
-        public float judgmentLineHeight = .1f;
+        public Image fieldTemplate;
+        public Sprite highway, divider, border, strikeShoe, pressedShoe, judgmentLine, beat, measure;
         public double flashDuration = .22;
         public double hudRefreshInterval = .05;
-        public Color perfectColor = new Color(0.64f, 0.85f, 0.72f);
-        public Color goodColor = new Color(0.97f, 0.75f, 0.39f);
-        public Color missColor = new Color(0.92f, 0.36f, 0.29f);
-        public Color heldColor = new Color(0.76f, 0.87f, 0.73f);
-        public Color idleColor = new Color(0.24f, 0.12f, 0.085f);
-        public Color highwayColor = Color.white;
-        public Color railColor = new Color(0.39f, 0.29f, 0.19f);
-        public Color judgmentLineColor = new Color(0.96f, 0.83f, 0.58f);
+        public Color perfectColor = new Color(.64f, .85f, .72f);
+        public Color goodColor = new Color(.97f, .75f, .39f);
+        public Color missColor = new Color(.92f, .36f, .29f);
+        public Color heldColor = new Color(.76f, .87f, .73f);
+        public Color idleColor = new Color(.24f, .12f, .085f);
 
         public void Validate()
         {
-            foreach (
-                float value in new[]
-                {
-                    headSize.x,
-                    headSize.y,
-                    headSize.z,
-                    bodyWidth,
-                    bodyHeight,
-                    minimumBodyLength,
-                    highwayLength,
-                    railWidth,
-                    railHeight,
-                    judgmentLineDepth,
-                    judgmentLineHeight,
-                }
-            )
+            if (!double.IsFinite(flashDuration) || flashDuration <= 0)
             {
-                if (!float.IsFinite(value) || value <= 0)
-                {
-                    throw new InvalidOperationException("Invalid presentation dimensions.");
-                }
+                throw new InvalidOperationException("Invalid input flash duration.");
             }
 
-            if (
-                (!double.IsFinite(flashDuration) || flashDuration <= 0)
-                || !double.IsFinite(hudRefreshInterval)
-            )
+            if (!double.IsFinite(hudRefreshInterval) || hudRefreshInterval <= 0)
             {
-                throw new InvalidOperationException("Invalid presentation timing or position.");
-            }
-
-            if (
-                (hudRefreshInterval <= 0 || !float.IsFinite(headHeight))
-                || !float.IsFinite(bodyElevation)
-            )
-            {
-                throw new InvalidOperationException("Invalid presentation timing or position.");
-            }
-
-            if ((!float.IsFinite(highwayCenter) || !float.IsFinite(laneGap)) || laneGap < 0)
-            {
-                throw new InvalidOperationException("Invalid presentation timing or position.");
+                throw new InvalidOperationException("Invalid HUD refresh interval.");
             }
         }
     }

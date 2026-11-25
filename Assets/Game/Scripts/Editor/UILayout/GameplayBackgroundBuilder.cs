@@ -18,10 +18,9 @@ namespace RhythmDojo.EditorTools
             material = art.StageMaterial(index);
         }
 
-        public static void Build(Camera camera, Camera displayCamera, GameplayCompositionRoot root)
+        public static void Build(Camera displayCamera, GameplayCompositionRoot root)
         {
             var art = new ActionStageArtwork();
-            camera.cullingMask &= ~(1 << SceneryLayer);
             displayCamera.cullingMask = 1 << SceneryLayer;
             displayCamera.orthographic = true;
             displayCamera.orthographicSize = 135;

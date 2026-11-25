@@ -35,11 +35,8 @@ namespace RhythmDojo.Tests
             Assert.That(view.songDetails.text, Is.EqualTo(flow.CurrentRequest.Difficulty.DisplayName));
             Assert.That(view.combo.text, Is.Empty);
             Assert.That(view.healthFill.gameObject.activeInHierarchy, Is.True);
-            var mode = flow.CurrentRequest.Song.Mode;
-            var presentation = flow.Settings.presentation;
-            float edge = view.gameplayCamera.WorldToViewportPoint(new Vector3(
-                mode.LaneCount * mode.LaneSpacing * .5f, 0,
-                presentation.highwayCenter - presentation.highwayLength * .5f)).x;
+            var field = view.viewport.field;
+            float edge = RectTransformUtility.WorldToScreenPoint(null, field.TransformPoint(field.rect.xMax, 0, 0)).x / Screen.width;
             Assert.That(view.healthGauge.anchorMin.x - edge, Is.EqualTo(.012f).Within(.002f));
             Assert.That(view.lanes.laneRoot.gameObject.activeInHierarchy, Is.True);
 
@@ -80,7 +77,7 @@ namespace RhythmDojo.Tests
 
         private static void Capture(string name)
         {
-            var texture = GameplayHudFlowTests.CaptureGameplayDisplay(GameplayHudFlowTests.LaneViewport());
+            var texture = GameplayHudFlowTests.CaptureGameplayDisplay();
             try
             {
                 System.IO.File.WriteAllBytes("Logs/" + name + ".png", texture.EncodeToPNG());

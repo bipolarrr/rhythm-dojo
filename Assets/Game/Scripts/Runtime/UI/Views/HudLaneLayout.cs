@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using RhythmDojo.Gameplay;
 using RhythmDojo.Services;
 using UnityEngine;
@@ -9,97 +10,47 @@ namespace RhythmDojo.UI
     public sealed class HudLaneLayout : MonoBehaviour
     {
         public RectTransform laneRoot;
-        public bool pixelTheme;
-        public Font font;
-        public Sprite sprite;
+        public Image template;
+        [SerializeField] private List<Image> keys = new List<Image>();
 
         public void Validate()
         {
-            if (!laneRoot)
+            if (!laneRoot || !template)
             {
-                throw new InvalidOperationException("HUD lane root missing.");
+                throw new InvalidOperationException("HUD key legend missing.");
             }
         }
 
         public Image[] Build(GameModeDefinition mode, GameplayPresentationSettings presentation,
             string modeId = null)
         {
-            for (int i = laneRoot.childCount - 1; i >= 0; i--)
-            {
-                var go = laneRoot.GetChild(i).gameObject;
-                go.SetActive(false);
-
-                if (UnityEngine.Application.isPlaying)
-                {
-                    Destroy(go);
-                }
-                else
-                {
-                    DestroyImmediate(go);
-                }
-            }
-
+            Validate();
             var indicators = new Image[mode.LaneCount];
-
             for (int i = 0; i < mode.LaneCount; i++)
             {
-                var go = new GameObject($"Lane {i} Feedback", typeof(RectTransform));
-                go.transform.SetParent(laneRoot, false);
-                indicators[i] = go.AddComponent<Image>();
-                indicators[i].color = presentation.idleColor;
-                indicators[i].raycastTarget = false;
-                indicators[i].sprite = sprite;
-                indicators[i].type = Image.Type.Sliced;
-                indicators[i].pixelsPerUnitMultiplier = 15;
-
-                var outline = go.AddComponent<Outline>();
-                outline.effectColor = new Color(.30f, .48f, .49f, .7f);
-                outline.effectDistance = new Vector2(1, -1);
-                if (pixelTheme)
+                if (i == keys.Count)
                 {
-                    indicators[i].color = Color.white;
-                    outline.enabled = false;
-                    outline.effectColor = new Color(.72f, .46f, .24f);
-                    outline.effectDistance = new Vector2(1, -1);
+                    keys.Add(Instantiate(template, laneRoot));
                 }
 
-                var rect = (RectTransform)go.transform;
-                rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(.5f, 0);
-                rect.anchoredPosition = new Vector2(
-                    GameModeDefinition.CenteredPosition(i, mode.LaneCount, mode.HudLaneSpacing),
-                    28
-                );
-                rect.sizeDelta = new Vector2(mode.HudLaneSpacing * .88f, 48);
-
+                var image = keys[i];
+                image.gameObject.SetActive(true);
+                image.name = $"Lane {i} Feedback";
+                var point = GameplayViewport.Position(i, mode.LaneCount, 0);
+                image.rectTransform.anchoredPosition = new Vector2(point.x, 8);
                 string label = mode.GetLane(i).displayName;
                 if (UnityEngine.Application.isPlaying)
                 {
                     label = PlayKeyBindings.GetLabel(mode, modeId ?? mode.name, i);
                 }
-                var key = UiElements.Label(
-                    "Key",
-                    go.transform,
-                    label,
-                    Vector2.zero,
-                    rect.sizeDelta,
-                    26
-                );
-                key.alignment = TextAnchor.MiddleCenter;
-                key.resizeTextForBestFit = true;
-                key.resizeTextMinSize = 12;
-                key.resizeTextMaxSize = 26;
-                if (font)
-                {
-                    key.font = font;
-                }
-
-                key.color = new Color(.94f, .93f, .85f);
-                if (pixelTheme)
-                {
-                    key.color = new Color(.24f, .12f, .085f);
-                }
+                image.GetComponentInChildren<Text>().text = label;
+                indicators[i] = image;
             }
 
+            for (int i = indicators.Length; i < keys.Count; i++)
+            {
+                keys[i].gameObject.SetActive(false);
+            }
             return indicators;
         }
     }

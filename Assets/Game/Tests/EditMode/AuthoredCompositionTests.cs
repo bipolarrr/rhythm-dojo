@@ -5,6 +5,7 @@ using RhythmDojo.Presentation;
 using RhythmDojo.UI;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace RhythmDojo.Tests
 {
@@ -35,17 +36,15 @@ namespace RhythmDojo.Tests
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Game/Prefabs/" + name + ".prefab");
             var view = prefab.GetComponent<NoteView>();
             view.Validate(kind);
-            var fields = new SerializedObject(view);
-            var skin = (SpriteRenderer)fields.FindProperty("headSkin").objectReferenceValue;
+            var skin = view.transform.Find("Head").GetComponent<Image>();
             Assert.That(AssetDatabase.Contains(skin.sprite), Is.True);
-            Assert.That(skin.transform.IsChildOf(view.transform), Is.True);
-            Assert.That(AssetDatabase.Contains(skin.sharedMaterial), Is.True);
+            Assert.That(skin.sprite.texture.filterMode, Is.EqualTo(FilterMode.Bilinear));
+            Assert.That(skin.sprite.rect.width, Is.GreaterThan(skin.rectTransform.rect.width));
             var clone = UnityEngine.Object.Instantiate(prefab);
             try
             {
-                var cloneSkin = clone.GetComponentsInChildren<SpriteRenderer>(true).Single(renderer => renderer.transform.IsChildOf(clone.transform.Find("Head")));
+                var cloneSkin = clone.transform.Find("Head").GetComponent<Image>();
                 Assert.That(cloneSkin.sprite, Is.SameAs(skin.sprite));
-                Assert.That(cloneSkin.sharedMaterial, Is.SameAs(skin.sharedMaterial));
                 UnityEngine.Object.DestroyImmediate(clone);
                 clone = null;
                 Assert.That(skin.sprite, Is.Not.Null, "Destroying a note must not destroy shared artwork.");
@@ -59,9 +58,9 @@ namespace RhythmDojo.Tests
             }
             if (kind == NoteKind.Hold)
             {
-                var tail = (SpriteRenderer)fields.FindProperty("tailMarker").objectReferenceValue;
-                Assert.That(tail.sprite, Is.SameAs(skin.sprite));
-                Assert.That(tail.sharedMaterial, Is.SameAs(skin.sharedMaterial));
+                var tail = view.transform.Find("Hold End Marker").GetComponent<Image>();
+                Assert.That(AssetDatabase.Contains(tail.sprite), Is.True);
+                Assert.That(tail.sprite, Is.Not.SameAs(skin.sprite));
             }
         }
 

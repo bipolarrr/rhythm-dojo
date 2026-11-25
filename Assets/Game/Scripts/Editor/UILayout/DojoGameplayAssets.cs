@@ -23,30 +23,7 @@ namespace RhythmDojo.EditorTools
             Load("WoodPanel", new Rect(26, 94, 1484, 860), new Vector4(104, 100, 104, 100));
             Load("StrikeTile", new Rect(0, 173, 1983, 444), new Vector4(100, 80, 100, 80));
             Load("GameplayScroll", new Rect(0, 0, 1024, 1536), Vector4.zero);
-            PrepareNoteMaterial();
             AssetDatabase.SaveAssets();
-        }
-
-        public static void PrepareNoteMaterial()
-        {
-            var sprite = Tile;
-            var material = AssetDatabase.LoadAssetAtPath<Material>("Assets/Game/Materials/Note Base.mat");
-            if (!material)
-            {
-                throw new InvalidOperationException("Note material missing.");
-            }
-
-            material.SetTexture("_BaseMap", sprite.texture);
-            material.SetTextureScale("_BaseMap", new Vector2(
-                sprite.rect.width / sprite.texture.width,
-                sprite.rect.height / sprite.texture.height
-            ));
-            material.SetTextureOffset("_BaseMap", new Vector2(
-                sprite.rect.x / sprite.texture.width,
-                sprite.rect.y / sprite.texture.height
-            ));
-            material.SetColor("_BaseColor", Color.white);
-            EditorUtility.SetDirty(material);
         }
 
         private static Sprite Load(string name, Rect rect, Vector4 border)

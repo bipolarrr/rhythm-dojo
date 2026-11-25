@@ -231,8 +231,6 @@ namespace RhythmDojo.Tests
                 AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Game/Prefabs/TapNote.prefab").GetComponent<NoteView>();
             serialized.FindProperty("holdTemplate").objectReferenceValue =
                 AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Game/Prefabs/HoldNote.prefab").GetComponent<NoteView>();
-            serialized.FindProperty("noteMaterial").objectReferenceValue =
-                AssetDatabase.LoadAssetAtPath<Material>("Assets/Game/Materials/Note Base.mat");
             serialized.ApplyModifiedPropertiesWithoutUndo();
             presenter.Configure(Settings.catalog[0].Mode, Settings.presentation);
             presenter.Initialize(Settings.catalog[0].Chart.ToChartData(), Settings.catalog[0].Mode.ToRules(),
@@ -361,18 +359,21 @@ namespace RhythmDojo.Tests
                 var hold = NoteData.Hold(0, 5.2, 6.8);
                 view.Render(hold, NoteState.Pending, 5, scroll, song.Mode, Settings.presentation);
 
-                // 150 BPM gives 10 units/s before 6s; 180 BPM gives 12 units/s afterwards.
-                Assert.That(view.transform.Find("Head").position.z, Is.EqualTo(2f).Within(.0001));
-                Assert.That(
-                    view.transform.Find("Hold Body").localScale.z,
-                    Is.EqualTo(17.6f).Within(.0001)
-                );
+                // At 150 BPM the first .2s spans two scroll units. The tail is in the upper extension.
+                var head = (RectTransform)view.transform.Find("Head");
+                var body = (RectTransform)view.transform.Find("Hold Body");
+                var tail = (RectTransform)view.transform.Find("Hold End Marker");
+                Assert.That(head.anchoredPosition.y, Is.EqualTo(GameplayViewport.StrikeY + 20).Within(.0001));
+                Assert.That(tail.anchoredPosition.y - head.anchoredPosition.y, Is.EqualTo(176).Within(.0001));
+                Assert.That(body.sizeDelta.y, Is.EqualTo(176).Within(.0001));
+
+                view.Render(NoteData.Hold(0, 5.2, 12), NoteState.Pending, 5, scroll, song.Mode, Settings.presentation);
+                Assert.That(body.anchoredPosition.y + body.sizeDelta.y, Is.EqualTo(GameplayViewport.Height + 4).Within(.001));
+
                 view.Render(hold, NoteState.Holding, 6.2, scroll, song.Mode, Settings.presentation);
-                Assert.That(view.transform.Find("Head").position.z, Is.Zero);
-                Assert.That(
-                    view.transform.Find("Hold Body").localScale.z,
-                    Is.EqualTo(7.2f).Within(.0001)
-                );
+                Assert.That(head.anchoredPosition.y, Is.EqualTo(GameplayViewport.StrikeY));
+                Assert.That(body.sizeDelta.y, Is.EqualTo(72).Within(.0001));
+                Assert.That(body.anchoredPosition.y + body.sizeDelta.y, Is.EqualTo(tail.anchoredPosition.y).Within(.001));
             }
             finally
             {

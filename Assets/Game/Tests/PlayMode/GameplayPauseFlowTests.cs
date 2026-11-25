@@ -45,7 +45,19 @@ namespace RhythmDojo.Tests
             double time = game.Clock.SongTime;
             int resolved = game.Session.Resolved;
             yield return new WaitForSecondsRealtime(.3f);
-            CaptureSelection("dojo-menu-refresh/pause", 1920, 1080);
+            var camera = Camera.main;
+            int cullingMask = camera.cullingMask;
+            try
+            {
+                // CaptureSelection projects the HUD onto the scenery camera for its offscreen render.
+                camera.cullingMask |= LayerMask.GetMask("Default", "UI");
+                CaptureSelection("dojo-menu-refresh/pause", 1920, 1080);
+            }
+            finally
+            {
+                camera.cullingMask = cullingMask;
+            }
+
             yield return Press(Key.D);
             Assert.That(game.Clock.SongTime, Is.EqualTo(time));
             Assert.That(game.Session.Resolved, Is.EqualTo(resolved));
@@ -115,9 +127,9 @@ namespace RhythmDojo.Tests
                 .Single(note => note.name.StartsWith("Note 00 -", System.StringComparison.Ordinal));
             var head = firstNote.transform.Find("Head");
             var playfield = Object.FindFirstObjectByType<PlayfieldPresenter>();
-            var measure = playfield.transform.Find("Measure Line");
-            double noteDistance = head.position.z;
-            double measureDistance = measure.position.z;
+            var measure = playfield.grid.GetChild(0);
+            double noteDistance = head.position.y;
+            double measureDistance = measure.position.y;
 
             // Existing pause regression now enforces immutable settings, including direct callers.
             var stored = PlayerPrefs.GetString(SelectionPreferences.StorageKey);
@@ -139,9 +151,9 @@ namespace RhythmDojo.Tests
             Assert.That(after.SongTime, Is.EqualTo(before.SongTime));
             Assert.That(game.Session, Is.SameAs(session));
             Assert.That(after.Session.Resolved, Is.EqualTo(before.Session.Resolved));
-            Assert.That(head.position.z, Is.EqualTo(noteDistance).Within(.001));
+            Assert.That(head.position.y, Is.EqualTo(noteDistance).Within(.001));
 
-            Assert.That(measure.position.z, Is.EqualTo(measureDistance).Within(.001));
+            Assert.That(measure.position.y, Is.EqualTo(measureDistance).Within(.001));
 
             yield return Click(menu.resumeButton);
             yield return Await(() => !game.IsPaused && !menu.countdown.activeSelf);

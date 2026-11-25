@@ -4,6 +4,7 @@ using System.Globalization;
 using RhythmDojo.Application;
 using RhythmDojo.Gameplay;
 using RhythmDojo.Presentation;
+using RhythmDojo.UI;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,9 +12,8 @@ namespace RhythmDojo.Authoring
 {
     public sealed class ChartGameplayPreview : MonoBehaviour
     {
-        private const int PreviewLayer = 31;
         public WorkspaceEditor workspace;
-        public RawImage image;
+        public Image image;
         public PlayfieldPresenter playfield;
         public GameplayPresentationSettings presentation;
         public ScrollSettings scrollSettings;
@@ -23,18 +23,7 @@ namespace RhythmDojo.Authoring
 
         private readonly List<NoteView> taps = new List<NoteView>();
         private readonly List<NoteView> holds = new List<NoteView>();
-        [SerializeField]
-        private Camera previewCamera;
-
-        [SerializeField]
-        private Transform previewRig;
-
-        [SerializeField]
-        private Camera displayCamera;
-
         private bool initialized;
-        private int displayMask;
-        private RenderTexture target;
         private IScrollTimeline scroll;
         private EditorSession observed;
         private EditorNote[] notes = System.Array.Empty<EditorNote>();
@@ -43,7 +32,6 @@ namespace RhythmDojo.Authoring
 
         public double SongTime { get; private set; }
         public int VisibleNoteCount { get; private set; }
-        public RenderTexture Target => target;
 
         private void LateUpdate()
         {
@@ -70,8 +58,8 @@ namespace RhythmDojo.Authoring
                 Refresh();
             }
 
-            Resize();
             SongTime = workspace.timeline.MusicTime + workspace.timeline.AudioOffset;
+            playfield.RenderMeasureLines(SessionState.Playing, SongTime);
             int tapCount = 0;
             int holdCount = 0;
             foreach (var note in notes)
@@ -80,7 +68,8 @@ namespace RhythmDojo.Authoring
                 {
                     continue;
                 }
-                if (scroll.DistanceBetween(SongTime, note.Data.StartTime) > presentation.highwayLength)
+                double distance = scroll.DistanceBetween(SongTime, note.Data.StartTime);
+                if (GameplayViewport.Position(0, 1, distance).y > GameplayViewport.Height + 4)
                 {
                     continue;
                 }
@@ -143,15 +132,6 @@ namespace RhythmDojo.Authoring
         private void Initialize()
         {
             playfield.Build(workspace.screen.Mode, presentation);
-            SetLayer(playfield.gameObject);
-            if (!previewCamera || !displayCamera)
-            {
-                throw new InvalidOperationException("Editor preview cameras missing.");
-            }
-
-            displayMask = displayCamera.cullingMask;
-            displayCamera.cullingMask &= ~(1 << PreviewLayer);
-            previewCamera.enabled = true;
             initialized = true;
         }
 
@@ -165,27 +145,16 @@ namespace RhythmDojo.Authoring
         private void UpdateScroll()
         {
             scroll = scrollSettings.CreateTimeline(ScrollMode.Constant, null, noteSpeedMultiplier);
-        }
-
-        private void Resize()
-        {
-            var canvas = image.GetComponentInParent<Canvas>();
-            int width = Mathf.Clamp(Mathf.RoundToInt(image.rectTransform.rect.width * canvas.scaleFactor), 64, 1024);
-            int height = Mathf.Clamp(Mathf.RoundToInt(image.rectTransform.rect.height * canvas.scaleFactor), 64, 1024);
-            if (target && target.width == width && target.height == height)
+            if (observed != null)
             {
-                return;
+                var tempo = new TempoMap(observed.Snapshot.TempoPoints);
+                double end = workspace.timeline.Duration + workspace.timeline.AudioOffset;
+                foreach (var note in notes)
+                {
+                    end = Math.Max(end, note.Data.EndTime);
+                }
+                playfield.ConfigureMeasureLines(tempo, scroll, end);
             }
-            if (target)
-            {
-                target.Release();
-                Destroy(target);
-            }
-            target = new RenderTexture(width, height, 24);
-            target.name = "Editor Gameplay Preview";
-            target.Create();
-            previewCamera.targetTexture = target;
-            image.texture = target;
         }
 
         private NoteView Pooled(List<NoteView> pool, NoteView template, int index)
@@ -193,7 +162,6 @@ namespace RhythmDojo.Authoring
             if (index == pool.Count)
             {
                 var view = Instantiate(template, playfield.transform);
-                SetLayer(view.gameObject);
                 pool.Add(view);
             }
             return pool[index];
@@ -207,41 +175,11 @@ namespace RhythmDojo.Authoring
             }
         }
 
-        private static void SetLayer(GameObject root)
-        {
-            foreach (var child in root.GetComponentsInChildren<Transform>(true))
-            {
-                child.gameObject.layer = PreviewLayer;
-            }
-        }
-
         private void OnDestroy()
         {
             if (observed != null)
             {
                 observed.Changed -= Refresh;
-            }
-            if (initialized && displayCamera)
-            {
-                displayCamera.cullingMask = displayMask;
-            }
-            if (previewCamera)
-            {
-                previewCamera.targetTexture = null;
-            }
-            if (target)
-            {
-                target.Release();
-                Destroy(target);
-            }
-            if (playfield)
-            {
-                Destroy(playfield.gameObject);
-            }
-
-            if (previewRig)
-            {
-                Destroy(previewRig.gameObject);
             }
         }
     }

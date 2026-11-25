@@ -55,14 +55,27 @@ namespace RhythmDojo.UI
             {
                 view.railOpacity.SetValueWithoutNotify(PresentationPreferences.Current.railOpacity);
                 railOpacityChanged(view.railOpacity.value);
+                view.railOpacity.onValueChanged.AddListener(ChangeRailOpacity);
             }
-            view.railOpacity.interactable = false;
+
+            view.railOpacity.interactable = railOpacityChanged != null;
             view.focusHudButton.interactable = false;
 
             Refresh();
         }
 
         private void Return() => returnRequested?.Invoke();
+
+        private void ChangeRailOpacity(float value)
+        {
+            if (!view.railOpacity.isActiveAndEnabled || !view.railOpacity.IsInteractable())
+            {
+                return;
+            }
+
+            railOpacityChanged(value);
+            PresentationPreferences.Current.SaveRailOpacity(value);
+        }
 
         private void ToggleFocusHud()
         {
@@ -103,7 +116,7 @@ namespace RhythmDojo.UI
 
             if (view && view.railOpacity && railOpacityChanged != null)
             {
-                view.railOpacity.onValueChanged.RemoveListener(railOpacityChanged);
+                view.railOpacity.onValueChanged.RemoveListener(ChangeRailOpacity);
             }
 
             railOpacityChanged = null;

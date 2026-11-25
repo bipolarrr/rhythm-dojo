@@ -389,10 +389,11 @@ namespace RhythmDojo.EditorTools
             var title = UiElements.Label("Preview Heading", panel, "인게임 미리보기",
                 new Vector2(12, -6), new Vector2(350, 22), 14);
             title.raycastTarget = false;
-            var go = new GameObject("Gameplay Preview", typeof(RectTransform), typeof(RawImage));
+            var go = new GameObject("Gameplay Preview", typeof(RectTransform), typeof(Image));
             go.transform.SetParent(panel, false);
-            var image = go.GetComponent<RawImage>();
+            var image = go.GetComponent<Image>();
             image.raycastTarget = false;
+            image.color = new Color(.09f, .14f, .15f);
             image.rectTransform.anchorMin = Vector2.zero;
             image.rectTransform.anchorMax = Vector2.one;
             image.rectTransform.offsetMin = new Vector2(10, 42);
@@ -419,36 +420,8 @@ namespace RhythmDojo.EditorTools
             preview.scrollSettings = SceneResources.Require<ScrollSettings>("Assets/Game/Settings/ScrollSettings.asset");
             preview.tapTemplate = SceneResources.Require<GameObject>("Assets/Game/Prefabs/TapNote.prefab").GetComponent<NoteView>();
             preview.holdTemplate = SceneResources.Require<GameObject>("Assets/Game/Prefabs/HoldNote.prefab").GetComponent<NoteView>();
-            preview.playfield = new GameObject("Editor Preview World").AddComponent<PlayfieldPresenter>();
-            var previewRig = new GameObject("Editor Preview Rig");
-            SceneDependencyAssembler.Wire(preview, "previewRig", previewRig.transform);
-            var previewCamera = new GameObject("Editor Preview Camera").AddComponent<Camera>();
-            previewCamera.transform.SetParent(previewRig.transform, false);
-            previewCamera.transform.position = new Vector3(0, 10, -10);
-            previewCamera.transform.LookAt(new Vector3(0, 0, 9));
-            previewCamera.fieldOfView = 52;
-            previewCamera.farClipPlane = 180;
-            previewCamera.clearFlags = CameraClearFlags.SolidColor;
-            previewCamera.backgroundColor = new Color(.025f, .035f, .065f);
-            previewCamera.cullingMask = 1 << 31;
-            previewCamera.allowHDR = false;
-            previewCamera.allowMSAA = false;
-            previewCamera.depth = -50;
-            previewCamera.enabled = false;
-            SceneDependencyAssembler.Wire(preview, "previewCamera", previewCamera);
-            SceneDependencyAssembler.Wire(preview, "displayCamera", Camera.main);
-            var light = new GameObject("Editor Preview Light").AddComponent<Light>();
-            light.transform.SetParent(previewRig.transform, false);
-            light.type = LightType.Directional;
-            light.intensity = 1.3f;
-            light.cullingMask = 1 << 31;
-            light.transform.rotation = Quaternion.Euler(50, -25, 0);
-
-            var serialized = new SerializedObject(preview.playfield);
-            serialized.FindProperty("highwayMaterial").objectReferenceValue = SceneResources.Require<Material>("Assets/Game/Materials/Highway.mat");
-            serialized.FindProperty("railMaterial").objectReferenceValue = SceneResources.Require<Material>("Assets/Game/Materials/Rails.mat");
-            serialized.FindProperty("judgmentMaterial").objectReferenceValue = SceneResources.Require<Material>("Assets/Game/Materials/Judgement.mat");
-            serialized.ApplyModifiedPropertiesWithoutUndo();
+            preview.playfield = PresentationAssetBuilder.BuildField(image.rectTransform);
+            preview.playfield.Build(SceneResources.Require<GameModeDefinition>("Assets/Game/Settings/FourLaneMode.asset"), preview.presentation);
         }
 
         private static InputField AddNoteSpeedField(Transform panel)

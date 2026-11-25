@@ -13,7 +13,8 @@ namespace RhythmDojo.UI
         public GameObject introduction;
         public Image healthDamage;
         public RectTransform healthGauge;
-        public Camera gameplayCamera;
+        public RectTransform laneReadout;
+        public GameplayViewport viewport;
         public HudLaneLayout lanes;
         public Button returnButton;
         public Text songTitle;
@@ -35,7 +36,7 @@ namespace RhythmDojo.UI
 
         public void Validate()
         {
-            if (!judgmentMotion)
+            if (!judgmentMotion || !laneReadout)
             {
                 throw new InvalidOperationException("Gameplay judgment composition missing.");
             }
@@ -49,7 +50,7 @@ namespace RhythmDojo.UI
             {
                 throw new InvalidOperationException("Gameplay health feedback missing.");
             }
-            if (!healthGauge || !gameplayCamera)
+            if (!healthGauge || !viewport)
             {
                 throw new InvalidOperationException("Gameplay gauge positioning references missing.");
             }

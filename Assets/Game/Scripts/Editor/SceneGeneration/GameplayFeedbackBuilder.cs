@@ -21,8 +21,8 @@ namespace RhythmDojo.EditorTools
             SceneDependencyAssembler.Wire(feedback, "sounds",
                 DojoSoundBuilder.Build(feedback.transform, feedback.GetComponent<AudioSource>(), inputSource));
             var effectsRoot = new GameObject("Gameplay Impacts", typeof(RectTransform)).GetComponent<RectTransform>();
-            effectsRoot.SetParent(parent, false);
-            effectsRoot.SetSiblingIndex(parent.GetComponent<GameplayHudView>().judgmentGroup.transform.GetSiblingIndex());
+            effectsRoot.SetParent(parent.GetComponent<GameplayHudView>().viewport.field, false);
+            effectsRoot.SetAsLastSibling();
             effectsRoot.anchorMin = Vector2.zero;
             effectsRoot.anchorMax = Vector2.one;
             effectsRoot.offsetMin = effectsRoot.offsetMax = Vector2.zero;
@@ -53,9 +53,9 @@ namespace RhythmDojo.EditorTools
             go.transform.SetParent(parent, false);
             var graphic = go.GetComponent<GameplayImpactGraphic>();
             SceneDependencyAssembler.Wire(graphic, "bristles",
-                SceneResources.Require<Texture2D>("Assets/Game/Art/DojoGameplay/ImpactBristles.png"));
+                SceneResources.Require<Texture2D>(PresentationAssetBuilder.Art + "Contact.png"));
             graphic.raycastTarget = false;
-            graphic.rectTransform.anchorMin = graphic.rectTransform.anchorMax = new Vector2(.5f, .5f);
+            graphic.rectTransform.anchorMin = graphic.rectTransform.anchorMax = new Vector2(.5f, 0);
             go.SetActive(false);
             return graphic;
         }

@@ -1,6 +1,6 @@
 # Gameplay의 횡스크롤 수련 무대
 
-곡의 재생 구간을 네 등분한다. 오른쪽 수련 공간에서 수련자의 발과 타격 지점이 보이고, 중앙에는 기존 레인과 판정선이 들어온다. 장면 경계에서는 배경 카메라가 옆 무대로 이동한다. 이동하는 동안 양쪽 무대의 동작이 이어진다.
+곡의 재생 구간을 네 등분한다. 오른쪽 수련 공간에서 수련자의 발과 타격 지점이 보이고, 중앙에는 레인과 판정선이 들어온다. 장면 경계에서는 배경 카메라가 옆 무대로 이동한다. 이동하는 동안 양쪽 무대의 동작이 이어진다.
 
 | 곡 구간 | 무대와 움직임 | Gameplay 캡처 |
 | --- | --- | --- |
@@ -19,7 +19,7 @@ Windows용 Unity 6000.3.23f1의 1920×1080 Game View에서 연속 384프레임�
 
 ## 씬과 아트
 
-`Game Tools > Scenes > Build Gameplay`와 `Build All Scenes`가 같은 `GameplayBackgroundBuilder`를 호출한다. 빌더가 전용 표시 카메라, 네 무대, 캐릭터·그림자·소품·효과를 씬에 배치하고 참조를 직렬화한다. 레인 카메라는 기존 `GameplayViewport`에 계속 그린다. 무대 셰이더는 패널의 폭을 계산할 때 URP 직교 카메라 반폭의 두 배를 사용한다.
+`Game Tools > Scenes > Build Gameplay`와 `Build All Scenes`가 같은 `GameplayBackgroundBuilder`를 호출한다. 빌더가 전용 표시 카메라, 네 무대, 캐릭터·그림자·소품·효과를 씬에 배치하고 참조를 직렬화한다. 현재 레인과 타격 이펙트는 HUD 캔버스의 같은 2D 좌표를 사용한다. [수직 레인 설계와 최신 캡처](pixel-dojo-gameplay.md) 무대 셰이더는 패널의 폭을 계산할 때 URP 직교 카메라 반폭의 두 배를 사용한다.
 
 전용 원화와 스프라이트 시트는 `Assets/Game/Art/ActionStages/`에 있다. `ActionStageArtwork`가 Point 필터 원본을 고정 셀로 잘라 Sprite 하위 에셋으로 보관한다. 전신 동작에는 수련자 24포즈와 대련 상대 색상이 따로 있다. [내장 ImageGen 제작 프롬프트](training-journey-art-prompts.json)
 

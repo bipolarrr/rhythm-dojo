@@ -88,7 +88,7 @@ namespace RhythmDojo.UI
             keyLabels = new Text[indicators.Length];
             if (!judgmentRect)
             {
-                judgmentRect = (RectTransform)view.judgmentGroup.transform;
+                judgmentRect = view.laneReadout;
                 judgmentAnchorMin = judgmentRect.anchorMin;
                 judgmentAnchorMax = judgmentRect.anchorMax;
             }
@@ -192,11 +192,10 @@ namespace RhythmDojo.UI
             switch (position)
             {
                 case JudgmentPosition.Upper:
-                    // Keep the upper stamp above the point where incoming notes enter.
-                    offset = .997f - judgmentAnchorMax.y;
+                    offset = .07f;
                     break;
                 case JudgmentPosition.Lower:
-                    offset = -.024f;
+                    offset = -.07f;
                     break;
             }
 
@@ -255,12 +254,10 @@ namespace RhythmDojo.UI
             }
 
             double now = Time.unscaledTimeAsDouble;
-            // Lane count and display aspect are runtime data. Keep the authored gauge
-            // adjacent to the widest visible part of the field without changing projection.
-            float right = view.gameplayCamera.WorldToViewportPoint(new Vector3(
-                bindingMode.LaneCount * bindingMode.LaneSpacing * .5f,
-                0,
-                settings.highwayCenter - settings.highwayLength * .5f)).x;
+            var drawing = view.viewport.field;
+            var canvas = (RectTransform)view.transform;
+            var edge = canvas.InverseTransformPoint(drawing.TransformPoint(drawing.rect.xMax, 0, 0));
+            float right = Mathf.InverseLerp(canvas.rect.xMin, canvas.rect.xMax, edge.x);
             var minimum = view.healthGauge.anchorMin;
             var maximum = view.healthGauge.anchorMax;
             float width = maximum.x - minimum.x;

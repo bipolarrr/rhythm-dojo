@@ -82,15 +82,6 @@ namespace RhythmDojo.EditorTools
                     .LoadAssetAtPath<GameObject>("Assets/Game/Prefabs/HoldNote.prefab")
                     .GetComponent<NoteView>()
             );
-            Wire(parts.Notes, "noteMaterial", content.NoteMaterial);
-            Wire(parts.Playfield, "highwayMaterial", content.HighwayMaterial);
-            Wire(parts.Playfield, "railMaterial", content.RailMaterial);
-            Wire(
-                parts.Playfield,
-                "fadeMaterial",
-                SceneResources.Require<Material>("Assets/Game/Materials/PlayfieldFade.mat")
-            );
-            Wire(parts.Playfield, "judgmentMaterial", content.JudgmentMaterial);
             Wire(parts.Root, "settings", content.Settings);
             Wire(parts.Root, "controller", parts.Controller);
             Wire(parts.Root, "clock", parts.Clock);

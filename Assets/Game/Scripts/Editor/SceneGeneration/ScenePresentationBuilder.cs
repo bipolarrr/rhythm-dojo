@@ -51,33 +51,14 @@ namespace RhythmDojo.EditorTools
             };
             content.ReloadAfterSceneChange();
 
-            var camera = new GameObject("Main Camera").AddComponent<Camera>();
-            camera.tag = "MainCamera";
-            camera.transform.position = new Vector3(0, 10, -10);
-            camera.transform.LookAt(new Vector3(0, 0, 9));
-            camera.fieldOfView = 52;
-            camera.farClipPlane = 180;
-            camera.clearFlags = CameraClearFlags.SolidColor;
-            camera.backgroundColor = new Color(.025f, .035f, .065f);
-            camera.gameObject.AddComponent<AudioListener>();
-
-            // The display camera draws the action stage behind the lane viewport and overlay HUD.
             var displayCamera = new GameObject("Gameplay Display Camera").AddComponent<Camera>();
+            displayCamera.tag = "MainCamera";
             displayCamera.clearFlags = CameraClearFlags.SolidColor;
-            displayCamera.backgroundColor = camera.backgroundColor;
-            displayCamera.cullingMask = 0;
-            displayCamera.depth = -100;
-            displayCamera.targetDisplay = camera.targetDisplay;
+            displayCamera.backgroundColor = new Color(.025f, .035f, .065f);
             displayCamera.allowHDR = false;
             displayCamera.allowMSAA = false;
+            displayCamera.gameObject.AddComponent<AudioListener>();
 
-            var light = new GameObject("Key Light").AddComponent<Light>();
-            light.type = LightType.Directional;
-            light.intensity = 1.3f;
-            light.transform.rotation = Quaternion.Euler(50, -25, 0);
-            RenderSettings.ambientLight = new Color(.4f, .45f, .55f);
-            parts.Playfield = new GameObject("Playfield").AddComponent<PlayfieldPresenter>();
-            parts.Notes = new GameObject("Notes").AddComponent<NotePresenter>();
             parts.Audio = new GameObject("Song Audio").AddComponent<AudioSource>();
             parts.Audio.playOnAwake = false;
             parts.Audio.spatialBlend = 0;
@@ -89,9 +70,12 @@ namespace RhythmDojo.EditorTools
             var game = new GameObject("Rhythm Game");
             parts.Controller = game.AddComponent<RhythmGameController>();
             parts.Root = game.AddComponent<GameplayCompositionRoot>();
-            SceneDependencyAssembler.Wire(parts.Root, "gameplayCamera", camera);
-            GameplayBackgroundBuilder.Build(camera, displayCamera, parts.Root);
+            GameplayBackgroundBuilder.Build(displayCamera, parts.Root);
             parts.HudView = GameplayHudLayoutBuilder.Build();
+            parts.Playfield = parts.HudView.viewport.field.GetComponentInChildren<PlayfieldPresenter>();
+            var drawing = parts.HudView.viewport.field;
+            parts.Notes = PresentationAssetBuilder.Group("Notes", drawing).gameObject.AddComponent<NotePresenter>();
+            parts.HudView.lanes.laneRoot.SetAsLastSibling();
             parts.Hud = parts.HudView.gameObject.AddComponent<RhythmHud>();
             parts.Ui = parts.HudView.gameObject.AddComponent<GameplayUiController>();
             parts.Hits = parts.HudView.gameObject.AddComponent<GameplayHitFeedback>();

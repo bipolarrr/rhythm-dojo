@@ -475,7 +475,7 @@ namespace RhythmDojo.Tests
 
         private static void CapturePlayback(string name)
         {
-            var capture = GameplayHudFlowTests.CaptureGameplayDisplay(GameplayHudFlowTests.LaneViewport());
+            var capture = GameplayHudFlowTests.CaptureGameplayDisplay();
             try
             {
                 System.IO.File.WriteAllBytes("Logs/" + name + ".png", capture.EncodeToPNG());

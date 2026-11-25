@@ -21,7 +21,7 @@ namespace RhythmDojo.UI
         private bool sustained;
         private bool missed;
         private Judgment grade;
-        private const float Duration = .24f;
+        private const float Duration = .21f;
 
         public void Play(Color tint, float intensity, bool miss = false)
         {
@@ -91,7 +91,7 @@ namespace RhythmDojo.UI
             }
 
             float progress = Mathf.Clamp01(elapsed / Duration);
-            float fade = 1 - Mathf.SmoothStep(0, 1, Mathf.InverseLerp(.048f, Duration, elapsed));
+            float fade = 1 - Mathf.SmoothStep(0, 1, Mathf.InverseLerp(.035f, Duration, elapsed));
             var pigment = color;
             pigment.a *= fade * strength;
             float direction = 1;
@@ -155,7 +155,7 @@ namespace RhythmDojo.UI
             }
 
             float width = radius * (.55f + .58f * attack);
-            float height = radius * (.22f + 1.55f * attack);
+            float height = radius * (.22f + 1.24f * attack);
             if (grade == Judgment.Good)
             {
                 width *= .80f;

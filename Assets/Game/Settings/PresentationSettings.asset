@@ -12,21 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2a39f260054b16c49861458c1f7a2829, type: 3}
   m_Name: PresentationSettings
   m_EditorClassIdentifier: Game.Runtime::RhythmDojo.Gameplay.GameplayPresentationSettings
-  beamTemplate: {fileID: 6921969022113597648, guid: 804bdc827df2fba478a8c589e73e02e0, type: 3}
-  strikeShoe: {fileID: 676888977679615526, guid: 46884610ec7fe444c956206e8fdde3aa, type: 3}
-  headSize: {x: 1.05, y: 0.22, z: 0.32}
-  headHeight: 0.28
-  bodyWidth: 0.42
-  bodyHeight: 0.16
-  bodyElevation: 0.2
-  minimumBodyLength: 0.01
-  highwayLength: 100
-  highwayCenter: 48
-  laneGap: 0.08
-  railWidth: 0.045
-  railHeight: 0.06
-  judgmentLineDepth: 0.13
-  judgmentLineHeight: 0.1
+  fieldTemplate: {fileID: 1243468798565062476, guid: 5a24d9972879e5e4f9ccb3745bd3d1ac, type: 3}
+  highway: {fileID: 21300000, guid: 41c3c9302a6d477294f0f04a62c12318, type: 3}
+  divider: {fileID: 21300000, guid: c7311df0b0a648e9bf7ae9a77cc70610, type: 3}
+  border: {fileID: 21300000, guid: 0b4138e6f868418bb5c6cf4457f58a62, type: 3}
+  strikeShoe: {fileID: 21300000, guid: 45cce14e45f949ab875b74fec42863ab, type: 3}
+  pressedShoe: {fileID: 21300000, guid: 7159ec9d209548c49258e3e9da504f60, type: 3}
+  judgmentLine: {fileID: 21300000, guid: 56d69fbd17324b1ca9051f6e3ac63353, type: 3}
+  beat: {fileID: 21300000, guid: e24dab78864a4ff985064df35fad4803, type: 3}
+  measure: {fileID: 21300000, guid: bebbc701ee7440ff963667a7310e437d, type: 3}
   flashDuration: 0.22
   hudRefreshInterval: 0.05
   perfectColor: {r: 0.64, g: 0.85, b: 0.72, a: 1}
@@ -34,6 +28,3 @@ MonoBehaviour:
   missColor: {r: 0.92, g: 0.36, b: 0.29, a: 1}
   heldColor: {r: 0.76, g: 0.87, b: 0.73, a: 1}
   idleColor: {r: 0.24, g: 0.12, b: 0.085, a: 1}
-  highwayColor: {r: 1, g: 1, b: 1, a: 1}
-  railColor: {r: 0.39, g: 0.29, b: 0.19, a: 1}
-  judgmentLineColor: {r: 0.96, g: 0.83, b: 0.58, a: 1}

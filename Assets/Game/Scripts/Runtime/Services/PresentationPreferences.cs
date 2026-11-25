@@ -31,27 +31,28 @@ namespace RhythmDojo.Services
 
         public static PresentationPreferences Current { get; private set; }
 
-        public static PresentationPreferences Load()
+        private static PresentationPreferences ReadSaved()
         {
             var saved = PlayerPrefs.GetString(StorageKey, "");
 
             try
             {
-                if (string.IsNullOrEmpty(saved))
+                if (!string.IsNullOrEmpty(saved))
                 {
-                    Current = new PresentationPreferences();
-                }
-                else
-                {
-                    Current = JsonUtility.FromJson<PresentationPreferences>(saved);
+                    return JsonUtility.FromJson<PresentationPreferences>(saved) ?? new PresentationPreferences();
                 }
             }
             catch (ArgumentException)
             {
-                Current = new PresentationPreferences();
+                return new PresentationPreferences();
             }
 
-            Current ??= new PresentationPreferences();
+            return new PresentationPreferences();
+        }
+
+        public static PresentationPreferences Load()
+        {
+            Current = ReadSaved();
             Current.masterVolume = Mathf.Clamp01(Current.masterVolume);
             Current.backgroundVolume = Mathf.Clamp01(Current.backgroundVolume);
             Current.gameplayVolume = Mathf.Clamp01(Current.gameplayVolume);
@@ -102,7 +103,7 @@ namespace RhythmDojo.Services
         public void SaveAudio()
         {
             ApplyAudio();
-            Save();
+            SaveValues();
         }
 
         public void ApplyAudio()
@@ -116,12 +117,27 @@ namespace RhythmDojo.Services
             Changed?.Invoke();
         }
 
-        public void SaveValues() => Save();
+        public void SaveValues()
+        {
+            if (SettingsAccessPolicy.CanChange)
+            {
+                Save();
+            }
+        }
+
+        internal void SaveRailOpacity(float value)
+        {
+            // During play only opacity can be committed, even if other values have pending edits.
+            var saved = ReadSaved();
+            railOpacity = Mathf.Clamp01(value);
+            saved.railOpacity = railOpacity;
+            saved.Save();
+        }
 
         public void ApplyGraphics(bool resize = true)
         {
             ApplyGraphicsValues(resize);
-            Save();
+            SaveValues();
         }
 
         public void ApplyGraphicsValues(bool resize = true)
@@ -149,11 +165,6 @@ namespace RhythmDojo.Services
 
         private void Save()
         {
-            if (!SettingsAccessPolicy.CanChange)
-            {
-                return;
-            }
-
             PlayerPrefs.SetString(StorageKey, JsonUtility.ToJson(this));
             PlayerPrefs.Save();
         }

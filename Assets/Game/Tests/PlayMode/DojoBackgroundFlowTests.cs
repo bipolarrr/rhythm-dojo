@@ -97,9 +97,9 @@ namespace RhythmDojo.Tests
             var chart = new ChartData(chartNotes.ToArray(), 80);
             var tempo = new TempoMap(new[] { new TempoPoint(0, 120), new TempoPoint(4, 170) });
             var rules = new PlayRules { GaugeFailure = GaugeFailureMode.Continue };
-            var camera = Camera.main;
-            var cameraPosition = camera.transform.position;
-            var cameraRotation = camera.transform.rotation;
+            var drawing = UnityEngine.Object.FindFirstObjectByType<GameplayViewport>().field;
+            var cameraPosition = drawing.position;
+            var cameraRotation = drawing.rotation;
             var bout = (DojoCombatStage)room.scenery[0];
             var authoredTarget = bout.partner;
             int authoredCount = room.GetComponentsInChildren<Transform>(true).Length;
@@ -157,8 +157,8 @@ namespace RhythmDojo.Tests
             Advance(game, director, clock, input, 20.8, false);
             Assert.That(room.scenery[0].gameObject.activeSelf, Is.False);
             Assert.That(room.scenery[1].gameObject.activeSelf, Is.True);
-            Assert.That(camera.transform.position, Is.EqualTo(cameraPosition));
-            Assert.That(camera.transform.rotation, Is.EqualTo(cameraRotation));
+            Assert.That(drawing.position, Is.EqualTo(cameraPosition));
+            Assert.That(drawing.rotation, Is.EqualTo(cameraRotation));
 
             game.RestartSession();
             yield return null;
@@ -197,10 +197,10 @@ namespace RhythmDojo.Tests
             }
             var chart = new ChartData(chartNotes.ToArray(), 16);
             var rules = new PlayRules { GaugeFailure = GaugeFailureMode.Continue };
-            var camera = Camera.main;
-            var cameraPosition = camera.transform.position;
-            var cameraRotation = camera.transform.rotation;
-            float fieldOfView = camera.fieldOfView;
+            var drawing = UnityEngine.Object.FindFirstObjectByType<GameplayViewport>().field;
+            var cameraPosition = drawing.position;
+            var cameraRotation = drawing.rotation;
+            var scale = drawing.localScale;
             var piece = ((DojoCombatStage)director.room.scenery[3]).wood;
             int count = director.room.GetComponentsInChildren<Transform>(true).Length;
 
@@ -235,6 +235,26 @@ namespace RhythmDojo.Tests
                         if (captured)
                         {
                             yield return CaptureJourneyState((phase * 96 + frame).ToString("D4"));
+                        }
+                        if (CaptureLanes && scenario == 0 && frame == 22)
+                        {
+                            var field = UnityEngine.Object.FindFirstObjectByType<PlayfieldPresenter>();
+                            field.ConfigureMeasureLines(new TempoMap(new[] { new TempoPoint(0, 120) }),
+                                new ConstantScrollTimeline(10, 1), chart);
+                            field.RenderMeasureLines(SessionState.Playing, clock.SongTime);
+                            yield return CaptureJourneyState("lane-stage-" + phase);
+                            if (phase == 0)
+                            {
+                                field.viewport.field.gameObject.SetActive(false);
+                                try
+                                {
+                                    yield return CaptureJourneyState("lane-background");
+                                }
+                                finally
+                                {
+                                    field.viewport.field.gameObject.SetActive(true);
+                                }
+                            }
                         }
                         if (frame == 38)
                         {
@@ -278,9 +298,9 @@ namespace RhythmDojo.Tests
                     yield return Await(() => director.room.FinishAge > .75f);
                     Assert.That(Quaternion.Angle(piece.transform.localRotation, Quaternion.identity), Is.LessThan(1));
                 }
-                Assert.That(camera.transform.position, Is.EqualTo(cameraPosition));
-                Assert.That(camera.transform.rotation, Is.EqualTo(cameraRotation));
-                Assert.That(camera.fieldOfView, Is.EqualTo(fieldOfView));
+                Assert.That(drawing.position, Is.EqualTo(cameraPosition));
+                Assert.That(drawing.rotation, Is.EqualTo(cameraRotation));
+                Assert.That(drawing.localScale, Is.EqualTo(scale));
                 Assert.That(game.ReadModel.Snapshot.ScrollMultiplier, Is.EqualTo(1));
             }
 
@@ -346,7 +366,7 @@ namespace RhythmDojo.Tests
                 ScrollMode.Constant, 1, new ConstantScrollTimeline(15, 1), input, clock, notes, null, rules);
             director.Initialize(game, 28, 0, true);
             hud.GetComponent<RhythmHud>().Initialize(game.ReadModel, mode, flow.Settings.presentation);
-            hits.Initialize(game.ReadModel, mode, hud.gameplayCamera, hud.GetComponent<Canvas>());
+            hits.Initialize(game.ReadModel, mode, UnityEngine.Object.FindFirstObjectByType<PlayfieldPresenter>());
             input.Start();
             int next = 0;
             int lastHead = 0;
@@ -372,6 +392,16 @@ namespace RhythmDojo.Tests
                 }
                 yield return null;
 
+                bool captureHold = frame == 100 || frame == 145 || frame == 166;
+                bool capturePattern = frame == 62 || frame == 128;
+                if (CaptureLanes && (captureHold || capturePattern))
+                {
+                    var field = UnityEngine.Object.FindFirstObjectByType<PlayfieldPresenter>();
+                    field.ConfigureMeasureLines(new TempoMap(new[] { new TempoPoint(0, 120) }),
+                        new ConstantScrollTimeline(15, 1), game.Chart);
+                    field.RenderMeasureLines(SessionState.Playing, clock.SongTime);
+                    yield return CaptureJourneyState("lane-dense-" + frame);
+                }
                 if (frame == 16)
                 {
                     Assert.That(((DojoCombatStage)director.room.scenery[0]).contact.enabled, Is.True);
@@ -444,7 +474,10 @@ namespace RhythmDojo.Tests
             }
         }
 
-        private static IEnumerator CaptureJourneyState(string name)
+        internal static bool CaptureLanes =>
+            Environment.GetEnvironmentVariable("RHYTHM_DOJO_CAPTURE_LANES") == "1";
+
+        internal static IEnumerator CaptureJourneyState(string name)
         {
             Directory.CreateDirectory("Logs/action-stages/frames");
             yield return new WaitForEndOfFrame();

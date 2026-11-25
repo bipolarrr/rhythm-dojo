@@ -153,7 +153,8 @@ namespace RhythmDojo.Tests
 
                 var hud = UnityEngine.Object.FindFirstObjectByType<RhythmHud>();
                 Assert.That(
-                    hud.GetComponentsInChildren<Image>().Count(i => i.name.StartsWith("Lane ")),
+                    hud.GetComponent<GameplayHudView>().lanes.laneRoot.GetComponentsInChildren<Image>(true)
+                        .Count(i => i.name.StartsWith("Lane ")),
                     Is.EqualTo(6)
                 );
                 yield return WaitForGameplayIntroduction();
@@ -161,6 +162,11 @@ namespace RhythmDojo.Tests
                 InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.K));
                 yield return null;
                 Assert.That(game.Session.IsHeld(5), Is.True);
+                if (DojoBackgroundFlowTests.CaptureLanes)
+                {
+                    yield return Await(() => game.Clock.SongTime >= .4);
+                    yield return DojoBackgroundFlowTests.CaptureJourneyState("lane-six-keys");
+                }
             }
             finally
             {
