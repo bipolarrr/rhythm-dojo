@@ -1,4 +1,3 @@
-using RhythmDojo.Audio;
 using RhythmDojo.Core;
 using RhythmDojo.Gameplay;
 using RhythmDojo.UI;
@@ -45,17 +44,6 @@ namespace RhythmDojo.EditorTools
             serialized.ApplyModifiedPropertiesWithoutUndo();
             SceneDependencyAssembler.Wire(root, "gameSettings",
                 SceneResources.Require<GameSettings>("Assets/Game/Settings/GameSettings.asset"));
-            var audio = new GameObject("Story Music", typeof(AudioSource), typeof(TitleMusicPlayer));
-            audio.transform.SetParent(view.transform, false);
-            var source = audio.GetComponent<AudioSource>();
-            source.playOnAwake = false;
-            source.loop = true;
-            source.spatialBlend = 0;
-            var music = audio.GetComponent<TitleMusicPlayer>();
-            SceneDependencyAssembler.Wire(music, "source", source);
-            SceneDependencyAssembler.Wire(root, "music", music);
-            SceneDependencyAssembler.Wire(root, "titleMusic",
-                SceneResources.Require<TitleMusicSettings>(MainMenuSceneBuilder.TitleMusicPath));
             UiElements.EventSystem(AssetDatabase.LoadAssetAtPath<UnityEngine.InputSystem.InputActionAsset>(
                 "Assets/InputSystem_Actions.inputactions"));
             var module = UnityEngine.Object.FindFirstObjectByType<UnityEngine.InputSystem.UI.InputSystemUIInputModule>();

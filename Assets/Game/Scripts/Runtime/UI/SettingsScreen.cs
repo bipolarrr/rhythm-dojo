@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using RhythmDojo.Application;
+using RhythmDojo.Audio;
 using RhythmDojo.Gameplay;
 using RhythmDojo.Services;
 using UnityEngine;
@@ -50,7 +51,8 @@ namespace RhythmDojo.UI
             IPlayRulesService rules = null,
             PresentationPreferences presentation = null,
             GameModeDefinition keyMode = null,
-            string modeId = null
+            string modeId = null,
+            TitleMusicPlayer titleMusic = null
         )
         {
             Unbind();
@@ -77,7 +79,8 @@ namespace RhythmDojo.UI
                 savedPreferences ?? new SelectionPreferences(null),
                 hardMode ?? new HardModePreferences(null),
                 rules,
-                presentation
+                presentation,
+                titleMusic
             );
             view.back.onClick.AddListener(Back);
             view.dismiss.onClick.AddListener(Back);

@@ -740,6 +740,8 @@ namespace RhythmDojo.Tests
         public IEnumerator StartLoadsBootstrapThenExistingSongSelection()
         {
             yield return LoadTitle();
+            var music = UnityEngine.Object.FindFirstObjectByType<AppFlowController>().Music.GetComponent<AudioSource>();
+            music.time = 12f;
             bool bootstrapLoaded = false;
             int selectionLoads = 0;
             UnityEngine.Events.UnityAction<Scene, LoadSceneMode> loaded = (scene, mode) =>
@@ -813,6 +815,9 @@ namespace RhythmDojo.Tests
                 AssertHasDisplayCamera();
                 Assert.That(bootstrapLoaded, Is.False,
                     "The title must enter selection directly, avoiding an extra scene activation stall.");
+                Assert.That(music.isPlaying, Is.True);
+                Assert.That(music.time, Is.GreaterThan(12f));
+                Assert.That(UnityEngine.Object.FindObjectsByType<RhythmDojo.Audio.TitleMusicPlayer>(FindObjectsSortMode.None), Has.Length.EqualTo(1));
                 Assert.That(selectionLoads, Is.Zero, "Play must reuse the warmed scene without loading it again.");
                 Assert.That((int)SceneManager.GetActiveScene().handle, Is.EqualTo(preparedHandle));
                 Assert.That(SceneManager.GetSceneByPath(MainMenuActions.ModeSelectionScenePath).isLoaded, Is.False,

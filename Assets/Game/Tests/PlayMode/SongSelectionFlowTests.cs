@@ -97,16 +97,21 @@ namespace RhythmDojo.Tests
         {
             var view = UnityEngine.Object.FindFirstObjectByType<SongSelectionView>();
             var screen = UnityEngine.Object.FindFirstObjectByType<SongSelectionScreen>();
+            var music = UnityEngine.Object.FindFirstObjectByType<AppFlowController>().Music.GetComponent<AudioSource>();
+            yield return Await(() => music.time > .25f);
+            float position = music.time;
             yield return Click(view.previewButton);
             yield return Await(() => view.previewSource.isPlaying, "Preview did not play.");
             Assert.That(view.previewButton.GetComponentInChildren<Text>().text, Does.Contain("멈추기"));
             Assert.That(view.previewSource.time, Is.GreaterThan(0));
+            Assert.That(music.isPlaying, Is.False);
 
             screen.SelectSong("tempo-pulse");
             Assert.That(view.previewSource.isPlaying, Is.False);
             Assert.That(view.previewSource.clip, Is.Null);
             Assert.That(view.previewButton.GetComponentInChildren<Text>().text, Does.Contain("미리듣기"));
 
+            yield return Await(() => music.isPlaying && music.time >= position);
             screen.SelectSong("test-pulse");
             yield return Click(view.previewButton);
             yield return Await(() => view.previewSource.isPlaying, "Preview did not restart.");
@@ -114,6 +119,7 @@ namespace RhythmDojo.Tests
             Assert.That(view.previewSource.isPlaying, Is.False);
             Assert.That(view.previewSource.clip, Is.Null);
             yield return Await(() => UnityEngine.Object.FindFirstObjectByType<RhythmGameController>());
+            Assert.That(music.isPlaying, Is.False);
         }
 
         [UnityTest]

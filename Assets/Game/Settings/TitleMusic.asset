@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e25a58816b98474aad1fd8b291213398, type: 3}
   m_Name: TitleMusic
   m_EditorClassIdentifier: Game.Runtime::RhythmDojo.Audio.TitleMusicSettings
-  musicClip: {fileID: 0}
-  beatsPerMinute: 120
-  firstBeatSeconds: 0
-  volume: 0.7
+  musicClip: {fileID: 8300000, guid: 35878d969a3645f786021848c9e42b00, type: 3}
+  beatsPerMinute: 105
+  firstBeatSeconds: 0.35601873
+  volume: 0.25

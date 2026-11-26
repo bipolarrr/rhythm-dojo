@@ -1,5 +1,4 @@
 using System;
-using RhythmDojo.Audio;
 using RhythmDojo.Gameplay;
 using RhythmDojo.UI;
 using UnityEngine;
@@ -23,12 +22,6 @@ namespace RhythmDojo.Core
         public bool IsInitialized { get; private set; }
 
         [SerializeField]
-        private TitleMusicPlayer music;
-
-        [SerializeField]
-        private TitleMusicSettings titleMusic;
-
-        [SerializeField]
         private GameSettings gameSettings;
 
         public void Validate()
@@ -50,16 +43,6 @@ namespace RhythmDojo.Core
             if (entranceScreen)
             {
                 entranceScreen.Validate();
-            }
-
-            if (titleMusic)
-            {
-                if (!music)
-                {
-                    throw new InvalidOperationException("Title music player missing.");
-                }
-
-                titleMusic.Validate();
             }
 
             if (!gameSettings)
@@ -90,12 +73,7 @@ namespace RhythmDojo.Core
                 ?? RhythmDojo.Services.PresentationPreferences.Load();
             AudioListener.volume = presentation.masterVolume;
 
-            RhythmDojo.Services.IMainMenuBeatClock beatClock = null;
-            if (titleMusic)
-            {
-                music.Initialize(titleMusic);
-                beatClock = music;
-            }
+            var beatClock = flow.Music;
 
             if (screen)
             {
@@ -125,10 +103,6 @@ namespace RhythmDojo.Core
         {
             sceneCamera.gameObject.SetActive(active);
             events.gameObject.SetActive(active);
-            if (music)
-            {
-                music.gameObject.SetActive(active);
-            }
             if (screen)
             {
                 screen.enabled = active;
@@ -140,13 +114,8 @@ namespace RhythmDojo.Core
 
         public void TakeOwnershipFrom(MainMenuCompositionRoot previous)
         {
-            // Snapshot the playback cursor before disabling the departing scene's source.
             if (previous)
             {
-                if (music)
-                {
-                    music.CopyPlaybackFrom(previous.music);
-                }
                 previous.SetOwnership(false);
             }
             SetOwnership(true);

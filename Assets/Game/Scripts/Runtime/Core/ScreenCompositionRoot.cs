@@ -132,7 +132,8 @@ namespace RhythmDojo.Core
                     flow,
                     flow.Preferences,
                     flow.HardMode,
-                    flow.Rules
+                    flow.Rules,
+                    flow.Music
                 );
                 flow.SelectionInitialized(selection);
             }
@@ -147,7 +148,8 @@ namespace RhythmDojo.Core
                     flow.Preferences,
                     flow.HardMode,
                     flow.Rules,
-                    RhythmDojo.Services.PresentationPreferences.Current
+                    RhythmDojo.Services.PresentationPreferences.Current,
+                    titleMusic: flow.Music
                 );
             }
         }

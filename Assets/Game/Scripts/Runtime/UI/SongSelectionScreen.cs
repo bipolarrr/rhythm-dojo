@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using RhythmDojo.Application;
+using RhythmDojo.Audio;
 using RhythmDojo.Content;
 using RhythmDojo.Gameplay;
 using RhythmDojo.Services;
@@ -25,6 +26,7 @@ namespace RhythmDojo.UI
         private CancellationTokenSource previewCancellation;
         private CancellationTokenSource playCancellation;
         private PlayableSong previewSong;
+        private TitleMusicPlayer titleMusic;
         private double previewEnd;
         private double loadingStartedAt;
         private bool libraryRefreshPending;
@@ -77,7 +79,7 @@ namespace RhythmDojo.UI
 
         public void Initialize(GameSettings gameSettings, ISongSelectionService songs,
             IAppNavigation appNavigation, ISelectionPreferences savedPreferences = null,
-            HardModePreferences hardMode = null, IPlayRulesService rules = null)
+            HardModePreferences hardMode = null, IPlayRulesService rules = null, TitleMusicPlayer titleMusic = null)
         {
             Unbind();
             Validate();
@@ -91,6 +93,7 @@ namespace RhythmDojo.UI
             }
             selection = songs;
             navigation = appNavigation;
+            this.titleMusic = titleMusic;
             difficultyOptions = gameSettings.difficulties.ToArray();
             speedOptions = Enumerable.Range(0, gameSettings.scroll.MultiplierCount)
                 .Select(gameSettings.scroll.GetMultiplier).ToArray();
@@ -583,10 +586,11 @@ namespace RhythmDojo.UI
                 source.clip = clip;
                 source.time = start;
                 source.volume = (PresentationPreferences.Current ?? PresentationPreferences.Load()).gameplayVolume;
-                source.Play();
-                previewEnd = AudioSettings.dspTime + Math.Min(previewDuration, clip.length - start);
                 previewSong = song;
                 song = null;
+                titleMusic?.SetPreviewActive(true);
+                source.Play();
+                previewEnd = AudioSettings.dspTime + Math.Min(previewDuration, clip.length - start);
                 previewCaption = "■ 멈추기";
             }
             catch (OperationCanceledException)
@@ -630,8 +634,15 @@ namespace RhythmDojo.UI
             }
             previewCaption = "▶ 미리듣기";
             previewFailure = null;
-            previewSong?.Dispose();
-            previewSong = null;
+            if (previewSong != null)
+            {
+                if (titleMusic)
+                {
+                    titleMusic.SetPreviewActive(false);
+                }
+                previewSong.Dispose();
+                previewSong = null;
+            }
         }
 
         private void Play() => Play(false);

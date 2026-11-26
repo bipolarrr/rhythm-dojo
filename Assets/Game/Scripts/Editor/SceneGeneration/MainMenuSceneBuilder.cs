@@ -13,6 +13,27 @@ namespace RhythmDojo.EditorTools
     {
         public const string TitleMusicPath = "Assets/Game/Settings/TitleMusic.asset";
 
+        public static void BuildAppFlowPrefab()
+        {
+            var root = new GameObject("AppFlow", typeof(AudioSource), typeof(TitleMusicPlayer), typeof(AppFlowController));
+            try
+            {
+                var source = root.GetComponent<AudioSource>();
+                source.playOnAwake = false;
+                source.loop = true;
+                var music = root.GetComponent<TitleMusicPlayer>();
+                SceneDependencyAssembler.Wire(music, "source", source);
+                var flow = root.GetComponent<AppFlowController>();
+                SceneDependencyAssembler.Wire(flow, "music", music);
+                SceneDependencyAssembler.Wire(flow, "titleMusic", SceneResources.Require<TitleMusicSettings>(TitleMusicPath));
+                PrefabUtility.SaveAsPrefabAsset(root, "Assets/Game/Resources/AppFlow.prefab");
+            }
+            finally
+            {
+                Object.DestroyImmediate(root);
+            }
+        }
+
         public static Scene Create() => Create(false);
 
         public static Scene Create(bool modeSelection)
@@ -60,26 +81,6 @@ namespace RhythmDojo.EditorTools
                 SceneDependencyAssembler.Wire(entranceScreen, "effects", effects);
                 SceneDependencyAssembler.Wire(root, "entranceScreen", entranceScreen);
             }
-            var musicObject = new GameObject("Title Music", typeof(AudioSource), typeof(TitleMusicPlayer));
-            musicObject.transform.SetParent(root.transform, false);
-            var music = musicObject.GetComponent<TitleMusicPlayer>();
-            var source = musicObject.GetComponent<AudioSource>();
-            source.playOnAwake = false;
-            source.loop = true;
-            source.spatialBlend = 0;
-            SceneDependencyAssembler.Wire(music, "source", source);
-            SceneDependencyAssembler.Wire(root, "music", music);
-
-            var titleMusic = AssetDatabase.LoadAssetAtPath<TitleMusicSettings>(TitleMusicPath);
-
-            if (!titleMusic)
-            {
-                throw new System.InvalidOperationException(
-                    "Title music settings missing: " + TitleMusicPath
-                );
-            }
-
-            SceneDependencyAssembler.Wire(root, "titleMusic", titleMusic);
             SceneDependencyAssembler.Wire(
                 root,
                 "gameSettings",

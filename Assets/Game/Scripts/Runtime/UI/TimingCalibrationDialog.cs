@@ -45,7 +45,7 @@ namespace RhythmDojo.UI
             new InputAction("Calibration tap", InputActionType.Button, "<Keyboard>/space");
         private readonly HashSet<int> recordedBeats = new HashSet<int>();
         private readonly List<double> errors = new List<double>();
-        private TitleMusicPlayer titleMusic;
+        private readonly TitleMusicPlayer titleMusic;
         private AudioClip clip;
 
         private double firstDspBeat;
@@ -74,9 +74,11 @@ namespace RhythmDojo.UI
             ISelectionPreferences preferences,
             Action<int> applyOffset,
             Func<IScrollTimeline> createSpeedTimeline,
-            Func<JudgmentSettings> getJudgmentTiming
+            Func<JudgmentSettings> getJudgmentTiming,
+            TitleMusicPlayer titleMusic
         )
         {
+            this.titleMusic = titleMusic;
             this.applyOffset = applyOffset;
             this.presentation = presentation;
             this.preferences = preferences;
@@ -113,6 +115,7 @@ namespace RhythmDojo.UI
 
         internal void Open(bool useSpeedTest)
         {
+            titleMusic?.SetCalibrationMuted(true);
             speedTest = useSpeedTest;
             overlay.SetActive(true);
             recommendation = null;
@@ -179,8 +182,6 @@ namespace RhythmDojo.UI
                 clip = CreateBeatTrack(sampleRate);
             }
 
-            titleMusic = Object.FindFirstObjectByType<TitleMusicPlayer>();
-            titleMusic?.SetCalibrationMuted(true);
             recommendation = null;
             errors.Clear();
             recordedBeats.Clear();
@@ -456,6 +457,11 @@ namespace RhythmDojo.UI
             StopTest();
             overlay.SetActive(false);
 
+            if (titleMusic)
+            {
+                titleMusic.SetCalibrationMuted(false);
+            }
+
             var previousEntry = entry;
             if (speedTest)
             {
@@ -484,12 +490,6 @@ namespace RhythmDojo.UI
             speedLane.Reset();
             AudioSettings.OnAudioConfigurationChanged -= AudioConfigurationChanged;
 
-            if (titleMusic)
-            {
-                titleMusic.SetCalibrationMuted(false);
-            }
-
-            titleMusic = null;
             start.interactable = true;
             start.GetComponentInChildren<Text>().text = "다시 테스트";
             EventSystem.current?.SetSelectedGameObject(start.gameObject);
@@ -509,6 +509,10 @@ namespace RhythmDojo.UI
         public void Dispose()
         {
             StopTest();
+            if (overlay.activeSelf && titleMusic)
+            {
+                titleMusic.SetCalibrationMuted(false);
+            }
             tap.Dispose();
             DestroyClip();
             overlay.SetActive(false);

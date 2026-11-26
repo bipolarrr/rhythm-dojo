@@ -1,5 +1,4 @@
 using System;
-using RhythmDojo.Audio;
 using RhythmDojo.Content;
 using RhythmDojo.Gameplay;
 using RhythmDojo.UI;
@@ -11,8 +10,6 @@ namespace RhythmDojo.Core
     {
         [SerializeField] private TutorialScreen screen;
         [SerializeField] private GameSettings gameSettings;
-        [SerializeField] private TitleMusicPlayer music;
-        [SerializeField] private TitleMusicSettings titleMusic;
         [SerializeField] private TrainingLesson lesson;
         [SerializeField] private TrainingLesson[] lessons;
         private AppFlowController flow;
@@ -24,12 +21,7 @@ namespace RhythmDojo.Core
             {
                 throw new InvalidOperationException("Tutorial scene dependencies missing.");
             }
-            if (!music || !titleMusic)
-            {
-                throw new InvalidOperationException("Tutorial music composition missing.");
-            }
             screen.Validate();
-            titleMusic.Validate();
             if (!lesson)
             {
                 throw new InvalidOperationException("Tutorial training lesson missing. Rebuild Tutorial.");
@@ -56,7 +48,6 @@ namespace RhythmDojo.Core
             Validate();
             flow = AppFlowController.Create(gameSettings);
             flow.CancelSelectionPreparation();
-            music.Initialize(titleMusic);
             screen.ConfigureLessons(lessons, SelectLesson, flow.TrainingProgress);
             screen.Initialize(Return, flow.CurrentTrainingLesson ?? lesson);
         }

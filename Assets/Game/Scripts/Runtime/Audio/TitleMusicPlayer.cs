@@ -7,23 +7,52 @@ namespace RhythmDojo.Audio
     [RequireComponent(typeof(AudioSource))]
     public sealed class TitleMusicPlayer : MonoBehaviour, IMainMenuBeatClock
     {
+        private const double FadeSeconds = 1d;
         private TitleMusicSettings settings;
-        [SerializeField]
-        private AudioSource source;
+        [SerializeField] private AudioSource source;
         private double startDspTime;
         private bool initialized;
         private bool restartRequested;
-        private bool resumeRequested;
         private int resumeSample;
+        private bool menuActive;
+        private bool previewActive;
+        private bool calibrationMuted;
+        private bool playing;
+        private float fade;
 
-        public double BeatPosition => settings.BeatPositionAt(AudioSettings.dspTime - startDspTime);
+        public double BeatPosition
+        {
+            get
+            {
+                if (settings.MusicClip)
+                {
+                    int sample = resumeSample;
+                    if (playing && source.isPlaying)
+                    {
+                        sample = source.timeSamples;
+                    }
+                    return settings.BeatPositionAt((double)sample / settings.MusicClip.frequency);
+                }
+                return settings.BeatPositionAt(AudioSettings.dspTime - startDspTime);
+            }
+        }
+
+        public void SetMenuActive(bool active)
+        {
+            menuActive = active;
+            UpdatePlayback();
+        }
+
+        public void SetPreviewActive(bool active)
+        {
+            previewActive = active;
+            UpdatePlayback();
+        }
 
         public void SetCalibrationMuted(bool muted)
         {
-            if (source)
-            {
-                source.mute = muted;
-            }
+            calibrationMuted = muted;
+            UpdatePlayback();
         }
 
         public void CopyPlaybackFrom(TitleMusicPlayer previous)
@@ -32,69 +61,89 @@ namespace RhythmDojo.Audio
             {
                 return;
             }
-            startDspTime = previous.startDspTime;
-            resumeSample = previous.source.timeSamples;
-            resumeRequested = true;
+
+            PausePlayback();
+            resumeSample = previous.resumeSample;
+            if (previous.source.isPlaying)
+            {
+                resumeSample = previous.source.timeSamples;
+            }
+            UpdatePlayback();
         }
 
-        public void Initialize(TitleMusicSettings musicSettings)
+        public void Initialize(TitleMusicSettings musicSettings, bool active = true)
         {
             if (!musicSettings)
             {
                 throw new ArgumentNullException(nameof(musicSettings));
             }
-
             musicSettings.Validate();
-            settings = musicSettings;
-
             if (!source)
             {
                 source = GetComponent<AudioSource>();
             }
 
+            PausePlayback();
+            settings = musicSettings;
             source.playOnAwake = false;
             source.loop = true;
             source.spatialBlend = 0f;
             source.pitch = 1f;
-            source.volume =
-                settings.Volume
-                * (
-                    PresentationPreferences.Current ?? PresentationPreferences.Load()
-                ).backgroundVolume;
             source.clip = settings.MusicClip;
+            resumeSample = 0;
+            startDspTime = AudioSettings.dspTime;
+            menuActive = active;
             initialized = true;
-
-            if (isActiveAndEnabled)
-            {
-                Restart();
-            }
+            UpdatePlayback();
         }
 
-        private void Restart()
+        private void UpdatePlayback()
         {
+            if (!initialized || !isActiveAndEnabled)
+            {
+                return;
+            }
+
+            if (!menuActive || previewActive || calibrationMuted)
+            {
+                PausePlayback();
+                return;
+            }
+
+            if (playing || !settings.MusicClip)
+            {
+                return;
+            }
+
+            source.timeSamples = resumeSample;
+            startDspTime = AudioSettings.dspTime;
+            fade = 0f;
+            RefreshVolume();
+            source.Play();
+            playing = true;
+        }
+
+        private void PausePlayback()
+        {
+            if (!playing)
+            {
+                return;
+            }
+
+            if (source.isPlaying)
+            {
+                resumeSample = source.timeSamples;
+            }
             source.Stop();
-
-            if (settings.MusicClip)
-            {
-                startDspTime = AudioSettings.dspTime + .15d;
-            }
-            else
-            {
-                startDspTime = AudioSettings.dspTime + 0d;
-            }
-
-            if (settings.MusicClip)
-            {
-                source.PlayScheduled(startDspTime);
-            }
+            playing = false;
         }
 
         private void RefreshVolume()
         {
             if (source && settings)
             {
-                source.volume = settings.Volume
-                    * (PresentationPreferences.Current ?? PresentationPreferences.Load()).backgroundVolume;
+                var presentation = PresentationPreferences.Current ?? PresentationPreferences.Load();
+                source.volume = settings.Volume * presentation.backgroundVolume * fade;
             }
         }
 
@@ -102,61 +151,44 @@ namespace RhythmDojo.Audio
         {
             PresentationPreferences.Changed += RefreshVolume;
             AudioSettings.OnAudioConfigurationChanged += AudioConfigurationChanged;
-
-            if (initialized)
-            {
-                RefreshVolume();
-                if (resumeRequested)
-                {
-                    resumeRequested = false;
-                    if (source.clip)
-                    {
-                        source.timeSamples = resumeSample;
-                        source.Play();
-                    }
-                }
-                else
-                {
-                    Restart();
-                }
-            }
+            UpdatePlayback();
         }
 
         private void OnDisable()
         {
-            restartRequested = false;
             PresentationPreferences.Changed -= RefreshVolume;
             AudioSettings.OnAudioConfigurationChanged -= AudioConfigurationChanged;
-
-            if (source)
-            {
-                source.Stop();
-            }
+            restartRequested = false;
+            PausePlayback();
         }
 
         private void AudioConfigurationChanged(bool deviceWasChanged)
         {
-            if (!isActiveAndEnabled || !initialized)
-            {
-                return;
-            }
-            if (source && settings)
-            {
-                // Reset may still be stopping sources while this event is raised.
-                restartRequested = true;
-            }
+            // Unity can invalidate the source before this callback. Keep the last observed sample.
+            restartRequested = playing;
         }
 
         private void LateUpdate()
         {
-            if (!restartRequested)
+            if (restartRequested)
+            {
+                restartRequested = false;
+                source.Stop();
+                playing = false;
+                UpdatePlayback();
+            }
+
+            if (!playing || !source.isPlaying)
             {
                 return;
             }
 
-            restartRequested = false;
-            RefreshVolume();
-            Restart();
+            resumeSample = source.timeSamples;
+            if (fade < 1f)
+            {
+                fade = Mathf.Clamp01((float)((AudioSettings.dspTime - startDspTime) / FadeSeconds));
+                RefreshVolume();
+            }
         }
     }
 }

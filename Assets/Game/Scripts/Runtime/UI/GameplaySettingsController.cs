@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using RhythmDojo.Application;
+using RhythmDojo.Audio;
 using RhythmDojo.Gameplay;
 using RhythmDojo.Services;
 using UnityEngine;
@@ -51,7 +52,8 @@ namespace RhythmDojo.UI
             ISelectionPreferences preferences,
             HardModePreferences hardMode,
             IPlayRulesService rules,
-            PresentationPreferences presentation
+            PresentationPreferences presentation,
+            TitleMusicPlayer titleMusic = null
         )
         {
             this.view = view;
@@ -67,7 +69,8 @@ namespace RhythmDojo.UI
                 preferences,
                 ApplyCalibration,
                 CreateSpeedTestTimeline,
-                () => rules?.Snapshot.Timing ?? new PlayRules().Timing
+                () => rules?.Snapshot.Timing ?? new PlayRules().Timing,
+                titleMusic
             );
 
             if (rules != null && view.playRuleLists != null && view.playRuleLists.Length == 5)

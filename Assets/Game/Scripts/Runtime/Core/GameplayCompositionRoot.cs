@@ -334,6 +334,7 @@ namespace RhythmDojo.Core
 
         private void StartGameplayIntroduction()
         {
+            flow.Music.SetMenuActive(false);
             if (pauseMenu)
             {
                 controller.FocusLost = pauseMenu.PauseForFocusLoss;
@@ -706,6 +707,7 @@ namespace RhythmDojo.Core
 
         private void ShowTrainingFeedback()
         {
+            flow.Music.SetMenuActive(true);
             if (pauseMenu)
             {
                 pauseMenu.panel.SetActive(false);

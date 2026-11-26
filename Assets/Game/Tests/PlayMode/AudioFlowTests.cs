@@ -45,10 +45,9 @@ namespace RhythmDojo.Tests
             var music = UnityEngine.Object.FindFirstObjectByType<TitleMusicPlayer>();
             Assert.That(music, Is.Not.Null);
             Assert.That(AudioListener.volume, Is.EqualTo(.25f).Within(.001f));
-            Assert.That(
-                music.GetComponent<AudioSource>().volume,
-                Is.EqualTo(.7f * .4f).Within(.001f)
-            );
+            var source = music.GetComponent<AudioSource>();
+            Assert.That(source.clip.name, Is.EqualTo("GaemunIlgyeok"));
+            yield return Await(() => source.isPlaying && Mathf.Abs(source.volume - .25f * .4f) < .001f);
         }
 
         [UnityTest]
@@ -67,18 +66,10 @@ namespace RhythmDojo.Tests
             var music = UnityEngine.Object.FindFirstObjectByType<TitleMusicPlayer>();
             var source = music.GetComponent<AudioSource>();
 
-            // Title music is optional in the existing asset. Use a controlled tone
-            // for output measurements without choosing a new production music track.
-            if (source.clip)
-            {
-                yield return new WaitForSecondsRealtime(.3f);
-                Assert.That(
-                    source.isPlaying,
-                    Is.True,
-                    "Opening settings must preserve title playback."
-                );
-            }
+            yield return Await(() => source.isPlaying && source.time > 1.1f);
+            Assert.That(source.clip.name, Is.EqualTo("GaemunIlgyeok"));
 
+            // A constant tone isolates slider gain from changes in the music itself.
             float baseVolume =
                 source.volume
                 / RhythmDojo.Services.PresentationPreferences.Current.backgroundVolume;
@@ -383,27 +374,17 @@ namespace RhythmDojo.Tests
         {
             var preferences = RhythmDojo.Services.PresentationPreferences.Current;
             var property = typeof(RhythmDojo.Services.PresentationPreferences).GetProperty("Current");
-            var settings = ScriptableObject.CreateInstance<TitleMusicSettings>();
-            // Use an imported clip: device resets discard procedural AudioClip data.
-            var clip = Resources.Load<AudioClip>("UI/DojoHitPerfect");
-            Assert.That(clip, Is.Not.Null);
-            typeof(TitleMusicSettings).GetField("musicClip", System.Reflection.BindingFlags.Instance
-                | System.Reflection.BindingFlags.NonPublic).SetValue(settings, clip);
-            var root = new GameObject("Title audio reload regression");
+            var player = UnityEngine.Object.FindFirstObjectByType<AppFlowController>().Music;
+            var source = player.GetComponent<AudioSource>();
             try
             {
                 preferences.backgroundVolume = .35f;
                 preferences.SaveAudio();
-                var player = root.AddComponent<TitleMusicPlayer>();
-                player.Initialize(settings);
-                root.SetActive(false);
+                player.enabled = false;
                 property.SetValue(null, null);
-                root.SetActive(true);
+                player.enabled = true;
                 Assert.That(RhythmDojo.Services.PresentationPreferences.Current, Is.Not.Null);
-                var source = root.GetComponent<AudioSource>();
-                Assert.That(source.volume, Is.EqualTo(settings.Volume * .35f).Within(.001f));
-                yield return new WaitForSecondsRealtime(.25f);
-                Assert.That(source.isPlaying, Is.True);
+                yield return Await(() => source.isPlaying && Mathf.Abs(source.volume - .25f * .35f) < .001f);
                 Assert.That(AudioSettings.Reset(AudioSettings.GetConfiguration()), Is.True);
                 yield return new WaitForSecondsRealtime(.3f);
                 Assert.That(source.isPlaying, Is.True, "DSP reconfiguration must not leave title music stopped.");
@@ -413,9 +394,7 @@ namespace RhythmDojo.Tests
             }
             finally
             {
-                root.SetActive(false);
-                UnityEngine.Object.Destroy(root);
-                UnityEngine.Object.Destroy(settings);
+                player.enabled = true;
                 property.SetValue(null, preferences);
             }
         }

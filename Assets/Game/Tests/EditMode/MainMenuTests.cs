@@ -96,15 +96,10 @@ namespace RhythmDojo.Tests
                     Is.EqualTo(1)
                 );
 
-                var root = view.GetComponent<MainMenuCompositionRoot>();
-                Assert.That(
-                    new SerializedObject(root).FindProperty("titleMusic").objectReferenceValue,
-                    Is.EqualTo(
-                        AssetDatabase.LoadAssetAtPath<TitleMusicSettings>(
-                            MainMenuSceneBuilder.TitleMusicPath
-                        )
-                    )
-                );
+                var prefab = Resources.Load<GameObject>("AppFlow").GetComponent<AppFlowController>();
+                var settings = AssetDatabase.LoadAssetAtPath<TitleMusicSettings>(MainMenuSceneBuilder.TitleMusicPath);
+                Assert.That(new SerializedObject(prefab).FindProperty("titleMusic").objectReferenceValue, Is.EqualTo(settings));
+                Assert.That(settings.MusicClip, Is.Not.Null);
             }
             finally
             {

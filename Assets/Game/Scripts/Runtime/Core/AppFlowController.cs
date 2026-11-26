@@ -5,6 +5,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using RhythmDojo.Application;
+using RhythmDojo.Audio;
 using RhythmDojo.Authoring;
 using RhythmDojo.Content;
 using RhythmDojo.Gameplay;
@@ -31,6 +32,10 @@ namespace RhythmDojo.Core
 
         [SerializeField]
         private GameSettings settings;
+
+        [SerializeField] private TitleMusicPlayer music;
+        [SerializeField] private TitleMusicSettings titleMusic;
+        public TitleMusicPlayer Music => music;
         private readonly CancellationTokenSource lifetime = new CancellationTokenSource();
         private string editorSessionId,
             returnScenePath;
@@ -129,7 +134,17 @@ namespace RhythmDojo.Core
 
             settings.ValidateOptions();
 
-            var flow = new GameObject("App Flow").AddComponent<AppFlowController>();
+            var asset = Resources.Load<GameObject>("AppFlow");
+            if (!asset || !asset.TryGetComponent<AppFlowController>(out var prefab))
+            {
+                throw new InvalidOperationException("AppFlow prefab missing.");
+            }
+            if (!prefab.music || !prefab.titleMusic)
+            {
+                throw new InvalidOperationException("The AppFlow prefab requires a menu music player and settings.");
+            }
+
+            var flow = Instantiate(prefab);
             flow.settings = settings;
             PlayKeyBindings.ConfigureDefaultMode(settings.catalog[0].Mode);
             flow.Library = new SongLibrary();
@@ -161,6 +176,7 @@ namespace RhythmDojo.Core
             flow.Audio = new AudioSettingsService(flow.CanApplyAudioSettings);
             flow.selectionPreparation = new PreparedSelectionScene(flow);
             DontDestroyOnLoad(flow.gameObject);
+            flow.music.Initialize(flow.titleMusic, flow.IsMusicScene(SceneManager.GetActiveScene()));
 
             return flow;
         }
@@ -190,9 +206,39 @@ namespace RhythmDojo.Core
             selectionPreparation?.Tick();
         }
 
-        private void OnEnable() => SceneManager.sceneLoaded += SceneLoaded;
+        private void OnEnable()
+        {
+            SceneManager.sceneLoaded += SceneLoaded;
+            SceneManager.activeSceneChanged += ActiveSceneChanged;
+        }
 
-        private void OnDisable() => SceneManager.sceneLoaded -= SceneLoaded;
+        private void OnDisable()
+        {
+            SceneManager.sceneLoaded -= SceneLoaded;
+            SceneManager.activeSceneChanged -= ActiveSceneChanged;
+        }
+
+        private void ActiveSceneChanged(Scene previous, Scene scene)
+        {
+            music.SetMenuActive(IsMusicScene(scene));
+        }
+
+        private bool IsMusicScene(Scene scene)
+        {
+            switch (scene.path)
+            {
+                case MainMenuActions.TitleScenePath:
+                case MainMenuActions.ModeSelectionScenePath:
+                case MainMenuActions.TutorialScenePath:
+                case SelectionPath:
+                case SettingsPath:
+                    return true;
+                case GameplayPath:
+                    return IsTrainingPlay && Training.State == TrainingState.Ready;
+                default:
+                    return false;
+            }
+        }
 
         private void SceneLoaded(Scene scene, LoadSceneMode mode)
         {
@@ -910,7 +956,8 @@ namespace RhythmDojo.Core
                     Rules,
                     PresentationPreferences.Current,
                     settingsKeyMode,
-                    settingsKeyModeId
+                    settingsKeyModeId,
+                    music
                 );
 
                 if (onApplied != null)

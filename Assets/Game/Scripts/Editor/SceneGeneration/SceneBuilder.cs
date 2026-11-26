@@ -27,6 +27,7 @@ namespace RhythmDojo.EditorTools
         {
             Guard();
 
+            MainMenuSceneBuilder.BuildAppFlowPrefab();
             DojoCursorAssetBuilder.Build();
             var content = SceneResources.Load();
             SaveGameplay(content);

@@ -304,6 +304,8 @@ namespace RhythmDojo.Tests
             var dialogue = Object.FindFirstObjectByType<DialogueScreen>();
             var view = Object.FindFirstObjectByType<DialogueView>();
             var objects = dialogue.GetComponentsInChildren<Transform>(true);
+            var music = flow.Music.GetComponent<AudioSource>();
+            Assert.That(music.isPlaying, Is.True);
             Assert.That(tutorial.trainingPanel.activeInHierarchy, Is.True);
             Assert.That(dialogue.IsActive, Is.False);
             yield return Click(tutorial.startButton);
@@ -344,6 +346,7 @@ namespace RhythmDojo.Tests
             yield return Await(() => Object.FindFirstObjectByType<RhythmGameController>());
             yield return WaitForGameplayIntroduction();
             Assert.That(Object.FindFirstObjectByType<DialogueScreen>(), Is.Null);
+            Assert.That(music.isPlaying, Is.False);
             Assert.That(flow.Training.Attempt, Is.EqualTo(1));
             Assert.That(Object.FindFirstObjectByType<RhythmGameController>().Session.State, Is.EqualTo(SessionState.Playing));
             yield return Await(() => Object.FindFirstObjectByType<RhythmGameController>().ReadModel.Snapshot.SongTime >= 3.02);
@@ -352,6 +355,7 @@ namespace RhythmDojo.Tests
             yield return Press(Key.Escape);
             yield return Click(Object.FindFirstObjectByType<GameplayPauseMenu>().exitButton);
             yield return WaitForFeedback();
+            Assert.That(music.isPlaying, Is.True);
             yield return ReturnToMap();
             yield return SelectTablet(5);
             yield return StartTraining(false);
