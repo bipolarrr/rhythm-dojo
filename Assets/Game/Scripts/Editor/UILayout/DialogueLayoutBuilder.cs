@@ -31,13 +31,6 @@ namespace RhythmDojo.EditorTools
             view.portrait.sprite = view.expressions[0];
             view.previousPortrait.sprite = view.expressions[0];
 
-            var caption = Label("Story Caption", root, "사형의 가르침", .075f, .72f, .53f, .85f, 54);
-            caption.font = SceneResources.Require<Font>("Assets/Game/Fonts/Dokdo-Regular.ttf");
-            caption.color = new Color(1, .94f, .79f);
-            UiFontSettings.Apply(caption);
-            Ink("Caption Ink", caption.rectTransform, new Color(.06f, .09f, .08f, .9f));
-            caption.transform.SetAsLastSibling();
-
             view.paper = Rect("Open Manuscript", root, new Vector2(.03f, .065f), new Vector2(.635f, .49f));
             var shadow = Rect("Paper Shadow", view.paper, new Vector2(-.012f, -.035f), new Vector2(1.012f, .97f))
                 .gameObject.AddComponent<DialoguePaperGraphic>();
@@ -53,7 +46,7 @@ namespace RhythmDojo.EditorTools
             rule.raycastTarget = false;
 
             view.speaker = Label("Speaker", view.paper, "사형", .07f, .73f, .55f, .98f, 46);
-            view.speaker.font = caption.font;
+            view.speaker.font = SceneResources.Require<Font>("Assets/Game/Fonts/Dokdo-Regular.ttf");
             UiFontSettings.Apply(view.speaker);
             var seal = Label("Transmission Seal", view.paper, "전\n수", .015f, .70f, .055f, .96f, 17);
             seal.color = new Color(.62f, .14f, .10f);
@@ -89,15 +82,6 @@ namespace RhythmDojo.EditorTools
             image.preserveAspect = true;
             image.raycastTarget = false;
             return image;
-        }
-
-        private static void Ink(string name, RectTransform parent, Color color)
-        {
-            var ink = Rect(name, parent.parent, parent.anchorMin, parent.anchorMax).gameObject.AddComponent<DojoInkGraphic>();
-            ink.contrastStroke = true;
-            ink.color = color;
-            ink.raycastTarget = false;
-            DojoInkGraphic.FitInk(ink.rectTransform, parent.GetComponent<Text>(), 0, 20, 10);
         }
 
         private static Button Control(string name, Transform parent, string caption, Vector2 minimum, Vector2 maximum)
