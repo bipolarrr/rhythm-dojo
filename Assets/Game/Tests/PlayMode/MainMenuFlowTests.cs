@@ -1065,6 +1065,8 @@ namespace RhythmDojo.Tests
             var tutorial = UnityEngine.Object.FindFirstObjectByType<TutorialView>();
             Assert.That(tutorial, Is.Not.Null);
             tutorial.Validate();
+            Assert.That(tutorial.lessonMap.activeInHierarchy, Is.True);
+            Assert.That(UnityEngine.Object.FindFirstObjectByType<TrainingPlaybackView>(), Is.Null);
             Assert.That(UnityEngine.Object.FindFirstObjectByType<DojoModeView>(), Is.Null);
             Assert.That(UnityEngine.Object.FindObjectsByType<UnityEngine.EventSystems.EventSystem>(
                 FindObjectsSortMode.None).Length, Is.EqualTo(1));

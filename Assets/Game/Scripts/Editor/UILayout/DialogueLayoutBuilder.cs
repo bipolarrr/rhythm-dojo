@@ -18,7 +18,7 @@ namespace RhythmDojo.EditorTools
             var blocker = root.gameObject.AddComponent<Image>();
             blocker.color = new Color(.035f, .045f, .04f, .24f);
 
-            view.actor = Rect("Senior Student", root, new Vector2(.025f, .035f), new Vector2(.385f, .97f));
+            view.actor = Rect("Senior Student", root, new Vector2(.63f, .025f), new Vector2(.985f, .97f));
             view.previousPortrait = Portrait("Previous Expression", view.actor);
             view.portrait = Portrait("Expression", view.actor);
             var names = Enum.GetNames(typeof(DialogueExpression));
@@ -31,16 +31,14 @@ namespace RhythmDojo.EditorTools
             view.portrait.sprite = view.expressions[0];
             view.previousPortrait.sprite = view.expressions[0];
 
-            var caption = Label("Story Caption", root, "사형의 가르침", .48f, .72f, .92f, .85f, 54);
+            var caption = Label("Story Caption", root, "사형의 가르침", .075f, .72f, .53f, .85f, 54);
             caption.font = SceneResources.Require<Font>("Assets/Game/Fonts/Dokdo-Regular.ttf");
             caption.color = new Color(1, .94f, .79f);
             UiFontSettings.Apply(caption);
             Ink("Caption Ink", caption.rectTransform, new Color(.06f, .09f, .08f, .9f));
             caption.transform.SetAsLastSibling();
-            Label("Story Subtitle", root, "비급 전수   /   마음을 가다듬고 귀를 기울여라",
-                .5f, .67f, .94f, .73f, 18).color = new Color(.20f, .13f, .08f);
 
-            view.paper = Rect("Open Manuscript", root, new Vector2(.315f, .055f), new Vector2(.97f, .43f));
+            view.paper = Rect("Open Manuscript", root, new Vector2(.03f, .065f), new Vector2(.635f, .49f));
             var shadow = Rect("Paper Shadow", view.paper, new Vector2(-.012f, -.035f), new Vector2(1.012f, .97f))
                 .gameObject.AddComponent<DialoguePaperGraphic>();
             shadow.color = new Color(.06f, .065f, .05f, .65f);

@@ -100,17 +100,15 @@ namespace RhythmDojo.UI
             session.Tick(Time.unscaledDeltaTime);
             RefreshText();
             var keyboard = Keyboard.current;
-            if (keyboard == null)
-            {
-                return;
-            }
-            if (keyboard.tabKey.wasPressedThisFrame)
+            if (keyboard?.tabKey.wasPressedThisFrame == true)
             {
                 SkipRead();
                 return;
             }
-            bool confirm = keyboard.enterKey.wasPressedThisFrame || keyboard.spaceKey.wasPressedThisFrame;
-            confirm |= keyboard.numpadEnterKey.wasPressedThisFrame;
+            bool confirm = keyboard?.enterKey.wasPressedThisFrame == true;
+            confirm |= keyboard?.spaceKey.wasPressedThisFrame == true;
+            confirm |= keyboard?.numpadEnterKey.wasPressedThisFrame == true;
+            confirm |= Gamepad.current?.buttonSouth.wasPressedThisFrame == true;
             if (confirm)
             {
                 Confirm();
@@ -216,6 +214,10 @@ namespace RhythmDojo.UI
         private static bool HasHeldInput()
         {
             if (Keyboard.current?.anyKey.isPressed == true)
+            {
+                return true;
+            }
+            if (Gamepad.current?.buttonSouth.isPressed == true)
             {
                 return true;
             }

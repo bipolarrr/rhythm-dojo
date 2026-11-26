@@ -95,9 +95,9 @@ namespace RhythmDojo.UI
                     lean = Mathf.Sin(Mathf.Clamp01(lineAge / 1.2f) * Mathf.PI) * 5;
                     break;
             }
-            actor.anchoredPosition = new Vector2(-36 * (1 - eased) + lean,
+            actor.anchoredPosition = new Vector2(36 * (1 - eased) - lean,
                 Mathf.Sin(lineAge * 1.6f) * 1.8f + nod);
-            actor.localRotation = Quaternion.Euler(0, 0, lean * -.08f);
+            actor.localRotation = Quaternion.Euler(0, 0, lean * .08f);
             float blend = Mathf.Clamp01(lineAge / .16f);
             portrait.color = new Color(1, 1, 1, blend);
             previousPortrait.color = new Color(1, 1, 1, 1 - blend);

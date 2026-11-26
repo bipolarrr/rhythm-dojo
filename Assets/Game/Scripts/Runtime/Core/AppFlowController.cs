@@ -492,8 +492,7 @@ namespace RhythmDojo.Core
         {
             if (!Transitioning && IsTrainingPlay)
             {
-                Training.Abort();
-                Load(MainMenuActions.TutorialScenePath);
+                FindFirstObjectByType<GameplayCompositionRoot>().ReturnToSelection();
                 return;
             }
             if (!Transitioning)
@@ -534,7 +533,13 @@ namespace RhythmDojo.Core
 
         public bool PlayTraining(TrainingLesson lesson)
         {
-            if (Transitioning || SceneManager.GetActiveScene().path != MainMenuActions.TutorialScenePath)
+            if (Transitioning || CurrentRequest != null)
+            {
+                return false;
+            }
+            string path = SceneManager.GetActiveScene().path;
+            bool continuing = path == GameplayPath && Training?.State == TrainingState.Feedback;
+            if (path != MainMenuActions.TutorialScenePath && !continuing)
             {
                 return false;
             }
@@ -552,7 +557,6 @@ namespace RhythmDojo.Core
                 }
                 var request = new PlayRequest(song, settings.defaultDifficulty, SelectedScrollMode,
                     SelectedMultiplier, timingOffsetMs, null, lesson.CreateRules());
-                session.BeginAttempt();
                 CloseSettingsImmediately();
                 SettingsAccessPolicy.Block(this);
                 Audio.CancelBufferValidation();
@@ -563,6 +567,10 @@ namespace RhythmDojo.Core
                 retryPlay = null;
                 ClearEditorReturn();
                 Load(GameplayPath);
+                if (continuing)
+                {
+                    session.BeginAttempt();
+                }
                 return true;
             }
             catch
@@ -590,6 +598,22 @@ namespace RhythmDojo.Core
 
             LastResult = result;
             TrainingProgress.SaveCompleted(session);
+            ReleaseRequest();
+        }
+
+        internal void AbortTraining()
+        {
+            Training.Abort();
+            ReleaseRequest();
+        }
+
+        internal void ShowTrainingMap()
+        {
+            if (Transitioning)
+            {
+                return;
+            }
+            Training.ReturnToSelection();
             Load(MainMenuActions.TutorialScenePath);
         }
 

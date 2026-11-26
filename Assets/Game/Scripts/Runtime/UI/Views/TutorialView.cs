@@ -12,14 +12,11 @@ namespace RhythmDojo.UI
         public Text heading;
         public Button backButton;
         public Text backLabel;
-        public Text lessonTitle;
-        public Text instructions;
-        public Text progress;
-        public Text feedback;
-        public Button startButton;
-        public Text startLabel;
         public Button[] lessonButtons;
         public Text[] lessonLabels;
+        public string[] lessonIds;
+        public GameObject[] completionSeals;
+        public GameObject lessonMap;
 
         public void Validate()
         {
@@ -31,27 +28,37 @@ namespace RhythmDojo.UI
             {
                 throw new InvalidOperationException("Tutorial navigation composition missing.");
             }
-            if (!lessonTitle || !instructions || !progress)
+            if (!lessonMap)
             {
-                throw new InvalidOperationException("Tutorial lesson composition missing.");
-            }
-            if (!feedback || !startButton || !startLabel)
-            {
-                throw new InvalidOperationException("Tutorial training controls missing.");
+                throw new InvalidOperationException("Tutorial map is missing.");
             }
             if (lessonButtons == null || lessonLabels == null)
             {
                 throw new InvalidOperationException("Tutorial lesson selection missing. Rebuild Tutorial.");
             }
-            if (lessonButtons.Length == 0 || lessonButtons.Length != lessonLabels.Length)
+            if (lessonButtons.Length != 7 || lessonButtons.Length != lessonLabels.Length)
             {
                 throw new InvalidOperationException("Tutorial lesson selection is incomplete.");
             }
+            if (lessonIds?.Length != lessonButtons.Length || completionSeals?.Length != lessonButtons.Length)
+            {
+                throw new InvalidOperationException("Tutorial tablet identities or seals are missing.");
+            }
+            var buttons = new System.Collections.Generic.HashSet<Button>();
+            var ids = new System.Collections.Generic.HashSet<string>();
             for (int i = 0; i < lessonButtons.Length; i++)
             {
                 if (!lessonButtons[i] || !lessonLabels[i])
                 {
                     throw new InvalidOperationException("Tutorial lesson button missing.");
+                }
+                if (!completionSeals[i] || string.IsNullOrEmpty(lessonIds[i]))
+                {
+                    throw new InvalidOperationException("Tutorial tablet references are incomplete.");
+                }
+                if (!buttons.Add(lessonButtons[i]) || !ids.Add(lessonIds[i]))
+                {
+                    throw new InvalidOperationException("Tutorial tablet is duplicated.");
                 }
             }
         }

@@ -21,19 +21,17 @@ namespace RhythmDojo.EditorTools
             camera.clearFlags = CameraClearFlags.SolidColor;
             camera.backgroundColor = new Color(.045f, .065f, .07f);
             var view = TutorialLayoutBuilder.Build(lessons.Length);
+            foreach (var selected in lessons)
+            {
+                int index = System.Array.IndexOf(view.lessonIds, selected.LessonId);
+                if (index < 0)
+                {
+                    throw new System.InvalidOperationException("Missing tablet for " + selected.LessonId);
+                }
+                view.lessonLabels[index].text = selected.Title;
+            }
             var screen = view.gameObject.AddComponent<TutorialScreen>();
             SceneDependencyAssembler.Wire(screen, "view", view);
-            var dialogueView = DialogueLayoutBuilder.Build(view.transform);
-            var dialogue = dialogueView.gameObject.AddComponent<DialogueScreen>();
-            SceneDependencyAssembler.Wire(dialogue, "view", dialogueView);
-            SceneDependencyAssembler.Wire(screen, "dialogue", dialogue);
-            var dialogueAudio = new GameObject("Dialogue Audio", typeof(AudioSource));
-            dialogueAudio.transform.SetParent(dialogueView.transform, false);
-            dialogueView.source = dialogueAudio.GetComponent<AudioSource>();
-            dialogueView.source.playOnAwake = false;
-            dialogueView.source.spatialBlend = 0;
-            dialogueView.turnSound = SceneResources.Require<AudioClip>("Assets/Game/Audio/Foley/ResultsStatistic.wav");
-            dialogueView.arrivalSound = SceneResources.Require<AudioClip>("Assets/Game/Audio/Foley/ResultsBrush.wav");
             var root = view.gameObject.AddComponent<TutorialCompositionRoot>();
             SceneDependencyAssembler.Wire(root, "screen", screen);
             SceneDependencyAssembler.Wire(root, "lesson", lesson);
@@ -60,6 +58,8 @@ namespace RhythmDojo.EditorTools
                 SceneResources.Require<TitleMusicSettings>(MainMenuSceneBuilder.TitleMusicPath));
             UiElements.EventSystem(AssetDatabase.LoadAssetAtPath<UnityEngine.InputSystem.InputActionAsset>(
                 "Assets/InputSystem_Actions.inputactions"));
+            var module = UnityEngine.Object.FindFirstObjectByType<UnityEngine.InputSystem.UI.InputSystemUIInputModule>();
+            ScenePresentationBuilder.ConfigureMenuInput(module);
             root.Validate();
             return scene;
         }

@@ -48,6 +48,7 @@ namespace RhythmDojo.Core
                 }
                 selected.Validate();
             }
+            screen.ValidateLessonIds(ids);
         }
 
         private void Start()
@@ -57,17 +58,12 @@ namespace RhythmDojo.Core
             flow.CancelSelectionPreparation();
             music.Initialize(titleMusic);
             screen.ConfigureLessons(lessons, SelectLesson, flow.TrainingProgress);
-            var selected = lesson;
-            if (Array.IndexOf(lessons, flow.CurrentTrainingLesson) >= 0)
-            {
-                selected = flow.CurrentTrainingLesson;
-            }
-            SelectLesson(selected);
+            screen.Initialize(Return, flow.CurrentTrainingLesson ?? lesson);
         }
 
         private void SelectLesson(TrainingLesson selected)
         {
-            screen.Initialize(Return, selected, flow.PrepareTraining(selected), () => flow.PlayTraining(selected));
+            flow.PlayTraining(selected);
         }
 
         private void Return()

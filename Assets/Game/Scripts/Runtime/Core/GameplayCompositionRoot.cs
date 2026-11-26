@@ -290,19 +290,16 @@ namespace RhythmDojo.Core
             {
                 hits.BindInput(input, controller);
             }
-            trainingView.Initialize(controller, trainingSession, runtimeMode, song.ModeId, flow.CurrentTrainingLesson);
             controller.ReadModel.Judged += TrackCombo;
             controller.ReadModel.ResetOccurred += ResetRecord;
             pauseMenu = hud.GetComponent<GameplayPauseMenu>();
             if (pauseMenu)
             {
                 pauseMenu.Initialize(controller, flow, this);
-                controller.FocusLost = pauseMenu.PauseForFocusLoss;
             }
             input.ReturnRequested += HandleGameplayEscape;
             ui.Initialize(controller.ReadModel, ReturnToSelection, playfield.SetRailOpacity);
             initialized = true;
-            input.Activate();
 
             if (EventSystem.current)
             {
@@ -314,6 +311,34 @@ namespace RhythmDojo.Core
             {
                 AudioConfigurationChanged(false);
             }
+            if (trainingSession?.State == TrainingState.Ready)
+            {
+                hud.SetIntroductionVisible(false);
+                trainingView.Initialize(flow.ShowTrainingMap, flow.CurrentTrainingLesson, trainingSession, BeginTraining);
+                return;
+            }
+            StartGameplayIntroduction();
+        }
+
+        private bool BeginTraining()
+        {
+            if (flow.Transitioning || trainingSession.State != TrainingState.Ready)
+            {
+                return false;
+            }
+            trainingSession.BeginAttempt();
+            trainingAttempt = trainingSession.Attempt;
+            StartGameplayIntroduction();
+            return true;
+        }
+
+        private void StartGameplayIntroduction()
+        {
+            if (pauseMenu)
+            {
+                controller.FocusLost = pauseMenu.PauseForFocusLoss;
+            }
+            input.Activate();
             StartCoroutine(BeginGameplay());
         }
 
@@ -553,6 +578,7 @@ namespace RhythmDojo.Core
             if (trainingSession != null)
             {
                 flow.ShowTrainingResults(trainingSession, trainingAttempt, result, trainingPlayback?.Inputs);
+                ShowTrainingFeedback();
             }
             else
             {
@@ -662,9 +688,31 @@ namespace RhythmDojo.Core
         private void CompleteReturn()
         {
             returnPending = false;
+            if (trainingSession?.State == TrainingState.Ready)
+            {
+                flow.ShowTrainingMap();
+                return;
+            }
             SaveRecord();
             ShutdownGameplay();
+            if (trainingSession != null)
+            {
+                flow.AbortTraining();
+                ShowTrainingFeedback();
+                return;
+            }
             flow.ReturnFromGameplay();
+        }
+
+        private void ShowTrainingFeedback()
+        {
+            if (pauseMenu)
+            {
+                pauseMenu.panel.SetActive(false);
+                pauseMenu.countdown.SetActive(false);
+            }
+            var lesson = flow.CurrentTrainingLesson;
+            trainingView.Initialize(flow.ShowTrainingMap, lesson, trainingSession, () => flow.PlayTraining(lesson));
         }
 
         private void ShutdownGameplay()
@@ -673,7 +721,6 @@ namespace RhythmDojo.Core
             StopAllCoroutines();
             ReleasePlaybackRecovery();
             UnbindRecord();
-            trainingView.Unbind();
             hits.Unbind();
             controller.Shutdown();
             input.Shutdown();

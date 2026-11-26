@@ -10,6 +10,7 @@ using RhythmDojo.Gameplay;
 using RhythmDojo.Services;
 using RhythmDojo.UI;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.SceneManagement;
@@ -80,11 +81,85 @@ namespace RhythmDojo.Tests
             yield return null;
         }
 
+        private IEnumerator SelectTablet(int index)
+        {
+            var view = Object.FindFirstObjectByType<TutorialView>();
+            yield return Click(view.lessonButtons[index]);
+            yield return Await(() => Object.FindFirstObjectByType<TrainingPlaybackView>());
+        }
+
+        private IEnumerator ReturnToMap()
+        {
+            yield return Click(Object.FindFirstObjectByType<TrainingPlaybackView>().backButton);
+            yield return Await(() => Object.FindFirstObjectByType<TutorialView>());
+            yield return null;
+        }
+
+        [UnityTest]
+        [Category("SceneIntegration")]
+        public IEnumerator MapBranchesOpenEveryBriefingAndRestoreTabletFocus()
+        {
+            yield return OpenTraining();
+            var view = Object.FindFirstObjectByType<TutorialView>();
+            var flow = Object.FindFirstObjectByType<AppFlowController>();
+            Assert.That(EventSystem.current.currentSelectedGameObject, Is.EqualTo(view.lessonButtons[0].gameObject));
+
+            yield return Press(Key.UpArrow);
+            Assert.That(EventSystem.current.currentSelectedGameObject, Is.EqualTo(view.lessonButtons[1].gameObject));
+            yield return Press(Key.LeftArrow);
+            var pad = InputSystem.AddDevice<Gamepad>();
+            try
+            {
+                InputSystem.QueueStateEvent(pad, new GamepadState().WithButton(GamepadButton.DpadDown));
+                yield return null;
+                InputSystem.QueueStateEvent(pad, new GamepadState());
+                yield return null;
+                Assert.That(EventSystem.current.currentSelectedGameObject, Is.EqualTo(view.lessonButtons[4].gameObject));
+                InputSystem.QueueStateEvent(pad, new GamepadState().WithButton(GamepadButton.South));
+                yield return null;
+                yield return null;
+                yield return Await(() => Object.FindFirstObjectByType<TrainingPlaybackView>());
+                Assert.That(Object.FindFirstObjectByType<DialogueScreen>().IsActive, Is.False);
+                yield return null;
+                InputSystem.QueueStateEvent(pad, new GamepadState().WithButton(GamepadButton.East));
+                yield return null;
+                InputSystem.QueueStateEvent(pad, new GamepadState());
+                yield return null;
+                yield return Await(() => Object.FindFirstObjectByType<TutorialView>());
+                yield return null;
+                view = Object.FindFirstObjectByType<TutorialView>();
+                Assert.That(EventSystem.current.currentSelectedGameObject, Is.EqualTo(view.lessonButtons[4].gameObject));
+            }
+            finally
+            {
+                InputSystem.RemoveDevice(pad);
+            }
+
+            for (int i = 0; i < view.lessonButtons.Length; i++)
+            {
+                string id = view.lessonIds[i];
+                string title = view.lessonLabels[i].text;
+                yield return SelectTablet(i);
+                var briefing = Object.FindFirstObjectByType<TrainingPlaybackView>();
+                Assert.That(flow.Training.LessonId, Is.EqualTo(id));
+                Assert.That(briefing.lessonTitle.text, Is.EqualTo(title));
+                Assert.That(flow.Training.Attempt, Is.Zero);
+                Assert.That(briefing.dialogue.IsActive, Is.False);
+                yield return Press(Key.Escape);
+                yield return Await(() => Object.FindFirstObjectByType<TutorialView>());
+                yield return null;
+                view = Object.FindFirstObjectByType<TutorialView>();
+                Assert.That(view.lessonMap.activeInHierarchy, Is.True);
+                Assert.That(EventSystem.current.currentSelectedGameObject, Is.EqualTo(view.lessonButtons[i].gameObject));
+            }
+        }
+
         private IEnumerator StartTraining(bool perfect, double error = 0, bool extra = false, string fault = null)
         {
-            yield return Click(Object.FindFirstObjectByType<TutorialView>().startButton);
+            yield return Click(Object.FindFirstObjectByType<TrainingPlaybackView>().startButton);
             yield return FinishDialogue();
-            yield return Await(() => Object.FindFirstObjectByType<RhythmGameController>());
+            yield return Await(() => !Object.FindFirstObjectByType<AppFlowController>().Transitioning);
+            yield return Await(() => Object.FindFirstObjectByType<RhythmGameController>()?.Session != null);
             game = Object.FindFirstObjectByType<RhythmGameController>();
             events.Clear();
             held.Clear();
@@ -175,7 +250,7 @@ namespace RhythmDojo.Tests
 
         private IEnumerator WaitForFeedback()
         {
-            yield return Await(() => Object.FindFirstObjectByType<TutorialScreen>(),
+            yield return Await(() => Object.FindFirstObjectByType<TrainingPlaybackView>(),
                 "Training did not return a result after real playback.", 35);
             InputSystem.onBeforeUpdate -= FeedInput;
             yield return null;
@@ -223,17 +298,21 @@ namespace RhythmDojo.Tests
         {
             yield return OpenTraining();
             var flow = Object.FindFirstObjectByType<AppFlowController>();
-            var tutorial = Object.FindFirstObjectByType<TutorialView>();
+            yield return Press(Key.Enter);
+            yield return Await(() => Object.FindFirstObjectByType<TrainingPlaybackView>());
+            var tutorial = Object.FindFirstObjectByType<TrainingPlaybackView>();
             var dialogue = Object.FindFirstObjectByType<DialogueScreen>();
             var view = Object.FindFirstObjectByType<DialogueView>();
             var objects = dialogue.GetComponentsInChildren<Transform>(true);
+            Assert.That(tutorial.trainingPanel.activeInHierarchy, Is.True);
+            Assert.That(dialogue.IsActive, Is.False);
             yield return Click(tutorial.startButton);
             yield return Await(() => view.advance.interactable);
             Assert.That(dialogue.Session.IsLineComplete, Is.False);
             yield return Press(Key.Escape);
             yield return Press(Key.D);
             Assert.That(flow.Training.State, Is.EqualTo(TrainingState.Ready));
-            Assert.That(flow.CurrentRequest, Is.Null);
+            Assert.That(flow.Training.Attempt, Is.Zero);
             Assert.That(tutorial.startButton.interactable, Is.False);
             Assert.That(tutorial.backButton.interactable, Is.False);
             Assert.That(view.skip.interactable, Is.False);
@@ -259,8 +338,8 @@ namespace RhythmDojo.Tests
             yield return Await(() => view.group.alpha == 0);
             yield return null;
             Assert.That(dialogue.IsActive, Is.True, "Held confirm/lane input must not leak into gameplay.");
-            Assert.That(flow.CurrentRequest, Is.Null);
-            Assert.That(Object.FindFirstObjectByType<RhythmGameController>(), Is.Null);
+            Assert.That(flow.Training.Attempt, Is.Zero);
+            Assert.That(Object.FindFirstObjectByType<RhythmGameController>().Session.State, Is.EqualTo(SessionState.Ready));
             InputSystem.QueueStateEvent(keyboard, new KeyboardState());
             yield return Await(() => Object.FindFirstObjectByType<RhythmGameController>());
             yield return WaitForGameplayIntroduction();
@@ -273,16 +352,10 @@ namespace RhythmDojo.Tests
             yield return Press(Key.Escape);
             yield return Click(Object.FindFirstObjectByType<GameplayPauseMenu>().exitButton);
             yield return WaitForFeedback();
-            yield return Click(Object.FindFirstObjectByType<TutorialView>().backButton);
-            tutorial = Object.FindFirstObjectByType<TutorialView>();
-            yield return Click(tutorial.lessonButtons[5]);
-            CaptureSelection("pattern-training-selection-final");
+            yield return ReturnToMap();
+            yield return SelectTablet(5);
             yield return StartTraining(false);
-            yield return Await(() => game.ReadModel.Snapshot.SongTime >= 3.1);
-            var heading = Object.FindFirstObjectByType<TrainingPlaybackView>().heading;
-            Canvas.ForceUpdateCanvases();
-            Assert.That(heading.preferredHeight, Is.LessThanOrEqualTo(heading.rectTransform.rect.height),
-                "The full lesson name and stage must fit the authored mentor heading.");
+            Assert.That(Object.FindFirstObjectByType<TrainingPlaybackView>(), Is.Null);
             CapturePlayback("shield-release-demonstration-final");
         }
 
@@ -291,22 +364,24 @@ namespace RhythmDojo.Tests
         public IEnumerator DialogueReadHistoryReopenCancellationAndFailedStartRemainUsable()
         {
             yield return OpenTraining();
+            yield return SelectTablet(0);
             var flow = Object.FindFirstObjectByType<AppFlowController>();
             var lesson = flow.CurrentTrainingLesson;
-            var screen = Object.FindFirstObjectByType<TutorialScreen>();
+            var screen = Object.FindFirstObjectByType<TrainingPlaybackView>();
             var view = Object.FindFirstObjectByType<DialogueView>();
             var dialogue = Object.FindFirstObjectByType<DialogueScreen>();
-            yield return Click(Object.FindFirstObjectByType<TutorialView>().startButton);
+            yield return Click(Object.FindFirstObjectByType<TrainingPlaybackView>().startButton);
             yield return Await(() => view.advance.interactable);
             yield return Press(Key.Enter);
             Assert.That(dialogue.Session.IsLineComplete, Is.True);
             screen.enabled = false;
             screen.enabled = true;
             Assert.That(dialogue.IsActive, Is.False);
-            Assert.That(flow.CurrentRequest, Is.Null);
+            Assert.That(flow.Training.Attempt, Is.Zero);
 
-            yield return OpenTraining();
-            screen = Object.FindFirstObjectByType<TutorialScreen>();
+            yield return ReturnToMap();
+            yield return SelectTablet(0);
+            screen = Object.FindFirstObjectByType<TrainingPlaybackView>();
             view = Object.FindFirstObjectByType<DialogueView>();
             dialogue = Object.FindFirstObjectByType<DialogueScreen>();
             int calls = 0;
@@ -315,7 +390,7 @@ namespace RhythmDojo.Tests
                 calls++;
                 return false;
             });
-            var tutorial = Object.FindFirstObjectByType<TutorialView>();
+            var tutorial = Object.FindFirstObjectByType<TrainingPlaybackView>();
             yield return Click(tutorial.startButton);
             yield return Await(() => view.advance.interactable);
             Assert.That(view.skip.interactable, Is.True);
@@ -325,7 +400,7 @@ namespace RhythmDojo.Tests
             yield return FinishDialogue();
             Assert.That(calls, Is.EqualTo(1));
             Assert.That(tutorial.startButton.interactable, Is.True);
-            Assert.That(tutorial.storyRoot.gameObject.activeSelf, Is.True);
+            Assert.That(tutorial.trainingPanel.activeInHierarchy, Is.True);
 
             yield return Click(tutorial.startButton);
             yield return Await(() => view.advance.interactable);
@@ -363,6 +438,7 @@ namespace RhythmDojo.Tests
             yield return Press(Key.Enter);
             yield return Await(() => Object.FindFirstObjectByType<TutorialScreen>());
             yield return null;
+            yield return SelectTablet(0);
             var flow = Object.FindFirstObjectByType<AppFlowController>();
             flow.Preferences.TimingOffsetMs = 30;
             var rules = flow.Rules.Snapshot;
@@ -380,8 +456,7 @@ namespace RhythmDojo.Tests
             yield return Press(Key.D);
             yield return Press(Key.K);
             yield return Await(() => game.ReadModel.Snapshot.SongTime >= 3.02);
-            var mentor = Object.FindFirstObjectByType<TrainingPlaybackView>();
-            Assert.That(mentor.actor.Current, Is.EqualTo(DojoIdleVariation.Motion.Punch));
+            Assert.That(Object.FindFirstObjectByType<TrainingPlaybackView>(), Is.Null);
             CapturePlayback("trill-demonstration");
             yield return WaitForFeedback();
             Assert.That(flow.Training.Result.Value.Perfect, Is.EqualTo(8));
@@ -447,17 +522,16 @@ namespace RhythmDojo.Tests
             Assert.That(song.Mode == null, Is.True, "Completed requests must release their owned mode.");
             Assert.That(new TrainingProgressStore().IsCompleted(lessonId, version), Is.True);
             CaptureSelection("trill-completed");
-
-            yield return StartTraining(false);
-            yield return WaitForFeedback();
-            Assert.That(flow.Training.Outcome, Is.EqualTo(TrainingOutcome.Failed));
-            Assert.That(flow.Training.Completed, Is.True);
             Assert.That(flow.Rules.Snapshot.Mode, Is.EqualTo(RhythmDojo.Gameplay.PlayMode.Challenge));
             Assert.That(PlayerPrefs.GetString(SelectionPreferences.StorageKey, ""), Is.EqualTo(ordinary));
-            yield return Click(Object.FindFirstObjectByType<TutorialView>().backButton);
+            yield return ReturnToMap();
             Assert.That(flow.Training.State, Is.EqualTo(TrainingState.Ready));
-            Assert.That(Object.FindFirstObjectByType<TutorialView>().progress.text, Is.EqualTo("이수 완료"));
+            var tutorial = Object.FindFirstObjectByType<TutorialView>();
+            Assert.That(tutorial.completionSeals[0].activeInHierarchy, Is.True);
+            Assert.That(EventSystem.current.currentSelectedGameObject, Is.EqualTo(tutorial.lessonButtons[0].gameObject));
+            yield return Await(() => tutorial.lessonButtons[0].GetComponent<DojoControlFocus>().stroke.localScale.x >= .99f);
             CaptureSelection("trill-selection-completed");
+            CaptureSelection("trill-selection-completed-16x10", 1280, 800);
             yield return Click(Object.FindFirstObjectByType<TutorialView>().backButton);
             yield return Await(() => SceneManager.GetActiveScene().path == MainMenuActions.ModeSelectionScenePath);
             Assert.That(flow.Training, Is.Null);
@@ -465,11 +539,14 @@ namespace RhythmDojo.Tests
             Object.Destroy(flow.gameObject);
             yield return null;
             yield return OpenTraining();
+            tutorial = Object.FindFirstObjectByType<TutorialView>();
+            Assert.That(tutorial.completionSeals[0].activeInHierarchy, Is.True);
+            yield return SelectTablet(0);
             flow = Object.FindFirstObjectByType<AppFlowController>();
             Assert.That(flow.Training.Completed, Is.True);
             Assert.That(flow.Training.State, Is.EqualTo(TrainingState.Ready));
             Assert.That(flow.Training.Result, Is.Null);
-            Assert.That(Object.FindFirstObjectByType<TutorialView>().progress.text, Is.EqualTo("이수 완료"));
+            Assert.That(Object.FindFirstObjectByType<TrainingPlaybackView>().progress.text, Is.EqualTo("이수 완료"));
             CaptureSelection("trill-restored");
         }
 
@@ -521,9 +598,7 @@ namespace RhythmDojo.Tests
             yield return OpenTraining();
             var flow = Object.FindFirstObjectByType<AppFlowController>();
             var view = Object.FindFirstObjectByType<TutorialView>();
-            var objects = view.GetComponentsInChildren<Transform>(true);
-            yield return Click(view.lessonButtons[index]);
-            Assert.That(view.GetComponentsInChildren<Transform>(true), Is.EqualTo(objects));
+            yield return SelectTablet(index);
             Assert.That(flow.Training.LessonId, Is.EqualTo(id));
             var lesson = flow.CurrentTrainingLesson;
             int version = lesson.DefinitionVersion;
@@ -572,7 +647,7 @@ namespace RhythmDojo.Tests
                     Is.EqualTo(step == TrainingStep.Assessment));
                 Assert.That(new TrainingProgressStore().IsCompleted("trill", 1), Is.False);
             }
-            Assert.That(Object.FindFirstObjectByType<TutorialView>().feedback.text, Does.Contain(lesson.Title + " 이수 완료"));
+            Assert.That(Object.FindFirstObjectByType<TrainingPlaybackView>().feedback.text, Does.Contain(lesson.Title + " 이수 완료"));
             CaptureSelection(id + "-completed");
 
             yield return StartTraining(false);
@@ -580,21 +655,25 @@ namespace RhythmDojo.Tests
             yield return WaitForFeedback();
             Assert.That(flow.Training.Outcome, Is.EqualTo(TrainingOutcome.Failed));
             Assert.That(flow.Training.Completed, Is.True);
-            yield return Click(Object.FindFirstObjectByType<TutorialView>().backButton);
+            yield return ReturnToMap();
             view = Object.FindFirstObjectByType<TutorialView>();
-            yield return Click(view.lessonButtons[0]);
+            Assert.That(view.completionSeals[index].activeInHierarchy, Is.True);
+            yield return SelectTablet(0);
             Assert.That(flow.Training.Completed, Is.False);
-            yield return Click(view.lessonButtons[index]);
+            yield return ReturnToMap();
+            yield return SelectTablet(index);
             Assert.That(flow.Training.Completed, Is.True);
             Assert.That(flow.Training.NextStep, Is.EqualTo(TrainingStep.Demonstration));
             Assert.That(flow.Training.Result, Is.Null);
-            Assert.That(view.lessonLabels[index].text, Does.Contain("이수"));
-            yield return Click(view.backButton);
+            yield return ReturnToMap();
+            yield return Click(Object.FindFirstObjectByType<TutorialView>().backButton);
             yield return Await(() => SceneManager.GetActiveScene().path == MainMenuActions.ModeSelectionScenePath);
             Object.Destroy(flow.gameObject);
             yield return null;
             yield return OpenTraining();
-            yield return Click(Object.FindFirstObjectByType<TutorialView>().lessonButtons[index]);
+            view = Object.FindFirstObjectByType<TutorialView>();
+            Assert.That(view.completionSeals[index].activeInHierarchy, Is.True);
+            yield return SelectTablet(index);
             flow = Object.FindFirstObjectByType<AppFlowController>();
             Assert.That(flow.Training.Completed, Is.True);
             Assert.That(flow.Training.State, Is.EqualTo(TrainingState.Ready));
@@ -607,29 +686,21 @@ namespace RhythmDojo.Tests
         {
             yield return OpenTraining();
             var flow = Object.FindFirstObjectByType<AppFlowController>();
-            var lesson = flow.CurrentTrainingLesson;
             var invalid = ScriptableObject.CreateInstance<TrainingLesson>();
             try
             {
                 Assert.Throws<System.InvalidOperationException>(() => flow.PlayTraining(invalid));
                 Assert.That(flow.Transitioning, Is.False);
                 Assert.That(flow.CurrentRequest, Is.Null);
-                Assert.That(flow.Training.State, Is.EqualTo(TrainingState.Ready));
+                Assert.That(flow.Training, Is.Null);
             }
             finally
             {
                 Object.Destroy(invalid);
             }
 
-            var view = Object.FindFirstObjectByType<TutorialView>();
-            var objects = view.GetComponentsInChildren<Transform>(true);
-            var screen = view.GetComponent<TutorialScreen>();
-            screen.Initialize(flow.ShowPracticeModes, lesson, flow.Training, () => flow.PlayTraining(lesson));
-            screen.Initialize(flow.ShowPracticeModes, lesson, flow.Training, () => flow.PlayTraining(lesson));
-            view.gameObject.SetActive(false);
-            view.gameObject.SetActive(true);
-            Assert.That(view.GetComponentsInChildren<Transform>(true), Is.EqualTo(objects));
-
+            yield return SelectTablet(0);
+            var lesson = flow.CurrentTrainingLesson;
             yield return StartTraining(false);
             var director = UnityEngine.Object.FindFirstObjectByType<GameplayBackgroundDirector>();
             Assert.That(director.room.scenery[0].gameObject.activeInHierarchy, Is.True);
@@ -637,8 +708,6 @@ namespace RhythmDojo.Tests
             Assert.That(flow.PlayTraining(lesson), Is.False);
             Assert.That(flow.Training.Attempt, Is.EqualTo(1));
             var song = flow.CurrentRequest.Song;
-            var mentor = Object.FindFirstObjectByType<TrainingPlaybackView>();
-            var playbackObjects = mentor.GetComponentsInChildren<Transform>(true);
             yield return Press(Key.Escape);
             Assert.That(game.IsPaused, Is.True);
             Assert.That(flow.Training.Outcome, Is.EqualTo(TrainingOutcome.None));
@@ -646,7 +715,7 @@ namespace RhythmDojo.Tests
             yield return null;
             Assert.That(flow.Training.Attempt, Is.EqualTo(2));
             Assert.That(flow.CurrentRequest.Song, Is.SameAs(song));
-            Assert.That(mentor.GetComponentsInChildren<Transform>(true), Is.EqualTo(playbackObjects));
+            Assert.That(Object.FindFirstObjectByType<TrainingPlaybackView>(), Is.Null);
             yield return Press(Key.Escape);
             yield return Click(Object.FindFirstObjectByType<GameplayPauseMenu>().exitButton);
             yield return WaitForFeedback();
@@ -654,7 +723,7 @@ namespace RhythmDojo.Tests
             Assert.That(flow.Training.Result, Is.Null);
             Assert.That(PlayerPrefs.HasKey(TrainingProgressStore.StorageKey), Is.False);
 
-            yield return Click(Object.FindFirstObjectByType<TutorialView>().backButton);
+            yield return ReturnToMap();
             Assert.That(flow.Training.State, Is.EqualTo(TrainingState.Ready));
             yield return Click(Object.FindFirstObjectByType<TutorialView>().backButton);
             yield return Await(() => SceneManager.GetActiveScene().path == MainMenuActions.ModeSelectionScenePath);
